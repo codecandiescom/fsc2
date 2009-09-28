@@ -136,7 +136,7 @@ er023m_exp_hook( void )
 
     if ( ! er023m_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
+        print( FATAL, "Initialization of device failed: %s.\n",
                gpib_error_msg );
         THROW( EXCEPTION );
     }

@@ -127,6 +127,7 @@ bvt3000        // Bruker BVT3000 temperature controller (with Eurotherm 902S)
 
 hp5340a         // HP5340A frequency counter
 hp5342a         // HP5342A frequency counter
+hp5343a         // HP5343A frequency counter
 eip371          // EIP 371 frequency counter
 agilent_53181a  // Agilent 53181a frequency counter
 

@@ -295,7 +295,7 @@ temp_contr_sample_channel( Var_T * v )
     {
         channel = get_long( v, "channel number" );
 
-        if ( channel < SAMPLE_CHANNEL_1 && channel > SAMPLE_CHANNEL_3 )
+        if ( channel < SAMPLE_CHANNEL_1 && channel > SAMPLE_CHANNEL_3  )
         {
             print( FATAL, "Invalid sample channel number (%ld).\n", channel );
             THROW( EXCEPTION );
@@ -840,7 +840,8 @@ itc503_sens_data( long channel )
     char cmd[ ] = "R*\r";
 
 
-    fsc2_assert( channel >= 0 && channel < NUM_SAMPLE_CHANNELS );
+    fsc2_assert(    channel >= SAMPLE_CHANNEL_1
+                 && channel <= NUM_SAMPLE_CHANNELS );
 
     cmd[ 1 ] = channel + '0';
     len = itc503_talk( cmd, buf, sizeof buf );

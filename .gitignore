@@ -93,6 +93,10 @@ modules/tds754a.map
 modules/tds754a_gpib.c
 modules/tds754a_util.c
 modules/tegam2714a_p.fsc2_so
+modules/vxi11.h
+modules/vxi11_clnt.c
+modules/vxi11_svc.c
+modules/vxi11_xdr.c
 src/fsc2
 src/fsc2_addr2line
 src/fsc2_clean.c

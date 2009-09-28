@@ -107,7 +107,7 @@ static FSPS25 fsps25, fsps25_stored;
 #define HEATER_OFF_DELAY       10000000  /* 10 s  */
 #define HEATER_ON_DELAY        1500000   /* 1.5 s */
 
-#define MAX_CURRENT_DIFF       12         /* 12 mA */
+#define MAX_CURRENT_DIFF       15        /* 15 mA */
 
 
 /* The different states the device can be in */

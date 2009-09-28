@@ -496,14 +496,14 @@ fsc2_serial_write( int          sn,
     if ( ll == LL_ALL )
     {
         if ( us_wait == 0 )
-            fsc2_serial_log_message( "Expected to write %ld bytes without "
+            fsc2_serial_log_message( "Expect to write %ld bytes without "
                                      "delay:\n%.*s\n", ( long int ) count,
                                      ( int ) count, buf );
         else if ( us_wait < 0 )
-            fsc2_serial_log_message( "Expected to write %ld bytes:\n%.*s\n",
+            fsc2_serial_log_message( "Expect to write %ld bytes:\n%.*s\n",
                                      ( long int ) count, ( int ) count, buf );
         else
-            fsc2_serial_log_message( "Expected to write %ld bytes within %ld "
+            fsc2_serial_log_message( "Expect to write %ld bytes within %ld "
                                      "ms:\n%.*s\n", ( long int ) count,
                                      us_wait / 1000, ( int ) count, buf );
     }
@@ -654,13 +654,13 @@ fsc2_serial_read( int          sn,
     if ( ll == LL_ALL )
     {
         if ( still_to_wait == 0 )
-            fsc2_serial_log_message( "Expected to read up to %ld bytes "
+            fsc2_serial_log_message( "Expect to read up to %ld bytes "
                                      "without delay\n", ( long ) count, sn );
         else if ( still_to_wait < 0 )
-            fsc2_serial_log_message( "Expected to read up to %ld bytes\n",
+            fsc2_serial_log_message( "Expect to read up to %ld bytes\n",
                                      ( long ) count, sn );
         else
-            fsc2_serial_log_message( "Expected to read up to %ld bytes "
+            fsc2_serial_log_message( "Expect to read up to %ld bytes "
                                      "within %ld ms\n", ( long ) count,
                                      still_to_wait / 1000, sn );
     }

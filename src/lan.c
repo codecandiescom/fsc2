@@ -31,24 +31,6 @@
 #include <sys/timeb.h>
 
 
-/* Definition of log levels allowed in calls of fsc2_log_exp_init().
-   Since they already may have been defined in the GPIB or serial port
-   module only define them if they aren't already known */
-
-#if ! defined LL_NONE
-#define  LL_NONE  0    /* log nothing */
-#endif
-#if ! defined LL_ERR
-#define  LL_ERR   1    /* log errors only */
-#endif
-#if ! defined LL_CE
-#define  LL_CE    2    /* log function calls and function exits */
-#endif
-#if ! defined LL_ALL
-#define  LL_ALL   3    /* log calls with parameters and function exits */
-#endif
-
-
 /* Local variables */
 
 static LAN_List_T            * lan_list = NULL;
@@ -81,16 +63,6 @@ static LAN_List_T * find_lan_entry( int handle );
 static void get_ip_address( const char *     address,
                             struct in_addr * ip_addr);
 
-static void fsc2_lan_log_date( void );
-
-static void fsc2_lan_log_function_start( const char * function,
-                                         const char * dev_name );
-
-static void fsc2_lan_log_function_end( const char * function,
-                                       const char * dev_name );
-
-static void fsc2_lan_log_data( long         length,
-                               const char * buffer );
 
 
 /*----------------------------------------------------------*
@@ -484,10 +456,10 @@ fsc2_lan_write( int          handle,
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( "Expecting to write %ld byte(s) to LAN "
+            fsc2_lan_log_message( "Expect to write %ld byte(s) to LAN "
                                   "device %s:\n", ( long ) length, ll->name );
         else
-            fsc2_lan_log_message( "Expecting to write %ld byte(s) within %ld "
+            fsc2_lan_log_message( "Expect to write %ld byte(s) within %ld "
                                   "ms to LAN device %s:\n", ( long ) length,
                                   us_timeout / 1000, ll->name );
         fsc2_lan_log_data( length, buffer );
@@ -550,8 +522,8 @@ fsc2_lan_write( int          handle,
 /*----------------------------------------------------------------*
  * Function for writing from a set from buffers to the socket. If
  * 'us_timeout' is set to a positive (non-zero) value it doesn't
- * wait longer than that  many microseconds. If 'quit_on_signal'
- * is set it returns immediately when a signal gets caught.
+ * wait longer than that many microseconds. If 'quit_on_signal'
+ * is set it returns immediately when a signal is caught.
  *----------------------------------------------------------------*/
 
 ssize_t
@@ -637,11 +609,11 @@ fsc2_lan_writev( int                  handle,
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( "Expecting to write %ld byte(s) (from %d "
+            fsc2_lan_log_message( "Expect to write %ld byte(s) (from %d "
                                   "buffers) to LAN device %s:\n",
                                   ( long ) length, count, ll->name );
         else
-            fsc2_lan_log_message( "Expecting to write %ld byte(s) (from %d "
+            fsc2_lan_log_message( "Expect to write %ld byte(s) (from %d "
                                   "buffers) within %ld ms to LAN device "
                                   "%s:\n", ( long ) length, count,
                                   us_timeout / 1000, ll->name );
@@ -708,7 +680,7 @@ fsc2_lan_writev( int                  handle,
  * Function for reading from the socket to a buffer. If 'us_timeout' is
  * set to a positive (non-zero) value it doesn't wait longer than that
  * many microseconds. If 'quit_on_signal' is set it returns immediately
- * if a signal gets caught.
+ * when a signal is caught.
  *----------------------------------------------------------------------*/
 
 ssize_t
@@ -770,11 +742,11 @@ fsc2_lan_read( int    handle,
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( "Expecting to read up to %ld byte(s) from "
+            fsc2_lan_log_message( "Expect to read up to %ld byte(s) from "
                                   "LAN device %s\n",
                                   ( long ) length, ll->name );
         else
-            fsc2_lan_log_message( "Expecting to read up to %ld byte(s) "
+            fsc2_lan_log_message( "Expect to read up to %ld byte(s) "
                                   "within %ld ms from LAN device %s\n",
                                   ( long ) length, us_timeout / 1000,
                                   ll->name );
@@ -841,7 +813,7 @@ fsc2_lan_read( int    handle,
  * Function for reading from the socket into a set of buffers. If
  * 'us_timeout' is set to a positive (non-zero) value it doesn't
  * wait longer than that many microseconds. If 'quit_on_signal' is
- * set it returns immediately if a signal gets caught.
+ * set it returns immediately when a signal is caught.
  * Take care: differing from the behaviour of readv() the length
  * fields in the iovec structures get set to the number of bytes
  * read into them (that's why the 'buffer' argument isn't declared
@@ -931,11 +903,11 @@ fsc2_lan_readv( int            handle,
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( "Expecting to read up to %ld byte(s) (into "
+            fsc2_lan_log_message( "Expect to read up to %ld byte(s) (into "
                                   "%d buffers) from LAN device %s\n",
                                   ( long ) length, count, ll->name );
         else
-            fsc2_lan_log_message( "Expecting to read up to %ld byte(s) (into "
+            fsc2_lan_log_message( "Expect to read up to %ld byte(s) (into "
                                   "%d buffer) within %ld ms from LAN device "
                                   "%s\n", ( long ) length, count,
                                   us_timeout / 1000, ll->name );
@@ -1395,7 +1367,7 @@ fsc2_lan_log_date( void )
  *  * name of the device involved
  *-----------------------------------------------------------*/
 
-static void
+void
 fsc2_lan_log_function_start( const char * function,
                              const char * dev_name )
 {
@@ -1418,7 +1390,7 @@ fsc2_lan_log_function_start( const char * function,
  *  * name of the device involved
  *--------------------------------------------------------*/
 
-static void
+void
 fsc2_lan_log_function_end( const char * function,
                            const char * dev_name )
 {
@@ -1468,7 +1440,7 @@ fsc2_lan_log_message( const char * fmt,
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-static void
+void
 fsc2_lan_log_data( long length, const char *buffer )
 {
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
@@ -1486,6 +1458,15 @@ fsc2_lan_log_data( long length, const char *buffer )
     lower_permissions( );
 }
 
+
+/*------------------------------------------------*
+ *------------------------------------------------*/
+
+int
+fsc2_lan_log_level( void )
+{
+    return lan_log_level;
+}
 
 
 /*

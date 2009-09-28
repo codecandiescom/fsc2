@@ -179,8 +179,6 @@ struct HORI_RES {
 
 
 struct LECROY_WR {
-    int device;
-
     unsigned int INR;
 
     bool is_displayed[ LECROY_WR_MAX_CHANNELS ];

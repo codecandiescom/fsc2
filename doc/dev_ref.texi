@@ -1728,8 +1728,8 @@ measurements are supported.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"ITC503"} as the device name,
-@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
-@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} to
+@code{yes} and both @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Status}: Tested for functions that measure the temperature,

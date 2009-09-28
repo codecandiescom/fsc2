@@ -177,11 +177,11 @@ device @{
         name        = "TDS744A"   /* symbolic name */
         pad         = 26          /* primary address */
         timeout     = 3s          /* device timeout */
-        eos         = '\n'        /* EOS character */
-        set-reos      no
-        set-xeos      no
-        set-bin       no
-        set-eot       yes
+        eos         = 0x0a        /* EOS character */
+        set-reos    = no
+        set-xeos    = no
+        set-bin     = no
+        set-eot     = yes
 @}
 @end example
 @noindent
@@ -271,38 +271,44 @@ for the devices.
 
 
 To be able to read from and write to the device files for the devices
-@code{fsc2} is supposed to control it needs permissions that often only the
-root account has. Therefore @code{fsc2} per default gets installed setuid'ed
-to root (i.e.@: it starts running with the privileges of the root account,
-i.e.@: with the user and group ID of the root account). But most of the time
-@code{fsc2} drops those privileges and runs with only the effective user ID
-(@code{EUID}) and group ID (@code{EGID}) of the users that started
-@code{fsc2}, i.e.@: with the permissions that user normally as. Care has been
-taken drop the extra privileges the root account has except for the few places
-where either device files are accessed or log files get written to.
+@code{fsc2} is supposed to control it needs permissions that often
+only the root account has. Therefore @code{fsc2} per default gets
+installed setuid'ed to root (i.e.@: it starts running with the
+privileges of the root account, i.e.@: with the user and group ID of
+the root account). But most of the time @code{fsc2} drops those
+privileges and runs with only the effective user ID (@code{EUID}) and
+effective group ID (@code{EGID}) of the users that started
+@code{fsc2}, i.e.@: with the permissions that user normally has. Care
+has been taken drop the extra privileges the root account has except
+for the few places where either device files are accessed or log files
+get written to.
 
 
-Should you feel uneasy about running a program setuid'ed to root
-(and I would sympathize with you if you do;-) there are alternatives, but
-which may requires some extra work. There are two variables in the Makefile,
-@code{OWNER} and @code{GROUP}, that can be used to avoid running @code{fsc2}
-with the full permissions of the root account. If both are set the program
-runs with the @code{UID} and @code{GID} of the account and group specified by
-these variables. If neither of them is set then they default to 'root' and the
-program gets setuid'ed to root, i.e.@: as in the default case discussed
-above. But if only @code{GROUP} is set then the program becomes setgid'ed to
-this group, i.e.@: it will run with the @code{UID} of the user but with the
-@code{GID} of the group specified by @code{GROUP} - this may already give it
-high enough access permissions for the device files if the device files are
-set up accordingly (i.e.@: their permission bits are set to allow read and write
-access to members of this group). It's also possible to specify @code{OWNER}
-alone and in this case the program runs with the @code{UID} of that process
-but the GID of the user.
+Ig you feel uneasy about running a program setuid'ed to root (and I
+fully sympathize with you if you do;-) there are alternatives, but
+which may requires some extra work. There are two variables in the
+Makefile, @code{OWNER} and @code{GROUP}, that can be used to avoid
+running @code{fsc2} with the full permissions of the root account. If
+both are set the program runs with the @code{UID} and @code{GID} of
+the account and group specified by these variables in all situations
+were it otherwise would run with root permissions. (Only if neither of
+them is set then they default to @code{root} and the program gets
+setuid'ed to root, i.e.@: as in the default case discussed above.) But
+if only @code{GROUP} is set then the program becomes setgid'ed to this
+group, i.e.@: it will run with the @code{UID} of the user but with the
+@code{GID} of the group specified by @code{GROUP} - this may already
+give it high enough access permissions for the device files if the
+device files are set up accordingly (i.e.@: their permission bits are
+set to allow read and write access to members of this group). It's
+also possible to specify @code{OWNER} alone and in this case the
+program runs with the @code{UID} of that process but the GID of the
+user.
 
 
-In the most simple case where you didn't set these variables (or both to
-@code{root}) and @code{fsc2} has in principle all permissions the root account
-has you don't have to care about the permission settings for the device files.
+In the most simple case where you didn't set these variables (or both
+to @code{root}) and @code{fsc2} has in principle all permissions the
+root account has you don't have to care about the permission settings
+for the device files.
 
 
 In all other cases you have to make sure that either the account the
@@ -312,28 +318,30 @@ permissions to read and write the required device files. If both
 readable and writable by either that account or that group (or both).
 If only @code{OWNER} but not @code{GROUP} is set they must be
 accessible by the account specified by @code{OWNER}. And if only
-@code{GROUP} but not @code{OWNER} is set the must be readable and
+@code{GROUP} but not @code{OWNER} is set they must be readable and
 writable by that group. Please note that if you change the access
 permissions of the device files on some systems they may get reset by
 the system to what it believes to be more secure, e.g.@: on a reboot
-or as part of some daily system maintenance tasks etc. (or because you
-use @code{udev} and the device files get deleted on shutdown and
-re-created on boot - but this can be handled by setting up @code{udev}
-correctly, i.e.@: to create the device files with the necessary
-permissions and ownerships being set).
+or as part of some daily system maintenance tasks etc. Moreover, on
+most modern Linux systems @code{udev} is used and the device files get
+deleted on shutdown and re-created on boot - but this can be handled
+by setting up @code{udev} to create the device files with the
+necessary permissions and ownerships, typically by creating a 'rules'
+file in @file{/etc/udev/rules.d/'}.
 
 
 One possible scenario is to create an account for @code{fsc2} with
-extremely low permissions (even logging in can be disabled) and set
-USER to that account, but set @code{GROUP} to a group that has read
-and write access permissions for the device files that are going to be
-required. This could be the @code{uucp} (or @code{dialout}) group that
-typically has the necessary permissions for the accessing the device
-files for the serial ports. Of course, you need to allow read and
-write access for all other device files (e.g.@: GPIB card, PCI data
-acquisition cards etc.) for this group or make the account @code{fsc2}
-is running under member of the groups that have read and write access
-permissions to these device files.
+extremely low permissions (even logging in can be disabled) - or use
+an already existing low permission account like @code{nobody} - and
+set @code{USER} to that account, but set @code{GROUP} to a group that
+has read and write access permissions for the device files that are
+going to be required. This could be the @code{uucp} (or
+@code{dialout}) group that typically has the necessary permissions for
+the accessing the device files for the serial ports. Of course, you
+need to allow read and write access for all other device files (e.g.@:
+GPIB card, PCI data acquisition cards etc.) for this group or make the
+account @code{fsc2} is running under member of the groups that have
+read and write access permissions to these device files.
 
 
 @node Preparing for installation, Compiling and Installation, Security issues, Installation

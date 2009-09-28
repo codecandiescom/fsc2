@@ -34,7 +34,7 @@
 %x COMMENT
 %x CONFIG
 
-CHAR   (\'\\[afnrtv?'"]\')
+CHAR   (\'\\?.\')
 NAME   \"[^"]+\"
 ERR    err(log)?
 TIMO   timeout|timo
@@ -149,47 +149,47 @@ W      [ \t]
                     return TIME_TOKEN;
                 }
 {CHAR}          {
-				    switch ( gpibtext[ 2 ] )
-				    {
-				  	  case 'a' :
-				  		  gpiblval.ival = ( int ) '\a';
-				  		  break;
+	                if ( gpibtext[ 1 ] != '\\' )
+						  gpiblval.ival = ( int ) gpibtext[ 1 ];
+					else
+						switch ( gpibtext[ 2 ] )
+						{
+							case '0' :
+								gpiblval.ival = ( int ) '\0';
+								break;
+
+							case 'a' :
+								gpiblval.ival = ( int ) '\a';
+								break;
                 
-				  	  case 'f' :
-				  		  gpiblval.ival = ( int ) '\f';
-				  		  break;
+							case 'b' :
+								gpiblval.ival = ( int ) '\b';
+								break;
                 
-				  	  case 'n' :
-				  		  gpiblval.ival = ( int ) '\n';
-				  		  break;
+							case 't' :
+								gpiblval.ival = ( int ) '\t';
+								break;
                 
-				  	  case 'r' :
-				  		  gpiblval.ival = ( int ) '\r';
-				  		  break;
+							case 'n' :
+								gpiblval.ival = ( int ) '\n';
+								break;
                 
-				  	  case 't' :
-				  		  gpiblval.ival = ( int ) '\t';
-				  		  break;
+							case 'v' :
+								gpiblval.ival = ( int ) '\v';
+								break;
                 
-				  	  case 'v' :
-				  		  gpiblval.ival = ( int ) '\v';
-				  		  break;
+							case 'f' :
+								gpiblval.ival = ( int ) '\f';
+								break;
                 
-				  	  case '?' :
-				  		  gpiblval.ival = ( int ) '\?';
-				  		  break;
+							case 'r' :
+								gpiblval.ival = ( int ) '\r';
+								break;
                 
-				  	  case '\'' :
-				  		  gpiblval.ival = ( int ) '\'';
-				  		  break;
-                
-				  	  case '"' :
-				  		  gpiblval.ival = ( int ) '\"';
-				  		  break;
-                
-				  	  default :
-				  		  exit( 1 );
-                    }
+							default :
+								gpiblval.ival = ( int ) gpibtext[ 2 ];
+								break;
+						}
                 
 				    return NUM_TOKEN;
                 }

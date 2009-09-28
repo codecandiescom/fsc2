@@ -332,8 +332,6 @@ extern int trg_channels[ 5 ];
 
 
 struct LECROY_WS {
-    int device;
-
     unsigned int INR;
 
     bool is_displayed[ LECROY_WS_MAX_CHANNELS ];

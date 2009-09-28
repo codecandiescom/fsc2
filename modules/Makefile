@@ -18,6 +18,12 @@
 #  Boston, MA 02111-1307, USA.
 
 
+
+# List of files that need to be created for the VXI-11 protocol
+
+vxi11_list      := vxi11_clnt.c vxi11_xdr.c
+
+
 # Lists of modules that get created from a set of template files
 
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
@@ -68,8 +74,8 @@ lecroy9450      := lecroy9450.c lecroy9450_gpib.c lecroy9450_util.c
 lecroy93xx      := lecroy93xx.c lecroy93xx_gpib.c lecroy93xx_util.c
 lecroy_wr       := lecroy_wr.c lecroy_wr_gpib.c lecroy_wr_util.c
 lecroy_wr_s     := lecroy_wr_s.c lecroy_wr_serial.c lecroy_wr_util.c
-lecroy_wr_l     := lecroy_wr_l.c lecroy_wr_net.c lecroy_wr_util.c lecroy_vicp.c
-lecroy_ws       := lecroy_ws.c lecroy_ws_net.c lecroy_ws_util.c lecroy_vicp.c
+lecroy_wr_l     := lecroy_wr_l.c lecroy_wr_net.c lecroy_wr_util.c vicp.c
+lecroy_ws       := lecroy_ws.c lecroy_ws_net.c lecroy_ws_util.c vicp.c
 lecroy_ws_g     := lecroy_ws_g.c lecroy_ws_gpib.c lecroy_ws_util.c
 rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
@@ -92,13 +98,15 @@ rb_pulser_w     := rb_pulser_w.c rb_pulser_w_gen.c rb_pulser_w_pulse.c \
 oriel_matrix    := oriel_matrix.c oriel_matrix_ll.c
 epr_mod         := epr_mod.c epr_mod_util.c epr_mod_lexer.c
 bvt3000         := bvt3000.c bvt3000_ll.c eurotherm902s_ll.c
+ag54830b        := ag54830b.c ag54830b_gpib.c
+ag54830b_l      := $(vxi11_list) ag54830b_l.c ag54830b_net.c vxi11_user.c
 
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
 # pre-installed software
 
-comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l
+comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l ag54830b_l
 
 
 # Add modules that only get created on demand (they require either some
@@ -111,13 +119,13 @@ ifneq ($(GPIB_LIBRARY),none)
 simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a              \
 				   $(hp534_list) ips20_4 ips120_10 ips120_10_mod itc503      \
 				   keithley228a kontron4060 lakeshore330 pt2025 sr510 sr530  \
-				   sr810 sr830 thurlby330 mcn700_2000 schlum7150 ag54830b    \
-				   bh15_fc eip371 agilent_53181a
+				   sr810 sr830 thurlby330 mcn700_2000 schlum7150 bh15_fc     \
+				   eip371 agilent_53181a
 
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
 	               $(tds_list) $(lecroy94_list) lecroy93xx lecroy_wr     \
-				   lecroy_ws_g epr_mod
+				   lecroy_ws_g epr_mod ag54830b
 endif
 
 
@@ -208,7 +216,7 @@ export        # export all symbols to the sub-makefiles
 
 .SUFFIXES:
 
-.PHONY: all modules install uninstall cleanup clean
+.PHONY: all vxi11 modules install uninstall cleanup clean
 
 
 # Making the modules consisting of just one file is simple, to make the
@@ -220,7 +228,9 @@ export        # export all symbols to the sub-makefiles
 all:
 	$(MAKE) -C .. modules
 
+
 modules:
+	$(MAKE) vxi11
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \
@@ -351,6 +361,13 @@ $(addsuffix .c,$(me_dio)): me_dio.c.tmpl
 	sed -e 's/me_dio_#/$(patsubst %.c,%,$@)/g' me_dio.c.tmpl > $@
 endif
 
+
+# How to create the code needed for the VXI-11 protocol
+
+vxi11: vxi11.x
+	rpcgen $<
+
+
 # How to install the modules
 
 install:
@@ -376,7 +393,8 @@ uninstall:
 # How to clean up the mess we created
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *_lexer.c me_dio_*.c cscope.out *.make svn-* *~
+	$(RM) $(RMFLAGS) *.o *_lexer.c me_dio_*.c cscope.out *.make \
+		  xvi11_clnt.c vxi11_svc.c vxi11_xdr.c vxi11.h svn-* *~
 
 clean:
 	$(MAKE) cleanup
@@ -406,6 +424,6 @@ clean:
 	done;
 	$(RM) $(RMFLAGS) *.fsc2_so
 
-# Don't automatically delete intermediate files created by flex
+# Don't automatically delete intermediate files created by flex or rpcgen
 
-.PRECIOUS: %.c
+.PRECIOUS: %.c %.h

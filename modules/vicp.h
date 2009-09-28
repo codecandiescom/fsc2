@@ -23,8 +23,8 @@
 #include "fsc2_module.h"
 
 
-#if ! defined LECROY_VICP_HEADER
-#define LECROY_VICP_HEADER
+#if ! defined VICP_HEADER
+#define VICP_HEADER
 
 
 #define SUCCESS            0
@@ -32,32 +32,32 @@
 #define FAILURE           -1
 
 
-void lecroy_vicp_init( const char * /* dev_name       */,
-                       const char * /* address        */,
-                       long         /* us_timeout     */,
-                       bool         /* quit_on_signal */  );
+void vicp_open( const char * /* dev_name       */,
+                const char * /* address        */,
+                long         /* us_timeout     */,
+                bool         /* quit_on_signal */  );
 
-void lecroy_vicp_close( void );
+void vicp_close( void );
 
-void lecroy_vicp_lock_out( bool /* lock_state */ );
+void vicp_lock_out( bool /* lock_state */ );
 
-void lecroy_vicp_set_timeout( int  /* dir        */,
-                              long /* us_timeout */ );
+void vicp_set_timeout( int  /* dir        */,
+                       long /* us_timeout */ );
 
-int lecroy_vicp_write( const char * /* buffer         */,
-                       ssize_t    * /* length         */,
-                       bool         /* with_eoi       */,
-                       bool         /* quit_on_signal */  );
+int vicp_write( const char * /* buffer         */,
+                ssize_t    * /* length         */,
+                bool         /* with_eoi       */,
+                bool         /* quit_on_signal */  );
 
-int lecroy_vicp_read( char *    /* buffer         */,
-                      ssize_t * /* length         */,
-                      bool    * /* with_eoi       */,
-                      bool      /* quit_on_signal */  );
+int vicp_read( char *    /* buffer         */,
+               ssize_t * /* length         */,
+               bool    * /* with_eoi       */,
+               bool      /* quit_on_signal */  );
 
-void lecroy_vicp_device_clear( void );
+void vicp_device_clear( void );
 
 
-#endif /* ! LECROY_VICP_HEADER */
+#endif /* ! VICP_HEADER */
 
 
 /*

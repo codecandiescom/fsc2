@@ -38,119 +38,124 @@
 #########################################################################
 
 
-# Please note: When in the following it is said that you have to "comment
-# out a variable" this simply means that you have to put a hash character
-# ('#') at the start of the line where the variable is set, effectively
-# making that line invisible for the progam reading this file.
+# Please note: When in the following it is said that you have to
+# "comment out a variable" this simply means that you have to put a hash
+# character ('#') at the start of the line where the variable is set,
+# effectively making that line invisible for the progam reading this
+# file.
 
-# The following variable determines under which directory the program and
-# its auxiliary files will be installed (defaults to /usr/local)
+# The following variable determines under which directory the program
+# and its auxiliary files will be installed (defaults to /usr/local)
 
 prefix             := /usr/local
 
 
-# Next the owner and the group of fsc2 all files that will be installed can
-# be set. Per default (i.e. when these variables aren't set) fsc2 will run
-# with the privileges of the root account (but will drop them to the ones
-# of the user running the program except in situations where the higher
-# permissions are required). I.e. the program will run with the UID and GID
-# of the root account. If you should feel uneasy about that there's the
-# alternative of setting both or at least one of them. If both are set
-# the program will run with the UID of the account USER is set to. If only
-# GROUP is set the program will will run with the GID of that group. If only
-# USER is set it will run with the UID of that account. Please also see the
-# discussion in the INSTALL file for more information.
+# Next the owner and the group of fsc2 all files that will be installed
+# can be set. Per default (i.e. when these variables aren't set) fsc2
+# will run with the privileges of the root account (but will drop them
+# to the ones of the user running the program except in situations where
+# the higher permissions are required). I.e. the program will run with
+# the UID and GID of the root account. If you should feel uneasy about
+# that there's the alternative of setting both or at least one of them.
+# If both are set the program will run with the UID of the account USER
+# is set to. If only GROUP is set the program will will run with the GID
+# of that group. If only USER is set it will run with the UID of that
+# account. Please also see the discussion in the INSTALL file for more
+# information.
 
 # OWNER              := fsc2
 # GROUP              := uucp
 
 
 # The next variable should only be set for very old Linux systems where
-# linker map files don't work and the program crashes after loading
-# a module. Only in that case the following line should be activated.
+# linker map files don't work and the program crashes after loading a
+# module. Only in that case the following line should be activated.
 
 # NO_VERSION_SCRIPTS := yes
 
 
-# Now set the system wide path for files to be included by EDL files when
-# after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
-# found. This is for the case where a system wide set of EDL files has been
-# set up from which users may use as include files without going to the hassle
-# of always having to write out the full path. If no such repository exists
-# it's save to leave this variable undefined.
+# Now set the system wide path for files to be included by EDL files
+# when after the '#INCLUDE' directive a file name enclosed in '<' and
+# '>' is found. This is for the case where a system wide set of EDL
+# files has been set up from which users may use as include files
+# without going to the hassle of always having to write out the full
+# path. If no such repository exists it's save to leave this variable
+# undefined.
 
 # DEF_INCL_DIR       := /scratch/EDL/includes
 
 
-# The next variable defines the GPIB library to use, it must be set to either
-# 'LLP' for the LLP library, 'NI' for the newer National Instruments library,
-# 'NI_OLD' for the old National Instruments library (you can distinguish
-# them from the include file they install, if it is ni488.h then it's the
-# newer version, if it's ugpib.h it's the older one), 'SLG' for the updated
-# version of the LLP library, now hosted on SourceForge, or 'JTT' for the
-# library written by me for some ISA GPIB cards. Alternatively, if no GPIB
-# support is needed, define GPIB_LIBRARY as 'NONE' (which is the default if
-# not set).
+# The next variable defines the GPIB library to use, it must be set to
+# either 'LLP' for the LLP library, 'NI' for the newer National
+# Instruments library, 'NI_OLD' for the old National Instruments library
+# (you can distinguish them from the include file they install, if it is
+# ni488.h then it's the newer version, if it's ugpib.h it's the older
+# one), 'SLG' for the updated version of the LLP library, now hosted on
+# SourceForge, or 'JTT' for the library written by me for some ISA GPIB
+# cards. Alternatively, if no GPIB support is needed, define
+# GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY       := JTT
 
 
-# If you're using the SourceForge GPIB driver and library you need to set
-# here the name of the GPIB card as set in the corresponding entry in th
-# GPIB configuration file (usually '/etc/gpib.conf') in the 'interface'
-# section for the card (on the line starting with 'name ='). If you use
-# the SourceForge library (i.e. you have set the variable 'GPIB_LIBRARY'
-# above to 'SLG') and don't set the following variable the name will be
-# assumed to be "gpib0".
+# If you're using the SourceForge GPIB driver and library you need to
+# set here the name of the GPIB card as set in the corresponding entry
+# in th GPIB configuration file (usually '/etc/gpib.conf') in the
+# 'interface' section for the card (on the line starting with 'name =').
+# If you use the SourceForge library (i.e. you have set the variable
+# 'GPIB_LIBRARY' above to 'SLG') and don't set the following variable
+# the name will be assumed to be "gpib0".
 
 # GPIB_CARD_NAME     := "gpib0"
 
 
-# Here the location of the GPIB configuration file is set (this usually is
-# needed for the National Instruments GPIB library only, if not set
+# Here the location of the GPIB configuration file is set (this usually
+# is needed for the National Instruments GPIB library only, if not set
 # GPIB_CONF_FILE defaults to /etc/gpib.conf).
 
 GPIB_CONF_FILE     := /etc/gpib.conf
 
 
 # Next set the file for writing logs about the activity on the GPIB bus.
-# Make sure that fsc2 or its users have write access to the directory the
-# log file will be created in. Don't use a partition on which you don't have
-# at least a few megabytes to spare, depending on the type of experiments
-# you do the file can become rather long. But the file will not grow
-# indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr (unless
-# @code{GPIB_LOG_LEVEL} is set to @{OFF}, see below).
+# Make sure that fsc2 or its users have write access to the directory
+# the log file will be created in. Don't use a partition on which you
+# don't have at least a few megabytes to spare, depending on the type of
+# experiments you do the file can become rather long. But the file will
+# not grow indefinitely, if you start a new experiment its previous
+# contents gets overwritten. If no file is specified logs will be
+# written to stderr (unless @code{GPIB_LOG_LEVEL} is set to @{OFF}, see
+# below).
 
 GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 
 
-# The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
-# logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to 'HIGH' all
-# GPIB function calls together with all data send to or received from the
-# devices are stored. When set to 'MEDIUM' only GPIB function calls and
-# errors are logged. When set to 'LOW' only errors messages get written to
-# the log file. If not set it defaults to 'LOW'.
+# The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the
+# GPIB logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to
+# 'HIGH' all GPIB function calls together with all data send to or
+# received from the devices are stored. When set to 'MEDIUM' only GPIB
+# function calls and errors are logged. When set to 'LOW' only errors
+# messages get written to the log file. If not set it defaults to 'LOW'.
 
 GPIB_LOG_LEVEL     := HIGH
 
 
 # Finally, if the header files for the GPIB library won't get found
 # automatically in either /usr/include or /usr/local/include (this is
-# typically only the case for the LLP library where one has to explicitely
-# specify that it's in /usr/include/gpib) set the variable GPIB_HEADER_DIR
-# to the absolute path of the directory where the header file(s) for the
-# library reside.
+# typically only the case for the LLP library where one has to
+# explicitely specify that it's in /usr/include/gpib) set the variable
+# GPIB_HEADER_DIR to the absolute path of the directory where the header
+# file(s) for the library reside.
 
 # GPIB_HEADER_DIR    := /usr/include/gpib
 
 
-# In the case you're using the newer National Instruments library you can link
-# against a file named cib.o coming with the library. By linking in this file
-# the dynamic library (libgpibapi.so) will only be loaded when the first call
-# is made into the library, otherwise the library gets loaded on start of the
-# program. To be able to link the file in the exact location of the file is
-# needed and the following variable set accordingly.
+# In the case you're using the newer National Instruments library you
+# can link against a file named cib.o coming with the library. By
+# linking in this file the dynamic library (libgpibapi.so) will only be
+# loaded when the first call is made into the library, otherwise the
+# library gets loaded on start of the program. To be able to link the
+# file in the exact location of the file is needed and the following
+# variable set accordingly.
 
 # GPIB_CIB_FILE      := /usr/local/src/ni488223L/driver/lib/cib.o
 
@@ -162,55 +167,59 @@ GPIB_LOG_LEVEL     := HIGH
 # WITHOUT_SERIAL_PORTS   := yes
 
 
-# The variable, SERIAL_LOCK_DIR, is the directory where UUCP style lockfiles
-# for the serial ports are created. This should be '/var/lock' according to
-# version 2.2 of the File-system Hierachy Standard. Either fsc2 itself or all
-# its users must have read and write permissions for this directory. Also see
-# the longer discussion in section C of the INSTALL file.
+# The variable, SERIAL_LOCK_DIR, is the directory where UUCP style
+# lockfiles for the serial ports are created. This should be '/var/lock'
+# according to version 2.2 of the File-system Hierachy Standard. Either
+# fsc2 itself or all its users must have read and write permissions for
+# this directory. Also see the longer discussion in section C of the
+# INSTALL file.
 
 SERIAL_LOCK_DIR    := /var/lock
 
 
-# Next set the file for writing logs about the activity on the serial port.
-# Make sure that fsc2 or its users have write access to the directory the
-# log file will be created in. Don't use a partition on which you don't have
-# at least a few megabytes to spare, depending on the type of experiments
-# you do the file can become rather long. But the file will not grow
-# indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr(unless
-# @code{SERIAL_LOG_LEVEL} is set to @{OFF}, see below).
+# Next set the file for writing logs about the activity on the serial
+# port. Make sure that fsc2 or its users have write access to the
+# directory the log file will be created in. Don't use a partition on
+# which you don't have at least a few megabytes to spare, depending on
+# the type of experiments you do the file can become rather long. But
+# the file will not grow indefinitely, if you start a new experiment its
+# previous contents gets overwritten. If no file is specified logs will
+# be written to stderr(unless @code{SERIAL_LOG_LEVEL} is set to @{OFF},
+# see below).
 
 SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 
 
-# The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the logs
-# for the serial port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
-# to 'HIGH' all serial port function calls together with all data send to or
-# received from the devices are stored. When set to 'MEDIUM' only serial port
-# function calls and errors are logged. When set to 'LOW' only errors messages
-# get written to the log file. If not set it defaults to 'LOW'.
+# The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the
+# logs for the serial port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'.
+# When set to 'HIGH' all serial port function calls together with all
+# data send to or received from the devices are stored. When set to
+# 'MEDIUM' only serial port function calls and errors are logged. When
+# set to 'LOW' only errors messages get written to the log file. If not
+# set it defaults to 'LOW'.
 
 SERIAL_LOG_LEVEL   := HIGH
 
 
 # Now set the file for writing logs about the activity on the LAN port
-# Make sure that fsc2 or its users have write access to the directory the
-# log file will be created in. Don't use a partition on which you don't have
-# at least a few megabytes to spare, depending on the type of experiments
-# you do the file can become rather long. But the file will not grow
-# indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr(unless
-# @code{ALN_LOG_LEVEL} is set to @{OFF}, see below).
+# Make sure that fsc2 or its users have write access to the directory
+# the log file will be created in. Don't use a partition on which you
+# don't have at least a few megabytes to spare, depending on the type of
+# experiments you do the file can become rather long. But the file will
+# not grow indefinitely, if you start a new experiment its previous
+# contents gets overwritten. If no file is specified logs will be
+# written to stderr(unless @code{ALN_LOG_LEVEL} is set to @{OFF}, see
+# below).
 
 LAN_LOG_FILE    := /tmp/fsc2_lan.log
 
 
-# The next variable, LAN_LOG_LEVEL, sets the verbosity level for the logs
-# for the LAN port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
-# to 'HIGH' all serial port function calls together with all data send to or
-# received from devices are stored. When set to 'MEDIUM' only serial port
-# function calls are logged. When set to 'LOW' only errors messages will be
-# written to the log file. If not set it defaults to 'LOW'.
+# The next variable, LAN_LOG_LEVEL, sets the verbosity level for the
+# logs for the LAN port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'.
+# When set to 'HIGH' all LAN function calls together with all data send
+# to or received from devices are stored. When set to 'MEDIUM' only LAN
+# function calls are logged. When set to 'LOW' only errors messages will
+# be written to the log file. If not set it defaults to 'LOW'.
 
 LAN_LOG_LEVEL   := HIGH
 
@@ -221,13 +230,13 @@ LAN_LOG_LEVEL   := HIGH
 # them. If the include file for the library isn't in one of the standard
 # places (i.e. # '/usr/include' or '/usr/local/include') you must also
 # uncomment the line starting with 'libusb_incl_path' and specify the
-# complete path to the place where it installed (e.g. '/usr/xxx/yyy'). If
-# the library for the card isn't in a place where the linker will find it
-# automatically (e.g. '/usr/lib' and '/usr/local/lib') you need also to specify
-# the full absolute path for the library by uncommenting the line starting with
-# 'libusb_lib_path and change the what it gets set to. You must make sure that
-# the libusb library is already properly installed if you want to build fsc2
-# with support for it.
+# complete path to the place where it installed (e.g. '/usr/xxx/yyy').
+# If the library for the card isn't in a place where the linker will
+# find it automatically (e.g. '/usr/lib' and '/usr/local/lib') you need
+# also to specify the full absolute path for the library by uncommenting
+# the line starting with 'libusb_lib_path and change the what it gets
+# set to. You must make sure that the libusb library is already properly
+# installed if you want to build fsc2 with support for it.
 
 # WITH_LIBUSB_0_1    := yes
 # WITH_LIBUSB_1_0    := yes
@@ -236,80 +245,82 @@ LAN_LOG_LEVEL   := HIGH
 # libusb_lib_path    := /usr/lib/local
 
 
-# If the following is defined the FFT pseudo-module is created. This requires
-# the the fftw3 library (and header its files) is installed
+# If the following is defined the FFT pseudo-module is created. This
+# requires the the fftw3 library (and header its files) is installed
 
 # WITH_FFT           := yes
 
 
-# Define the default editor to use for editing when the "Edit" button gets
-# pressed or for writing a bug report  (but a user can still override this
-# by setting the 'EDITOR' environment variable).
+# Define the default editor to use for editing when the "Edit" button
+# gets pressed or for writing a bug report (but a user can still
+# override this by setting the 'EDITOR' environment variable).
 
 EDITOR             := vi
 
 
-# Define the default browser to use when the "Help" button gets pressed and
-# the manual is to be shown, currently supported are netscape, mozilla,
-# firefox, opera, konqueror, galeon, lnyx and w3m (but a user can still
-# override this by setting the 'BROWSER' environment variable named).
+# Define the default browser to use when the "Help" button gets pressed
+# and the manual is to be shown, currently supported are netscape,
+# mozilla, firefox, opera, konqueror, galeon, lnyx and w3m (but a user
+# can still override this by setting the 'BROWSER' environment variable
+# named).
 
 BROWSER            := firefox
 
 
-# Both the next two lines must be uncommented if you want support for the
-# National Instruments 6601 GPCT card. If the library for the card isn't in a
-# place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolute path for the library
-# (e.g. '/usr/xxx/yyy/libni6601.so'). You must make sure that the library for
-# the card is already properly installed if you want to build fsc2 with
-# support for the card.
+# Both the next two lines must be uncommented if you want support for
+# the National Instruments 6601 GPCT card. If the library for the card
+# isn't in a place where the linker will find it automatically (e.g.
+# '/usr/lib' and '/usr/local/lib') you need to specify the full absolute
+# path for the library (e.g. '/usr/xxx/yyy/libni6601.so'). You must make
+# sure that the library for the card is already properly installed if
+# you want to build fsc2 with support for the card.
 
 # WITH_NI6601        := yes
 # ni6601_libs        := /usr/local/lib/libni6601.so
 
 
-# Uncommented both the next two lines if you want support for the Meilhaus
-# Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
-# place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolute path for the
-# library  (e.g. '/opt/zzz/ttt/libme6x00.so'). You must make sure that the
-# library for the card is already properly installed if you want to build
-# fsc2 with support for the card.
+# Uncommented both the next two lines if you want support for the
+# Meilhaus Electronics 6000 or 6100 DAC card. If the library for the
+# card isn't in a place where the linker will find it automatically
+# (e.g. '/usr/lib' and '/usr/local/lib') you need to specify the full
+# absolute path for the library (e.g. '/opt/zzz/ttt/libme6x00.so'). You
+# must make sure that the library for the card is already properly
+# installed if you want to build fsc2 with support for the card.
 
 # WITH_ME6000        := yes
 # me6000_libs        := /usr/local/lib/libme6x00.so
 
 
-# Both the next two lines must be uncommented if you want support for the
-# Wasco WITIO-48 DIO card. If the library for the card isn't in a place where
-# the linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib')
-# you need to specify the full absolute path for the library (e.g.
-# '/usr/xxx/yyy/libwitio_48.so'). You must make sure that the library for the
-# card is already properly installed if you want to build fsc2 with support
-# for the Wasco WITIO-48 DIO card.
+# Both the next two lines must be uncommented if you want support for
+# the Wasco WITIO-48 DIO card. If the library for the card isn't in a
+# place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need to specify the full absolute path for the
+# library (e.g. '/usr/xxx/yyy/libwitio_48.so'). You must make sure that
+# the library for the card is already properly installed if you want to
+# build fsc2 with support for the Wasco WITIO-48 DIO card.
 
 # WITH_WITIO_48      := yes
 # witio_48_libs      := /usr/local/lib/libwitio_48.so
 
 
-# All of the top three of the the four following lines must be uncommented
-# when you want support for the Roper Scientific Spec-10 CCD camera. Depending
-# on where the header files required by the PVCAM library are installed (which
-# is to compile the module for the the camera) you may have to change the
-# 'rs_spec10_incl' variable to the name of the installation directory. The
-# third variable, 'rs_spec10_libs', must be changed if the library isn't in
-# a place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib'). In this case it must be the full absolute path of the
-# library (for example '/usr/lib/pvcam/libpvcam.so'). You must make sure that
-# the header files and the library for the camera are already properly
-# installed before you build fsc2 with support for the camera.
+# All of the top three of the the four following lines must be
+# uncommented when you want support for the Roper Scientific Spec-10 CCD
+# camera. Depending on where the header files required by the PVCAM
+# library are installed (which is to compile the module for the the
+# camera) you may have to change the 'rs_spec10_incl' variable to the
+# name of the installation directory. The third variable,
+# 'rs_spec10_libs', must be changed if the library isn't in a place
+# where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib'). In this case it must be the full absolute path of
+# the library (for example '/usr/lib/pvcam/libpvcam.so'). You must make
+# sure that the header files and the library for the camera are already
+# properly installed before you build fsc2 with support for the camera.
 # The fourth line must be uncommented if you use a newer version of the
-# PVCAM library (I don't know which is the exact version where the requirements
-# changed, but it's definitely needed since version 2.7.0.0). For these
-# versions of the PVCAM library fsc2 needs to be linked against the real-
-# time and a firewire library and thus 'rs_spec10_extra_libs' must be
-# uncommented.
+# PVCAM library (I don't know which is the exact version where the
+# requirements changed, but it's definitely needed since version
+# 2.7.0.0). For these versions of the PVCAM library fsc2 needs to be
+# linked against the real- time and a firewire library and thus
+# 'rs_spec10_extra_libs' must be uncommented.
 
 # WITH_RS_SPEC10       := yes
 # rs_spec10_incl       := /usr/local/include/pvcam
@@ -317,13 +328,13 @@ BROWSER            := firefox
 # rs_spec10_extra_libs := yes
 
 
-# Both the next two lines must be uncommented if you want support for the
-# National Instruments PCI-MIO-16E-1 card. If the library for the card isn't
-# in a place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need to specify the full absolute path for the library
-# (e.g. '/usr/xxx/yyy/libni_daq.so'). You must make sure that the library for
-# the card is already properly installed if you want to build fsc2 with
-# support for the card.
+# Both the next two lines must be uncommented if you want support for
+# the National Instruments PCI-MIO-16E-1 card. If the library for the
+# card isn't in a place where the linker will find it automatically
+# (e.g. '/usr/lib' and '/usr/local/lib') you need to specify the full
+# absolute path for the library (e.g. '/usr/xxx/yyy/libni_daq.so'). You
+# must make sure that the library for the card is already properly
+# installed if you want to build fsc2 with support for the card.
 
 # WITH_PCI_MIO_16E_1 := yes
 # pci_mio_16e_1_libs := libni_daq.so
@@ -332,33 +343,34 @@ BROWSER            := firefox
 # The next line must be uncommented if you want support for the RULBUS
 # (Rijksuniversiteit Leiden BUS) and the devices connected to it. If the
 # include file for the library isn't in one of the standard places (i.e.
-# '/usr/include' or '/usr/local/include') you must also uncomment the line
-# starting with 'rulbus_incl_path and specify the complete path to the place
-# where it installed (e.g. '/usr/xxx/yyy). If the library for the card isn't
-# in a place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need also to specify the full absolute path for the
-# library by uncommenting the line starting with 'rulbus_lib_path and change
-# the what it gets set to. You must make sure that the library for the Rulbus
-# interface is already properly installed if you want to build fsc2 with
-# support for it.
+# '/usr/include' or '/usr/local/include') you must also uncomment the
+# line starting with 'rulbus_incl_path and specify the complete path to
+# the place where it installed (e.g. '/usr/xxx/yyy). If the library for
+# the card isn't in a place where the linker will find it automatically
+# (e.g. '/usr/lib' and '/usr/local/lib') you need also to specify the
+# full absolute path for the library by uncommenting the line starting
+# with 'rulbus_lib_path and change the what it gets set to. You must
+# make sure that the library for the Rulbus interface is already
+# properly installed if you want to build fsc2 with support for it.
 
 # WITH_RULBUS        := yes
 # rulbus_incl_path   := /usr/local/include
 # rulbus_lib_path    := /usr/lib/local
 
 
-# The next line must be uncommented if you want support for a Meilhaus 
+# The next line must be uncommented if you want support for a Meilhaus
 # data acquisition card, using the Meilhaus supplied driver and library.
-# If the include files for the library aren't in one of the standard places
-# (i.e. '/usr/include' or '/usr/local/include') you must also uncomment the line
-# starting with 'medriver_incl_path and specify the complete path to the place
-# where it installed (e.g. '/usr/xxx/yyy). If the library for the card isn't
-# in a place where the linker will find it automatically (e.g. '/usr/lib' and
-# '/usr/local/lib') you need also to specify the full absolute path for the
-# library by uncommenting the line starting with 'medriver_lib_path and change
-# the what it gets set to. You must make sure that the library supplied by
-# Meilhaus is already properly installed if you want to build fsc2 with
-# support for it.
+# If the include files for the library aren't in one of the standard
+# places (i.e. '/usr/include' or '/usr/local/include') you must also
+# uncomment the line starting with 'medriver_incl_path and specify the
+# complete path to the place where it installed (e.g. '/usr/xxx/yyy). If
+# the library for the card isn't in a place where the linker will find
+# it automatically (e.g. '/usr/lib' and '/usr/local/lib') you need also
+# to specify the full absolute path for the library by uncommenting the
+# line starting with 'medriver_lib_path and change the what it gets set
+# to. You must make sure that the library supplied by Meilhaus is
+# already properly installed if you want to build fsc2 with support for
+# it.
 
 # WITH_MEDRIVER      := yes
 # medriver_incl_path := /usr/local/include/medriver
@@ -373,10 +385,11 @@ BROWSER            := firefox
 # ADD_LIB_PATHS      := /usr/lib64 /usr/local/xyz/def
 
 
-# Comment out the next two lines if you don't want the ability to run a HTTP
-# server that allows to monitor fsc2s current state via the Internet. The
-# default port number the HTTP server will listen on can be set via the second
-# variable, DEFAULT_HTTP_PORT, which must be a number between 1024 and 65535.
+# Comment out the next two lines if you don't want the ability to run a
+# HTTP server that allows to monitor fsc2s current state via the
+# Internet. The default port number the HTTP server will listen on can
+# be set via the second variable, DEFAULT_HTTP_PORT, which must be a
+# number between 1024 and 65535.
 
 WITH_HTTP_SERVER   := yes
 DEFAULT_HTTP_PORT  := 8080
@@ -389,32 +402,33 @@ DEFAULT_HTTP_PORT  := 8080
 # FLEX_NEEDS_DECLARATIONS := yes
 
 
-# Uncomment the following line if you don't want the program to send me an
-# email with a report when it crashes.
+# Uncomment the following line if you don't want the program to send me
+# an email with a report when it crashes.
 
 # NO_MAIL            := yes
 
 
-# Normally, fsc2 will use the systems 'mail' command when it needs to send
-# emails. This requires that a mail transport agent (MTA) like sendmail is
-# installed on the system (i.e. sendmail or a similar program is installed,
-# but not necessarily be running, waiting for incoming connections).
-# Otherwise, when no MTA is installed a somewhat rudimentary mail transfer
-# agent built into fsc2 can be used instead. If you want to use fsc2s MTA
-# (e.g. because sendmail isn't installed on your machine) uncomment the
-# following line. In this case you must also uncomment the line defining
-# the USE_IPv6 variable if your machine uses the new IP address scheme with
-# 128 bit addresses instead of the traditional one with only 32 bit addresses.
+# Normally, fsc2 will use the systems 'mail' command when it needs to
+# send emails. This requires that a mail transport agent (MTA) like
+# sendmail is installed on the system (i.e. sendmail or a similar
+# program is installed, but not necessarily be running, waiting for
+# incoming connections). Otherwise, when no MTA is installed a somewhat
+# rudimentary mail transfer agent built into fsc2 can be used instead.
+# If you want to use fsc2s MTA (e.g. because sendmail isn't installed on
+# your machine) uncomment the following line. In this case you must also
+# uncomment the line defining the USE_IPv6 variable if your machine uses
+# the new IP address scheme with 128 bit addresses instead of the
+# traditional one with only 32 bit addresses.
 
 # USE_FSC2_MTA       := yes
 # USE_IPv6           := yes
 
 
 # This last variable controls to whom emails with bug reports and about
-# crashes will be send - if it's commented out no "Bug report" button will
-# be shown. Please change this if you change the program yourself (in which
-# case sending bug reports or emails about crashes to me wouldn't make too
-# much sense).
+# crashes will be send - if it's commented out no "Bug report" button
+# will be shown. Please change this if you change the program yourself
+# (in which case sending bug reports or emails about crashes to me
+# wouldn't make too much sense).
 
 MAIL_ADDRESS       := fsc2@toerring.de
 
@@ -1009,7 +1023,7 @@ src:
 
 modules:
 	$(MAKE) config
-	$(MAKE) -C $(sdir) modules
+	$(MAKE) -C $(mdir) modules
 
 
 utils:

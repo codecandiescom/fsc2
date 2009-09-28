@@ -19,7 +19,7 @@
 
 
 @node Writing Modules, Installation, Internals, fsc2
-@chapter Modules
+@chapter Writing Modules
 @cindex modules
 
 This chapter tries to describe how to write new modules for use with
@@ -1295,12 +1295,14 @@ i.e.@: you need
 #include "lan.h"
 @end example
 
-Naturally the functions aren't written with a certain protocol in mind
--- writing that is your business -- but just provide a set of fundamental
-routines on top of which you can write your own functions. You can even
-forego using them at all and write your own code for talking with the
-devices directly, they only exist for your convenience. But if you use
-them make sure they don't get invoked before the @code{exp_hook} function.
+Naturally, the functions aren't written with a certain protocol in
+mind -- writing that is your business unless it's either the VXI-11 or
+LeCroy's VICP protocol, for which support already exists -- but just
+provide a set of fundamental routines on top of which you can write
+your own functions. You can as well forego using them and write your
+own code for talking with the devices directly, they only exist for
+your convenience. But if you use them make sure they don't get invoked
+before the @code{exp_hook} function.
 
 The advantage of using them is that you don't have to care about basic
 operations (including dealing with timeouts etc.@:) and that the
@@ -1312,23 +1314,37 @@ main @file{Makefile} or the settings for your machine in the
 
 Here is a complete list of these convenience functions:
 @table @samp
-@item @code{fsc2_lan_open()}
+@item @code{@ref{fsc2_lan_open()}}
 Opens a connection to a device
-@item @code{fsc2_lan_write()}
-Sends data to the device
-@item @code{fsc2_lan_read()}
-Reads data from the device
-@item @code{fsc2_lan_close()}
+@item @code{@ref{fsc2_lan_write()}}
+Sends data to the device from a single buffer
+@item @code{@ref{fsc2_lan_writev()}}
+Sends data to the device from a set of buffers
+@item @code{@ref{fsc2_lan_read()}}
+Reads data from the device into a single buffer
+@item @code{@ref{fsc2_lan_readv()}}
+Reads data from the device into a set of buffers
+@item @code{@ref{fsc2_lan_close()}}
 Closes the connection to the device
+@item @code{@ref{fsc2_lan_log_message()}}
+Writes a message to the LAN log file
+@item @code{@ref{fsc2_lan_log_function_start()}}
+Write a message to the LAN log file about the start of a function
+@item @code{@ref{fsc2_lan_log_function_end()}}
+Write a message to the LAN log file about the end of a function
+@item @code{@ref{fsc2_lan_log_data()}}
+Write data directly to the LAN log file
+@item @code{@ref{fsc2_lan_log_level()}}
+Returns the log level for LAN log file messages.
 @end table
 @noindent
 While they are similar to the @code{open()}, @code{write()}, @code{read()}
 and @code{close()} function for dealing with normal file descriptors the
 all need several extra arguments.
 
+@anchor{fsc2_lan_open()}
 @findex fsc2_lan_open()
-The function for opening a connection, @code{fsc2_lan_open()}, is declared
-as
+The function opens a connection to the device and is declared as
 @example
 int fsc2_lan_open( const char * dev_name,
                    const char * address,
@@ -1340,34 +1356,36 @@ int fsc2_lan_open( const char * dev_name,
 The first argument, @code{dev_name}, is a string with the name of the
 device to be used when writing to the log file. The second argument,
 @code{address} is a string with the IP address of the device. This can
-be either the numerical IP address in dotted-quad format (e.g.@:
-@code{"123.97.243.12"}) or a symbolic host name
-(e.g.@: @code{"hex.discworld.unseen.edu"}), for which the IP address
-then is determined via a DNS request. The third argument, @code{port},
-is the port the device is accepting connections on, i.e.@: a number
-between @code{0} and @code{65535}. The fourth argument, @code{us_timeout},
-is the maximum time (in micro-seconds) to wait for a connection to be
+be either the numeric IP address in dotted-quad format (e.g.@:
+@code{"123.97.243.12"}) or a symbolic host name (e.g.@:
+@code{"hex.discworld.unseen.edu"}), for which the IP address then is
+determined via a DNS request. The third argument, @code{port}, is the
+port the device is accepting connections on, i.e.@: a number between
+@code{0} and @code{65535}. The fourth argument, @code{us_timeout}, is
+the maximum time (in micro-seconds) to wait for a connection to be
 achieved. If set to @code{0} (or a negative value) the connection will
-only time out after a system dependent delay (typically in the order of
-a minute). Finally, the last argument @code{quit_on_signal} tells the
-function if it is supposed to return immediately if a signal is received
-while the function is trying to connect to the device.
+only time out after a system dependent delay (typically in the order
+of a minute). Finally, the last argument @code{quit_on_signal} tells
+the function if it is supposed to return immediately if a signal is
+received while the function is trying to connect to the device.
 
 The function returns a positive integer on success that can be used as
-a handle for the device in all the following function calls, and @code{-1}
-on errors. The handle returned by the function is the file descriptor
-for the socket connected to the device. You are free to use this file
-descriptor for whatever you want, but please call the function
-@code{fsc2_lan_close()} to close it. The only two option set for the
-socket are @code{SO_KEEPALIVE} and @code{TCP_NODELAY} (but you can unset
-them if you want). Later on the options @code{SO_SNDTIMEO} and
-@code{SO_RCVTIMEO} may be set for timeouts for read and write
-operations (if the system supports setting these options), so you better
-leave them alone if you plan to use the functions @code{fsc2_lan_write()}
-and @code{fsc2_lan_read()}.
+a handle for the device in all the following function calls, and
+@code{-1} on errors. The handle returned by the function is the file
+descriptor for the socket connected to the device. You are free to use
+this file descriptor for whatever you want, but please call the
+function @code{@code{fsc2_lan_close()}} to close it. The only two
+option set for the socket are @code{SO_KEEPALIVE} and
+@code{TCP_NODELAY} (but you can unset them if you want). Later on the
+options @code{SO_SNDTIMEO} and @code{SO_RCVTIMEO} may be set for
+timeouts for read and write operations (if the system supports setting
+these options), so you better leave them alone if you plan to use the
+functions @code{@ref{fsc2_lan_write()}} and
+@code{@ref{fsc2_lan_read()}}.
 
+@anchor{fsc2_lan_write()}
 @findex fsc2_lan_write()
-The function for writing, @code{fsc2_lan_write()}, is declared as
+The function for writing data from a single buffer is declared as
 @example
 ssize_t fsc2_lan_write( int          handle,
                         const char * message,
@@ -1376,23 +1394,49 @@ ssize_t fsc2_lan_write( int          handle,
                         bool         quit_on_signal )
 @end example
 @noindent
-The first argument is the handle returned by @code{fsc2_lan_open()},
-identifying the device. The second argument, @code{message}, is a
-buffer with the data to be send to the device. The third, @code{length},
-is the length of the data buffer. The fourth argument, @code{us_timeout},
-is the amount of time to wait for data to be written to the device
-before timing out. If this is set to @code{0} (or a negative value)
-no timeout is used, i.e.@: the write function will wait indefinitely if
-necessary. The last argument, @code{quit_on_signal}, again indicates i
-the function must return immediately if a signal is received.
+The first argument is the handle returned by
+@code{@ref{fsc2_lan_open()}}, identifying the device. The second
+argument, @code{message}, is a buffer with the data to be send to the
+device. The third, @code{length}, is the length of the data buffer.
+The fourth argument, @code{us_timeout}, is the amount of time to wait
+for data to be written to the device before timing out. If this is set
+to @code{0} (or a negative value) no timeout is used, i.e.@: the write
+function will wait indefinitely if necessary. The last argument,
+@code{quit_on_signal}, again indicates i the function must return
+immediately if a signal is received.
 
 Please note that (as always with writing to the network) the function
 may return before as many bytes as requested have been send. The return
 value will tell you how many actually were sent or, if @code{-1} is
 returned, that the write operation failed.
 
+
+@anchor{fsc2_lan_writev()}
+@findex fsc2_lan_writev()
+The function for writing from a set of buffers is declared as
+@example
+ssize_t fsc2_lan_writev( int                  handle,
+                         const struct iovec * data,
+                         int                  count,
+                         long                 us_timeout,
+                         bool                 quit_on_signal )
+@end example
+@noindent
+The first argument is the handle returned by
+@code{@ref{fsc2_lan_open()}}, identifying the device. The second is a
+pointer to a set of buffers, described by a structure of type
+@code{struct iovec} as used by the @code{writev()} function and
+defined in the include file @file{<sys/uio.h>} (it contains a pointer
+to the data and a @code{size_t} with the number of data bytes). The
+third argument is the number of such @code{iovec} structures passed to
+the function via the second argument. The remaining two arguments as
+well as the return value have exactly the same meaning as for the
+@code{@ref{fsc2_lan_write()}} function.
+
+
+@anchor{fsc2_lan_read()}
 @findex fsc2_lan_read()
-The function for reading, @code{fsc2_lan_read()}, is declared as
+The function for reading into a single buffer is declared as
 @example
 ssize_t fsc2_lan_read( int    handle,
                        char * buffer,
@@ -1401,18 +1445,37 @@ ssize_t fsc2_lan_read( int    handle,
                        bool   quit_on_signal )
 @end example
 @noindent
-The arguments are identical to the ones of @code{fsc2_lan_write()},
-with the only difference that the second, @code{buffer}, is a buffer
-large enough to hold at least @code{length} bytes (make sure that
-this is the case!).
+The arguments are identical to the ones of
+@code{@ref{fsc2_lan_write()}}, with the only difference that the
+second, @code{buffer}, is a buffer large enough to hold at least
+@code{length} bytes (make sure that this is the case!).
 
-As for @code{fsc2_lan_write()} it isn't guaranteed that has many bytes
-as requested get read. The return value tells you how many actually
-got read - if this should be @code{-1} reading failed.
+As for @code{@ref{fsc2_lan_write()}} it isn't guaranteed that has many
+bytes as requested get read. The return value tells you how many
+actually got read - if this should be @code{-1} reading failed.
 
+
+@anchor{fsc2_lan_readv()}
+@findex fsc2_lan_readv()
+The function for reading data into a set of buffers is declared as
+@example
+ssize_t fsc2_lan_readv( int            handle,
+                        struct iovec * data,
+                        int            count,
+                        long           us_timeout,
+                        bool           quit_on_signal )
+@end example
+@noindent
+The arguments are identical to the ones of @code{@ref{fsc2_lan_writev()}}.
+
+As for @code{@ref{fsc2_lan_writev()}} it isn't guaranteed that has
+many bytes as requested get read. The return value tells you how many
+actually got read - if this should be @code{-1} reading failed.
+
+
+@anchor{fsc2_lan_close()}
 @findex fsc2_lan_close()
-Finally, the function @code{fsc2_lan_close()} for closing the connection
-is declared as
+The function for closing the connection to the device is declared as
 @example
 int fsc2_lan_close( int handle )
 @end example
@@ -1422,11 +1485,10 @@ with an invalid handle (possibly because the connection had already been
 closed), @code{-1} gets returned.
 
 
+@anchor{fsc2_lan_log_message()}
 @findex fsc2_lan_log_message()
-The only other additional function that can be called is
-@code{fsc2_lan_log_message()} and lets you directly write to
-the log file that stores information about the details of the
-communication over the LAN:
+The function allows you to write to the log file that stores
+information about the details of the communication over the LAN:
 @example
 void fsc2_lan_log_message( const char * fmt, ... );
 @end example
@@ -1434,6 +1496,253 @@ void fsc2_lan_log_message( const char * fmt, ... );
 It expects a format string as you would use in the @code{C printf()}
 function plus arguments corresponding to the conversion specifiers in
 the format string.
+
+
+@anchor{fsc2_lan_log_function_start()}
+@findex fsc2_lan_log_function_start()
+To put a message into the log file about the start of a function
+use
+@example
+void fsc2_lan_log_function_start( const char * function,
+                                  const char * dev_name )
+@end example
+@noindent
+It expects two arguments: the name of the function and the name of
+the device.
+
+
+@anchor{fsc2_lan_log_function_end()}
+@findex fsc2_lan_log_function_end()
+To put a message into the log file about the end of a function
+use
+@example
+void fsc2_lan_log_function_end( const char * function,
+                                const char * dev_name )
+@end example
+@noindent
+It expects two arguments: the name of the function and the name of
+the device.
+
+
+@anchor{fsc2_lan_log_data()}
+@findex fsc2_lan_log_data()
+The function for writing data directly into the LAN lof file,
+e.g.@: to report data read from or send to a device, is declared as
+@example
+void fsc2_lan_log_data( long         length,
+                        const char * buffer )
+@end example
+@noindent
+The first argument is the number of bytes of the data to be written to
+the LAN log file and the second is a pointer to the data itself.
+
+
+@anchor{fsc2_lan_log_level()}
+@findex fsc2_lan_log_level()
+The function to determine which log level is to be used is declared as
+@example
+int fsc2_lan_log_level( void )
+@end example
+@noindent
+It returns an integer with a value of the constants @code{LL_NONE}
+(don't log at all), @code{LL_ERR} (log errors only), @code{LL_CE}
+(log only start and end of function calls) or @code{LL_HIGH} (also
+log data receive or send) as defined in @file{lan.h}.
+
+
+@menu
+* LeCroy's VICP Protocol::  Support for LeCroy's VICP protocol
+@end menu
+
+
+@node LeCroy's VICP Protocol, , , Handling devices connected via LAN
+@subsubsection LeCroy's VICP Protocol
+
+LeCroy's VICP (Versatile Instrument Control Protocol), running on top
+of TCP/IP, is already is directy supported. The following functions
+exist to communicate with devices using this protocol:
+@table @samp
+@item @code{@ref{vicp_open()}}
+Establish a connection with the device
+@item @code{@ref{vicp_close()}}
+Close the connection to the device
+@item @code{@ref{vicp_lock_out()}}
+Switch local lockout state on or off
+@item @code{@ref{vicp_set_timeout()}}
+Set imeout for read or write operations
+@item @code{@ref{vicp_write()}}
+Send data to the device
+@item @code{@ref{vicp_read()}}
+Read data send by the device
+@item @code{@ref{vicp_device_clear()}}
+Clear the device
+@end table
+
+
+In order to use these functions include the appropriate header file,
+i.e.@: use
+@example
+#include "vicp.h"
+@end example
+and, when creating the shared library for the module, make sure to
+link against @file{vicp.c}.
+
+
+@anchor{vicp_open()}
+@findex vicp_open
+The function
+@example
+void vicp_open( const char * dev_name,
+                const char * address,
+                long         us_timeout,
+                bool         quit_on_signal )
+@end example
+@noindent
+must be the first function to be called. It establishes the connection
+to the device which then is used for all further function calls. The
+function expects a symbolic name for the device (only to be used for
+the log file), its IP address, either as a hostname (like
+@code{"hex.discworld.unseen.edu"}) or or a numeric IP address in
+dotted-quad format (like @code{"123.97.243.12"}), a positive or zero
+maximum time (in micro-seconds, a zero value means indefinitely long
+timeout) the function is allowed to wait for successfully establishing
+the connection and a flag that tells if the function is supposed to
+return immediately on receipt of a signal. Please note that a timer,
+raising a @code{SIGALRM} signal on expiry, is used for controlling the
+timeout. Thus the function temporarily installs its own signal handler
+for @code{SIGALRM}, so the caller should make sure that it doesn't
+initate anything that would also raise such a signal. Please also note
+that the function can't be called when an connection has already been
+created. On failure (either because the connection has already been
+opened, connecting to the device fails or not enough memory is
+available) the function throws an exception.
+
+
+@anchor{vicp_close()}
+@findex vicp_close()
+The function
+@example
+void vicp_close( void )
+@end example
+@noindent
+is the opposite of @code{@ref{vicp_open()}}, i.e.@: it closes down the
+existing connection. It throws an exception when you try to close an
+already closed connection.
+
+
+@anchor{vicp_lock_out()}
+@findex vicp_lock_out()
+The function
+@example
+void vicp_lock_out( bool lock_out )
+@end example
+@noindent
+allows to control if the device is in local lockout state (the default
+when a connection is made) or not. By calling the funtion with a true
+boolean value local lockout gets switched on, switch it off by calling
+it with a false value.
+
+
+@anchor{vicp_set_timeout()}
+@findex vicp_set_timeout()
+The function
+@example
+void vicp_set_timeout( int  dir,
+                       long us_timeout )
+@end example
+@noindent
+allows to set timeouts for read or write operations. If the first
+argument is the symbolic value @code{READ} (or 0), a timeout for read
+operations gets set, if it's @code{WRITE} (or 1) the timeout for
+writes gets set. Timeouts must be specified in micro-seconds and must
+be either positive numbers or zero, in which case an indefinitely long
+timeout is used. Without calling the function a default timeout of 5
+seconds will be used. Please note that the function can only be called
+after the connection has been established. Please also note that on
+some systems (those tht don't support the @code{SO_RCVTIMEO} and
+@code{SO_SNDTIMEO} socket options) the timeouts get created via a
+timer that raises a @code{SIGALRM} signal. Thus on these systems the
+caller may not initiate any action that would raise such a signal when
+calling one of the functions that can timeout.
+
+
+@anchor{vicp_write()}
+@findex vicp_write()
+The function
+@example
+int vicp_write( const char * buffer,
+                ssize_t    * length,
+                bool         with_eoi,
+                bool         quit_on_signal )
+@end example
+@noindent
+is used to send data to the device. It requires four arguments, a
+buffer with the data to be send, a pointer to a variable with the
+number of bytes to be send, a flag that tells if the data are send
+with a trailing @code{EOI} and a flag that tells if the function is
+supposed to return immediately when receiving a signal. The function
+returns either @code{SUCCESS} (0) if the date could be send
+successfully, or @code{FAILURE} (-1) if sending the data aborted due
+to receiving a signal. On errors or timeouts the function closes the
+connection and throws an exception. On return the variable pointed to
+by the second argument will contain the number of bytes that have been
+sent -- this also is the case if the function returns @code{FAILURE}
+or did throw an exception.
+
+
+@anchor{vicp_read()}
+@findex vicp_read()
+The function
+@example
+int vicp_read( char *    buffer,
+               ssize_t * length,
+               bool    * with_eoi,
+               bool      quit_on_signal )
+@end example
+@noindent
+is for reading data the device sends. It takes four arguments, a
+buffer for storing the data, a pointer to a variable with the length
+of the buffer, a pointer to a variable that tells on return if
+@code{EOI} was set for the data and a flag telling if the function is
+supposed to return immediately on signals. The function returns
+@code{SUCCESS_BUT MORE} (1) if a reply was received but not all data
+could be read because they wouldn't have fit into the user supplied
+buffer, @code{SUCCESS} (0) if the reply was read completely and
+@code{FAILURE} (-1) if the function aborted because a signal was
+received. On erros or timeouts the function closes the connection and
+throws an exception. On return the variable pointed to by the second
+argument is set to the number of bytes that have been received and the
+third one shows if the data sent have a trailing @code{EOI}, even if
+the function did return with @code{FAILURE} or threw an exception.
+
+If the function returns less data than the device was willing to send
+(in which case @code{SUCCESS_BUT_MORE} gets returned) the next
+invocation of @code{@ref{vicp_read()}} will return these yet unread
+data, even if another reply by the device was initiated by sending
+another command in between. I.e.@: "new data" (data resulting from the
+next command) only will be returned after the function has been called
+until @code{SUCCESS} has been returned.
+
+Please note: If a read or write gets aborted due to a signal there may
+still be data to be read from the device or the device may still be
+waiting to receive more data. Unless you're closing the connection
+after receipt of a signal you must make sure that the remaining data
+are fetched from or get send to the device.
+
+
+@anchor{vicp_device_clear()}
+@findex vicp_device_clear()
+The function
+@example
+void vicp_device_clear( void )
+@end example
+@noindent
+allows to clear the device and reset the connection. Clearing the
+device includes clearing its input and output buffers and aborting the
+interpretation of the current command (if any) as well as clearing all
+pending commands. Status and status enable registers remain unchanged.
+All of this may take several seconds to finish. The function also
+closes and reopens the connection to the device.
 
 
 @node Hook functions, Caveats for the test run, Handling devices connected via LAN, Writing New Modules

@@ -26,6 +26,24 @@
 #include <netinet/in.h>         /* needed for struct in_addr */
 
 
+/* Definition of log levels. Since they already may have been
+   defined in the GPIB or serial port module only define them
+   only if they aren't already known */
+
+#if ! defined LL_NONE
+#define  LL_NONE  0    /* log nothing */
+#endif
+#if ! defined LL_ERR
+#define  LL_ERR   1    /* log errors only */
+#endif
+#if ! defined LL_CE
+#define  LL_CE    2    /* log function calls and function exits */
+#endif
+#if ! defined LL_ALL
+#define  LL_ALL   3    /* log calls with parameters and function exits */
+#endif
+
+
 typedef struct LAN_List LAN_List_T;
 
 struct LAN_List {
@@ -75,6 +93,17 @@ ssize_t fsc2_lan_readv( int            /* handle         */,
 
 void fsc2_lan_log_message( const char * /* fmt */,
                            ...                     );
+
+void fsc2_lan_log_function_start( const char * function,
+                                  const char * dev_name );
+
+void fsc2_lan_log_function_end( const char * function,
+                                const char * dev_name );
+
+void fsc2_lan_log_data( long         length,
+                        const char * buffer );
+
+int fsc2_lan_log_level( void );
 
 void fsc2_lan_cleanup( void );
 

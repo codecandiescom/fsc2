@@ -24,7 +24,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate August 18, 2009
+@set lastupdate September 27, 2009
 @iftex
 @afourpaper
 @end iftex
@@ -41,7 +41,7 @@
 @sp 4
 @center A Program for Remote Control of Spectrometers
 @sp 2
-@center August 2009
+@center September 2009
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
@@ -71,7 +71,7 @@ translation approved by the Free Software Foundation.
 
 @ifnottex
 @direntry
-* fsc2: (fsc2). A program for the remote control of EPR spectrometers.
+* fsc2: (fsc2). A program for the remote control of spectrometers.
 @end direntry
 
 

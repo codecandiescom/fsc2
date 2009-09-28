@@ -2230,8 +2230,8 @@ conn_request_handler( void )
  * to try to get rid of shared memory and kill the other processes etc.
  *-----------------------------------------------------------------------*/
 
-static
-void set_main_signals( void )
+static void
+set_main_signals( void )
 {
     struct sigaction sact;
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT,
@@ -2259,8 +2259,8 @@ void set_main_signals( void )
  * Signal handler for the main program
  *-------------------------------------*/
 
-static
-void main_sig_handler( int signo )
+static void
+main_sig_handler( int signo )
 {
     int errno_saved;
     pid_t pid;

@@ -21,7 +21,7 @@
 
 
 #include "lecroy_ws.h"
-#include "lecroy_vicp.h"
+#include "vicp.h"
 
 
 static unsigned char *lecroy_ws_get_data( long * len );
@@ -67,10 +67,10 @@ lecroy_ws_init( const char * name )
 
     /* Open a socket to the device */
 
-    lecroy_vicp_init( name, NETWORK_ADDRESS, 100000, 1 );
+    vicp_open( name, NETWORK_ADDRESS, 100000, 1 );
 
-    lecroy_vicp_set_timeout( READ, READ_TIMEOUT );
-    lecroy_vicp_set_timeout( WRITE, WRITE_TIMEOUT );
+    vicp_set_timeout( READ, READ_TIMEOUT );
+    vicp_set_timeout( WRITE, WRITE_TIMEOUT );
 
     TRY
     {
@@ -79,13 +79,12 @@ lecroy_ws_init( const char * name )
            first. Then ask for status byte to make sure the device reacts. */
 
         len = 51;
-        if ( lecroy_vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
-                                "CORD LO;*STB?\n", &len, SET, UNSET )
-                                                                   != SUCCESS )
+        if ( vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
+                         "CORD LO;*STB?\n", &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
 
         len = sizeof buffer;
-        if ( lecroy_vicp_read( buffer, &len, &with_eoi, UNSET ) == FAILURE )
+        if ( vicp_read( buffer, &len, &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
 
         /* Figure out which traces are displayed (only 4 can be displayed
@@ -114,7 +113,7 @@ lecroy_ws_init( const char * name )
         /* Make sure the internal timebase is used */
 
         len = 9;
-        if ( lecroy_vicp_write( "SCLK INT\n", &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( "SCLK INT\n", &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
 
         /* Set or get the timebase (including the index in the table of
@@ -330,7 +329,7 @@ lecroy_ws_set_timebase( double timebase )
 
     strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -369,7 +368,7 @@ lecroy_ws_set_interleaved( bool state )
 
     strcat( cmd, state ? "ON\n" : "OFF\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -415,7 +414,7 @@ lecroy_ws_set_memory_size( long mem_size )
 
     sprintf( cmd, "MSIZ %ld\n", mem_size );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     /* The memory size influences the horizontal resolution */
@@ -468,7 +467,7 @@ lecroy_ws_set_sens( int    channel,
     sprintf( cmd, "C%1d:VDIV ", channel - LECROY_WS_CH1 + 1 );
     strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -513,7 +512,7 @@ lecroy_ws_set_offset( int    channel,
     sprintf( cmd, "C%1d:OFST ", channel - LECROY_WS_CH1 + 1 );
     strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -580,7 +579,7 @@ lecroy_ws_set_coupling( int channel,
 
     sprintf( cmd, "C%1d:CPL %s\n", channel - LECROY_WS_CH1 + 1, cpl[ type ] );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -667,7 +666,7 @@ lecroy_ws_set_bandwidth_limiter( int channel,
 #endif
 
     len = strlen( buf );
-    if ( lecroy_vicp_write( buf, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( buf, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -744,7 +743,7 @@ lecroy_ws_set_trigger_source( int channel )
         strcat( cmd, "EX10\n" );
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -807,7 +806,7 @@ lecroy_ws_set_trigger_level( int    channel,
 
     strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -878,7 +877,7 @@ lecroy_ws_set_trigger_slope( int channel,
 
     strcat( cmd, slope ? "POS\n" : "NEG\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -969,7 +968,7 @@ lecroy_ws_set_trigger_coupling( int channel,
     strcat( cmd, cpl_str[ cpl ] );
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -1023,7 +1022,7 @@ lecroy_ws_set_trigger_mode( int mode )
 
     strcat( cmd, mode_str[ mode ] );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -1076,7 +1075,7 @@ lecroy_ws_set_trigger_delay( double delay )
 
     strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -1149,7 +1148,7 @@ lecroy_ws_display( int ch,
     }
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     if ( on_off )
@@ -1174,7 +1173,7 @@ lecroy_ws_display( int ch,
 void
 lecroy_ws_finished( void )
 {
-    lecroy_vicp_close( );
+    vicp_close( );
 }
 
 
@@ -1197,7 +1196,7 @@ lecroy_normal_channel_averaging( int  channel,
     sprintf( cmd, "VBS 'app.Acquisition.C%d.AverageSweeps=%ld'\n",
              channel - LECROY_WS_CH1 + 1, num_avg );
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 }
 
@@ -1218,7 +1217,7 @@ lecroy_ws_start_acquisition( void )
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
     len = 5;
-    if ( lecroy_vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     /* Set up the parameter to be used for averaging for the function channels
@@ -1243,14 +1242,14 @@ lecroy_ws_start_acquisition( void )
             sprintf( cmd, "C%1d:HMAG 1;C%1d:HPOS 5\n",
                      ch - LECROY_WS_CH1 + 1, ch - LECROY_WS_CH1 + 1 );
             len = strlen( cmd );
-            if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
                 lecroy_ws_lan_failure( );
 
             /* Finally reset what's currently stored in the trace */
 
             sprintf( cmd, "C%1d:FRST\n", ch - LECROY_WS_CH1 + 1 );
             len = strlen( cmd );
-            if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
                 lecroy_ws_lan_failure( );
         }
         else
@@ -1267,7 +1266,7 @@ lecroy_ws_start_acquisition( void )
                   lecroy_ws.num_avg[ LECROY_WS_MATH ] );
 
         len = strlen( cmd );
-        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
 
         lecroy_normal_channel_averaging( lecroy_ws.source_ch[ LECROY_WS_MATH ],
@@ -1284,7 +1283,7 @@ lecroy_ws_start_acquisition( void )
 
         sprintf( cmd, "F1:HMAG 1;F1:HPOS 5\n" );
         len = strlen( cmd );
-        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
 
         /* Finally reset what's currently stored in the trace (otherwise a
@@ -1292,12 +1291,12 @@ lecroy_ws_start_acquisition( void )
 
         sprintf( cmd, "F1:FRST\n" );
         len = strlen( cmd );
-        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
     }
 
     len = 5;
-    if ( lecroy_vicp_write( "CLSW\n", &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( "CLSW\n", &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     /* Reset the bits in the word that tells us later when data from an
@@ -1320,7 +1319,7 @@ lecroy_ws_start_acquisition( void )
         lecroy_ws.trigger_mode = LECROY_WS_TRG_MODE_NORMAL;
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 }
 
@@ -1374,7 +1373,7 @@ lecroy_ws_get_prep( int              ch,
                  lecroy_ws_curve_length( ) );
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     /* When a non-memory curve is to be fetched and the acquisition isn't
@@ -1394,7 +1393,7 @@ lecroy_ws_get_prep( int              ch,
         strcpy( cmd, ch_str );
         strcat( cmd, ":WF? DAT1\n" );
         len = strlen( cmd );
-        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_ws_lan_failure( );
 
         /* ...and fetch 'em */
@@ -1579,7 +1578,7 @@ lecroy_ws_copy_curve( long src,
              dest - LECROY_WS_M1 + 1 );
 
     len = strlen( cmd );
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 }
 
@@ -1609,8 +1608,8 @@ lecroy_ws_get_data( long * length )
 
     while ( gotten < len )
     {
-        if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
-                                                                   == FAILURE )
+        if ( vicp_read( len_str + gotten, &to_get,
+                        &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
         gotten += to_get;
         to_get = len - gotten;
@@ -1628,8 +1627,8 @@ lecroy_ws_get_data( long * length )
 
     while ( gotten < len )
     {
-        if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
-                                                                   == FAILURE )
+        if ( vicp_read( len_str + gotten, &to_get,
+                        &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
         gotten += to_get;
         to_get = len - gotten;
@@ -1653,8 +1652,8 @@ lecroy_ws_get_data( long * length )
 
     while ( gotten < len )
     {
-        if ( lecroy_vicp_read( ( char * ) data + gotten, &to_get,
-                               &with_eoi, UNSET ) == FAILURE )
+        if ( vicp_read( ( char * ) data + gotten, &to_get,
+                        &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
         gotten += to_get;
         to_get = len - gotten;
@@ -1741,7 +1740,7 @@ lecroy_ws_get_float_value( int          ch,
 void
 lecroy_ws_lock_state( bool lock_state )
 {
-    lecroy_vicp_lock_out( lock_state );
+    vicp_lock_out( lock_state );
 }
 
 
@@ -1754,7 +1753,7 @@ lecroy_ws_command( const char * cmd )
     ssize_t len = strlen( cmd );
 
 
-    if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
     return OK;
@@ -1800,9 +1799,9 @@ lecroy_ws_talk( const char * cmd,
 
     TRY
     {
-        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             THROW( EXCEPTION );
-        ret = lecroy_vicp_read( reply, length, &with_eoi, UNSET );
+        ret = vicp_read( reply, length, &with_eoi, UNSET );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1818,7 +1817,7 @@ lecroy_ws_talk( const char * cmd,
 static void
 lecroy_ws_lan_failure( void )
 {
-    lecroy_vicp_close( );
+    vicp_close( );
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
 }
