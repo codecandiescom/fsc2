@@ -121,9 +121,9 @@ digitizer_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------*
- * Switches the channel on or off
- *--------------------------------*/
+/*------------------------------*
+ * Switches a channel on or off
+ *------------------------------*/
 
 Var_T *
 digitizer_show_channel( Var_T * v )

@@ -43,6 +43,8 @@ ag54830b_l_init( const char * name )
 
 	vxi11_device_clear( );
 
+	vxi11_lock_out( SET );
+
 	ag54830b_l_command( ":WAV:BYT LSBF\n" );   /* set byte order */
 	ag54830b_l_command( ":WAV:FORM WORD\n" );  /* set transfer format */
 	ag54830b_l_command( ":WAV:VIEW ALL\n" );   /* set all acquared data */

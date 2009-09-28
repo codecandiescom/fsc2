@@ -253,7 +253,7 @@ ag54830b_get_curve( int       channel,
 {
 	char cmd[ 50 ];
 	char reply[ 32 ];
-	long blength = 32;
+	long blength = sizeof reply;
 	char *buffer = NULL;
 	long i;
 	double yinc;
@@ -351,13 +351,13 @@ ag54830b_get_curve( int       channel,
 		 && channel >= AG54830B_CH1
 		 && channel < NUM_DISPLAYABLE_CHANNELS )
 	{
-		blength = 32;
+		blength = sizeof reply;
 		ag54830b_talk( ":WAV:YINC?\n", reply, &blength ); /* get y-increment */
 		reply[ blength - 1 ] = '\0';
 		yinc = T_atod( reply );
 		fsc2_usleep( 1000, UNSET );
 
-		blength = 32;
+		blength = sizeof reply;
 		ag54830b_talk( ":WAV:YOR?\n", reply, &blength );  /* get y-origin */
 		reply[ blength - 1 ] = '\0';
 		yorg = T_atod( reply );
@@ -643,7 +643,7 @@ void
 ag54830b_set_trigger_pos( double pos )
 {
     char   reply[ 30 ];
-    long   length = 30;
+    long   length = sizeof reply;
 	double time_pos;
 	double time_range;
 	char   cmd[ 30 ];
@@ -668,7 +668,7 @@ double
 ag54830b_get_trigger_pos( void )
 {
     char   reply[ 30 ];
-    long   length = 30;
+    long   length = sizeof reply;
 	double time_pos;
 	double time_range;
 
@@ -677,7 +677,7 @@ ag54830b_get_trigger_pos( void )
     reply[ length - 1 ] = '\0';
 	time_pos = - T_atod( reply );
 
-	length = 30;
+	length = siezof reply;
 	ag54830b_talk( ":TIM:RANG?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 	time_range = T_atod( reply );
