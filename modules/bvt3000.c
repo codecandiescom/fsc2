@@ -414,7 +414,7 @@ temp_contr_proportional_band( Var_T * v )
     if ( v == NULL )
         return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT ?
                           eurotherm902s_get_proportional_band( ) :
-                          TEST_PROPORTIOAL_BAND );
+                          TEST_PROPORTIONAL_BAND );
 
     pb = get_double( v, "proportional band" );
 
@@ -478,7 +478,7 @@ temp_contr_derivative_time( Var_T * v )
 
 
     if ( v == NULL )
-        return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT :
+        return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT ?
                           eurotherm902s_get_derivative_time( ) :
                           TEST_DERIVATIVE_TIME );
 
