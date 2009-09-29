@@ -526,6 +526,63 @@ temp_contr_lock_keyboard( Var_T * v )
 
 
 /*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_cutbackss( Var_T * v )
+{
+    double cb[ 2 ] = { TEST_CUTBACK_LOW, TEST_CUTBACK_HIGH };
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            cb[ 0 ] = eurotherm902s_get_cutback_low( );
+            cb[ 1 ] = eurotherm902s_get_cutback_high( );
+        }
+
+        return vars_push( FLOAT_ARR, cb, 2 );
+    }
+
+    cb[ 0 ] = get_double( v, "low cutback" );
+
+    if ( cb[ 0 ] < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for low cutback.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        print( FATAL, "Missing argument for high cutback.\n" );
+        THROW( EXCEPTION );
+    }
+
+    cb[ 1 ] = get_double( v, "high cutback" );
+
+    if ( cb[ 1 ] < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for high cutback.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_ARR, cb, 2 );
+
+    eurotherm902s_set_cutback_low( cb[ 0 ] );
+    eurotherm902s_set_cutback_high( cb[ 1 ] );
+
+    cb[ 0 ] = eurotherm902s_get_cutback_low( );
+    cb[ 1 ] = eurotherm902s_get_cutback_high( );
+    
+    return vars_push( FLOAT_ARR, cb, 2 );
+}
+
+
+/*----------------------------------------------------*
  * Sends a query to the device and returns the result
  *----------------------------------------------------*/
 

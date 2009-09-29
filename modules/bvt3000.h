@@ -84,6 +84,8 @@
 #define TEST_PROPORTIONAL_BAND      8.1
 #define TEST_INTEGRAL_TIME         17.0
 #define TEST_DERIVATIVE_TIME        2.8
+#define TEST_CUTBACK_LOW           67.9
+#define TEST_CUTBACK_HIGH          56.2
 
 /* Maximum time to wait for a reply (in us) */
 
@@ -123,6 +125,7 @@ Var_T * temp_contr_state(              Var_T * v );
 Var_T * temp_contr_proportional_band(  Var_T * v );
 Var_T * temp_contr_integral_time(      Var_T * v );
 Var_T * temp_contr_derivative_time(    Var_T * v );
+Var_T * temp_contr_cutbackss(          Var_T * v );
 Var_T * temp_contr_lock_keyboard(      Var_T * v );
 
 
