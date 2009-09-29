@@ -32,9 +32,6 @@ extern BVT3000 bvt3000;
 void
 bvt3000_init( void )
 {
-    double sp;
-
-
 	/* Try to open the device file */
 
     if ( ( bvt3000.tio = fsc2_serial_open( bvt3000.sn,
@@ -128,25 +125,23 @@ bvt3000_init( void )
 
     /* Check that during the test run no out of range setpoint was requested */
 
-    sp = eurotherm902s_get_min_setpoint( SP1 );
-    if ( bvt3000.min_setpoint < sp )
+    bvt3000.min_setpoint = eurotherm902s_get_min_setpoint( SP1 );
+    if ( bvt3000.setpoint < bvt3000.min_setpoint )
     {
         print( FATAL, "During test run a setpoint of %f K was requested "
                "which is below the lowest configured setpoint of %f K.\n",
-               bvt3000.min_setpoint, sp );
+               bvt3000.setpoint, bvt3000.min_setpoint );
         THROW( EXCEPTION );
     }
-    bvt3000.min_setpoint = sp;
 
-    sp = eurotherm902s_get_max_setpoint( SP1 );
-    if ( bvt3000.max_setpoint > sp )
+    bvt3000.max_setpoint = eurotherm902s_get_max_setpoint( SP1 );
+    if ( bvt3000.setpoint > bvt3000.max_setpoint )
     {
         print( FATAL, "During test run a setpoint of %f K was requested "
                "which is above the highest configured setpoint of %f K.\n",
-               bvt3000.max_setpoint, sp );
+               bvt3000.setpoint, bvt3000.max_setpoint );
         THROW( EXCEPTION );
     }
-    bvt3000.max_setpoint = sp;
 
     /* Check if the Eurotherm 902S detected a sensor break */
 
