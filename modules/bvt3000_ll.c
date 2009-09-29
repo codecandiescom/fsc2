@@ -123,6 +123,10 @@ bvt3000_init( void )
 
     bvt3000.is_open = SET;
 
+    /* Check the Eurotherm902S and bring into known state */
+
+    eurotherm902s_init( );
+
     /* Check that during the test run no out of range setpoint was requested */
 
     bvt3000.min_setpoint = eurotherm902s_get_min_setpoint( SP1 );
@@ -328,61 +332,6 @@ bvt3000_query( const char * cmd )
 
     buf[ len - 2 ] = '\0';
 	return buf + 3;
-}
-
-
-/*---------------------------------------------------------------*
- * Checks if a command is available, argument must be 2 char command
- * that, if the command is implemented, would result in a reply
- *---------------------------------------------------------------*/
-
-bool
-bvt3000_check_cmd( const char * cmd )
-{
-	char buf[ 100 ];
-	unsigned char bc;
-	ssize_t len;
-
-
-	fsc2_assert( cmd && cmd[ 2 ] == '\0' );
-
-	/* Assemble string to be send */
-
-	len = sprintf( buf, "%c%02d%02d%s%c", EOT, GROUP_ID, DEVICE_ID, cmd, ENQ );
-
-	/* Send string and read and analyze response. The response must start
-	   with STX, followed by the 2-char command, then data and finally an
-	   ETX and the BCC (block check character) gets send. */
-
-    if (    fsc2_serial_write( bvt3000.sn, buf, len,
-						      SERIAL_WAIT, UNSET ) != len
-         || ( len = fsc2_serial_read( bvt3000.sn, buf, sizeof buf - 1, NULL,
-									  SERIAL_WAIT, UNSET ) ) < 5
-         || len == sizeof buf - 1 )                      /* reply too long */
-        bvt3000_comm_fail( );
-
-    /* The following indicates a non-valid mnemonic */
-
-    if (    ( len == 1 && *buf == EOT )                  /* for 900 ESP */
-         || (    len == 4
-              && buf[ 0 ] == STX
-              && buf[ 1 ] == GROUP_ID
-              && buf[ 2 ] == DEVICE_ID
-              && buf[ 3 ] == EOT ) )
-        return FAIL;
-
-    if (    buf[ 0 ] != STX                              /* missing STX */
-         || buf[ len - 2 ] != ETX                        /* missing ETX */
-         || strncmp( buf + 1, cmd, 2 ) )                 /* wrong command */
-        bvt3000_comm_fail( );
-
-    bc = buf[ len - 1 ];
-    buf[ len - 1 ] = '\0';
-
-    if ( ! bvt3000_check_bcc( ( unsigned char * ) ( buf + 1 ), bc ) )
-        bvt3000_comm_fail( );
-
-    return OK;
 }
 
 

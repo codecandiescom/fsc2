@@ -274,7 +274,7 @@ temp_contr_heater_power( Var_T *v )
  *----------------------------------------------------*/
 
 Var_T *
-temp_contr_flow_rate( Var_T * v )
+temp_contr_gas_flow( Var_T * v )
 {
     size_t i;
     double flow_rate;
@@ -285,7 +285,7 @@ temp_contr_flow_rate( Var_T * v )
     {
         if ( FSC2_MODE == TEST )
             return vars_push( FLOAT_VAR, bvt3000.flow_rate );
-        return vars_push( FLOAT_VAR, bvt3000_get_flow_rate( ) );
+        return vars_push( FLOAT_VAR, flow_rates[ bvt3000_get_flow_rate( ) ] );
     }
 
     flow_rate = get_double( v, "flow rate" );

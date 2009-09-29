@@ -106,6 +106,7 @@ int bvt3000_init_hook(       void );
 int bvt3000_exp_hook(        void );
 int bvt3000_end_of_exp_hook( void );
 
+
 Var_T * temp_contr_name(               Var_T * v );
 Var_T * temp_contr_command(            Var_T * v );
 Var_T * temp_contr_temperature(        Var_T * v );
@@ -113,9 +114,10 @@ Var_T * temp_contr_setpoint(           Var_T * v );
 Var_T * temp_contr_heater_state(       Var_T * v );
 Var_T * temp_contr_heater_power(       Var_T * v );
 Var_T * temp_contr_heater_power_limit( Var_T * v );
-Var_T * temp_contr_flow_rate(          Var_T * v );
+Var_T * temp_contr_gas_flow(           Var_T * v );
 Var_T * temp_contr_state(              Var_T * v );
 Var_T * temp_contr_lock_keyboard(      Var_T * v );
+
 
 void bvt3000_init( void );
 void bvt3000_set_flow_rate( unsigned int fr );
@@ -126,7 +128,6 @@ unsigned char bvt300_get_port( int port );
 unsigned int bvt3000_get_interface_status( void );
 char * bvt3000_query( const char * cmd );
 void bvt3000_send_command( const char * cmd );
-bool bvt3000_check_cmd( const char * cmd );
 bool bvt3000_check_ack( void );
 size_t bvt3000_add_bcc( unsigned char * data );
 bool bvt3000_check_bcc( unsigned char * data,

@@ -33,18 +33,11 @@ eurotherm902s_init( void )
     unsigned int xs;
 
 
-    if ( strcmp( reply, "9020" ) )
+    if ( strcmp( reply, ">9020" ) )
     {
         print( FATAL, "Device doesn't have an Eurotherm 902S.\n" );
         THROW( EXCEPTION );
     }
-
-    /* If the CP ("current program") command is understood is implemented
-       this can't be a Eurotherm 902S */
-
-    if ( bvt3000_check_cmd( "CP" ) )
-        print( WARN, "Device doesn't have an Eurotherm 902S, some "
-               "functionalities may not be supported by this module.\n" );
 
     /* Make sure we're in normal operations mode */
 
@@ -236,7 +229,7 @@ eurotherm902s_get_working_setpoint( void )
 void
 eurotherm902s_set_sw( unsigned int sw )
 {
-    char buf[ 10 ];
+    char buf[ 8 ];
 
 
     fsc2_assert( sw <= 0xFFFF );
