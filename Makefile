@@ -751,6 +751,8 @@ else
 
 	ifdef SERIAL_LOG_LEVEL
 		SERIAL_LOG_LEVEL := $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
+	else
+		SERIAL_LOG_LEVEL := HIGH
 	endif
 
 	ifeq ($(SERIAL_LOG_LEVEL),HIGH)
@@ -778,7 +780,9 @@ else
 endif
 
 ifdef LAN_LOG_LEVEL
-	LAN_LOG_FILE = $(patsubst % ,%,$(LAN_LOG_LEVEL))
+	LAN_LOG_LEVEL := $(patsubst % ,%,$(LAN_LOG_LEVEL))
+else
+	LAN_LOG_LEVEL := HIGH
 endif
 
 ifeq ($(LAN_LOG_LEVEL),HIGH)
