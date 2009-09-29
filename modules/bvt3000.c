@@ -259,6 +259,12 @@ temp_contr_heater_power( Var_T *v )
         THROW( EXCEPTION );
     }
 
+    if ( bvt3000.state != MANUAL_MODE )
+    {
+        print( FATAL, "Heater power can only be set while in MANUAL state.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( FSC2_MODE != EXPERIMENT )
     {
         bvt3000.heater_power = hp;
@@ -395,6 +401,108 @@ temp_contr_state( Var_T * v )
     return vars_push( INT_VAR, ( long ) bvt3000.state );
 }
  
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_proportional_band( Var_T * v )
+{
+    double pb;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+            no_query_possible( );
+        return vars_push( FLOAT_VAR, eurotherm902s_get_proportional_band( ) );
+    }
+
+    pb = get_double( v, "proportional band" );
+
+    if ( pb < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for proportional band.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, pb );
+
+    eurotherm902s_set_proportional_band( pb );
+ 
+   return vars_push( FLOAT_VAR, eurotherm902s_get_proportional_band( ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_integral_time( Var_T * v )
+{
+    double it;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+            no_query_possible( );
+        return vars_push( FLOAT_VAR, eurotherm902s_get_integral_time( ) );
+    }
+
+    it = get_double( v, "integral time" );
+
+    if ( it < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for integral time.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, it );
+
+    eurotherm902s_set_integral_time( it );
+ 
+   return vars_push( FLOAT_VAR, eurotherm902s_get_integral_time( ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_derivative_time( Var_T * v )
+{
+    double dt;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+            no_query_possible( );
+        return vars_push( FLOAT_VAR, eurotherm902s_get_derivative_time( ) );
+    }
+
+    dt = get_double( v, "derivative time" );
+
+    if ( dt < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for derivative time.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, dt );
+
+    eurotherm902s_set_derivative_time( dt );
+ 
+   return vars_push( FLOAT_VAR, eurotherm902s_get_derivative_time( ) );
+}
+
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/

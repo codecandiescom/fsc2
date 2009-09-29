@@ -370,8 +370,17 @@ bvt3000_check_ack( void )
 {
 	unsigned char r;
 
-	return    fsc2_serial_read( bvt3000.sn, &r, 1, NULL, ACK_WAIT, UNSET ) == 1
-		   && r == ACK;
+	if ( fsc2_serial_read( bvt3000.sn, &r, 1, NULL, ACK_WAIT, UNSET ) != 1 )
+        return FAIL;
+
+    if ( r == ACK )
+        return OK;
+
+    if ( r == NAK )
+        bvt3000_query( "EE" );    
+
+    return FAIL;
+
 }
 
 

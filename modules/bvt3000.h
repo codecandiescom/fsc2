@@ -38,6 +38,7 @@
 #define EOT   '\x04'
 #define ENQ   '\x05'
 #define ACK   '\x06'
+#define NAK   '\x15'
 
 #define SP1   0
 #define SP2   1
@@ -116,6 +117,9 @@ Var_T * temp_contr_heater_power(       Var_T * v );
 Var_T * temp_contr_heater_power_limit( Var_T * v );
 Var_T * temp_contr_gas_flow(           Var_T * v );
 Var_T * temp_contr_state(              Var_T * v );
+Var_T * temp_contr_proportional_band(  Var_T * v );
+Var_T * temp_contr_integral_time(      Var_T * v );
+Var_T * temp_contr_derivative_time(    Var_T * v );
 Var_T * temp_contr_lock_keyboard(      Var_T * v );
 
 

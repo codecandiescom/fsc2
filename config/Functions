@@ -309,7 +309,7 @@ multimeter_command, 1, EXP;
 
 
 /* Functions exported by the temperature controllers (Lakeshore 330,
-   Oxford ITC503, Eurotherm 902S) */
+   Oxford ITC503, Bruker BVT3000) */
 
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
@@ -320,6 +320,9 @@ temp_contr_state, -1, EXP;
 temp_contr_heater_power_limit, -1, EXP;
 temp_contr_heater_power, -1, EXP;
 temp_contr_gas_flow, -1, EXP;
+temp_contr_proportional_band, -1, EXP;
+temp_contr_integral_time, 1, EXP;
+temp_contr_derivative_time, -1, EXP;
 temp_contr_command, 1, EXP;
 
 

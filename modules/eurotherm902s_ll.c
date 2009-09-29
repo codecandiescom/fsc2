@@ -52,6 +52,14 @@ eurotherm902s_init( void )
         THROW( EXCEPTION );
     }
 
+    /* Always use SP1 */
+
+    if ( eurotherm902s_get_active_setpoint( ) == SP2 )
+    {
+        eurotherm902s_set_setpoint( SP1, eurotherm902s_get_setpoint( SP2 ) );
+        eurotherm902s_set_active_setpoint( SP1 );
+    }    
+
     /* Only PID1 seems to be usable */
 
     if ( ( xs = eurotherm902s_get_xs( ) ) & ACTIVE_PID_FLAG )
@@ -178,7 +186,7 @@ eurotherm902s_set_active_setpoint( int sp )
 int
 eurotherm902s_get_active_setpoint( void )
 {
-    return eurotherm902s_get_sw( ) & 0x20 ? SP2 : SP1;
+    return eurotherm902s_get_sw( ) & 0x2000 ? SP2 : SP1;
 }
 
 
@@ -265,12 +273,12 @@ eurotherm902s_get_sw( void )
 void
 eurotherm902s_set_os( unsigned int os )
 {
-    char buf[ 10 ];
+    char buf[ 8 ];
 
 
     fsc2_assert( os <= 0xFFFF );
 
-    sprintf( buf, "OS>%04x", os & 0x20B3 );
+    sprintf( buf, "OS>%04x", os & 0x30BF );
     bvt3000_send_command( buf );
 }
 
@@ -302,7 +310,7 @@ eurotherm902s_get_os( void )
 void
 eurotherm902s_set_xs( unsigned int xs )
 {
-    char buf[ 10 ];
+    char buf[ 8 ];
 
 
     fsc2_assert( xs <= 0xFFFF );
