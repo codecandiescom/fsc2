@@ -410,12 +410,11 @@ temp_contr_proportional_band( Var_T * v )
 {
     double pb;
 
+
     if ( v == NULL )
-    {
-        if ( FSC2_MODE != EXPERIMENT )
-            no_query_possible( );
-        return vars_push( FLOAT_VAR, eurotherm902s_get_proportional_band( ) );
-    }
+        return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT ?
+                          eurotherm902s_get_proportional_band( ) :
+                          TEST_PROPORTIOAL_BAND );
 
     pb = get_double( v, "proportional band" );
 
@@ -444,12 +443,11 @@ temp_contr_integral_time( Var_T * v )
 {
     double it;
 
+
     if ( v == NULL )
-    {
-        if ( FSC2_MODE != EXPERIMENT )
-            no_query_possible( );
-        return vars_push( FLOAT_VAR, eurotherm902s_get_integral_time( ) );
-    }
+        return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT ?
+                          eurotherm902s_get_integral_time( ) :
+                          TEST_INTEGRAL_TIME );
 
     it = get_double( v, "integral time" );
 
@@ -478,12 +476,11 @@ temp_contr_derivative_time( Var_T * v )
 {
     double dt;
 
+
     if ( v == NULL )
-    {
-        if ( FSC2_MODE != EXPERIMENT )
-            no_query_possible( );
-        return vars_push( FLOAT_VAR, eurotherm902s_get_derivative_time( ) );
-    }
+        return vars_push( FLOAT_VAR, FSC2_MODE == EXPERIMENT :
+                          eurotherm902s_get_derivative_time( ) :
+                          TEST_DERIVATIVE_TIME );
 
     dt = get_double( v, "derivative time" );
 

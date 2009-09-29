@@ -81,6 +81,9 @@
 #define TEST_HEATER_POWER_LIMIT   100.0
 #define TEST_HEATER_POWER          50.0
 #define TEST_FLOW_RATE           1600.0
+#define TEST_PROPORTIONAL_BAND      8.1
+#defice TEST_INTEGRAL_TIME         17.0
+#define TEST_DERIVATIVE_TIME        2.8
 
 /* Maximum time to wait for a reply (in us) */
 
