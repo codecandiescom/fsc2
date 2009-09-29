@@ -228,7 +228,7 @@ bvt3000_get_heater_state( void )
     char *reply = bvt3000_query( "HP" );
 
 
-    if ( reply[ 0 ] != '1' || reply[ 0 ] != '0' )
+    if ( reply[ 0 ] != '1' && reply[ 0 ] != '0' )
         bvt3000_comm_fail( );
     return reply[ 0 ] != '1' ? SET : UNSET;
 }
@@ -307,7 +307,7 @@ bvt3000_query( const char * cmd )
     if (    fsc2_serial_write( bvt3000.sn, buf, len,
 						      SERIAL_WAIT, UNSET ) != len
          || ( len = fsc2_serial_read( bvt3000.sn, buf, sizeof buf - 1, NULL,
-									  SERIAL_WAIT, UNSET ) ) < 5
+									  SERIAL_WAIT, UNSET ) ) < 6
 		 || len == sizeof buf - 1                        /* reply too long */
 		 || buf[ 0 ] != STX                              /* missing STX */
          || buf[ len - 2 ] != ETX                        /* missing ETX */

@@ -227,9 +227,9 @@ eurotherm902s_get_working_setpoint( void )
 }
 
 
-/*-------------------------------*
+/*-----------------------*
  * Sets the status word
- *-------------------------------*/
+ *-----------------------*/
 
 void
 eurotherm902s_set_sw( unsigned int sw )
