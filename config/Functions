@@ -317,6 +317,7 @@ temp_contr_temperature, 0, EXP;
 temp_contr_sample_channel, -1, EXP;
 temp_contr_setpoint, -1, EXP;
 temp_contr_state, -1, EXP;
+temp_contr_tune_state, -1, EXP;
 temp_contr_heater_power_limit, -1, EXP;
 temp_contr_heater_power, -1, EXP;
 temp_contr_gas_flow, -1, EXP;

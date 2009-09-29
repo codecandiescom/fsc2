@@ -49,6 +49,10 @@
 #define NORMAL_OPERATION    0
 #define CONFIGURATION_MODE  2
 
+#define TUNE_OFF            0
+#define ADAPTIVE_TUNE       1
+#define SELF_TUNE           2
+
 
 /* Defines for bits in the status word (SW) */
 
@@ -76,12 +80,14 @@
 #define MAX_SETPOINT  1273.0   /* highest allowed value for setpoint, 1273 K */
 
 
+#define TEST_STATE                 MANUAL_MODE
+#define TEST_TUNE_STATE            ADAPTIVE_TUNE
 #define TEST_TEMPERATURE          123.4
 #define TEST_SETPOINT             123.4
 #define TEST_HEATER_POWER_LIMIT   100.0
 #define TEST_HEATER_POWER          50.0
 #define TEST_FLOW_RATE           1600.0
-#define TEST_PROPORTIONAL_BAND      8.1
+#define TEST_PROPORTIONAL_BAND     35.0
 #define TEST_INTEGRAL_TIME         17.0
 #define TEST_DERIVATIVE_TIME        2.8
 #define TEST_CUTBACK_LOW           67.9
@@ -102,6 +108,7 @@ typedef struct {
     double           heater_power_limit;
     double           heater_power;
     double           flow_rate;
+    int              tune_state;
     int              sn;
 	bool             is_open;
     struct termios * tio;
@@ -122,6 +129,7 @@ Var_T * temp_contr_heater_power(       Var_T * v );
 Var_T * temp_contr_heater_power_limit( Var_T * v );
 Var_T * temp_contr_gas_flow(           Var_T * v );
 Var_T * temp_contr_state(              Var_T * v );
+Var_T * temp_contr_tune_state(         Var_T * v );
 Var_T * temp_contr_proportional_band(  Var_T * v );
 Var_T * temp_contr_integral_time(      Var_T * v );
 Var_T * temp_contr_derivative_time(    Var_T * v );

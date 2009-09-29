@@ -59,7 +59,8 @@ bvt3000_init_hook( void )
     bvt3000.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     bvt3000.is_open            = UNSET;
-    bvt3000.state              = MANUAL_MODE;
+    bvt3000.state              = TEST_STATE;
+    bvt3000.tune_state         = TEST_TUNE_STATE;
     bvt3000.setpoint           = TEST_SETPOINT;
     bvt3000.min_setpoint       = MIN_SETPOINT;
     bvt3000.max_setpoint       = MAX_SETPOINT;
@@ -401,6 +402,71 @@ temp_contr_state( Var_T * v )
     return vars_push( INT_VAR, ( long ) bvt3000.state );
 }
  
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_tune_state( Var_T * v )
+{
+    int state;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+            return vars_push( FLOAT_VAR, ( long ) bvt3000.tune_state );
+
+        state =
+              ( eurotherm902s_get_adaptive_tune_state( ) ? ADAPTIVE_TUNE : 0 )
+            | ( eurotherm902s_get_self_tune_state( )     ? SELF_TUNE     : 0 );
+        return vars_push( FLOAT_VAR, ( long ) state );
+    }
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcmp( v->val.sptr, "OFF" ) )
+            state = TUNE_OFF;
+        else if ( ! strcmp( v->val.sptr, "ADAPTIVE" ) )
+            state = ADAPTIVE_TUNE;
+        else if ( ! strcmp( v->val.sptr, "SELF" ) )
+            state = SELF_TUNE;
+        else if (    ! strcmp( v->val.sptr, "ADAPTIVE+SELF" )
+                  || ! strcmp( v->val.sptr, "SELF+ADAPTIVE" ) )
+            state = ADAPTIVE_TUNE | SELF_TUNE;
+        else
+        {
+            print( FATAL, "Invalid tune mode argument.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        state = get_long( v, "tune mode" );
+
+        if ( state & ~ ( ADAPTIVE_TUNE | SELF_TUNE ) )
+        {
+            print( FATAL, "Invalid tune mode argument.\n" );
+            THROW( EXCEPTION );
+        }
+    }            
+        
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        eurotherm902s_set_adaptive_tune_state( state & ADAPTIVE_TUNE ?
+                                               SET : UNSET );
+        eurotherm902s_set_self_tune_state( state & SELF_TUNE ?
+                                           SET : UNSET );
+
+        state =
+              ( eurotherm902s_get_adaptive_tune_state( ) ? ADAPTIVE_TUNE : 0 )
+            | ( eurotherm902s_get_self_tune_state( )     ? SELF_TUNE     : 0 );
+    }
+
+    return vars_push( FLOAT_VAR, ( long ) ( bvt3000.tune_state = state ) );
+}
+
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
