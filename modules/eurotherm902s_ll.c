@@ -351,6 +351,24 @@ eurotherm902s_get_alarm_state( void )
 }
 
 
+/*-------------------------------*
+ * Sets self tune stat on or off
+ *-------------------------------*/
+
+void
+eurotherm902s_set_self_tune_state( bool on_off )
+{
+    unsigned int xs = eurotherm902s_get_self_tune_state( );
+
+
+    if ( on_off )
+        xs |= SELF_TUNE_FLAG;
+    else
+        xs &= ~ SELF_TUNE_FLAG;
+
+    eurotherm902s_set_xs( xs );
+}
+
 
 /*-----------------------------------------*
  * Returns if device is in self tune state
@@ -363,12 +381,42 @@ eurotherm902s_get_self_tune_state( void )
 }
 
 
-/*--------------------------------*
- * Sets self tune state on or off
- *--------------------------------*/
+/*------------------------------*
+ * Sets adaptive tune on or off
+ *------------------------------*/
 
 void
-eurotherm902s_set_self_tune_trigger( double tr )
+eurotherm902s_set_adaptive_tune_state( bool on_off )
+{
+    unsigned int xs = eurotherm902s_get_adaptive_tune_state( );
+
+
+    if ( on_off )
+        xs |= ADAPTIVE_TUNE_FLAG;
+    else
+        xs &= ~ ADAPTIVE_TUNE_FLAG;
+
+    eurotherm902s_set_xs( xs );
+}
+
+
+/*---------------------------------------*
+ * Returns if adaptive tune is on or off
+ *---------------------------------------*/
+
+bool
+eurotherm902s_get_adaptive_tune_state( void )
+{
+    return eurotherm902s_get_xs( ) & ADAPTIVE_TUNE_FLAG ? SET : UNSET;
+}
+
+
+/*----------------------------------*
+ * Sets adaptive tune trigger level
+ *----------------------------------*/
+
+void
+eurotherm902s_set_adaptive_tune_trigger( double tr )
 {
     char buf[ 20 ];
 
@@ -389,55 +437,6 @@ double
 eurotherm902s_get_adaptive_tune_trigger( void )
 {
     return T_atod( bvt3000_query( "TR" ) );
-}
-
-
-/*-------------------------------*
- * Sets self tune stat on or off
- *-------------------------------*/
-
-void
-eurotherm902s_set_self_tune_state( bool on_off )
-{
-    unsigned int xs = eurotherm902s_get_adaptive_tune_state( );
-
-
-    if ( on_off )
-        xs |= SELF_TUNE_FLAG;
-    else
-        xs &= ~ SELF_TUNE_FLAG;
-
-    eurotherm902s_set_xs( xs );
-}
-
-
-/*---------------------------------------*
- * Returns if adaptive tune is on or off
- *---------------------------------------*/
-
-bool
-eurotherm902s_get_adaptive_tune_state( void )
-{
-    return eurotherm902s_get_xs( ) & ADAPTIVE_TUNE_FLAG ? SET : UNSET;
-}
-
-
-/*------------------------------*
- * Sets adaptive tune on or off
- *------------------------------*/
-
-void
-eurotherm902s_set_adaptive_tune_state( bool on_off )
-{
-    unsigned int xs = eurotherm902s_get_adaptive_tune_state( );
-
-
-    if ( on_off )
-        xs |= ADAPTIVE_TUNE_FLAG;
-    else
-        xs &= ~ ADAPTIVE_TUNE_FLAG;
-
-    eurotherm902s_set_xs( xs );
 }
 
 

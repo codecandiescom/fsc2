@@ -173,7 +173,7 @@ void eurotherm902s_set_xs( unsigned int xs );
 unsigned int eurotherm902s_get_xs( void );
 bool eurotherm902s_get_alarm_state( void );
 bool eurotherm902s_get_self_tune_state( void );
-void eurotherm902s_set_self_tune_trigger( double tr );
+void eurotherm902s_set_adaptive_tune_trigger( double tr );
 double eurotherm902s_get_adaptive_tune_trigger( void );
 void eurotherm902s_set_self_tune_state( bool on_off );
 bool eurotherm902s_get_adaptive_tune_state( void );
