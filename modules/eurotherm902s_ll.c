@@ -315,7 +315,7 @@ eurotherm902s_set_xs( unsigned int xs )
 
     fsc2_assert( xs <= 0xFFFF );
 
-    sprintf( buf, "OS>%04x", xs & 0xFFB7 );
+    sprintf( buf, "XS>%04x", xs & 0xFFB7 );
     bvt3000_send_command( buf );
 }
 
