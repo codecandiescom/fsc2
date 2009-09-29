@@ -464,7 +464,7 @@ temp_contr_tune_state( Var_T * v )
             | ( eurotherm902s_get_self_tune_state( )     ? SELF_TUNE     : 0 );
     }
 
-    return vars_push( FLOAT_VAR, ( long ) ( bvt3000.tune_state = state ) );
+    return vars_push( INT_VAR, ( long ) ( bvt3000.tune_state = state ) );
 }
 
 
