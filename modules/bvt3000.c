@@ -529,7 +529,7 @@ temp_contr_lock_keyboard( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-temp_contr_cutbackss( Var_T * v )
+temp_contr_cutbacks( Var_T * v )
 {
     double cb[ 2 ] = { TEST_CUTBACK_LOW, TEST_CUTBACK_HIGH };
 

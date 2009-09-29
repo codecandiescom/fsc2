@@ -125,7 +125,7 @@ Var_T * temp_contr_state(              Var_T * v );
 Var_T * temp_contr_proportional_band(  Var_T * v );
 Var_T * temp_contr_integral_time(      Var_T * v );
 Var_T * temp_contr_derivative_time(    Var_T * v );
-Var_T * temp_contr_cutbackss(          Var_T * v );
+Var_T * temp_contr_cutbacks(           Var_T * v );
 Var_T * temp_contr_lock_keyboard(      Var_T * v );
 
 
