@@ -750,7 +750,7 @@ else
 	endif
 
 	ifdef SERIAL_LOG_LEVEL
-		SERIAL_LOG_FILE = $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
+		SERIAL_LOG_LEVEL = $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
 	endif
 
 	ifeq ($(SERIAL_LOG_LEVEL),HIGH)
