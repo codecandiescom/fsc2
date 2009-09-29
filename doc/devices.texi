@@ -4370,7 +4370,7 @@ i.e.@: if active temperature control is on or off.
 
 This function is currently only available for the @ref{itc503, Oxford
 Instruments ITC503}. If called without an argument it returns an
-integer between @code{0} and @code{5}, where @code{1} stands for
+integer between @code{0} and @code{5}, where @code{0} stands for
 manual control, @code{1} for automatic control of the heater power,
 @code{2} for automatic control of the gas flow, @code{3} for full
 automatic control (both heater power and flow rate). To set the state

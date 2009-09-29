@@ -154,6 +154,10 @@ bvt3000_init( void )
     /* Check if the heater is on or off (must be on for setting flow rate) */
 
     bvt3000.heater_state = bvt3000_get_heater_state( );
+
+    /* Check what mode the device is in */
+
+    bvt3000.state = eurotherm902s_get_mode( );
 }
 
 

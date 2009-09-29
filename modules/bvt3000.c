@@ -59,6 +59,7 @@ bvt3000_init_hook( void )
     bvt3000.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     bvt3000.is_open            = UNSET;
+    bvt3000.state              = MANUAL_MODE;
     bvt3000.setpoint           = TEST_SETPOINT;
     bvt3000.min_setpoint       = MIN_SETPOINT;
     bvt3000.max_setpoint       = MAX_SETPOINT;
@@ -339,6 +340,61 @@ temp_contr_flow_rate( Var_T * v )
     return vars_push( FLOAT_VAR, flow_rates[ bvt3000_get_flow_rate( ) ] );
 }
 
+
+/*-----------------------------------------------------------------*
+ * Determines or sets if the device is in manual or automatic mode
+ *-----------------------------------------------------------------*/
+
+Var_T *
+temp_contr_state( Var_T * v )
+{
+    long state;
+
+
+    if ( v == NULL )
+        return vars_push( INT_VAR, FSC2_MODE != EXPERIMENT ?
+                          ( long ) bvt3000.state :
+                          ( long ) eurotherm902s_get_mode( ) );
+
+    
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcmp( v->val.sptr, "MANUAL" ) )
+            state = MANUAL_MODE;
+        else if ( ! strcmp( v->val.sptr, "AUTO" ) )
+            state = AUTOMATIC_MODE;
+        else
+        {
+            print( FATAL, "Invalid state specified as argument, only \"AUTO\" "
+                   "and \"MANUAL\" can be used.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        state = get_long( v, "temperature controller state" );
+
+        if ( state != AUTOMATIC_MODE && state != MANUAL_MODE )
+        {
+            print( FATAL, "Invalid state specified as argument, only \"AUTO\" "
+                   "(3) and \"MANUAL\" (0) can be used.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        bvt3000.state = state;
+    else
+    {
+        eurotherm902s_set_mode( state );
+        bvt3000.state = eurotherm902s_get_mode( );
+    }
+
+    return vars_push( INT_VAR, ( long ) bvt3000.state );
+}
+ 
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/

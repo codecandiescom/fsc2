@@ -42,8 +42,8 @@
 #define SP1   0
 #define SP2   1
 
-#define AUTOMATIC_MODE  0
-#define MANUAL_MODE     1
+#define AUTOMATIC_MODE  3
+#define MANUAL_MODE     0
 
 #define NORMAL_OPERATION    0
 #define CONFIGURATION_MODE  2
@@ -88,6 +88,7 @@
 
 
 typedef struct {
+    int              state;
     double           setpoint;
     double           min_setpoint;
     double           max_setpoint;

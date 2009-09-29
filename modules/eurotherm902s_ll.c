@@ -142,7 +142,7 @@ int
 eurotherm902s_get_mode( void )
 {
     return eurotherm902s_get_sw( ) & MANUAL_MODE_FLAG ?
-           AUTOMATIC_MODE : MANUAL_MODE;
+           MANUAL_MODE : AUTOMATIC_MODE;
 }
 
 
@@ -219,6 +219,7 @@ eurotherm902s_get_setpoint( int sp )
 
 /*--------------------------------------------------------*
  * Returns the value of the setpoint currently being used
+ * (i.e. the temperature for the currently used setpoint)
  *--------------------------------------------------------*/
 
 double
@@ -361,9 +362,9 @@ eurotherm902s_get_self_tune_state( void )
 }
 
 
-/*-------------------------------*
- * Sets self tune stat on or off
- *-------------------------------*/
+/*--------------------------------*
+ * Sets self tune state on or off
+ *--------------------------------*/
 
 void
 eurotherm902s_set_self_tune_trigger( double tr )

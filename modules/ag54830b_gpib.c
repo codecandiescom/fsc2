@@ -677,7 +677,7 @@ ag54830b_get_trigger_pos( void )
     reply[ length - 1 ] = '\0';
 	time_pos = - T_atod( reply );
 
-	length = siezof reply;
+	length = sizeof reply;
 	ag54830b_talk( ":TIM:RANG?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 	time_range = T_atod( reply );
