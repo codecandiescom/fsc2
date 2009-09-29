@@ -320,7 +320,7 @@ temp_contr_flow_rate( Var_T * v )
         print( WARN, "Flow rate had to be adjusted from %.1f l/h to "
                "%.1f l/h.\n", flow_rate, flow_rates[ fr_index ] );
 
-    /* Take care: when heater is of flow rate gets autoatically changed
+    /* Take care: when heater is off flow rate gets autoatically changed
        to the default rate and changes aren't possible */
 
     if ( ! bvt3000.heater_state )

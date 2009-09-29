@@ -59,7 +59,7 @@ eurotherm902s_init( void )
         THROW( EXCEPTION );
     }
 
-    /* With this device only PID1 seems to be usable */
+    /* Only PID1 seems to be usable */
 
     if ( ( xs = eurotherm902s_get_xs( ) ) & ACTIVE_PID_FLAG )
         eurotherm902s_set_xs( xs & ~ ACTIVE_PID_FLAG );
