@@ -414,12 +414,12 @@ temp_contr_tune_state( Var_T * v )
     if ( v == NULL )
     {
         if ( FSC2_MODE != EXPERIMENT )
-            return vars_push( FLOAT_VAR, ( long ) bvt3000.tune_state );
+            return vars_push( INT_VAR, ( long ) bvt3000.tune_state );
 
         state =
               ( eurotherm902s_get_adaptive_tune_state( ) ? ADAPTIVE_TUNE : 0 )
             | ( eurotherm902s_get_self_tune_state( )     ? SELF_TUNE     : 0 );
-        return vars_push( FLOAT_VAR, ( long ) state );
+        return vars_push( INT_VAR, ( long ) state );
     }
 
     if ( v->type == STR_VAR )
