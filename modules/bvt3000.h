@@ -114,6 +114,7 @@ Var_T * temp_contr_heater_state(       Var_T * v );
 Var_T * temp_contr_heater_power(       Var_T * v );
 Var_T * temp_contr_heater_power_limit( Var_T * v );
 Var_T * temp_contr_flow_rate(          Var_T * v );
+Var_T * temp_contr_state(              Var_T * v );
 Var_T * temp_contr_lock_keyboard(      Var_T * v );
 
 void bvt3000_init( void );
