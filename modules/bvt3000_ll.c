@@ -147,6 +147,23 @@ bvt3000_init( void )
         THROW( EXCEPTION );
     }
 
+    if ( bvt3000.cb[ 0 ] > bvt3000.max_setpoint - bvt3000.min_setpoint )
+    {
+        print( FATAL, "During test run a low cutback was requested which is "
+               "larger than the difference between the minimum and maximum "
+               "setpoint value of %.1f K.\n",
+               bvt3000.max_setpoint - bvt3000.min_setpoint );
+        THROW( EXCEPTION );
+    }
+
+    if ( bvt3000.cb[ 1 ] > bvt3000.max_setpoint - bvt3000.min_setpoint )
+    {
+        print( FATAL, "During test run a high cutback was requested which is "
+               "larger than the difference between the minimum and maximum "
+               "setpoint value of %.1f K.\n",
+               bvt3000.max_setpoint - bvt3000.min_setpoint );
+        THROW( EXCEPTION );
+    }
     /* Check if the Eurotherm 902S detected a sensor break */
 
     if ( eurotherm902s_check_sensor_break( ) )

@@ -68,6 +68,8 @@ bvt3000_init_hook( void )
     bvt3000.heater_power_limit = TEST_HEATER_POWER_LIMIT;
     bvt3000.heater_power       = TEST_HEATER_POWER;
     bvt3000.flow_rate          = TEST_FLOW_RATE;
+    bvt3000.cb[ 0 ]            = TEST_CUTBACK_LOW;
+    bvt3000.cb[ 1 ]            = TEST_CUTBACK_HIGH;
 
 	return 1;
 }
@@ -622,18 +624,18 @@ temp_contr_lock_keyboard( Var_T * v )
 Var_T *
 temp_contr_cutbacks( Var_T * v )
 {
-    double cb[ 2 ] = { TEST_CUTBACK_LOW, TEST_CUTBACK_HIGH };
+    double cb[ 2 ];
 
 
     if ( v == NULL )
     {
         if ( FSC2_MODE == EXPERIMENT )
         {
-            cb[ 0 ] = eurotherm902s_get_cutback_low( );
-            cb[ 1 ] = eurotherm902s_get_cutback_high( );
+            bvt3000.cb[ 0 ] = eurotherm902s_get_cutback_low( );
+            bvt3000.cb[ 1 ] = eurotherm902s_get_cutback_high( );
         }
 
-        return vars_push( FLOAT_ARR, cb, 2 );
+        return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
     }
 
     /* Accept an array with two values or two separate values */
@@ -664,24 +666,40 @@ temp_contr_cutbacks( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( cb[ 0 ] > bvt3000.max_setpoint - bvt3000.min_setpoint )
+    {
+        print( FATAL, "Value for low cutback too high, can't be larger than "
+               "difference between minimum and maximum setpoint value.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( cb[ 1 ] < 0.0 )
     {
         print( FATAL, "Invalid negative value for high cutback.\n" );
         THROW( EXCEPTION );
     }
 
+    if ( cb[ 1 ] > bvt3000.max_setpoint - bvt3000.min_setpoint )
+    {
+        print( FATAL, "Value for high cutback too high, can't be larger than "
+               "difference between minimum and maximum setpoint value.\n" );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
-    if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( FLOAT_ARR, cb, 2 );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        eurotherm902s_set_cutback_low( cb[ 0 ] );
+        eurotherm902s_set_cutback_high( cb[ 1 ] );
 
-    eurotherm902s_set_cutback_low( cb[ 0 ] );
-    eurotherm902s_set_cutback_high( cb[ 1 ] );
-
-    cb[ 0 ] = eurotherm902s_get_cutback_low( );
-    cb[ 1 ] = eurotherm902s_get_cutback_high( );
+        bvt3000.cb[ 0 ] = eurotherm902s_get_cutback_low( );
+        bvt3000.cb[ 1 ] = eurotherm902s_get_cutback_high( );
+    }
+    else
+        memcpy( bvt3000.cb, cb, sizeof bvt3000.cb );
     
-    return vars_push( FLOAT_ARR, cb, 2 );
+    return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
 }
 
 

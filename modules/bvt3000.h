@@ -113,6 +113,7 @@ typedef struct {
     double           heater_power;
     double           flow_rate;
     int              tune_state;
+    double           cb[ 2 ];
     int              sn;
 	bool             is_open;
     struct termios * tio;
