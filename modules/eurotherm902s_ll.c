@@ -421,10 +421,9 @@ eurotherm902s_set_adaptive_tune_trigger( double tr )
     char buf[ 20 ];
 
 
-    fsc2_assert( tr >= 0.0
-                 && tr <=   eurotherm902s_get_display_maximum( )
-                          - eurotherm902s_get_display_minimum( ) );
-    fsc2_assert( sprintf( buf, "TR%6.1f", tr ) <= 8 );
+    fsc2_assert( tr >= 0.0 && tr <= MAX_AT_TRIGGER_LEVEL );
+
+    fsc2_assert( sprintf( buf, "TR%3.2f", tr ) <= 8 );
     bvt3000_send_command( buf );
 }
 

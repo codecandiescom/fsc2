@@ -170,15 +170,6 @@ bvt3000_init( void )
         THROW( EXCEPTION );
     }
 
-    if ( bvt3000.max_at_trigger > bvt3000.display_max - bvt3000.display_min )
-    {
-        print( FATAL, "During test run a adaptive tune trigger level was "
-               "requested that is larger than the difference between the "
-               "display minimum and maximum of %.1f K.\n",
-               bvt3000.display_max - bvt3000.display_min );
-        THROW( EXCEPTION );
-    }
-
     /* Check if the Eurotherm 902S detected a sensor break */
 
     if ( eurotherm902s_check_sensor_break( ) )

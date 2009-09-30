@@ -79,9 +79,10 @@
 #define MIN_SETPOINT    73.0   /* lowest allowed value for setpoint, 73 K */
 #define MAX_SETPOINT  1273.0   /* highest allowed value for setpoint, 1273 K */
 
-#define MAX_PROPORTIONAL_BAND   999.9   /* according to experiments */
-#define MAX_INTEGRAL_TIME      9999.0   /* according to experiments */
-#define MAX_DERIVATIVE_TIME     999.9   /* according to experiments */
+#define MAX_PROPORTIONAL_BAND   999.9    /* according to experiments */
+#define MAX_INTEGRAL_TIME      9999.0    /* according to experiments */
+#define MAX_DERIVATIVE_TIME     999.9    /* according to experiments */
+#define MAX_AT_TRIGGER_LEVEL    231.7    /* according to experiments */
 
 
 #define TEST_STATE                 MANUAL_MODE

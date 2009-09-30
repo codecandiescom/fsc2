@@ -740,10 +740,10 @@ temp_contr_adaptive_tune_trigger( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( tl > bvt3000.display_max - bvt3000.display_min )
+    if ( tl > MAX_AT_TRIGGER_LEVEL )
     {
-        print( FATAL, "Adaptive tune level larger the difference between "
-               "minimum and maximum display value.\n" );
+        print( FATAL, "Adaptive tune level too large, maximun is %.1f K.\n",
+               MAX_AT_TRIGGER_LEVEL );
         THROW( EXCEPTION );
     }
 
