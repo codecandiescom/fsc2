@@ -24,7 +24,7 @@
 vxi11_list      := vxi11_clnt.c vxi11_xdr.c
 
 
-# Lists of modules that get created from a set of template files
+# Lists of modules that each get created from the same template
 
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
@@ -34,7 +34,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 
 # List of modules that are to be made from a single source file only (as
-# far as they don't require some additional software
+# far as they don't require some additional software)
 
 simp_modules    := User_Functions gg_chopper
 
@@ -99,21 +99,21 @@ oriel_matrix    := oriel_matrix.c oriel_matrix_ll.c
 epr_mod         := epr_mod.c epr_mod_util.c epr_mod_lexer.c
 bvt3000         := bvt3000.c bvt3000_ll.c eurotherm902s_ll.c
 ag54830b        := ag54830b.c ag54830b_gpib.c
-ag54830b_l      := $(vxi11_list) ag54830b_l.c ag54830b_net.c vxi11_user.c
+ag54830b_l      := ag54830b_l.c ag54830b_net.c $(vxi11_list) vxi11_user.c
 
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
-# pre-installed software
+# pre-installed software or extra hardware
 
 comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l ag54830b_l
 
 
-# Add modules that only get created on demand (they require either some
-# additional libraries that may not be installed on all systems or a serial
-# port that may not be available everywhere)
+# Now follow modules that only get created on demand (they require either
+# some additional libraries that may not be installed on all systems or
+# hardware like a serial port that may not be available everywhere)
 
-# Support for devices contolled via GPIB
+# Support for devices controlled via GPIB
 
 ifneq ($(GPIB_LIBRARY),none)
 simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a              \
@@ -129,7 +129,7 @@ comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 endif
 
 
-# Support for devices controlled via the serial port
+# Support for devices controlled via the serial port (or USB-serial converter)
 
 ifndef WITHOUT_SERIAL_PORTS
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
@@ -192,7 +192,7 @@ simp_modules    += me6000
 endif
 
 
-# Support Newport Oriel MMS spectrometer
+# Support for devices that are controlled via USB (not USB-serial converter)
 
 ifdef WITH_LIBUSB_0_1
 comp_modules    += oriel_matrix
@@ -230,7 +230,7 @@ all:
 
 
 modules:
-	$(MAKE) vxi11
+	$(MAKE) $(vxi11_list) vxi11.h
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \
@@ -364,7 +364,7 @@ endif
 
 # How to create the code needed for the VXI-11 protocol
 
-vxi11: vxi11.x
+$(vxi11_list) vxi11.h: vxi11.x
 	rpcgen $<
 
 
