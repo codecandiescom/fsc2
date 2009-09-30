@@ -74,6 +74,8 @@ bvt3000_init_hook( void )
     bvt3000.max_cb[ 1 ]        = 0.0;
     bvt3000.at_trigger         = TEST_AT_TRIGGER_LEVEL;
     bvt3000.max_at_trigger     = 0.0;
+    bvt3000.display_min        = TEST_DISPLAY_MIN;
+    bvt3000.display_max        = TEST_DISPLAY_MAX;
 
 	return 1;
 }
@@ -734,7 +736,14 @@ temp_contr_adaptive_tune_trigger( Var_T * v )
 
     if ( tl < 0.0 )
     {
-        print( FATAL, "Invalid egative value for adaptive trigger level.\n" );
+        print( FATAL, "Invalid negative value for adaptive trigger level.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( tl > bvt3000.display_max - bvt3000.display_min )
+    {
+        print( FATAL, "Adaptive tune level larger the difference between "
+               "minimum and maximum display value.\n" );
         THROW( EXCEPTION );
     }
 

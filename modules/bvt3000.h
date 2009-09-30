@@ -97,6 +97,9 @@
 #define TEST_CUTBACK_LOW           67.9
 #define TEST_CUTBACK_HIGH          56.2
 #define TEST_AT_TRIGGER_LEVEL       4.6
+#define TEST_DISPLAY_MIN            73.0
+#define TEST_DISPLAY_MAX          1273.0
+
 
 /* Maximum time to wait for a reply (in us) */
 
@@ -118,6 +121,8 @@ typedef struct {
     double           max_cb[ 2 ];
     double           at_trigger;
     double           max_at_trigger;
+    double           display_max;
+    double           display_min;
     int              sn;
 	bool             is_open;
     struct termios * tio;

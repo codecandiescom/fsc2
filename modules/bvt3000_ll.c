@@ -127,6 +127,11 @@ bvt3000_init( void )
 
     eurotherm902s_init( );
 
+    /* Get the display maximum and minimum */
+
+    bvt3000.display_max = eurotherm902s_get_display_maximum( );
+    bvt3000.display_min = eurotherm902s_get_display_minimum( );
+
     /* Check that during the test run no out of range setpoint was requested */
 
     bvt3000.min_setpoint = eurotherm902s_get_min_setpoint( SP1 );
@@ -164,6 +169,16 @@ bvt3000_init( void )
                bvt3000.max_setpoint - bvt3000.min_setpoint );
         THROW( EXCEPTION );
     }
+
+    if ( bvt3000.max_at_trigger > bvt3000.display_max - bvt3000.display_min )
+    {
+        print( FATAL, "During test run a adaptive tune trigger level was "
+               "requested that is larger than the difference between the "
+               "display minimum and maximum of %.1f K.\n",
+               bvt3000.display_max - bvt3000.display_min );
+        THROW( EXCEPTION );
+    }
+
     /* Check if the Eurotherm 902S detected a sensor break */
 
     if ( eurotherm902s_check_sensor_break( ) )
