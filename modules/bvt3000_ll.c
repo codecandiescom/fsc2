@@ -172,6 +172,12 @@ bvt3000_init( void )
         THROW( EXCEPTION );
     }
 
+    /* Check if self and/or adaptive tune are on */
+
+    bvt3000.tune_state =
+              ( eurotherm902s_get_adaptive_tune_state( ) ? ADAPTIVE_TUNE : 0 )
+            | ( eurotherm902s_get_self_tune_state( )     ? SELF_TUNE     : 0 );
+
     /* Check if the heater is on or off (must be on for setting flow rate) */
 
     bvt3000.heater_state = bvt3000_get_heater_state( );

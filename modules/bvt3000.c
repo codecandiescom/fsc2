@@ -72,6 +72,8 @@ bvt3000_init_hook( void )
     bvt3000.cb[ 1 ]            = TEST_CUTBACK_HIGH;
     bvt3000.max_cb[ 0 ]        = 0.0;
     bvt3000.max_cb[ 1 ]        = 0.0;
+    bvt3000.at_trigger         = TEST_AT_TRIGGER_LEVEL;
+    bvt3000.max_at_trigger     = 0.0;
 
 	return 1;
 }
@@ -503,6 +505,13 @@ temp_contr_proportional_band( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( bvt3000.tune_state != TUNE_OFF )
+    {
+        print( FATAL, "Proportional band can't be changed while self or "
+               "adaptive tune is on.\n" );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -540,6 +549,13 @@ temp_contr_integral_time( Var_T * v )
     {
         print( FATAL, "Value for integral time is too large, maximum is "
                "%.0f s\n", MAX_INTEGRAL_TIME );
+        THROW( EXCEPTION );
+    }
+
+    if ( bvt3000.tune_state != TUNE_OFF )
+    {
+        print( FATAL, "Integral time can't be changed while self or adaptive "
+               "tune is on.\n" );
         THROW( EXCEPTION );
     }
 
@@ -585,6 +601,13 @@ temp_contr_derivative_time( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( bvt3000.tune_state != TUNE_OFF )
+    {
+        print( FATAL, "Derivative time can't be changed while self or adaptive "
+               "tune is on.\n" );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -593,30 +616,6 @@ temp_contr_derivative_time( Var_T * v )
     eurotherm902s_set_derivative_time( dt );
  
    return vars_push( FLOAT_VAR, eurotherm902s_get_derivative_time( ) );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *
-temp_contr_lock_keyboard( Var_T * v )
-{
-    bool lock;
-
-
-    if ( v == NULL )
-        lock = SET;
-    else
-    {
-        lock = get_boolean( v );
-        too_many_arguments( v );
-    }
-
-    if ( FSC2_MODE == EXPERIMENT )
-        eurotherm902s_lock_keyboard( lock );
-
-    return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -688,6 +687,12 @@ temp_contr_cutbacks( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( bvt3000.tune_state & ADAPTIVE_TUNE )
+    {
+        print( FATAL, "Cutbacks can't be changed while adaptive tune is "
+               "on.\n" );
+        THROW( EXCEPTION );
+    }
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -706,6 +711,69 @@ temp_contr_cutbacks( Var_T * v )
     }
     
     return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_adaptive_tune_trigger( Var_T * v )
+{
+    double tl;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            bvt3000.at_trigger = eurotherm902s_get_adaptive_tune_trigger( );
+        return vars_push( FLOAT_VAR, bvt3000.at_trigger );
+    }
+
+    tl = get_double( v, "adaptive trigger level" );
+
+    if ( tl < 0.0 )
+    {
+        print( FATAL, "Invalid egative value for adaptive trigger level.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        bvt3000.max_at_trigger = d_max( tl, bvt3000.at_trigger );
+        return vars_push( FLOAT_VAR, bvt3000.at_trigger = tl );
+    }
+
+    eurotherm902s_set_adaptive_tune_trigger( tl );
+    bvt3000.at_trigger = eurotherm902s_get_adaptive_tune_trigger( );
+    
+    return  vars_push( FLOAT_VAR, bvt3000.at_trigger );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+temp_contr_lock_keyboard( Var_T * v )
+{
+    bool lock;
+
+
+    if ( v == NULL )
+        lock = SET;
+    else
+    {
+        lock = get_boolean( v );
+        too_many_arguments( v );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        eurotherm902s_lock_keyboard( lock );
+
+    return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 

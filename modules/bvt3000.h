@@ -96,6 +96,7 @@
 #define TEST_DERIVATIVE_TIME        2.8
 #define TEST_CUTBACK_LOW           67.9
 #define TEST_CUTBACK_HIGH          56.2
+#define TEST_AT_TRIGGER_LEVEL       4.6
 
 /* Maximum time to wait for a reply (in us) */
 
@@ -115,6 +116,8 @@ typedef struct {
     int              tune_state;
     double           cb[ 2 ];
     double           max_cb[ 2 ];
+    double           at_trigger;
+    double           max_at_trigger;
     int              sn;
 	bool             is_open;
     struct termios * tio;
@@ -126,21 +129,22 @@ int bvt3000_exp_hook(        void );
 int bvt3000_end_of_exp_hook( void );
 
 
-Var_T * temp_contr_name(               Var_T * v );
-Var_T * temp_contr_command(            Var_T * v );
-Var_T * temp_contr_temperature(        Var_T * v );
-Var_T * temp_contr_setpoint(           Var_T * v );
-Var_T * temp_contr_heater_state(       Var_T * v );
-Var_T * temp_contr_heater_power(       Var_T * v );
-Var_T * temp_contr_heater_power_limit( Var_T * v );
-Var_T * temp_contr_gas_flow(           Var_T * v );
-Var_T * temp_contr_state(              Var_T * v );
-Var_T * temp_contr_tune_state(         Var_T * v );
-Var_T * temp_contr_proportional_band(  Var_T * v );
-Var_T * temp_contr_integral_time(      Var_T * v );
-Var_T * temp_contr_derivative_time(    Var_T * v );
-Var_T * temp_contr_cutbacks(           Var_T * v );
-Var_T * temp_contr_lock_keyboard(      Var_T * v );
+Var_T * temp_contr_name(                  Var_T * v );
+Var_T * temp_contr_command(               Var_T * v );
+Var_T * temp_contr_temperature(           Var_T * v );
+Var_T * temp_contr_setpoint(              Var_T * v );
+Var_T * temp_contr_heater_state(          Var_T * v );
+Var_T * temp_contr_heater_power(          Var_T * v );
+Var_T * temp_contr_heater_power_limit(    Var_T * v );
+Var_T * temp_contr_gas_flow(              Var_T * v );
+Var_T * temp_contr_state(                 Var_T * v );
+Var_T * temp_contr_tune_state(            Var_T * v );
+Var_T * temp_contr_proportional_band(     Var_T * v );
+Var_T * temp_contr_integral_time(         Var_T * v );
+Var_T * temp_contr_derivative_time(       Var_T * v );
+Var_T * temp_contr_cutbacks(              Var_T * v );
+Var_T * temp_contr_adaptive_tune_trigger( Var_T * v );
+Var_T * temp_contr_lock_keyboard(         Var_T * v );
 
 
 void bvt3000_init( void );
