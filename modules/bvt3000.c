@@ -636,21 +636,33 @@ temp_contr_cutbacks( Var_T * v )
         return vars_push( FLOAT_ARR, cb, 2 );
     }
 
-    cb[ 0 ] = get_double( v, "low cutback" );
+    /* Accept an array with two values or two separate values */
+
+    if ( v->type == INT_ARR && v->len == 2 )
+    {
+        cb[ 0 ] = v->val.lpnt[ 0 ];
+        cb[ 1 ] = v->val.lpnt[ 1 ];
+    }
+    else if ( v->type == FLOAT_ARR && v->len == 2 )
+        memcpy( cb, v->val.dpnt, sizeof cb );
+    else
+    {
+        cb[ 0 ] = get_double( v, "low cutback" );
+
+        if ( ( v = vars_pop( v ) ) == NULL )
+        {
+            print( FATAL, "Missing argument for high cutback.\n" );
+            THROW( EXCEPTION );
+        }
+
+        cb[ 1 ] = get_double( v, "high cutback" );
+    }
 
     if ( cb[ 0 ] < 0.0 )
     {
         print( FATAL, "Invalid negative value for low cutback.\n" );
         THROW( EXCEPTION );
     }
-
-    if ( ( v = vars_pop( v ) ) == NULL )
-    {
-        print( FATAL, "Missing argument for high cutback.\n" );
-        THROW( EXCEPTION );
-    }
-
-    cb[ 1 ] = get_double( v, "high cutback" );
 
     if ( cb[ 1 ] < 0.0 )
     {
