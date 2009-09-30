@@ -114,6 +114,7 @@ typedef struct {
     double           flow_rate;
     int              tune_state;
     double           cb[ 2 ];
+    double           max_cb[ 2 ];
     int              sn;
 	bool             is_open;
     struct termios * tio;

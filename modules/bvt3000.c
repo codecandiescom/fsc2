@@ -70,6 +70,8 @@ bvt3000_init_hook( void )
     bvt3000.flow_rate          = TEST_FLOW_RATE;
     bvt3000.cb[ 0 ]            = TEST_CUTBACK_LOW;
     bvt3000.cb[ 1 ]            = TEST_CUTBACK_HIGH;
+    bvt3000.max_cb[ 0 ]        = 0.0;
+    bvt3000.max_cb[ 1 ]        = 0.0;
 
 	return 1;
 }
@@ -697,7 +699,11 @@ temp_contr_cutbacks( Var_T * v )
         bvt3000.cb[ 1 ] = eurotherm902s_get_cutback_high( );
     }
     else
+    {
+        bvt3000.max_cb[ 0 ] = d_max( cb[ 0 ], bvt3000.cb[ 0 ] );
+        bvt3000.max_cb[ 1 ] = d_max( cb[ 1 ], bvt3000.cb[ 1 ] );
         memcpy( bvt3000.cb, cb, sizeof bvt3000.cb );
+    }
     
     return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
 }
