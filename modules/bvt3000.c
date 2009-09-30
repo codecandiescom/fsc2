@@ -572,6 +572,15 @@ temp_contr_derivative_time( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    dt = 0.1 * floor( 10.0 * dt );
+
+    if ( dt > MAX_DERIVATIVE_TIME )
+    {
+        print( FATAL, "Value for derivative time is too large, maximum is "
+               "%.1f s\n", MAX_DERIVATIVE_TIME );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )

@@ -579,12 +579,14 @@ eurotherm902s_get_integral_time( void )
  *-----------------------------------------*/
 
 void
-eurotherm902s_set_derivative_time( double t )
+eurotherm902s_set_derivative_time( double dt )
 {
     char buf[ 20 ];
 
 
-    fsc2_assert( sprintf( buf, "TD%6.1f", t ) <= 8 );
+    fsc2_assert( dt <= MAX_DERIVATIVE_TIME );
+
+    fsc2_assert( sprintf( buf, "TD%6.1f", dt ) <= 8 );
     bvt3000_send_command( buf );
 }
 

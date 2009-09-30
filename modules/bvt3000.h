@@ -81,6 +81,7 @@
 
 #define MAX_PROPORTIONAL_BAND   999.9   /* according to experiments */
 #define MAX_INTEGRAL_TIME      9999.0   /* according to experiments */
+#define MAX_DERIVATIVE_TIME     999.9   /* according to experiments */
 
 
 #define TEST_STATE                 MANUAL_MODE
