@@ -296,10 +296,11 @@
 		          ; go back to enclosing '{', '(' or '[' (if there's one)
 		   (backward-up-list)
 		   (cond
-		          ; if this is '{' indent as far as that line + tab width
+		          ; if this is '{' indent according to current level
 			 ((looking-at "{")
-			  (beginning-of-line-text)
-			  (+ tab-width (current-column)))
+			  (let ((opened (count-matches "{" 0 (point)))
+					(closed (count-matches "}" 0 (point))))
+				(* tab-width (1+ (- opened closed)))))
 			      ; for '(' and '[' indent to behind that + possible spaces
 			 ((looking-at "\\(\(\\|\\[\\)")
 			  (forward-char)
