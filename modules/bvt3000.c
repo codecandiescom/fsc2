@@ -532,8 +532,6 @@ temp_contr_integral_time( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    it = lrnd( it );
-
     if ( it > MAX_INTEGRAL_TIME )
     {
         print( FATAL, "Value for integral time is too large, maximum is "
