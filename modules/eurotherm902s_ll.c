@@ -530,7 +530,7 @@ eurotherm902s_set_proportional_band( double pb )
     char buf[ 20 ];
 
 
-    fsc2_assert( pb < MAX_PROPORTIONAL_BAND );
+    fsc2_assert( pb <= MAX_PROPORTIONAL_BAND );
 
     fsc2_assert( sprintf( buf, "XP%6.1f", pb ) <= 8 );
     bvt3000_send_command( buf );
@@ -552,11 +552,13 @@ eurotherm902s_get_proportional_band( void )
  *------------------------------------------*/
 
 void
-eurotherm902s_set_integral_time( double t )
+eurotherm902s_set_integral_time( double it )
 {
     char buf[ 20 ];
 
-    fsc2_assert( sprintf( buf, "TI%6.1f", t ) <= 8 );
+    fsc2_assert( it <= MAX_INTEGRAL_TIME );
+
+    fsc2_assert( sprintf( buf, "TI%6.1f", it ) <= 8 );
     bvt3000_send_command( buf );
 }
 

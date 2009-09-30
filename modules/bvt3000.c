@@ -490,6 +490,15 @@ temp_contr_proportional_band( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    pb = 0.1 * floor( 10.0 * pb );
+
+    if ( pb > MAX_PROPORTIONAL_BAND )
+    {
+        print( FATAL, "Value for proportional band too large, maximum is "
+               "%.1f K.\n", MAX_PROPORTIONAL_BAND );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -520,6 +529,15 @@ temp_contr_integral_time( Var_T * v )
     if ( it < 0.0 )
     {
         print( FATAL, "Invalid negative value for integral time.\n" );
+        THROW( EXCEPTION );
+    }
+
+    it = lrnd( it );
+
+    if ( it > MAX_INTEGRAL_TIME )
+    {
+        print( FATAL, "Value for integral time is too large, maximum is "
+               "%.0f s\n", MAX_INTEGRAL_TIME );
         THROW( EXCEPTION );
     }
 
