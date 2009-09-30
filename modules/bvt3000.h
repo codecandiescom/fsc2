@@ -79,6 +79,8 @@
 #define MIN_SETPOINT    73.0   /* lowest allowed value for setpoint, 73 K */
 #define MAX_SETPOINT  1273.0   /* highest allowed value for setpoint, 1273 K */
 
+#define MAX_PROPORTIONAL_BAND  999.9   /* according to experiments */
+
 
 #define TEST_STATE                 MANUAL_MODE
 #define TEST_TUNE_STATE            ADAPTIVE_TUNE
@@ -87,7 +89,7 @@
 #define TEST_HEATER_POWER_LIMIT   100.0
 #define TEST_HEATER_POWER          50.0
 #define TEST_FLOW_RATE           1600.0
-#define TEST_PROPORTIONAL_BAND     35.0
+#define TEST_PROPORTIONAL_BAND     36.0
 #define TEST_INTEGRAL_TIME         17.0
 #define TEST_DERIVATIVE_TIME        2.8
 #define TEST_CUTBACK_LOW           67.9
