@@ -41,6 +41,7 @@
 * er032m::          Bruker Field controller ER 032 M 
 * er035m::          Bruker NMR Gaussmeter ER 035 M
 * er035m_sa::       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
+* bvt3000::         Bruker BVT3000 Temperature Controller
 * fsps25::          Frankfurt Sweep Power Supply
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
@@ -910,7 +911,7 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 
 @c #############################################################
 
-@node er035m_sa, fsps25, er035m, Device Reference
+@node er035m_sa, bvt3000, er035m, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 @end iftex
@@ -962,7 +963,53 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 
 @c #############################################################
 
-@node fsps25, gg_chopper, er035m_sa, Device Reference
+@node bvt3000, fsps25, er035m_sa, Device Reference
+@iftex
+@subheading Bruker BVT3000 Temperature Controller
+@end iftex
+@ifnottex
+@section Bruker BVT3000 Temperature Controller
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{bvt3000}
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.bruker-biospin.com/, Bruker}
+BVT3000 temperature controller (using a
+@uref{http://www.eurotherm.com/, Eurotherm} 902S controller)
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{temp_contr_name()}
+@item @ref{temp_contr_temperature()}
+@item @ref{temp_contr_setpoint()}
+@item @ref{temp_contr_heater_state()}
+@item @ref{temp_contr_heater_power()}
+@item @ref{temp_contr_heater_power_limit()}
+@item @ref{temp_contr_gas_flow()}
+@item @ref{temp_contr_state()}
+@item @ref{temp_contr_tune_state()}
+@item @ref{temp_contr_proportional_band()}
+@item @ref{temp_contr_integral_time()}
+@item @ref{temp_contr_derivative_time()}
+@item @ref{temp_contr_cutbacks()}
+@item @ref{temp_contr_adaptive_tune_trigger()}
+@item @ref{temp_contr_lock_keyboard()}
+@end table
+
+
+@c #############################################################
+
+@node fsps25, gg_chopper, bvt3000, Device Reference
 @iftex
 @subheading Frankfurt Sweep Power Supply (Prisner group, Frankfurt)
 @end iftex

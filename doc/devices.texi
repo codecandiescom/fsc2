@@ -4242,11 +4242,13 @@ least @w{20 ns} apart).
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
 The only currently implemented temperature controllers are the
-@ref{lakeshore330, Lake Shore 330} and the @ref{itc503, Oxford
-Instruments ITC503}. Their modules get loaded by specifying
+@ref{lakeshore330, Lake Shore 330}, @ref{itc503, Oxford Instruments
+ITC503} and the @ref{bvt3000, Bruker BVT3000}. Their modules get
+loaded by specifying
 @example
 lakeshore330
 itc503
+bvt3000
 @end example
 @noindent
 in the @code{DEVICES} section. All functions for the temperature
@@ -4263,9 +4265,16 @@ the @code{EDL} script.
 @item @ref{temp_contr_heater_sensor()}
 @item @ref{temp_contr_setpoint()}
 @item @ref{temp_contr_state()}
+@item @ref{temp_contr_heater_state()}
 @item @ref{temp_contr_heater_power()}
 @item @ref{temp_contr_heater_power_limit()}
 @item @ref{temp_contr_gas_flow()}
+@item @ref{temp_contr_tune_state()}
+@item @ref{temp_contr_proportional_band()}
+@item @ref{temp_contr_integral_time()}
+@item @ref{temp_contr_derivative_time()}
+@item @ref{temp_contr_cutbacks()}
+@item @ref{temp_contr_adaptive_tune_trigger()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 
@@ -4288,12 +4297,13 @@ Returns a string with the name of the temperature controller being used.
 @findex temp_contr_temperature()
 @item temp_contr_temperature()
 This function returns the temperature (in Kelvin). If the device has
-only a single sample channel the function accepts no arguments.
-Otherwise it accepts an option argument, the sampel channel to be
-used. This then becomes the default sample channel that is used when
-the function is called again, that time without an argument. If no
-sample channel has been set before (either by a call of this function
-or @code{@ref{temp_contr_sample_channel()}}) the default sample channel
+only a single sample channel the function accepts no arguments (like
+for the @ref{bvt3000, Bruker BVT3000}). Otherwise it accepts an optional
+argument, the sampel channel to be used. This then becomes the default
+sample channel that is used when the function is called again, that
+time without an argument. If no sample channel has been set before
+(either by a call of this function or
+@code{@ref{temp_contr_sample_channel()}}) the default sample channel
 is used. This is channel @code{1} for the @ref{itc503, Oxford
 Instruments ITC503} and the channel before the program start at the
 front panel for the @ref{lakeshore330, Lake Shore 330}.
@@ -4304,12 +4314,13 @@ The function returned is always in Kelvin.
 @anchor{temp_contr_sample_channel()}
 @findex temp_contr_sample_channel()
 @item temp_contr_sample_channel()
-This function returns when called with no argument the currently
-selected sample channel. For the @ref{lakeshore330, Lake Shore 330} it
-returns @code{1} for channel @code{A} and @code{2} for channel
-@code{B} while for the @ref{itc503, Oxford Instruments ITC503}
-@code{1}, @code{2} or @code{3} get returned, indicating which of
-sample channel is selected.
+This function only exists for the @ref{itc503, Oxford Instruments
+ITC503} and the @ref{lakeshore330, Lake Shore 330} and returns when
+called with no argument the currently selected sample channel. For the
+@ref{lakeshore330, Lake Shore 330} it returns @code{1} for channel
+@code{A} and @code{2} for channel @code{B} while for the @ref{itc503,
+Oxford Instruments ITC503} @code{1}, @code{2} or @code{3} get
+returned, indicating which of sample channel is selected.
 
 Otherwise it can be used to select a new default sample channel. In
 that case it expects a single argument. This must either be an integer
@@ -4333,10 +4344,12 @@ device.
 @anchor{temp_contr_heater_sensor()}
 @findex temp_contr_heater_sensor()
 @item temp_contr_heater_sensor()
-This function allows to set or query the sensor that is used for
-active control of the temperature when comparing to the setpoint
-(the target temperature). It may differ from the sensor used when
-calling @code{@ref{temp_contr_temperature()}}.
+This function only exists for the @ref{itc503, Oxford Instruments
+ITC503} and the @ref{lakeshore330, Lake Shore 330} and allows to set
+or query the sensor that is used for active control of the temperature
+when comparing to the setpoint (the target temperature). It may differ
+from the sensor used when calling
+@code{@ref{temp_contr_temperature()}}.
 
 The function currently only is implemented for the @ref{itc503, Oxford
 Instruments ITC503}. If called without an argument it returns
@@ -4356,10 +4369,10 @@ The function allows to query or set the setpoint, i.e.@: the
 target temperature the device will try to achieve and maintain
 when active control is one. If called without an argument it
 returns the setpoint temperature in Kelvin. To set a new setpoint
-value call it with the ew target temperature in Kelvin.
+value call it with the new target temperature in Kelvin.
 
-This function is currently only available for the @ref{itc503, Oxford
-Instruments ITC503}.
+This function is only available for the @ref{itc503, Oxford
+Instruments ITC503} and the @ref{bvt3000, Bruker BVT3000}.
 
 
 @anchor{temp_contr_state()}
@@ -4379,6 +4392,28 @@ or one of the strings @code{"MANUAL"}, @code{"HEATER_AUTO"},
 @code{"GAS_AUTO"} or @code{"AUTO"} (both heater and gas flow are
 controlled by the device).
 
+Please note: while implemented this function doesn't work for the
+@ref{bvt3000, Bruker BVT3000} when trying to switch to manual mode,
+the device seems to be always in automatic mode and doesn't accept
+the command (as described in the manual) to switch to manual.
+
+
+@anchor{temp_contr_heater_state()}
+@findex temp_contr_heater_state()
+@item temp_contr_heater_state()
+This function only exists for the @ref{bvt3000, Bruker BVT3000}. If
+called without an argument it returns if the heater is on or off.
+If called with a boolean argument (either on of the strings
+@code{"ON"} or @code{"OFF"} or an integer value, where everything
+except @code{0} is treated as true) the heater gets switched on
+or off.
+
+Please note: the heater can be switched on only if the gas flow isn't
+missing. Also note that changing the heater state has no influence on
+the heater power setting as set or queried with
+@code{@ref{temp_contr_heater_power()}}.
+
+
 
 @anchor{temp_contr_heater_power()}
 @findex temp_contr_heater_power()
@@ -4395,34 +4430,138 @@ printed out and the heater power remains unchanged.
 If called without an argument the function returns the current
 setting of the heater power.
 
+Please note: this function is also implemented for the @ref{bvt3000,
+Bruker BVT3000} but can't be used since it would require that the
+device is in manual mode (but which this device doesn't seem to
+allow).
+
 
 @anchor{temp_contr_heater_power_limit()}
 @findex temp_contr_heater_power_limit()
 @item temp_contr_heater_power_limit()
 This function is currently only available for the @ref{itc503, Oxford
-Instruments ITC503}. It allows to set a limit in the heater power.
-The function expects a single argument, a value between @code{0.0}
-and @code{99.9}, where @code{99.9} corresponds to the maximum
-possible output voltage of @w{40 V}.
+Instruments ITC503} and the @ref{bvt3000, Bruker BVT3000}. It allows
+to set a limit in the heater power. The function expects a single
+argument, for the @ref{itc503, Oxford Instruments ITC503} a value
+between @code{0.0} and @code{99.9} (where @code{99.9} corresponds to
+the maximum possible output voltage of @w{40 V}) and between
+@code{0.0} and @code{100.0} for the @ref{bvt3000, Bruker BVT3000}.
 
-The function can only be called while the device is in manual
-mode, otherwise only a warning message is output (and the function
-returns @code{-1.0} instead of the new value of the limit).
-
-It is not powssible to query the heater power limit.
+For the @ref{itc503, Oxford Instruments ITC503} the function can only
+be called while the device is in manual mode, otherwise only a warning
+message is output (and the function returns @code{-1.0} instead of the
+new value of the limit). For this device it is also not possible to
+query the heater power limit by calling the function without an
+argument,
 
 
 @anchor{temp_contr_gas_flow()}
 @findex temp_contr_gas_flow()
 @item temp_contr_gas_flow()
 This function is currently only available for the @ref{itc503, Oxford
-Instruments ITC503}. It allows to set or query the gas flow. The
-function expects a single argument, a value between @code{0.0} and
-@code{99.9}, representing the percentage of the maximum gas flow. If
-the device isn't in manual or heater power control mode a warning gets
-printed out and the heater power remains unchanged.
+Instruments ITC503} and the @ref{bvt3000, Bruker BVT3000}. It allows
+to set or query the gas flow. The function expects a single argument,
+a value between @code{0.0} and @code{99.9}, representing the
+percentage of the maximum gas flow. If the device isn't in manual or
+heater power control mode a warning gets printed out and the heater
+power remains unchanged.
 
-To determine the current gas flow call the function without an argument.
+To determine the current gas flow call the function without an
+argument.
+
+For the @ref{bvt3000, Bruker BVT3000} setting the gas flow is only
+possible if the heater state is on as can be set or queried by
+@code{@ref{temp_contr_heater_state()}}.
+
+
+
+@anchor{temp_contr_tune_state()}
+@findex temp_contr_tune_state()
+@item temp_contr_tune_state()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to enable adaptive and/or self tune mode (or query the state
+by calling the function without an argument). The only accepted
+argument is a string or an integer with the following values:
+@code{"OFF"} (@code{0}) to switch off both adaptive and self
+tuning, @code{"ADAPTIVE"} (@code{1}) to select adaptive tuning
+only, @code{"SELF"} (@code{2}) for self tuning only and
+@code{"SELF+ADAPTIVE"} (@code{3}) to enable bot adaptive and
+selftuning.
+
+
+@anchor{temp_contr_proportional_band()}
+@findex temp_contr_proportional_band()
+@item temp_contr_proportional_band()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to set or query the proportional band setting of the PI
+controller. If called without an argument the current value for the
+proportional band (in K) is returned, otherwise a new value for the
+proporional band is set accordingly (accpted values range from
+@code{0.0} to @code{999.9}).
+
+The value for the proportional band can only be changed if neither
+adaptive or self tuning is running.
+
+@anchor{temp_contr_integral_time()}
+@findex temp_contr_integral_time()
+@item temp_contr_integral_time()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to set or query the integral time setting of the PID loop.
+If called without an argument the current value for the
+integral time (in s) is returned, otherwise a new value for the
+integral time is set accordingly (accpted values range from
+@code{0.0} to @code{9999.9}).
+
+The value for the integral time can only be changed if neither adaptive
+or self tuning is running. When setting this value to @code{0.0}
+before switching on adaptive of self tuning the PID loop will be tuned
+without this parameter (unless large offsets exist for very long
+times).
+
+
+@anchor{temp_contr_derivative_time()}
+@findex temp_contr_derivative_time()
+@item temp_contr_derivative_time()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to set or query the derivative time setting of the PID loop.
+If called without an argument the current value for the
+derivative time (in s) is returned, otherwise a new value for the
+integral time is set accordingly (accpted values range from
+@code{0.0} to @code{999.9}).
+
+The value for the integral time can only be changed if neither
+adaptive or self tuning is running. When setting this value to
+@code{0.0} before switching on adaptive of self tuning the PID loop
+will be tuned without this parameter.
+
+
+@anchor{temp_contr_cutbacks()}
+@findex temp_contr_cutbacks()
+@item temp_contr_cutbacks()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to set or query the low and high cutback value. If called
+without an argument an array with two floating point numbers is
+returned, where the first element is the low cutback value and
+the second is the high cutback value. To set new cutback values
+call the function with two arguments, first the new low cutback
+and then the new high cutback value.
+
+The cutback values can't be changed while self tuning is running.
+Setting one or both of these values to @code{0.0} before switching on
+self tuning will result in the parameter not being used for tuning the
+PID loop.
+
+
+@anchor{temp_contr_adaptive_tune_trigger()}
+@findex temp_contr_adaptive_tune_trigger()
+@item temp_contr_adaptive_tune_trigger()
+This function is only available for the @ref{bvt3000, Bruker BVT3000}.
+It allows to set or query the adaptive tune trigger level (i.e.
+minimum deviation of the temperature from the setpoint at which
+adaptive tuning is done when adaptive tune is switched on). To
+determine the value call the function without an argument. To set new
+value call it with a temperatur (in K). Accepted vales range from
+@code{0.0} to @code{231.7}.
 
 
 @anchor{temp_contr_lock_keyboard()}

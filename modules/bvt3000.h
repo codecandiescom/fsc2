@@ -54,7 +54,19 @@
 #define SELF_TUNE           2
 
 
-/* Defines for bits in the status word (SW) */
+/* Defines for the BVT3000 interface status */
+
+#define BVT3000_HEATER_ON                ( 1 <<  0 )
+#define BVT3000_EVAPORATOR_CONNECTED     ( 1 <<  2 )
+#define BVT3000_MISSING_GAS_FLOW         ( 1 <<  3 )
+#define BVT3000_HEATER_OVERHEATING       ( 1 <<  4 )
+#define BVT3000_EXCHANGER_CONNECTED      ( 1 <<  5 )
+#define BVT3000_LN2_REFILL               ( 1 <<  6 )
+#define BVT3000_LN2_EMPTY                ( 1 <<  7 )
+#define BVT3000_LN2_HEATER_ON            ( 1 <<  8 )
+#define BVT3000_BVBT3500_PRESENT         ( 1 << 10 )
+
+/* Defines for bits in the Eurotherm 902S status word (SW) */
 
 #define DATA_FORMAT_FLAG        0x0001   /* off for free, on for fixed format */
 #define SENSOR_BREAK_FLAG       0x0002   /* set on sensor break */
@@ -67,7 +79,7 @@
 #define MANUAL_MODE_FLAG        0x8000   /* set when manual, off in auto mode */
 
 
-/* Defines for bits in the extension status word (XS) */
+/* Defines for bits in the Eurotherm 902S extension status word (XS) */
 
 #define SELF_TUNE_FLAG          0x01     /* set if in self tune mode */
 #define ADAPTIVE_TUNE_FLAG      0x02     /* set if adaptuve tune is on */

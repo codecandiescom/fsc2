@@ -26,8 +26,9 @@
 extern BVT3000 bvt3000;
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*-----------------------------------------------*
+ * Opens connection to device and initializes it
+ *-----------------------------------------------*/
 
 void
 bvt3000_init( void )
@@ -123,6 +124,7 @@ bvt3000_init( void )
 
     bvt3000.is_open = SET;
 
+
     /* Check the Eurotherm902S and bring into known state */
 
     eurotherm902s_init( );
@@ -194,8 +196,9 @@ bvt3000_init( void )
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*----------------------------------------*
+ * Sends command to set the gas flow rate
+ *----------------------------------------*/
 
 void
 bvt3000_set_flow_rate( unsigned int flow_rate )
@@ -214,8 +217,9 @@ bvt3000_set_flow_rate( unsigned int flow_rate )
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*-----------------------------------------------*
+ * Asks the device for the current gas flow rate 
+ *-----------------------------------------------*/
 
 unsigned int
 bvt3000_get_flow_rate( void )
@@ -241,23 +245,33 @@ bvt3000_get_flow_rate( void )
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*-------------------------------*
+ * Switches the heater on or off 
+ *-------------------------------*/
 
 void
 bvt3000_set_heater_state( bool state )
 {
-    char buf[ 4 ] = "HP1";
+    char buf[ 4 ] = "HP*";
 
 
-    if ( state == UNSET )
-        buf[ 2 ] = '0';
+    /* Before switching on the heater check if gas flow is present */
+
+    if ( state && bvt3000_get_interface_status( ) & BVT3000_MISSING_GAS_FLOW )
+    {
+        print( FATAL, "Can't switch on heater, gas flow is missing.\n" );
+        THROW( EXCEPTION );
+    }
+
+    buf[ 2 ] = state ? '1' : '0';
     bvt3000_send_command( buf );
+    fsc2_usleep( 500000, UNSET );
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*------------------------------------*
+ * Returns if the heater is on or off 
+ *------------------------------------*/
 
 bool
 bvt3000_get_heater_state( void )
@@ -267,12 +281,13 @@ bvt3000_get_heater_state( void )
 
     if ( reply[ 0 ] != '1' && reply[ 0 ] != '0' )
         bvt3000_comm_fail( );
-    return reply[ 0 ] != '1' ? SET : UNSET;
+    return reply[ 0 ] == '1' ? SET : UNSET;
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*---------------------------------------*
+ * Reads from port 1 to 4 (not used yet)
+ *---------------------------------------*/
 
 unsigned char
 bvt300_get_port( int port )
@@ -296,8 +311,9 @@ bvt300_get_port( int port )
 }
 
 
-/*---------------------------------------------------------------*
- *---------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Returns information about the status of the device
+ *----------------------------------------------------*/
 
 unsigned int
 bvt3000_get_interface_status( void )
@@ -308,9 +324,7 @@ bvt3000_get_interface_status( void )
 
     if (    reply[ 0 ] != '>'
          || sscanf( reply + 1, "%x", &is ) != 1
-         || is > 0x07FF
-         || is & 0x0002
-         || ! ( is & 0x0200 ) )
+         || is & 0xF802 )
         bvt3000_comm_fail( );
 
     return is;
@@ -320,7 +334,7 @@ bvt3000_get_interface_status( void )
 /*---------------------------------------------------------------*
  * Sends an query to the device. The command must consist of a
  * 2 character string and the function returns the data returned
- * by te device as a '\0'-terminated string.
+ * by the device as a string with a terminating '\0' appened.
  *---------------------------------------------------------------*/
 
 char *
@@ -415,8 +429,8 @@ bvt3000_check_ack( void )
 
 /*-------------------------------------------------------------*
  * Adds BCC (block check character) to the end of the command.
- * The BCC is calculated by doing a XOR of all bytes. The
- * function returns the length.
+ * The BCC is calculated by doing a XOR of all bytes. Returns
+ * the length, including the BCC.
  *-------------------------------------------------------------*/
 
 size_t

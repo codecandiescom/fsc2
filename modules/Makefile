@@ -281,7 +281,7 @@ modules:
 	done;
 	@for n in $(hp534_list); do                                     \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
-		if [ ! -e $$n.x -o hp534.c.tmpl -nt $$n.c ]; then           \
+		if [ ! -e $$n.c -o hp534.c.tmpl -nt $$n.c ]; then           \
 			sed -e "s/hp534_tmpl/$$n/g"                             \
 				-e "s/HP534_TMPL/$$o/g"                             \
 				hp534.c.tmpl > $$n.c;                               \

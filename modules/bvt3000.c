@@ -183,6 +183,7 @@ temp_contr_heater_state( Var_T * v )
 {
     bool state;
 
+
     if ( v == NULL )
     {
         if ( FSC2_MODE == TEST )
@@ -201,9 +202,15 @@ temp_contr_heater_state( Var_T * v )
     }
 
     bvt3000_set_heater_state( state );
-    return vars_push( INT_VAR,
-                      ( long ) ( bvt3000.heater_state =
-                                               bvt3000_get_heater_state( ) ) );
+    bvt3000.heater_state = bvt3000_get_heater_state( );
+
+    if ( state != bvt3000.heater_state )
+    {
+        print( FATAL, "Can't switch heater %s.\n", state ? "on" : "off" );
+        THROW( EXCEPTION );
+    }
+
+    return vars_push( INT_VAR, ( long ) bvt3000.heater_state );
 }
 
 
@@ -706,10 +713,9 @@ temp_contr_cutbacks( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( bvt3000.tune_state & ADAPTIVE_TUNE )
+    if ( bvt3000.tune_state & SELF_TUNE )
     {
-        print( FATAL, "Cutbacks can't be changed while adaptive tune is "
-               "on.\n" );
+        print( FATAL, "Cutbacks can't be changed while self tune is on.\n" );
         THROW( EXCEPTION );
     }
     too_many_arguments( v );
