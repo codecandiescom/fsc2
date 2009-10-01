@@ -102,9 +102,10 @@ eurotherm902s_set_operation_mode( int op_mode )
 }
 
 
-/*--------------------------------------------------------------------*
- * Returns the operation mode normal operation or configuration mode)
- *--------------------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Returns the operation mode (for normal operation
+ * 0 is returned, for configuration mode 2)
+ *--------------------------------------------------*/
 
 int
 eurotherm902s_get_operation_mode( void )
@@ -531,7 +532,7 @@ eurotherm902s_set_proportional_band( double pb )
 
     fsc2_assert( pb <= MAX_PROPORTIONAL_BAND );
 
-    fsc2_assert( sprintf( buf, "XP%6.1f", pb ) <= 8 );
+    fsc2_assert( sprintf( buf, "XP%6.2f", pb ) <= 8 );
     bvt3000_send_command( buf );
 }
 
@@ -555,9 +556,13 @@ eurotherm902s_set_integral_time( double it )
 {
     char buf[ 20 ];
 
+
     fsc2_assert( it <= MAX_INTEGRAL_TIME );
 
-    fsc2_assert( sprintf( buf, "TI%6.1f", it ) <= 8 );
+    if ( it < 999.5 )
+        fsc2_assert( sprintf( buf, "TI%6.2f", it ) <= 8 );
+    else
+        fsc2_assert( sprintf( buf, "TI%6.1f", it ) <= 8 );
     bvt3000_send_command( buf );
 }
 
@@ -585,7 +590,7 @@ eurotherm902s_set_derivative_time( double dt )
 
     fsc2_assert( dt <= MAX_DERIVATIVE_TIME );
 
-    fsc2_assert( sprintf( buf, "TD%6.1f", dt ) <= 8 );
+    fsc2_assert( sprintf( buf, "TD%6.2f", dt ) <= 8 );
     bvt3000_send_command( buf );
 }
 
@@ -610,7 +615,10 @@ eurotherm902s_set_cutback_high( double cb )
     char buf[ 20 ];
 
 
-    fsc2_assert( sprintf( buf, "HB%6.1f", cb ) <= 8 );
+    if ( cb < 999.5 )
+        fsc2_assert( sprintf( buf, "HB%6.2f", cb ) <= 8 );
+    else
+        fsc2_assert( sprintf( buf, "HB%6.1f", cb ) <= 8 );
     bvt3000_send_command( buf );
 }
 
@@ -634,7 +642,10 @@ eurotherm902s_set_cutback_low( double cb )
     char buf[ 20 ];
 
 
-    fsc2_assert( sprintf( buf, "LB%6.1f", cb ) <= 8 );
+    if ( cb < 999.5 )
+        fsc2_assert( sprintf( buf, "LB%6.2f", cb ) <= 8 );
+    else
+        fsc2_assert( sprintf( buf, "LB%6.1f", cb ) <= 8 );
     bvt3000_send_command( buf );
 }
 
