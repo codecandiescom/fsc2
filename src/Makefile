@@ -28,7 +28,7 @@ c_sources      = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
 				 mail.c ipc.c print.c serial.c lan.c graphics.c              \
 				 graphics_edl.c graph_handler_1d.c graph_handler_2d.c        \
 				 graph_cut.c bugs.c fsc2_assert.c dump.c module_util.c       \
-				 fsc2d.c global.c help.c edit.c sha1.c
+				 fsc2d.c global.c help.c edit.c
 ifdef WITH_HTTP_SERVER
 c_sources     += http.c dump_graphic.c
 endif
@@ -81,7 +81,7 @@ fsc2: $(objects)
 
 %.c %.h: %.y $(headers)
 	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) \
-			 -o $(addsuffix .c,$(basename $@)) $<
+			 -o $(addsuffix .c,$(basename $<)) $<
 
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
@@ -99,7 +99,7 @@ fsc2: $(objects)
 
 # Make the primary lexer (which does the cleanup of the input EDL files)
 
-fsc2_clean: fsc2_clean.o exceptions.o sha1.o
+fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lm
 
 

@@ -19,31 +19,35 @@
  *  Boston, MA 02111-1307, USA.
  *
  *
- *  This program expects an EDL program on standard input. It will then read it
- *  in, write it to a temporary file and try to connect to fsc2 via a socket on
- *  which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
- *  invoking users UID, followed by a letter that depends on the name the
- *  program was invocated with - if it was started as 'fsc2_start' it sends an
- *  'S', if as 'fsc2_test' it sends 'T', if as 'fsc2_iconic_start' it sends 'I'
- *  and if invocated as either 'fsc2_load' or 'fsc2_connect' it sends an 'L',
- *  thus indicating what fsc2 is supposed to do, i.e. either start the EDL
- *  program immediately, to test it or only to load it. It also sends a second
- *  letter, 'd' to tell fsc2 to delete the temporary file when it's done with
- *  it. Finally it sends the file name. fsc2 can react in different ways: It
- *  can indicate that it is either run by a user with a different UID, that it
- *  is busy, or that it couldn't read the messages, which in turn is returned
- *  by this program via its return value (see list below).
+ *  This program expects an EDL program on standard input. It will then
+ *  read it in, write it to a temporary file and try to connect to fsc2
+ *  via a socket on which fsc2 is supposed to listen. If this succeeds
+ *  it sends fsc2 the invoking user's UID, followed by a letter that
+ *  depends on the name the program was invocated with - if it was
+ *  started as 'fsc2_start' it sends an 'S', if as 'fsc2_test' it sends
+ *  'T', if as 'fsc2_iconic_start' it sends 'I' and if invocated as
+ *  either 'fsc2_load' or 'fsc2_connect' it sends an 'L', thus
+ *  indicating what fsc2 is supposed to do, i.e. either start the EDL
+ *  program immediately, to test it or to only load it. It also sends a
+ *  second letter, 'd' to tell fsc2 to delete the temporary file when
+ *  it's done with it. Finally, it sends the file name. fsc2 can react
+ *  in different ways: It can indicate that it is either run by a user
+ *  with a different UID, that it is busy, or that it could not read the
+ *  messages, which in turn is returned by this program via its return
+ *  value (see list below).
  *
- *  If, on the other hand, the program finds that fsc2 isn't running (because
- *  it can't connect to fsc2) it will try to start fsc2 with the '--delete'
- *  flag (to make fsc2 delete its input file when done with it) and, depending
- *  on the name this program was invocated with, with the '-S' or '-T' flag or
- *  no flag and the name of the temporary file. If fsc2 can't be started
- *  properly this program will return a return value to indicate it.
+ *  If, on the other hand, the program finds that fsc2 isn't running
+ *  (because it can't connect to fsc2) it will try to start fsc2 with
+ *  the '--delete' flag (to make fsc2 delete its input file when done
+ *  with it) and, depending on the name this program was invocated with,
+ *  with the '-S' or '-T' flag or no flag and the name of the temporary
+ *  file. If fsc2 can't be started properly this program will return a
+ *  return value to indicate it.
  *
- *  The best way to use this program is to create the EDL program to send to
- *  fsc2 and send it to this program using a popen() call. The success can be
- *  obtained by examining the return status of the following call of pclose().
+ *  The best way to use this program is to create the EDL program to
+ *  send to fsc2 and send it to this program, using popen(). If it was
+ *  successful can be found out by examining the return status of the
+ *  final call of pclose().
  *
  *  Return codes:
  *
@@ -79,20 +83,6 @@ typedef unsigned int socklen_t;
 #endif
 
 
-/* Functions and defines we can't do without but which aren't available
-   when compiling with -ansi on Linux */
-
-#if defined __STRICT_ANSI__
-#define P_tmpdir   "/tmp"
-extern int mkstemp( char * template );
-extern int fchmod( int    fildes,
-                   mode_t mode );
-extern int snprintf( char        * str,
-                     size_t        size,
-                     const  char * format,
-                     ... );
-#endif
-
 /* FSC2_SOCKET must be identical to the definition in global.h ! */
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
@@ -100,26 +90,26 @@ extern int snprintf( char        * str,
 #define MAXLINE      4096
 
 
-void make_tmp_file( char * fname );
-int open_fsc2_socket( const char * fname );
-void start_fsc2( char * pname,
-                 char * fname,
-                 int    wait_flag );
-void sig_handler( int signo );
-void contact_fsc2( int    sock_fd,
-                   char * pname,
-                   char * fname );
-void clean_up( const char * fname,
-               int          sock_fd,
-               int          ret_val );
-ssize_t writen( int          fd,
-                const void * vptr,
-                size_t       n );
-ssize_t read_line( int      fd,
-                   void   * vptr,
-                   size_t   max_len );
-ssize_t do_read( int    fd,
-                 char * ptr );
+static void make_tmp_file( char * fname );
+static int open_fsc2_socket( const char * fname );
+static void start_fsc2( char * pname,
+                        char * fname,
+                        int    wait_flag );
+static void sig_handler( int signo );
+static void contact_fsc2( int    sock_fd,
+                          char * pname,
+                          char * fname );
+static void clean_up( const char * fname,
+                      int          sock_fd,
+                      int          ret_val );
+static ssize_t writen( int          fd,
+                       const void * vptr,
+                       size_t       n );
+static ssize_t read_line( int      fd,
+                          void   * vptr,
+                          size_t   max_len );
+static ssize_t do_read( int    fd,
+                        char * ptr );
 
 
 static volatile sig_atomic_t Sig_type = 0;
@@ -160,7 +150,7 @@ main( int    argc,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void
+static void
 make_tmp_file( char * fname )
 {
     int tmp;
@@ -206,7 +196,7 @@ make_tmp_file( char * fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int
+static int
 open_fsc2_socket( const char * fname )
 {
     int sock_fd;
@@ -259,7 +249,7 @@ open_fsc2_socket( const char * fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void
+static void
 start_fsc2( char * pname,
             char * fname,
             int    wait_flag )
@@ -328,7 +318,7 @@ start_fsc2( char * pname,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void
+static void
 sig_handler( int signo )
 {
     /* Bomb out on unexpected signals */
@@ -343,7 +333,7 @@ sig_handler( int signo )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void
+static void
 contact_fsc2( int    sock_fd,
               char * pname,
               char * fname )
@@ -439,7 +429,7 @@ contact_fsc2( int    sock_fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void
+static void
 clean_up( const char * fname,
           int          sock_fd,
           int          ret_val )
@@ -453,7 +443,7 @@ clean_up( const char * fname,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t
+static ssize_t
 read_line( int      fd,
            void   * vptr,
            size_t   max_len )
@@ -491,7 +481,7 @@ read_line( int      fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t
+static ssize_t
 do_read( int    fd,
          char * ptr )
 {
@@ -524,7 +514,7 @@ do_read( int    fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t
+static ssize_t
 writen( int          fd,
         const void * vptr,
         size_t       n )
@@ -546,7 +536,7 @@ writen( int          fd,
         }
 
         nleft -= nwritten;
-        ptr += nwritten;
+        ptr   += nwritten;
     }
 
     return n;

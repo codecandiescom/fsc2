@@ -41,7 +41,7 @@
 * er032m::          Bruker Field controller ER 032 M 
 * er035m::          Bruker NMR Gaussmeter ER 035 M
 * er035m_sa::       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
-* bvt3000::         Bruker BVT3000 Temperature Controller
+* bvt3000::         Bruker BVT3000 Variable Temperature Unit
 * fsps25::          Frankfurt Sweep Power Supply
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
@@ -965,10 +965,10 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 
 @node bvt3000, fsps25, er035m_sa, Device Reference
 @iftex
-@subheading Bruker BVT3000 Temperature Controller
+@subheading Bruker BVT3000 Variable Temperature Unit
 @end iftex
 @ifnottex
-@section Bruker BVT3000 Temperature Controller
+@section Bruker BVT3000 variable Temperature Unit
 @end ifnottex
 
 @paragraphindent 0
@@ -976,8 +976,9 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/, Bruker}
-BVT3000 temperature controller (using a
-@uref{http://www.eurotherm.com/, Eurotherm} 902S controller)
+BVT3000 Variable Temperature Unit (using a
+@uref{http://www.eurotherm.com/, Eurotherm} 902S temperature
+controller)
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port

@@ -25,10 +25,6 @@
 
 #include "fsc2.h"
 
-#if defined __STRICT_ANSI__
-#define inline
-#endif
-
 
 static inline short int i2s15( int /* i */ );
 

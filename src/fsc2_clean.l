@@ -40,7 +40,6 @@
 #include <sys/types.h>
 
 #include "fsc2_config.h"
-#include "sha1.h"
 
 
 #ifndef __cplusplus
@@ -66,19 +65,6 @@ typedef enum
 
 char *Prog_Name;
 
-
-/* Functions and defines we can't do without but which aren't available
-   when compiling with -ansi on Linux */
-
-#if defined __STRICT_ANSI__
-extern int seteuid( uid_t euid );
-extern int setegid( gid_t egid );
-extern int vsnprintf( char *       str,
-                      size_t       size,
-                      const char * format,
-                      va_list      ap );
-extern int fileno( FILE * stream );
-#endif
 
 #define MAX_INCLUDE_DEPTH  16
 
@@ -110,8 +96,6 @@ static long Lc,
        Str_Lc;
 static char *Fname;
 static bool Eol;
-static SHA1_Context context;
-static unsigned char digest[ SHA1_HASH_SIZE ];
 
 
 /* The following declarations are to avoid unnecessary warnings from
@@ -335,16 +319,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             }
 
             /* "#QUIT" means that all following input is to be discarded */
-{QUIT}      {
-                /* Write SHA1 hash of output to stderr */
-
-                sha1_calculate( &context, digest );
-                if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE )
-                                                            != SHA1_HASH_SIZE )
-                    exit( EXIT_FAILURE );
-
-    			exit( EXIT_SUCCESS );
-            }
+{QUIT}      exit( EXIT_SUCCESS );
 
             /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
@@ -480,10 +455,6 @@ main( int    argc,
 
     Prog_Name = argv[ 0 ];
 
-    /* Initialize SHA1 calculation */
-
-    sha1_initialize( &context );
-
     if ( argc < 2 )
     {
         yyin = stdin;
@@ -541,15 +512,6 @@ main( int    argc,
     TRY
     {
         yylex( );
-
-        /* Calculate and write out (to stderr) the SHA1 digest of the data */
-
-        sha1_calculate( &context, digest );
-        if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE ) != SHA1_HASH_SIZE )
-            return EXIT_FAILURE;
-
-        /* Finished succesfully... */
-
         return EXIT_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
@@ -702,14 +664,6 @@ include_handler( char * file )
         if ( incl_depth == -1 )
         {
             T_free( Fname );
-
-            /* Write SHA1 hash of output to stderr */
-
-            sha1_calculate( &context, digest );
-            if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE )
-                                                            != SHA1_HASH_SIZE )
-                exit( EXIT_FAILURE );
-
             exit( EXIT_SUCCESS );
         }
         else
@@ -1012,13 +966,6 @@ output( const char * fmt,
         bytes_to_write -= last_written;
         total_bytes_written += last_written;
     }
-
-    /* Add output to the SHA1 hash data (unless the line starts with 0x01,
-       in which case it's a file name, and names are insignificant and
-       vary variable) */
-
-    if ( *c != 0x01 )
-        sha1_add_data( &context, c, total_bytes_written );
 
     return total_bytes_written;
 }

@@ -568,8 +568,7 @@ new_client( int               fd,
         return num_instances;
     }
 
-    /* If we have already as many instances as can be run send tell the
-       client now */
+    /* If we have already as many instances as can be run tell the client */
 
     if ( num_instances == FSC2_MAX_INSTANCES )
     {
