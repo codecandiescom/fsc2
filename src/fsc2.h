@@ -117,7 +117,6 @@
 #include "func_intact_m.h"
 #include "lan.h"
 #include "conn.h"
-#include "sha1.h"
 #if defined WITH_HTTP_SERVER
 #include "dump_graphic.h"
 #include "http.h"
