@@ -1,0 +1,184 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+# Copyright (C) 1999-2009 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+use strict;
+use warnings;
+use Tk;
+use Tk::Balloon;
+use Tk::Dialog;
+
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+    if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+
+$SIG{ CHLD } = sub { };
+
+create_gui( );
+MainLoop;
+
+
+#############################################
+
+sub create_gui {
+
+	my $f;
+	my @b;
+	my %fp = ( -side => 'top',
+			   -fill => 'x',
+			   -padx => '2m',
+			   -pady => '2m' );
+
+	my $mw = MainWindow->new( );
+	$mw->title( "EPR" );
+
+	$f = $mw->Frame( );
+	$b[ 0 ] = $f->Button( -text => 'Monitor Mode (Bruker)' );
+	$b[ 1 ] = $f->Button( -text => 'Monitor Mode (Stanford)' );
+	$b[ 2 ] = $f->Button( -text => 'cw-EPR Experiment (Bruker)' );
+	$b[ 3 ] = $f->Button( -text => 'cw-EPR Experiment (Stanford)' );
+	$b[ 4 ] = $f->Button( -text => 'Set temperature' );
+	$b[ 5 ] = $f->Button( -text => 'Self tune' );
+	$b[ 6 ] = $f->Button( -text => 'Quit' );
+
+	$b[ 0 ]->configure( -command => sub { monitor( $mw, 'bruker' ) } );
+	$b[ 1 ]->configure( -command => sub { monitor( $mw, 'sr' ) } );
+	$b[ 2 ]->configure( -command => sub { cw_epr( $mw, 'bruker' )  } );
+	$b[ 3 ]->configure( -command => sub { cw_epr( $mw, 'sr' )  } );
+	$b[ 4 ]->configure( -command => sub { set_temp( $mw ); } );
+	$b[ 5 ]->configure( -command => sub { self_tune( $mw ); } );
+	$b[ 6 ]->configure( -command => sub { $mw->destroy; } );
+
+	$f->pack( %fp );
+	$_->pack( %fp ) foreach @b;
+}
+
+
+#############################################
+
+sub cw_epr {
+	my ( $top, $what ) = @_;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/cw_epr_$what 2>&1 |" ) {
+		show_message( $top, "Program for cw EPR\nexperiment not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub monitor {
+	my ( $top, $what ) = @_;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/monitor_$what 2>&1 |" ) {
+		show_message( $top, "Program for monitor\nmode not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub set_temp {
+	my $top = shift;
+	my $fh;
+	my $txt;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/set_temperature 2>&1 |" ) {
+		show_message( $top, "Program for setting the\ntemperature not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh> ) {
+		$txt .= $_;
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub self_tune {
+	my $top = shift;
+	my $fh;
+	my $txt;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/self_tune 2>&1 |" ) {
+		show_message( $top, "Program for running\nself tune not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh> ) {
+		$txt .= $_;
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+
+
+#############################################
+
+sub show_message {
+	my ( $mw, $text ) = @_;
+
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+}

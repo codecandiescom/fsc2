@@ -1,4 +1,24 @@
 #!/usr/bin/perl
+# -*- cperl -*-
+#
+#  Copyright (C) 1999-2009 Jens Thoms Toerring
+#
+#  This file is part of fsc2.
+#
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
 
 use strict;
 use warnings;
@@ -66,20 +86,19 @@ if ( $reply =~ /^(F|S|W) / ) {
 	exit 0;
 }
 
-my ( $sp, $pb, $it, $dt, $hl, $fi, $hs ) = split / /, $reply;
+my ( $sp, $pb, $it, $dt, $hl, $fi, $st ) = split / /, $reply;
 $fi += 1;
 
+# Create a script suitable for fsc2_guify for running a self tune
 
-# Create a script for setting the temperature
-
-my $EDL = <<'EOT';
-=== TEMPERATURE float [ 73.0 : 1000.0 ] [ CUR_TEMPERATURE ] "Temperature" "K"
-=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ CUR_HEATER_LIMIT ] "Heater power limit" "%"
-=== GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ CUR_GAS_FLOW ] "Gas flow" "l/h"
-=== PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ CUR_PROPORTIONAL_BAND ] "Proportional band" "K"
-=== INTEGRAL_TIME float_empty [ 0 : 9999.0 ][ CUR_INTEGRAL_TIME ] "Integral time" "s"
-=== DERIVATIVE_TIME float_empty [ 0 : 999.0 ][ CUR_DERIVATIVE_TIME ] "Derivative time" "s"
-=== ADAPTIVE_TUNE button [ CUR_ADAPTIVE_TUNE ] "Enable adaptive tune"
+my $edl = <<"EOT";
+=== TEMPERATURE float [ 73.0 : 1000.0 ] [ $st ] "Temperature" "K"
+=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ $hl ] "Heater power limit" "%"
+=== GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ $fi ] "Gas flow" "l/h"
+=== PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ $pb ] "Proportional band" "K"
+=== INTEGRAL_TIME float_empty [ 0 : 9999.0 ][ $it ] "Integral time" "s"
+=== DERIVATIVE_TIME float_empty [ 0 : 999.0 ][ $dt ] "Derivative time" "s"
+=== ADAPTIVE_TUNE button [ $ts ] "Enable adaptive tune"
 DEVICES:
 
 bvt3000;
@@ -132,25 +151,18 @@ WHILE temp_contr_tune_state( ) >= 2 {
 }
 EOT
 
-# Set the parameters we just got from the device as the default values
-
-$EDL =~ s/CUR_TEMPERATURE/$sp/;
-$EDL =~ s/CUR_HEATER_LIMIT/$hl/;
-$EDL =~ s/CUR_GAS_FLOW/$fi/;
-$EDL =~ s/CUR_PROPORTIONAL_BAND/$pb/;
-$EDL =~ s/CUR_INTEGRAL_TIME/$it/;
-$EDL =~ s/CUR_DERIVATIVE_TIME/$dt/;
-$EDL =~ s/CUR_ADAPTIVE_TUNE/$hs/;
+# Run it through fsc2_guify
 
 open2 my $rd, my $wd, 'fsc2_guify -ns' or die "Failure\n";
-print $wd $EDL;
+print $wd $edl;
 close $wd;
-my @edl = <$rd>;
+$edl = join '', <$rd>;
 close $rd;
 
-# Run the script
+# Run the resulting script
 
-eval join '', @edl;
+eval $edl;
+
 
 #############################################
 # Displays a message box
