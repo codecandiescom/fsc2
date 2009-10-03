@@ -1,0 +1,138 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Tk;
+use IPC::Open2;
+use File::Temp ':mktemp';
+
+
+my ( $f, $fn ) = mkstemp( "/tmp/set_temperature.XXXXXX" );
+
+print $f <<EOT;
+DEVICES:
+
+bvt3000;
+
+VARIABLES:
+
+Flow_rates[ * ] = {    0,  135,  270,  400,  535,  670,  800,  935,
+					1070, 1200, 1335, 1470, 1600, 1735, 1870, 2000 };
+cf;
+FI;
+
+EXPERIMENT:
+
+cf = temp_contr_gas_flow( );
+FOR FI = 1 : 16  {
+	IF Flow_rates[ FI ] == int( cf ) {
+		BREAK;
+	}
+}
+
+print( "# # # # # # #\n", temp_contr_setpoint( ),
+                          temp_contr_proportional_band( ),
+                          temp_contr_integral_time( ),
+                          temp_contr_derivative_time( ),
+                          temp_contr_heater_power_limit( ),
+                          FI,
+                          temp_contr_tune_state( ) & 1 ? "ON" : "OFF" );
+EOT
+
+unless ( open $f, '-|', "fsc2 -nw $fn 2>&1" ) {
+	close $f;
+	unlink $fn;
+	show_message( "Can't start fsc2" );
+	exit 1;
+}
+
+my $reply = <$f>;
+close $f;
+unlink $fn;
+
+if ( defined $reply and $reply =~ /^(F|S|W) / ) {
+	$reply =~ s/^(F|S|W) //;
+	show_message( $reply );
+	exit 0;
+}
+
+my ( $sp, $pb, $it, $dt, $hl, $fi, $hs ) = split $reply;
+$fi += 1;
+
+
+my $EDL = <<'EOT';
+=== TEMPERATURE float [ 73.0 : 1000.0 ] [ CUR_TEMPERATURE ] "Temperature" "K"
+=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ CUR_HEATER_LIMIT ] "Heater power limit" "%"
+=== GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ CUR_GAS_FLOW ] "Gas flow" "l/h"
+=== PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ CUR_PROPORTIONAL_BAND ] "Proportional band" "K"
+=== INTEGRAL_TIME float_empty [ 0 : 9999.0 ][ CUR_INTEGRAL_TIME ] "Integral time" "s"
+=== DERIVATIVE_TIME float_empty [ 0 : 999.0 ][ CUR_DERIVATIVE_TIME ] "Derivative time" "s"
+=== ADAPTIVE_TUNE button [ CUR_ADAPTIVE_TUNE ] "Enable adaptive tune"
+DEVICES:
+
+bvt3000;
+
+VARIABLES:
+
+TUNE_STATE;
+flow[ * ] = { 0.0, 135.0, 270.0, 400.0, 535.0, 670.0, 800.0, 935.0, 1070.0,
+	          1200.0, 1335.0, 1470.0, 1600.0, 1735.0, 1870.0, 2000.0 };
+
+EXPERIMENT:
+
+temp_contr_heater_state( "OFF" );
+TUNE_STATE = temp_contr_tune_state( );
+temp_contr_tune_state( "OFF" );
+=== if defined HEATER_LIMIT
+temp_contr_heater_power_limit( HEATER_LIMIT );
+=== endif
+=== if defined PROPORTIONAL_BAND
+temp_contr_proportional_band( PROPORTIONAL_BAND K );
+=== endif
+=== if defined INTEGRAL_TIME
+temp_contr_integral_time( INTEGRAL_TIME s );
+=== endif
+=== if defined DERIVATIVE_TIME
+temp_contr_derivative_time( DERIVATIVE_TIME s );
+=== endif
+=== if ADAPTIVE_TUNE
+temp_contr_tune_state( "ADAPTIVE" );
+=== endif
+temp_contr_setpoint( TEMPERATURE K );
+temp_contr_heater_state( "ON" );
+=== if defined GAS_FLOW and GAS_FLOW ne "Don't set"
+temp_contr_gas_flow( GAS_FLOW );
+=== endif
+EOT
+
+$EDL =~ s/CUR_TEMPERATURE/$sp/;
+$EDL =~ s/CUR_HEATER_LIMIT/$hl/;
+$EDL =~ s/CUR_GAS_FLOW/$fi/;
+$EDL =~ s/CUR_PROPORTIONAL_BAND/$pb/;
+$EDL =~ s/CUR_INTEGRAL_TIME/$it/;
+$EDL =~ s/CUR_DERIVATIVE_TIME/$dt/;
+$EDL =~ s/CUR_ADAPTIVE_TUNE/$hs/;
+
+open2 my $rd, my $wd, 'fsc2_guify -ns' or die "Failure\n";
+print $wd $EDL;
+close $wd;
+my @edl = <$rd>;
+close $rd;
+
+eval join '', @edl;
+
+
+#############################################
+# Displays a message box
+
+sub show_message {
+	my $text = shift;
+
+	my $mw = MainWindow->new( );
+	$mw->geometry( "0x0+0+0" );
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+	$mw->destroy;
+}
