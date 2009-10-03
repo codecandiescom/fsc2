@@ -448,7 +448,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Version information
 
-VERSION          := 2.3.16
+VERSION          := 2.3.17
 
 # Set the optimization level
 
