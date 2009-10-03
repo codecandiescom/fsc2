@@ -53,6 +53,13 @@
 #define ADAPTIVE_TUNE       1
 #define SELF_TUNE           2
 
+#define HEATER_OK           0
+#define HEATER_OVERHEATING  1
+
+#define LN2_OK              0
+#define LN2_NEEDS_REFILL    1
+#define LN2_TANK_EMPTY      2
+
 
 /* Defines for the BVT3000 interface status */
 
@@ -112,6 +119,7 @@
 #define TEST_AT_TRIGGER_LEVEL       4.6
 #define TEST_DISPLAY_MIN            73.0
 #define TEST_DISPLAY_MAX          1273.0
+#define TEST_LN2_HEATER_POWER       35.0
 
 
 /* Maximum time to wait for a reply (in us) */
@@ -136,6 +144,10 @@ typedef struct {
     double           max_at_trigger;
     double           display_max;
     double           display_min;
+    double           ln2_heater_power;
+    bool             ln2_heater_state;
+    bool             has_evaporator;
+    bool             evaporator_needed;
     int              sn;
 	bool             is_open;
     struct termios * tio;
@@ -154,6 +166,7 @@ Var_T * temp_contr_setpoint(              Var_T * v );
 Var_T * temp_contr_heater_state(          Var_T * v );
 Var_T * temp_contr_heater_power(          Var_T * v );
 Var_T * temp_contr_heater_power_limit(    Var_T * v );
+Var_T * temp_contr_check_heater(          Var_T * v );
 Var_T * temp_contr_gas_flow(              Var_T * v );
 Var_T * temp_contr_state(                 Var_T * v );
 Var_T * temp_contr_tune_state(            Var_T * v );
@@ -163,6 +176,9 @@ Var_T * temp_contr_derivative_time(       Var_T * v );
 Var_T * temp_contr_cutbacks(              Var_T * v );
 Var_T * temp_contr_adaptive_tune_trigger( Var_T * v );
 Var_T * temp_contr_lock_keyboard(         Var_T * v );
+Var_T * temp_contr_ln2_heater_state(      Var_T * v );
+Var_T * temp_contr_ln2_heater_power(      Var_T * v );
+Var_T * temp_contr_check_ln2_heater(      Var_T * v );
 
 
 void bvt3000_init( void );
@@ -170,8 +186,14 @@ void bvt3000_set_flow_rate( unsigned int fr );
 unsigned int bvt3000_get_flow_rate( void );
 void bvt3000_set_heater_state( bool state );
 bool bvt3000_get_heater_state( void );
+int bvt3000_check_heater( void );
 unsigned char bvt300_get_port( int port );
 unsigned int bvt3000_get_interface_status( void );
+void bvt3000_set_ln2_heater_state( bool state );
+bool bvt3000_get_ln2_heater_state( void );
+void bvt3000_set_ln2_heater_power( double p );
+double bvt3000_get_ln2_heater_power( void );
+int bvt3000_check_ln2_heater( void );
 char * bvt3000_query( const char * cmd );
 void bvt3000_send_command( const char * cmd );
 bool bvt3000_check_ack( void );

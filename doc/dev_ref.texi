@@ -968,7 +968,7 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 @subheading Bruker BVT3000 Variable Temperature Unit
 @end iftex
 @ifnottex
-@section Bruker BVT3000 variable Temperature Unit
+@section Bruker BVT3000 Variable Temperature Unit
 @end ifnottex
 
 @paragraphindent 0
@@ -978,13 +978,15 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 @strong{Description}: @uref{http://www.bruker-biospin.com/, Bruker}
 BVT3000 Variable Temperature Unit (using a
 @uref{http://www.eurotherm.com/, Eurotherm} 902S temperature
-controller)
+controller). Worksa also with BVT3500 booster. Please note: some
+device functions can only be used if the device is fitted with an LN2
+evaporator.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
-@strong{Status}: Tested
+@strong{Status}: Mostly tested
 
 
 @paragraphindent 0
@@ -996,6 +998,7 @@ controller)
 @item @ref{temp_contr_heater_state()}
 @item @ref{temp_contr_heater_power()}
 @item @ref{temp_contr_heater_power_limit()}
+@item @ref{temp_contr_check_heater()}
 @item @ref{temp_contr_gas_flow()}
 @item @ref{temp_contr_state()}
 @item @ref{temp_contr_tune_state()}
@@ -1004,6 +1007,10 @@ controller)
 @item @ref{temp_contr_derivative_time()}
 @item @ref{temp_contr_cutbacks()}
 @item @ref{temp_contr_adaptive_tune_trigger()}
+@item @ref{temp_contr_ln2_heater_state()}
+@item @ref{temp_contr_ln2_heater_power()}
+@item @ref{temp_contr_check_ln2_heater()}
+@item @ref{temp_contr_check_ln2_heater()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 

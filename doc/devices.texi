@@ -4268,6 +4268,7 @@ the @code{EDL} script.
 @item @ref{temp_contr_heater_state()}
 @item @ref{temp_contr_heater_power()}
 @item @ref{temp_contr_heater_power_limit()}
+@item @ref{temp_contr_check_heater()}
 @item @ref{temp_contr_gas_flow()}
 @item @ref{temp_contr_tune_state()}
 @item @ref{temp_contr_proportional_band()}
@@ -4275,6 +4276,9 @@ the @code{EDL} script.
 @item @ref{temp_contr_derivative_time()}
 @item @ref{temp_contr_cutbacks()}
 @item @ref{temp_contr_adaptive_tune_trigger()}
+@item @ref{temp_contr_ln2_heater_state()}
+@item @ref{temp_contr_ln2_heater_power()}
+@item @ref{temp_contr_check_ln2_heater()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 
@@ -4432,8 +4436,8 @@ setting of the heater power.
 
 Please note: this function is also implemented for the @ref{bvt3000,
 Bruker BVT3000} but can't be used since it would require that the
-device is in manual mode (but which this device doesn't seem to
-allow).
+device is in manual mode - but which this device doesn't seem to
+allow.
 
 
 @anchor{temp_contr_heater_power_limit()}
@@ -4453,6 +4457,15 @@ message is output (and the function returns @code{-1.0} instead of the
 new value of the limit). For this device it is also not possible to
 query the heater power limit by calling the function without an
 argument,
+
+
+@anchor{temp_contr_check_heater()}
+@findex temp_contr_check_heater()
+@item temp_contr_check_heater()
+This function is currently only available for the @ref{bvt3000, Bruker
+BVT3000}. It allows to check if the heater isn't overheating. The
+function takes no arguments and returns @code{0} if the heater is ok
+and @code{1} if the heater is overheating.
 
 
 @anchor{temp_contr_gas_flow()}
@@ -4562,6 +4575,49 @@ adaptive tuning is done when adaptive tune is switched on). To
 determine the value call the function without an argument. To set new
 value call it with a temperatur (in K). Accepted vales range from
 @code{0.0} to @code{231.7}.
+
+
+@anchor{temp_contr_ln2_heater_state()}
+@findex temp_contr_ln2_heater_state()
+@item temp_contr_ln2_heater_state()
+This function only exists for the @ref{bvt3000, Bruker BVT3000} and
+only can be used when fitted with an LN2 evaporator. If
+called without an argument it returns if the LN2 heater is on or off.
+If called with a boolean argument (either on of the strings
+@code{"ON"} or @code{"OFF"} or an integer value, where everything
+except @code{0} is treated as true) the LN2 heater gets switched on
+or off.
+
+Please note: Changing the LN2 heater state has no influence on the
+LN2 heater power setting as set or queried with
+@code{@ref{temp_contr_ln2_heater_power()}}.
+
+
+
+@anchor{temp_contr_ln2_heater_power()}
+@findex temp_contr_ln2_heater_power()
+@item temp_contr_ln2_heater_power()
+This function is currently only available for the @ref{bvt3000, Bruker
+BVT3000} and can only be used if fitted with a LN2 evaporator. It
+allows to adjust the LN2 heater power by calling it with an argument
+between @code{0} and @code{100.0}, representing the percentage of
+maximum LN2 heater power. If called without an argument the function
+returns the current setting of the LN2 heater power.
+
+Please note: Changing the LN2 heater power has no immediate effect if
+the LN2 heater isn't swicthed on (as can be determined or chaneged
+using @code{@ref{temp_contr_ln2_heater_state()}}.
+
+
+@anchor{temp_contr_check_ln2_heater()}
+@findex temp_contr_check_ln2_heater()
+@item temp_contr_check_ln2_heater()
+This function is currently only available for the @ref{bvt3000, Bruker
+BVT3000} and can only be used if fitted with a LN2 evaporator.. It
+allows to check if the LN2 tank needs a refill or is even empty.
+The function takes no arguments and returns @code{0} if there's
+still enough LN2, @code{1} if a refill is advisable and @code{2}
+if the LN2 is empty.
 
 
 @anchor{temp_contr_lock_keyboard()}

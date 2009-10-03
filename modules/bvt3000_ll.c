@@ -124,6 +124,17 @@ bvt3000_init( void )
 
     bvt3000.is_open = SET;
 
+    /* Check if an evaporator is required and if it is connected */
+
+    bvt3000.has_evaporator = (   bvt3000_get_interface_status( )
+                               & BVT3000_EVAPORATOR_CONNECTED ) ? SET : UNSET;
+
+    if ( bvt3000.evaporator_needed && ! bvt3000.has_evaporator )
+    {
+        print( FATAL, "During test run a command was used that requires an "
+               "LN2 evaporator but none is connected.\n" );
+        THROW( EXCEPTION );
+    }
 
     /* Check the Eurotherm902S and bring into known state */
 
@@ -285,6 +296,18 @@ bvt3000_get_heater_state( void )
 }
 
 
+/*--------------------------------------------*
+ * Returns if the heater is ok or overheating
+ *--------------------------------------------*/
+
+int
+bvt3000_check_heater( void )
+{
+    return ( bvt3000_get_interface_status( ) & BVT3000_HEATER_OVERHEATING ) ?
+           HEATER_OVERHEATING : HEATER_OK;
+}
+
+
 /*---------------------------------------*
  * Reads from port 1 to 4 (not used yet)
  *---------------------------------------*/
@@ -328,6 +351,92 @@ bvt3000_get_interface_status( void )
         bvt3000_comm_fail( );
 
     return is;
+}
+
+
+/*-----------------------------------*
+ * Switches the LN2 heater on or off 
+ *-----------------------------------*/
+
+void
+bvt3000_set_ln2_heater_state( bool state )
+{
+    char buf[ 4 ] = "NP*";
+
+
+    fsc2_assert( bvt3000.has_evaporator );
+
+    buf[ 2 ] = state ? '1' : '0';
+    bvt3000_send_command( buf );
+    fsc2_usleep( 500000, UNSET );
+}
+
+
+/*----------------------------------------*
+ * Returns if the LN2 heater is on or off 
+ *----------------------------------------*/
+
+bool
+bvt3000_get_ln2_heater_state( void )
+{
+    char *reply = bvt3000_query( "NP" );
+
+
+    fsc2_assert( bvt3000.has_evaporator );
+
+    if ( reply[ 0 ] != '1' && reply[ 0 ] != '0' )
+        bvt3000_comm_fail( );
+    return reply[ 0 ] == '1' ? SET : UNSET;
+}
+
+
+/*---------------------------*
+ * Sets the LN2 heater power
+ *---------------------------*/
+
+void
+bvt3000_set_ln2_heater_power( double p )
+{
+    char buf[ 8 ];
+
+
+    fsc2_assert( bvt3000.has_evaporator );
+    fsc2_assert( p >= 0.0 && p <= 100.0 );
+
+    sprintf( buf, "NH%5.2f", p );
+    bvt3000_send_command( buf );
+}
+
+
+/*------------------------------*
+ * Returns the LN2 heater power
+ *------------------------------*/
+
+double
+bvt3000_get_ln2_heater_power( void )
+{
+    fsc2_assert( bvt3000.has_evaporator );
+    return T_atod( bvt3000_query( "NH" ) );
+}
+
+
+/*-----------------------------------------------------------------*
+ * Returns if the LN2 tank needs is empty, needs a refill or is ok
+ *-----------------------------------------------------------------*/
+
+int
+bvt3000_check_ln2_heater( void )
+{
+    unsigned int state = bvt3000_get_interface_status( );
+
+
+    fsc2_assert( bvt3000.has_evaporator );
+    if ( state & BVT3000_LN2_EMPTY )
+        return LN2_TANK_EMPTY;
+    else if ( state & BVT3000_LN2_REFILL )
+        return LN2_NEEDS_REFILL;
+
+    return LN2_OK;
 }
 
 

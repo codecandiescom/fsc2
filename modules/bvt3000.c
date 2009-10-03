@@ -76,6 +76,10 @@ bvt3000_init_hook( void )
     bvt3000.max_at_trigger     = 0.0;
     bvt3000.display_min        = TEST_DISPLAY_MIN;
     bvt3000.display_max        = TEST_DISPLAY_MAX;
+    bvt3000.ln2_heater_power   = TEST_LN2_HEATER_POWER;
+    bvt3000.ln2_heater_state   = SET;
+    bvt3000.has_evaporator     = SET;
+    bvt3000.evaporator_needed  = UNSET;
 
 	return 1;
 }
@@ -255,12 +259,12 @@ temp_contr_heater_power_limit( Var_T * v )
 
 /*-------------------------------------------------------------*
  * Set or get the heater power (in percent) (take care: if the
- * heater is switched off changing the power has no innediate
+ * heater is switched off changing the power has no immediate
  * effect)
  *-------------------------------------------------------------*/
 
 Var_T *
-temp_contr_heater_power( Var_T *v )
+temp_contr_heater_power( Var_T * v )
 {
     double hp;
 
@@ -300,6 +304,20 @@ temp_contr_heater_power( Var_T *v )
 }
 
 
+/*------------------------------------------*
+ * Allows to check if heater is overheating
+ *------------------------------------------*/
+
+Var_T *
+temp_contr_check_heater( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, HEATER_OK );
+
+    return vars_push( INT_VAR, ( long ) bvt3000_check_heater( ) );
+}
+
+
 /*--------------------------------------------------*
  * Set or get the gas flow (between 0 and 2000 l/h)
  *--------------------------------------------------*/
@@ -314,7 +332,7 @@ temp_contr_gas_flow( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( FSC2_MODE == TEST )
+        if ( FSC2_MODE != EXPERIMENT )
             return vars_push( FLOAT_VAR, bvt3000.flow_rate );
         return vars_push( FLOAT_VAR, flow_rates[ bvt3000_get_flow_rate( ) ] );
     }
@@ -814,6 +832,126 @@ temp_contr_lock_keyboard( Var_T * v )
         eurotherm902s_lock_keyboard( lock );
 
     return vars_push( INT_VAR, lock ? 1L : 0L );
+}
+
+
+/*----------------------------------------------------------------*
+ * Set or get LN2 heater state (take care: setting the LN2 heater
+ * power has no immediate effect if the heater is switched off)
+ *----------------------------------------------------------------*/
+
+Var_T *
+temp_contr_ln2_heater_state( Var_T * v )
+{
+    bool state;
+
+
+    if ( ! bvt3000.has_evaporator )
+    {
+        print( FATAL, "Device isn't fitted with a LN2 evaporator.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bvt3000.evaporator_needed = SET;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( INT_VAR, ( long ) bvt3000.ln2_heater_state );
+        return vars_push( FLOAT_VAR, ( long ) bvt3000_get_ln2_heater_state( ) );
+    }
+
+    state = get_boolean( v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        bvt3000.ln2_heater_state = state;
+        return vars_push( INT_VAR, ( long ) state );
+    }
+
+    bvt3000_set_ln2_heater_state( state );
+    bvt3000.ln2_heater_state = bvt3000_get_ln2_heater_state( );
+
+    if ( state != bvt3000.ln2_heater_state )
+    {
+        print( FATAL, "Can't switch LN2 heater %s.\n", state ? "on" : "off" );
+        THROW( EXCEPTION );
+    }
+
+    return vars_push( INT_VAR, ( long ) bvt3000.ln2_heater_state );
+}
+
+
+/*-------------------------------------------------------------*
+ * Set or get the LN2 heater power (in percent) (take care: if
+ * the LN2 heater is switched off changing the power has no
+ * immediate effect)
+ *-------------------------------------------------------------*/
+
+Var_T *
+temp_contr_ln2_heater_power( Var_T * v )
+{
+    double hp;
+
+
+    if ( ! bvt3000.has_evaporator )
+    {
+        print( FATAL, "Device isn't fitted with a LN2 evaporator.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bvt3000.evaporator_needed = SET;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, bvt3000.ln2_heater_power );
+        return vars_push( FLOAT_VAR, bvt3000_get_ln2_heater_power( ) );
+    }
+
+    hp = get_double( v, NULL );
+
+    too_many_arguments( v );
+
+    if ( hp < 0.0 || hp > 100.0 )
+    {
+        print( FATAL, "Invalid value for LN2 heater poer, must be between "
+               "0 %% and 100 %%.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        bvt3000.ln2_heater_power = hp;
+        return vars_push( FLOAT_VAR, hp );
+    }
+
+    bvt3000_set_ln2_heater_power( hp );
+    return vars_push( FLOAT_VAR, bvt3000_get_ln2_heater_power( ) );
+}
+
+
+/*------------------------------------------------------------*
+ * Allows to check if the LN2 tank needs a refill or is empty
+ *------------------------------------------------------------*/
+
+Var_T *
+temp_contr_check_ln2_heater( Var_T * v  UNUSED_ARG )
+{
+    if ( ! bvt3000.has_evaporator )
+    {
+        print( FATAL, "Device isn't fitted with a LN2 evaporator.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bvt3000.evaporator_needed = SET;
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, LN2_OK );
+
+    return vars_push( INT_VAR, ( long ) bvt3000_check_ln2_heater( ) );
 }
 
 
