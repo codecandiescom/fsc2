@@ -442,7 +442,13 @@ temp_contr_tune_state( Var_T * v )
     if ( v == NULL )
     {
         if ( FSC2_MODE != EXPERIMENT )
+        {
+            /* Self tune gets swiched off automatically after some time,
+               emulate that behaviour */
+
+            bvt3000.tune_state &= ~ SELF_TUNE;
             return vars_push( INT_VAR, ( long ) bvt3000.tune_state );
+        }
 
         state =
               ( eurotherm902s_get_adaptive_tune_state( ) ? ADAPTIVE_TUNE : 0 )
