@@ -128,7 +128,7 @@ temp_contr_tune_state( "SELF" );
 WHILE temp_contr_tune_state( ) >= 2 {
     display_1d( I, temp_contr_temperature( ) ); 
     I += 1;
-	fsc2_wait( 1 s );
+	wait( 1 s );
 }
 EOT
 
