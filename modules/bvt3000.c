@@ -150,7 +150,7 @@ temp_contr_setpoint( Var_T * v )
         return vars_push( FLOAT_VAR, eurotherm902s_get_working_setpoint( ) );
     }
 
-    sp = get_double( v, "setpoint" );
+    sp = get_double( v, NULL );
 
     too_many_arguments( v );
 
@@ -231,7 +231,7 @@ temp_contr_heater_power_limit( Var_T * v )
         return vars_push( FLOAT_VAR, eurotherm902s_get_heater_power_limit( ) );
     }
 
-    hp = get_double( v, "heater power" );
+    hp = get_double( v, NULL );
 
     too_many_arguments( v );
 
@@ -272,7 +272,7 @@ temp_contr_heater_power( Var_T *v )
         return vars_push( FLOAT_VAR, eurotherm902s_get_heater_power( ) );
     }
 
-    hp = get_double( v, "heater power" );
+    hp = get_double( v, NULL );
 
     too_many_arguments( v );
 
@@ -319,7 +319,7 @@ temp_contr_gas_flow( Var_T * v )
         return vars_push( FLOAT_VAR, flow_rates[ bvt3000_get_flow_rate( ) ] );
     }
 
-    flow_rate = get_double( v, "flow rate" );
+    flow_rate = get_double( v, NULL );
 
     too_many_arguments( v );
 
@@ -511,7 +511,7 @@ temp_contr_proportional_band( Var_T * v )
                           eurotherm902s_get_proportional_band( ) :
                           TEST_PROPORTIONAL_BAND );
 
-    pb = get_double( v, "proportional band" );
+    pb = get_double( v, NULL );
 
     if ( pb < 0.0 )
     {
@@ -561,7 +561,7 @@ temp_contr_integral_time( Var_T * v )
                           eurotherm902s_get_integral_time( ) :
                           TEST_INTEGRAL_TIME );
 
-    it = get_double( v, "integral time" );
+    it = get_double( v, NULL );
 
     if ( it < 0.0 )
     {
@@ -609,7 +609,7 @@ temp_contr_derivative_time( Var_T * v )
                           eurotherm902s_get_derivative_time( ) :
                           TEST_DERIVATIVE_TIME );
 
-    dt = get_double( v, "derivative time" );
+    dt = get_double( v, NULL );
 
     if ( dt < 0.0 )
     {
@@ -676,7 +676,7 @@ temp_contr_cutbacks( Var_T * v )
         memcpy( cb, v->val.dpnt, sizeof cb );
     else
     {
-        cb[ 0 ] = get_double( v, "low cutback" );
+        cb[ 0 ] = get_double( v, NULL );
 
         if ( ( v = vars_pop( v ) ) == NULL )
         {
@@ -684,7 +684,7 @@ temp_contr_cutbacks( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        cb[ 1 ] = get_double( v, "high cutback" );
+        cb[ 1 ] = get_double( v, NULL );
     }
 
     if ( cb[ 0 ] < 0.0 )
@@ -756,7 +756,7 @@ temp_contr_adaptive_tune_trigger( Var_T * v )
         return vars_push( FLOAT_VAR, bvt3000.at_trigger );
     }
 
-    tl = get_double( v, "adaptive trigger level" );
+    tl = get_double( v, NULL );
 
     if ( tl < 0.0 )
     {

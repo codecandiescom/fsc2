@@ -53,12 +53,19 @@ my $lino;
 my $need_file_sel = 0;
 my $if;
 my $of;
-
+my $store = 1;
 
 # Open the input file (if one was specified on the command line)
 
 if ( $ARGV[ 0 ] ) {
     usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--help$/;
+    if ( $ARGV[ 0 ] eq '-ns' ) {
+        $store = 0;
+        shift @ARGV;
+    }
+}
+
+if ( $ARGV[ 0 ] ) {
     open $if, '<:utf8', $ARGV[ 0 ]
         or die "Can't open input file $ARGV[ 0 ]: $!\n";
 } else {
@@ -225,8 +232,11 @@ chmod 0755, $ARGV[ 1 ] if $ARGV[ 1 ];
 # Function prints out usage info
 
 sub usage {
-    print "Usage: fsc2_guify [ IN_FILE [ OUT_FILE ] ]\n" .
-          "Program for creating a GUI for (slightly modified) EDL scripts.\n";
+    print "Usage: fsc2_guify [-ns] [IN_FILE [OUT_FILE]]\n" .
+          "Program for creating a GUI for (slightly modified) EDL scripts.\n" .
+          "Options:\n" .
+          "         -ns         Don't store and read default values\n" .
+          "         -h, --help  Display this text\n";
     exit 0;
 }
 
@@ -514,9 +524,13 @@ my %wp = ( -side   => 'left',
            -expand => 1 );
 my %up = ( -side => 'left' );
 my $geom;
+EOT
+    print "my \$store = $store;\n";
+
+    print <<'EOT';
 
 my @VARS;
-my $fsc2_how_to_run = 'Test program';
+my $fsc2_how_to_run = 'Start program';
 my @fsc2_how_to_run = ( 'Start experiment',
                         'Test program',
                         'Load into fsc2' );
@@ -533,14 +547,14 @@ my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => 'Quit',
                  -command => sub { $fsc2_main_window->geometry =~
                                                    /^\d+x\d+([+-]\d+[+-]\d+)$/;
                                    $geom = $1;
-                                   &store_defs;
+                                   store_defs( $store );
                                    $fsc2_main_window->destroy } );
 $fsc2_quit_button->bind( 'all',
                          '<Alt-q>' =>
                                 sub { $fsc2_main_window->geometry =~
                                                    /^\d+x\d+([+-]\d+[+-]\d+)$/;
                                       $geom = $1;
-                                      &store_defs;
+                                      store_defs( $store );
                                       $fsc2_main_window->destroy } );
 $fsc2_apply_frame->pack( -side => 'bottom',
                          -fill => 'x',
@@ -639,7 +653,7 @@ EOT
 \$fsc2_apply_button->pack( \%wp, -padx => 25, -pady => 5 );
 \$fsc2_quit_button->pack(  \%wp, -padx => 25, -pady => 5 );
 
-load_defs( );
+load_defs( $store );
 \$fsc2_main_window->geometry( \$geom ) if defined \$geom;
 EOT
 
@@ -927,6 +941,7 @@ sub show_message {
 ################################################################
 
 sub store_defs {
+    my $store_defaults = shift;
     my $fh;
     my $name = $0;
 
@@ -934,6 +949,8 @@ sub store_defs {
     mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
     open $fh, '>:utf8', $ENV{ HOME } . "/.fsc2/$name" or return;
     print $fh "# Do not edit - created automatically!\n";
+
+    goto skip_defaults if ! $store_defaults;
 EOT
 
     for ( @vars ) {
@@ -974,6 +991,9 @@ EOT
         }
     }
     print "
+
+  skip_defaults:
+
     print \$fh \"\$fsc2_how_to_run\\n\";
 
 ";
@@ -988,6 +1008,7 @@ EOT
 ################################################################
 
 sub load_defs {
+    my $store_defaults = shift;
     my $fh;
     my $name = $0;
     my $ne;
@@ -1001,6 +1022,8 @@ sub load_defs {
     }
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
+
+    goto skip_defaults if ! $store_defaults;
 EOT
 
     for ( @vars ) {
@@ -1073,6 +1096,8 @@ EOT
     }
 
     print <<'EOT';
+
+  skip_defaults:
 
     goto done_reading unless defined( $ne = <$fh> );
     chomp $ne;
