@@ -86,7 +86,7 @@ if ( $reply =~ /^(F|S|W) / ) {
 	exit 0;
 }
 
-my ( $sp, $pb, $it, $dt, $hl, $fi, $st ) = split / /, $reply;
+my ( $sp, $pb, $it, $dt, $hl, $fi, $ts ) = split / /, $reply;
 $fi += 1;
 
 # Create a script suitable for fsc2_guify for running a self tune

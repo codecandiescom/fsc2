@@ -93,7 +93,7 @@ $fi += 1;
 # Create a script suitable for fsc2_guify for setting the temperature
 
 my $edl = <<"EOT";
-=== TEMPERATURE float [ 73.0 : 1000.0 ] [ $ts ] "Temperature" "K"
+=== TEMPERATURE float [ 73.0 : 1000.0 ] [ $sp ] "Temperature" "K"
 === HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ $hl ] "Heater power limit" "%"
 === GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ $fi ] "Gas flow" "l/h"
 === PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ $pb ] "Proportional band" "K"
