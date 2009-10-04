@@ -149,6 +149,20 @@ WHILE temp_contr_tune_state( ) >= 2 {
     I += 1;
 	wait( 1 s );
 }
+
+print( "Self tune complete.\n"
+       "  Temperature:        # K\n"
+       "  Gas flow:           # l/h\n"
+       "  Heater power limit: # %\n"
+       "  Proportional band:  # K\n"
+       "  Integral time:      # s\n"
+       "  Derivative time:    # s\n",
+       temp_contr_setpoint( ),
+       temp_contr_gas_flow( ),
+       temp_contr_heater_power_limit( ),
+       temp_contr_proportional_band( ),
+       temp_contr_integral_time( ),
+       temp_contr_derivative_time( ) );
 EOT
 
 # Run it through fsc2_guify
