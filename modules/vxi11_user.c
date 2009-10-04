@@ -89,6 +89,7 @@ static const char *vxi11_errors[ ] =
 								 "channel already established"    /* 29 */
 							   };
 
+static int vxi11_abort( void );
 static const char * vxi11_sperror( Device_ErrorCode error );
 
 
@@ -100,7 +101,8 @@ static const char * vxi11_sperror( Device_ErrorCode error );
  *       or as name that can be resolved via a DNS request)
  *    3. Name of the VXI-11 name of the device
  *    4. Maximum timeout (in micro-seconds) to wait for the
- *       connection to succeeded
+ *       connection to succeeded (0 is interpreted to mean
+ *       a nearly infinite timeout)
  *------------------------------------------------------------*/
 
 int
@@ -137,7 +139,7 @@ vxi11_open( const char * dev_name,
 	{
 		if ( name )
 			name = T_free( ( char * ) name );
-		return FAILURE;
+        return FAILURE;
 	}
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -157,14 +159,15 @@ vxi11_open( const char * dev_name,
 
 		print( FATAL, "%s",
 			   clnt_spcreateerror( "Failed to connect to device" ) );
-        THROW( EXCEPTION );
+        return FAILURE;
 	}
 
 	/* Set up link parameters - we need to lock the device */
 
 	link_parms.clientId	    = 0;         /* not needed here */
 	link_parms.lockDevice	= 1;
-	link_parms.lock_timeout	= lrnd( 0.001 * us_timeout );
+	link_parms.lock_timeout	=
+                            us_timeout ? lrnd( 0.001 * us_timeout ) : LANG_MAX;
 	link_parms.device	    = ( char * ) vxi11_name;
 
 	core_link = create_link_1( &link_parms, core_client );
@@ -243,7 +246,7 @@ vxi11_close( void )
 	if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-		return FAILURE;
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -272,7 +275,7 @@ vxi11_close( void )
 		if ( fsc2_lan_log_level( ) >= LL_CE )
 			fsc2_lan_log_function_end( "vxi11_close", name );
 		print( FATAL, "Failed to close connection to device.\n" );
-        THROW( EXCEPTION );
+        return FAILURE;
 	}
 
 	core_link   = NULL;
@@ -287,15 +290,16 @@ vxi11_close( void )
 }
 
 
-/*----------------------------------------------------------------*
+/*-------------------------------------------------------------*
  * Function for setting the maximum allowed time for a read or
  * write operation.
  * ->
  *    1. Flag that tells if the timeout is for read or write
  *       operations - 0 stands for read, everything else for
  *       write operations.
- *    2. Timeout value in micro-seconds
- *----------------------------------------------------------------*/
+ *    2. Timeout value in micro-seconds (o is interpreted to
+ *       mean a nearly infinite timeout
+ *-------------------------------------------------------------*/
 
 void
 vxi11_set_timeout( int  dir,
@@ -304,13 +308,13 @@ vxi11_set_timeout( int  dir,
     if ( us_timeout < 0 )
     {
         print( FATAL, "Internal error in module, invalid timeout.\n" );
-        THROW( EXCEPTION );
+        return FAILURE;
     }
 
     if ( dir == READ )
-        read_timeout  = lrnd( 0.001 * us_timeout );
+        read_timeout  = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
     else
-        write_timeout = lrnd( 0.001 * us_timeout );
+        write_timeout = us_timeout : lrnd( 0.001 * us_timeout ) : LONG_MAX;
 }
 
 
@@ -336,7 +340,7 @@ vxi11_read_stb( unsigned char * stb )
 	if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-		return FAILURE;
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -362,14 +366,14 @@ vxi11_read_stb( unsigned char * stb )
 			fsc2_lan_log_function_end( "vxi11_read_stb", name );
 
 		print( FATAL, "Failed to read STB.\n" );
-
 		return FAILURE;
 	}
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
 		fsc2_lan_log_function_end( "vxi11_read_stb", name );
 
-	*stb = readstb_resp->stb;
+    if ( stb )
+        *stb = readstb_resp->stb;
 
 	return SUCCESS;
 }
@@ -405,7 +409,7 @@ vxi11_lock_out( bool lock_state )
 	if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-		return FAILURE;
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -435,7 +439,6 @@ vxi11_lock_out( bool lock_state )
 
 		print( FATAL, "Failed to set device into %s state.\n",
 			   lock_state ? "local" : "remote" );
-
    		return FAILURE;
 	}
 
@@ -473,7 +476,7 @@ vxi11_device_clear( void )
 	if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-		return FAILURE;
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -499,7 +502,6 @@ vxi11_device_clear( void )
 			fsc2_lan_log_function_end( "vxi11_device_clear", name );
 
 		print( FATAL, "Failed to send device clear.\n" );
-
 		return FAILURE;
 	}
 
@@ -537,7 +539,7 @@ vxi11_device_trigger( void )
 	if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-		return FAILURE;
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )
@@ -582,7 +584,7 @@ vxi11_device_trigger( void )
  * in which case the function does nothing.
  *--------------------------------------------------*/
 
-int
+static int
 vxi11_abort( void )
 {
 #if defined DEVICE_SUPPORTS_ASYNC_CHANNEL
@@ -797,7 +799,7 @@ vxi11_read( char   * buffer,
     {
         print( FATAL, "Internal error in module, read data buffer is "
                "NULL.\n" );
-        THROW( EXCEPTION );
+        return FAILURE;
     }
 
 	if ( fsc2_lan_log_level( ) >= LL_CE )

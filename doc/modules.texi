@@ -1296,12 +1296,13 @@ i.e.@: you need
 @end example
 
 Naturally, the functions aren't written with a certain protocol in
-mind -- writing that is your business unless it's either the VXI-11 or
-LeCroy's VICP protocol, for which support already exists -- but just
-provide a set of fundamental routines on top of which you can write
-your own functions. You can as well forego using them and write your
-own code for talking with the devices directly, they only exist for
-your convenience. But if you use them make sure they don't get invoked
+mind -- writing that is your business (unless it's either the
+@ref{VXI-11 Protocol, VXI-11} or @ref{LeCroy's VICP Protocol, LeCroy's
+VICP} protocol, for which support already exists) -- but just provide
+a set of fundamental routines on top of which you can write your own
+functions. You can as well forego using them and write your own code
+for talking with the devices directly, they only exist for your
+convenience. But if you use them make sure they don't get invoked
 before the @code{exp_hook} function.
 
 The advantage of using them is that you don't have to care about basic
@@ -1551,11 +1552,226 @@ log data receive or send) as defined in @file{lan.h}.
 
 
 @menu
+* VXI-11 Protocol::         Support for the VXI-11 protocol
 * LeCroy's VICP Protocol::  Support for LeCroy's VICP protocol
 @end menu
 
+@node VXI-11 Protocol, LeCroy's VICP Protocol, , Handling devices connected via LAN
+@subsubsection VXI-11 Protocol
 
-@node LeCroy's VICP Protocol, , , Handling devices connected via LAN
+The VXI-11 protocol (VMEbus Extensions for Instrumentation TCI/IP
+Instrument Protocol) is used for a lot of devices e.g. by Agilent
+(formerly Hewlett-Packard), Tektronix, Wavetek etc. and basically
+allows to control instruments over LAN in a similar manner to GPIB.
+The following functions built into @code{fsc2} exist to communicate
+with devices using this protocol:
+@table @samp
+@item @code{@ref{vxi11_open()}}
+Establish a connection with the device
+@item @code{@ref{vxi11_close()}}
+Close the connection to a device
+@item @code{@ref{vxi11_set_timeout()}}
+Set a read or write timeout for message exchanges with the device
+@item @code{@ref{vxi11_read_stb()}}
+Ask the device to send its status byte
+@item @code{@ref{vxi11_lock_out()}}
+Switch local lockout state on or off
+@item @code{@ref{vxi11_device_clear()}}
+Send a device clear command to the device
+@item @code{@ref{vxi11_device_trigger()}}
+Send a device trigger command to the device
+@item @code{@ref{vxi11_write()}}
+Send data to the device
+@item @code{@ref{vxi11_read()}}
+Read data sent by the device
+@end table
+
+In order to use these functions include the appropriate header files
+have to be included, i.e.@: use
+@example
+#include "vxi11_user.h"
+@end example
+and, when creating the shared library for the module, make sure to
+link against both the files @file{vxi11_user.c} and @file{vxi11.c}.
+
+All function calls get logged automatically to the log file for
+LAN connections with a verbosity according to the general settings
+for this log file.
+
+
+@anchor{vxi11_open()}
+@findex vxi11_open()
+The function
+@example
+int vxi11_open( const char * dev_name,
+	            const char * address,
+			    const char * vxi11_name,
+			    long         us_timeout )
+@end example
+@noindent
+must be the first function to be called. It establishes the connection
+to the device which then is used for all further function calls. The
+function expects a symbolic name for the device (only to be used for
+the log file), its IP address, either as a hostname (like
+@code{"hex.discworld.unseen.edu"}) or or a numeric IP address in
+dotted-quad format (like @code{"123.97.243.12"}), the name assigned to
+the device for the VXI-11 protocol (often per default set to
+@code{"inst0"}) and a positive or zero maximum time (in micro-seconds,
+a zero value means indefinitely long timeout) the function is allowed
+to wait for successfully establishing the connection. Please note
+that the function can't be called when an connection has already been
+created. On success the function returns @code{SUCCESS}, on failure
+(either because the connection has already been opened, connecting to
+the device fails or not enough memory is available) it returns
+@code{FAILURE} after printing out an error message.
+
+
+@anchor{vxi11_close()}
+@findex vxi11_close()
+The function
+@example
+void vxi11_close( void )
+@end example
+@noindent
+is the opposite of @code{@ref{vxi11_open()}}, i.e.@: it closes down the
+existing connection. The function normally returns @code{SUCCESS}
+but when there were no connection or shutting down teh connection
+failed an error messages is printed out and @code{FAILURE} is
+returned.
+
+
+@anchor{vxi11_set_timeout()}
+@findex vxi11_set_timeout()
+The function
+@example
+void vxi11_set_timeout( int  dir,
+                        long us_timeout )
+@end example
+@noindent
+allows to set timeouts for read or write (and similar) operations. If
+the first argument is the symbolic value @code{READ} (or @code{0}), a
+timeout for read operations gets set, if it's @code{WRITE} (or
+@code{1}) the timeout for writes gets set. Timeouts must be specified
+in micro-seconds and must be either positive numbers or zero, in which
+case a (nearly) indefinitely long timeout is used. Without calling the
+function a default timeout of 5 seconds will be used. The function
+always returns @code{SUCSESS} except for the case that the timeout
+value was negative, then an error message is printed out and
+@code{FAILURE} gets returned.
+
+
+@anchor{vxi11_read_stb()}
+@findex vxi11_read_stb()
+The function
+@example
+int vxi11_read_stb( unsigned char * stb )
+@end example
+@noindent
+asks the device to send back its status byte which then is passed
+back to the caller via the @code{stb} argument. On success the
+function returns @code{SUCESS}, otherwise (because no connection
+exists or the operation takes longer than the timeout set for reads)
+an error message is printed out and @code{FAILURE} is returned.
+
+
+@anchor{vxi11_lock_out()}
+@findex vxi11_lock_out()
+The function
+@example
+int vxi11_lock_out( bool lock_state )
+@end example
+@noindent
+allows to control if the device is in local lockout state or not. By
+calling the funtion with a true boolean value local lockout gets
+switched on, switch it off by calling it with a false value. Normally
+returns @code{SUCCESS} but may return @code{FAILURE} (and print out an
+error message) if there's no connection, the device doesn't support
+the command or the command takes longer than the write timeout value.
+Please note tha some devices that don;t support this command may not
+indicate this, thus @code{SUCCESS} may get returned even though the
+command had no effect.
+
+
+@anchor{vxi11_device_clear()}
+@findex vxi11_device_clear()
+The function
+@example
+int vxi11_device_clear( void )
+@end example
+@noindent
+sends a device clear command to the device. Normally the function
+returns @code{SUCCESS} but @code{FAILURE} may be the result (in which
+case an error message is printed out) if there's no connection, the
+device doesn't support the command or the command takes longer than
+the write timeout value. Please note tha some devices that don't
+support this command may not indicate this, thus @code{SUCCESS} may
+get returned even though the command had no effect.
+
+
+@anchor{vxi11_device_trigger()}
+@findex vxi11_device_trigger()
+The function
+@example
+int vxi11_device_trigger( void )
+@end example
+@noindent
+sends a device trigger command to the device. Normally the function
+returns @code{SUCCESS} but @code{FAILURE} may be the result (in which
+case an error message is printed out) if there's no connection, the
+device doesn't support the command or the command takes longer than
+the write timeout value. Please note tha some devices that don't
+support this command may not indicate this, thus @code{SUCCESS} may
+get returned even though the command had no effect.
+
+
+@anchor{vxi11_write()}
+@findex vxi11_write()
+The function
+@example
+int vxi11_write( const char * buffer,
+			     size_t     * length,
+			     bool         allow_abort )
+@end example
+@noindent
+is for sending data to the device. It takes three arguments, a pointer
+to an array with the data, a pointer to a variable with the length of
+that array and a flag that tells if the write operation may be
+interrupted. An write operation can only be interrupted if the data
+can only be send in more than one package and when the user clicks on
+the @code{STOP} button - in that case the operation is aborted and a
+@code{USER_BREAK_EXCEPTION} gets thrown. On success the function
+returns @code{SUCCESS}, on failure (because there's no connection,
+invalid arguments or the operation takes longer than the write
+timeout) an error message is printed out and @code{FAILURE} is
+returned. On return the number of bytes sent to the device is returned
+via the @code{length} pointer.
+
+
+@anchor{vxi11_read()}
+@findex vxi11_read()
+The function
+@example
+int vxi11_read( const char * buffer,
+			    size_t     * length,
+			    bool         allow_abort )
+@end example
+@noindent
+reads data send by the device. It takes three arguments, a pointer to
+an array for storing the received data, a pointer to a variable with
+the length of that array (i.e.@: the maximum length of the message
+that can be accepted) and a flag that tells if the read operation may
+be interrupted. A read operation can only be interrupted if the data
+get send by the device in more than one package and when the user
+clicks on the @code{STOP} button - in that case the operation is
+aborted and a @code{USER_BREAK_EXCEPTION} gets thrown. On success the
+function returns @code{SUCCESS}, on failure (because there's no
+connection, invalid arguments or the operation takes longer than the
+read timeout) an error message is printed out and @code{FAILURE} is
+returned. On return the number of bytes sent by the device is returned
+via the @code{length} pointer.
+
+
+@node LeCroy's VICP Protocol, , VXI-11 Protocol, Handling devices connected via LAN
 @subsubsection LeCroy's VICP Protocol
 
 LeCroy's VICP (Versatile Instrument Control Protocol), running on top
@@ -1588,8 +1804,13 @@ and, when creating the shared library for the module, make sure to
 link against @file{vicp.c}.
 
 
+All function calls get logged automatically to the log file for
+LAN connections with a verbosity according to the general settings
+for this log file.
+
+
 @anchor{vicp_open()}
-@findex vicp_open
+@findex vicp_open()
 The function
 @example
 void vicp_open( const char * dev_name,
@@ -1652,18 +1873,19 @@ void vicp_set_timeout( int  dir,
 @end example
 @noindent
 allows to set timeouts for read or write operations. If the first
-argument is the symbolic value @code{READ} (or 0), a timeout for read
-operations gets set, if it's @code{WRITE} (or 1) the timeout for
-writes gets set. Timeouts must be specified in micro-seconds and must
-be either positive numbers or zero, in which case an indefinitely long
-timeout is used. Without calling the function a default timeout of 5
-seconds will be used. Please note that the function can only be called
-after the connection has been established. Please also note that on
-some systems (those tht don't support the @code{SO_RCVTIMEO} and
-@code{SO_SNDTIMEO} socket options) the timeouts get created via a
-timer that raises a @code{SIGALRM} signal. Thus on these systems the
-caller may not initiate any action that would raise such a signal when
-calling one of the functions that can timeout.
+argument is the symbolic value @code{READ} (or @code{0}), a timeout
+for read operations gets set, if it's @code{WRITE} (or @code{1}) the
+timeout for writes gets set. Timeouts must be specified in
+micro-seconds and must be either positive numbers or zero, in which
+case an indefinitely long timeout is used. Without calling the
+function a default timeout of 5 seconds will be used. Please note that
+the function can only be called after the connection has been
+established. Please also note that on some systems (those tht don't
+support the @code{SO_RCVTIMEO} and @code{SO_SNDTIMEO} socket options)
+the timeouts get created via a timer that raises a @code{SIGALRM}
+signal. Thus on these systems the caller may not initiate any action
+that would raise such a signal when calling one of the functions that
+can timeout.
 
 
 @anchor{vicp_write()}

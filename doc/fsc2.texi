@@ -24,7 +24,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate October 4, 2009
+@set lastupdate October 5, 2009
 @iftex
 @afourpaper
 @end iftex

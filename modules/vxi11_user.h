@@ -37,7 +37,7 @@
 #define TIMEOUT            1
 
 
-#define	VXI11_DEFAULT_TIMEOUT	10000	/* in ms */
+#define	VXI11_DEFAULT_TIMEOUT	5000	/* in ms */
 
 
 #define VXI11_WAITLOCK_FLAG     ( 1 << 0 )
@@ -70,8 +70,6 @@ int vxi11_lock_out( bool /* lock_state */ );
 int vxi11_device_clear( void );
 
 int vxi11_device_trigger( void );
-
-int vxi11_abort( void );
 
 int vxi11_write( const char * /* buffer      */,
                  size_t     * /* length      */,
