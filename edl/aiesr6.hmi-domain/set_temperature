@@ -109,6 +109,11 @@ VARIABLES:
 TUNE_STATE;
 flow[ * ] = { 0.0, 135.0, 270.0, 400.0, 535.0, 670.0, 800.0, 935.0, 1070.0,
 	          1200.0, 1335.0, 1470.0, 1600.0, 1735.0, 1870.0, 2000.0 };
+I = 1;
+
+PREPARATIONS:
+
+init_1d( "Time [s]", "Temperature [K]" );
 
 EXPERIMENT:
 
@@ -135,6 +140,12 @@ temp_contr_heater_state( "ON" );
 === if defined GAS_FLOW and GAS_FLOW ne "Don't set"
 temp_contr_gas_flow( GAS_FLOW );
 === endif
+
+FOREVER {
+    display_1d( I, temp_contr_temperature( ) );
+    I += 1;
+    wait( 1 s );
+}
 EOT
 
 # Run it through fsc2_guify
