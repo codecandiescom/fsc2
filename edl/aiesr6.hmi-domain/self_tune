@@ -93,8 +93,8 @@ $fi += 1;
 
 my $edl = <<"EOT";
 === TEMPERATURE float [ 73.0 : 1000.0 ] [ $sp ] "Temperature" "K"
-=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ $hl ] "Heater power limit" "%"
 === GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ $fi ] "Gas flow" "l/h"
+=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ $hl ] "Heater power limit" "%"
 === PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ $pb ] "Proportional band" "K"
 === INTEGRAL_TIME float_empty [ 0 : 9999.0 ][ $it ] "Integral time" "s"
 === DERIVATIVE_TIME float_empty [ 0 : 999.0 ][ $dt ] "Derivative time" "s"
