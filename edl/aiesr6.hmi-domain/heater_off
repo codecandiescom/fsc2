@@ -1,0 +1,9 @@
+#!/usr/local/bin/fsc2 -nw
+DEVICES:
+
+bvt3000;
+
+EXPERIMENT:
+
+temp_contr_setpoint( 295 K );
+temp_contr_heater_state( "OFF" );

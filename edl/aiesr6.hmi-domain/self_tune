@@ -108,6 +108,8 @@ VARIABLES:
 TUNE_STATE;
 flow[ * ] = { 0.0, 135.0, 270.0, 400.0, 535.0, 670.0, 800.0, 935.0, 1070.0,
 	          1200.0, 1335.0, 1470.0, 1600.0, 1735.0, 1870.0, 2000.0 };
+t
+T, HL,
 I = 1;
 
 PREPARATIONS:
@@ -142,10 +144,18 @@ temp_contr_tune_state( "SELF+ADAPTIVE" );
 temp_contr_tune_state( "SELF" );
 === endif
 
+hide_toolbox( "ON" );
+T = output_create( FLOAT_OUT, temp_contr_temperature( ), "Temperature [K]" );
+HL = output_create( FLOAT_OUT, temp_contr_heater_power( ), "Heater power [%]" );
+hide_toolbox( "OFF" );
+
 // Loop until self tune is finished
 
 WHILE temp_contr_tune_state( ) >= 2 {
-    display_1d( I, temp_contr_temperature( ) ); 
+    t = temp_contr_temperature( );
+    display_1d( I, t );
+    output_value( T, t );
+    output_value( HL, temp_contr_heater_power( ) );
     I += 1;
 	wait( 1 s );
 }
