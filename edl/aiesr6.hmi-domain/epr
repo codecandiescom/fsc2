@@ -59,7 +59,8 @@ sub create_gui {
 	$b[ 3 ] = $f->Button( -text => 'cw-EPR Experiment (Stanford)' );
 	$b[ 4 ] = $f->Button( -text => 'Set temperature' );
 	$b[ 5 ] = $f->Button( -text => 'Self tune' );
-	$b[ 6 ] = $f->Button( -text => 'Quit' );
+	$b[ 6 ] = $f->Button( -text => 'Heater off' );
+	$b[ 7 ] = $f->Button( -text => 'Quit' );
 
 	$b[ 0 ]->configure( -command => sub { monitor( $mw, 'bruker' ) } );
 	$b[ 1 ]->configure( -command => sub { monitor( $mw, 'sr' ) } );
@@ -67,6 +68,7 @@ sub create_gui {
 	$b[ 3 ]->configure( -command => sub { cw_epr( $mw, 'sr' )  } );
 	$b[ 4 ]->configure( -command => sub { set_temp( $mw ); } );
 	$b[ 5 ]->configure( -command => sub { self_tune( $mw ); } );
+	$b[ 7 ]->configure( -command => sub { heater_off( $mw ); } );
 	$b[ 6 ]->configure( -command => sub { $mw->destroy; } );
 
 	$f->pack( %fp );
@@ -170,6 +172,27 @@ sub self_tune {
 }
 
 
+#############################################
+
+sub heater_off {
+	my $top = @_;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/heater_off 2>&1 |" ) {
+		show_message( $top, "Program for switching\nheater off not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
 
 
 #############################################
