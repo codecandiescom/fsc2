@@ -20,7 +20,7 @@
 
 EDL         := $(wildcard *.EDL)
 EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
-SCRIPTS     := $(EDL_SCRIPTS) set_temperature self_tune epr
+SCRIPTS     := $(EDL_SCRIPTS) set_temperature self_tune heater_off epr
 
 
 all: $(EDL_SCRIPTS)
