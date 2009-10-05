@@ -68,8 +68,8 @@ sub create_gui {
 	$b[ 3 ]->configure( -command => sub { cw_epr( $mw, 'sr' )  } );
 	$b[ 4 ]->configure( -command => sub { set_temp( $mw ); } );
 	$b[ 5 ]->configure( -command => sub { self_tune( $mw ); } );
-	$b[ 7 ]->configure( -command => sub { heater_off( $mw ); } );
-	$b[ 6 ]->configure( -command => sub { $mw->destroy; } );
+	$b[ 6 ]->configure( -command => sub { heater_off( $mw ); } );
+	$b[ 7 ]->configure( -command => sub { $mw->destroy; } );
 
 	$f->pack( %fp );
 	$_->pack( %fp ) foreach @b;
@@ -175,7 +175,7 @@ sub self_tune {
 #############################################
 
 sub heater_off {
-	my $top = @_;
+	my $top = shift;
 	my $fh;
 
 	$top->withdraw;
