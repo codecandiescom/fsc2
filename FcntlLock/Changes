@@ -1,5 +1,9 @@
 Revision history for Perl extension File::FcntlLock
 
+0.11
+    - Mistakes in documentation removed as pointed ouyt by
+      FANY and Glenn Herteg.
+
 0.10  Wed May 14 2008
     - Removed an issue in Makefile.PL that kept the module
       from being built on some systems

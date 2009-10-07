@@ -301,9 +301,10 @@ sub l_len {
 
 =item C<l_pid()>
 
-This method allows to determine the PID of the process currently
-holding the lock after a call of C<lock()> with C<F_GETLK> that
-indicated that another process is holding the lock.
+This method allows retrieving the PID of a process currently
+holding the lock after a call of C<lock()> with C<F_SETLK> that
+indicated another process is holding the lock. A call to C<lock()>
+with C<F_GETLK> will fill in this value so C<l_pid()> can be called.
 
 =back
 
@@ -328,7 +329,7 @@ After having set up the object representing a flock structure you
 can determine the current holder of a lock or try to obtain a lock
 by invoking the C<lock()> method with two arguments, a file handle
 (or a file descriptor, the module figures out automatically what
-it got) and a flag indicating the action to be taken, i.e.
+it got) and a flag indicating the action to be taken, e.g.
 
   $fs->lock( $fh, F_SETLK );
 
@@ -341,9 +342,11 @@ There are three values that can be used as the second argument:
 For C<F_GETLK> the C<lock()> method determines if and who currently
 is holding the lock.  If no other process is holding the lock the
 C<l_type> field is set to C<F_UNLCK>. Otherwise the flock structure
-object is set to the values that prevent us from obtaining a lock,
-with the C<l_pid> member set to the PID of the process holding the
-lock.
+object is set to the values that prevent us from obtaining a lock.
+There may be multiple such blocking processes, including some that
+are themselves blocked waiting to obtain a lock. C<F_GETLK> will
+only make details one of these visible, but one has no control over
+which process this is.
 
 =item C<F_SETLK>
 
@@ -375,11 +378,12 @@ sub lock {
     my ( $flock_struct, $fh, $action ) = @_;
     my ( $ret, $err );
 
-    # Set the file descriptors value to something which will make fcntl(2)
-    # fail with EBADF if the argument is undefined or is a file handle that
-    # is invalid.
+    # Figure out the file descriptor - we might get a file handle, a
+    # typeglob or already a file descriptor) and set it to a value which
+    # will make fcntl(2) fail with EBADF if the argument is undefined or
+    # is a file handle that's invalid.
 
-    my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
+    my $fd = ( ref( $fh ) or $fh =~ /^\*/ ) ? fileno( $fh ) : $fh );
     $fd = -1 unless defined $fd;
 
     # Set the action argument to something invalid if it's not defined
@@ -477,7 +481,9 @@ SEEK_SET SEEK_CUR SEEK_END
 =head1 CREDITS
 
 Thanks to Mark Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
-helpful discussions, code examples and encouragement.
+helpful discussions, code examples and encouragement. Also thanks to
+Glenn Herteg who pointed out problems and helped with the documentation.
+
 
 =head1 AUTHOR
 

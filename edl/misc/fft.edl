@@ -36,8 +36,8 @@ a[ N / 2 + 1 : N ] = 1;
 
 
 b = fft_real( a );
-print( "\T# #\n", size( b[ 1 ] ), size( fft_real( b ) ) );
-c = fft_real( b );
+print( "\T# #\n", size( b[ 1 ] ), size( fft_real( b, size( a ) ) ) );
+c = fft_real( b, size( a ) );
 
 //display_1d( 1, b[ 1 ], 1, 1, b[ 2 ], 2 );
 display_1d( 1, a, 1, 1, c, 2 );
