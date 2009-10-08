@@ -5,5 +5,3 @@ Makefile.PL
 MANIFEST
 README
 t/FcntlLock.t
-sizes1.c
-sizes2.c

@@ -1,7 +1,10 @@
 Revision history for Perl extension File::FcntlLock
 
-0.11
-    - Mistakes in documentation removed as pointed ouyt by
+0.11  Wed Oct 7 2009
+	- Module did use only 32-bit flock structure, making it
+      impossible to obtain locks on parts of files above
+      4 GB. Now it also should work for large files.
+    - Mistakes in documentation removed as pointed out by
       FANY and Glenn Herteg.
 
 0.10  Wed May 14 2008

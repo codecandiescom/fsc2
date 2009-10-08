@@ -32,11 +32,7 @@ print $fh <<EOF;
 #include <fcntl.h>
 int main( void ) {
 	int fd = fileno( fopen( "./fcntl_test.c", "r" ) );
-    struct flock f;
-    f.l_type = F_RDLCK;
-    f.l_whence = SEEK_SET;
-    f.l_start = 0;
-    f.l_len = 0;
+    struct flock f = { F_RDLCK, SEEK_SET, 0, 0, 0 };
     return fcntl( fd, F_SETLK, &f ) != -1 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 EOF
@@ -49,23 +45,6 @@ if ( system "$Config{cc} -o fcntl_test fcntl_test.c" ) {
 }
 unlink 'fcntl_test';
 unlink 'fcntl_test.c';
-
-
-# Compile and run the program that creates the include file (first try
-# a version that also tries 'long long', then one that only uses 'long'
-# since 'long long' may not exist on all systems).
-
-if (     (    system "$Config{cc} -o sizes1 sizes1.c"
-		   or system './sizes1' ) 
-     and (    system "$Config{cc} -o sizes2 sizes2.c"
-		   or system './sizes2' ) ) {
-    unlink 'sizes1' if -e 'sizes1';
-    unlink 'sizes2' if -e 'sizes2';
-	unlink 'Fnctl_Lock.h' if -e 'Fnctl_Lock.h';
-    die "Failed to create the required header file.\n";
-}
-unlink 'sizes1' if -e 'sizes1';
-unlink 'sizes2' if -e 'sizes2';
 
 
 # Finally create the Makefile

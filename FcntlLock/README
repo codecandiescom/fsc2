@@ -1,4 +1,4 @@
-File::FcntlLock version 0.10
+File::FcntlLock version 0.11
 =============================
 
 FcntlLock is a module to do file locking in an object oriented
@@ -34,33 +34,11 @@ To install the module a C compiler must be available and the
 system must support the use of shared libraries (or DLLs).
 
 
-IMPLEMENTATION DETAILS
-
-Basically, the module isn't much more than a wrapper for the fcntl()
-system call. The somewhat tricky part was setting up the required
-flock structure correctly in a hopefully system-independent way. The
-concrete layout of this structure will be quite different on different
-systems/architectures. The naive solution would be to include fcntl.h
-in the XS file and simply populate the members of the structure with
-the data passed by the user.
-
-Unfortunately, it isn't always that simple. E.g. on a system where Perl
-has been built with the flags LARGEFILE_SOURCE and FILE_OFFSET_BITS=64
-and where those differ from the settings that have been used when
-compiling the system itself this results in the declaration of the flock
-structure to be different when including fcntl.h in the XS file (where
-the flags Perl was built with are set) from the ones needed to call
-fcntl(). Thus, before the XS file is compiled a C program is run
-(without the flags) that determines the real size and alignment of
-the flock structure and writes out an include file. The data from this
-file are then used to populate (or extract data from) the flock structure
-of the correct type.
-
-
 ACKNOWLEDGMENTS
 
 Thanks to Mark Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
-helpful discussions, code examples and encouragement.
+helpful discussions, code examples and encouragement. Glenn Herteg
+pointed out several problems and also helped improve the documentation.
 
 
 AUTHOR

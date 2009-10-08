@@ -9,7 +9,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "FcntlLock.h"
+#include <fcntl.h>
 
 
 MODULE = File::FcntlLock     PACKAGE = File::FcntlLock
@@ -25,9 +25,12 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
     SV *int_err
 
     INIT:
-        unsigned char flock_struct[ STRUCT_SIZE ];
+        struct flock flock_struct;
         HV *fs;
-        SV **sv_type, **sv_whence, **sv_start, **sv_len;
+        SV **sv_type,
+           **sv_whence,
+           **sv_start,
+           **sv_len;
 
         sv_setiv( int_err, 0 );
 
@@ -40,26 +43,7 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
         fs = ( HV * ) SvRV( flock_hash );
 
     CODE:
-        /* Unfortunately, we can't even be sure that the constants aren't
-           messed up... */
-
-        switch ( function )
-        {
-            case F_GETLK :
-                function = REAL_F_GETLK;
-                break;
-
-            case F_SETLK :
-                function = REAL_F_SETLK;
-                break;
-
-            case F_SETLKW :
-                function = REAL_F_SETLKW;
-                break;
-        }
-
-        /* Let's be careful and not assume that anything at all will work as
-           expected (otherwise we could merge this with the following) */
+        /* Let's be careful and not assume that anything at all will work */
 
         if (    ( sv_type   = hv_fetch( fs, "l_type",   6, 0 ) ) == NULL
              || ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL
@@ -70,43 +54,30 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
             XSRETURN_UNDEF;
         }
 
-        /* Set up the the flock structure expected by fcntl(2) with the
-           values in the hash we got passed */
+        flock_struct.l_type   = SvIV( *sv_type   );
+        flock_struct.l_whence = SvIV( *sv_whence );
+        flock_struct.l_start  = SvIV( *sv_start  );
+        flock_struct.l_len    = SvIV( *sv_len    );
 
-        * ( LTYPE_TYPE * ) ( flock_struct + LTYPE_OFFSET ) =
-                                           ( LTYPE_TYPE ) SvIV( *sv_type );
-        * ( LWHENCE_TYPE * ) ( flock_struct + LWHENCE_OFFSET ) =
-                                           ( LWHENCE_TYPE ) SvIV( *sv_whence );
-        * ( LSTART_TYPE * ) ( flock_struct + LSTART_OFFSET ) =
-                                           ( LSTART_TYPE ) SvIV( *sv_start );
-        * ( LLEN_TYPE * ) ( flock_struct + LLEN_OFFSET ) =
-                                           ( LLEN_TYPE ) SvIV( *sv_len );
+        /* Now call fcntl(2) - if we want the lock immediately but some other
+           process is holding it we return 'undef' (people can find out about
+           the reasons by checking errno). The same happens if we wait for the
+           lock but receive a signal before we obtain the lock. */
 
-        /* Now comes the great moment: fcntl(2) is finally called - if we want
-           the lock immediately but some other process is holding it we return
-           'undef' (people can find out about the reasons by checking errno).
-           The same happens if we wait for the lock but receive a signal
-           before we obtain the lock. */
-
-        if ( fcntl( fd, function, flock_struct ) != 0 )
+        if ( fcntl( fd, function, &flock_struct ) != 0 )
             XSRETURN_UNDEF;
 
         /* Now to find out who's holding the lock we now must unpack the
            structure we got back from fcntl(2) and store it in the hash we
            got passed. */
 
-        if ( function == REAL_F_GETLK )
+        if ( function == F_GETLK )
         {
-            hv_store( fs, "l_type",   6, newSViv( * ( LTYPE_TYPE * ) 
-                                      ( flock_struct + LTYPE_OFFSET ) ), 0 );
-            hv_store( fs, "l_whence", 8, newSViv( * ( LWHENCE_TYPE * ) 
-                                      ( flock_struct + LWHENCE_OFFSET ) ), 0 );
-            hv_store( fs, "l_start",  7, newSViv( * ( LSTART_TYPE * ) 
-                                      ( flock_struct + LSTART_OFFSET ) ), 0 );
-            hv_store( fs, "l_len",    5, newSViv( * ( LLEN_TYPE * ) 
-                                      ( flock_struct + LLEN_OFFSET ) ), 0 );
-            hv_store( fs, "l_pid",    5, newSViv( * ( LPID_TYPE * ) 
-                                      ( flock_struct + LPID_OFFSET ) ), 0 );
+            hv_store( fs, "l_type",   6, newSViv( flock_struct.l_type   ), 0 );
+            hv_store( fs, "l_whence", 8, newSViv( flock_struct.l_whence ), 0 );
+            hv_store( fs, "l_start",  7, newSViv( flock_struct.l_start  ), 0 );
+            hv_store( fs, "l_len",    5, newSViv( flock_struct.l_len    ), 0 );
+            hv_store( fs, "l_pid",    5, newSViv( flock_struct.l_pid    ), 0 );
         }
 
         /* Return the systems return value of the fcntl(2) call (which is 0)
