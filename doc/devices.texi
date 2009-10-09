@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Device Functions, Other Modules, Built-in Functions, fsc2
+@node Device Functions, Other Modules, Built-in Functions, Top
 @chapter Device Functions
 
 @ifnottex

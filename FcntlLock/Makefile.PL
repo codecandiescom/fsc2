@@ -32,7 +32,11 @@ print $fh <<EOF;
 #include <fcntl.h>
 int main( void ) {
 	int fd = fileno( fopen( "./fcntl_test.c", "r" ) );
-    struct flock f = { F_RDLCK, SEEK_SET, 0, 0, 0 };
+    struct flock f;
+    f.l_type   = F_RDLCK;
+    f.l_whence = SEEK_SET;
+    f.l_start  = 0;
+    f.l_len    = 0;
     return fcntl( fd, F_SETLK, &f ) != -1 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 EOF

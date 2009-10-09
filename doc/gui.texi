@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node GUI, Web Server, Introduction, fsc2
+@node GUI, Web Server, Introduction, Top
 @chapter GUI
 
 @ifnottex

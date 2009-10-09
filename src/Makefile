@@ -209,19 +209,6 @@ endif
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
-	$(RM) $(RMFLAGS) $(libdir)/Digests
-	touch $(libdir)/Digests
-ifdef ONLY_SETGID
-	chgrp $(GROUP) $(libdir)/Digests
-else
-ifdef ONLY_SETUID
-	chown $(OWNER) $(libdir)/Digests
-else
-	chgrp $(GROUP) $(libdir)/Digests
-	chown $(OWNER) $(libdir)/Digests
-endif
-endif
-
 uninstall:
 	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \
 					 $(bindir)/fsc2_connect $(bindir)/fsc2_start   \

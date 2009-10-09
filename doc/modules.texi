@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Writing Modules, Installation, Internals, fsc2
+@node Writing Modules, Installation, Internals, Top
 @chapter Writing Modules
 @cindex modules
 

@@ -75,7 +75,7 @@ translation approved by the Free Software Foundation.
 @end direntry
 
 
-@node fsc2, , (dir), (dir)
+@node Top, , (dir), (dir)
 @top fsc2
 
 This manual describes @code{fsc2}, a program to control spectrometers.
@@ -159,7 +159,7 @@ translation approved by the Free Software Foundation.
 @include ack.texi
 @include gpl.texi
 
-@node Index, , , fsc2
+@node Index, , , Top
 @unnumbered Index
 @printindex cp
 

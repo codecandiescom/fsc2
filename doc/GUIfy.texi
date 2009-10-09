@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node GUI-fying, Cloning Devices, Command Line Options, fsc2
+@node GUI-fying, Cloning Devices, Command Line Options, Top
 @chapter GUI-fying EDL scripts
 
 @ifnottex

@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Other Modules, Using Pulsers, Device Functions, fsc2
+@node Other Modules, Using Pulsers, Device Functions, Top
 @chapter Other Modules
 
 

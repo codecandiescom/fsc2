@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Web Server, EDL, GUI, fsc2
+@node Web Server, EDL, GUI, Top
 @chapter Web Server
 @cindex web server
 

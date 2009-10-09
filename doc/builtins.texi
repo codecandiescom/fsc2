@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Built-in Functions, Device Functions, EDL, fsc2
+@node Built-in Functions, Device Functions, EDL, Top
 @chapter Built-in Functions
 
 @ifnottex

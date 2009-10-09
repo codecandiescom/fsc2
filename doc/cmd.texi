@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Command Line Options, GUI-fying, Example EDL Scripts, fsc2
+@node Command Line Options, GUI-fying, Example EDL Scripts, Top
 @chapter Command Line Options
 @cindex command line options
 

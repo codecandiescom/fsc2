@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Installation, Device Reference, Writing Modules, fsc2
+@node Installation, Device Reference, Writing Modules, Top
 @appendix Installation
 
 @ifnottex

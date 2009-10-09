@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node EDL Mode for Emacs and VIM, Acknowledgments, Reserved Words, fsc2
+@node EDL Mode for Emacs and VIM, Acknowledgments, Reserved Words, Top
 @appendix EDL Mode for Emacs and VIM
 
 There exists an @emph{emacs} mode for editing @code{EDL} scripts. It
