@@ -20,7 +20,7 @@
 
 EDL         := $(wildcard *.EDL)
 EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
-SCRIPTS     := $(EDL_SCRIPTS) epr fcntrl2 fsps25_shutdown \
+SCRIPTS     := $(EDL_SCRIPTS) epr fcntrl2 fsps25_shutdown field_mode \
 			   fsps25_shutdown_zero monitor_mode pfail_recover
 
 

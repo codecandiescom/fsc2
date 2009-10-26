@@ -1,5 +1,5 @@
 The following additiona; packages were required with a freshly installed
-Ubuntu 7.10 (Gutsy) in order to make the program and the documentation:
+Ubuntu 9.04 (Jaunty) in order to make the program and the documentation:
 
   dialog
   bison
@@ -11,6 +11,7 @@ Ubuntu 7.10 (Gutsy) in order to make the program and the documentation:
   tetex-bin
   texinfo
   texlive-generic-recommended
+  texi2html
   perl-tk
 
 To avoid warnings while compiling the program you may have to delete
@@ -32,8 +33,9 @@ After unpacking the archive go into the its main directory and do
 ./configure --enable-optimization
 
 For this to work you may have to install the development version of the
-JPEG library first. To do so install the package
+Xpm and the JPEG library first. To do so install the package
 
+  libxpm-dev
   libjpeg62-dev
 
 When the configure script ended successfully do
@@ -42,4 +44,6 @@ make
 make install
 
 (the last command has to be run with root permissions). Then make sure
-the library i
+the library is in the linker path and cache by calling (again as root)
+
+ldconfig

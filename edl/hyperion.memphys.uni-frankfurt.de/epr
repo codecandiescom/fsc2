@@ -55,13 +55,15 @@ sub create_gui {
 	$f = $mw->Frame( );
 	$b[ 0 ] = $f->Button( '-text' => "cw-EPR Experiment" );
 	$b[ 1 ] = $f->Button( '-text' => "Monitor Mode" );
-	$b[ 2 ] = $f->Button( '-text' => "Shutdown" );
-	$b[ 3 ] = $f->Button( '-text' => "Shutdown with 0 A" );
+	$b[ 2 ] = $f->Button( '-text' => "Field sweep" );
+	$b[ 3 ] = $f->Button( '-text' => "Shutdown" );
+	$b[ 4 ] = $f->Button( '-text' => "Shutdown with 0 A" );
 
 	$b[ 0 ]->configure( '-command' => sub { cw_epr( $mw )  } );
 	$b[ 1 ]->configure( '-command' => sub { monitor( $mw ) } );
-	$b[ 2 ]->configure( '-command' => sub { shutdown_normal( $mw ); } );
-	$b[ 3 ]->configure( '-command' => sub { shutdown_zero( $mw ); } );
+	$b[ 2 ]->configure( '-command' => sub { field( $mw ) } );
+	$b[ 3 ]->configure( '-command' => sub { shutdown_normal( $mw ); } );
+	$b[ 4 ]->configure( '-command' => sub { shutdown_zero( $mw ); } );
 
 	$f->pack( %fp );
 	$_->pack( %fp ) foreach @b;
@@ -101,6 +103,29 @@ sub monitor {
 
 	unless ( open $fh, "/usr/local/bin/monitor_mode 2>&1 |" ) {
 		show_message( $top, "Program for monitor\nmode not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub field {
+	my $top = shift;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/field_mode 2>&1 |" ) {
+		show_message( $top, "Program for field sweep\nmode not found" );
 		$top->deiconify;
 		return;
 	}
