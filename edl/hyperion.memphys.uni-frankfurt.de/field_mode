@@ -1,0 +1,120 @@
+#!/usr/local/bin/fsc2 -S
+DEVICES:
+
+fsps25;
+
+
+VARIABLES:
+
+current;
+current_step = 25 mA;
+max_current;
+max_current_step = 1 A;
+min_current_step = 5 mV;
+Sweep_state = 0;
+step_time = 0.3 s;
+new;
+
+Current;
+Current_step;
+Step_time;
+Sweep_up;
+Sweep_stop;
+Sweep_down;
+
+SWEEP_STOPPED = 0;
+SWEEP_UP = 1;
+SWEEP_DOWN = -1;
+
+
+PREPARATIONS:
+
+init_1d( );
+
+
+EXPERIMENT:
+
+current = magnet_field( );
+max_current = magnet_max_current( );
+
+hide_toolbox( "ON" );
+Current = input_create( "FLOAT_INPUT", current, "Magnet current [A]" );
+Current_step = input_create( "FLOAT_INPUT", current_step / 1 mV,
+			   				 "Current step size [mA]" );
+Step_time = input_create( "FLOAT_INPUT", step_time, "Step time [s]" );
+Sweep_up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_stop = button_create( "RADIO_BUTTON", Sweep_up, "Stop sweep" );
+Sweep_down = button_create( "RADIO_BUTTON", Sweep_up, "Sweep down" );
+button_state( Sweep_stop, "ON" );
+hide_toolbox( "OFF" );
+
+FOREVER {
+    IF toolbox_changed( ) {
+        IF button_state( Sweep_stop ) {
+            Sweep_state = SWEEP_STOPPED;
+        }
+
+        IF button_state( Sweep_up ) {
+            Sweep_state = SWEEP_UP;
+        }
+
+        IF button_state( Sweep_down ) {
+            Sweep_state = SWEEP_DOWN;
+        }
+
+        IF button_state( Sweep_stop ) {
+            IF input_changed( Current ) {
+                new = input_value( Current );
+                IF abs( new ) <= max_current {
+                    current = magnet_field( new );
+                }   
+                input_value( Current, current );
+            }
+
+            IF input_changed( Current_step ) {
+                new = input_value( Current_step );
+                IF new >= min_current_step AND
+                   new <= max_current_step {
+                    current_step = min_current_step
+					               * round( new / min_current_step );
+                }
+                input_value( current_step, current_step );
+            }
+        } ELSE {
+		    input_value( Current, current );
+            input_value( current_step, current_step );
+		}
+
+		IF input_changed( Step_time ) {
+		    new = input_value( Step_time );
+			IF new >= 0.0 {
+				step_time = new;
+			}
+			input_value( Step_time );
+		}
+    }
+
+    IF Sweep_state == SWEEP_UP {
+        IF abs( current + current_step ) <= max_current {
+            current = magnet_field( current + current_step );
+            input_value( Current, current );
+        } ELSE {
+            button_state( Sweep_stop, "ON" );
+            Sweep_state = SWEEP_STOPPED;
+        }
+    }
+
+    IF Sweep_state == SWEEP_DOWN {
+        IF abs( current - current_step ) <= max_current {
+            current = magnet_field( current - current_step );
+            input_value( Current, current );
+        } ELSE {
+            button_state( Sweep_stop, "ON" );
+            Sweep_state = SWEEP_STOPPED;
+        }
+    }
+
+	IF Step_time > 0.0 {
+		wait( step_time );
+	}
+}

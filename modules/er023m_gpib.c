@@ -320,7 +320,7 @@ er023m_get_ct( void )
  * as how many of the bits in the returned bytes are valid we
  * also have to (re)read this number of bytes and recalculate
  * the scaling factor and offset according to the algorithm
- * that Robert Bittl (FU Berlin) has figured out (as usual, the
+ * that Robert Bittl (FU Berlin) has figured out (as usual the
  * manual tells nothing about how to do it...).
  *--------------------------------------------------------------*/
 

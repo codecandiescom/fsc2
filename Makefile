@@ -471,7 +471,7 @@ libdir           := $(prefix)/lib/fsc2
 auxdir           := $(libdir)/aux
 docdir           := $(prefix)/share/doc/fsc2
 mandir           := $(prefix)/man
-infodir          := $(prefix)/info
+infodir          := $(prefix)/share/info
 
 
 # These variables are used internally in the make process

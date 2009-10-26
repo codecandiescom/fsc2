@@ -168,7 +168,7 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
         if ( ! $failed ) {
             $fs->l_type( F_WRLCK );
             ok(     $fs->lock( $fh, F_SETLK )
-                    and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
+                and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
         } else {
             ok( 0 );
         }
