@@ -127,7 +127,7 @@ gpib_init( const char * log_file_name,
     if ( gpib_is_active )
         return SUCCESS;
 
-    if ( ! fsc2_obtain_lock( "gpib" ) )
+    if ( ! fsc2_obtain_lock( "libgpib" ) )
     {
         strcpy( gpib_error_msg, "Failed to obtain lock for GPIB system" );
         return FAILURE;
@@ -176,7 +176,7 @@ gpib_init( const char * log_file_name,
             }
         }
 
-        fsc2_release_lock( "gpib" );
+        fsc2_release_lock( "libgpib" );
 
         return FAILURE;
     }
@@ -266,7 +266,7 @@ gpib_shutdown( void )
     }
 
     gpib_is_active = 0;
-    fsc2_release_lock( "gpib" );
+    fsc2_release_lock( "libgpib" );
 
     return SUCCESS;
 }

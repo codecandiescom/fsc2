@@ -554,15 +554,9 @@ through the sources. When @code{fsc2} is invoked it obviously starts with
 the @code{main()} function in the file @file{fsc2.c}. After setting up
 lots of global variables and checking the command line options it tries to
 connect to a kind of daemon process (or starts it if it's not already
-running).  This daemon is taking care of situations where @code{fsc2} is
-running in non-exclusive mode, i.e.@: when more than one instance of
-@code{fsc2} is allowed to be run at the same time, and it will tell new
-instances about what they are allowed to do and what not to avoid more
-than one instance trying to access the same devices at the same time. It
-also is supposed to remove things like lock files, shared memory
-segments etc.@: should it ever happen that @code{fsc2} crashes so badly
-that it isn't able anymore to clean up after itself (not that this is
-supposed to happen;-).
+running).  This daemon is taking care of situations where an instance
+of @code{fsc2} crashes and then releases resources (lock files, shared
+memory segments etc.) that may have been left over.
 
 
 When this hurdle has been taken the initialization of the graphics is

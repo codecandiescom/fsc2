@@ -285,24 +285,24 @@ get written to.
 
 
 Ig you feel uneasy about running a program setuid'ed to root (and I
-fully sympathize with you if you do;-) there are alternatives, but
-which may requires some extra work. There are two variables in the
-Makefile, @code{OWNER} and @code{GROUP}, that can be used to avoid
-running @code{fsc2} with the full permissions of the root account. If
-both are set the program runs with the @code{UID} and @code{GID} of
-the account and group specified by these variables in all situations
-were it otherwise would run with root permissions. (Only if neither of
-them is set then they default to @code{root} and the program gets
-setuid'ed to root, i.e.@: as in the default case discussed above.) But
-if only @code{GROUP} is set then the program becomes setgid'ed to this
-group, i.e.@: it will run with the @code{UID} of the user but with the
-@code{GID} of the group specified by @code{GROUP} - this may already
-give it high enough access permissions for the device files if the
-device files are set up accordingly (i.e.@: their permission bits are
-set to allow read and write access to members of this group). It's
-also possible to specify @code{OWNER} alone and in this case the
-program runs with the @code{UID} of that process but the GID of the
-user.
+fully sympathize with you if you do, I also don't do that;-) there are
+alternatives, but which may requires some extra work. There are two
+variables in the Makefile, @code{OWNER} and @code{GROUP}, that can be
+used to avoid running @code{fsc2} with the full permissions of the
+root account. If both are set the program runs with the @code{UID} and
+@code{GID} of the account and group specified by these variables in
+all situations were it otherwise would run with root permissions.
+(Only if neither of them is set then they default to @code{root} and
+the program gets setuid'ed to root, i.e.@: as in the default case
+discussed above.) But if only @code{GROUP} is set then the program
+becomes setgid'ed to this group, i.e.@: it will run with the
+@code{UID} of the user but with the @code{GID} of the group specified
+by @code{GROUP} - this may already give it high enough access
+permissions for the device files if the device files are set up
+accordingly (i.e.@: their permission bits are set to allow read and
+write access to members of this group). It's also possible to specify
+@code{OWNER} alone and in this case the program runs with the
+@code{UID} of that process but the GID of the user.
 
 
 In the most simple case where you didn't set these variables (or both

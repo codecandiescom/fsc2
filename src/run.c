@@ -259,8 +259,7 @@ start_comm_libs( void )
     {
         if ( fsc2_obtain_lock( "rulbus" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to initialize RULBUS: Can't obtain "
-                    "lock.\n" );
+            eprint( FATAL, UNSET, "Failed to obtain lock on RULBUS system.\n" );
             goto rulbus_fail;
         }
 
@@ -284,10 +283,9 @@ start_comm_libs( void )
 
     if ( Need_USB )
     {
-        if ( fsc2_obtain_lock( "usb" ) == FAIL )
+        if ( fsc2_obtain_lock( "libusb" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to initialize USB: %s.\n",
-                    rulbus_strerror( ) );
+            eprint( FATAL, UNSET, "Failed to obtain lock on USB system.\n" );
             goto libusb_fail;
         }
 
@@ -301,7 +299,7 @@ start_comm_libs( void )
         if ( libusb_init( NULL ) != 0 )
         {
             lower_permissions( );
-            fsc2_release_lock( "usb" );
+            fsc2_release_lock( "libusb" );
             eprint( FATAL, UNSET, "Failed to initialize USB.\n" );
             goto libusb_fail;
         }
@@ -325,8 +323,8 @@ start_comm_libs( void )
     {
         if ( fsc2_obtain_lock( "meilhaus" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
-                    "Can't obtain lock.\n" );
+            eprint( FATAL, UNSET, "Failed to obtain lock on Meilhaus "
+                    "system.\n" );
             goto medriver_fail;
         }
 
@@ -368,7 +366,7 @@ start_comm_libs( void )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "usb" );
+        fsc2_release_lock( "libusb" );
     }
 
  libusb_fail:
@@ -473,7 +471,7 @@ no_prog_to_run( void )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "usb" );
+        fsc2_release_lock( "libusb" );
     }
 #endif
 
@@ -641,7 +639,7 @@ init_devs_and_graphics( void )
         if ( Need_USB )
         {
             libusb_exit( NULL );
-            fsc2_release_lock( "usb" );
+            fsc2_release_lock( "libusb" );
         }
 #endif
 
@@ -800,7 +798,7 @@ fork_failure( int stored_errno )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "usb" );
+        fsc2_release_lock( "libusb" );
     }
 #endif
 
@@ -1135,7 +1133,7 @@ run_sigchld_callback( FL_OBJECT * a,
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "usb" );
+        fsc2_release_lock( "libusb" );
     }
 #endif
 

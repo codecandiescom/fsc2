@@ -26,6 +26,7 @@
 @menu
 * Overview::            
 * Using two (or more) devices of the same type::
+* Handling of several instances of fsc2::
 * Magnet Functions::
 * Gaussmeter Functions::
 * Lock-In Functions::
@@ -93,11 +94,11 @@ enough it at least reduces the amount of changes to be done to an
 @code{EDL} script considerably.
 
 
-@node Using two (or more) devices of the same type, Magnet Functions, Overview, Device Functions
+@node Using two (or more) devices of the same type, Handling of several instances of fsc2, Overview, Device Functions
 @section Using two (or more) devices of the same type
 @cindex Using two (or more) devices of the same type
 
-But what if you need to use e.g.@: two digitizers simultaneously?
+Wwhat if you need to use e.g.@: two digitizers simultaneously?
 When the names of the functions for accessing both the digitizers are
 identical how does one specify which one to use for a command? Actually,
 it's quite simple. In the @code{DEVICES} section the two digitizers will
@@ -145,7 +146,31 @@ please see one of the following chapters (@pxref{Cloning Devices}) on how
 this can be done.
 
 
-@node Magnet Functions, Gaussmeter Functions, Using two (or more) devices of the same type, Device Functions
+@node Handling of several instances of fsc2, Magnet Functions, Using two (or more) devices of the same type, Device Functions
+@section Handling of several instances of fsc2
+@cindex Handling of several instances of fsc2
+
+Since version 2.4.0 several instances of @code{fsc2} can be run
+simultaneously. This, of course, could lead to problems when two
+instances of @code{fsc2} would try to use the same device at the same
+time. To avoid that devices (or groups of devices) get locked when an
+experiment is started and only released again when it ends. Thus it
+is possible that an experiment gets stopped with an error message
+indicating that a lock could not be obtained. In that case a different
+instance of @code{fsc2} is still using the corresponding device (or
+group of devices).
+
+Locking is done via UUC type lock file that (unless configured
+differently at installation) reside in @file{/var/lock}. All
+devices connected via the GPIB bus currently are locked together,
+i.e.@: only on instance of fsc2 can access devices on the GPIB at a
+time. The same holds for devices connected via USB (except USB-serial
+converters) and those connected via RULBUS. Devices connected via
+LAN or serial ports are locked individually, as are devices realized
+as PCI cards.
+
+
+@node Magnet Functions, Gaussmeter Functions, Handling of several instances of fsc2, Device Functions
 @section Magnet Functions
 @cindex Magnet Functions
 

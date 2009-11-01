@@ -26,14 +26,13 @@
 
 @menu
 * Batch mode::              Non-supervised operation
-* Non-exclusive mode::      Running more than one instance of @code{fsc2} at once
 * Options summary::         List of all command line options
 @end menu
 
 @end ifnottex
 
 
-@node Batch mode, Non-exclusive mode, Command Line Options, Command Line Options
+@node Batch mode, Options summary, Command Line Options, Command Line Options
 @section Batch mode
 @cindex batch mode
 
@@ -110,61 +109,7 @@ the scripts to be used carefully before running them in batch mode.
 @end quotation
 
 
-@node Non-exclusive mode, Options summary, Batch mode, Command Line Options
-@section Non-exclusive mode
-@cindex non-exclusive mode
-
-Normally it is not possible to start @code{fsc2} more than once, if you
-try to a short error message is printed out and the program aborts. It was
-written this way to avoid the problem that only one program should be
-able to control the devices at a time. Otherwise it can't be guaranteed
-that the devices react as expected (just imagine how happy you would be
-when you're doing a pulsed experiment where you set the field manually
-to a certain value and someone else starts to change the field via a
-different instance of @code{fsc2}).
-
-But there can be some cases where it might be desirable to be able to
-run more than one instance of @code{fsc2} at the same time. In this case
-you have to start @code{fsc2} with the @code{-non-exclusive} option (the
-option name was intentionally made hard to type so you won't use it
-accidentally). In this case another instance of @code{fsc2} can be
-started if it is also started with the @code{-non-exclusive} option (but
-not without it).
-
-If you start more than one instance of @code{fsc2} you will have to
-consider some possible problems:
-@itemize @bullet
-@item
-  Only one of the instances will be able to control devices via the GPIB
-  bus. If you try to start a second experiment which also needs devices
-  controlled via the GPIB the second experiment will abort immediately.
-  The same also holds for devices controlled using the serial ports or via
-  other channels like built-in PCI or ISA cards -- each serial port and card
-  can only be accessed from a single instance of @code{fsc2} at the same
-  time. What works is for example having one instance of @code{fsc2}
-  controlling devices via the GPIB bus and the first serial port and another
-  instance controlling devices via the second serial port and e.g.@: a
-  built-in PCI or ISA card. Devices connected via the LAN should pose no
-  problems as long as only one instance of @code{fsc2} is trying to a certain
-  device (but that's not someting @code{fsc2} itself can test for, so if
-  that should happen all kinds of weird things can happen!).
-@item
-  Only the first instance of @code{fsc2} is going to be able to
-  communicate with external programs (i.e.@: scripts that automatically
-  generate @code{EDL} scripts and send them to @code{fsc2}). And if this
-  instance exits, none of the others will take over -- you need to start a
-  new instance which then is going to deal with external programs.
-@item
-  You also won't be able to run the built-in web server for more than
-  one of the instances of @code{fsc2}, at least if both web servers listen
-  on the same port (8080 per default). If you want the web server to be
-  able to run for each (or at least for more than one) instance of
-  @code{fsc2} you need to specify different HTTP ports for the different
-  instances via the @code{-httpPort} option.
-@end itemize
-
-
-@node Options summary, , Non-exclusive mode, Command Line Options
+@node Options summary, , Batch mode, Command Line Options
 @section Options summary
 @cindex options summary
 
@@ -193,9 +138,6 @@ Starts @code{fsc2} in graphics mode and immediately does a syntax
 check on FILE. If the syntax check does not fail the experiment is
 started without the need for further user input.
 
-@item @option{-B}
-Starts @code{fsc2} in batch mode, see discussion above.
-
 @item @option{-I}
 Starts @code{fsc2} in graphics mode but with the main window being
 iconified. After a syntax check the experiment is started immediately.
@@ -203,6 +145,9 @@ If the main window is still iconified when the experiment display
 window gets closed @code{fsc2} is also quit. On syntax or other
 errors in the @code{EDL} script the main window gets automatically
 de-iconified so that the error messages become readable.
+
+@item @option{-B}
+Starts @code{fsc2} in batch mode, see discussion above.
 
 @item @option{-ng, -nw}
 Does both the test run as well as the experiment for the input
@@ -229,12 +174,6 @@ deleted} when @code{fsc2} is done with it, i.e.@: when either
 for cases where the input file is a temporary file that needs to be
 deleted when it isn't needed anymore, so better be @strong{really
 careful}.
-
-@item @option{-non-exclusive}
-When started with this option you are able to run several instances
-of @code{fsc2} at the same time (at least if all the other instances
-were also started with this option). Please see also the discussion
-above.
 
 @item @option{-h, --help}
 Displays a very short help text and exits.
