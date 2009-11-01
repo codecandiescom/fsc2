@@ -10,7 +10,7 @@ current;
 current_step = 25 mA;
 max_current;
 max_current_step = 1 A;
-min_current_step = 5 mV;
+min_current_step = 1 mA;
 Sweep_state = 0;
 step_time = 0.3 s;
 new;
@@ -39,9 +39,9 @@ max_current = magnet_max_current( );
 
 hide_toolbox( "ON" );
 Current = input_create( "FLOAT_INPUT", current, "Magnet current [A]" );
-Current_step = input_create( "FLOAT_INPUT", current_step / 1 mV,
-			   				 "Current step size [mA]" );
-Step_time = input_create( "FLOAT_INPUT", step_time, "Step time [s]" );
+Current_step = input_create( "FLOAT_INPUT", current_step / 1 mA,
+                             "Current step size [mA]" );
+Step_time = input_create( "FLOAT_INPUT", step_time, "Inter-step delay [s]" );
 Sweep_up   = button_create( "RADIO_BUTTON", "Sweep up" );
 Sweep_stop = button_create( "RADIO_BUTTON", Sweep_up, "Stop sweep" );
 Sweep_down = button_create( "RADIO_BUTTON", Sweep_up, "Sweep down" );
@@ -66,32 +66,36 @@ FOREVER {
             IF input_changed( Current ) {
                 new = input_value( Current );
                 IF abs( new ) <= max_current {
+                    object_enable( Sweep_up, "OFF" );
+                    object_enable( Sweep_down, "OFF" );
                     current = magnet_field( new );
+                    object_enable( Sweep_up, "ON" );
+                    object_enable( Sweep_down, "ON" );
                 }   
                 input_value( Current, current );
             }
 
             IF input_changed( Current_step ) {
-                new = input_value( Current_step );
+                new = input_value( Current_step ) * 1 mA;
                 IF new >= min_current_step AND
                    new <= max_current_step {
-                    current_step = min_current_step
-					               * round( new / min_current_step );
+                    current_step =   min_current_step
+                                   * round( new / min_current_step );
                 }
-                input_value( current_step, current_step );
+                input_value( Current_step, current_step / 1 mA);
             }
         } ELSE {
-		    input_value( Current, current );
-            input_value( current_step, current_step );
-		}
+            input_value( Current, current );
+            input_value( Current_step, current_step / 1 mA );
+        }
 
-		IF input_changed( Step_time ) {
-		    new = input_value( Step_time );
-			IF new >= 0.0 {
-				step_time = new;
-			}
-			input_value( Step_time );
-		}
+        IF input_changed( Step_time ) {
+            new = input_value( Step_time );
+            IF new >= 0 s {
+                step_time = new;
+            }
+            input_value( Step_time );
+        }
     }
 
     IF Sweep_state == SWEEP_UP {
@@ -114,7 +118,11 @@ FOREVER {
         }
     }
 
-	IF Step_time > 0.0 {
-		wait( step_time );
-	}
+    IF Sweep_state != SWEEP_STOPPED {
+        IF step_time >= 1 us {
+            wait( step_time );
+        }
+    } ELSE {
+        wait( 0.1 s );
+    }
 }

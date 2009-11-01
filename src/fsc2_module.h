@@ -55,6 +55,7 @@
 #include "exceptions.h"
 #include "T.h"
 #include "variables.h"
+#include "locks.h"
 #include "util.h"
 #include "func.h"
 #include "func_basic.h"

@@ -85,6 +85,17 @@ prefix             := /usr/local
 # DEF_INCL_DIR       := /scratch/EDL/includes
 
 
+# The variable LOCK_DIR is the directory where UUCP style lockfiles
+# are created that protect all devices from oncurrent access by differrnt
+# instances of fsc2. This should be '/var/lock' (which is the default if
+# this variable isn't set) according to version 2.2 of the File-system
+# Hierachy Standard. Either fsc2 itself or all its users must have read
+# and write permissions for this directory. Also see the longer discussion
+# in section C of the INSTALL file.
+
+LOCK_DIR    := /var/lock
+
+
 # The next variable defines the GPIB library to use, it must be set to
 # either 'LLP' for the LLP library, 'NI' for the newer National
 # Instruments library, 'NI_OLD' for the old National Instruments library
@@ -165,16 +176,6 @@ GPIB_LOG_LEVEL     := HIGH
 # devices controlled via serial ports are not created.
 
 # WITHOUT_SERIAL_PORTS   := yes
-
-
-# The variable, SERIAL_LOCK_DIR, is the directory where UUCP style
-# lockfiles for the serial ports are created. This should be '/var/lock'
-# according to version 2.2 of the File-system Hierachy Standard. Either
-# fsc2 itself or all its users must have read and write permissions for
-# this directory. Also see the longer discussion in section C of the
-# INSTALL file.
-
-SERIAL_LOCK_DIR    := /var/lock
 
 
 # Next set the file for writing logs about the activity on the serial
@@ -647,6 +648,15 @@ CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
 
+# Make sure a directory for lock files is set
+
+ifndef LOCK_DIR
+	LOCK_DIR       := "/var/lock"
+endif
+
+CONFFLAGS += -DLOCK_DIR=\"$(patsubst % ,%,$(LOCK_DIR))\"
+
+
 # Make sure the GPIB settings are reasonable
 
 ifdef GPIB_LIBRARY
@@ -739,10 +749,6 @@ endif
 ifdef WITHOUT_SERIAL_PORTS
 	CONFFLAGS += -DWITHOUT_SERIAL_PORTS
 else
-	ifdef SERIAL_LOCK_DIR
-		CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(patsubst % ,%,$(SERIAL_LOCK_DIR))\"
-	endif
-
 	ifdef SERIAL_LOG_FILE
 		CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
 	else

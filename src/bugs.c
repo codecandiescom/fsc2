@@ -53,8 +53,6 @@ bug_report_callback( FL_OBJECT * a,
     int ret;
 
 
-    notify_conn( BUSY_SIGNAL );
-
     /* Create a temporary file for the mail */
 
     if (    ( tmp_fd = mkstemp( filename ) ) < 0
@@ -67,8 +65,6 @@ bug_report_callback( FL_OBJECT * a,
         }
 
         fl_show_messages( "Sorry, can't send a bug report." );
-        notify_conn( UNBUSY_SIGNAL );
-
         return;
     }
 
@@ -198,7 +194,6 @@ bug_report_callback( FL_OBJECT * a,
 
     close( tmp_fd );
     sigaction( SIGCHLD, &oact, NULL );
-    notify_conn( UNBUSY_SIGNAL );
 }
 #else
 void

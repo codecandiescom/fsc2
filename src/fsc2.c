@@ -27,6 +27,7 @@
 
 #include <execinfo.h>
 #include "serial.h"
+#include <sys/un.h>
 
 
 /* Locally used global variables */
@@ -74,7 +75,6 @@ main( int    argc,
       char * argv[ ] )
 {
     char *fname = NULL;
-    int conn_pid;
 
 
 #if defined LIBC_MDEBUG
@@ -96,10 +96,7 @@ main( int    argc,
        spawn a process that deals with further instances of fsc2 and takes
        care of shared memory segments. */
 
-    if ( ( Fsc2_Internals.conn_pid =
-                ( pid_t ) check_spawn_fsc2d( ! (   Fsc2_Internals.cmdline_flags
-                                                 & NON_EXCLUSIVE ),
-                                             In_file_fp ) ) == -1 )
+    if ( check_spawn_fsc2d( In_file_fp ) == -1 )
     {
         fprintf( stderr, "Failed to start or connect to daemon process for "
                  "fsc2.\n" );
@@ -145,12 +142,7 @@ main( int    argc,
             }
         }
         else
-        {
-            conn_pid = Fsc2_Internals.conn_pid;
-            Fsc2_Internals.conn_pid = 0;
             load_file( GUI.main_form->browser, 1 );
-            Fsc2_Internals.conn_pid = conn_pid;
-        }
     }
 
     /* In batch mode try to get the next file if the first input file
@@ -186,12 +178,7 @@ main( int    argc,
             }
         }
         else
-        {
-            conn_pid = Fsc2_Internals.conn_pid;
-            Fsc2_Internals.conn_pid = 0;
             load_file( GUI.main_form->browser, 1 );
-            Fsc2_Internals.conn_pid = conn_pid;
-        }
 
         for ( i = 1; i < argc; i++ )
             argv[ i ] = argv[ i + 1 ];
@@ -213,84 +200,69 @@ main( int    argc,
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         no_gui_run( );
 
-    /* Only if starting the server for external connections succeeds really
-       start the main loop */
+    /* Trigger test or start of current EDL program if the appropriate
+       flags were passed to the program on the command line */
 
-    if (    Fsc2_Internals.conn_pid == 0
-         || ( Fsc2_Internals.conn_pid =
-                  spawn_conn( Fsc2_Internals.cmdline_flags &
-                              ( DO_TEST | DO_START )
-                              && Is_loaded, In_file_fp ) ) != -1 )
+    if ( Fsc2_Internals.cmdline_flags & DO_TEST && Is_loaded )
+        fl_trigger_object( GUI.main_form->test_file );
+    if ( Fsc2_Internals.cmdline_flags & DO_START && Is_loaded )
+        fl_trigger_object( GUI.main_form->run );
+
+    /* If required send signal to the invoking process */
+
+    if ( Fsc2_Internals.cmdline_flags & DO_SIGNAL )
+        kill( getppid( ), SIGUSR1 );
+
+    /* And, finally, here's the main loop of the program - it first checks
+       the objects of the GUI, if necessary executing the associated
+       callbacks, then calls a function that does everything else required
+       (while no experiment is run just dealing with requests from the
+       child process handling external connections and from the HTTP
+       server, during an experiment also accepting new data and requests
+       from the child process running the experiment). In batch mode we
+       then try to get the next file from the command line and start it. */
+
+ run_next:
+
+    while ( fl_check_forms( ) != GUI.main_form->quit )
+        if ( Fsc2_Internals.child_pid == 0 )
+            idle_handler( );
+        else
+            new_data_handler( );
+
+    if ( Fsc2_Internals.cmdline_flags & BATCH_MODE && argc > 1 )
     {
-        /* Trigger test or start of current EDL program if the appropriate
-           flags were passed to the program on the command line */
+        Is_loaded = UNSET;
 
-        if ( Fsc2_Internals.cmdline_flags & DO_TEST && Is_loaded )
-            fl_trigger_object( GUI.main_form->test_file );
-        if ( Fsc2_Internals.cmdline_flags & DO_START && Is_loaded )
-            fl_trigger_object( GUI.main_form->run );
-
-        /* If required send signal to the invoking process */
-
-        if ( Fsc2_Internals.cmdline_flags & DO_SIGNAL )
-            kill( getppid( ), SIGUSR1 );
-
-        /* And, finally, here's the main loop of the program - it first checks
-           the objects of the GUI, if necessary executing the associated
-           callbacks, then calls a function that does everything else required
-           (while no experiment is run just dealing with requests from the
-           child process handling external connections and from the HTTP
-           server, during an experiment also accepting new data and requests
-           from the child process running the experiment). In batch mode we
-           then try to get the next file from the command line and start it. */
-
-    run_next:
-
-        while ( fl_check_forms( ) != GUI.main_form->quit )
-            if ( Fsc2_Internals.child_pid == 0 )
-                idle_handler( );
-            else
-                new_data_handler( );
-
-        if ( Fsc2_Internals.cmdline_flags & BATCH_MODE && argc > 1 )
+        while ( argc > 1 && ! Is_loaded )
         {
-            Is_loaded = UNSET;
+            int i;
 
-            while ( argc > 1 && ! Is_loaded )
+            if ( EDL.files )
             {
-                int i;
-
-                if ( EDL.files )
-                {
-                    while ( EDL.file_count > 0 )
-                        T_free( EDL.files[ --EDL.file_count ].name );
-                    EDL.files = T_free( EDL.files );
-                }
-
-                fname = argv[ 1 ];
-
-                if ( ! get_edl_file( fname ) )
-                    break;
-
-                conn_pid = Fsc2_Internals.conn_pid;
-                Fsc2_Internals.conn_pid = 0;
-                load_file( GUI.main_form->browser, 1 );
-                Fsc2_Internals.conn_pid = conn_pid;
-
-                for ( i = 1; i < argc; i++ )
-                    argv[ i ] = argv[ i + 1 ];
-                argc -= 1;
+                while ( EDL.file_count > 0 )
+                    T_free( EDL.files[ --EDL.file_count ].name );
+                EDL.files = T_free( EDL.files );
             }
 
-            if ( Is_loaded )
-            {
-                fl_trigger_object( GUI.main_form->run );
-                goto run_next;
-            }
+            fname = argv[ 1 ];
+
+            if ( ! get_edl_file( fname ) )
+                break;
+
+            load_file( GUI.main_form->browser, 1 );
+
+            for ( i = 1; i < argc; i++ )
+                argv[ i ] = argv[ i + 1 ];
+            argc -= 1;
+        }
+
+        if ( Is_loaded )
+        {
+            fl_trigger_object( GUI.main_form->run );
+            goto run_next;
         }
     }
-    else
-        fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
     clean_up( );
     xforms_close( );
@@ -334,8 +306,6 @@ globals_init( const char * pname )
     Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;
     Fsc2_Internals.rsc_handle = NULL;
     Fsc2_Internals.http_server_died = UNSET;
-    Fsc2_Internals.conn_request = UNSET;
-    Fsc2_Internals.conn_child_replied = UNSET;
     Fsc2_Internals.title = NULL;
     Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
@@ -941,7 +911,7 @@ scan_args( int   * argc,
 
         if ( ! strcmp( argv[ cur_arg ], "-non-exclusive" ) )
         {
-            flags |= NON_EXCLUSIVE;
+            fprintf( stderr, "Option '-non-exclusive' is deprecated.\n" );
             for ( i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
@@ -1258,11 +1228,11 @@ scan_args( int   * argc,
 static void
 final_exit_handler( void )
 {
-    /* Stop the process that is waiting for external connections as well
-       as the child process and the HTTP server */
+    size_t len = sizeof( ( ( struct sockaddr_un * ) NULL )->sun_path );
+    char sock_file[ len ];
 
-    if ( Fsc2_Internals.conn_pid > 0 )
-        kill( Fsc2_Internals.conn_pid, SIGTERM );
+
+    /* Stop the hild process and the HTTP server */
 
     if ( Fsc2_Internals.child_pid > 0 )
         kill( Fsc2_Internals.child_pid, SIGTERM );
@@ -1281,7 +1251,17 @@ final_exit_handler( void )
 
     if ( Delete_old_file && EDL.files->name )
         unlink( EDL.files->name );
-    unlink( FSC2_SOCKET );
+
+    TRY
+    {
+        snprintf( sock_file, len, P_tmpdir "/fsc2_%lu.uds", ( long ) getpid );
+        unlink( sock_file );
+    }
+    OTHERWISE
+    {
+        fprintf( stderr, "Couldn't delete socket file '" P_tmpdir
+                 "/fsc2_%lu.uds'.\n", ( long ) getpid );
+    }
 
     if ( EDL.files )
     {
@@ -1347,8 +1327,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
     CLOBBER_PROTECT( old_count );
 
-    notify_conn( BUSY_SIGNAL );
-
     /* If new file is to be loaded get its name and store it, otherwise use
        the previous name */
 
@@ -1360,10 +1338,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             fn = fsc2_show_fselector( "Select EDL file:", NULL, "*.edl",
                                       NULL );
             if ( ! fn || ! *fn )
-            {
-                notify_conn( UNBUSY_SIGNAL );
                 return;
-            }
         }
         else
         {
@@ -1378,7 +1353,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         {
             EDL.files = old_list;
             EDL.file_count = old_count;
-            notify_conn( UNBUSY_SIGNAL );
             return;
         }
     }
@@ -1389,7 +1363,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         if ( ! EDL.files )
         {
             fl_show_alert( "Error", "No file is loaded yet.", NULL, 1 );
-            notify_conn( UNBUSY_SIGNAL );
             return;
         }
 
@@ -1403,7 +1376,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
                                "anymore.", old_list->name, 1 );
             EDL.files = old_list;
             EDL.file_count = old_count;
-            notify_conn( UNBUSY_SIGNAL );
             return;
         }
 
@@ -1467,7 +1439,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         EDL.file_count = old_count;
         EDL.files = old_list;
 
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1523,7 +1494,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         EDL.file_count = old_count;
         EDL.files = old_list;
 
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1582,7 +1552,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         EDL.file_count = old_count;
         EDL.files = old_list;
 
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1635,7 +1604,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         EDL.file_count = old_count;
         EDL.files = old_list;
 
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1710,8 +1678,6 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
     Parse_result = FAIL;
     Is_tested = UNSET;
-
-    notify_conn( UNBUSY_SIGNAL );
 }
 
 
@@ -1745,8 +1711,6 @@ test_file( FL_OBJECT * a,
         THROW( EXCEPTION );
     }
 
-    notify_conn( BUSY_SIGNAL );
-
     /* If fsc2 is too busy testing a program to react to clicks of the "Stop
        Test" button and the user presses the button several times strange
        things happen, especially the "Quit" button becomes unusable. The
@@ -1763,7 +1727,6 @@ test_file( FL_OBJECT * a,
     if ( ! Is_loaded )
     {
         fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-        notify_conn( UNBUSY_SIGNAL );
         in_test = UNSET;
         return;
     }
@@ -1771,7 +1734,6 @@ test_file( FL_OBJECT * a,
     if ( Is_tested )
     {
         fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
-        notify_conn( UNBUSY_SIGNAL );
         in_test = UNSET;
         return;
     }
@@ -1794,7 +1756,6 @@ test_file( FL_OBJECT * a,
             in_test = UNSET;
             return;
         }
-        notify_conn( BUSY_SIGNAL );
     }
 
     /* While the test is run the only accessible button is the test button
@@ -1863,7 +1824,6 @@ test_file( FL_OBJECT * a,
     fl_activate_object( GUI.main_form->quit );
     fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-    notify_conn( UNBUSY_SIGNAL );
     in_test = UNSET;
 }
 
@@ -1882,12 +1842,9 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
          str2[ 128 ];
 
 
-    notify_conn( BUSY_SIGNAL );
-
     if ( ! Is_loaded )              /* check that there is a file loaded */
     {
         fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1896,7 +1853,6 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
         test_file( GUI.main_form->test_file, 1 );
         if ( GUI.main_form->test_file->u_ldata == 1 )  /* user break ? */
             return;
-        notify_conn( BUSY_SIGNAL );
     }
     else
     {
@@ -1926,7 +1882,6 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
                 test_file( GUI.main_form->test_file, 1 );
                 if ( GUI.main_form->test_file->u_ldata == 1 ) /* user break ? */
                     return;
-                notify_conn( BUSY_SIGNAL );
                 break;
             }
         }
@@ -1947,7 +1902,6 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
         else
             fl_show_alert( "Error", "Test of file failed.",
                            NULL, 1 );
-        notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
@@ -1984,7 +1938,6 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
         if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
                                   2, "No", "Yes", "", 1 ) )
         {
-            notify_conn( UNBUSY_SIGNAL );
             return;
         }
     }
@@ -2198,30 +2151,6 @@ clean_up( void )
 }
 
 
-/*----------------------------------------------------------------*
- * Function that deals with requests by the child process that is
- * listening for external connections (to send a new EDL program)
- *----------------------------------------------------------------*/
-
-void
-conn_request_handler( void )
-{
-    char line[ MAXLINE ];
-    int count;
-
-
-    while (    ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1
-            && errno == EINTR )
-        /* empty */ ;
-    line[ count - 1 ] = '\0';
-    GUI.main_form->Load->u_ldata = ( long ) *line;
-    if ( line[ 1 ] == 'd' )
-        Delete_file = SET;
-    GUI.main_form->Load->u_cdata = T_strdup( line + 2 );
-    fl_trigger_object( GUI.main_form->Load );
-}
-
-
 /*-----------------------------------------------------------------------*
  * Sets up the signal handlers for all kinds of signals the main process
  * could receive. This probably looks a bit like overkill, but I just
@@ -2298,11 +2227,7 @@ main_sig_handler( int signo )
             return;
 
         case SIGUSR1 :
-            Fsc2_Internals.conn_request = SET;
-            return;
-
         case SIGUSR2 :
-            Fsc2_Internals.conn_child_replied = SET;
             return;
 
         case SIGALRM :
@@ -2341,37 +2266,6 @@ main_sig_handler( int signo )
             Crash.already_crashed = SET;
             exit( EXIT_FAILURE );
     }
-}
-
-
-/*-------------------------------------------------------------------*
- * Function for sending signals to the child process that waits for
- * external connections. It sends either BUSY_SIGNAL (aka SIGUSR1)
- * or UNBUSY_SIGNAL (aka SIGUSR2) and then waits for the child
- * to reply with its own signal.
- *-------------------------------------------------------------------*/
-
-void
-notify_conn( int signo )
-{
-    /* Don't send signal to the process responsible for connections if it
-       doesn't exist (in load_file() at the very start) or when the
-       experiment is running - in this case fsc2 is busy anyway and the
-       connection process has already been informed about this. */
-
-    if (    Fsc2_Internals.conn_pid <= 0
-         || Fsc2_Internals.child_pid > 0
-         || Fsc2_Internals.cmdline_flags & DO_CHECK )
-        return;
-
-    kill( Fsc2_Internals.conn_pid, signo );
-
-    /* Wait for reply from child but avoid waiting when it in fact already
-       did reply (as indicated by the variable). */
-
-    while ( ! Fsc2_Internals.conn_child_replied )
-        fsc2_usleep( 50000, SET );
-    Fsc2_Internals.conn_child_replied = UNSET;
 }
 
 
@@ -2452,15 +2346,6 @@ usage( int return_status )
 int
 idle_handler( void )
 {
-    /* Check if a request from the child for external conections has
-       come in */
-
-    if ( Fsc2_Internals.conn_request )
-    {
-        Fsc2_Internals.conn_request = UNSET;
-        conn_request_handler( );
-    }
-
     /* Check for request by the HTTP server and its death */
 
 #if defined WITH_HTTP_SERVER

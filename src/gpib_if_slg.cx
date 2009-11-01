@@ -64,7 +64,7 @@ char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
 static int   gpib_init_controller( void );
 static void  gpib_init_log( const char * log_file_name );
 static void  gpib_read_end( const char * dev_name,
-                            char *       buffer,
+                            char       * buffer,
                             long         received,
                             long         expected );
 static void  gpib_log_date( void );
@@ -127,6 +127,12 @@ gpib_init( const char * log_file_name,
     if ( gpib_is_active )
         return SUCCESS;
 
+    if ( ! fsc2_obtain_lock( "gpib" ) )
+    {
+        strcpy( gpib_error_msg, "Failed to obtain lock for GPIB system" );
+        return FAILURE;
+    }
+
     ll = log_level;
     if ( ll < LL_NONE )
         ll = LL_NONE;
@@ -143,7 +149,7 @@ gpib_init( const char * log_file_name,
         {
             raise_permissions( );
             gpib_log_date( );
-            fprintf( gpib_log, "Initialization of controller failed.\n\n" );
+            fprintf( gpib_log, "Initialization of controller failed.\n" );
             if ( gpib_log != stderr )
                 fclose( gpib_log );                 /* close log file */
             lower_permissions( );
@@ -169,6 +175,8 @@ gpib_init( const char * log_file_name,
                     break;
             }
         }
+
+        fsc2_release_lock( "gpib" );
 
         return FAILURE;
     }
@@ -258,6 +266,8 @@ gpib_shutdown( void )
     }
 
     gpib_is_active = 0;
+    fsc2_release_lock( "gpib" );
+
     return SUCCESS;
 }
 
@@ -284,7 +294,7 @@ gpib_init_log( const char * log_file_name )
 
     raise_permissions( );
 
-    if ( log_file_name == NULL || *log_file_name == '\0' )
+    if ( ! log_file_name || ! *log_file_name )
     {
         gpib_log = stderr;
         fprintf( stderr, "GPIB log file not specified, using stderr "
@@ -333,7 +343,7 @@ gpib_init_log( const char * log_file_name )
 
 int
 gpib_init_device( const char * device_name,
-                  int *        dev )
+                  int        * dev )
 {
     GPIB_Dev_T *cur_dev;
 
@@ -516,8 +526,8 @@ gpib_timeout( int device,
     {
         raise_permissions( );
         gpib_log_date( );
-        fprintf( gpib_log, "CALL of gpib_timeout for device %s, ", dev_name );
-        fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
+        fprintf( gpib_log, "CALL of gpib_timeout for device %s: timeout "
+                           "is set to %s\n", dev_name, tc[ period ] );
         fflush( gpib_log );
         lower_permissions( );
     }
@@ -992,7 +1002,7 @@ gpib_read( int    device,
 
 static void
 gpib_read_end( const char * dev_name,
-               char *       buffer,
+               char       * buffer,
                long         received,
                long         expected )
 {

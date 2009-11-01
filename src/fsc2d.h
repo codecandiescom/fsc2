@@ -24,8 +24,7 @@
 #define FSC2D_HEADER
 
 
-int check_spawn_fsc2d( bool   /* exclusive  */,
-                       FILE * /* in_file_fp */  );
+pid_t check_spawn_fsc2d( FILE * /* in_file_fp */ );
 
 
 #endif  /* ! FSC2D_HEADER */

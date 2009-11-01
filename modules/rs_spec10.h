@@ -62,6 +62,7 @@ struct RS_SPEC10 {
     const char *dev_file;
     int16 handle;
     bool is_open;
+    bool has_lock;
     bool lib_is_init;
 
     struct {

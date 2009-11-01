@@ -62,8 +62,6 @@ run_help( FL_OBJECT * a,
         return;
     }
 
-    notify_conn( BUSY_SIGNAL );
-
     /* Fork and run help browser in child process */
 
     if ( ( res = fork( ) ) == 0 )
@@ -72,8 +70,6 @@ run_help( FL_OBJECT * a,
     if ( res == -1 )                                /* fork failed ? */
         fl_show_alert( "Error", "Sorry, unable to start the help browser.",
                        NULL, 1 );
-
-    notify_conn( UNBUSY_SIGNAL );
 }
 
 

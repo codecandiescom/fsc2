@@ -20,20 +20,15 @@
  */
 
 
-#if ! defined CONN_HEADER
-#define CONN_HEADER
-
-#include "fsc2.h"
-
-#define BUSY_SIGNAL    SIGUSR1
-#define UNBUSY_SIGNAL  SIGUSR2
+#if ! defined LOCKS_HEADER
+#define LOCKS_HEADER
 
 
-pid_t spawn_conn( bool   /* start_state */,
-                  FILE * /* in_file_fp  */  );
+bool fsc2_obtain_lock( const char * /* name */ );
+void fsc2_release_lock( const char * /* name */ );
 
 
-#endif  /* ! CONN_HEADER */
+#endif  /* ! LOCKS_HEADER */
 
 
 /*

@@ -314,15 +314,6 @@ new_data_handler( void )
     }
 #endif
 
-    /* Check if a request from the child for external conections came in */
-
-    if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-         && Fsc2_Internals.conn_request )
-    {
-        Fsc2_Internals.conn_request = UNSET;
-        conn_request_handler( );
-    }
-
     return 0;
 }
 

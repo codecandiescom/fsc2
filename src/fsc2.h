@@ -78,6 +78,7 @@
 #include "edit.h"
 #include "mail.h"
 #include "ipc.h"
+#include "locks.h"
 #include "exceptions.h"
 #include "T.h"
 #include "variables.h"
@@ -116,7 +117,6 @@
 #include "func_intact_o.h"
 #include "func_intact_m.h"
 #include "lan.h"
-#include "conn.h"
 #if defined WITH_HTTP_SERVER
 #include "dump_graphic.h"
 #include "http.h"
@@ -150,10 +150,6 @@ int  preparations_parser( FILE * /* in */ );
 
 int  experiment_parser( FILE * /* in */ );
 
-void conn_request_handler( void );
-
-void notify_conn( int /* signo */ );
-
 void usage( int /* result_status */ );
 
 int idle_handler( void );
@@ -184,8 +180,6 @@ struct Internals {
 
     pid_t child_pid;             /* pid of child process doing the
                                     measurement */
-    pid_t conn_pid;              /* pid of child process for handling
-                                    communication with scripts */
     volatile pid_t http_pid;     /* pid of child process that is a http server
                                     to allow viewing fsc2's state */
     int http_port;               /* port the http server is running on */
@@ -218,11 +212,6 @@ struct Internals {
                                       toolbox */
 
     volatile sig_atomic_t http_server_died; /* set when the http server dies */
-
-    volatile sig_atomic_t conn_request; /* set on request from the child
-                                           process dealing with external
-                                           connections */
-    volatile sig_atomic_t conn_child_replied;
 
     char *title;                 /* string with title of the main window */
     bool use_def_directory;
@@ -288,7 +277,6 @@ struct EDL_Info {
 
 struct Communication {
     int pd[ 4 ];                 /* pipe descriptors for measurement child */
-    int conn_pd[ 2 ];            /* pipe for communication child */
     int http_pd[ 4 ];            /* pipes for HTTP server */
 
     int mq_semaphore;            /* semaphore for message queue */

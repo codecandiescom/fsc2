@@ -26,32 +26,6 @@
 #include <sys/socket.h>
 
 
-/* Define the maximum number of instances of fsc2 that can run at the
-   same time (this number must be lower than SOMAXCONN, i.e. the
-   maximum backlog value in calls of listen(2). */
-
-#define FSC2_MAX_INSTANCES 16
-
-#if FSC2_MAX_INSTANCES > SOMAXCONN
-#error ***********************************************
-#error *   Maximum number of instances of fsc2 is    *
-#error *   larger than SOMAXCONN, see src/global.h   *
-#error ***********************************************
-#endif
-
-
-/* Define the name of fsc2's (Unix domain) socket file via which other
-   programs can send EDL scripts */
-
-#define FSC2_SOCKET  "/tmp/fsc2.uds"
-
-
-/* Define the name of fsc2d's (Unix domain) socket file that is used to
-   control the different instances of fsc2 */
-
-#define FSC2D_SOCKET  "/tmp/fsc2d.uds"
-
-
 /* The maximum length send via sockets by fsc2 */
 
 #define MAX_LINE_LENGTH    4096
@@ -554,13 +528,12 @@ enum {
     DO_DELETE     = ( 1 <<  4 ),
     NO_MAIL       = ( 1 <<  5 ),
     NO_BALLOON    = ( 1 <<  6 ),
-    NON_EXCLUSIVE = ( 1 <<  7 ),
-    BATCH_MODE    = ( 1 <<  8 ),
-    DO_CHECK      = ( 1 <<  9 ),                /* used for check runs only */
-    TEST_ONLY     = ( 1 << 10 ),
-    NO_GUI_RUN    = ( 1 << 11 ),
-    ICONIFIED_RUN = ( 1 << 12 ),
-    LOCAL_EXEC    = ( 1 << 13 )
+    BATCH_MODE    = ( 1 <<  7 ),
+    DO_CHECK      = ( 1 <<  8 ),                /* used for check runs only */
+    TEST_ONLY     = ( 1 <<  9 ),
+    NO_GUI_RUN    = ( 1 << 10 ),
+    ICONIFIED_RUN = ( 1 << 11 ),
+    LOCAL_EXEC    = ( 1 << 12 )
 };
 
 

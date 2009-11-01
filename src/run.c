@@ -127,7 +127,7 @@ run( void )
         return FAIL;
     }
 
-    /* Initilaize libraries for communication with the devices and do some
+    /* Initialize libraries for communication with the devices and do some
        changes to the graphics */
 
     if ( ! start_comm_libs( ) )
@@ -257,11 +257,19 @@ start_comm_libs( void )
 
     if ( Need_RULBUS )
     {
+        if ( fsc2_obtain_lock( "rulbus" ) == FAIL )
+        {
+            eprint( FATAL, UNSET, "Failed to initialize RULBUS: Can't obtain "
+                    "lock.\n" );
+            goto rulbus_fail;
+        }
+
         raise_permissions( );
 
         if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
         {
             lower_permissions( );
+            fsc2_release_lock( "rulbus" );
             eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
                     rulbus_strerror( ) );
             goto rulbus_fail;
@@ -276,6 +284,13 @@ start_comm_libs( void )
 
     if ( Need_USB )
     {
+        if ( fsc2_obtain_lock( "usb" ) == FAIL )
+        {
+            eprint( FATAL, UNSET, "Failed to initialize USB: %s.\n",
+                    rulbus_strerror( ) );
+            goto libusb_fail;
+        }
+
         raise_permissions( );
 
 #if defined WITH_LIBUSB_0_1
@@ -286,6 +301,7 @@ start_comm_libs( void )
         if ( libusb_init( NULL ) != 0 )
         {
             lower_permissions( );
+            fsc2_release_lock( "usb" );
             eprint( FATAL, UNSET, "Failed to initialize USB.\n" );
             goto libusb_fail;
         }
@@ -307,6 +323,13 @@ start_comm_libs( void )
 
     if ( Need_MEDRIVER )
     {
+        if ( fsc2_obtain_lock( "meilhaus" ) == FAIL )
+        {
+            eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
+                    "Can't obtain lock.\n" );
+            goto medriver_fail;
+        }
+
         raise_permissions( );
 
         if ( ( retval = meOpen( ME_OPEN_NO_FLAGS ) ) != ME_ERRNO_SUCCESS )
@@ -315,6 +338,7 @@ start_comm_libs( void )
 
             meErrorGetMessage( retval, msg, sizeof msg );
             lower_permissions( );
+            fsc2_release_lock( "meilhaus" );
             eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
                     "%s\n", msg );
             goto medriver_fail;
@@ -342,14 +366,20 @@ start_comm_libs( void )
 
 #if defined WITH_LIBUSB_1_0
     if ( Need_USB )
+    {
         libusb_exit( NULL );
+        fsc2_release_lock( "usb" );
+    }
 
  libusb_fail:
 #endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
+    {
         rulbus_close( );
+        fsc2_release_lock( "rulbus" );
+    }
 
  rulbus_fail:
 #endif
@@ -427,6 +457,8 @@ no_prog_to_run( void )
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
+
+        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
@@ -439,12 +471,18 @@ no_prog_to_run( void )
 
 #if defined WITH_LIBUSB_1_0
     if ( Need_USB )
+    {
         libusb_exit( NULL );
+        fsc2_release_lock( "usb" );
+    }
 #endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
+    {
         rulbus_close( );
+        fsc2_release_lock( "rulbus" );
+    }
 #endif
 
     if ( Need_GPIB )
@@ -587,6 +625,8 @@ init_devs_and_graphics( void )
                 eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n",
                         msg );
             }
+
+            fsc2_release_lock( "meilhaus" );
         }
 #endif
 
@@ -599,12 +639,18 @@ init_devs_and_graphics( void )
 
 #if defined WITH_LIBUSB_1_0
         if ( Need_USB )
+        {
             libusb_exit( NULL );
+            fsc2_release_lock( "usb" );
+        }
 #endif
 
 #if defined WITH_RULBUS
         if ( Need_RULBUS )
+        {
             rulbus_close( );
+            fsc2_release_lock( "rulbus" );
+        }
 #endif
 
         if ( Need_GPIB )
@@ -738,6 +784,8 @@ fork_failure( int stored_errno )
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
+
+        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
@@ -750,12 +798,18 @@ fork_failure( int stored_errno )
 
 #if defined WITH_LIBUSB_1_0
     if ( Need_USB )
+    {
         libusb_exit( NULL );
+        fsc2_release_lock( "usb" );
+    }
 #endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
+    {
         rulbus_close( );
+        fsc2_release_lock( "rulbus" );
+    }
 #endif
 
     if ( Need_GPIB )
@@ -1065,6 +1119,8 @@ run_sigchld_callback( FL_OBJECT * a,
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
+
+        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
@@ -1077,12 +1133,18 @@ run_sigchld_callback( FL_OBJECT * a,
 
 #if defined WITH_LIBUSB_1_0
     if ( Need_USB )
+    {
         libusb_exit( NULL );
+        fsc2_release_lock( "usb" );
+    }
 #endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
+    {
         rulbus_close( );
+        fsc2_release_lock( "rulbus" );
+    }
 #endif
 
     if ( Need_GPIB )
@@ -1242,8 +1304,6 @@ set_buttons_for_run( int run_state )
 
         fl_activate_object( GUI.main_form->bug_report );
         fl_set_object_lcol( GUI.main_form->bug_report, FL_BLACK );
-
-        notify_conn( UNBUSY_SIGNAL );
     }
 
     fl_unfreeze_form( GUI.main_form->fsc2 );
@@ -1454,8 +1514,6 @@ child_sig_handler( int signo )
 
     if ( getppid( ) == 1 )
     {
-        if ( Fsc2_Internals.conn_pid > 0 )
-            kill( Fsc2_Internals.conn_pid, SIGTERM );
         delete_all_shm( );
         sema_destroy( Comm.mq_semaphore );
     }

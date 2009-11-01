@@ -334,9 +334,16 @@ vicp_open( const char * dev_name,
     if ( us_timeout < 0 )
         us_timeout = VICP_DEFAULT_CONNECT_TIMEOUT;
 
+    if ( ! fsc2_obtain_lock( address ) )
+    {
+        print( FATAL, "Failed to obtain lock for device %s.\n", dev_name );
+        THROW( EXCEPTION );
+    }
+
     if ( ( fd = fsc2_lan_open( dev_name, address, VICP_PORT,
                                us_timeout, quit_on_signal ) ) == -1 )
     {
+        fsc2_release_lock( address );
         print( FATAL, "Failed to open connection to device.\n" );
         THROW( EXCEPTION );
     }
@@ -348,7 +355,7 @@ vicp_open( const char * dev_name,
     vicp.eoi_was_set      = UNSET;
     vicp.us_write_timeout =
     vicp.us_read_timeout  = VICP_DEFAULT_READ_WRITE_TIMEOUT;
-    vicp.name             =
+    vicp.name             = NULL;
     vicp.address          = NULL;
 
     /* Also store name and address for the device, this information is
@@ -363,10 +370,11 @@ vicp_open( const char * dev_name,
     OTHERWISE
     {
         vicp_close_without_header( );
+        fsc2_release_lock( address );
         RETHROW( );
     }
 
-    /* Finally bring the device into the remote state by sending a header
+    /* Finally bring the device into remote state by sending a header
        where just the remote and the lockout bits in the operations byte
        are set */
 
@@ -405,7 +413,10 @@ vicp_close_without_header( void )
         vicp.name = T_free( vicp.name );
 
     if ( vicp.address )
-        vicp.address= T_free( vicp.address );
+    {
+        fsc2_release_lock( vicp.address );
+        vicp.address = T_free( vicp.address );
+    }
 }
 
 
@@ -439,12 +450,6 @@ vicp_close( void )
     /* Now close down the connection to the device */
 
     vicp_close_without_header( );
-
-    if ( vicp.name )
-        vicp.name = T_free( vicp.name );
-
-    if ( vicp.address )
-        vicp.address = T_free( vicp.address );
 }
 
 

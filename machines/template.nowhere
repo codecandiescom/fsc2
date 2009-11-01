@@ -60,6 +60,16 @@ prefix             := /usr/local
 # DEF_INCL_DIR       := /scratch/EDL/includes
 
 
+# The variable, LOCK_DIR, is the directory where UUCP style lockfiles
+# are created. This should be '/var/lock' (which is the default if
+# this variable isn't set) according to version 2.2 of the File-system
+# Hierachy Standard. Either fsc2 itself or all its users must have read
+# and write permissions for this directory. Also see the longer discussion
+# in section C of the INSTALL file.
+
+LOCK_DIR    := /var/lock
+
+
 # The next variable defines the GPIB library to use, it must be set to
 # either 'LLP' for the LLP library, 'NI' for the newer National
 # Instruments library, 'NI_OLD' for the old National Instruments library
@@ -140,16 +150,6 @@ GPIB_LOG_LEVEL     := HIGH
 # devices controlled via serial ports are not created.
 
 # WITHOUT_SERIAL_PORTS   := yes
-
-
-# The variable, SERIAL_LOCK_DIR, is the directory where UUCP style
-# lockfiles for the serial ports are created. This should be '/var/lock'
-# according to version 2.2 of the File-system Hierachy Standard. Either
-# fsc2 itself or all its users must have read and write permissions for
-# this directory. Also see the longer discussion in section C of the
-# INSTALL file.
-
-SERIAL_LOCK_DIR    := /var/lock
 
 
 # Next set the file for writing logs about the activity on the serial

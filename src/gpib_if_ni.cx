@@ -128,6 +128,12 @@ gpib_init( const char * log_file_name,
     if ( gpib_is_active )
         return SUCCESS;
 
+    if ( ! fsc2_obtain_lock( "gpib" ) )
+    {
+        strcpy( gpib_error_msg, "Failed to obtain lock for GPIB system" );
+        return FAILURE;
+    }
+
     ll = log_level;
     if ( ll < LL_NONE )
         ll = LL_NONE;
@@ -156,6 +162,8 @@ gpib_init( const char * log_file_name,
                 fclose( gpib_log );                 /* close log file */
             lower_permissions( );
         }
+
+        fsc2_release_lock( "gpib" );
 
         return FAILURE;
     }
@@ -238,6 +246,9 @@ gpib_shutdown( void )
     }
 
     gpib_is_active = 0;
+
+    fsc2_release_lock( "gpib" );
+
     return SUCCESS;
 }
 

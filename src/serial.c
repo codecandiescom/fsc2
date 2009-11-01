@@ -48,7 +48,6 @@
 static struct {
     char           * dev_file;
     char           * dev_name;
-    char           * lock_file;
     bool             is_open;
     bool             have_lock;
     int              fd;
@@ -63,10 +62,6 @@ static int ll;                       /* log level                            */
 static FILE *fsc2_serial_log = NULL; /* file pointer of serial port log file */
 
 
-
-static bool get_serial_lock( int sn );
-
-static void remove_serial_lock( int sn );
 
 static void fsc2_serial_log_date( void );
 
@@ -125,7 +120,7 @@ fsc2_request_serial_port( const char * dev_file,
 			THROW( EXCEPTION );
 		}
 
-    /* Get memory fir another structure */
+    /* Get memory for another structure */
 
 	Serial_Ports = T_realloc( Serial_Ports,
 							  ( Num_Serial_Ports + 1 ) * sizeof *Serial_Ports );
@@ -134,21 +129,7 @@ fsc2_request_serial_port( const char * dev_file,
     Serial_Ports[ Num_Serial_Ports ].dev_name  = T_strdup( dev_name );
     Serial_Ports[ Num_Serial_Ports ].have_lock = UNSET;
     Serial_Ports[ Num_Serial_Ports ].is_open   = UNSET;
-	Serial_Ports[ Num_Serial_Ports ].lock_file = NULL;
 	Serial_Ports[ Num_Serial_Ports ].fd        = -1;
-
-    /* Assemble name of lockfile ((optional) */
-
-#ifdef SERIAL_LOCK_DIR
-    if ( *( SERIAL_LOCK_DIR + strlen( SERIAL_LOCK_DIR ) - 1 ) == '/' )
-        Serial_Ports[ Num_Serial_Ports ].lock_file
-			= get_string( "%sLCK..%s", SERIAL_LOCK_DIR,
-						  strrchr( dev_file, '/' ) + 1 );
-    else
-        Serial_Ports[ Num_Serial_Ports ].lock_file
-			= get_string( "%s/LCK..%s", SERIAL_LOCK_DIR,
-						  strrchr( dev_file, '/' ) + 1 );
-#endif
 
 	return Num_Serial_Ports++;
 }
@@ -267,7 +248,6 @@ fsc2_final_serial_cleanup( void )
 
         Serial_Ports[ i ].dev_name  = T_free( Serial_Ports[ i ].dev_name );
         Serial_Ports[ i ].dev_file  = T_free( Serial_Ports[ i ].dev_file );
-        Serial_Ports[ i ].lock_file = T_free( Serial_Ports[ i ].lock_file );
     }
 
     Serial_Ports = T_free( Serial_Ports );
@@ -329,11 +309,13 @@ fsc2_serial_open( int sn,
         return &Serial_Ports[ sn ].new_tio;
     }
 
-    /* Try to create a lockfile */
+    /* Try to obtain a lock */
 
-    if ( ! get_serial_lock( sn ) )
+    if ( ! ( Serial_Ports[ sn ].have_lock =
+	             		fsc2_obtain_lock( strchr( Serial_Ports[ sn ].dev_file,
+                                                  '/' ) + 1 ) ) )
     {
-        fsc2_serial_log_message( "Error: Failure to create lockfile\n" );
+        fsc2_serial_log_message( "Error: Failure to create lock file\n" );
         fsc2_serial_log_function_end( "fsc2_serial_open",
 										Serial_Ports[ sn ].dev_name );
         errno = EACCES;
@@ -346,7 +328,7 @@ fsc2_serial_open( int sn,
 
     if ( ( fd = open( Serial_Ports[ sn ].dev_file, flags ) ) < 0 )
     {
-        remove_serial_lock( sn );
+        fsc2_release_lock( strchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
         lower_permissions( );
         fsc2_serial_log_message( "Error: Failure to open serial port '%s' in "
                                  "function fsc2_serial_open()\n",
@@ -426,10 +408,10 @@ fsc2_serial_close( int sn )
         Serial_Ports[ sn ].is_open = UNSET;
     }
 
-    /* Also remove the lockfile for the serial port */
+    /* Also remove the lock file for the serial port */
 
     if ( Serial_Ports[ sn ].have_lock )
-        remove_serial_lock( sn );
+        fsc2_release_lock( strchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
 
     if ( Serial_Ports[ sn ].dev_name )
     {
@@ -834,217 +816,6 @@ fsc2_serial_read( int          sn,
                                   Serial_Ports[ sn ].dev_name );
 
     return total_count;
-}
-
-
-/*---------------------------------------------------------------*
- * Tries to create a UUCP style lockfile for a serial port.
- * According to version 2.2 of the Filesystem Hierarchy
- * Standard the lockfiles must be stored in /var/lock following
- * the naming convention that the file name starts with "LCK..",
- * followed by the base name of the device file. E.g. for the
- * device file '/dev/ttyS0' the lockfile 'LCK..ttyS0' has to
- * be created.
- * According to the same standard, the lockfile must contain
- * the process identifier (PID) as a ten byte ASCII decimal
- * number, with a trailing newline (HDB UUCP format).
- *---------------------------------------------------------------*/
-
-#ifdef SERIAL_LOCK_DIR
-static bool
-get_serial_lock( int sn )
-{
-    int fd;
-    char buf[ 128 ];
-    const char *bp;
-    int n;
-    long pid = -1;
-    mode_t mask;
-
-
-    /* Try to open lockfile - if it exists we can check its content and
-       decide what to do, i.e. find out if the process it belonged to is
-       dead, in which case it can be removed */
-
-    fsc2_serial_log_function_start( "get_serial_lock",
-                                    Serial_Ports[ sn ].dev_name );
-
-    raise_permissions( );
-
-    if ( ( fd = open( Serial_Ports[ sn ].lock_file, O_RDONLY ) ) >= 0 )
-    {
-        n = read( fd, buf, sizeof buf - 1 );
-        close( fd );
-
-        lower_permissions( );
-
-        if ( n == 11 )                    /* expect standard HDB UUCP format */
-        {
-            buf[ n ] = '\0';
-            n = 0;
-            bp = buf;
-            while ( *bp && *bp == ' ' )
-                bp++;
-
-            if ( *bp && isdigit( ( unsigned char ) *bp ) )
-                n = sscanf( bp, "%ld", &pid );
-
-            if ( n == 0 || n == EOF )
-            {
-                fsc2_serial_log_message( "Error: Lockfile '%s' for serial "
-                                         "port '%s' has unknown format.\n",
-										 Serial_Ports[ sn ].lock_file,
-                                         Serial_Ports[ sn ].dev_file );
-                fsc2_serial_log_function_end( "get_serial_lock",
-                                              Serial_Ports[ sn ].dev_name );
-                return FAIL;
-            }
-
-            /* Check if the lockfile belongs to a running process, if not
-               try to delete it */
-
-            if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 && errno == ESRCH )
-            {
-                raise_permissions( );
-
-                if ( unlink( Serial_Ports[ sn ].lock_file ) < 0 )
-                {
-                    lower_permissions( );
-                    fsc2_serial_log_message( "Error: Can't delete stale lock "
-                                             "'%s' file for serial port "
-                                             "'%s'.\n",
-                                             Serial_Ports[ sn ].lock_file,
-											 Serial_Ports[ sn ].dev_file );
-                    fsc2_serial_log_function_end( "get_serial_lock",
-                                                  Serial_Ports[ sn ].dev_name );
-                    return FAIL;
-                }
-
-                lower_permissions( );
-            }
-            else
-            {
-                fsc2_serial_log_message( "Error: Serial port '%s' is locked by "
-                                         "another program according to lock "
-                                         "file '%s'.\n",
-										 Serial_Ports[ sn ].dev_file,
-                                         Serial_Ports[ sn ].lock_file );
-                fsc2_serial_log_function_end( "get_serial_lock",
-                                              Serial_Ports[ sn ].dev_name );
-                return FAIL;
-            }
-        }
-        else
-        {
-            fsc2_serial_log_message( "Error: Can't read lockfile '%s' for "
-                                     "serial port '%s' or it has an unknown "
-                                     "format.\n",
-                                     Serial_Ports[ sn ].lock_file,
-									 Serial_Ports[ sn ].dev_file );
-            fsc2_serial_log_function_end( "get_serial_lock",
-                                          Serial_Ports[ sn ].dev_name );
-            return FAIL;
-        }
-    }
-    else                               /* couldn't open lockfile, check why */
-    {
-        lower_permissions( );
-
-        if ( errno == EACCES )                       /* no access permission */
-        {
-            fsc2_serial_log_message( "Error: No permission to access lock "
-                                     "file '%s' for serial port '%s'.\n",
-                                     Serial_Ports[ sn ].lock_file,
-									 Serial_Ports[ sn ].dev_file );
-            fsc2_serial_log_function_end( "get_serial_lock",
-                                          Serial_Ports[ sn ].dev_name );
-            return FAIL;
-        }
-
-        if ( errno != ENOENT )    /* other errors except file does not exist */
-        {
-            fsc2_serial_log_message( "Error: Can't access lockfile '%s' for "
-                                     "serial port '%s'.\n",
-                                     Serial_Ports[ sn ].lock_file,
-									 Serial_Ports[ sn ].dev_file );
-            fsc2_serial_log_function_end( "get_serial_lock",
-                                          Serial_Ports[ sn ].dev_name );
-            return FAIL;
-        }
-    }
-
-    /* Create lockfile compatible with UUCP-1.2 */
-
-    mask = umask( 022 );
-
-    raise_permissions( );
-
-    if ( ( fd = open( Serial_Ports[ sn ].lock_file,
-                      O_WRONLY | O_CREAT | O_EXCL, 0666 ) ) < 0 )
-    {
-        lower_permissions( );
-        fsc2_serial_log_message( "Error: Can't create lockfile '%s' for "
-                                 "serial port '%s'.\n",
-                                 Serial_Ports[ sn ].lock_file,
-								 Serial_Ports[ sn ].dev_file );
-        fsc2_serial_log_function_end( "get_serial_lock",
-                                      Serial_Ports[ sn ].dev_name );
-        return FAIL;
-    }
-
-    umask( mask );
-    if ( chown( Serial_Ports[ sn ].lock_file, Fsc2_Internals.EUID,
-                Fsc2_Internals.EGID ) != 0 )
-        print( WARN, "Failed to set ownership on lockfile '%s' for serial "
-               "port '%s', might cause trouble later on.\n",
-               Serial_Ports[ sn ].lock_file, Serial_Ports[ sn ].dev_file );
-
-    snprintf( buf, sizeof buf, "%10ld\n", ( long ) getpid( ) );
-    if ( write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) )
-        print( WARN, "Failed to write to lockfile '%s' for serial port '%s', "
-               "might cause trouble later on.\n",
-               Serial_Ports[ sn ].lock_file, Serial_Ports[ sn ].dev_file );
-    close( fd );
-
-    lower_permissions( );
-
-    Serial_Ports[ sn ].have_lock = SET;
-
-    fsc2_serial_log_function_end( "get_serial_lock",
-                                  Serial_Ports[ sn ].dev_name );
-
-    return OK;
-}
-#else
-static bool get_serial_lock( int sn  UNUSED_ARG )
-{
-    return OK;
-}
-#endif
-
-
-/*-------------------------------------------------------------*
- * Deletes the previously created lockfile for a serial port.
- *-------------------------------------------------------------*/
-
-static void
-remove_serial_lock( int sn )
-{
-#ifdef SERIAL_LOCK_DIR
-    fsc2_serial_log_function_end( "remove_serial_lock",
-                                  Serial_Ports[ sn ].dev_name );
-
-    if ( Serial_Ports[ sn ].have_lock )
-    {
-        raise_permissions( );
-        unlink( Serial_Ports[ sn ].lock_file );
-        lower_permissions( );
-        Serial_Ports[ sn ].have_lock = UNSET;
-    }
-
-    fsc2_serial_log_function_end( "remove_serial_lock",
-                                  Serial_Ports[ sn ].dev_name );
-#endif
 }
 
 

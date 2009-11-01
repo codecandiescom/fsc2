@@ -45,6 +45,7 @@ rs_spec10_init_hook( void )
 
     rs_spec10->dev_file = DEVICE_FILE;
     rs_spec10->is_open = UNSET;
+    rs_spec10->has_lock = UNSET;
     rs_spec10->lib_is_init = UNSET;
 
     rs_spec10->temp.is_setpoint = UNSET;
@@ -106,7 +107,26 @@ rs_spec10_exp_hook( void )
 
     rs_spec10_read_state( );
 
-    rs_spec10_init_camera( );
+    if ( ! fsc2_obtain_lock( device_name ) )
+    {
+        print( FATAL, "Can't obtain lock for device.\n" );
+        THROW( EXCEPTION );
+    }
+
+    rs_spec10->has_lock = SET;
+
+    TRY
+    {
+        rs_spec10_init_camera( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fsc2_release_lock( device_name );
+        rs_spec10->has_lock = UNSET;
+        RETHROW( );
+    }
+
     return 1;
 }
 
@@ -136,6 +156,12 @@ rs_spec10_end_of_exp_hook( void )
         rs_spec10->is_open = UNSET;
     }
 
+    if ( rs_spec10->has_lock )
+    {
+        fsc2_release_lock( device_name );
+        rs_spec10->has_lock = UNSET;
+    }
+
     return 1;
 }
 
@@ -163,6 +189,12 @@ rs_spec10_exit_hook( void )
     {
         pl_pvcam_uninit( );
         rs_spec10->lib_is_init = UNSET;
+    }
+
+    if ( rs_spec10->has_lock )
+    {
+        fsc2_release_lock( device_name );
+        rs_spec10->has_lock = UNSET;
     }
 }
 

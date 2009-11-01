@@ -142,6 +142,15 @@ vxi11_open( const char * dev_name,
         return FAILURE;
 	}
 
+    if ( fsc2_obtain_lock( address ) )
+    {
+        print( FATAL, "Failed to obtain lock for device %s.\n", name );
+
+		ip   = T_free( ( char * ) ip );
+		name = T_free( ( char * ) name );
+        return FAILURE;
+    }
+
 	if ( fsc2_lan_log_level( ) >= LL_CE )
 		fsc2_lan_log_function_start( "vxi11_open", name );
 
@@ -154,8 +163,10 @@ vxi11_open( const char * dev_name,
 		if ( fsc2_lan_log_level( ) >= LL_CE )
 			fsc2_lan_log_function_end( "vxi11_open", name );
 
-		T_free( ( char * ) ip );
-		T_free( ( char * ) name );
+        fsc2_release_lock( ip );
+
+		ip   = T_free( ( char * ) ip );
+		name = T_free( ( char * ) name );
 
 		print( FATAL, "%s",
 			   clnt_spcreateerror( "Failed to connect to device" ) );
@@ -180,8 +191,11 @@ vxi11_open( const char * dev_name,
 		if ( fsc2_lan_log_level( ) >= LL_CE )
 			fsc2_lan_log_function_end( "vxi11_open", name );
 
-		T_free( ( char * ) ip );
-		T_free( ( char * ) name );
+        fsc2_release_lock( ip );
+
+		ip   = T_free( ( char * ) ip );
+		name = T_free( ( char * ) name );
+
 		core_link = NULL;
 
 		print( FATAL, "Failed to connect to device.\n" );
@@ -269,6 +283,8 @@ vxi11_close( void )
 
 	if ( dev_error->error )
 	{
+        fsc2_release_lock( ip );
+
 		if ( fsc2_lan_log_level( ) >= LL_ERR )
 			fsc2_lan_log_message( "Error on vxi11_close(): %s",
 								  vxi11_sperror( dev_error->error ) );
@@ -282,9 +298,11 @@ vxi11_close( void )
 
 	clnt_destroy( core_client );
 
+    fsc2_release_lock( ip );
+
 	core_client = NULL;
 	ip          = T_free( ( char * ) ip );
-	name        = T_free( ( char * ) ip );
+	name        = T_free( ( char * ) name );
 
 	return SUCCESS;
 }

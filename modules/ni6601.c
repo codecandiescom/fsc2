@@ -108,6 +108,12 @@ ni6601_exp_hook( void )
     int ret;
 
 
+    if ( ! fsc2_obtain_lock( device_name ) )
+    {
+        print( FATAL, "Can't obtain lock for device.\n" );
+        return 0;
+    }
+
     buffered_counter = NI6601_COUNTER_0 - 1;
 
     /* Ask for state of the one of the counters of the board to find out
@@ -117,47 +123,49 @@ ni6601_exp_hook( void )
     ret = ni6601_is_counter_armed( BOARD_NUMBER, NI6601_COUNTER_0, &s );
     lower_permissions( );
 
+    if ( ret == NI6601_OK )
+        return 1;
+
     switch ( ret )
     {
-        case NI6601_OK :
-            break;
-
         case NI6601_ERR_NSB :
             print( FATAL, "Invalid board number.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_NDV :
             print( FATAL, "Driver for board not loaded.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_ACS :
             print( FATAL, "No permissions to open device file for board.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_DFM :
             print( FATAL, "Device file for board missing.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_DFP :
             print( FATAL, "Unspecified error when opening device file for "
                    "board.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_BBS :
             print( FATAL, "Board already in use by another program.\n" );
-            THROW( EXCEPTION );
+            break;
 
         case NI6601_ERR_INT :
             print( FATAL, "Internal error in board driver or library.\n" );
-            THROW( EXCEPTION );
+            break;
 
         default :
             print( FATAL, "Unrecognized error when trying to access the "
                    "board.\n" );
-            THROW( EXCEPTION );
+            break;
     }
 
-    return 1;
+    fsc2_release_lock( device_name );
+
+    return 0;
 }
 
 
@@ -172,6 +180,9 @@ ni6601_end_of_exp_hook( void )
     lower_permissions( );
 
     buffered_counter = NI6601_COUNTER_0 - 1;
+
+    fsc2_release_lock( device_name );
+
     return 1;
 }
 
