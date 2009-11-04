@@ -398,8 +398,8 @@ dg2020_channel_assign( int channel,
 /*--------------------------------------------------------------*
  * dg2020_update_data() tells the pulser to update all channels
  * according to the data it got send before - this is necessary
- * because the pulser is used in manual update mode which this
- * is faster than automatic update.
+ * because the pulser is used in manual update mode which is
+ * faster than automatic update.
  * <-
  *  * 1: ok, 0: error
  *--------------------------------------------------------------*/
@@ -818,9 +818,6 @@ dg2020_gpib_check( void )
         }
         else
         {
-            gpib_log_message( "dg2020_set_constant( %d, %ld, %ld, %d ) "
-                              "failed.\n", cur->channel, cur->address,
-                              cur->length, cur->state );
             result = FAIL;
             cur = cur->next;
         }
