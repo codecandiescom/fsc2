@@ -427,8 +427,8 @@ ep385_exp_hook( void )
     if ( ! ep385_init( DEVICE_NAME ) )
     {
         ep385.in_setup = UNSET;
-        print( FATAL, "Failure to initialize the pulser: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Failure to initialize the pulser: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
     ep385.in_setup = UNSET;

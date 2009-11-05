@@ -62,6 +62,7 @@ int gpib_init( const char * /* log_file_name */,
 int gpib_shutdown( void );
 int gpib_init_device( const char * /* device_name */,
                       int *        /* dev         */ );
+int gpib_remove_device( int /* device */ );
 int gpib_timeout( int /* device */,
                   int /* period */ );
 int gpib_clear_device( int /* device */ );
@@ -88,13 +89,6 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 
 #define SUCCESS   0
 #define FAILURE  -1
-
-
-#ifdef __cplusplus
-#define GPIB_DEV_P ( GPIB_Dev_T * )
-#else
-#define GPIB_DEV_P
-#endif
 
 
 /*----------------------------------------------------------*

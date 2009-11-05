@@ -85,6 +85,7 @@ int gpib_init( const char * /* log_file_name */,
 int gpib_shutdown( void );
 int gpib_init_device( const char * /* device_name */,
                       int *        /* dev         */ );
+int gpib_remove_device( int /* device */ );
 int gpib_timeout( int /* device */,
                   int /* period */ );
 int gpib_clear_device( int /* device */ );

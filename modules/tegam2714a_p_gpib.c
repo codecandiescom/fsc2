@@ -21,7 +21,7 @@
 
 
 #include "tegam2714a_p.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 static void tegam2714a_p_set_timebase( double timebase );
@@ -56,8 +56,8 @@ tegam2714a_p_init( const char * name )
 
     if ( gpib_init_device( name, &tegam2714a_p.device ) == FAILURE )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

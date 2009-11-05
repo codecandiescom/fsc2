@@ -83,7 +83,7 @@ static volatile sig_atomic_t Sig_type = 0;
  *-----------------------------------------------------------*/
 
 int
-main( int    argc,
+main( int    argc    UNUSED_ARG,
       char * argv[ ] )
 {
     char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";

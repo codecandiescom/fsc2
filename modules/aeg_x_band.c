@@ -46,6 +46,8 @@ Var_T * magnet_field(           Var_T * v );
 Var_T * set_field(              Var_T * v );
 Var_T * get_field(              Var_T * v );
 Var_T * magnet_field_step_size( Var_T * v );
+Var_T * magnet_sweep_up(        Var_T * v );
+Var_T * magnet_sweep_down(      Var_T * v );
 Var_T * sweep_up(               Var_T * v );
 Var_T * sweep_down(             Var_T * v );
 Var_T * reset_field(            Var_T * v );
@@ -437,6 +439,16 @@ get_field( Var_T * v  UNUSED_ARG )
  *-----------------------------------------------------*/
 
 Var_T *
+magnet_sweep_up( Var_T * v )
+{
+    return sweep_up( v );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
+Var_T *
 sweep_up( Var_T * v  UNUSED_ARG )
 {
     bool err_flag = UNSET;
@@ -462,6 +474,16 @@ sweep_up( Var_T * v  UNUSED_ARG )
 
     magnet_sweep( 1 );
     return vars_push( FLOAT_VAR, magnet.act_field );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
+Var_T *
+magnet_sweep_down( Var_T * v )
+{
+    return sweep_down( v );
 }
 
 

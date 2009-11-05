@@ -201,8 +201,8 @@ lecroy9400_exp_hook( void )
     lecroy9400_IN_SETUP = SET;
     if ( ! lecroy9400_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
     lecroy9400_IN_SETUP = UNSET;

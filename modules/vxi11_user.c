@@ -178,7 +178,7 @@ vxi11_open( const char * dev_name,
 	link_parms.clientId	    = 0;         /* not needed here */
 	link_parms.lockDevice	= 1;
 	link_parms.lock_timeout	=
-                            us_timeout ? lrnd( 0.001 * us_timeout ) : LANG_MAX;
+                            us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
 	link_parms.device	    = ( char * ) vxi11_name;
 
 	core_link = create_link_1( &link_parms, core_client );
@@ -319,7 +319,7 @@ vxi11_close( void )
  *       mean a nearly infinite timeout
  *-------------------------------------------------------------*/
 
-void
+int
 vxi11_set_timeout( int  dir,
 				   long us_timeout )
 {
@@ -332,7 +332,9 @@ vxi11_set_timeout( int  dir,
     if ( dir == READ )
         read_timeout  = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
     else
-        write_timeout = us_timeout : lrnd( 0.001 * us_timeout ) : LONG_MAX;
+        write_timeout = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
+
+    return SUCCESS;
 }
 
 

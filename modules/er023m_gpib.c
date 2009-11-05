@@ -21,7 +21,7 @@
 
 
 #include "er023m.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 static bool dont_print_on_error = UNSET;

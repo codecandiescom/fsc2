@@ -161,8 +161,8 @@ lecroy93xx_exp_hook( void )
 
     if ( ! lecroy93xx_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

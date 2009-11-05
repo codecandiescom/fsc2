@@ -26,7 +26,7 @@
 /* Include configuration information for the device */
 
 #include "sr510.conf"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 const char device_name[ ]  = DEVICE_NAME;
@@ -200,8 +200,8 @@ sr510_exp_hook( void )
 
     if ( ! sr510_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

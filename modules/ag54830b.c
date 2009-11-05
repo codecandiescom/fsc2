@@ -81,8 +81,8 @@ ag54830b_exp_hook( void )
 
 	if ( ! ag54830b_init( DEVICE_NAME ) )
 	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s.\n",
+			   gpib_last_error( ) );
 		THROW( EXCEPTION );
 	}
 

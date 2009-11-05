@@ -24,7 +24,7 @@
 #define AG54830B_HEADER
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */

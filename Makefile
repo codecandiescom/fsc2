@@ -449,7 +449,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Version information
 
-VERSION          := 2.3.17
+VERSION          := 2.4.0
 
 # Set the optimization level
 
@@ -703,12 +703,12 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		ifndef GPIB_HEADER_DIR
 			INCLUDES             += -I/usr/local/include/gpib
 		endif
-		LIBS                     += -lgpib -lfl
+		GPIB_LIBS                := -lgpib -lfl
 		CONFFLAGS                += -DGPIB_LIBRARY_LLP
 	else
 		ifeq ($(GPIB_LIBRARY),SLG)
 			GPIB_LIBRARY         := slg
-			LIBS                 += -lgpib
+			GPIB_LIBS            := -lgpib
 			CONFFLAGS            += -DGPIB_LIBRARY_SLG
 			ifeq ($(GPIB_CARD_NAME),)
 				CONFFLAGS        += -DGPIB_CARD_NAME=\"gpib0\"
@@ -719,20 +719,25 @@ ifneq ($(GPIB_LIBRARY),NONE)
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
 				ifeq ($(GPIB_CIB_FILE),)
-					LIBS         += -lgpibapi
+					GPIB_LIBS    := -lgpibapi
 				else
-					LIBS         += $(GPIB_CIB_FILE)
+					GPIB_LIBS    := $(GPIB_CIB_FILE)
 				endif
 				CONFFLAGS        += -DGPIB_LIBRARY_NI
+				GPIB_HELPER      := gpib_lexer.c gpib_parser.c
+				ifdef GPIB_CIB_FILE
+					GPIB_HELPER  += GPIB_CIB_FILE
+				endif
 			else
 				ifeq ($(GPIB_LIBRARY),NI_OLD)
 					GPIB_LIBRARY     := ni_old
-					LIBS             += -lgpib
+					GPIB_LIBS        := -lgpib
 					CONFFLAGS        += -DGPIB_LIBRARY_NI_OLD
+					GPIB_HELPER      := gpib_lexer.c gpib_parser.c
 				else
 					ifeq ($(GPIB_LIBRARY),JTT)
 						GPIB_LIBRARY := jtt
-						LIBS         += -lgpib
+						GPIB_LIBS    := -lgpib
 						CONFFLAGS    += -DGPIB_LIBRARY_JTT
 					endif
 				endif
@@ -740,6 +745,7 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		endif
 	endif
 else
+	CONFFLAGS    += -DGPIB_LIBRARY_NONE
 	GPIB_LIBRARY := none
 endif
 

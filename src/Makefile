@@ -24,18 +24,18 @@ c_sources      = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
 				 func.c func_basic.c func_util.c func_save.c chld_func.c     \
 				 func_intact.c func_intact_b.c func_intact_s.c               \
 				 func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
-				 exp.c run.c comm.c accept.c gpib_if.c loader.c mail.c       \
-				 ipc.c print.c serial.c lan.c graphics.c graphics_edl.c      \
+				 exp.c run.c comm.c accept.c gpib.c loader.c mail.c ipc.c    \
+				 locks.c print.c serial.c lan.c graphics.c graphics_edl.c    \
 				 graph_handler_1d.c graph_handler_2d.c graph_cut.c bugs.c    \
 				 fsc2_assert.c dump.c module_util.c fsc2d.c global.c help.c  \
-				 edit.c locks.c
+				 edit.c 
 
 ifdef WITH_HTTP_SERVER
 c_sources     += http.c dump_graphic.c
 endif
 
-bison_sources  = $(wildcard *_parser.y)
-flex_sources   = $(wildcard *_lexer.l)
+bison_sources  = $(patsubst gpib_%.y,,$(wildcard *_parser.y))
+flex_sources   = $(patsubst gpib_%.l,,$(wildcard *_lexer.l))
 sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
 objects        = $(sources:.c=.o)
 resources      = $(wildcard fsc2_rsc_*r.fd)
@@ -62,6 +62,9 @@ src:
 	$(MAKE) fsc2
 	$(MAKE) fsc2_clean
 	$(MAKE) fsc2_connect
+ifneq ($(GPIB_LIBRARY),none)
+	$(MAKE) gpibd
+endif
 ifdef ADDR2LINE
 	$(MAKE) fsc2_addr2line
 endif
@@ -136,19 +139,26 @@ $(resources:.fd=.o): %.o: %.c %.h
 	fdesign -convert $<
 
 
+# Make the GPIB daemon
+
+gpibd: gpibd.c gpib_if.c $(GPIB_HELPER) gpibd.h gpib_if.h ../fsc2_config.h
+	$(CC) $(CFLAGS) $(INCLUDES) -o gpibd gpibd.c gpib_if.c $(GPIB_HELPER)  \
+		  -lpthread $(GPIB_LIBS)
+
+
 # Create files and links needed for the GPIB interface - they need making if
 # either gpib_if.[ch] doesn't exit or the files they're made from are newer.
 # When using the NI library also the parser and lexer for the GPIB
 # configuration file are needed, otherwise they must be deleted.
 
 gpib_setup:
+ifneq ($(GPIB_LIBRARY),none)
 	@if [ -n "$(GPIB_LIBRARY)"                                       \
 		  -a \(    "$(GPIB_LIBRARY)" = "llp"                         \
 			    -o "$(GPIB_LIBRARY)" = "ni"                          \
 			    -o "$(GPIB_LIBRARY)" = "ni_old"                      \
 			    -o "$(GPIB_LIBRARY)" = "slg"                         \
-			    -o "$(GPIB_LIBRARY)" = "jtt"                         \
-			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then             \
+			    -o "$(GPIB_LIBRARY)" = "jtt"  \) ]; then             \
 		if [  ! gpib_if_$(GPIB_LIBRARY).cx -ef gpib_if.c             \
 			 -o gpib_if_$(GPIB_LIBRARY).cx -nt gpib_if.c ]; then     \
 			$(RM) $(RMFLAGS) gpib_if.c;                              \
@@ -180,7 +190,7 @@ gpib_setup:
 		echo "************************************************";     \
 		exit 2;                                                      \
 	fi
-
+endif
 
 # How to install the binaries
 
@@ -190,11 +200,14 @@ install:
 
 ifdef ONLY_SETGID
 	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
 else
 ifdef ONLY_SETUID
 	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
 else
 	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
 endif
 endif
 	$(INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
@@ -205,19 +218,19 @@ endif
 	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test        \
-					 $(bindir)/fsc2_load $(bindir)/fsc2_iconic_start
+					 $(bindir)/fsc2_load  $(bindir)/fsc2_iconic_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
 uninstall:
-	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \
-					 $(bindir)/fsc2_connect $(bindir)/fsc2_start   \
-					 $(bindir)/fsc2_test $(bindir)/fsc2_load       \
+	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/gpibd $(bindir)/fsc2_clean  \
+					 $(bindir)/fsc2_connect $(bindir)/fsc2_start          \
+					 $(bindir)/fsc2_test $(bindir)/fsc2_load              \
 					 $(bindir)/fsc2_addr2line
-	for f in *.fsc2_so; do                                         \
-		$(RM) $(RMFLAGS) $(libdir)/$$f;                            \
+	for f in *.fsc2_so; do                                                \
+		$(RM) $(RMFLAGS) $(libdir)/$$f;                                   \
 	done
 
 
@@ -229,7 +242,7 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
+	$(RM) $(RMFLAGS) fsc2 gpibd fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch]  \
 		  fsc2_addr2line *.fsc2_so *.bak
 
 

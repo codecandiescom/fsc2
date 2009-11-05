@@ -21,7 +21,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -125,7 +125,7 @@ thurlby330_exp_hook( void )
     if ( ! thurlby330_init( DEVICE_NAME ) )
     {
         print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

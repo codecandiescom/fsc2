@@ -24,7 +24,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 #include <float.h>
 
 

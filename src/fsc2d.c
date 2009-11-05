@@ -57,9 +57,6 @@ static void fsc2d( int fd );
 static void check_instances( int is_new_connect );
 static bool is_tmp_edl( const char * name );
 static void new_client( int fd );
-static void new_instance( int   cli_fd,
-                          uid_t uid,
-                          bool  allow_connect );
 static void set_fs2d_signals( void );
 
 
@@ -160,6 +157,7 @@ start_fsc2d( FILE * in_file_fp )
     struct sockaddr_un serv_addr;
     mode_t old_mask;
     struct sigaction sact;
+    struct sigaction old_sact;
 
 
     raise_permissions( );
@@ -199,10 +197,12 @@ start_fsc2d( FILE * in_file_fp )
     /* Set handler for a signal from the "daemon" that tells us when the
        "daemon" has finished its initialization */
 
+    Fsc2d_replied = 0;
+
     sact.sa_handler = fsc2d_sig_handler;
     sigemptyset( &sact.sa_mask );
     sact.sa_flags = 0;
-    if ( sigaction( SIGUSR2, &sact, NULL ) == -1 )
+    if ( sigaction( SIGUSR2, &sact, &old_sact ) == -1 )
     {
         unlink( P_tmpdir "/fsc2.uds" );
         lower_permissions( );
@@ -228,6 +228,7 @@ start_fsc2d( FILE * in_file_fp )
     {
         unlink( P_tmpdir "/fsc2.uds" );
         lower_permissions( );
+        sigaction( SIGUSR2, &old_sact, NULL );
         return -1;
     }
 
@@ -239,6 +240,8 @@ start_fsc2d( FILE * in_file_fp )
             return -1;
         fsc2_usleep( 20000, SET );
     }
+
+    sigaction( SIGUSR2, &old_sact, NULL );
 
     return 1;
 }

@@ -26,7 +26,7 @@
 /* Include configuration information for the device */
 
 #include "sr830.conf"
-#include "gpib_if.h"
+#include "gpib.h"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -356,7 +356,7 @@ sr830_exp_hook( void )
     if ( ! sr830_init( DEVICE_NAME ) )
     {
         print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

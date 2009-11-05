@@ -38,7 +38,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -728,8 +728,8 @@ bh15_fc_init( void )
     if ( gpib_init_device( DEVICE_NAME, &magnet.device ) == FAILURE )
     {
         magnet.device = -1;
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

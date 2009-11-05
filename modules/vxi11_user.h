@@ -60,8 +60,8 @@ int vxi11_open( const char * /* dev_name   */,
 
 int vxi11_close( void );
 
-void vxi11_set_timeout( int  /* dir        */,
-                        long /* us_timeout */  );
+int vxi11_set_timeout( int  /* dir        */,
+                       long /* us_timeout */  );
 
 int vxi11_read_stb( unsigned char * stb );
 

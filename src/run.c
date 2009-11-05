@@ -23,7 +23,7 @@
 #include <dlfcn.h>
 #include <execinfo.h>
 #include "fsc2.h"
-#include "gpib_if.h"
+#include "gpib.h"
 #include "serial.h"
 #include "exp_parser_common.h"
 
@@ -245,10 +245,10 @@ start_comm_libs( void )
 
     /* If there are devices that need the GPIB bus initialize it now */
 
-    if ( Need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
+    if ( Need_GPIB && gpib_init( ) == FAILURE )
     {
         eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
-                gpib_error_msg );
+                gpib_last_error( ) );
         goto gpib_fail;
     }
 

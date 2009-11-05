@@ -21,7 +21,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -100,8 +100,8 @@ egg4402_exp_hook( void )
 
     if ( ! egg4402_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 
@@ -213,7 +213,6 @@ boxcar_get_curve( Var_T * v )
     Var_T *cl;
     double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
     int new_timo;
-    int old_timo = -1;
     double max_time;
     bool size_dynamic = UNSET;
 
@@ -221,7 +220,6 @@ boxcar_get_curve( Var_T * v )
     CLOBBER_PROTECT( curve_type );
     CLOBBER_PROTECT( first );
     CLOBBER_PROTECT( last );
-    CLOBBER_PROTECT( old_timo );
 
     if ( v == NULL )
     {
@@ -360,7 +358,7 @@ boxcar_get_curve( Var_T * v )
     {
         /* Set a timeout value that we have at least 20 ms per point - this
            seems to be the upper limit needed. Don't set timout to less than
-           1s. Reset timeout when finished. */
+           1s. */
 
         max_time = 0.02 * num_points;
         new_timo = 0;
@@ -369,22 +367,11 @@ boxcar_get_curve( Var_T * v )
         new_timo += 11;
         gpib_timeout( egg4402.device, new_timo );
 
-#if ! defined GPIB_NONE
-#if defined GPIB_JTT
-        old_timo = ( int ) gpib_count;
-#else
-        old_timo = ( int ) ibcnt;
-#endif
-#endif
-
         egg4402_query( ( char * ) buffer, &length, curve_type ? UNSET : SET );
-        gpib_timeout( egg4402.device, old_timo );
         TRY_SUCCESS;
     }
     CATCH( USER_BREAK_EXCEPTION )
     {
-        if ( old_timo > 0 )
-            gpib_timeout( egg4402.device, old_timo );
         T_free( buffer );
         RETHROW( );
     }

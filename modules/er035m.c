@@ -21,7 +21,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -238,8 +238,8 @@ er035m_exp_hook( void )
     if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
     {
         nmr.device = -1;
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
     fsc2_usleep( ER035M_WAIT, UNSET );

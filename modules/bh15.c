@@ -21,7 +21,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -114,8 +114,8 @@ bh15_exp_hook( void )
     if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
     {
         bh15.device = -1;
-        print( FATAL, "Can't initialize Bruker BH15 field controller: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Can't initialize Bruker BH15 field controller: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

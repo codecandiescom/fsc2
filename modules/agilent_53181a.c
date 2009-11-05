@@ -23,7 +23,8 @@
 #include "fsc2_module.h"
 
 #include "agilent_53181a.conf"
-#include "gpib_if.h"
+#include "gpib.h"
+
 
 /*--------------------------------*/
 /* global variables of the module */
@@ -161,8 +162,8 @@ agilent_53181a_exp_hook( void )
 
 	if ( ! agilent_53181a_init( ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

@@ -21,7 +21,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "gpib.h"
 
 
 /* Include configuration information for the device */
@@ -319,8 +319,8 @@ ips120_10_mod_exp_hook( void )
 	if ( ! ips120_10_mod_init( DEVICE_NAME ) )
 	{
 		ips120_10_mod.in_init_phase = UNSET;
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s.\n",
+			   gpib_last_error( ) );
 		THROW( EXCEPTION );
 	}
 

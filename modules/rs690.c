@@ -411,8 +411,8 @@ rs690_exp_hook( void )
 
     if ( ! rs690_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Failure to initialize the pulser: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Failure to initialize the pulser: %s.\n",
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

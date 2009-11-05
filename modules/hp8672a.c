@@ -130,7 +130,7 @@ hp8672a_exp_hook( void )
     if ( ! hp8672a_init( DEVICE_NAME ) )
     {
         print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+               gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

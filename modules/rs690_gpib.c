@@ -544,9 +544,10 @@ rs690_write( int          device_no,
              const char * s,
              long         len )
 {
+    /* On failure try again, the device sometimes reacts strangely */
+
     if (    gpib_write( device_no, s, len ) == FAILURE
-         && GPIB_IS_TIMEOUT
-         && gpib_write( device_no, s, len ) == FAILURE )
+         || gpib_write( device_no, s, len ) == FAILURE )
         return FAILURE;
     return SUCCESS;
 }
