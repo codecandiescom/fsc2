@@ -209,7 +209,7 @@ main( void )
     {
         if (    S_ISSOCK( sbuf.st_mode )
              && test_connect( ) != -1 )
-        return EXIT_FAILURE;
+            return EXIT_FAILURE;
         unlink( GPIBD_SOCK_FILE );
     }
 
