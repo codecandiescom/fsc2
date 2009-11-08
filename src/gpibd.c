@@ -208,7 +208,7 @@ main( void )
     if ( stat( GPIBD_SOCK_FILE, &sbuf ) != -1 )
     {
         if (    S_ISSOCK( sbuf.st_mode )
-             && test_connect( ) != -1 )
+             && test_connect( ) == -1 )
             return EXIT_FAILURE;
         unlink( GPIBD_SOCK_FILE );
     }
