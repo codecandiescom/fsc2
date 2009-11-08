@@ -30,10 +30,10 @@
 
   Thus each instance must connect to the "GPIB daemon" (and start it if
   it's not yet running) and then route all requests through the daemon.
-  The daemon as a single instance, exclusively talking to the devices
-  on the GPIB, can now enforce that requests to the devices happen in
-  an ordered fashion and also ensure that only a single process can talk
-  to a device (until that process "releases" the device).
+  The daemon, exclusively talking to the devices on the GPIB, can now
+  enforce that requests to the devices happen in an ordered fashion and
+  also ensure that only a single process can talk to a device (until
+  that process "releases" the device).
 
   The "GPIB daemon creates a UNIX domain socket it's listening on and accepts
   connections from each instance of fsc2, starting a new thread for each
@@ -77,6 +77,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <signal.h>
 
 #include "fsc2_config.h"
@@ -132,6 +133,7 @@ char *gpib_error_msg;
 
 
 static void new_client( int fd );
+static int test_connect( void );
 static size_t check_connections( void );
 static void cleanup_devices( pthread_t tid );
 static void * gpib_handler( void * null );
@@ -190,6 +192,7 @@ static void set_gpibd_signals( void );
 int
 main( void )
 {
+    struct stat sbuf;
     int fd;
     fd_set fds;
     struct timeval timeout;
@@ -198,6 +201,17 @@ main( void )
     /* Igore all signals */
 
 	set_gpibd_signals( );
+
+    /* Check that the socket file does not exist, otherwise assume that
+       another instance of gpibd is already running */
+
+    if ( stat( GPIBD_SOCK_FILE, &sbuf ) != -1 )
+    {
+        if (    S_ISSOCK( sbuf.st_mode )
+             && test_connect( ) != -1 )
+        return EXIT_FAILURE;
+        unlink( GPIBD_SOCK_FILE );
+    }
 
     /* Create a UNIX domain socket we're going to listen on for
        connections */
@@ -321,6 +335,47 @@ new_client( int fd )
 
     pthread_attr_destroy( &attr );
     thread_count++;
+}
+
+
+/*--------------------------------------------------------*
+ * Function tests if another instance of gpibd is already
+ * running by trying to connect to the socket file. If
+ * this is successful or fails due to other reasons than
+ * that there's nothing accepting connections return 0,
+ * otherwise -1.
+ *--------------------------------------------------------*/
+
+static int
+test_connect( void )
+{
+    int sock_fd;
+    struct sockaddr_un serv_addr;
+    int ret = 0;
+
+
+    /* Try to get a socket */
+
+    if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
+        return -1;
+
+    memset( &serv_addr, 0, sizeof serv_addr );
+    serv_addr.sun_family = AF_UNIX;
+    strcpy( serv_addr.sun_path, GPIBD_SOCK_FILE );
+
+    /* If connect fails due to connection refused or because there's no socket
+       file (or it exists but isn't a socket file) it means gpibd isn't running
+       and we've got to start it */
+
+    if (    connect( sock_fd, ( struct sockaddr * ) &serv_addr,
+                     sizeof serv_addr ) != -1
+         || ( errno != ECONNREFUSED && errno != ENOENT ) )
+         ret = -1;
+
+    shutdown( sock_fd, SHUT_RDWR );
+    close( sock_fd );
+
+    return ret;
 }
 
 
@@ -1185,7 +1240,6 @@ create_socket( void )
 
     /* Bind it to the socket file */
 
-    unlink( GPIBD_SOCK_FILE );
     memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, GPIBD_SOCK_FILE );
