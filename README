@@ -113,12 +113,9 @@ Suported devices
   * Tektronix Digitizing Oscilloscopes TDS 540
   * Tektronix Digitizing Oscilloscopes TDS 744A
   * Tektronix Digitizing Oscilloscopes TDS 754A
-  * LeCroy Digitizing Oscilloscope 9400
-  * LeCroy Digitizing Oscilloscope 9420
-  * LeCroy Digitizing Oscilloscope 9424
-  * LeCroy Digitizing Oscilloscope 9424
-  * LeCroy Digitizing Oscilloscope 9450
-  * LeCroy Digitizing Oscilloscope Waverunner-2
+  * LeCroy Digitizing Oscilloscope 93xx series
+  * LeCroy Digitizing Oscilloscope 94xx series
+  * LeCroy Digitizing Oscilloscope Waverunner
   * LeCroy Digitizing Oscilloscope WaveSurfer
 
  Pulse generators:
@@ -168,6 +165,10 @@ Suported devices
  Frequency counters:
 
   * Hewlett-Packard Frequency Counter HP5340A
+  * Hewlett-Packard Frequency Counter HP5342A
+  * Hewlett-Packard Frequency Counter HP5343A
+  * EIP Microwave. Inc. Frequency Counter 371
+  * Agilent Frequency Counter 53181A
 
  Temperature controllers:
 
@@ -214,7 +215,7 @@ Suported devices
  Monochromators:
 
   * Acton Research SpectraPro-300i Monochromator
-  * SPEX Monochromators with CD2A Compudrive
+  * SPEX Monochromators with CD2A Compudrive SPEX232 Interface
 
  Microwave Attenuators
 

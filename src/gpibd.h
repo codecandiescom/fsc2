@@ -25,6 +25,8 @@
 
 #define GPIBD_SOCK_FILE  P_tmpdir "/gpibd.uds"
 
+#define GPIB_ERROR_BUFFER_LENGTH 256
+
 #define GPIB_INIT           0
 #define GPIB_SHUTDOWN       1
 #define GPIB_INIT_DEVICE    2
@@ -38,6 +40,12 @@
 #define GPIB_READ          10
 #define GPIB_SERIAL_POLL   11
 #define GPIB_LAST_ERROR    12
+
+
+#define ACK        '\x06'
+#define NAK        '\x15'
+#define STR_ACK    "\x06"
+#define STR_NAK    "\x15"
 
 
 #if defined __GNUC__

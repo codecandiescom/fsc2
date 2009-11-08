@@ -24,6 +24,25 @@
 
 @ifnottex
 
+Before going into the details of batch processing and listing
+@code{fsc2}'s command line options a remark concerning the use of
+several instances of @code{fsc2}: Until version 2.4.0 only a single
+instance of @code{fsc2} could be run. This limitation was deliberate
+in order to avoid having different instances trying to access the same
+devices at the same time. With version 2.4.0 this limitation has been
+removed and devices instead are "locked" by an instance of @code{fsc2}
+while using them, and another instance trying to gain access to an
+already locked device will be notified and output a suitable error
+message. Devices controlled via GPIB, LAN and serial ports as well as
+devices, that are PCI cards, are locked individually (in the case of
+GPIB devices by use of an extra program, the "GPIB daemon"
+@code{gpibd}, in the other cases via UUCP style lock files). Devices
+connected via USB (except USB-serial converters, which are treated
+like serial port devices) and via RULBUS currently get locked as
+groups, i.e.@: only one instance of @code{fsc2} can access USB or
+RULBUS devices. This restriction may be removed in later versions.
+
+
 @menu
 * Batch mode::              Non-supervised operation
 * Options summary::         List of all command line options
@@ -84,12 +103,12 @@ complete list of all differences that might be expected:
 
 @item
   In batch mode @code{fsc2} does not query the user for names of
-output file names. Instead, a file name is constructed from the name
-of the currently executed @code{EDL} script and an extension of
-"@code{.batch_output.}", followed by a unique integer number. See the
-description of the built-in @code{EDL} functions
-@code{@ref{get_file()}}, @code{@ref{open_file()}} and
-@code{@ref{clone_file()}} for the details.
+  output file names. Instead, a file name is constructed from the name
+  of the currently executed @code{EDL} script and an extension of
+  @code{'.batch_output.'}, followed by a unique integer number. See the
+  description of the built-in @code{EDL} functions
+  @code{@ref{get_file()}}, @code{@ref{open_file()}} and
+  @code{@ref{clone_file()}} for the details.
 
 @item
   Device modules, that under normal circumstances ask the user for

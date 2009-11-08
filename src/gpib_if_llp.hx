@@ -35,6 +35,7 @@
 /* If ib.h can't be found set the variable GPIB_HEADER_FILE in the top level
    Makefile to the full path of the directory where this header file resides */
 
+#include "gpibd.h"
 #include <ib.h>
 
 #include <dirent.h>
@@ -84,9 +85,6 @@ void gpib_log_message( const char * /* fmt */,
                        ... );
 
 
-extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
-
-
 #define SUCCESS   0
 #define FAILURE  -1
 
@@ -99,13 +97,6 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define  LL_ERR   1    /* log errors only */
 #define  LL_CE    2    /* log function calls and function exits */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
-
-
-/*-------------------------------*
- * Definitions of utility macros
- *-------------------------------*/
-
-#define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
 
 
 #endif /* ! GPIB_IF_LLP_HEADER */

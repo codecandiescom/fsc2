@@ -53,17 +53,10 @@ int gpib_dev_setup( GPIB_Dev_T * /* temp_dev */ );
             return FAILURE;                                          \
         }
 
-#define GPIB_ERROR_BUFFER_LENGTH 1024
 
+extern char *gpib_error_msg;
 
-/*------------------------------------------------------------------------*/
-/* exported variables                                                     */
-/*------------------------------------------------------------------------*/
-
-
-char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
-int gpiblineno;                         /* used in the lexer for the
-                                           configuration file */
+int gpiblineno;           /* used in the lexer for the configuration file */
 
 /*------------------------------------------------------------------------*/
 /* local functions                                                        */
@@ -393,20 +386,20 @@ gpib_remove_device( int device )
 
     if ( ! devp->is_online )
     {
-        sprintf( gpib_error_msg, "Call of gpib_timeout() for device %s that is "
-                 "off-line", devp->name );
+        sprintf( gpib_error_msg, "Call of gpib_remove_device() for device %s "
+                 "that is off-line", devp->name );
         return FAILURE;
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_init_device", devp->name );
+        gpib_log_function_start( "gpib_remove_device", devp->name );
 
     devp->is_online = 0;
     num_init_devices--;
     ibsta &= ~IBERR;
 
     if ( ll > LL_ERR )
-        gpib_log_function_end( "gpib_init_device", devp->name );
+        gpib_log_function_end( "gpib_remove_device", devp->name );
 
     return SUCCESS;
 }
@@ -501,9 +494,8 @@ gpib_timeout( int device,
     if ( ll > LL_ERR )
     {
         gpib_log_date( );
-        fprintf( gpib_log, "Call of gpib_timeout() for device %s, ",
-                 devp->name );
-        fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
+        fprintf( gpib_log, "Call of gpib_timeout(), dev = %s\n-> timeout "
+                 "is to be set to %s\n", devp->name, tc[ period ] );
         fflush( gpib_log );
     }
 
@@ -1028,7 +1020,7 @@ gpib_log_function_start( const char * function,
                          const char * dev_name )
 {
     gpib_log_date( );
-    fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
+    fprintf( gpib_log, "Call of %s(), dev = %s\n", function, dev_name );
     fflush( gpib_log );
 }
 
@@ -1052,7 +1044,7 @@ gpib_log_function_end( const char * function,
         if ( ll > LL_ERR )
         {
             gpib_log_date( );
-            fprintf( gpib_log, "EXIT of %s, dev = %s\n", function, dev_name );
+            fprintf( gpib_log, "Exit of %s(), dev = %s\n", function, dev_name );
         }
     }
 

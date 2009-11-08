@@ -55,12 +55,7 @@
         }
 
 
-/*------------------------------------------------------------------------*/
-/* Exported variables                                                     */
-/*------------------------------------------------------------------------*/
-
-
-char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
+extern char *gpib_error_msg;
 
 
 /*------------------------------------------------------------------------*/
@@ -236,7 +231,7 @@ gpib_shutdown( void )
     if ( ll > LL_NONE )
     {
         gpib_log_date( );
-        fprintf( gpib_log, "GPIB bus is being shut down.\n\n" );
+        fprintf( gpib_log, "GPIB bus is being shut down.\n" );
         if ( gpib_log != stderr )
             fclose( gpib_log );                 /* close log file */
     }
@@ -422,7 +417,7 @@ gpib_remove_device( int device )
     ibsta &= ~IBERR;
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_init_device", NULL );
+        gpib_log_function_end( "gpib_remove_device", NULL );
 
     return SUCCESS;
 }
@@ -510,25 +505,21 @@ gpib_timeout( int device,
     if ( ll > LL_ERR )
     {
         gpib_log_date( );
-        fprintf( gpib_log, "Call of gpib_timeout() for device %s: timeout "
-                           "is set to %s", dev_name, tc[ period ] );
+        fprintf( gpib_log, "Call of gpib_timeout(), dev = %s\n-> timeout "
+                           "is to bet set to %s\n", dev_name, tc[ period ] );
         fflush( gpib_log );
     }
 
     ibtmo( device, period );
+
+    if ( ll > LL_NONE )
+        gpib_log_function_end( "gpib_timeout", dev_name );
 
     if ( ibsta & IBERR )
     {
         sprintf( gpib_error_msg, "Can't set timeout period for device %s, "
                  "ibsta = 0x%x", dev_name, ibsta );
         return FAILURE;
-    }
-
-    if ( ll > LL_ERR )
-    {
-        gpib_log_date( );
-        fprintf( gpib_log, "EXIT of gpib_timeout\n" );
-        fflush( gpib_log );
     }
 
     timeout = period;          /* store actual value of timeout period */
@@ -852,6 +843,7 @@ gpib_read( int    device,
     }
 
     ibrd( device, buffer, expected );
+    *length = ibcnt;
 
     if ( ll > LL_NONE )
         gpib_read_end( dev_name, buffer, *length, expected );
@@ -1020,7 +1012,7 @@ gpib_log_function_start( const char * function,
                          const char * dev_name )
 {
     gpib_log_date( );
-    fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
+    fprintf( gpib_log, "Call of %s(), dev = %s\n", function, dev_name );
     fflush( gpib_log );
 }
 
@@ -1045,10 +1037,10 @@ gpib_log_function_end( const char * function,
         {
             gpib_log_date( );
             if ( dev_name != NULL )
-                fprintf( gpib_log, "Exit of %s, dev = %s\n",
+                fprintf( gpib_log, "Exit of %s(), dev = %s\n",
                          function, dev_name );
             else
-                fprintf( gpib_log, "Exit of %s\n", function );
+                fprintf( gpib_log, "Exit of %s()\n", function );
         }
     }
 

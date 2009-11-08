@@ -561,23 +561,20 @@ within the condition (unless that's exactly what you want to do).
 
 
 The @code{fsc2_guify} conversion tool (or, more exactly, the script
-created by this tool) relies on @code{fsc2} listening to external
-programs that might want to send it @code{EDL} scripts. There is a
-rather simple protocol for doing so. But you don't even have to know
-about this protocol because there are three programs that do all the
-required things for you:
+created by this tool) starts a new instancere of @code{fsc2} by
+using one of the programs
 @example
 fsc2_load
 fsc2_test
 fsc2_start
 @end example
-If these programs get passed an @code{EDL} script on their standard
-input they will contact (or, if necessary, start) @code{fsc2} and pass
-it the @code{EDL} script. From the names of the programs their
-functions should be obvious: the first one tells @code{fsc2} to just
-load the @code{EDL} script, the second one tells it to also test the
-script, and the third asks @code{fsc2} to start the @code{EDL} script
-after a successful test run.
+These programs get passed an @code{EDL} script on their standard input
+and then start a new instance of @code{fsc2} with the @code{EDL}
+script. From the names of the programs their functions should be
+obvious: the first one tells @code{fsc2} to just load the @code{EDL}
+script, the second one tells it to also test the script, and the third
+asks @code{fsc2} to start the @code{EDL} script after a successful
+test run.
 
 You could e.g.@: invoke these programs from the command line, type in an
 @code{EDL} script and when you're finished, you would see the program
@@ -605,16 +602,9 @@ from the return value:
 Everything's ok, program finished successfully, i.e.@: @code{fsc2}
 accepted the script.
 @item -1
-An internal error has been detected in the program handling the
-connection to @code{fsc2} (please send a bug report).
+An internal error has been detected in the program starting a new
+instance of @code{fsc2} (please send a bug report!).
 @item 1
-A different user is already running fsc2.
-@item 2
-@code{fsc2} is busy, i.e.@: it's already running an experiment
-or a test run.
-@item 3
-Internal error in @code{fsc2} detected (please send a bug report).
-@item 4
 @code{fsc2} could not be started (probably because its executable was
 not found).
 @end table
@@ -622,8 +612,10 @@ not found).
 Using these programs you are able to send @code{EDL} scripts to
 @code{fsc2}, created with whatever method or programming language you
 prefer. A few example scripts written in Perl can be found in the
-@code{scripts} subdirectory of the main directory of the package. You
-could also examine one of the scripts created by @code{fsc2_guify} but
-be warned that these scripts may not be very easy to understand because
-at least some of them were written by a program that doesn't care much
-about proper indentation or human readability etc.
+@code{edl} subdirectory (or the subdirectories there-in, to be
+precise) of the main directory of the package - they typically have an
+externsion of @code{.EDL}. You could also examine one of the scripts
+created by @code{fsc2_guify} but be warned that these scripts may not
+be very easy to understand because at least some of them were written
+by a program that doesn't care much about proper indentation or human
+readability etc.

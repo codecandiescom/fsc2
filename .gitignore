@@ -98,6 +98,7 @@ modules/vxi11_clnt.c
 modules/vxi11_svc.c
 modules/vxi11_xdr.c
 src/fsc2
+src/gpibd
 src/fsc2_addr2line
 src/fsc2_clean.c
 src/fsc2_clean

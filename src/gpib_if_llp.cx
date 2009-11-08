@@ -1,4 +1,4 @@
-/* -*-C-*-
+s/* -*-C-*-
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
@@ -21,7 +21,6 @@
 
 
 #include "fsc2_config.h"
-#include "gpibd.h"
 #include "gpib_if.h"
 #include <sys/timeb.h>
 #include <stdio.h>
@@ -55,12 +54,7 @@
         }
 
 
-/*------------------------------------------------------------------------*/
-/* exported variables                                                     */
-/*------------------------------------------------------------------------*/
-
-
-char gpib_error_msg[ 1024 ];            /* global for GPIB error messages */
+extern char *gpib_error_msg;
 
 
 /*------------------------------------------------------------------------*/
@@ -441,7 +435,7 @@ gpib_remove_device( int device )
     ibsta &= ~ IBERR;
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_init_device", NULL );
+        gpib_log_function_end( "gpib_remove_device", NULL );
 
     return SUCCESS;
 }
@@ -504,8 +498,8 @@ gpib_timeout( int device,
     if ( ll > LL_ERR )
     {
         gpib_log_date( );
-        fprintf( gpib_log, "Call of gpib_timeout() for device %s, ", dev_name );
-        fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
+        fprintf( gpib_log, "Call of gpib_timeout(), dev = %s\n-> timeout "
+                 "is to be set to %s\n", dev_name, tc[ period ] );
         fflush( gpib_log );
     }
 
@@ -1015,7 +1009,7 @@ gpib_log_function_start( const char * function,
                          const char * dev_name )
 {
     gpib_log_date( );
-    fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
+    fprintf( gpib_log, "Call of %s(), dev = %s\n", function, dev_name );
     fflush( gpib_log );
 }
 
@@ -1039,7 +1033,7 @@ gpib_log_function_end( const char * function,
         if ( ll > LL_ERR )
         {
             gpib_log_date( );
-            fprintf( gpib_log, "EXIT of %s, dev = %s\n", function, dev_name );
+            fprintf( gpib_log, "Exit of %s(), dev = %s\n", function, dev_name );
         }
     }
 

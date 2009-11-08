@@ -20,6 +20,53 @@
  */
 
 
+/*
+  This file, together with the file for interfacing to the GPIB library
+  used, makes up the "GPIB daemon". Having a kind of daemon for the GPIB
+  is necessary when there can be several instances of fsc2, trying to
+  access the GPIB bus at the same time. In that case it must be avoided
+  that these instances try to access the single bus asynchronously or
+  that more than one instance tries to talk to the same device.
+
+  Thus each instance must connect to the "GPIB daemon" (and start it if
+  it's not yet running) and then route all requests through the daemon.
+  The daemon as a single instance, exclusively talking to the devices
+  on the GPIB, can now enforce that requests to the devices happen in
+  an ordered fashion and also ensure that only a single process can talk
+  to a device (until that process "releases" the device).
+
+  The "GPIB daemon creates a UNIX domain socket it's listening on and accepts
+  connections from each instance of fsc2, starting a new thread for each
+  connection.
+
+  An instance of fsc2 makes requests by sending a line starting with a unique
+  number for the kind of request (possibly followed by some more, request-
+  dependend data). Before handling the request the thread handing requests
+  by this instance of fsc2 locks a mutex that gives it exclusive access to
+  the GPIB bus, thereby avoiding intermixing data on the bus from different
+  requests. Only when the request is satisfied the mutex is unlocked again
+  and another instance of fsc2 and the corresponding thread can get access
+  to the GPIB.
+
+  At the same time there's a list of all device claimed by the different
+  instances of fsc2. Once a device is succesfully claimed by one instance
+  of fsc2 requests for that device by another instance of fsc2 are denied,
+  thus avoiding that different instances send unrelated requests to the
+  same device.
+
+  Since fsc2 supports diferrent libraries for GPIB cards the daemons gets
+  built with an interface suitable for the GPIB library being used. These
+  "interfaces" are the files named "gpib_if_*.[ch]x" (and in some cases
+  an additional flex and bison file).
+
+  The daemon closes the connection to the client when the communication
+  with the client fails. In that case it doesn't "release" the devices,
+  i.e. they remain assigned to the client. The client thus may reonnect
+  (by opening a new connection and calling gpib_init() again) and then
+  continue to use the devices it previously had requested.
+*/
+
+
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +89,7 @@
 
 #define MAX_DEVICES   14
 
+
 /* Since there can't be more than 15 GPIB devices on the bus, including the
    controller which is handled by the main thread, there never can be more
    than 14 threads */
@@ -49,30 +97,42 @@
 #define MAX_THREADS MAX_DEVICES
 
 
+/* Typedef for a structure with thread specific data */
+
 typedef struct {
-    pthread_t tid;
-    pid_t     pid;
-    int       fd;
-    char      err_msg[ 1024 ];
+    pthread_t tid;                  /* thread ID */
+    pid_t     pid;                  /* PID of process the thread is serving */
+    int       fd;                   /* socket file descriptor */
+    char      err_msg[ GPIB_ERROR_BUFFER_LENGTH ];
 } thread_data_T;
+
+
+/* Typedef for a structure with device specific data */
 
 typedef struct
 {
     char      * name;               /* symbolic name of device */
     int         dev_id;             /* GPIB library ID of device */
-    pthread_t   tid;                /* ID of thread responsible for device */
+    pthread_t   tid;                /* thread handling the device */
 } device_T;
 
-thread_data_T thread_data[ MAX_THREADS ];
-device_T devices[ MAX_DEVICES ];
 
-pthread_mutex_t gpib_mutex   = PTHREAD_MUTEX_INITIALIZER;
+static thread_data_T thread_data[ MAX_THREADS ];
+static device_T devices[ MAX_DEVICES ];
 
-size_t thread_count = 0;
-size_t device_count = 0;
+
+/* Mutex for protecting accssesto the GPIB bus */
+
+static pthread_mutex_t gpib_mutex   = PTHREAD_MUTEX_INITIALIZER;
+
+static size_t thread_count = 0;
+static size_t device_count = 0;
+
+char *gpib_error_msg;
 
 
 static void new_client( int fd );
+static size_t check_connections( void );
 static void cleanup_devices( pthread_t tid );
 static void * gpib_handler( void * null );
 static int gpibd_init( int    fd,
@@ -89,8 +149,8 @@ static int gpibd_local( int    fd,
                         char * line );
 static int gpibd_local_lockout( int    fd,
                                 char * line );
-static int gpibd_triggger( int    fd,
-                           char * line );
+static int gpibd_trigger( int    fd,
+                          char * line );
 static int gpibd_wait( int    fd,
                        char * line );
 static int gpibd_write( int    fd,
@@ -101,23 +161,27 @@ static int gpibd_serial_poll( int    fd,
                               char * line );
 static int gpibd_last_error( int    fd,
                              char * line );
-static ssize_t read_line( int    fd,
-                          void * vptr,
-                          size_t max_len );
-static ssize_t do_read( int    fd,
-						char * ptr );
+static ssize_t swrite( int          d,
+                       const char * buf,
+                       ssize_t      len );
+static ssize_t sread( int       d,
+                      char    * buf,
+                      ssize_t   len );
+static ssize_t readline( int       d,
+                         char    * vptr,
+                         ssize_t   max_len );
 static thread_data_T * find_thread_data( pthread_t tid );
-static int get_long( char ** line,
-					 char    ec,
-					 long  * val );
-static int get_ulong( char          ** line,
-					  char             ec,
-					  unsigned long  * val );
-static int get_int( char ** line,
-					char    ec,
-					int   * val );
+static int extract_long( char ** line,
+                         char    ec,
+                         long  * val );
+static int extract_int( char ** line,
+                        char    ec,
+                        int   * val );
 static int create_socket( void );
+static int send_nak( int fd );
+static int send_ack( int fd );
 static void set_gpibd_signals( void );
+
 
 
 /*--------------------------------------------*
@@ -131,6 +195,8 @@ main( void )
     struct timeval timeout;
 
 
+    /* Igore all signals */
+
 	set_gpibd_signals( );
 
     /* Create a UNIX domain socket we're going to listen on for
@@ -138,6 +204,10 @@ main( void )
 
     if ( ( fd = create_socket( ) ) == -1 )
         return EXIT_FAILURE;
+
+    /* Send parent a signal to tell it we're listening n the socket */
+
+    kill( getppid( ), SIGUSR2 );
 
     /* Initialize the GPIB library */
 
@@ -148,26 +218,31 @@ main( void )
         return EXIT_FAILURE;
     }
 
-    /* Send parent a signal to tell it we're done with initialization */
-
-    kill( getppid( ), SIGUSR2 );
-
-    /* Wait for connections and quit when no clients exist anymore */
+    /* Wait for connections and quit when no clients exist anymore (the
+       first client will connect more or less immediately since it's our
+       parent) */
 
     do
     {
         FD_ZERO( &fds );
         FD_SET( fd, &fds );
 
-        timeout.tv_sec  = 1;
+        timeout.tv_sec  = 5;
         timeout.tv_usec = 0; 
+
+        /* Wait for a new clients trying to connect and regularly check if
+           the processes for which threads where started are still alive */
 
         if ( select( fd + 1, &fds, NULL, NULL, &timeout ) == 1 )
         {
             pthread_mutex_lock( &gpib_mutex );
             new_client( fd );
-            pthread_mutex_unlock( &gpib_mutex );
         }
+        else
+            pthread_mutex_lock( &gpib_mutex );
+
+        check_connections( );
+        pthread_mutex_unlock( &gpib_mutex );
    } while ( thread_count > 0 );
 
     shutdown( fd, SHUT_RDWR );
@@ -180,8 +255,10 @@ main( void )
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*---------------------------------------------------*
+ * Called whenever there's a new connection. Creates
+ * a new thread for dealing with the client.
+ *---------------------------------------------------*/
 
 static void
 new_client( int fd )
@@ -198,9 +275,35 @@ new_client( int fd )
                             &cli_len ) ) < 0 )
         return;
 
-    /* Store the socket descriptor in an empty slot */
+    /* If all the threads we're prepared to run are used up check if there
+       are dead clients and close connections for those, and if then there
+       still are no free threads just send a single NAK character and close
+       the socket. */
 
-    thread_data[ thread_count ].fd = cli_fd;
+    if (    thread_count >= MAX_THREADS
+         && check_connections( ) >= MAX_THREADS )
+    {
+        swrite( cli_fd, STR_NAK, 1 );
+        shutdown( cli_fd, SHUT_RDWR );
+        close( cli_fd );
+        return;
+    }
+
+    /* Send a single ACK character, if that fails close down connection */
+
+    if ( swrite( cli_fd, STR_ACK, 1 ) != 1 )
+    {
+        shutdown( cli_fd, SHUT_RDWR );
+        close( cli_fd );
+        return;
+    }
+
+    /* Store the socket descriptor in an empty slot and initialize the
+       string for error messages */
+
+    thread_data[ thread_count ].fd  = cli_fd;
+    thread_data[ thread_count ].pid = -1;
+    *thread_data[ thread_count ].err_msg = '\0';
 
     /* Create a new thread for dealing with the client */
 
@@ -221,8 +324,40 @@ new_client( int fd )
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*----------------------------------------------------*
+ * Function checks if clients still exist and removes
+ * the threads handling those that have vanished
+ *----------------------------------------------------*/
+
+static size_t
+check_connections( void )
+{
+    size_t i;
+
+
+    for ( i = 0; i < thread_count; i++ )
+        if (    thread_data[ i ].pid != -1
+             && kill( thread_data[ i ].pid, 0 ) == -1
+             && errno == ESRCH )
+        {
+            pthread_cancel( thread_data[ i ].tid );
+            shutdown( thread_data[ i ].fd, SHUT_RDWR );
+            close( thread_data[ i ].fd );
+            cleanup_devices( thread_data[ i ].tid );
+            gpib_log_message( "Connection closed for dead process, "
+                              "PID = %ld\n", thread_data[ i ].pid );
+            memmove( thread_data + i, thread_data + i + 1,
+                     ( --thread_count - i ) * sizeof *thread_data );
+            i--;
+        }
+
+   return thread_count;
+}
+
+
+/*--------------------------------------------------------*
+ * Main function of each thread for dealing with a client
+ *--------------------------------------------------------*/
 
 static void *
 gpib_handler( void * null  UNUSED_ARG )
@@ -241,7 +376,7 @@ gpib_handler( void * null  UNUSED_ARG )
 									  gpibd_clear_device,
 									  gpibd_local,
 									  gpibd_local_lockout,
-									  gpibd_triggger,
+									  gpibd_trigger,
 									  gpibd_wait,
 									  gpibd_write,
 									  gpibd_read,
@@ -249,8 +384,9 @@ gpib_handler( void * null  UNUSED_ARG )
 									  gpibd_last_error };
 
 
-    /* Wait for the file descriptor we're going to listen on being set and
-       store it in a local variable */
+    /* Wait for our thread ID to become available in the list of threads
+       and the copy the socket file descriptor we're going to communicate
+       on to a local variable. */
 
     while ( fd == -1 )
     {
@@ -265,7 +401,6 @@ gpib_handler( void * null  UNUSED_ARG )
             }
 
         pthread_mutex_unlock( &gpib_mutex );
-        usleep( 1000 );
     }
 
     /* Now keep on waiting for requests from the client until the client
@@ -277,41 +412,45 @@ gpib_handler( void * null  UNUSED_ARG )
 
         /* Get a line-feed terminated line from the client */
 
-        if (    ( len = read_line( fd, buf, sizeof buf - 1 ) ) < 2
+        if (    ( len = readline( fd, buf, sizeof buf - 1 ) ) < 2
              || buf[ len - 1 ] != '\n' )
-            break;
+            continue;
 
+        buf[ len ] = '\0';
         cmd = strtol( buf, &eptr, 10 );
 
-        /* Give up on obviously wrong data sent by the client */
+        /* Check for obviously wrong data sent by the client, where "wrong data"
+           means not a number (or an out of range number) or the number not
+           followed by a space (or a line-feed for the last error request),
+           or a request other than GPIB_INIT while it hasn't called before. */
 
         if (    eptr == buf
              || cmd < 0
              || cmd > GPIB_LAST_ERROR
-             || (    ( cmd == GPIB_SHUTDOWN || cmd == GPIB_LAST_ERROR )
+             || (    ( cmd == GPIB_LAST_ERROR || cmd == GPIB_SHUTDOWN )
                   && *eptr != '\n' )
-             || *eptr != ' ' )
-            break;
+             || (    ! ( cmd == GPIB_LAST_ERROR || cmd == GPIB_SHUTDOWN )
+                  && *eptr != ' ' ) )
+            continue;
 
-        /* Call the appropriate function, during that time no other thread
-           may access the GPIB bus */
+        /* Set the 'gpib_error_msg' pointer to the threads string for error
+           messages and call the appropriate GPIB function. During its
+           execution no other thread can access the GPIB bus */
 
         pthread_mutex_lock( &gpib_mutex );
+        gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
         ret = f[ cmd ]( fd, eptr + 1 );
         pthread_mutex_unlock( &gpib_mutex );
 
-        /* Leave on error or shutdown request */
+        /* Leave on failed gpib_init() and on gpib_shutdown() command */
 
-        if ( ret == -1 || cmd == GPIB_SHUTDOWN )
+        if ( ( cmd == GPIB_INIT && ret == -1 ) || cmd == GPIB_SHUTDOWN )
             break;
     }
 
-    /* When we're done remove all devices we may have been using, close
-       the socket and remove ourself from the list of threads */
+    /* Close the socket and remove ourself from the list of threads */
 
     pthread_mutex_lock( &gpib_mutex );
-
-    cleanup_devices( pthread_self( ) );
 
     shutdown( fd, SHUT_RDWR );
     close( fd );
@@ -330,8 +469,10 @@ gpib_handler( void * null  UNUSED_ARG )
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*-----------------------------------------*
+ * Removes all devices handled by a thread
+ * from the list of devices
+ *-----------------------------------------*/
 
 static void
 cleanup_devices( pthread_t tid )
@@ -350,8 +491,9 @@ cleanup_devices( pthread_t tid )
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*--------------------------------------------------*
+ * Function called for a gpib_init() client request
+ *--------------------------------------------------*/
 
 static int
 gpibd_init( int    fd,
@@ -362,37 +504,39 @@ gpibd_init( int    fd,
 
     /* Client should have sent its PID */
 
-    if ( get_long( &line, '\n', &pid ) || pid < 0 )
+    if ( extract_long( &line, '\n', &pid ) || pid < 0 )
     {
-		pid = write( fd, "FAIL\n", 5 );
+        send_nak( fd );
         return -1;
     }
 
+    find_thread_data( pthread_self( ) )->pid = pid;
     gpib_log_message( "New connection, PID = %ld\n", pid );
 
-    find_thread_data( pthread_self( ) )->pid = pid;
-
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
+    send_ack( fd );
     return 0;
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function called when the client wants to shutdown all
+ * its devices and end the connection.
+ *---------------------------------------------------------*/
 
 static int
 gpibd_shutdown( int    fd    UNUSED_ARG,
                 char * line  UNUSED_ARG )
 {
+    cleanup_devices( find_thread_data( pthread_self( ) )->pid );
     gpib_log_message( "Connection closed, PID = %ld\n",
-                      ( long ) find_thread_data( pthread_self( ) )->pid );
+                      find_thread_data( pthread_self( ) )->pid );
     return 0;
 }
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+
+/*---------------------------------------------------------*
+ * Function called for a gpib_init_device() client request
+ *---------------------------------------------------------*/
 
 static int
 gpibd_init_device( int    fd,
@@ -407,11 +551,8 @@ gpibd_init_device( int    fd,
 
     if ( device_count >= MAX_DEVICES )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg, "Too many "
-                 "devices used concurrently" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Too many devices used concurrently" );
+        return send_nak( fd );
     }
 
     /* The client should have sent the device name, check that it's not
@@ -426,24 +567,19 @@ gpibd_init_device( int    fd,
                 sprintf( gpib_error_msg, "Device %s is already "
                          "initialized", devices[ i ].name );
             else
-                sprintf( gpib_error_msg, "Device %s is already in use by a "
-                         "different process, PID = %ld", devices[ i ].name,
+                sprintf( gpib_error_msg, "Device %s is already in use by "
+                         "another process, PID = %ld", devices[ i ].name,
                          ( long ) find_thread_data( devices[ i ].tid )->pid );
 
-            if ( write( fd, "FAIL\n", 5 ) != 5 )
-                return -1;
+            return send_nak( fd );
         }
 
     /* Initialze the device */
 
     if ( gpib_init_device( line, &dev_id ) != SUCCESS )
-    {
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    /* Mark the device as in use */
+    /* Set up the device array element for the device */
 
     devices[ device_count ].dev_id = dev_id;
     devices[ device_count ].tid    = pthread_self( );
@@ -451,24 +587,19 @@ gpibd_init_device( int    fd,
     if ( ! ( devices[ device_count ].name = strdup( line ) ) )
     {
         gpib_remove_device( dev_id );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        return send_nak( fd );
     }
 
     device_count++;
 
     len = sprintf( line, "%d\n", dev_id );
-
-    if ( write( fd, line, len ) != len )
-        return -1;
-
-    return 0;
+    return swrite( fd, line, len ) == len ? 0 : -1;
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function called for a gpib_timeout() client request
+ *-----------------------------------------------------*/
 
 static int
 gpibd_timeout( int    fd,
@@ -481,45 +612,34 @@ gpibd_timeout( int    fd,
 
     /* Client should have sent device ID and timeout value */
 
-    if ( ( ret = get_int( &line, ' ', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_timeout() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_timeout() with invalid "
+                 "device handle" );
+        return send_nak( fd );
     }
 
-    if ( ( ret = get_int( &line, ' ', &timeout ) ) < 0 )
+    if ( ( ret = extract_int( &line, ' ', &timeout ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_timeout() with invalid timeout value" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_timeout() with invalid "
+                 "timeout value" );
+        return send_nak( fd );
     }
 
     if ( gpib_timeout( dev_id, timeout ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function called for a gpib_clear_device() client request
+ *----------------------------------------------------------*/
 
 static int
 gpibd_clear_device( int    fd,
@@ -531,34 +651,25 @@ gpibd_clear_device( int    fd,
 
     /* Client should have sent device ID */
 
-    if ( ( ret = get_int( &line, '\n', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_clear_device() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_clear_device() with invalid "
+                 "device handle" );
+        return send_nak( fd );
     }
 
     if ( gpib_clear_device( dev_id ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*---------------------------------------------------*
+ * Function called for a gpib_local() client request
+ *---------------------------------------------------*/
 
 static int
 gpibd_local( int    fd,
@@ -570,34 +681,25 @@ gpibd_local( int    fd,
 
     /* Client should have sent device ID and timeout value */
 
-    if ( ( ret = get_int( &line, '\n', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_local() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_local() with invalid device "
+                 "handle" );
+        return send_nak( fd );
     }
 
     if ( gpib_local( dev_id ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function called for a gpib_local_lockout() client request
+ *-----------------------------------------------------------*/
 
 static int
 gpibd_local_lockout( int    fd,
@@ -609,29 +711,19 @@ gpibd_local_lockout( int    fd,
 
     /* Client should have sent device ID and timeout value */
 
-    if ( ( ret = get_int( &line, '\n', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_local_lockout() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_local_lockout() with invalid "
+                 "device handle" );
+        return send_nak( fd );
     }
 
     if ( gpib_local_lockout( dev_id ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
@@ -639,8 +731,8 @@ gpibd_local_lockout( int    fd,
  *--------------------------------------------*/
 
 static int
-gpibd_triggger( int    fd,
-                char * line )
+gpibd_trigger( int    fd,
+               char * line )
 {
     int dev_id;
     int ret;
@@ -648,34 +740,25 @@ gpibd_triggger( int    fd,
 
     /* Client should have sent device ID and timeout value */
 
-    if ( ( ret = get_int( &line, '\n', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_trigger() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_trigger() with invalid device "
+                 "handle" );
+        return send_nak( fd );
     }
 
     if ( gpib_trigger( dev_id ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*--------------------------------------------------*
+ * Function called for a gpib_wait() client request
+ *--------------------------------------------------*/
 
 static int
 gpibd_wait( int    fd,
@@ -690,47 +773,35 @@ gpibd_wait( int    fd,
 
     /* Client should have sent device ID and mask value */
 
-    if ( ( ret = get_int( &line, ' ', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_wait() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_wait() with invalid device "
+                 "handle" );
+        return send_nak( fd );
     }
         
-    if ( ( ret = get_int( &line, '\n', &mask ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &mask ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_wait() with invalid mask value" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_wait() with invalid mask "
+                 "value" );
+        return send_nak( fd );
     }
 
     if ( gpib_wait( dev_id, mask, &status ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+        return send_nak( fd );
 
     len = sprintf( line, "%d\n", status );
-
-    if ( write( fd, line, len ) != len )
-        return -1;
-
-    return 0;
+    return swrite( fd, line, len ) == len ? 0 : -1;
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*---------------------------------------------------*
+ * Function called for a gpib_write() client request
+ *---------------------------------------------------*/
 
 static int
 gpibd_write( int    fd,
@@ -738,90 +809,73 @@ gpibd_write( int    fd,
 {
     int ret;
     int dev_id;
-    unsigned long len;
+    long len;
     char *buf;
-    long bytes_to_read;
 
 
     /* Client should have sent device ID and the number of bytes to write */
 
-    if ( ( ret = get_int( &line, ' ', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_write() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_write() with invalid device "
+                 "handle" );
+        return send_nak( fd );
     }
 
-    if ( ( ret = get_ulong( &line, '\n', &len ) ) < 0 )
+    if ( ( ret = extract_long( &line, '\n', &len ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_write() with invalid buffer length value" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_write() with invalid buffer "
+                 "length value" );
+        return send_nak( fd );
     }
 
     /* Get a large enough buffer */
 
     if ( ( buf = malloc( len ) ) == NULL )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Running out of memory in gpib_write()" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Running out of memory in gpib_write()" );
+        return send_nak( fd );
     }
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
+    /* Send an acknowlegde to the client to make it send the data...*/
 
-    /* Read the complete data from the client, avoid getting thrown off by
-       read() not returning as many bytes as expected... */
-
-    bytes_to_read = len;
-	len = 0;
-
-    while ( bytes_to_read )
+    if ( send_ack( fd ) == -1 )
     {
-		ssize_t bytes_read;
+        free( buf );
+        return -1;
+    }
 
-        if ( ( bytes_read = read( fd, buf + len, bytes_to_read ) ) < 0 )
-        {
-            if ( bytes_read != EAGAIN && bytes_read != EINTR )
-                return -1;
-            continue;
-        }
-        bytes_to_read -= bytes_read;
-		len += bytes_read;
+    /* ...read the complete data from the client... */
+
+    if ( len != sread( fd, buf, len ) )
+    {
+        free( buf );
+        return -1;
     }
 
     /* ...and pass them on to the device */
 
     if ( gpib_write( dev_id, buf, len ) != SUCCESS )
     {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        free( buf );
+        return send_nak( fd );
     }
+
+    free( buf );
 
     /* Signal back success */
 
-    if ( write( fd, "OK\n", 3 ) != 3 )
-        return -1;
-
-    return 0;
+    return send_ack( fd );
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*--------------------------------------------------*
+ * Function called for a gpib_read() client request
+ *--------------------------------------------------*/
 
 static int
 gpibd_read( int    fd,
@@ -836,37 +890,30 @@ gpibd_read( int    fd,
 
     /* Client should have sent device ID and the number of bytes to read */
 
-    if ( ( ret = get_int( &line, ' ', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_read() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_read() with invalid device "
+                 "handle" );
+        return send_nak( fd );
     }
 
-    if ( ( ret = get_long( &line, '\n', &len ) ) < 0 )
+    if ( ( ret = extract_long( &line, '\n', &len ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_read() with invalid length value" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_read() with invalid length "
+                 "value" );
+        return send_nak( fd );
     }
 
     /* Get a large enough buffer */
 
     if ( ( buf = malloc( len ) ) == NULL )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Running out of memory in gpib_read()" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Running out of memory in gpib_read()" );
+        return send_nak( fd );
     }
 
     /* Now read from the device */
@@ -874,18 +921,17 @@ gpibd_read( int    fd,
     if ( gpib_read( dev_id, buf, &len ) != SUCCESS )
     {
         free( buf );
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        return send_nak( fd );
     }
 
-    /* First send the length of the buffer a line-feed terminated line,
-       then all the data */
+    /* First send the length of the buffer as a line-feed terminated line,
+       wait for an ACK character as acknowledgement and then send the data */
 
     mlen = sprintf( line, "%lu\n", len );
-    if (    write( fd, line, mlen ) != mlen
-         || write( fd, buf, len ) != len )
+    if (    swrite( fd, line, mlen ) != mlen
+         || sread( fd, line, 1 ) != 1
+         || *line != ACK
+         || swrite( fd, buf, len ) != len )
     {
         free( buf );
         return -1;
@@ -896,8 +942,9 @@ gpibd_read( int    fd,
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function called for a gpib_serial_poll() client request
+ *---------------------------------------------------------*/
 
 static int
 gpibd_serial_poll( int    fd,
@@ -905,130 +952,141 @@ gpibd_serial_poll( int    fd,
 {
     int dev_id;
     int ret;
-    unsigned char stb;
+    unsigned char reply;
+    ssize_t len;
 
 
     /* Client should have sent device ID and timeout value */
 
-    if ( ( ret = get_int( &line, '\n', &dev_id ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
         return -1;
     else if ( ret )
     {
-        sprintf( find_thread_data( pthread_self( ) )->err_msg,
-                 "Call of gpib_serial_poll() with invalid device handle" );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
+        sprintf( gpib_error_msg, "Call of gpib_serial_poll() with invalid "
+                 "device handle" );
+        return send_nak( fd );
     }
 
-    if ( gpib_serial_poll( dev_id, &stb ) != SUCCESS )
-    {
-        strcpy( find_thread_data( pthread_self( ) )->err_msg, gpib_error_msg );
-        if ( write( fd, "FAIL\n", 5 ) != 5 )
-            return -1;
-        return 0;
-    }
+    if ( gpib_serial_poll( dev_id, &reply ) != SUCCESS )
+        return send_nak( fd );
 
-    if ( write( fd, &stb, 1 ) != 1 )
-        return -1;
-
-    return 0;
+    len = sprintf( line, "%u\n", ( unsigned int ) reply );
+    return swrite( fd, line, len ) == len ? 0 : -1;
 }
 
 
-/*--------------------------------------------*
- *--------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function called for a gpib_last_error() client request
+ *--------------------------------------------------------*/
 
 static int
 gpibd_last_error( int    fd,
                   char * line )
 {
-    char *err_msg = find_thread_data( pthread_self( ) )->err_msg;
-    ssize_t len = strlen( err_msg );
-	ssize_t llen;
+    long len = strlen( gpib_error_msg ) + 1;
+	long mlen = sprintf( line, "%ld\n", len );
 
 
-    llen = sprintf( line, "%lu\n", ( unsigned long ) len );
+    /* Send a line with the length of the error message string and then,
+       if its not the empty string wait for a single ACK character before
+       sending the error message */
 
-    if (    write( fd, line, llen ) != llen
-         || ( len > 0 && write( fd, err_msg, len ) != len ) )
+    if (    swrite( fd, line, mlen ) != mlen
+         || ( len > 0
+              && (    sread( fd, line, 1 ) != 1
+                   || *line != ACK
+                   || swrite( fd, gpib_error_msg, len ) != len ) ) )
         return -1;
 
     return 0;
 }
 
 
+/*-----------------------------------------------------------*
+ * Writes as many bytes as was asked for to file descriptor,
+ * returns the number of bytes of success and -1 on failure
+ *-----------------------------------------------------------*/
+
+static ssize_t
+swrite( int          d,
+        const char * buf,
+        ssize_t      len )
+{
+    ssize_t n = len,
+            ret;
+
+
+    if ( len == 0 )
+        return 0;
+
+    do
+    {
+        if (    ( ret = write( d, buf, n ) ) < 1
+             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
+             return -1;
+        buf += ret;
+    } while ( ( n -= ret ) > 0 );
+
+    return len;
+}
+
 /*----------------------------------------------------------------*
- * Reads a line of text of max_len characters ending in '\n' from
- * a socket. This is directly copied from W. R. Stevens, UNP1.2.
+ * Reads as many bytes as was asked for from file descriptor,
+ * returns the number of bytes of success and -1 on failure
  *----------------------------------------------------------------*/
 
 static ssize_t
-read_line( int    fd,
-           void * vptr,
-           size_t max_len )
+sread( int       d,
+       char    * buf,
+       ssize_t   len )
 {
-    ssize_t n,
-            rc;
-    char c,
-         *ptr = vptr;
+    ssize_t n = len,
+            ret;
 
 
-    for ( n = 1; n < ( ssize_t ) max_len; n++ )
+    if ( len == 0 )
+        return 0;
+
+    do
     {
-        if ( ( rc = do_read( fd, &c ) ) == 1 )
-        {
-            *ptr++ = c;
-            if ( c == '\n' )
-                break;
-        }
-        else if ( rc == 0 )
-        {
-            if ( n == 1 )
-                return 0;
-            else
-                break;
-        }
-        else
-            return -1;
-    }
+        if (    ( ret = read( d, buf, n ) ) < 1
+             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
+             return -1;
+        buf += ret;
+    } while ( ( n -= ret ) > 0 );
 
-    *ptr = '\0';
-    return n;
+    return len;
 }
+               
 
-
-/*-----------------------------------------------------*
- * This is directly copied from W. R. Stevens, UNP1.2.
- *-----------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Reads a line-feed terminated (but only up to a maximum of
+ * bytes) from a file descriptor, returns the number of bytes
+ * read on success and -1 on failure
+ *------------------------------------------------------------*/
 
 static ssize_t
-do_read( int    fd,
-         char * ptr )
+readline( int       d,
+          char    * buf,
+          ssize_t   max_len )
 {
-    static int read_cnt;
-    static char *read_ptr;
-    static char read_buf[ 1028 ];
+    ssize_t n = 0,
+            ret;
 
 
-    if ( read_cnt <= 0 )
-    {
-      again:
-        if ( ( read_cnt = read( fd, read_buf, sizeof read_buf ) ) < 0 )
+    if ( max_len == 0 )
+        return 0;
+
+    do
+        if ( ( ret = read( d, buf, 1 ) ) < 1 )
         {
-            if ( errno == EINTR )
-                goto again;
-            return -1;
+            if ( ret == -1 && errno != EINTR && errno != EAGAIN )
+                return -1;
+            continue;
         }
-        else if ( read_cnt == 0 )
-            return 0;
+    while ( ++n < max_len && *buf++ != '\n' );
 
-        read_ptr = read_buf;
-    }
-
-    read_cnt--;
-    *ptr = *read_ptr++;
-    return 1;
+    return n;
 }
 
 
@@ -1050,12 +1108,15 @@ find_thread_data( pthread_t tid )
 
 
 /*--------------------------------------------*
+ * Tries to extract a long from a line, which
+ * has to be follwed directly by 'ec'. The
+ * result is stored in 'val'.
  *--------------------------------------------*/
 
 static int
-get_long( char ** line,
-          char    ec,
-          long  * val )
+extract_long( char ** line,
+              char    ec,
+              long  * val )
 {
     char *eptr;
 
@@ -1075,37 +1136,15 @@ get_long( char ** line,
 
 
 /*--------------------------------------------*
+ * Tries to extract an int from a line, which
+ * has to be follwed directly by 'ec' The
+ * result is stored in 'val'.
  *--------------------------------------------*/
 
 static int
-get_ulong( char          ** line,
-           char             ec,
-           unsigned long  * val )
-{
-    char *eptr;
-
-
-    *val = strtoul( *line, &eptr, 10 );
-
-    if (    eptr == *line
-         || *eptr != ec )
-        return -1;
-
-    if ( *val == ULONG_MAX && errno == ERANGE )
-        return 1;
-
-    *line = eptr + 1;
-    return 0;
-}
-
-
-/*--------------------------------------------*
- *--------------------------------------------*/
-
-static int
-get_int( char ** line,
-         char    ec,
-         int   * val )
+extract_int( char ** line,
+             char    ec,
+             int   * val )
 {
     long lval;
     char *eptr;
@@ -1178,6 +1217,34 @@ create_socket( void )
     }
 
     return listen_fd;
+}
+
+
+/*-----------------------------------------*
+ * Sends a single NAK character to client,
+ * returns 0 on success and -1 in failure
+ *-----------------------------------------*/
+
+static int
+send_nak( int fd )
+{
+    if ( swrite( fd, STR_NAK, 1 ) != 1 )
+        return -1;
+    return 0;
+}
+
+
+/*-----------------------------------------*
+ * Sends a single ACK character to client,
+ * returns 0 on success and -1 in failure
+ *-----------------------------------------*/
+
+static int
+send_ack( int fd )
+{
+    if ( swrite( fd, STR_ACK, 1 ) != 1 )
+        return -1;
+    return 0;
 }
 
 

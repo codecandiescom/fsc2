@@ -215,9 +215,11 @@ start_fsc2d( FILE * in_file_fp )
     {
         if ( in_file_fp )
             fclose( in_file_fp );
+
         close( STDIN_FILENO );
         close( STDOUT_FILENO );
         close( STDERR_FILENO );
+
         fsc2d( listen_fd );
         _exit( 0 );
     }

@@ -154,20 +154,20 @@ Since version 2.4.0 several instances of @code{fsc2} can be run
 simultaneously. This, of course, could lead to problems when two
 instances of @code{fsc2} would try to use the same device at the same
 time. To avoid that devices (or groups of devices) get locked when an
-experiment is started and only released again when it ends. Thus it
-is possible that an experiment gets stopped with an error message
+experiment is started and only released when it ends. Thus it is
+possible that an experiment gets stopped with an error message
 indicating that a lock could not be obtained. In that case a different
 instance of @code{fsc2} is still using the corresponding device (or
 group of devices).
 
-Locking is done via UUC type lock file that (unless configured
-differently at installation) reside in @file{/var/lock}. All
-devices connected via the GPIB bus currently are locked together,
-i.e.@: only on instance of fsc2 can access devices on the GPIB at a
-time. The same holds for devices connected via USB (except USB-serial
-converters) and those connected via RULBUS. Devices connected via
-LAN or serial ports are locked individually, as are devices realized
-as PCI cards.
+Locking is mostly done via UUCP type lock file that (unless configured
+differently at installation) reside in @file{/var/lock}. All devices
+connected via USB (except USB-serial converter, those are treated like
+serial port devices) currently are locked together, i.e.@: only on
+instance of fsc2 can access USB devices at a time. The same holds for
+devices connected via RULBUS. Devices connected via GPIB, LAN or
+serial ports are locked individually as are devices realized as PCI
+cards.
 
 
 @node Magnet Functions, Gaussmeter Functions, Handling of several instances of fsc2, Device Functions
@@ -4886,6 +4886,7 @@ the Agilent 53181A. The modules get loaded by specifying
 @example
 hp5340a
 hp5342a
+hp5343a
 eip371
 agilent_53181a
 @end example

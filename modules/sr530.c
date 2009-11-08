@@ -140,8 +140,8 @@ static void sr530_lock_state( bool lock );
 static bool sr530_command( const char * cmd );
 
 static bool sr530_talk( const char * cmd,
-                        char *       reply,
-                        long *       length );
+                        char       * reply,
+                        long       * length );
 
 static void sr530_failure( void );
 
@@ -1084,8 +1084,8 @@ sr530_command( const char * cmd )
 
 static bool
 sr530_talk( const char * cmd,
-            char *       reply,
-            long *       length )
+            char       * reply,
+            long       * length )
 {
     if (    gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( sr530.device, reply, length ) == FAILURE )

@@ -31,6 +31,7 @@
 #if ! defined GPIB_IFF_JTT_HEADER
 #define GPIB_IFF_JTT_HEADER
 
+#include "gpibd.h"
 #include <gpib.h>
 
 #define GPIB_JTT
@@ -73,9 +74,6 @@ void gpib_log_message( const char * /* fmt */,
                        ...                     );
 
 
-extern char gpib_error_msg[ 1024 ];  /* global for GPIB error messages */
-
-
 #define SUCCESS   0
 #define FAILURE  -1
 
@@ -88,13 +86,6 @@ extern char gpib_error_msg[ 1024 ];  /* global for GPIB error messages */
 #define  LL_ERR   1    /* log errors only */
 #define  LL_CE    2    /* log function calls and function exits */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
-
-
-/*-------------------------------*
- * Definitions of utility macros
- *-------------------------------*/
-
-#define GPIB_IS_TIMEOUT    ( ( gpib_status & GPIB_TIMO ) ? 1 : 0 )
 
 
 #endif /* ! GPIB_IFF_JTT_HEADER */
