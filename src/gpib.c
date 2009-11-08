@@ -609,6 +609,14 @@ connect_to_gpibd( void )
         return -2;
     }
 
+    if ( swrite( sock_fd, STR_ACK, 1 ) != 1 )
+    {
+        shutdown( sock_fd, SHUT_RDWR );
+        close( sock_fd );
+        print( FATAL, "Coonection to GPIB daemon failed.\n" );
+        return -2;
+    }
+
     /* Try to read a single character that tells if the daemon is able to
        deal with our connection. NAK means there are already too many
        connections. */

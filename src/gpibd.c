@@ -281,6 +281,7 @@ new_client( int fd )
     socklen_t cli_len = sizeof cli_addr;
     int cli_fd;
     pthread_attr_t attr;
+    char c;
 
 
     /* Accept the connection by the new client */
@@ -288,6 +289,16 @@ new_client( int fd )
     if ( ( cli_fd = accept( fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
         return;
+
+    /* Check if the client sends an ACK character */
+
+    if ( sread( cli_fd, &c, 1 ) != 1
+            || c != ACK )
+    {
+        shutdown( cli_fd, SHUT_RDWR );
+        close( cli_fd );
+        return;
+    }
 
     /* If all the threads we're prepared to run are used up check if there
        are dead clients and close connections for those, and if then there
@@ -368,9 +379,13 @@ test_connect( void )
        and we've got to start it */
 
     if (    connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-                     sizeof serv_addr ) != -1
-         || ( errno != ECONNREFUSED && errno != ENOENT ) )
-         ret = -1;
+                     sizeof serv_addr ) != -1 )
+    {
+        swrite( sock_fd, STR_NAK, 1 );
+        ret = -1;
+    }
+    else if ( errno != ECONNREFUSED && errno != ENOENT )
+        ret = -1;
 
     shutdown( sock_fd, SHUT_RDWR );
     close( sock_fd );
