@@ -435,7 +435,7 @@ new_client( int fd )
         if ( instances[ i ] == pid )
             break;
 
-    if ( i != num_instances )
+    if ( i == num_instances )
         instances[ num_instances++ ] = pid;
 
     writen( cli_fd, "OK\n", 3 );
