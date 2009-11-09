@@ -423,7 +423,7 @@ gpib_read( int    dev,
          || val > *length )
         return FAILURE;
 
-    /* Send a single ACK char as acknowlegdement and then read the data sent
+    /* Send a single ACK char as acknowledgment and then read the data sent
        by the device */
 
     if (    swrite( fd, STR_ACK, 1 ) != 1

@@ -911,7 +911,7 @@ gpibd_write( int    fd,
         return send_nak( fd );
     }
 
-    /* Send an acknowlegde to the client to make it send the data...*/
+    /* Send an ACK as acknowledgement to client to make it send the data... */
 
     if ( send_ack( fd ) == -1 )
     {

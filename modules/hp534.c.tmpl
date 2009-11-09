@@ -276,37 +276,59 @@ hp534_tmpl_init( const char * name )
 
 /*---------------------------------------------------*
  * To get a new frequency just read from the device,
- * setting it up as talker makes it send a value
+ * setting it up as talker makes it send a value.
+ * The device sometimes seems to send an single 'N'
+ * character instead of a string with the frequency,
+ * in that case give it another chance...
  *---------------------------------------------------*/
 
 static double
 hp534_tmpl_get_freq( void )
 {
     char buf[ 22 ];
-    long len = sizeof buf;
+    long len;
+	int retries = 3;      /* initialize with maximum number of read attempts */
 
 
-    if (    gpib_read( hp534_tmpl.device, buf, &len ) == FAILURE )
+ retry:
+
+	len =  = sizeof buf;
+    if ( gpib_read( hp534_tmpl.device, buf, &len ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
 			   gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 
+	if ( len == 1 && *buf = 'N' && --retries > 0 )
+		goto retry;
+
 	if ( len != sizeof buf )
     {
-        print( FATAL, "Communication with GPIB daemon failed.\n" );
+        print( FATAL, "Less data received from device than requested.\n" );
         THROW( EXCEPTION );
     }
 
-	if ( strncmp( buf, " F  ", 4 ) )
+	if ( strncmp( buf, " F  ", 4 ) || buf[ 20 ] != '\r' || buf[ 21 ] != '\n' )
     {
-        print( FATAL, "Device send unexpected data.\n" );
+        print( FATAL, "Device returned unexpected data.\n" );
         THROW( EXCEPTION );
     }
-
 
     buf[ 20 ] = '\0';
+
+    if ( ! strcmp( buf, " F  99999.999999E+09" ) )
+	{
+		print( FATAL, "Excessive signal level.\n" );
+		THROW( EXCEPTION );
+    }
+
+    if ( ! strcmp( buf, " F  00000.000000E+06" ) )
+	{
+		print( FATAL, "Insufficient input signal.\n" );
+		THROW( EXCEPTION );
+    }
+
     return T_atod( buf + 4 );
 }
 
