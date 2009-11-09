@@ -274,8 +274,10 @@ hp534_tmpl_init( const char * name )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*---------------------------------------------------*
+ * To get a new frequency just read from the device,
+ * setting it up as talker makes it send a value
+ *---------------------------------------------------*/
 
 static double
 hp534_tmpl_get_freq( void )
@@ -284,13 +286,25 @@ hp534_tmpl_get_freq( void )
     long len = sizeof buf;
 
 
-    if (    gpib_read( hp534_tmpl.device, buf, &len ) == FAILURE
-         || len != sizeof buf
-         || strncmp( buf, " F  ", 4 ) )
+    if (    gpib_read( hp534_tmpl.device, buf, &len ) == FAILURE )
     {
-        print( FATAL, "Communication with device failed.\n" );
+        print( FATAL, "Communication with device failed: %s.\n",
+			   gpib_last_error( ) );
         THROW( EXCEPTION );
     }
+
+	if ( len != sizeof buf )
+    {
+        print( FATAL, "Communication with GPIB daemon failed.\n" );
+        THROW( EXCEPTION );
+    }
+
+	if ( strncmp( buf, " F  ", 4 ) )
+    {
+        print( FATAL, "Device send unexpected data.\n" );
+        THROW( EXCEPTION );
+    }
+
 
     buf[ 20 ] = '\0';
     return T_atod( buf + 4 );
@@ -311,7 +325,8 @@ hp534_tmpl_set_resolution( int res )
 	cmd[ 2 ] = '3' + res;
     if ( gpib_write( hp534_tmpl.device, cmd, 3 ) == FAILURE )
     {
-        print( FATAL, "Communication with device failed.\n" );
+        print( FATAL, "Communication with device failed: %s.\n",
+			   gpib_last_error( ) );
         THROW( EXCEPTION );
     }
     return OK;
@@ -326,7 +341,8 @@ hp534_tmpl_command( const char * cmd )
 {
     if ( gpib_write( hp534_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
     {
-        print( FATAL, "Communication with device failed.\n" );
+        print( FATAL, "Communication with device failed: %s.\n",
+			   gpib_last_error( ) );
         THROW( EXCEPTION );
     }
 

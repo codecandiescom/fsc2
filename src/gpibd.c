@@ -512,7 +512,7 @@ gpib_handler( void * null  UNUSED_ARG )
         ret = f[ cmd ]( fd, eptr + 1 );
         pthread_mutex_unlock( &gpib_mutex );
 
-        /* Leave on failed gpib_init() and on gpib_shutdown() command */
+        /* Quit on failed gpib_init() and always on gpib_shutdown() command */
 
         if ( ( cmd == GPIB_INIT && ret == -1 ) || cmd == GPIB_SHUTDOWN )
             break;
@@ -1074,7 +1074,7 @@ gpibd_last_error( int    fd,
 
 /*-----------------------------------------------------------*
  * Writes as many bytes as was asked for to file descriptor,
- * returns the number of bytes of success and -1 on failure
+ * returns the number of bytes on success and -1 otherwise.
  *-----------------------------------------------------------*/
 
 static ssize_t
@@ -1091,9 +1091,12 @@ swrite( int          d,
 
     do
     {
-        if (    ( ret = write( d, buf, n ) ) < 1
-             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
-             return -1;
+        if ( ( ret = write( d, buf, n ) ) < 1 )
+        {
+            if ( ret == -1 && errno != EINTR )
+                return -1;
+            continue;
+        }
         buf += ret;
     } while ( ( n -= ret ) > 0 );
 
@@ -1102,7 +1105,7 @@ swrite( int          d,
 
 /*----------------------------------------------------------------*
  * Reads as many bytes as was asked for from file descriptor,
- * returns the number of bytes of success and -1 on failure
+ * returns the number of bytes on success and -1 otherwise.
  *----------------------------------------------------------------*/
 
 static ssize_t
@@ -1119,9 +1122,12 @@ sread( int       d,
 
     do
     {
-        if (    ( ret = read( d, buf, n ) ) < 1
-             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
-             return -1;
+        if ( ( ret = read( d, buf, n ) ) < 1 )
+        {
+            if ( ret == 0 || errno != EINTR )
+                return -1;
+            continue;
+        }
         buf += ret;
     } while ( ( n -= ret ) > 0 );
 
@@ -1130,9 +1136,9 @@ sread( int       d,
                
 
 /*------------------------------------------------------------*
- * Reads a line-feed terminated (but only up to a maximum of
- * bytes) from a file descriptor, returns the number of bytes
- * read on success and -1 on failure
+ * Reads a line-feed terminated (but only up to a maximum
+ * number of bytes) from a file descriptor, returns the
+ * number of bytes read on success and -1 on failure
  *------------------------------------------------------------*/
 
 static ssize_t
@@ -1140,20 +1146,15 @@ readline( int       d,
           char    * buf,
           ssize_t   max_len )
 {
-    ssize_t n = 0,
-            ret;
+    ssize_t n = 0;
 
 
     if ( max_len == 0 )
         return 0;
 
     do
-        if ( ( ret = read( d, buf, 1 ) ) < 1 )
-        {
-            if ( ret == -1 && errno != EINTR && errno != EAGAIN )
-                return -1;
-            continue;
-        }
+        if ( sread( d, buf, 1 ) != 1 )
+            return -1;
     while ( ++n < max_len && *buf++ != '\n' );
 
     return n;

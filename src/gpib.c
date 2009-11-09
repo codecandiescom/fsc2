@@ -401,7 +401,7 @@ gpib_read( int    dev,
         return FAILURE;
 
     /* Send the 'magic value' for gpib_read(), the device ID and the
-       number of bytes to be read */
+       maximum number of bytes to be read */
 
 	len = sprintf( line, "%d %d %ld\n", GPIB_READ, dev, *length );
 	if ( swrite( fd, line, len ) != len )
@@ -409,7 +409,9 @@ gpib_read( int    dev,
 
     /* The expected answer is either a line with the number of bytes
        that got read (which can't be larger then the number of bytes
-       we asked for) or a single NAK character */
+       we asked for) or a single NAK character (either because memory
+       allocation for a large enough buffer or the call of gpib_read()
+       failed) */
 
     if (    ( len = readline( fd, line, sizeof line - 1 ) ) < 1
          || ( len == 1 && *line == NAK ) )
@@ -421,9 +423,8 @@ gpib_read( int    dev,
          || val > *length )
         return FAILURE;
 
-    /* Send a single ACK char as acknowlegdementand then the data sent by the
-       device should arrive. Keep on reading until we got all the data or a
-       serious error is detected */
+    /* Send a single ACK char as acknowlegdement and then read the data sent
+       by the device */
 
     if (    swrite( fd, STR_ACK, 1 ) != 1
          || sread( fd, buffer, val ) != val )
@@ -711,7 +712,7 @@ start_gpibd( void )
 
 /*----------------------------------------------------------------*
  * Writes as many bytes as was asked for to file descriptor,
- * returns the number of bytes of success and -1 on failure
+ * returns the number of bytes on success and -1 otherwise.
  *----------------------------------------------------------------*/
 
 static ssize_t
@@ -728,9 +729,12 @@ swrite( int          d,
 
     do
     {
-        if (    ( ret = write( d, buf, n ) ) < 1
-             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
-             return -1;
+        if ( ( ret = write( d, buf, n ) ) < 1 )
+        {
+            if  ( ret == -1 && errno != EINTR )
+                return -1;
+            continue;
+        }
         buf += ret;
     } while ( ( n -= ret ) > 0 );
 
@@ -739,7 +743,7 @@ swrite( int          d,
 
 /*------------------------------------------------------------*
  * Reads as many bytes as was asked for from file descriptor,
- * returns the number of bytes of success and -1 on failure
+ * returns the number of bytes on success and -1 otherwise.
  *------------------------------------------------------------*/
 
 static ssize_t
@@ -756,9 +760,12 @@ static ssize_t
 
     do
     {
-        if (    ( ret = read( d, buf, n ) ) < 1
-             && ( ret == -1 && errno != EINTR && errno != EAGAIN ) )
-             return -1;
+        if ( ( ret = read( d, buf, n ) ) < 1 )
+        {
+            if ( ret == 0 || errno != EINTR )
+                return -1;
+            continue;
+        }
         buf += ret;
     } while ( ( n -= ret ) > 0 );
 
@@ -777,20 +784,15 @@ readline( int       d,
           char    * buf,
           ssize_t   max_len )
 {
-    ssize_t n = 0,
-            ret;
+    ssize_t n = 0;
 
 
     if ( max_len == 0 )
         return 0;
 
     do
-        if ( ( ret = read( d, buf, 1 ) ) < 1 )
-        {
-            if ( ret == -1 && errno != EINTR && errno != EAGAIN )
-                return -1;
-            continue;
-        }
+        if ( sread( d, buf, 1 ) != 1 )
+            return -1;
     while ( ++n < max_len && *buf++ != '\n' );
 
     return n;
