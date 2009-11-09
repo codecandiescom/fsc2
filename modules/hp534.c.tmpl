@@ -292,7 +292,7 @@ hp534_tmpl_get_freq( void )
 
  retry:
 
-	len =  = sizeof buf;
+	len = sizeof buf;
     if ( gpib_read( hp534_tmpl.device, buf, &len ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
@@ -300,7 +300,7 @@ hp534_tmpl_get_freq( void )
         THROW( EXCEPTION );
     }
 
-	if ( len == 1 && *buf = 'N' && --retries > 0 )
+	if ( len == 1 && *buf == 'N' && --retries > 0 )
 		goto retry;
 
 	if ( len != sizeof buf )
