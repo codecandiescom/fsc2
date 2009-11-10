@@ -319,13 +319,13 @@ hp534_tmpl_get_freq( void )
 
     if ( ! strcmp( buf, " F  99999.999999E+09" ) )
 	{
-		print( FATAL, "Excessive signal level.\n" );
+		print( FATAL, "Excessive input signal level.\n" );
 		THROW( EXCEPTION );
     }
 
     if ( ! strcmp( buf, " F  00000.000000E+06" ) )
 	{
-		print( FATAL, "Insufficient input signal.\n" );
+		print( FATAL, "Insufficient input signal level.\n" );
 		THROW( EXCEPTION );
     }
 

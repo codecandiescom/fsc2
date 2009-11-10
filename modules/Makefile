@@ -216,7 +216,7 @@ export        # export all symbols to the sub-makefiles
 
 .SUFFIXES:
 
-.PHONY: all vxi11 modules install uninstall cleanup clean
+.PHONY: all modules install uninstall cleanup clean
 
 
 # Making the modules consisting of just one file is simple, to make the
@@ -378,6 +378,7 @@ install:
 				install-$(machine_name);               \
 	fi
 
+
 # How to uninstall the modules
 
 uninstall:
@@ -423,6 +424,7 @@ clean:
 		$(RM) $(RMFLAGS) $$n.c;                   \
 	done;
 	$(RM) $(RMFLAGS) *.fsc2_so
+
 
 # Don't automatically delete intermediate files created by flex or rpcgen
 

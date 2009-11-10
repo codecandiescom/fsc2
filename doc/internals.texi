@@ -52,10 +52,11 @@ reloading the @code{EDL} file) only this third step is repeated.
 
 
 In the following I will try to explain what happens during these three
-steps of the execution of an @code{EDL} script in some more details. Then
+steps of the execution of an @code{EDL} script in some more detail. Then
 follows a real long section with a @i{tour de force} through the sources
 of the program. This is hopefully going to be helpful for people that try
 eliminate bugs or even extend @code{fsc2}.
+
 
 @ifnottex
 
@@ -68,6 +69,7 @@ eliminate bugs or even extend @code{fsc2}.
 @end menu
 
 @end ifnottex
+
 
 
 @node First stage of interpretation, Second stage of interpretation, Internals, Internals

@@ -257,7 +257,7 @@ u15rnd( double d )
         return 0;
     }
 
-    return ( unsigned short int ) floor( d + 0.5 );
+    return floor( d + 0.5 );
 }
 
 
@@ -313,7 +313,7 @@ u16rnd( double d )
         return 0;
     }
 
-    return ( unsigned short int ) floor( d + 0.5 );
+    return floor( d + 0.5 );
 }
 
 
@@ -362,7 +362,7 @@ usrnd( double d )
         return 0;
     }
 
-    return ( unsigned short int ) floor( d + 0.5 );
+    return floor( d + 0.5 );
 }
 
 
@@ -410,7 +410,7 @@ uirnd( double d )
         return 0;
     }
 
-    return ( unsigned int ) floor( d + 0.5 );
+    return floor( d + 0.5 );
 }
 
 
@@ -458,7 +458,7 @@ ulrnd( double d )
         return 0;
     }
 
-    return ( unsigned long ) floor( d + 0.5 );
+    return floor( d + 0.5 );
 }
 
 

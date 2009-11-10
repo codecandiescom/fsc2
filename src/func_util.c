@@ -3951,7 +3951,7 @@ f_curve_button_1d( Var_T * v )
     v = vars_pop( v );
 
     if ( v != NULL )
-        state = ( long ) get_boolean( v );
+        state = get_boolean( v );
 
     too_many_arguments( v );
 
@@ -4070,7 +4070,7 @@ f_curve_button_2d( Var_T * v )
         v = vars_pop( v );
 
         if ( v != NULL )
-            state = ( long ) get_boolean( v );
+            state = get_boolean( v );
 
         too_many_arguments( v );
     }
@@ -4207,7 +4207,7 @@ f_fs_button_1d( Var_T * v )
     }
 
     if ( v != NULL )
-        state = ( long ) get_boolean( v );
+        state = get_boolean( v );
 
     too_many_arguments( v );
 
@@ -4309,7 +4309,7 @@ f_fs_button_2d( Var_T * v )
     v = vars_pop( v );
 
     if ( v != NULL )
-        state = ( long ) get_boolean( v );
+        state = get_boolean( v );
 
     too_many_arguments( v );
 

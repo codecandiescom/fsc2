@@ -491,23 +491,19 @@ mchdir           := $(fdir)/machines
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -Wall                   \
+CFLAGS           := -W                      \
+					-Wall                   \
+					-Wextra                 \
 					-Wwrite-strings         \
 					-Wstrict-prototypes     \
 					-Wmissing-prototypes    \
 					-Wmissing-declarations  \
 					-Wredundant-decls       \
-					-W                      \
 					-Wshadow                \
 					-Wpointer-arith         \
 					-Waggregate-return      \
 					-Wnested-externs        \
 					-Wcast-align
-				    # -Wconversion        # too many false positives
-				    # -Wsign-compare      # missing in older gcc versions
-				    # -Wbad-function-cast # too many false positives
-				    # -Wcast-qual         # too many false positives
-				    # -Wundef             # fails for bison/flex created files
 
 
 BISON         := bison
