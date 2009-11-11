@@ -502,7 +502,7 @@ gpib_handler( void * null  UNUSED_ARG )
 
         pthread_mutex_lock( &gpib_mutex );
         gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
-        ret = fpib_func[ cmd ]( fd, eptr + 1 );
+        ret = gpib_func[ cmd ]( fd, eptr + 1 );
         pthread_mutex_unlock( &gpib_mutex );
 
         /* Quit on failed gpib_init() and always on gpib_shutdown() command */
