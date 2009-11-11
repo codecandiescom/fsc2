@@ -404,18 +404,19 @@ fsc2_serial_close( int sn )
         tcsetattr( Serial_Ports[ sn ].fd, TCSANOW,
                    &Serial_Ports[ sn ].old_tio );
         close( Serial_Ports[ sn ].fd );
-        if ( Serial_Ports[ sn ].have_lock && Serial_Ports[ sn ].dev_name )
-            fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_name,
-                                        '/' ) + 1 );
         lower_permissions( );
         Serial_Ports[ sn ].is_open = UNSET;
     }
 
+    if ( Serial_Ports[ sn ].have_lock )
+    {
+        raise_permissions( );
+        fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' ) + 1 );
+        lower_permissions( );
+    }
+
     if ( Serial_Ports[ sn ].dev_name )
     {
-        if ( Serial_Ports[ sn ].have_lock )
-            fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_name,
-                                        '/' ) + 1 );
         fsc2_serial_log_message( "Closed serial port '%s' for device %s\n",
                                  Serial_Ports[ sn ].dev_file,
                                  Serial_Ports[ sn ].dev_name );
