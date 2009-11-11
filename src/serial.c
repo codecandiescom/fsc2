@@ -328,7 +328,7 @@ fsc2_serial_open( int sn,
 
     if ( ( fd = open( Serial_Ports[ sn ].dev_file, flags ) ) < 0 )
     {
-        fsc2_release_lock( strchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
+        fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
         lower_permissions( );
         fsc2_serial_log_message( "Error: Failure to open serial port '%s' in "
                                  "function fsc2_serial_open()\n",
@@ -411,7 +411,7 @@ fsc2_serial_close( int sn )
     /* Also remove the lock file for the serial port */
 
     if ( Serial_Ports[ sn ].have_lock )
-        fsc2_release_lock( strchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
+        fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_name, '/' ) + 1 );
 
     if ( Serial_Ports[ sn ].dev_name )
     {
