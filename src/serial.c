@@ -312,8 +312,8 @@ fsc2_serial_open( int sn,
     /* Try to obtain a lock */
 
     if ( ! ( Serial_Ports[ sn ].have_lock =
-	             		fsc2_obtain_lock( strchr( Serial_Ports[ sn ].dev_file,
-                                                  '/' ) + 1 ) ) )
+	             		fsc2_obtain_lock( strrchr( Serial_Ports[ sn ].dev_file,
+                                                   '/' ) + 1 ) ) )
     {
         fsc2_serial_log_message( "Error: Failure to create lock file\n" );
         fsc2_serial_log_function_end( "fsc2_serial_open",

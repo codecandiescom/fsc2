@@ -23,7 +23,7 @@
 /*
   This file, together with the file for interfacing to the GPIB library
   used, makes up the "GPIB daemon". Having a kind of daemon for the GPIB
-  is necessary when there can be several instances of fsc2, trying to
+  is necessary when there are several instances of fsc2, all trying to
   access the GPIB bus at the same time. In that case it must be avoided
   that these instances try to access the single bus asynchronously or
   that more than one instance tries to talk to the same device.
@@ -35,18 +35,18 @@
   also ensure that only a single process can talk to a device (until
   that process "releases" the device).
 
-  The "GPIB daemon creates a UNIX domain socket it's listening on and accepts
-  connections from each instance of fsc2, starting a new thread for each
-  connection.
+  The "GPIB daemon" creates a UNIX domain socket it's listening on and
+  accepts connections from each instance of fsc2, starting a new thread
+  for each connection.
 
-  An instance of fsc2 makes requests by sending a line starting with a unique
-  number for the kind of request (possibly followed by some more, request-
-  dependend data). Before handling the request the thread handing requests
-  by this instance of fsc2 locks a mutex that gives it exclusive access to
-  the GPIB bus, thereby avoiding intermixing data on the bus from different
-  requests. Only when the request is satisfied the mutex is unlocked again
-  and another instance of fsc2 and the corresponding thread can get access
-  to the GPIB.
+  An instance of fsc2 makes requests by sending a line starting with a
+  unique number for the kind of request (possibly followed by some more,
+  request-dependend data). Before handling the request the thread handing
+  requests by this instance of fsc2 locks a mutex that gives it exclusive
+  access to the GPIB bus, thereby avoiding intermixing data on the bus
+  from different requests. Only when the request is satisfied the mutex
+  is unlocked again and another instance of fsc2 and the corresponding
+  thread can get access to the GPIB.
 
   At the same time there's a list of all device claimed by the different
   instances of fsc2. Once a device is succesfully claimed by one instance
@@ -58,12 +58,6 @@
   built with an interface suitable for the GPIB library being used. These
   "interfaces" are the files named "gpib_if_*.[ch]x" (and in some cases
   an additional flex and bison file).
-
-  The daemon closes the connection to the client when the communication
-  with the client fails. In that case it doesn't "release" the devices,
-  i.e. they remain assigned to the client. The client thus may reonnect
-  (by opening a new connection and calling gpib_init() again) and then
-  continue to use the devices it previously had requested.
 */
 
 
@@ -439,19 +433,20 @@ gpib_handler( void * null  UNUSED_ARG )
     char buf[ 1024 ];
     long cmd;
     char *eptr;
-    int ( * f[ ] )( int, char * ) = { gpibd_init,
-									  gpibd_shutdown,
-									  gpibd_init_device,
-									  gpibd_timeout,
-									  gpibd_clear_device,
-									  gpibd_local,
-									  gpibd_local_lockout,
-									  gpibd_trigger,
-									  gpibd_wait,
-									  gpibd_write,
-									  gpibd_read,
-									  gpibd_serial_poll,
-									  gpibd_last_error };
+    int ret;
+    int ( * gpib_func[ ] )( int, char * ) = { gpibd_init,
+                                              gpibd_shutdown,
+                                              gpibd_init_device,
+                                              gpibd_timeout,
+                                              gpibd_clear_device,
+                                              gpibd_local,
+                                              gpibd_local_lockout,
+                                              gpibd_trigger,
+                                              gpibd_wait,
+                                              gpibd_write,
+                                              gpibd_read,
+                                              gpibd_serial_poll,
+                                              gpibd_last_error };
 
 
     /* Wait for our thread ID to become available in the list of threads
@@ -478,8 +473,6 @@ gpib_handler( void * null  UNUSED_ARG )
 
     while ( 1 )
     {
-        int ret;
-
         /* Get a line-feed terminated line from the client */
 
         if (    ( len = readline( fd, buf, sizeof buf - 1 ) ) < 2
@@ -509,7 +502,7 @@ gpib_handler( void * null  UNUSED_ARG )
 
         pthread_mutex_lock( &gpib_mutex );
         gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
-        ret = f[ cmd ]( fd, eptr + 1 );
+        ret = fpib_func[ cmd ]( fd, eptr + 1 );
         pthread_mutex_unlock( &gpib_mutex );
 
         /* Quit on failed gpib_init() and always on gpib_shutdown() command */

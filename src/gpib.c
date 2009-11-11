@@ -26,7 +26,7 @@
 #include <sys/un.h>
 
 
-int fd = -1;
+int GPIB_fd = -1;
 static volatile sig_atomic_t Gpibd_replied;
 static char err_msg[ GPIB_ERROR_BUFFER_LENGTH + 1 ];
 
@@ -35,13 +35,13 @@ static int simple_gpib_call( int dev,
                              int func_id );
 static int connect_to_gpibd( void );
 static int start_gpibd( void );
-static ssize_t swrite( int          d,
+static ssize_t swrite( int          fd,
                        const char * buf,
                        ssize_t      len );
-static ssize_t sread( int       d,
+static ssize_t sread( int       fd,
                       char    * buf,
                       ssize_t   len );
-static ssize_t readline( int       d,
+static ssize_t readline( int       fd,
                          char    * buf,
                          ssize_t   max_len );
 static int extract_long( char * line,
@@ -73,18 +73,21 @@ gpib_init( void )
 
     fsc2_assert( Fsc2_Internals.I_am == PARENT );
 
-	if ( fd >= 0 )
+    /* If the file descriptor already has positive value the GPIB must
+       already up */
+
+	if ( GPIB_fd >= 0 )
 		return SUCCESS;
 
 	/* Try to connect to the gpibd daemon - if that fails because it's
 	   not yet running (when the call returned -1) try to start it and
        then again try to connect */
 
-	if (    ( fd = connect_to_gpibd( ) ) < 0
-		 && (    fd == -2
-              || ( fd = start_gpibd( ) ) < 0 ) )
+	if (    ( GPIB_fd = connect_to_gpibd( ) ) < 0
+		 && (    GPIB_fd == -2
+              || ( GPIB_fd = start_gpibd( ) ) < 0 ) )
 	{
-		fd = -1;
+		GPIB_fd = -1;
         strcpy( err_msg, "Failed to connect to GPIB daemon" );
 		return FAILURE;
 	}
@@ -93,13 +96,13 @@ gpib_init( void )
        reply is either a NAK or ACK character */
 
 	len = sprintf( line, "%d %ld\n", GPIB_INIT, ( long ) getpid( ) );
-	if (    swrite( fd, line, len ) != len
-		 || sread( fd, line, 1 ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || sread( GPIB_fd, line, 1 ) < 1
 		 || *line != ACK )
 	{
-		shutdown( fd, SHUT_RDWR );
-		close( fd );
-		fd = -1;
+		shutdown( GPIB_fd, SHUT_RDWR );
+		close( GPIB_fd );
+		GPIB_fd = -1;
         strcpy( err_msg, "GPIB daemon doesn't react as required" );
 		return FAILURE;
 	}
@@ -109,12 +112,12 @@ gpib_init( void )
 }
 
 
-/*----------------------------------------------------*
- * Shutdown the connection to the daemon, no reply is
- * expected. If there are no other instances of fsc2
- * running an experiment using the GPIB bus this will
- * result in it getting shut down.
- *----------------------------------------------------*/
+/*---------------------------------------------------------------* 
+ * Shutdown the connection to the daemon, no reply is expected.
+ * If there are no other instances of fsc2 running an experiment
+ * using the GPIB this will result in it getting shutdown an
+ * the daemon exiting.
+ *--------------------------------------------------------------*/
 
 int
 gpib_shutdown( void )
@@ -127,15 +130,18 @@ gpib_shutdown( void )
 
     fsc2_assert( Fsc2_Internals.I_am == PARENT );
 
-    if ( fd < 0 )
-        return FAILURE;
+    /* If the file descriptor doesn't have a reasonable value GPIB
+       must already be shutdown */
+
+    if ( GPIB_fd < 0 )
+        return SUCCESS;
 
 	len = sprintf( line, "%d\n", GPIB_SHUTDOWN );
-	swrite( fd, line, len );
+	swrite( GPIB_fd, line, len );
 
-	shutdown( fd, SHUT_RDWR );
-	close( fd );
-	fd = -1;
+	shutdown( GPIB_fd, SHUT_RDWR );
+	close( GPIB_fd );
+	GPIB_fd = -1;
 
     strcpy( err_msg, "Connection to GPIB daemon is closed" );
 
@@ -166,7 +172,7 @@ gpib_init_device( const char * name,
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
 	/* Send a line with the 'magic number' for gpib_init_device(), followed
@@ -177,8 +183,8 @@ gpib_init_device( const char * name,
 	line = get_string( "%d %s\n", GPIB_INIT_DEVICE, name );
 	len = strlen( line );
 
-	if (    swrite( fd, line, len ) != len
-         || ( len = readline( fd, reply, sizeof reply - 1 ) ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+         || ( len = readline( GPIB_fd, reply, sizeof reply - 1 ) ) < 1
          || ( len == 1 && *reply == NAK ) )
         return FAILURE;
 
@@ -213,7 +219,7 @@ gpib_timeout( int dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send line with 'magic value' for gpib_timeout(), followed by the
@@ -221,8 +227,8 @@ gpib_timeout( int dev,
        a ACK or NAK character */
 
 	len = sprintf( line, "%d %d %d\n", GPIB_TIMEOUT, dev, timeout );
-	if (    swrite( fd, line, len ) != len
-		 || sread( fd, line, 1 ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || sread( GPIB_fd, line, 1 ) < 1
          || *line != ACK )
 		return FAILURE;
 
@@ -302,7 +308,7 @@ gpib_wait( int   dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send the 'magic value' for gpib_wait(), the device ID and the mask.
@@ -310,8 +316,8 @@ gpib_wait( int   dev,
        device (as an integer) or with a single NAK character. */
 
 	len = sprintf( line, "%d %d %d\n", GPIB_WAIT, dev, mask );
-	if (    swrite( fd, line, len ) != len
-		 || ( len = readline( fd, line, sizeof line - 1 ) ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || ( len = readline( GPIB_fd, line, sizeof line - 1 ) ) < 1
          || ( len == 1 && *line == NAK ) )
 		return FAILURE;
 
@@ -346,7 +352,7 @@ gpib_write( int          dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send a line with the 'magic number' for gpib_write(), the device ID
@@ -354,16 +360,16 @@ gpib_write( int          dev,
        or NAK character */
 
 	len = sprintf( line, "%d %d %ld\n", GPIB_WRITE, dev, length );
-	if (    swrite( fd, line, len ) != len
-         || sread( fd, line, 1 ) != 1
+	if (    swrite( GPIB_fd, line, len ) != len
+         || sread( GPIB_fd, line, 1 ) != 1
          || *line != ACK )
         return FAILURE;
 
     /* Now send over all the data to be written to the device and expect
        a reply of ACK or NAK */
 
-    if (    swrite( fd, buffer, length ) != length
-		 || sread( fd, line, 1 ) < 1
+    if (    swrite( GPIB_fd, buffer, length ) != length
+		 || sread( GPIB_fd, line, 1 ) < 1
          || *line != ACK )
 		return FAILURE;
 
@@ -397,14 +403,14 @@ gpib_read( int    dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send the 'magic value' for gpib_read(), the device ID and the
        maximum number of bytes to be read */
 
 	len = sprintf( line, "%d %d %ld\n", GPIB_READ, dev, *length );
-	if ( swrite( fd, line, len ) != len )
+	if ( swrite( GPIB_fd, line, len ) != len )
         return FAILURE;
 
     /* The expected answer is either a line with the number of bytes
@@ -413,7 +419,7 @@ gpib_read( int    dev,
        allocation for a large enough buffer or the call of gpib_read()
        failed) */
 
-    if (    ( len = readline( fd, line, sizeof line - 1 ) ) < 1
+    if (    ( len = readline( GPIB_fd, line, sizeof line - 1 ) ) < 1
          || ( len == 1 && *line == NAK ) )
         return FAILURE;
 
@@ -426,8 +432,8 @@ gpib_read( int    dev,
     /* Send a single ACK char as acknowledgment and then read the data sent
        by the device */
 
-    if (    swrite( fd, STR_ACK, 1 ) != 1
-         || sread( fd, buffer, val ) != val )
+    if (    swrite( GPIB_fd, STR_ACK, 1 ) != 1
+         || sread( GPIB_fd, buffer, val ) != val )
         return FAILURE;
 
     *length = val;
@@ -458,7 +464,7 @@ gpib_serial_poll( int             dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send a line with the 'magic value' for gpib_serial_poll() and the
@@ -466,8 +472,8 @@ gpib_serial_poll( int             dev,
        (must be positive an not larger the 255) or a single NAK character */
 
 	len = sprintf( line, "%d %d\n", GPIB_SERIAL_POLL, dev );
-	if (    swrite( fd, line, len ) != len
-		 || ( len = readline( fd, line, sizeof line ) ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || ( len = readline( GPIB_fd, line, sizeof line ) ) < 1
          || ( len == 1 && *line == NAK ) )
 		return FAILURE;
 
@@ -505,14 +511,14 @@ gpib_last_error( void )
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-	if ( fd < 0 )
+	if ( GPIB_fd < 0 )
 		return err_msg;
 
     *err_msg = '\0';
 
 	len = sprintf( line, "%d\n", GPIB_LAST_ERROR );
-	if (    swrite( fd, line, len ) != len
-		 || ( len = readline( fd, line, sizeof line - 1 ) ) < 2 )
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || ( len = readline( GPIB_fd, line, sizeof line - 1 ) ) < 2 )
         return "Communication failure with GPIB daemon";
 
 	line[ len ] = '\0';
@@ -523,8 +529,8 @@ gpib_last_error( void )
 	if ( val == 0 )
 		return strcpy( err_msg, "No errror message available" );
 
-    if (    swrite( fd, STR_ACK, 1 ) != 1
-         || sread( fd, err_msg, val ) != val )
+    if (    swrite( GPIB_fd, STR_ACK, 1 ) != 1
+         || sread( GPIB_fd, err_msg, val ) != val )
         return "Communication failure with GPIB daemon";
 
 	err_msg[ val ] = '\0';
@@ -532,11 +538,11 @@ gpib_last_error( void )
 }
 
 
-/*---------------------------------------------------------*
- * Function for dealing with simple commands that jst need
- * to pass the device ID and wait for a reply consisting
- * of either a ACK or NAK character.
- *---------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for dealing with simple commands that just need
+ * to pass the device ID and wait for a reply consisting of
+ * either a ACK or NAK character.
+ *----------------------------------------------------------*/
 
 static int
 simple_gpib_call( int dev,
@@ -554,15 +560,15 @@ simple_gpib_call( int dev,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    if ( fd < 0 )
+    if ( GPIB_fd < 0 )
         return FAILURE;
 
     /* Send line with 'magic value' for requested function and the device
        number. The expected reply is either a ACK or NAK character. */
 
 	len = sprintf( line, "%d %d\n", func_id, dev );
-	if (    swrite( fd, line, len ) != len
-		 || sread( fd, line, 1 ) < 1
+	if (    swrite( GPIB_fd, line, len ) != len
+		 || sread( GPIB_fd, line, 1 ) < 1
          || *line != ACK )
 		return FAILURE;
 
@@ -572,8 +578,9 @@ simple_gpib_call( int dev,
 
 /*--------------------------------------------------------*
  * Tries to open a connection to the GPIB daemon. Returns
- * a file descriptor for a socket on success, -1 if the
- * daemon isn't running and -2 on failure.
+ * a file descriptor for a socket connected to the "GPIB
+ * daemon" on success, -1 if the daemon isn't running and
+ * -2 on failure.
  *--------------------------------------------------------*/
 
 static int
@@ -594,9 +601,9 @@ connect_to_gpibd( void )
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, GPIBD_SOCK_FILE );
 
-    /* If connect fails due to connection refused or because there's no socket
-       file (or it exists but isn't a socket file) it means gpibd isn't running
-       and we've got to start it */
+    /* If connect fails due to connection refused or because there's no
+       socket file (or it exists but isn't a socket file) it means gpibd
+       isn't running and got to be started */
 
     if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
                   sizeof serv_addr ) == -1 )
@@ -614,7 +621,7 @@ connect_to_gpibd( void )
     {
         shutdown( sock_fd, SHUT_RDWR );
         close( sock_fd );
-        print( FATAL, "Coonection to GPIB daemon failed.\n" );
+        print( FATAL, "Connection to GPIB daemon failed.\n" );
         return -2;
     }
 
@@ -716,7 +723,7 @@ start_gpibd( void )
  *----------------------------------------------------------------*/
 
 static ssize_t
-swrite( int          d,
+swrite( int          fd,
         const char * buf,
         ssize_t      len )
 {
@@ -729,7 +736,7 @@ swrite( int          d,
 
     do
     {
-        if ( ( ret = write( d, buf, n ) ) < 1 )
+        if ( ( ret = write( fd, buf, n ) ) < 1 )
         {
             if  ( ret == -1 && errno != EINTR )
                 return -1;
@@ -741,13 +748,14 @@ swrite( int          d,
     return len;
 }
 
+
 /*------------------------------------------------------------*
  * Reads as many bytes as was asked for from file descriptor,
  * returns the number of bytes on success and -1 otherwise.
  *------------------------------------------------------------*/
 
 static ssize_t
-    sread( int       d,
+    sread( int       fd,
            char    * buf,
            ssize_t   len )
 {
@@ -760,7 +768,7 @@ static ssize_t
 
     do
     {
-        if ( ( ret = read( d, buf, n ) ) < 1 )
+        if ( ( ret = read( fd, buf, n ) ) < 1 )
         {
             if ( ret == 0 || errno != EINTR )
                 return -1;
@@ -780,7 +788,7 @@ static ssize_t
  *------------------------------------------------------------*/
 
 static ssize_t
-readline( int       d,
+readline( int       fd,
           char    * buf,
           ssize_t   max_len )
 {
@@ -791,7 +799,7 @@ readline( int       d,
         return 0;
 
     do
-        if ( sread( d, buf, 1 ) != 1 )
+        if ( sread( fd, buf, 1 ) != 1 )
             return -1;
     while ( ++n < max_len && *buf++ != '\n' );
 
