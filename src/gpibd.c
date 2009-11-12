@@ -221,6 +221,7 @@ main( void )
     {
         shutdown( fd, SHUT_RDWR );
         close( fd );
+        unlink( GPIBD_SOCK_FILE );
         return EXIT_FAILURE;
     }
 
