@@ -190,6 +190,7 @@ main( void )
     int fd;
     fd_set fds;
     struct timeval timeout;
+    char err_msg[ GPIB_ERROR_BUFFER_LENGTH ];
 
 
     /* Igore all signals */
@@ -213,18 +214,19 @@ main( void )
     if ( ( fd = create_socket( ) ) == -1 )
         return EXIT_FAILURE;
 
-    /* Send parent a signal to tell it we're listening n the socket */
-
-    kill( getppid( ), SIGUSR2 );
-
     /* Initialize the GPIB library */
 
+    gpib_error_msg = err_msg;
     if ( gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) != SUCCESS )
     {
         shutdown( fd, SHUT_RDWR );
         close( fd );
         return EXIT_FAILURE;
     }
+
+    /* Send parent a signal to tell it we're listening n the socket */
+
+    kill( getppid( ), SIGUSR2 );
 
     /* Wait for connections and quit when no clients exist anymore (the
        first client will connect more or less immediately since it's our
