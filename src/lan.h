@@ -47,15 +47,16 @@
 typedef struct LAN_List LAN_List_T;
 
 struct LAN_List {
-    const char *   name;
-    int            fd;
-    struct in_addr address;
-    int            port;
-    long           us_read_timeout;
-    long           us_write_timeout;
-    bool           so_timeo_avail;
-    LAN_List_T *   next;
-    LAN_List_T *   prev;
+    const char     * name;
+    int              fd;
+    struct in_addr   address;
+    int              port;
+    long             us_read_timeout;
+    long             us_write_timeout;
+    bool             so_timeo_avail;
+	FILE           * log_fp;
+    LAN_List_T     * next;
+    LAN_List_T     * prev;
 };
 
 
@@ -91,24 +92,29 @@ ssize_t fsc2_lan_readv( int            /* handle         */,
                         long           /* us_timeout     */,
                         bool           /* quit_on_signal */  );
 
-void fsc2_lan_log_message( const char * /* fmt */,
-                           ...                     );
+FILE * fsc2_lan_open_log( const char * /* dev_name */ );
 
-void fsc2_lan_log_function_start( const char * function,
-                                  const char * dev_name );
+FILE * fsc2_lan_close_log( FILE * /* fp */ );
 
-void fsc2_lan_log_function_end( const char * function,
-                                const char * dev_name );
+void fsc2_lan_log_message( FILE       * /* fp  */,
+						   const char * /* fmt */,
+						   ...                        );
 
-void fsc2_lan_log_data( long         length,
-                        const char * buffer );
+void fsc2_lan_log_function_start( FILE       * /* handle   */,
+								  const char * /* function */,
+								  const char * /* dev_name */ );
+
+void fsc2_lan_log_function_end( FILE *       /* fp       */,
+								const char * /* function */,
+								const char * /* dev_name */ );
+
+void fsc2_lan_log_data( FILE       * /* fp     */,
+						long         /* length */,
+						const char * /* buffer */ );
 
 int fsc2_lan_log_level( void );
 
 void fsc2_lan_cleanup( void );
-
-void fsc2_lan_exp_init( const char * /* log_file_name */,
-                        int          /* log_level     */  );
 
 
 #endif   /* ! LAN_HEADER */

@@ -286,6 +286,7 @@ er023m_set_tc( int tc_index )
 {
     char buf[ 30 ];
 
+
     fsc2_assert( tc_index >= TC_MIN_INDEX && tc_index <= TC_MAX_INDEX );
 
     sprintf( buf, "TC%d\r", tc_index );

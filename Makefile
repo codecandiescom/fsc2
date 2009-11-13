@@ -85,15 +85,14 @@ prefix             := /usr/local
 # DEF_INCL_DIR       := /scratch/EDL/includes
 
 
-# The variable LOCK_DIR is the directory where UUCP style lockfiles
-# are created that protect all devices from oncurrent access by differrnt
-# instances of fsc2. This should be '/var/lock' (which is the default if
-# this variable isn't set) according to version 2.2 of the File-system
+# The variable, LOCK_DIR, is the directory where UUCP style lock files
+# for devices are created. This should be '/var/lock' (which is the default
+# if this variable isn't set) according to version 2.2 of the File-system
 # Hierachy Standard. Either fsc2 itself or all its users must have read
 # and write permissions for this directory. Also see the longer discussion
 # in section C of the INSTALL file.
 
-LOCK_DIR    := /var/lock
+# LOCK_DIR    := /var/lock
 
 
 # The next variable defines the GPIB library to use, it must be set to
@@ -178,17 +177,16 @@ GPIB_LOG_LEVEL     := HIGH
 # WITHOUT_SERIAL_PORTS   := yes
 
 
-# Next set the file for writing logs about the activity on the serial
-# port. Make sure that fsc2 or its users have write access to the
-# directory the log file will be created in. Don't use a partition on
-# which you don't have at least a few megabytes to spare, depending on
-# the type of experiments you do the file can become rather long. But
-# the file will not grow indefinitely, if you start a new experiment its
-# previous contents gets overwritten. If no file is specified logs will
-# be written to stderr(unless @code{SERIAL_LOG_LEVEL} is set to @{OFF},
-# see below).
+# Next set the directory were log files for serial port devices are
+# created. Make sure that fsc2 or its users have write access to the
+# directory. Don't use a partition on which you don't have at least a
+# few megabytes to spare, depending on the type of experiments you do
+# the files can become rather long. But the files will not grow indefinitely,
+# if you start a new experiment their previous contents get overwritten. If
+# no directory is specified logs will be written to the default directory
+# for temporary files
 
-SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
+# SERIAL_LOG_DIR    := /tmp
 
 
 # The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the
@@ -202,17 +200,16 @@ SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 SERIAL_LOG_LEVEL   := HIGH
 
 
-# Now set the file for writing logs about the activity on the LAN port
-# Make sure that fsc2 or its users have write access to the directory
-# the log file will be created in. Don't use a partition on which you
-# don't have at least a few megabytes to spare, depending on the type of
-# experiments you do the file can become rather long. But the file will
-# not grow indefinitely, if you start a new experiment its previous
-# contents gets overwritten. If no file is specified logs will be
-# written to stderr(unless @code{ALN_LOG_LEVEL} is set to @{OFF}, see
-# below).
+# Next set the directory were log files for LAN devices are created.
+# Make sure that fsc2 or its users have write access to the directory.
+# Don't use a partition on which you don't have at least a few megabytes
+# to spare, depending on the type of experiments you do the files can
+# become rather long. But the files will not grow indefinitely, if you
+# start a new experiment their previous contents get overwritten. If no
+# directory is specified logs will be written to the default directory
+# for temporary files
 
-LAN_LOG_FILE    := /tmp/fsc2_lan.log
+# LAN_LOG_DIR    := /tmp
 
 
 # The next variable, LAN_LOG_LEVEL, sets the verbosity level for the
@@ -751,10 +748,8 @@ endif
 ifdef WITHOUT_SERIAL_PORTS
 	CONFFLAGS += -DWITHOUT_SERIAL_PORTS
 else
-	ifdef SERIAL_LOG_FILE
-		CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
-	else
-		CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/fsc2_serial.log\"
+	ifdef SERIAL_LOG_DIR
+		CONFFLAGS += -DSERIAL_LOG_DIR=\"$(patsubst % ,%,$(SERIAL_LOG_DIR))\"
 	endif
 
 	ifdef SERIAL_LOG_LEVEL
@@ -781,10 +776,8 @@ endif
 
 # Make sure settings for the LAN port are reasonable
 
-ifdef LAN_LOG_FILE
-	CONFFLAGS += -DLAN_LOG_FILE=\"$(patsubst % ,%,$(LAN_LOG_FILE))\"
-else
-	CONFFLAGS += -DLAN_LOG_FILE=\"/tmp/fsc2_lan.log\"
+ifdef LAN_LOG_FIR
+	CONFFLAGS += -DLAN_LOG_DIR=\"$(patsubst % ,%,$(LAN_LOG_DIR))\"
 endif
 
 ifdef LAN_LOG_LEVEL

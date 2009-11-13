@@ -752,6 +752,7 @@ correct sequence, so it's not completely foolproof.
 * Files to be included::
 * Variables a module must define::
 * Global variables::
+* Device Locking::
 * Handling GPIB Devices::
 * Serial Port Handling::
 * Handling devices connected via USB::
@@ -907,7 +908,7 @@ must be avoided to use identical @code{EDL} function names in modules
 for devices of different types.
 
 
-@node Global variables, Handling GPIB Devices, Variables a module must define, Writing New Modules
+@node Global variables, Device Locking, Variables a module must define, Writing New Modules
 @subsection Global variables
 
 First, there is a global variable@footnote{Actually, @code{FSC2_MODE}
@@ -987,7 +988,47 @@ variable @code{Need_LAN} (also of type @code{bool}) need to be set in
 the init hook function.
 
 
-@node Handling GPIB Devices, Serial Port Handling, Global variables, Writing New Modules
+@node Device Locking, Handling GPIB Devices, Global variables, Writing New Modules
+@subsection Device Locking
+
+While being used in the experiment devices must be locked against the
+use by other instances of @code{fsc2}. In most cases you don't have to
+take care of this yourself, e.g.@: as long as you use just the
+functions built-in into @code{fsc2} to communicate with the devices
+this happens automatically.
+
+But in case you have to write a module that by-passes the built-in
+methods you also have to take care of locking. The that case the
+following two functions can be used:
+
+@anchor{fsc2_obtain_lock()}
+@findex fsc2_obtain_lock()
+This function tries to obtain a lock on a device. Its declaration is
+@example
+bool fsc2_obtain_lock( const char * name );
+@end example
+@noindent
+where the only argument is the (unique) device name. The function
+tries to create a UUCCP style lock file. typically in @file{/var/lock}
+(unless the configuration variable @code{LOCK_DIR} has been set to
+something different, make sure @code{fsc2} has write permissions for
+that directory). On success the function returns @code{OK} (@code{1}),
+otherwise @code{FAIL} (@code{0}). You shouldn't continue unless the
+function was successful.
+
+
+@anchor{fsc2_release_lock()}
+@findex fsc2_release_lock()
+This function releases the lock on the device. Its declaration is
+@example
+void fsc2_release_lock( const char * name );
+@end example
+@noindent
+The argument is again the same device name as was used when obtaining
+the lock.
+
+
+@node Handling GPIB Devices, Serial Port Handling, Device Locking, Writing New Modules
 @subsection Handling GPIB Devices
 
 To make dealing with the GPIB bus simpler there are several routines
@@ -1103,7 +1144,7 @@ include the appropriate header file, i.e.@: you need
 For serial ports things are handled a bit differently from GPIB
 devices. You don't need to set a special variable to advertise your
 intention of using one of them. Instead, in the init hook function you
-must try to request the serial port you need by calling the function
+must request the serial port you need by calling the function
 @anchor{fsc2_request_serial_port()}
 @findex fsc2_request_serial_port()
 @example
@@ -1112,24 +1153,25 @@ int fsc2_request_serial_port( const char * device_file,
 @end example
 @noindent
 with the name of the device file for the serial port (typically
-@code{"/dev/ttyS0"}, @code{"/dev/ttyS1"} etc.@: for normal serial
-ports and @code{"/dev/ttyUSB0"} etc.@: for USB-serial converters) as
-the first and the device name as the second argument. The device name
-is for use in log files, error messages etc.
+@file{/dev/ttyS0}, @file{/dev/ttyS1} @: for normal serial ports and
+@file{/dev/ttyUSB0} etc.@: for USB-serial converters) as the first and
+a device name as the second argument. The device name is for use in
+log files, error messages etc.
 
 If the requested serial port has already been claimed by a different
-device the function will print an error message and stop the
-@code{EDL} script, so you don't have to deal with error handling
-yourself. In case of success it returns an integer number that in
-calls of all other functions identifies the serial port.
+device or instance of @code{fsc2} the function will print an error
+message and stop the @code{EDL} script, so you don't have to deal with
+error handling yourself. In case of success it returns an integer
+number that in calls of all other functions identifies the serial
+port.
 
 No other serial port function may not be called before the
 @code{exp_hook} function.
 
 For all functions that deal directly with file descriptors for the
 serial port device files there are replacement functions. The
-following table lists all functions that are used with respect to
-serial ports with their replacements:
+following table lists all functions that normally are used with device
+file descriptors for serial ports with their replacements:
 @table @samp
 @item open()
 @code{fsc2_serial_open()}
@@ -1241,19 +1283,6 @@ argument is always the serial port number instead of a file
 descriptor. If the function gets passed an invalid serial port number
 @code{errno} is set to @code{EBADF}.
 
-@findex fsc2_serial_log_message()
-The only other additional function that can be called is
-@code{fsc2_serial_log_message()} and lets you directly write to
-the log file that stores information about the details of the
-communication over the serial port:
-@example
-void fsc2_serial_log_message( const char * fmt, ... );
-@end example
-@noindent
-It expects a format string as you would use in the @code{C printf()}
-function plus arguments corresponding to the conversion specifiers in
-the format string.
-
 
 @node Handling devices connected via USB, Handling devices connected via LAN, Serial Port Handling, Writing New Modules
 @subsection Handling devices connected via USB
@@ -1312,7 +1341,7 @@ convenience. But if you use them make sure they don't get invoked
 before the @code{exp_hook} function.
 
 The advantage of using them is that you don't have to care about basic
-operations (including dealing with timeouts etc.@:) and that the
+operations (including dealing with timeouts etc.) and that the
 functions automatically log whatever gets send between the computer
 and the devices. How much is written to the log file (and where this
 log file is and is named) can be set as a compilation option, see the
@@ -1333,16 +1362,6 @@ Reads data from the device into a single buffer
 Reads data from the device into a set of buffers
 @item @code{@ref{fsc2_lan_close()}}
 Closes the connection to the device
-@item @code{@ref{fsc2_lan_log_message()}}
-Writes a message to the LAN log file
-@item @code{@ref{fsc2_lan_log_function_start()}}
-Write a message to the LAN log file about the start of a function
-@item @code{@ref{fsc2_lan_log_function_end()}}
-Write a message to the LAN log file about the end of a function
-@item @code{@ref{fsc2_lan_log_data()}}
-Write data directly to the LAN log file
-@item @code{@ref{fsc2_lan_log_level()}}
-Returns the log level for LAN log file messages.
 @end table
 @noindent
 While they are similar to the @code{open()}, @code{write()}, @code{read()}
@@ -1492,17 +1511,72 @@ with an invalid handle (possibly because the connection had already been
 closed), @code{-1} gets returned.
 
 
+
+If you instead want (or have) to do most things all by yourself you
+can at lease use some functions for logging. Please note that in this
+case you also have to take care of device locking yourself, i.e.@:
+before opening a connection to the device call
+@code{@ref{fsc2_obtain_lock()}} (and only continue when the function
+returns indicating success) and release the lock after connection has
+been closed using @code{@ref{fsc2_release_lock()}}.
+
+These are for logging are:
+@table @samp
+@item @code{@ref{fsc2_lan_open_log()}}
+Opens a file for logs
+@item @code{@ref{fsc2_lan_close_log()}}
+Closes the log file
+@item @code{@ref{fsc2_lan_log_message()}}
+Writes a message to the LAN log file
+@item @code{@ref{fsc2_lan_log_function_start()}}
+Write a message to the LAN log file about the start of a function
+@item @code{@ref{fsc2_lan_log_function_end()}}
+Write a message to the LAN log file about the end of a function
+@item @code{@ref{fsc2_lan_log_data()}}
+Write data directly to the LAN log file
+@item @code{@ref{fsc2_lan_log_level()}}
+Returns the log level for LAN log file messages.
+@end table
+
+Please note that 
+
+@anchor{fsc2_lan_open_log()}
+@findex fsc2_lan_opne_log()
+This function lets you open a log file for the device:
+@example
+FILE *fsc2_lan_open_log( const char * dev_name );
+@end example
+@noindent
+It takes the name of the device and opens up a log file (typically
+in @file{/tmp} unless the configuration variable @code{LAN_LOG_DIR}
+hasn't been set to something else. The function returns a file pointer
+to be used in the rest of the functions.
+
+
+@anchor{fsc2_lan_close_log()}
+@findex fsc2_lan_close_log()
+This function lets you open a log file for the device:
+@example
+FILE *fsc2_lan_open_log( FILE * fp );
+@end example
+@noindent
+When called it closes the log file pointed to bt @code{fp} and
+returns always @code{NULL}.
+
+
 @anchor{fsc2_lan_log_message()}
 @findex fsc2_lan_log_message()
 The function allows you to write to the log file that stores
 information about the details of the communication over the LAN:
 @example
-void fsc2_lan_log_message( const char * fmt, ... );
+void fsc2_lan_log_message( FILE       * fp,
+                           const char * fmt,
+                           ... );
 @end example
 @noindent
-It expects a format string as you would use in the @code{C printf()}
-function plus arguments corresponding to the conversion specifiers in
-the format string.
+It expects the pointer to the log file, a format string as you would
+use in the @code{C printf()} function plus arguments corresponding to
+the conversion specifiers in the format string.
 
 
 @anchor{fsc2_lan_log_function_start()}
@@ -1510,12 +1584,13 @@ the format string.
 To put a message into the log file about the start of a function
 use
 @example
-void fsc2_lan_log_function_start( const char * function,
+void fsc2_lan_log_function_start( FILE       * fp,
+                                  const char * function,
                                   const char * dev_name )
 @end example
 @noindent
-It expects two arguments: the name of the function and the name of
-the device.
+It expects three arguments: the pointer to the log file, the name of
+the function and the name of the device.
 
 
 @anchor{fsc2_lan_log_function_end()}
@@ -1523,12 +1598,13 @@ the device.
 To put a message into the log file about the end of a function
 use
 @example
-void fsc2_lan_log_function_end( const char * function,
+void fsc2_lan_log_function_end( FILE       * fp,
+                                const char * function,
                                 const char * dev_name )
 @end example
 @noindent
-It expects two arguments: the name of the function and the name of
-the device.
+It expects three arguments: the pointer to the log file, the name of
+the function and the name of the device.
 
 
 @anchor{fsc2_lan_log_data()}
@@ -1536,12 +1612,14 @@ the device.
 The function for writing data directly into the LAN lof file,
 e.g.@: to report data read from or send to a device, is declared as
 @example
-void fsc2_lan_log_data( long         length,
+void fsc2_lan_log_data( FILE       * fp,
+                        long         length,
                         const char * buffer )
 @end example
 @noindent
-The first argument is the number of bytes of the data to be written to
-the LAN log file and the second is a pointer to the data itself.
+The first argument is the pointer to the log file, the second the
+number of bytes of the data to be written to the LAN log file and the
+third is a pointer to the data itself.
 
 
 @anchor{fsc2_lan_log_level()}

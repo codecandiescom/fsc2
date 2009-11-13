@@ -310,11 +310,8 @@ start_comm_libs( void )
 #endif
 
 #if ! defined WITHOUT_SERIAL_PORTS
-    fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
+    fsc2_serial_exp_init( SERIAL_LOG_LEVEL );
 #endif
-
-    if ( Need_LAN )
-        fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
 
 #if defined WITH_MEDRIVER
     /* If there are devices that are controlled via the Meilhaus library */

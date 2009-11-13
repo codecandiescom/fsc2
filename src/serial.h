@@ -74,13 +74,10 @@ int fsc2_tcflush( int /* sn             */,
 int fsc2_tcflow( int /* sn     */,
                  int /* action */ );
 
-void fsc2_serial_log_message( const char * /* fmt */,
-                              ...                     );
 
 /* Routines for internal use only */
 
-void fsc2_serial_exp_init( const char * /* log_file_name */,
-                           int          /* log_level     */  );
+void fsc2_serial_exp_init( int /* log_level */ );
 
 void fsc2_serial_cleanup( void );
 

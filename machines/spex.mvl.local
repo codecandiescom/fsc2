@@ -3,10 +3,7 @@
 OWNER              := fsc2
 GROUP              := dialout
 GPIB_LIBRARY       := NONE
-SERIAL_LOCK_DIR    := /var/lock
-SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 SERIAL_LOG_LEVEL   := HIGH
-LAN_LOG_FILE       := /tmp/fsc2_lan.log
 LAN_LOG_LEVEL      := HIGH
 WITH_NI6601        := yes
 ni6601_libs        := libni6601.so
