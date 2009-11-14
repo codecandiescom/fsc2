@@ -77,7 +77,7 @@ int fsc2_tcflow( int /* sn     */,
 
 /* Routines for internal use only */
 
-void fsc2_serial_exp_init( int /* log_level */ );
+bool fsc2_serial_exp_init( int /* log_level */ );
 
 void fsc2_serial_cleanup( void );
 

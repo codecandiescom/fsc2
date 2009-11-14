@@ -33,9 +33,9 @@
 
 /* Local variables */
 
-static LAN_List_T            * lan_list = NULL;
-static volatile sig_atomic_t   got_sigalrm;
-static int                     lan_log_level = LAN_LOG_LEVEL;
+static LAN_List_T *lan_list = NULL;
+static volatile sig_atomic_t got_sigalrm;
+static int lan_log_level = LAN_LOG_LEVEL;
 
 
 /* Functions used only locally */
@@ -66,11 +66,11 @@ static void fsc2_lan_log_date( FILE * fp );
 
 
 
-/*----------------------------------------------------------*
+/*-----------------------------------------------------------*
  * Function for opening a connection to a device on the LAN
- * Returns the sockets file descriptor on success or -1 on
- * failure.
- *----------------------------------------------------------*/
+ * (and, at the same time opening the log file). Returns the
+ * sockets file descriptor on success or -1 on failure.
+ *-----------------------------------------------------------*/
 
 int
 fsc2_lan_open( const char * dev_name,
@@ -102,10 +102,17 @@ fsc2_lan_open( const char * dev_name,
 
     fsc2_assert( dev_name != NULL );
 
+    /* Try to get a lock on the device */
+
+    if ( ! fsc2_obtain_lock( dev_name ) )
+    {
+        print( FATAL, "Failed to obtain lock for device %s.\n", dev_name );
+        return -1;
+    }
+
+    /* Try to open the log file */
+
     log_fp = fsc2_lan_open_log( dev_name );
-
-    /* Figure out which device connection it's meant for */
-
     fsc2_lan_log_function_start( log_fp, "fsc2_lan_open", dev_name );
 
     /* Try to resolve the address we got from the caller */
@@ -118,6 +125,7 @@ fsc2_lan_open( const char * dev_name,
                               "Error: invalid IP address: %s\n", address );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -128,15 +136,8 @@ fsc2_lan_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, "Error: invalid port number: %d\n",
                               port );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        log_fp = fsc2_lan_close_log( log_fp );
-        return -1;
-    }
-
-    if ( !fsc2_obtain_lock( dev_name ) )
-    {
-        print( FATAL, "Failed to obtain lock for device %s.\n", dev_name );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -147,8 +148,8 @@ fsc2_lan_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, "Error: failed to create a socket: %s\n",
                               strerror( errno ) );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        fsc2_release_lock( dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -164,8 +165,8 @@ fsc2_lan_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, "Error: failed to set SO_KEEPALIVE "
                               "option for socket\n" );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        fsc2_release_lock( dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -181,8 +182,8 @@ fsc2_lan_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, "Error: failed to set TCP_NODELAY "
                               "option for socket\n" );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        fsc2_release_lock( dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -265,8 +266,8 @@ fsc2_lan_open( const char * dev_name,
                                   "failed: %s\n", strerror( errno ) );
 
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        fsc2_release_lock( dev_name );
         fsc2_lan_close_log( log_fp );
+        fsc2_release_lock( dev_name );
         return -1;
     }
 
@@ -293,23 +294,27 @@ fsc2_lan_open( const char * dev_name,
             ll = ll->next;
         }
 
-        ll->fd = sock_fd;
-        ll->name = NULL;
-        ll->name = T_strdup( dev_name );
+        ll->fd     = sock_fd;
+        ll->name   = NULL;
+        ll->name   = T_strdup( dev_name );
+        ll->log_fp = log_fp;
         TRY_SUCCESS;
     }
     OTHERWISE
     {
+        bool need_close = ll->name == NULL;
+
         fsc2_lan_log_message( log_fp, "Error: Running out of memory\n" );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
-        if ( ll && ! ll->name )
-            fsc2_release_lock( dev_name );
         fsc2_lan_cleanup( );
-        fsc2_lan_close_log( log_fp );
+        if ( need_close )
+        {
+            fsc2_lan_close_log( log_fp );
+            fsc2_release_lock( dev_name );
+        }
         RETHROW( );
     }
 
-    ll->log_fp = log_fp;
     ll->next = NULL;
 
     /* Set the wait time for reads and writes to zero (meaning that none is
@@ -392,8 +397,7 @@ fsc2_lan_close( int handle )
     if ( ll == lan_list )
         lan_list = ll->next;
 
-    if ( ll->log_fp && ll->log_fp != stderr )
-        fclose( ll->log_fp );
+    fsc2_lan_close_log( ll->log_fp );
 
     if ( ll->name )
     {
@@ -1053,8 +1057,7 @@ fsc2_lan_cleanup( void )
             fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_cleanup()",
                                        ll->name ? ll->name : "?" );
 
-            if ( ll->log_fp && ll->log_fp != stderr )
-                fclose( ll->log_fp );
+            fsc2_lan_close_log( ll->log_fp );
             if ( ll->name )
                 fsc2_release_lock( ll->name );
         }

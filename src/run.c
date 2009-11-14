@@ -310,7 +310,8 @@ start_comm_libs( void )
 #endif
 
 #if ! defined WITHOUT_SERIAL_PORTS
-    fsc2_serial_exp_init( SERIAL_LOG_LEVEL );
+    if ( ! fsc2_serial_exp_init( SERIAL_LOG_LEVEL ) )
+        goto serial_fail;
 #endif
 
 #if defined WITH_MEDRIVER
@@ -357,6 +358,8 @@ start_comm_libs( void )
 
 #if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+
+ serial_fail:
 #endif
 
 #if defined WITH_LIBUSB_1_0
@@ -365,7 +368,6 @@ start_comm_libs( void )
         libusb_exit( NULL );
         fsc2_release_lock( "libusb" );
     }
-
  libusb_fail:
 #endif
 

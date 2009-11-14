@@ -140,68 +140,93 @@ fsc2_request_serial_port( const char * dev_file,
  * ->
  *  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL
  *    (if log level is LL_NONE 'log_file_name' is not used at all)
+ * Returns 1 on success, 0 otherwise
  *-----------------------------------------------------------------------*/
 
-void
+bool
 fsc2_serial_exp_init( int log_level )
 {
     int i;
 
 
     if ( Num_Serial_Ports == 0 )
-        return;
+        return OK;
 
     ll = log_level;
 
     if ( ll <= LL_NONE )
-    {
         ll = LL_NONE;
-        return;
-    }
 
     if ( ll > LL_ALL )
         ll = LL_ALL;
 
-    /* Create a log file for each device */
+    /* Lock all devices and create log files for all of them */
 
     raise_permissions( );
 
     for ( i = 0; i < Num_Serial_Ports; i++ )
     {
+        if ( ! ( Serial_Ports[ i ].have_lock =
+	             		fsc2_obtain_lock( strrchr( Serial_Ports[ i ].dev_file,
+                                                   '/' ) + 1 ) ) )
+        {
+            print( FATAL, "Device %s is locked by another process.\n",
+                   Serial_Ports[ i ].dev_name );
+
+            for ( i--; i > 0; i-- )
+            {
+                if (    Serial_Ports[ i ].log_fp
+                        && Serial_Ports[ i ].log_fp != stderr )
+                    fclose( Serial_Ports[ i ].log_fp );
+
+                fsc2_release_lock( strrchr( Serial_Ports[ i ].dev_file, '/' )
+                                   + 1 );
+            }
+
+            lower_permissions( );
+            return FAIL;
+        }
+
+        if ( ll > LL_NONE )
+        {
 #if defined SERIAL_LOG_DIR
-        char *log_file_name = get_string( "%s%sfsc2_%s.log", SERIAL_LOG_DIR,
-                                          slash( SERIAL_LOG_DIR ),
-                                          Serial_Ports[ i ].dev_name );
+            char *log_file_name = get_string( "%s%sfsc2_%s.log", SERIAL_LOG_DIR,
+                                              slash( SERIAL_LOG_DIR ),
+                                              Serial_Ports[ i ].dev_name );
 #else
-        char *log_file_name = get_string( P_tmpdir "/%sfsc2_%s.log",
-                                          Serial_Ports[ i ].dev_name );
+            char *log_file_name = get_string( P_tmpdir "/%sfsc2_%s.log",
+                                              Serial_Ports[ i ].dev_name );
 #endif
 
-        if ( ! ( Serial_Ports[ i ].log_fp = fopen( log_file_name, "w" ) ) )
-        {
-            Serial_Ports[ i ].log_fp = stderr;
-            fprintf( stderr, "Can't open serial log file for %s, using "
-                     "stderr instead.\n", Serial_Ports[ i ].dev_name );
-        }
-        else
-        {
-            int fd_flags = fcntl( fileno( Serial_Ports[ i ].log_fp ), F_GETFD );
+            if ( ! ( Serial_Ports[ i ].log_fp = fopen( log_file_name, "w" ) ) )
+            {
+                Serial_Ports[ i ].log_fp = stderr;
+                fprintf( stderr, "Can't open serial log file for %s, using "
+                         "stderr instead.\n", Serial_Ports[ i ].dev_name );
+            }
+            else
+            {
+                int fd_flags = fcntl( fileno( Serial_Ports[ i ].log_fp ),
+                                      F_GETFD );
 
-            if ( fd_flags < 0 )
-                fd_flags = 0;
-            fcntl( fileno( Serial_Ports[ i ].log_fp ), F_SETFD,
-                   fd_flags | FD_CLOEXEC );
-            chmod( log_file_name,
-                   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
-        }
+                if ( fd_flags < 0 )
+                    fd_flags = 0;
+                fcntl( fileno( Serial_Ports[ i ].log_fp ), F_SETFD,
+                       fd_flags | FD_CLOEXEC );
+                chmod( log_file_name,
+                       S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
+            }
 
-        T_free( log_file_name );
+            T_free( log_file_name );
+        }
 
         fsc2_serial_log_message( i, "Starting serial port logging for "
                                  "device %s\n", Serial_Ports[ i ].dev_name );
     }
 
     lower_permissions( );
+
+    return OK;
 }
 
 
@@ -219,11 +244,10 @@ fsc2_serial_cleanup( void )
     if ( Num_Serial_Ports == 0 )
         return;
 
-    for ( i = 0; i < Num_Serial_Ports; i++ )
-    {
-        if ( Serial_Ports[ i ].is_open )
-            fsc2_serial_close( i );
+    /* Close the lock files for all devices and release the locks */
 
+    for ( i = Num_Serial_Ports; i > 0; i-- )
+    {
         if ( Serial_Ports[ i ].log_fp && Serial_Ports[ i ].log_fp != stderr )
         {
             raise_permissions( );
@@ -231,6 +255,9 @@ fsc2_serial_cleanup( void )
             Serial_Ports[ i ].log_fp = NULL;
             lower_permissions( );
         }
+
+        if ( Serial_Ports[ i ].is_open )
+            fsc2_serial_close( i );
     }
 }
 
@@ -251,8 +278,10 @@ fsc2_final_serial_cleanup( void )
         if ( Serial_Ports[ i ].is_open )
             fsc2_serial_close( i );
 
-        Serial_Ports[ i ].dev_name  = T_free( Serial_Ports[ i ].dev_name );
-        Serial_Ports[ i ].dev_file  = T_free( Serial_Ports[ i ].dev_file );
+        if ( Serial_Ports[ i ].dev_name )
+            Serial_Ports[ i ].dev_name  = T_free( Serial_Ports[ i ].dev_name );
+        if ( Serial_Ports[ i ].dev_file )
+            Serial_Ports[ i ].dev_file  = T_free( Serial_Ports[ i ].dev_file );
     }
 
     Serial_Ports = T_free( Serial_Ports );
@@ -264,9 +293,8 @@ fsc2_final_serial_cleanup( void )
  * This function should be called by device modules that need to open
  * a serial port device file. Instead of the device file name as in
  * the open() function this routine expects the number of the serial
- * port and the name of the device to make it possible to check if
- * the device has requested this port. The third parameter is, as in
- * the open() function, the flags used for opening the device file.
+ * port. The second parameter is, as in the open() function, the
+ * flags used for opening the device file.
  *--------------------------------------------------------------------*/
 
 struct termios *
@@ -308,18 +336,6 @@ fsc2_serial_open( int sn,
                                  "open\n" );
         fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
         return &Serial_Ports[ sn ].new_tio;
-    }
-
-    /* Try to obtain a lock */
-
-    if ( ! ( Serial_Ports[ sn ].have_lock =
-	             		fsc2_obtain_lock( strrchr( Serial_Ports[ sn ].dev_file,
-                                                   '/' ) + 1 ) ) )
-    {
-        fsc2_serial_log_message( sn, "Error: Failure to create lock file\n" );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
-        errno = EACCES;
-        return NULL;
     }
 
     /* Try to open the serial port */
@@ -404,9 +420,21 @@ fsc2_serial_close( int sn )
         close( Serial_Ports[ sn ].fd );
         lower_permissions( );
         Serial_Ports[ sn ].is_open = UNSET;
+        fsc2_serial_log_message( sn, "Closed serial port '%s'\n",
+                                 Serial_Ports[ sn ].dev_file );
+        fsc2_serial_log_function_end( sn, "fsc2_serial_close" );
     }
 
-    /* Relase the lock (remove lock file) */
+    /* Close the log file */
+
+    if ( Serial_Ports[ sn ].log_fp && Serial_Ports[ sn ].log_fp != stderr )
+    {
+        raise_permissions( );
+        fclose( Serial_Ports[ sn ].log_fp );
+        Serial_Ports[ sn ].log_fp = NULL;
+    }
+
+    /* Relase the lock */
 
     if ( Serial_Ports[ sn ].have_lock )
     {
@@ -414,13 +442,6 @@ fsc2_serial_close( int sn )
         fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' ) + 1 );
         Serial_Ports[ sn ].have_lock = UNSET;
         lower_permissions( );
-    }
-
-    if ( Serial_Ports[ sn ].dev_name )
-    {
-        fsc2_serial_log_message( sn, "Closed serial port '%s'\n",
-                                 Serial_Ports[ sn ].dev_file );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_close" );
     }
 }
 
@@ -1101,6 +1122,9 @@ fsc2_serial_log_date( int sn )
 
     fsc2_assert( sn >= 0 && sn <= Num_Serial_Ports );
 
+    if ( ! Serial_Ports[ sn ].log_fp )
+        return;
+
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
     tc[ 10 ] = '\0';
@@ -1126,7 +1150,7 @@ fsc2_serial_log_function_start( int          sn,
 {
     fsc2_assert( sn >= 0 && sn <= Num_Serial_Ports );
 
-    if ( Serial_Ports[ sn ].log_fp == NULL || ll < LL_CE )
+    if ( ll < LL_CE || ! Serial_Ports[ sn ].log_fp )
         return;
 
     raise_permissions( );
@@ -1151,7 +1175,7 @@ fsc2_serial_log_function_end( int          sn,
 {
     fsc2_assert( sn >= 0 && sn <= Num_Serial_Ports );
 
-    if ( ll < LL_CE )
+    if ( ll < LL_CE || ! Serial_Ports[ sn ].log_fp )
         return;
 
     raise_permissions( );
@@ -1176,7 +1200,7 @@ fsc2_serial_log_message( int          sn,
 
     fsc2_assert( sn >= 0 && sn <= Num_Serial_Ports );
 
-    if ( ll == LL_NONE )
+    if ( ll == LL_NONE || ! Serial_Ports[ sn ].log_fp )
         return;
 
     raise_permissions( );

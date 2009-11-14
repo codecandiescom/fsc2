@@ -1511,7 +1511,6 @@ with an invalid handle (possibly because the connection had already been
 closed), @code{-1} gets returned.
 
 
-
 If you instead want (or have) to do most things all by yourself you
 can at lease use some functions for logging. Please note that in this
 case you also have to take care of device locking yourself, i.e.@:
@@ -1538,10 +1537,8 @@ Write data directly to the LAN log file
 Returns the log level for LAN log file messages.
 @end table
 
-Please note that 
-
 @anchor{fsc2_lan_open_log()}
-@findex fsc2_lan_opne_log()
+@findex fsc2_lan_open_log()
 This function lets you open a log file for the device:
 @example
 FILE *fsc2_lan_open_log( const char * dev_name );
@@ -1550,7 +1547,9 @@ FILE *fsc2_lan_open_log( const char * dev_name );
 It takes the name of the device and opens up a log file (typically
 in @file{/tmp} unless the configuration variable @code{LAN_LOG_DIR}
 hasn't been set to something else. The function returns a file pointer
-to be used in the rest of the functions.
+to be used in the rest of the functions. The function may only be
+called after you have successfully locked the device using
+@code{@ref{fsc2_obtain_lock()}}.
 
 
 @anchor{fsc2_lan_close_log()}
@@ -1560,8 +1559,9 @@ This function lets you open a log file for the device:
 FILE *fsc2_lan_open_log( FILE * fp );
 @end example
 @noindent
-When called it closes the log file pointed to bt @code{fp} and
-returns always @code{NULL}.
+When called it closes the log file pointed to bt @code{fp} and returns
+always @code{NULL}. This function must be called before the lock on
+the device is released using @code{@ref{fsc2_release_lock()}}.
 
 
 @anchor{fsc2_lan_log_message()}
