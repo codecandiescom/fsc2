@@ -116,10 +116,10 @@ device {
         pad         = 26
         timeout     = 3s
         eos         = '\n'
-        set-reos      no
-        set-xeos      no
-        set-bin       no
-        set-eot       yes
+        set-reos    = no
+        set-xeos    = no
+        set-bin     = no
+        set-eot     = yes
 }
 
 It specifies a symbolic name for the device, the primary GPIB address (you
@@ -212,49 +212,53 @@ the effective user ID (EUID) and group ID (EGID) of the users that
 started fsc2, i.e. with the permissions that user normally as. Care
 has been taken drop the extra privileges the root account has except
 for the few places where either device files are accessed or log files
-get written to.
+get written to. The obvious problem is that a single bug in the program
+concerning the handling of permissions may allow a user to take over
+the machine.
 
 
 Should you feel uneasy about running a program setuid'ed to root
-(and I would sympathize strongly with you if you do;-) there are
-alternatives, but which may requires some extra work. There are
-two variables in the Makefile, OWNER and GROUP, that can be used
-to avoid running fsc2 with the full permissions of the root account.
-If both are set the program runs with the UID and GID of the account
-and group specified by these variables. If neither of them is set
-then they default to 'root' and the program gets setuid'ed to root,
-i.e. as in the default case discussed above. But if only GROUP is set
-then the program becomes setgid'ed to this group, i.e. it will run
-with the UID of the user but with the GID of the group specified by
-GROUP - this may already give it high enough access permissions for
-the device files if the device files are set up accordingly (i.e.
-their permission bits are set to allow read and write access to
-members of this group). It's also possible to specify OWNER alone
-and in this case the program runs with the UID of that process but
-the GID of the user.
+(and I would sympathize strongly with you if you do, I myself never
+do that;-) there are alternatives, but which may requires a bit
+of extra work. There are two variables in the Makefile, OWNER and
+GROUP, that can be used to avoid running fsc2 with the full per-
+missions of the root account. If both are set the program runs
+with the UID and GID of the account and group specified by these
+variables. If neither of them is set then they default to 'root'
+and the program gets setuid'ed and setguid'ed to root, i.e. as in
+the default case discussed above. But if only GROUP is set then
+the program becomes setgid'ed to this group, i.e. it will run
+with the UID of the user but with the GID of the group specified
+by GROUP - this may already give it high enough access permissions
+for the device files if the device files are set up accordingly
+(i.e. the permission bits of all required device files are set to
+allow read and write access for members of this group). It's also
+possible to specify OWNER alone and in this case the program runs
+with the UID of that process butthe GID of the user.
 
 
 In the most simple case where you didn't set these variables (or both
 to 'root') and fsc2 has in principle all permissions the root account
 has you don't have to care about the permission settings for the device
-files.
+files but bugs in the program could result in a local user taking
+over the machine.
 
 
-In all other cases you have to make sure that either the account the
-program belongs to or the group it belongs to has the necessary
+In all other cases you have to make sure that either the account
+the program belongs to or the group it belongs to has the necessary
 permissions to read and write the required device files. If both
-OWNER and GROUP are set, the device files must be readable and writable
-by either that account or that group (or both). If only OWNER but not
-GROUP is set they must be accessible by the account specified by OWNER.
-And if only GROUP but not OWNER is set the must be readable and writable
-by that group. Please note that if you change the access permissions of
-the device files on some systems they may get reset by the system to
-what it believes to be more secure, e.g. on a reboot or as part of
-some daily system maintenance tasks etc. (or because you use udev
-and the device files get deleted on shutdown and re-created on boot
-- but this can be handled by setting up udev correctly, i.e. to
-create the device files with the necessary permissions and ownerships
-being set).
+OWNER and GROUP are set, the device files must be readable and
+writable by either that account or that group (or both). If only
+OWNER but not GROUP is set they must be accessible by the account
+specified by OWNER. And if only GROUP but not OWNER is set the must
+be readable and writable by that group. Please note that if you
+change the access permissions of the device files on some systems
+they may get reset by the system to what it believes to be more
+secure, e.g. on a reboot or as part of some daily system maintenance
+tasks etc. (or because you use udev and the device files get deleted
+on shutdown and re-created on boot - but this can be handled by
+setting up udev correctly, i.e. to create the device files with
+the necessary permissions and ownerships being set).
 
 
 One possible scenario is to create an account for fsc2 with extremely
@@ -269,6 +273,13 @@ etc.) for this group or make the account fsc2 is running under member
 of the groups that have read and write access permissions to these
 device files.
 
+
+The way I set up things is to set the OWNER variable to 'nobody'
+(a user with the most minimal permissions) and GROUP to either
+'uucp' or 'dialout', depending on what are the default group
+for the serial port devices files (/dev/tty*). Then I set the
+group for all other device files required by fsc2 to the same
+group I set GROUP to.
 
 
 C) Preparing for Installation
@@ -553,7 +564,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    July 21, 2009                      Much luck, Jens
+    November 14, 2009                   Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

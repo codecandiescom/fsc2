@@ -118,6 +118,7 @@ edl/aiesr6.hmi-domain/cw_epr_bruker
 edl/aiesr6.hmi-domain/cw_epr_sr
 edl/aiesr6.hmi-domain/monitor_bruker
 edl/aiesr6.hmi-domain/monitor_sr
+edl/aiesr6.hmi-domain/mod_amp_bruker
 edl/fptchpc97.tugraz.at/tresr
 edl/hyperion.memphys.uni-frankfurt.de/cw_epr
 edl/hyperion.memphys.uni-frankfurt.de/fcntrl
