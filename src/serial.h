@@ -26,6 +26,24 @@
 #include <termios.h>
 
 
+/* Definition of log levels allowed in calls of fsc2_serial_exp_init().
+   Since they already may have been defined in the GPIB module only
+   define them if they aren't already known */
+
+#if ! defined LL_NONE
+#define  LL_NONE  0    /* log nothing */
+#endif
+#if ! defined LL_ERR
+#define  LL_ERR   1    /* log errors only */
+#endif
+#if ! defined LL_CE
+#define  LL_CE    2    /* log function calls and function exits */
+#endif
+#if ! defined LL_ALL
+#define  LL_ALL   3    /* log calls with parameters and function exits */
+#endif
+
+
 /* Defines for the parity used by devices */
 
 #define NO_PARITY         0
@@ -38,8 +56,8 @@
 int fsc2_request_serial_port( const char * /* dev_file */,
                               const char * /* dev_name */  );
 
-struct termios *fsc2_serial_open( int          /* sn       */,
-                                  int          /* flags    */  );
+struct termios *fsc2_serial_open( int /* sn       */,
+                                  int /* flags    */  );
 
 void fsc2_serial_close( int /* sn */ );
 
@@ -81,7 +99,7 @@ bool fsc2_serial_exp_init( int /* log_level */ );
 
 void fsc2_serial_cleanup( void );
 
-void fsc2_final_serial_cleanup( void );
+void fsc2_serial_final_reset( void );
 
 
 #endif   /* ! SERIAL_HEADER */

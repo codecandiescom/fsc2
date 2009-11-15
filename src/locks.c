@@ -41,13 +41,21 @@ bool
 fsc2_obtain_lock( const char * name )
 {
     int fd;
-	char *fn = get_string( "%s%sLCK..%s", LOCK_DIR, slash( LOCK_DIR ), name );
+	char *fn = NULL;
     char buf[ 13 ];
     const char *bp;
 	char *eptr;
     long pid = -1;
     mode_t mask;
 
+
+    TRY
+    {
+        fn = get_string( "%s%sLCK..%s", LOCK_DIR, slash( LOCK_DIR ), name );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+        return FAIL;
 
     raise_permissions( );
 
@@ -174,13 +182,20 @@ fsc2_obtain_lock( const char * name )
 void
 fsc2_release_lock( const char * name )
 {
-	char *fn = get_string( "%s%sLCK..%s", LOCK_DIR, slash( LOCK_DIR ), name );
+	char *fn = NULL;
 
+
+    TRY
+    {
+        fn = get_string( "%s%sLCK..%s", LOCK_DIR, slash( LOCK_DIR ), name );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+        return;
 
 	raise_permissions( );
 	if ( unlink( fn ) < 0 )
 		print( SEVERE, "Can't remove lock file '%s'\n", fn );
-
 	lower_permissions( );
 	T_free( fn );
 }

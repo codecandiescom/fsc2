@@ -106,7 +106,8 @@ fsc2_lan_open( const char * dev_name,
 
     if ( ! fsc2_obtain_lock( dev_name ) )
     {
-        print( FATAL, "Failed to obtain lock for device %s.\n", dev_name );
+        print( FATAL, "Device %s is already locked by another process.\n",
+               dev_name );
         return -1;
     }
 
@@ -1325,7 +1326,7 @@ FILE *
 fsc2_lan_open_log( const char * dev_name )
 {
     FILE *fp;
-    char *fname;
+    char *fname = NULL;
 
 
     if ( lan_log_level <= LL_NONE )
@@ -1337,15 +1338,20 @@ fsc2_lan_open_log( const char * dev_name )
     if ( lan_log_level > LL_ALL )
         lan_log_level = LL_ALL;
 
-    raise_permissions( );
-
+    TRY
+    {
 #if defined SERIAL_LOG_DIR
-    fname = get_string( "%s%sfsc2_%s.log", LAN_LOG_DIR, slash( LAN_LOG_DIR ),
-                        dev_name );
+        fname = get_string( "%s%sfsc2_%s.log", LAN_LOG_DIR,
+                            slash( LAN_LOG_DIR ), dev_name );
 #else
-    fname = get_string( P_tmpdir "/%sfsc2_%s.log", dev_name );
+        fname = get_string( P_tmpdir "/%sfsc2_%s.log", dev_name );
 #endif
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+        return NULL;
 
+    raise_permissions( );
 
     if ( ( fp = fopen( fname, "w" ) ) == NULL )
     {

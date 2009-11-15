@@ -25,8 +25,6 @@
 
 static void ag54830b_l_failure( void );
 
-static bool in_init = UNSET;
-
 
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
@@ -177,7 +175,7 @@ ag54830b_l_get_num_avg( void )
 
 	if ( ag54830b_l_get_acq_mode( ) == 1 )
 	{
-		ag54830b_l_talk(":ACQ:AVERAGE:COUNT?\n", reply, &length );
+		ag54830b_l_talk( ":ACQ:AVERAGE:COUNT?\n", reply, &length );
 		reply[ length - 1 ] = '\0';
 		return T_atol( reply );
 	}
@@ -476,14 +474,6 @@ ag54830b_l_set_sens( int    channel,
 
 		if ( ! strncmp( reply, "DC50", 4 ) )
 		{
-			if ( in_init )
-			{
-				print( FATAL, "Sensitivity of %f V for channel %s too low "
-					   "with input impedance set to  50 Ohm.\n",
-					   AG54830B_L_Channel_Names[ channel ], sens );
-				THROW( EXCEPTION );
-			}
-
 			print( SEVERE, "Sensitivity of %f V for channel %s too low "
 				   "with input impedance set to 50 Ohm.\n",
 				    AG54830B_L_Channel_Names[ channel ], sens );
@@ -491,7 +481,8 @@ ag54830b_l_set_sens( int    channel,
 		}
 	}
 
-	sprintf( cmd, "%s:SCAL %8.3E\n", AG54830B_L_Channel_Names[ channel ], sens );
+	sprintf( cmd, "%s:SCAL %8.3E\n",
+			 AG54830B_L_Channel_Names[ channel ], sens );
 	ag54830b_l_command( cmd );
 }
 

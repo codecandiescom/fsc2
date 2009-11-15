@@ -1156,19 +1156,22 @@ with the name of the device file for the serial port (typically
 @file{/dev/ttyS0}, @file{/dev/ttyS1} @: for normal serial ports and
 @file{/dev/ttyUSB0} etc.@: for USB-serial converters) as the first and
 a device name as the second argument. The device name is for use in
-log files, error messages etc.
+lock and log files, error messages etc.
 
 If the requested serial port has already been claimed by a different
-device or instance of @code{fsc2} the function will print an error
-message and stop the @code{EDL} script, so you don't have to deal with
-error handling yourself. In case of success it returns an integer
-number that in calls of all other functions identifies the serial
-port.
+device the function will print an error message and stop the
+@code{EDL} script, so you don't have to deal with error handling
+yourself. In case of success it returns an integer number that in
+calls of all other functions identifies the serial port requested.
 
-No other serial port function may not be called before the
-@code{exp_hook} function.
+No other serial port function may be called before the @code{exp_hook}
+function.
 
-For all functions that deal directly with file descriptors for the
+During initialization of the experiment (and before the
+@code{exp_hooks} are called) @code{fsc2} tries to obtain locks on all
+requested serial port devices and to open log files for each of them.
+
+For all functions dealing directly with file descriptors for the
 serial port device files there are replacement functions. The
 following table lists all functions that normally are used with device
 file descriptors for serial ports with their replacements:
@@ -1206,13 +1209,12 @@ file descriptors for serial ports with their replacements:
 @end table
 
 Note that all functions that normally expect a a file descriptor now
-must be called with the number returned by
+must be called with the handle returned by
 @ref{fsc2_request_serial_port()}.
 
 The only functions that are different from their normal counterparts are
 @code{fsc2_serial_open()}, @code{fsc2_serial_write()},
-@code{fsc2_serial_read()} and
-@code{fsc2_serial_close()}:
+@code{fsc2_serial_read()} and @code{fsc2_serial_close()}:
 
 @code{fsc2_serial_open()} is defined as
 @example
@@ -1220,14 +1222,13 @@ struct termios * fsc2_serial_open( int sn,
                                    int flags )
 @end example
 @noindent
-where @code{sn} is the number for the serial port as returned by
+where @code{sn} is the handle for the serial port as returned by
 @ref{fsc2_request_serial_port()} and @code{flags} are the same flags
-you would pass to a normal @code{open()} call. The function not only
-opens the file but also creates the necessary lock file and determines
-the current communication parameter settings for the serial port.
-These are returned via a pointer to a @code{termios} structure, that
-can be freely changed within the module. If the function returns a
-@code{NULL} pointer opening the device file (or the lock file) failed
+you would pass to a normal @code{open()} call. The function opens the
+file and determines the current communication parameter settings for
+the serial port. These are returned via a pointer to a @code{termios}
+structure, that can be freely changed within the module. If the
+function returns a @code{NULL} pointer opening the device file failed
 and you can determine the reasons by checking @code{errno}. In case
 @ref{fsc2_request_serial_port()} function wasn't called before an
 exception gets thrown.

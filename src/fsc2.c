@@ -2118,7 +2118,7 @@ clean_up( void )
     Need_RULBUS = UNSET;
     Need_LAN = UNSET;
 #if ! defined WITHOUT_SERIAL_PORTS
-    fsc2_final_serial_cleanup( );
+    fsc2_serial_final_reset( );
 #endif
 
     /* Delete function list */

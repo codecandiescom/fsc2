@@ -259,7 +259,8 @@ start_comm_libs( void )
     {
         if ( fsc2_obtain_lock( "rulbus" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to obtain lock on RULBUS system.\n" );
+            eprint( FATAL, UNSET, "RULBUS system is already locked by another "
+                    "process.\n" );
             goto rulbus_fail;
         }
 
@@ -285,7 +286,8 @@ start_comm_libs( void )
     {
         if ( fsc2_obtain_lock( "libusb" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to obtain lock on USB system.\n" );
+            eprint( FATAL, UNSET, "USB system is already locked by another "
+                    "process.\n" );
             goto libusb_fail;
         }
 
@@ -321,8 +323,8 @@ start_comm_libs( void )
     {
         if ( fsc2_obtain_lock( "meilhaus" ) == FAIL )
         {
-            eprint( FATAL, UNSET, "Failed to obtain lock on Meilhaus "
-                    "system.\n" );
+            eprint( FATAL, UNSET, "Meilhaus system is already locked by "
+                    "another process.\n" );
             goto medriver_fail;
         }
 
