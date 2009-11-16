@@ -1677,11 +1677,12 @@ have to be included, i.e.@: use
 #include "vxi11_user.h"
 @end example
 and, when creating the shared library for the module, make sure to
-link against both the files @file{vxi11_user.c} and @file{vxi11.c}.
+link against both the files @file{vxi11_user.c},
+@file{vxi11_clnt.c} and @code{vxi11_xdr.c}.
 
-All function calls get logged automatically to the log file for
-LAN connections with a verbosity according to the general settings
-for this log file.
+All function calls get logged automatically to a device specific log
+file with a verbosity according to the general settings for this log
+file.
 
 
 @anchor{vxi11_open()}
@@ -1702,13 +1703,17 @@ the log file), its IP address, either as a hostname (like
 dotted-quad format (like @code{"123.97.243.12"}), the name assigned to
 the device for the VXI-11 protocol (often per default set to
 @code{"inst0"}) and a positive or zero maximum time (in micro-seconds,
-a zero value means indefinitely long timeout) the function is allowed
-to wait for successfully establishing the connection. Please note
-that the function can't be called when an connection has already been
-created. On success the function returns @code{SUCCESS}, on failure
-(either because the connection has already been opened, connecting to
-the device fails or not enough memory is available) it returns
-@code{FAILURE} after printing out an error message.
+a zero value means a nearlyindefinitely long timeout) the function is
+allowed to wait for successfully establishing the connection. Please
+note that the function can't be called when an connection has already
+been created. On success the function returns @code{SUCCESS}, on
+failure (either because the connection has already been opened,
+connecting to the device fails or not enough memory is available) it
+returns @code{FAILURE} after printing out an error message.
+
+Opening the connection to the device also locks it for exclusive use,
+thus it's not necessary to obtain a different lock, e.g.@: by calling
+@code{@ref{fsc2_obtain_lock()}}.
 
 
 @anchor{vxi11_close()}
