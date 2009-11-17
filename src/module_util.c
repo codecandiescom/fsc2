@@ -22,6 +22,7 @@
 
 #include <dlfcn.h>
 #include "fsc2.h"
+#include <stdarg.h>
 
 
 /*-----------------------------------------------------*
@@ -413,6 +414,12 @@ fsc2_fopen( const char * path,
  * Function for formated reading from a file with the full
  * permissions of fsc2
  *---------------------------------------------------------*/
+
+#if ! defined vfscanf
+extern int vfscanf( FILE       * stream,
+                    const char * format,
+                    va_list      arg );
+#endif
 
 int
 fsc2_fscanf( FILE *       stream,

@@ -99,7 +99,7 @@ ag54830b_l_end_of_exp_hook( void )
 		vxi11_device_clear( );
 		ag54830b_l_command( ":CDIS;:RUN\n" );
 		vxi11_close( );
-		ag54830b_l.device == -1;
+		ag54830b_l.device = -1;
 	}
 
 	return 1;
