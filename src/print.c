@@ -727,7 +727,7 @@ start_printing( FILE *       fp,
  *------------------------------------------------------------------------*/
 
 static void
-print_header( FILE *       fp,
+print_header( FILE       * fp,
               const char * name )
 {
     time_t d;

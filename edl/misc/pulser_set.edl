@@ -1,0 +1,84 @@
+DEVICES:
+
+hfs9003;
+ag54830b;
+
+
+VARIABLES:
+
+timebase = 2 ns;
+pi_pulse = 100 ns;
+I;
+ttime;
+data[ * ];
+data1[ * ];
+J;
+
+
+ASSIGNMENTS:
+
+TIME_BASE: timebase;
+
+TRIGGER_MODE: EXTERNAL, LEVEL = 1 V, SLOPE = POSITIVE;
+
+MICROWAVE: CHANNEL = A1;
+DETECTION: CHANNEL = TRIGGER_OUT;
+MICROWAVE: V_HIGH = 4.5 V, V_LOW = 0 V;
+
+
+PREPARATIONS:
+
+pulser_maximum_pattern_length( 5us );
+
+P0: FUNCTION     = MICROWAVE,
+	START        = 0 ns,
+	LENGTH       = 20 ns,
+	DELTA_START  = 2 ns;
+
+P1: FUNCTION     = MICROWAVE,
+	START        = 60 ns,
+	LENGTH       = 20 ns,
+	DELTA_LENGTH = 2 ns,
+    DELTA_START  = 4 ns;
+
+P2: FUNCTION = DETECTION,
+	START = 0ns;
+
+
+init_2d( 1, 50, 100, "Time [ points ]", "Field [ A ]", "Signal [ bits ]" );
+
+
+EXPERIMENT:
+
+pulser_stop_on_update( 1 );
+
+//pulser_state("ON");
+//pulser_pulse_reset( );
+
+I = 1;
+wait ( 3.0 s );
+digitizer_num_averages( 100 );
+ 
+WHILE I <= 200 {
+
+   delta_time();
+  
+   digitizer_start_acquisition( ); 
+    FOR J = 1 : 100 {
+		digitizer_start_acquisition( ); 
+		data=digitizer_get_curve_fast( CH1 ); 
+		pulser_shift(P0, P1);  pulser_update( );
+	}
+    pulser_pulse_reset( );
+	pulser_update();
+	display( 1, I , data );
+   ttime =  delta_time();
+   print( "ttime is #.; I = #.\n", ttime, I );
+   I += 1;
+}
+
+
+ON_STOP:
+
+pulser_pulse_reset( );
+pulser_update( );

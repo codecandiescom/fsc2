@@ -41,7 +41,7 @@
 
   An instance of fsc2 makes requests by sending a line starting with a
   unique number for the kind of request (possibly followed by some more,
-  request-dependend data). Before handling the request the thread handing
+  request-dependent data). Before handling the request the thread handing
   requests by this instance of fsc2 locks a mutex that gives it exclusive
   access to the GPIB bus, thereby avoiding intermixing data on the bus
   from different requests. Only when the request is satisfied the mutex
@@ -49,12 +49,12 @@
   thread can get access to the GPIB.
 
   At the same time there's a list of all device claimed by the different
-  instances of fsc2. Once a device is succesfully claimed by one instance
+  instances of fsc2. Once a device is successfully claimed by one instance
   of fsc2 requests for that device by another instance of fsc2 are denied,
   thus avoiding that different instances send unrelated requests to the
   same device.
 
-  Since fsc2 supports diferrent libraries for GPIB cards the daemons gets
+  Since fsc2 supports different libraries for GPIB cards the daemons gets
   built with an interface suitable for the GPIB library being used. These
   "interfaces" are the files named "gpib_if_*.[ch]x" (and in some cases
   an additional flex and bison file).
@@ -179,7 +179,6 @@ static int send_ack( int fd );
 static void set_gpibd_signals( void );
 
 
-
 /*--------------------------------------------*
  *--------------------------------------------*/
 
@@ -193,7 +192,7 @@ main( void )
     char err_msg[ GPIB_ERROR_BUFFER_LENGTH ];
 
 
-    /* Igore all signals */
+    /* Ignore all signals */
 
 	set_gpibd_signals( );
 
@@ -202,14 +201,12 @@ main( void )
 
     if ( stat( GPIBD_SOCK_FILE, &sbuf ) != -1 )
     {
-        if (    S_ISSOCK( sbuf.st_mode )
-             && test_connect( ) == -1 )
+        if ( S_ISSOCK( sbuf.st_mode ) && test_connect( ) == -1 )
             return EXIT_FAILURE;
         unlink( GPIBD_SOCK_FILE );
     }
 
-    /* Create a UNIX domain socket we're going to listen on for
-       connections */
+    /* Create a UNIX domain socket we're going to listen on for connections */
 
     if ( ( fd = create_socket( ) ) == -1 )
         return EXIT_FAILURE;
@@ -225,7 +222,7 @@ main( void )
         return EXIT_FAILURE;
     }
 
-    /* Send parent a signal to tell it we're listening n the socket */
+    /* Send parent a signal to tell it we're listening on the socket */
 
     kill( getppid( ), SIGUSR2 );
 
@@ -281,13 +278,13 @@ new_client( int fd )
     char c;
 
 
-    /* Accept the connection by the new client */
+    /* Accept connection by new client */
 
     if ( ( cli_fd = accept( fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
         return;
 
-    /* Check if the client sends an ACK character */
+    /* Check if client sends an ACK character */
 
     if ( sread( cli_fd, &c, 1 ) != 1
             || c != ACK )
@@ -311,7 +308,7 @@ new_client( int fd )
         return;
     }
 
-    /* Send a single ACK character, if that fails close down connection */
+    /* Send single ACK character, if that fails close down the connection */
 
     if ( swrite( cli_fd, STR_ACK, 1 ) != 1 )
     {
@@ -371,9 +368,9 @@ test_connect( void )
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, GPIBD_SOCK_FILE );
 
-    /* If connect fails due to connection refused or because there's no socket
-       file (or it exists but isn't a socket file) it means gpibd isn't running
-       and we've got to start it */
+    /* If connect fails due to connection refused or because there's no
+       socket file (or it exists but isn't a socket file) it means gpibd
+       isn't running and we've got to start it */
 
     if (    connect( sock_fd, ( struct sockaddr * ) &serv_addr,
                      sizeof serv_addr ) != -1 )
@@ -550,6 +547,8 @@ cleanup_devices( pthread_t tid )
         if ( pthread_equal( devices[ i ].tid, tid ) )
         {
             gpib_remove_device( devices[ i ].dev_id );
+            free( devices[ i ].name );
+            devices[ i ].name = NULL;
             memmove( devices + i, devices + i + 1,
                      ( --device_count - i ) * sizeof *devices );
             i--;
@@ -593,7 +592,7 @@ static int
 gpibd_shutdown( int    fd    UNUSED_ARG,
                 char * line  UNUSED_ARG )
 {
-    cleanup_devices( find_thread_data( pthread_self( ) )->pid );
+    cleanup_devices( pthread_self( ) );
     gpib_log_message( "Connection closed, PID = %ld\n",
                       find_thread_data( pthread_self( ) )->pid );
     return 0;
@@ -640,7 +639,7 @@ gpibd_init_device( int    fd,
             return send_nak( fd );
         }
 
-    /* Initialze the device */
+    /* Initialize the device */
 
     if ( gpib_init_device( line, &dev_id ) != SUCCESS )
         return send_nak( fd );

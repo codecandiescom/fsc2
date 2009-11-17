@@ -106,8 +106,11 @@ static const char * vxi11_sperror( Device_ErrorCode error );
  *       or as a name that can be resolved via DNS request)
  *    3. VXI-11 name of the device
  *    4. Maximum timeout (in microseconds) to wait for the
- *       connection to succeeded (0 is interpreted to mean
- *       a nearly infinite timeout)
+ *       connection if it's locked by another process (0 is
+ *       interpreted to mean a nearly infinite timeout)
+ *
+ * Note: Creating the connection can take quite a bit of time
+ * and it only times out after about 25 s.
  *------------------------------------------------------------*/
 
 int
@@ -168,13 +171,14 @@ vxi11_open( const char * dev_name,
 
 	core_link = create_link_1( &link_parms, core_client );
 
-	if ( core_link->error )
+	if ( ! core_link || core_link->error )
 	{
 		ip   = T_free( ( char * ) ip );
 		name = T_free( ( char * ) name );
 
 		print( FATAL, "Failed to connect to device: %s\n",
-               vxi11_sperror( core_link->error ) );
+               core_link ? vxi11_sperror( core_link->error ) :
+                           "unknown reasons" );
 
 		core_link = NULL;
 		clnt_destroy( core_client );
@@ -296,16 +300,15 @@ vxi11_close( void )
 }
 
 
-/*-------------------------------------------------------------*
- * Function for setting the maximum allowed time for a read or
- * write operation.
+/*----------------------------------------------------------------*
+ * Function for setting the timeout for a read or write operation
  * ->
  *    1. Flag that tells if the timeout is for read or write
  *       operations - 0 stands for read, everything else for
  *       write operations.
  *    2. Timeout value in micro-seconds (o is interpreted to
  *       mean a nearly infinite timeout
- *-------------------------------------------------------------*/
+ *----------------------------------------------------------------*/
 
 int
 vxi11_set_timeout( int  dir,
@@ -423,7 +426,7 @@ vxi11_lock_out( bool lock_state )
 	if ( fsc2_lan_log_level( ) == LL_ALL )
 		fsc2_lan_log_message( log_fp, "Trying to put device in %s state "
                               "withing %ld ms\n",
-                              lock_state ? "local" : "remote",
+                              lock_state ? "remote" : "local",
                               write_timeout );
 
 	generic_parms.lid           = core_link->lid;
@@ -784,6 +787,7 @@ vxi11_read( char   * buffer,
 	Device_ReadParms read_parms;
 	Device_ReadResp *read_resp;
 	size_t to_read = *length;
+    size_t expected = *length;
     struct timeval before,
 		           now;
 
@@ -919,6 +923,20 @@ vxi11_read( char   * buffer,
     fsc2_assert(    (    to_read - *length == 0
                       && read_resp->reason & VXI11_REQCNT_REASON )
                  || read_resp->reason & VXI11_END_REASON );
+
+    if ( fsc2_lan_log_level( ) >= LL_CE )
+    {
+        fprintf( log_fp, "-> Received %ld of up to %ld bytes\n",
+                 *length, ( long ) expected );
+
+        if ( fsc2_lan_log_level( ) == LL_ALL )
+        {
+            size_t c;
+
+            c = fwrite( buffer, *length, 1, log_fp );
+            fputc( ( int ) '\n', log_fp );
+        }
+    }
 
     fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
 	return SUCCESS;

@@ -1340,11 +1340,11 @@ fsc2_lan_open_log( const char * dev_name )
 
     TRY
     {
-#if defined SERIAL_LOG_DIR
+#if defined LAN_LOG_DIR
         fname = get_string( "%s%sfsc2_%s.log", LAN_LOG_DIR,
                             slash( LAN_LOG_DIR ), dev_name );
 #else
-        fname = get_string( P_tmpdir "/%sfsc2_%s.log", dev_name );
+        fname = get_string( P_tmpdir "/fsc2_%s.log", dev_name );
 #endif
         TRY_SUCCESS;
     }

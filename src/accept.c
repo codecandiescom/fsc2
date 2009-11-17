@@ -221,7 +221,7 @@ unpack_and_accept( int    dim,
     int nsets;
     char *ptr_next = NULL;
     long x_index,
-         y_index,
+         y_index = 0,
          curve;
     Var_Type_T type;
     long len;

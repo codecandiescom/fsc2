@@ -20,8 +20,6 @@
 */
 
 
-#define AG54830B_MAIN
-
 #include "ag54830b.h"
 
 
@@ -29,6 +27,7 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+AG54830B_T ag54830b;
 const char *AG54830B_Channel_Names[ MAX_CHANNELS  ] = {
 											"CHAN1", "CHAN2", "FUNC1", "FUNC2",
 								 			"FUNC3", "FUNC4", "WMEM1", "WMEM2",

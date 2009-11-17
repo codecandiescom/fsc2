@@ -1,0 +1,9 @@
+DEVICES:
+
+ag54830b_l;
+
+
+EXPERIMENT:
+
+print( "#\n", digitizer_timebase( ) );
+digitizer_timebase( 1 ms );

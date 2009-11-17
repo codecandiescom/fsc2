@@ -60,9 +60,9 @@
 
 
 #define MIN_REC_LEN    16
-#define MAX_REC_LEN    32768
+#define MAX_REC_LEN    1048576
 #define MIN_NUM_AVG    1
-#define MAX_NUM_AVG    4096
+#define MAX_NUM_AVG    65534
 #define MIN_TIMEBASE   500.0e-12
 #define MAX_TIMEBASE   20.0
 #define MIN_SENS       5.0
@@ -166,22 +166,9 @@ enum {
 };
 
 
-#if defined AG53840B_MAIN
-
-AG54830B_L_T ag54830b_l;
-
-const char *AG54830B_L_Channel_Names[ MAX_CHANNELS  ] = {
-											"CHAN1", "CHAN2", "FUNC1", "FUNC2",
-								 			"FUNC3", "FUNC4", "WMEM1", "WMEM2",
-								 			"WMEM3", "WMEM4", "LINE" };
-
-#else
-
 extern AG54830B_L_T ag54830b_l;
-
 extern const char *AG54830B_L_Channel_Names[ MAX_CHANNELS  ];
 
-#endif
 
 
 #endif /* ! defined AG54830B_L_HEADER */

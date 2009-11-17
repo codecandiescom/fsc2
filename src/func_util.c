@@ -1123,7 +1123,8 @@ f_cscale( Var_T * v )
 Var_T *
 f_cscale_1d( Var_T * v )
 {
-    double x_0, dx;                  /* new scale settings */
+    double x_0 = 0.0,                /* new scale settings */
+           dx  = 0.0;
     int is_set = 0;                  /* flags, indicating what to change */
     int shm_id;
     long len = 0;                    /* total length of message to send */
@@ -1244,7 +1245,10 @@ f_cscale_1d( Var_T * v )
 Var_T *
 f_cscale_2d( Var_T * v )
 {
-    double x_0, y_0, dx, dy;         /* new scale settings */
+    double x_0 = 0.0,                /* new scale settings */
+           y_0 = 0.0,
+           dx  = 0.0,
+           dy  = 0.0;
     int is_set = 0;                  /* flags, indicating what to change */
     int shm_id;
     long len = 0;                    /* total length of message to send */

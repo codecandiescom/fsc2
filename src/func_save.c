@@ -1956,7 +1956,7 @@ print_include( int          fid,
                const char * comment,
                const char * cur_file )
 {
-    char delim;
+    char delim = '\0';
     char *ep;
     FILE *finc = NULL;
     char buf[ PRINT_BUF_SIZE ];

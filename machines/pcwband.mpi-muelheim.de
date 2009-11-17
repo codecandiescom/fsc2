@@ -1,0 +1,13 @@
+# -*-Makefile-*-
+
+OWNER              := nobody
+GROUP              := dialout
+GPIB_LIBRARY       := SLG
+GPIB_LOG_LEVEL     := HIGH
+GPIB_HEADER_DIR    := /usr/local/include/gpib
+SERIAL_LOG_LEVEL   := HIGH 
+LAN_LOG_LEVEL      := HIGH 
+WITH_HTTP_SERVER   := yes
+DEFAULT_HTTP_PORT  := 8080
+EDITOR             := emacs
+MAIL_ADDRESS       := jens

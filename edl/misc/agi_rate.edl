@@ -1,0 +1,58 @@
+DEVICES:
+
+ag54830b_l;
+
+
+VARIABLES:
+
+Rec_length;
+File;
+I;
+data1;
+d_t;
+Aver =1;
+d_t[ 10 ];
+d_tmean;
+mtime;
+J;
+mrms;
+AAver = 1;
+data[ * ];
+yorg;
+yinc;
+trig_pos = 0.1;
+rate;
+
+
+PREPARATIONS:
+
+init_1d( 1, 100, 1, 1,  "Averages", "Time [ s ]" );
+
+
+EXPERIMENT:
+
+File = get_file( "", "*.dat", "./W_band_EPR/DATA/" );
+
+digitizer_trigger_position( trig_pos );
+Rec_length = digitizer_record_length( );
+
+FOR J = 1 : 100 {
+	Aver = J ^ 2;
+	digitizer_num_averages( Aver ); 
+	AAver = digitizer_num_averages( ); 
+	yorg = digitizer_get_yorigin( CH1 );
+	yinc = digitizer_get_yincrement( CH1 );
+	delta_time( );
+	FOR I = 1 : 10 {
+		delta_time( );
+		digitizer_start_acquisition( );
+		data = yinc * digitizer_get_curve_fast( CH1 ) + yorg;
+	    d_t[ I ] = delta_time( );
+	}
+	display( 1, data );
+	d_tmean = mean( d_t );
+	rate = AAver / d_tmean;
+	print( "Time is #; Rate is #; Record Length is #\n",
+		   d_tmean, rate, Rec_length );
+	save( File, AAver, d_tmean, data );
+}

@@ -20,8 +20,6 @@
 */
 
 
-#define AG54830B_L_MAIN
-
 #include "ag54830b_l.h"
 
 
@@ -29,12 +27,11 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+AG54830B_L_T ag54830b_l;
 const char *AG54830B_L_Channel_Names[ MAX_CHANNELS  ] = {
 											"CHAN1", "CHAN2", "FUNC1", "FUNC2",
 								 			"FUNC3", "FUNC4", "WMEM1", "WMEM2",
 								 			"WMEM3", "WMEM4", "LINE" };
-
-
 
 
 /*------------------------------------*/
@@ -53,6 +50,7 @@ ag54830b_l_init_hook( void )
 
 	/* Initialize some variables in the digitizers structure */
 
+	ag54830b_l.device            = -1;
 	ag54830b_l.is_num_avg        = UNSET;
 	ag54830b_l.is_time_per_point = UNSET;
 	ag54830b_l.is_rec_len        = UNSET;
@@ -63,8 +61,6 @@ ag54830b_l_init_hook( void )
 
 	for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
 		ag54830b_l.channels_in_use[ i ] = UNSET;
-
-	ag54830b_l.device = -1;
 
 	return 1;
 }
@@ -96,12 +92,15 @@ ag54830b_l_exp_hook( void )
 int
 ag54830b_l_end_of_exp_hook( void )
 {
-	/* Switch digitizer back to local mode */
+	/* Switch to run mode and close the connection */
 
-	vxi11_device_clear( );
-	ag54830b_l_command( ":CDIS;:RUN\n" );
-
-	ag54830b_l.device = -1;
+	if ( ag54830b_l.device != -1 )
+	{
+		vxi11_device_clear( );
+		ag54830b_l_command( ":CDIS;:RUN\n" );
+		vxi11_close( );
+		ag54830b_l.device == -1;
+	}
 
 	return 1;
 }
@@ -117,9 +116,9 @@ digitizer_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------*
- * Switches the channel on or off
- *--------------------------------*/
+/*------------------------------*
+ * Switches a channel on or off
+ *------------------------------*/
 
 Var_T *
 digitizer_show_channel( Var_T * v )

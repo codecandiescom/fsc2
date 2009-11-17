@@ -210,12 +210,15 @@ gpib_init_device( const char * name,
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 	if (    swrite( GPIB_fd, line, len ) != len
-         || ( len = readline( GPIB_fd, reply, sizeof reply - 1 ) ) < 1
-         || ( len == 1 && *reply == NAK ) )
+         || sread( GPIB_fd, reply, 1 ) < 1 
+         || *reply == NAK
+         || ( len = readline( GPIB_fd, reply + 1, sizeof reply - 2 ) ) < 1 )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
         return FAILURE;
     }
+
+    len++;
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
 
