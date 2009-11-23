@@ -202,7 +202,7 @@ powersupply_voltage( Var_T * v )
  * If there's no argument the current at the output is returned
  * (which may be smaller than current that had been set due to
  * the voltage limit).
-/*---------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 Var_T *
 powersupply_current( Var_T * v )
@@ -326,7 +326,7 @@ mcn700_2000_set_voltage( double voltage )
 static double
 mcn700_2000_get_voltage( void )
 {
-    const *char buffer = "N0\n";
+    const char *buffer = "N0\n";
     char reply[ 100 ];
     long length = 100;
     
