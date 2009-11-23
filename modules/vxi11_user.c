@@ -927,7 +927,7 @@ vxi11_read( char   * buffer,
     if ( fsc2_lan_log_level( ) >= LL_CE )
     {
         fprintf( log_fp, "-> Received %ld of up to %ld bytes\n",
-                 *length, ( long ) expected );
+                 ( long ) *length, ( long ) expected );
 
         if ( fsc2_lan_log_level( ) == LL_ALL )
         {
