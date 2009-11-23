@@ -1,0 +1,15 @@
+DEVICES:
+
+hp8648b;
+
+VARIABLES:
+
+
+
+EXPERIMEMT:
+
+FOR I = 1: 10 {
+	synthesizer_freqency( freq );
+	freq += 100 MHz;
+	waut( 0.5 s );
+}

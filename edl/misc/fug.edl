@@ -1,0 +1,21 @@
+DEVICES:
+
+mcn700_2000;
+
+EXPERIMENT:
+
+
+print( "#\n", powersupply_voltage(  ) );
+
+powersupply_voltage( 10 V );
+wait( 2 s );
+powersupply_voltage( 9 V );
+wait( 2 s );
+powersupply_voltage( 10 V );
+wait( 2 s );
+powersupply_voltage( 9 V );
+wait( 2 s );
+powersupply_voltage( 10 V );
+wait( 2 s );
+powersupply_voltage( 9 V );
+wait( 2 s );

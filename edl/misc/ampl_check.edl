@@ -1,0 +1,49 @@
+// amplifier test test program   (Savitsky 16.2.02) 
+
+DEVICES:
+
+hp8648B;
+tds540;
+
+
+VARIABLES:
+
+freqS =.01e6;  freqE=150e6; ffrequency, File_Name; I;
+freqFAC=2; atten = -20 dB; sig; Freq; ampl; tbase;
+sensitiv[12] ={1e-3, 2e-3, 5e-3, 10e-3, 20e-3, 50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5};
+time_base[15]= {20e-6, 10e-6, 5e-6, 2e-6, 1e-6, 0.4e-6, 0.2e-6, 0.1e-6, 50e-9, 20e-9, 10e-9, 5e-9, 2e-9, 1e-9, .5e-9};
+TT=2; Sens=8; data[*];
+
+PREPARATIONS:
+
+init_1d(1, 1000, 1, 1, "Freq [kHz]", "Amplification [dB]");
+
+EXPERIMENT:
+
+        synthesizer_attenuation(atten);
+		synthesizer_state(1);	
+	    digitizer_num_averages(10);
+		digitizer_timebase( time_base[TT] );
+		digitizer_sensitivity(CH2, sensitiv [ Sens ]);
+		// Save data_file
+		File_Name = get_file("","*.dat","./W_band_EPR/DATA/");
+		I = 1;
+		ffrequency=freqS;
+		// Start acquisition
+		WHILE ffrequency <= freqE {
+			 ffrequency = ffrequency*1.05;
+		  	 synthesizer_frequency(ffrequency);
+             IF 1/ffrequency < time_base[TT] { IF TT < 15 {TT=TT+1;} digitizer_timebase(time_base[TT]);}
+ 			 digitizer_start_acquisition();
+			 data = digitizer_get_curve(CH2);
+			 sig=max_of(data)-min_of(data);
+			 //Freq = int(ffrequency/1e3); 
+			 IF abs(sig) < sensitiv[Sens]*2 { IF Sens > 1 {Sens = Sens - 1} digitizer_sensitivity(CH2,sensitiv[Sens]);}	
+			 IF abs(sig) > sensitiv[Sens]*7 { IF Sens < 11 {Sens = Sens + 1} digitizer_sensitivity(CH2,sensitiv[Sens]);}	
+			 ampl = log(sig*sig/400*1000)*10-atten; 
+			 display(I, ampl);
+			 IF File_Name != -1 { save(File_Name, ffrequency, sig );}
+			I=I+1; 
+			//wait ( 1s );
+		}
+ synthesizer_state(0); 

@@ -1,0 +1,31 @@
+// Power Supply Set program  
+
+DEVICES:
+
+kontron4060;
+
+VARIABLES:
+
+voltage_kontron; ttime=0; File_Name; I=1;  v[60]=0; II;
+
+PREPARATIONS:
+init_1d( 1, 1000, "Time [min]", "LN2 Level [ cm ]");
+//init_2d( 1, 1000, 1, 1,  "Point", "Signal [mV]" );
+
+EXPERIMENT:
+
+File_Name = get_file("","*.dat","./W_band_EPR/DATA/");
+delta_time();
+FOREVER {
+v=0;
+FOR II=1:60 {
+v[II]=multimeter_get_data();
+wait(1s);
+}
+voltage_kontron=mean(v);
+display(I, voltage_kontron*100);
+ttime=ttime+delta_time(); I=I+1;
+IF File_Name != -1 { save(File_Name, ttime, voltage_kontron);}
+//ttime=ttime+delta_time(); I=I+1;
+}
+

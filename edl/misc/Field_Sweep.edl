@@ -1,0 +1,84 @@
+// Measure by Metrolab Field Sweep
+
+DEVICES:
+
+//kontron4060;
+PT2025;
+sr510;
+keithley228a;
+
+VARIABLES:
+
+// Buttons
+I_low, I_high, I_step, I_numpoi, I_current, B_start; I_field;
+
+//Field sweep variables
+field_curr = 0.0; field_start = 0.0; field_end = 10.0; field_step = 0.001; 
+Field_Points = ceil(abs((field_end - field_start)/field_step)) + 1;
+
+//General
+field_meas = 0, I = 1, File_Name; li_tc;
+voltage_sr, voltage_kontron, field_current_get;
+
+ASSIGNMENTS:
+
+
+PREPARATIONS:
+
+//magnet_use_correction();
+init_1d( 1, 1000 , 1 , 1, "Time [ s ]", "Field [ G ]" );
+
+EXPERIMENT:
+	gaussmeter_resolution(0.01);
+	// Create Buttons
+	I_low = input_create("FLOAT_INPUT", field_start , "Low Field [A]", "", "%.3f");
+	I_high = input_create("FLOAT_INPUT", field_end , "High Field [A]", "", "%.3f");
+	I_step = input_create("FLOAT_INPUT", field_step , "Field Step [A]");
+	I_numpoi = output_create("FLOAT_OUTPUT", Field_Points, "Points");
+	I_current = output_create("FLOAT_OUTPUT", field_start, "Current Field [A]", "", "%.4f");
+	I_field =  output_create("FLOAT_OUTPUT", field_meas, "Magnetic Field [G]", "","%.8f");
+	B_start = button_create("PUSH_BUTTON","Start/Stop"); button_state(B_start,0);
+
+FOREVER  {
+	 field_meas = measure_field();
+	 output_value(I_field, field_meas);
+	// Set Fields
+		field_start = input_value(I_low);
+		field_end = input_value(I_high);
+		field_step = input_value(I_step);
+   	    Field_Points = round(abs((field_end - field_start)/field_step)) + 1;
+		IF field_end != (field_start + (Field_Points - 1) * field_step) { 
+		   field_end = field_start + (Field_Points - 1) * field_step; input_value(I_high,field_end); }
+		output_value(I_numpoi, Field_Points); 
+  	    IF field_start != field_curr  { 
+			set_field(field_start); field_curr = field_start; 
+			output_value(I_current,field_curr); }
+
+	IF  button_state (B_start) {
+		
+		li_tc = lockin_time_constant( );
+		rescale(Field_Points);
+		change_scale(field_start , field_step);
+	    change_label("Field [ A ]");
+		
+		File_Name = get_file("","*.dat","./W_band_EPR/DATA/");
+		
+		I= 1;
+		FOR I = 1 : Field_Points {
+			IF !button_state(B_start) { BREAK }
+			 //field_current_get=get_field(); //get Keithley current
+			 field_meas = measure_field(); 
+		  	 voltage_sr=lockin_dac_voltage(6); //get setted SR voltage
+			 print("Voltge set #\n", voltage_sr);
+			 //voltage_kontron=voltmeter_get_data(); //get SR voltage
+			 //voltage_kontron=voltmeter_get_data(); //get SR voltage
+			 display(I, field_meas);
+			 output_value(I_field, field_meas);
+			 IF File_Name != -1 { save(File_Name, field_curr, field_meas);}
+			 field_curr = field_curr + field_step; output_value(I_current, field_curr); set_field(field_curr); 
+			 wait (li_tc );
+		}
+   	   button_state(B_start,0);
+	}
+}
+

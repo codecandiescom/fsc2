@@ -1,0 +1,237 @@
+// CWEPR and Monitor Mode Program with Frequency Detection (Savitsky, version 8.11.02, 12.3.03)
+// phase -172 
+// lockin phase, usual mixer, long kabel +164 (or -16)
+// lockin phase, quadr. mixer, long kabel -10 (or +170) (6.7.04)
+
+DEVICES:
+
+sr510;
+keithley228a;
+hp5340a;
+lakeshore330;
+
+VARIABLES:
+
+// Lock_In parameters
+li_tc; li_sens, Lock = 0;
+phase = 171; //-172; //new bridge configuration 17.7.03
+//phase = 114; // for Wavetek;   
+
+// Other variables
+J, I; data; File_Name; freq; temper;
+
+// Buttons Monitor
+B_stop, B_up, B_down, B_clear, B_display, B_set, Sl_sweep, B_monit, B_cwepr, B_end; 
+I_low, I_high, I_set; I_sweep; I_current; I_freq;
+
+//Buttons CWEPR
+I_step; I_numpoi, B_start;
+
+// Field sweep variables
+field_low = 0.0; field_high = 10.0; field_curr = 0.0, sweep_rate; field_set, Sweep_index;
+field_start = 0.0; field_end = 10.0; field_step = 0.001; 
+Field_Points = ceil(abs((field_end - field_start)/field_step)) + 1;
+sweep_rate_fix[ 12 ] = {0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.003, 0.004, 0.005, 0.0075, 0.01, 0.02, 0.03 };
+
+PREPARATIONS:
+
+init_1d( 1, 1000 , 1 , 1, "Field [ A ]", "Signal [ uV ]" );
+magnet_use_correction();
+
+
+EXPERIMENT:
+
+temp_contr_command("SCHN A\n"); wait(0.1s); //set channel A on LakeShore
+
+B_cwepr = button_create("NORMAL_BUTTON","CW-EPR Mode");
+B_monit = button_create("NORMAL_BUTTON","Monitor Mode");
+
+FOREVER  {
+
+ IF button_state(B_monit) > 0 { //Monitor_Mode
+	
+	object_delete(B_cwepr, B_monit);
+	
+	// Read Frequency
+	field_low = field_start; field_high = field_end;
+	freq=13e-9*freq_counter_measure();
+	
+	layout("VERT");
+	I_low = input_create("FLOAT_INPUT", field_low, "Low Field [A]", "","%.3f");
+	I_high = input_create("FLOAT_INPUT", field_high, "High Field [A]", "","%.3f");
+	I_set = input_create("FLOAT_INPUT", field_low, "Set Field [A]");
+	B_set = button_create ("NORMAL_BUTTON", "Set Field");
+	I_current =  output_create("FLOAT_OUTPUT", field_curr, "Current Field [A]", "", "%.4f");
+    I_freq =  output_create("FLOAT_OUTPUT", freq, "Current Frequency [GHz]", "", "%.5f");
+	B_stop = button_create("RADIO_BUTTON", "STOP"); button_state(B_stop,1);
+	B_up = button_create("RADIO_BUTTON", B_stop, "UP");
+	B_down = button_create("RADIO_BUTTON", B_stop, "DOWN");
+	I_sweep = output_create("FLOAT_OUTPUT", sweep_rate_fix [1],"Sweep Rate [ mA/lockin-tc]");
+	Sl_sweep = slider_create("NORMAL_SLIDER",1,size(sweep_rate_fix,1),1);
+	slider_value(Sl_sweep,1);
+	B_display = button_create("PUSH_BUTTON","Display On/Off"); button_state(B_display,0);
+	B_clear = button_create("NORMAL_BUTTON","Clear");
+    B_end = button_create("NORMAL_BUTTON","Finish");
+	
+	clear_curve();
+	rescale(1000);
+	change_scale( 1, 1);
+	change_label("Points [ N ]");
+	lockin_phase( phase ); 
+	lockin_lock_keyboard( 0 );
+
+	J = 0; I=0; 
+
+	FOREVER {
+		IF J % 10 == 0 {
+			li_tc = lockin_time_constant( );
+			J += 1;
+		}
+		field_low = input_value (I_low); 
+    	field_high = input_value (I_high);
+		
+		Sweep_index = round( slider_value(Sl_sweep) );
+		sweep_rate = sweep_rate_fix [Sweep_index];
+		output_value(I_sweep,sweep_rate);
+		
+		freq=13e-9*freq_counter_measure();
+		output_value(I_freq,freq);
+		
+		IF button_state (B_clear) { clear_curve(); I = 1; }
+		IF button_state (B_set) > 0   { field_set = input_value (I_set);  
+			IF field_set >= field_low & field_set <= field_high {
+				field_curr = field_set; 
+				set_field(field_curr); 
+				output_value(I_current, field_curr);
+			} ELSE { input_value(I_set,field_curr); }
+		} 
+		IF button_state (B_up)    { field_curr += sweep_rate; }
+		IF button_state (B_down)  { field_curr -= sweep_rate; }
+   	    IF field_curr < field_low  { 
+			field_curr = field_low; 
+			set_field(field_curr); 
+			output_value(I_current, field_curr); button_state(B_stop, 1);
+		}
+		IF field_curr > field_high { 
+			field_curr = field_high; 
+			set_field( field_curr ); 
+			output_value(I_current, field_curr); button_state(B_stop, 1);
+		}
+		IF ! button_state (B_stop) { 
+			set_field( field_curr ); 
+			output_value(I_current, field_curr);
+		} 
+		IF  button_state (B_display) {
+			I += 1;
+			wait( li_tc);
+			data = lockin_get_data( ) * 1e6 ;
+			display(I,  data );
+		} ELSE { wait(li_tc); }
+		IF button_state(B_end) > 0 { //Finish Monitor Mode
+			object_delete(I_low, I_high, I_set, B_set, I_current, I_freq, B_stop, B_up, B_down, I_sweep, Sl_sweep, B_display, B_end, B_clear);
+			//input_delete(I_low);  input_delete(I_high); input_delete(I_set); button_delete(B_set);
+			//output_delete(I_current); output_delete(I_freq); button_delete(B_stop); button_delete(B_up); button_delete(B_down);
+			//output_delete(I_sweep); slider_delete(Sl_sweep); button_delete(B_display);
+			//button_delete(B_end); button_delete(B_clear);
+			B_cwepr = button_create("NORMAL_BUTTON","CW-EPR Mode");
+			B_monit = button_create("NORMAL_BUTTON","Monitor Mode");
+			BREAK;
+		}
+	}
+ }
+ 
+ IF button_state(B_cwepr) > 0 { //CWEPR mode
+	
+	object_delete(B_cwepr, B_monit);
+
+//	set_field( field_start );
+	freq=13e-9*freq_counter_measure();
+	
+	// Create Buttons
+	I_low = input_create("FLOAT_INPUT", field_start , "Low Field [A]", "", "%.3f");
+	I_high = input_create("FLOAT_INPUT", field_end , "High Field [A]", "", "%.3f");
+	I_step = input_create("FLOAT_INPUT", field_step , "Field Step [A]");
+	I_numpoi = output_create("FLOAT_OUTPUT", Field_Points, "Points");
+	I_current = output_create("FLOAT_OUTPUT", field_start, "Current Field [A]", "", "%.4f");
+	I_freq =  output_create("FLOAT_OUTPUT", freq, "Current Frequency [GHz]", "", "%.5f");
+	B_start = button_create("PUSH_BUTTON","Start/Stop"); button_state(B_start,0);
+    B_end =  button_create("NORMAL_BUTTON","Finish");
+	lockin_phase( phase ); 
+
+	FOREVER {
+
+    	field_start = input_value(I_low);
+		field_end = input_value(I_high);
+		field_step = input_value(I_step);
+   	    Field_Points = round(abs((field_end - field_start)/field_step)) + 1;
+		IF field_end != (field_start + (Field_Points - 1) * field_step) { 
+		   field_end = field_start + (Field_Points - 1) * field_step; input_value(I_high,field_end); }
+		output_value(I_numpoi, Field_Points); 
+  	    IF field_start != field_curr  { 
+			set_field(field_start); field_curr = field_start; 
+			output_value(I_current,field_curr); }
+
+ 	   IF Lock == 0 { lockin_lock_keyboard("OFF"); Lock = 1; }
+	
+  	IF  button_state (B_start) {
+	
+		// Read Lock_In
+		lockin_lock_keyboard("ON"); Lock = 0;
+		li_sens = lockin_sensitivity( );
+		li_tc = lockin_time_constant( );
+   	 
+		display(1,li_sens*1e6); display(1,-li_sens*1e6); clear_curve();
+		rescale(Field_Points);
+		change_scale(field_start , field_step);
+	    change_label("Field [ A ]");
+
+		// Save data_file
+		File_Name = get_file("","*.wcw","./W_band_EPR/DATA/");
+		IF File_Name != -1 {
+			//save_program(File_Name, "% " );
+			
+		    fsave(File_Name, "% CW W-band EPR Spectrum \n% Measured on  # \n", date());
+			fsave(File_Name, "% Time was     # \n",  time());
+
+			save_comment(File_Name, "% ", "Sample: \nMod-Ampl: \nAttenuation: \n" );
+			
+			fsave(File_Name, "% Sensitivity            = # V\n",  		li_sens);
+			fsave(File_Name, "% Time_constant          = # s\n",  		li_tc );
+			fsave(File_Name, "% Phase                  = # degree\n",  	lockin_phase( ) );
+			fsave(File_Name, "% Modulation Frequency   = # kHz\n",	 	lockin_ref_freq() * 1e-3 );
+			fsave(File_Name, "% MW Frequency / 13      = # GHz\n", 		13e-9*freq_counter_measure() );
+			fsave(File_Name, "% Sample Temperature     = # K\n", 		temp_contr_temperature() );
+			fsave(File_Name, "%\n" );
+
+			fsave(File_Name, "% number of field points \n" ); save (File_Name, Field_Points);
+			fsave(File_Name,"% start field \n" );            save (File_Name, field_start);
+			fsave(File_Name,"% step field \n" );             save (File_Name, field_step);
+			fsave(File_Name,"% end field \n" );              save (File_Name, field_end);
+   	  }
+		// Start acquisition
+		I = 1;
+		FOR I = 1 : Field_Points {
+			IF !button_state(B_start) { BREAK }
+			 data = lockin_get_data( ) * 1e6 ;
+		  	 display(I ,data);
+			 //Read Frequency every 10 points
+			 IF I % 10 ==0  {freq=13e-9*freq_counter_measure(); output_value(I_freq,freq);}
+			 
+			 IF File_Name != -1 { save(File_Name, data );}
+			 field_curr = field_curr + field_step; output_value(I_current, field_curr); set_field(field_curr); 
+			 wait (li_tc);
+		}
+   	 button_state(B_start,0);
+		
+	  	}
+        IF button_state(B_end) > 0 {
+			object_delete(B_end, B_start, I_current, I_freq, I_numpoi, I_step, I_high, I_low);
+			//button_delete(B_start); output_delete(I_current); output_delete(I_freq); output_delete(I_numpoi);
+			//input_delete(I_step); input_delete(I_high); input_delete(I_low);
+			B_cwepr = button_create("NORMAL_BUTTON","CW-EPR Mode");
+			B_monit = button_create("NORMAL_BUTTON","Monitor Mode");
+			BREAK;
+		}
+	}
+ }
+}

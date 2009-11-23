@@ -1,0 +1,54 @@
+DEVICES:
+
+tegam2714a_p;
+
+
+VARIABLES:
+
+I, set;
+
+
+ASSIGNMENTS:
+
+TIMEBASE: 1000 ns;
+MICROWAVE: CHANNEL = 98, V_HIGH = 3 V, V_LOW = 0 V;
+
+TRIGGER_MODE: EXTERNAL; // V_HIGH = 2 V, SLOPE = POSITIVE;
+
+PREPARATIONS:
+
+//P1: FUNCTION     = MICROWAVE,
+//	START        = 0 ns,
+//	LENGTH       = 200 ns;
+
+P1: FUNCTION     = MICROWAVE,
+	START        = 20 us,
+	LENGTH       = 20 us,
+	DELTA_START  = 10 us;
+
+//pulser_show_pulses( );
+//pulser_dump_pulses( );
+pulser_maximum_pattern_length( 50 ms );
+
+
+EXPERIMENT:
+pulser_state("ON");
+
+FOREVER {
+	wait(.2s);
+	delta_time();	
+    P1.START = 10us;
+	//IF P1.LENGTH == 0 ns {
+	//	P1.LENGTH = 200 ns;
+	//} ELSE {
+	//	P1.LENGTH = 0 ns;
+	//}
+	//pulser_state("OFF");
+	pulser_update( );
+	wait(.2s);
+	//pulser_state("ON");
+    set = delta_time();
+    print("Time is #.\n", set);
+    P1.START = 20us;
+	pulser_update( ); //wait(.5s);
+}

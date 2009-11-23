@@ -1,0 +1,54 @@
+// Power Supply Set program  
+
+DEVICES:
+
+thurlby330;
+//kontron4060;
+
+VARIABLES:
+
+voltage = 0 V; I; J;
+voltage_get, current_get; resist; state;
+Points=500; delta_voltage= 0.01 V;
+Channel = CH1; voltage_kontron;
+freq_curr=0.0; Qu=4480; Ql=775; pulselength0=64ns; off; beta; p4_length; p_absorb;
+
+
+PREPARATIONS:
+init_1d( 1, 100, "Voltage [V]", "Resistanse [ Om ]");
+//init_2d( 1, 1000, 1, 1,  "Point", "Signal [mV]" );
+
+EXPERIMENT:
+powersupply_current_limit(Channel, 0.05 A);
+powersupply_voltage(Channel, voltage); 
+powersupply_channel_state(Channel, 1);
+//powersupply_damping(Channel, 0);
+wait(1s);
+
+
+rescale(Points);
+change_scale(voltage, delta_voltage);
+
+
+FOR I=1:Points {
+freq_curr=float(I-1);
+off = freq_curr*2.8e6*2*Qu/95e9;  			
+beta = float(Qu)/float(Ql)-1;
+p_absorb = 1 - ((1-beta)^2+off^2)/((1+beta)^2+off^2);
+print("freq #.\n", freq_curr);
+p4_length = round(pulselength0*1e9/sqrt(p_absorb)/2)*2e-9;
+print("p4_length #.\n", p4_length*1e9);
+powersupply_voltage(Channel, voltage); 
+wait(1s);
+voltage_get=powersupply_voltage(Channel);
+//FOR J=1:3 { voltage_kontron=voltmeter_get_data();}
+//current_get=powersupply_current(Channel);
+//resist=voltage_get/current_get;
+display(I, voltage_get);
+voltage=voltage+delta_voltage;
+//wait(1s);
+
+}
+ON_STOP:
+powersupply_voltage(Channel, 0.0);
+powersupply_channel_state(Channel, 0);			

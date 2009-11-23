@@ -224,7 +224,13 @@ main( void )
 
     /* Send parent a signal to tell it we're listening on the socket */
 
-    kill( getppid( ), SIGUSR2 );
+    if ( kill( getppid( ), SIGUSR1 ) )
+    {
+        shutdown( fd, SHUT_RDWR );
+        close( fd );
+        unlink( GPIBD_SOCK_FILE );
+        return EXIT_FAILURE;
+    }
 
     /* Wait for connections and quit when no clients exist anymore (the
        first client will connect more or less immediately since it's our
@@ -686,7 +692,7 @@ gpibd_timeout( int    fd,
         return send_nak( fd );
     }
 
-    if ( ( ret = extract_int( &line, ' ', &timeout ) ) < 0 )
+    if ( ( ret = extract_int( &line, '\n', &timeout ) ) < 0 )
         return -1;
     else if ( ret )
     {

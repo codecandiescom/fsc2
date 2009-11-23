@@ -219,10 +219,10 @@ hp5340a_init( const char * name )
        addressed as talker(don't lock the keyboard, the user is supposed
        to do settings at the front panel) */
 
-    if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
+    if ( gpib_write( hp5340a.device, "J", 1 ) == FAILURE )
         return FAIL;
 
-    if ( gpib_write( hp5340a.device, "J", 1 ) == FAILURE )
+    if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
         return FAIL;
 
     return OK;
@@ -236,14 +236,35 @@ static double
 hp5340a_get_freq( void )
 {
     char buf[ 16 ];
-    long len = sizeof buf;
+    long len;
 
 
+ restart_get_freq:
+    len = sizeof buf;
     if (    gpib_read( hp5340a.device, buf, &len ) == FAILURE
          || len != sizeof buf )
     {
         print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );
+    }
+
+    /* This is a dirty hack: sometimes the first byte to be read goes AWOL
+       and in this case we read simply read single bytes until the next
+       byte to be read should be the start of a message.. */
+
+    if ( buf[ len - 1 ] == 'L' )
+    {
+        do
+        {
+            len = 1;
+            if (    gpib_read( hp5340a.device, buf, &len ) == FAILURE
+                 || len != 1 )
+            {
+                print( FATAL, "Communication with device failed.\n" );
+                THROW( EXCEPTION );
+            }
+        } while ( *buf != '\n' );
+        goto restart_get_freq;
     }
 
     if ( buf[ 1 ] != ' ' )
@@ -252,7 +273,14 @@ hp5340a_get_freq( void )
         THROW( EXCEPTION );
     }
 
+    if ( buf[ 2 ] != ' ' )
+    {
+        print( FATAL, "Communication with device failed.\n" );
+        THROW( EXCEPTION );
+    }
+
     buf[ 14 ] = '\0';
+
     return T_atod( buf + 3 );
 }
 

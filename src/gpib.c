@@ -27,7 +27,7 @@
 
 
 int GPIB_fd = -1;
-static volatile sig_atomic_t Gpibd_replied;
+static volatile sig_atomic_t Gpibd_replied = 0;
 static char err_msg[ GPIB_ERROR_BUFFER_LENGTH + 1 ];
 
 
@@ -50,7 +50,7 @@ static int extract_long( char * line,
 static int extract_int( char * line,
                         char   ec,
                         int  * val );
-static void gpibd_sig_handler( int signo );
+static void gpib_sig_handler( int signo );
 
 
 /*--------------------------------------------------*
@@ -497,14 +497,15 @@ gpib_read( int    dev,
        allocation for a large enough buffer or the call of gpib_read()
        failed) */
 
-    if (    ( len = readline( GPIB_fd, line, sizeof line - 1 ) ) < 1
-         || ( len == 1 && *line == NAK ) )
+    if (    sread( GPIB_fd, line, 1 ) < 1
+         || *line == NAK
+         || ( len = readline( GPIB_fd, line + 1, sizeof line - 2 ) ) < 1 )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
         return FAILURE;
     }
 
-	line[ len ] = '\0';
+	line[ ++len ] = '\0';
     if ( extract_long( line, '\n', &val ) || val < 0 || val > *length )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
@@ -648,9 +649,7 @@ gpib_last_error( void )
         return "Communication failure with GPIB daemon";
     }
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
 
 	err_msg[ val ] = '\0';
 	return err_msg;
@@ -796,10 +795,10 @@ start_gpibd( void )
        us it's done with its initialization and now accepts connections */
 
 	Gpibd_replied = 0;
-    sact.sa_handler = gpibd_sig_handler;
+    sact.sa_handler = gpib_sig_handler;
     sigemptyset( &sact.sa_mask );
     sact.sa_flags = 0;
-    if ( sigaction( SIGUSR2, &sact, &old_sact ) == -1 )
+    if ( sigaction( SIGUSR1, &sact, &old_sact ) == -1 )
         return -2;
 
     /* Fork of the daemon as a new child process */
@@ -833,7 +832,7 @@ start_gpibd( void )
     while ( ! Gpibd_replied && waitpid( pid, NULL, WNOHANG ) == 0 )
         fsc2_usleep( 20000, SET );
 
-	sigaction( SIGUSR2, &old_sact, NULL );
+	sigaction( SIGUSR1, &old_sact, NULL );
 
     /* Signal back failure if the daemon exited */
 
@@ -997,9 +996,9 @@ extract_int( char * line,
  *---------------------------------------------------*/
 
 static void
-gpibd_sig_handler( int signo )
+gpib_sig_handler( int signo )
 {
-    if ( signo == SIGUSR2 )
+    if ( signo == SIGUSR1 )
         Gpibd_replied = 1;
 }
 

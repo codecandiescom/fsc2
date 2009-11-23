@@ -1,0 +1,10 @@
+DEVICES:
+
+hp5340a;
+
+EXPERIMENT:
+
+FOREVER {
+	print( "#\n", freq_counter_measure( ) );
+	wait( 0.2 s );
+}

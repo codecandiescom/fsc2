@@ -1,0 +1,38 @@
+// Power Supply Set program  
+
+DEVICES:
+schlum7150;
+//kontron4060;
+//schlum7150;
+
+
+VARIABLES:
+
+ttime=0; File_Name; I=1;  v[60]=0; II;
+ohm_schlum;  mode;
+
+PREPARATIONS:
+init_1d( 1, 1000, 1, 1,"Time [min]", "LN2 Level [ cm ]");
+//init_2d( 1, 1000, 1, 1,  "Point", "Signal [mV]" );
+
+EXPERIMENT:
+multimeter_mode(4);
+multimeter_precision(2);
+//multimeter_mode("Vdc");
+File_Name = get_file("","*.dat","./W_band_EPR/DATA/");
+delta_time();
+FOREVER {
+v=0;
+FOR II=1:60 {
+//v[II]=multimeter_get_data#2();
+v[II]=multimeter_get_data();
+wait(1s);
+}
+//voltage_kontron=mean(v);
+ohm_schlum=mean(v)*1e3;
+display(I, ohm_schlum);
+ttime=ttime+delta_time(); I=I+1;
+IF File_Name != -1 { save(File_Name, ttime, ohm_schlum);}
+//ttime=ttime+delta_time(); I=I+1;
+}
+
