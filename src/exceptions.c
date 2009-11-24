@@ -93,7 +93,7 @@ jmp_buf *
 push_exception_frame( const char * file,
                       int          line )
 {
-    if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
+    if ( ++Exception_stack_pos >= MAX_NESTED_EXCEPTION )
     {
         fprintf( stderr, "%s: Too many nested exceptions at %s:%d.\n",
                  Prog_Name, file, line );
@@ -106,7 +106,6 @@ push_exception_frame( const char * file,
         exit( EXIT_FAILURE );
     }
 
-    ++Exception_stack_pos;
     Stored_exceptions[ Exception_stack_pos ] =
                                         Exception_stack[ Exception_stack_pos ];
     Exception_stack[ Exception_stack_pos ].file = file;
@@ -167,8 +166,8 @@ throw_exception( Exception_Types_T type )
 
 #ifdef FSC2_HEADER
     /* Make sure that carelessly written code where the exception is thrown
-       while the program has higher permissions than the user opens up a
-       security hole */
+       while the program has higher permissions than the user doesn't opens
+       up a security hole */
 
     lower_permissions( );
 #endif
