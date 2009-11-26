@@ -1,6 +1,6 @@
 # -*-Makefile-*-
 
-install-door.secnet.physik.fu-berlin.de:
+install-pcdoor.mpi-muelheim.mpg.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	-$(LN) $(LNFLAGS) $(libdir)/hfs9000.fsc2_so $(libdir)/hfs9003.fsc2_so
 	-chown $(OWNER).$(GROUP) $(libdir)/hfs9003.fsc2_so
@@ -9,7 +9,7 @@ install-door.secnet.physik.fu-berlin.de:
 	-$(LN) $(LNFLAGS) $(libdir)/keithley228a.fsc2_so $(libdir)/magnet.fsc2_so
 	-chown $(OWNER).$(GROUP) $(libdir)/magnet.fsc2_so
 
-uninstall-door.secnet.physik.fu-berlin.de:
+uninstall-pcdoor.mpi-muelheim.mpg.de:
 	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.fsc2_so
 	-$(RM) $(RMFLAGS) $(libdir)/w_band.fsc2_so
 	-$(RM) $(RMFLAGS) $(libdir)/magnet.fsc2_so
