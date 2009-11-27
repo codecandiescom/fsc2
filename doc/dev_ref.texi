@@ -3801,6 +3801,8 @@ In the GPIB configuration file use @code{"SR510"} as the device name,
 @item @ref{lockin_ref_freq()}
 @item @ref{lockin_dac_voltage()}
 @item @ref{lockin_is_overload()}
+@item @ref{lockin_is_locked()}
+@item @ref{lockin_has_reference()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 
@@ -3844,6 +3846,8 @@ In the GPIB configuration file use @code{"SR530"} as the device name,
 @item @ref{lockin_ref_freq()}
 @item @ref{lockin_dac_voltage()}
 @item @ref{lockin_is_overload()}
+@item @ref{lockin_is_locked()}
+@item @ref{lockin_has_reference()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 
@@ -3891,6 +3895,8 @@ In the GPIB configuration file use @code{"SR810"} as the device name,
 @item @ref{lockin_harmonic()}
 @item @ref{lockin_ref_mode()}
 @item @ref{lockin_ref_level()}
+@item @ref{lockin_is_overload()}
+@item @ref{lockin_is_locked()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 
@@ -3938,6 +3944,8 @@ In the GPIB configuration file use @code{"SR830"} as the device name,
 @item @ref{lockin_harmonic()}
 @item @ref{lockin_ref_mode()}
 @item @ref{lockin_ref_level()}
+@item @ref{lockin_is_overload()}
+@item @ref{lockin_is_locked()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 

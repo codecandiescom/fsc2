@@ -105,6 +105,7 @@ Var_T * lockin_auto_setup(       Var_T * v );
 Var_T * lockin_get_sample_time(  Var_T * v );
 Var_T * lockin_auto_acquisition( Var_T * v );
 Var_T * lockin_is_overload(      Var_T * v );
+Var_T * lockin_is_locked(        Var_T * v );
 Var_T * lockin_lock_keyboard(    Var_T * v );
 Var_T * lockin_command(          Var_T * v );
 
@@ -240,6 +241,7 @@ static long sr830_get_display_channel( int channel );
 static void sr830_auto( int flag );
 static double sr830_get_auto_data( int type );
 static bool sr830_get_overload( void );
+static bool sr830_is_locked( void );
 static void sr830_lock_state( bool lock );
 static bool sr830_command( const char * cmd );
 static bool sr830_talk( const char * cmd,
@@ -1323,6 +1325,19 @@ lockin_is_overload( Var_T * v  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 Var_T *
+lockin_is_locked( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, 1L );
+
+    return vars_push( INT_VAR, ( long ) sr830_is_locked( ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
 lockin_lock_keyboard( Var_T * v )
 {
     bool lock;
@@ -2279,7 +2294,23 @@ sr830_get_overload( void )
     long length = sizeof buffer;
 
 
-    sr830_talk( "LIAS?1\n", buffer, &length );
+    sr830_talk( "LIAS?0\n", buffer, &length );
+    return buffer[ 0 ] == '1';
+}
+
+
+/*----------------------------------------------------------*
+ * Function returns if the lock-in locked to the reference.
+ *----------------------------------------------------------*/
+
+static bool
+sr830_is_locked( void )
+{
+    char buffer[ 20 ];
+    long length = sizeof buffer;
+
+
+    sr830_talk( "LIAS?3\n", buffer, &length );
     return buffer[ 0 ] == '1';
 }
 

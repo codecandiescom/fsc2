@@ -64,6 +64,8 @@ Var_T * lockin_phase(         Var_T * v );
 Var_T * lockin_ref_freq(      Var_T * v );
 Var_T * lockin_dac_voltage(   Var_T * v );
 Var_T * lockin_is_overload(   Var_T * v );
+Var_T * lockin_is_locked(     Var_T * v );
+Var_T * lockin_has_reference( Var_T * v );
 Var_T * lockin_lock_keyboard( Var_T * v );
 Var_T * lockin_command(       Var_T * v );
 
@@ -125,6 +127,8 @@ static double sr530_get_ref_freq( void );
 static double sr530_set_dac_voltage( long   channel,
                                      double voltage );
 static bool sr530_get_overload( void );
+static bool sr530_is_locked( void );
+static bool sr530_has_reference( void );
 static void sr530_lock_state( bool lock );
 static bool sr530_command( const char * cmd );
 static bool sr530_talk( const char * cmd,
@@ -692,6 +696,32 @@ lockin_is_overload( Var_T * v  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 Var_T *
+lockin_is_locked( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, 1L );
+
+    return vars_push( INT_VAR, ( long ) sr530_is_locked( ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
+lockin_has_reference( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, 1L );
+
+    return vars_push( INT_VAR, ( long ) sr530_has_reference( ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
 lockin_lock_keyboard( Var_T * v )
 {
     bool lock;
@@ -1086,6 +1116,38 @@ sr530_get_overload( void )
 
     sr530_talk( "Y4\n", buffer, &length );
     return buffer[ 0 ] == '1';
+}
+
+
+/*----------------------------------------------------------*
+ * Function returns if the lock-in locked to the reference.
+ *----------------------------------------------------------*/
+
+static bool
+sr530_is_locked( void )
+{
+    char buffer[ 20 ];
+    long length = sizeof buffer;
+
+
+    sr530_talk( "Y3\n", buffer, &length );
+    return buffer[ 0 ] == '0';
+}
+
+
+/*--------------------------------------------------*
+ * Function returns if the lock-in has a reference. 
+ *--------------------------------------------------*/
+
+static bool
+sr530_has_reference( void )
+{
+    char buffer[ 20 ];
+    long length = sizeof buffer;
+
+
+    sr530_talk( "Y2\n", buffer, &length );
+    return buffer[ 0 ] == '0';
 }
 
 

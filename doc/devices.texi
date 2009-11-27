@@ -1067,6 +1067,8 @@ check the arguments to achieve the desired results.
 @item @ref{lockin_conversion_time()}
 @item @ref{lockin_resonator()}
 @item @ref{lockin_is_overload()}
+@item @ref{lockin_is_locked()}
+@item @ref{lockin_has_reference()}
 @item @ref{lockin_rg()}
 @item @ref{lockin_tc()}
 @item @ref{lockin_ma()}
@@ -1502,17 +1504,41 @@ an argument, i.e.@: as a query.
 @anchor{lockin_is_overload()}
 @findex lockin_is_overload()
 @item lockin_is_overload()
-This can only be used as a query, i.e.@: it does not allows arguments.
-It can be called before a new data value is fetched from the lock-in
-to find out if an overload has occurred since the start of the
-experiment or since the function was called the last time. A return
-value of @code{1} indicates that an overload happened, otherwise
-@code{0} is returned. Calling this function (or in the case of the
-@ref{er023m, Bruker ER023M} fetching the data value) will reset the
-overload condition and calls of the function will return @code{0} as
-long as no further overloads occur.
+This function can only be used as a query, i.e.@: it does not allows
+arguments. It can be called before a new data value is fetched from
+the lock-in to find out if an overload has occurred since the start of
+the experiment or since the function was called the last time. A
+return value of @code{1} indicates that an overload happened,
+otherwise @code{0} is returned. Calling this function (or in the case
+of the @ref{er023m, Bruker ER023M} fetching the data value) will reset
+the overload condition and calls of the function will return @code{0}
+as long as no further overloads occur.
 
 The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_is_locked()}
+@findex lockin_is_locked()
+@item lockin_is_locked()
+This function can only be used with the @ref{sr510, SR510},
+@ref{sr530, SR530}, @ref{sr810, SR810} and @ref{sr830, SR830} lock-in
+amplifiers and only as a query, i.e.@: it does not allows arguments.
+If called it returns if the lock-in's reference input is locked to
+the reference input.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_has_reference()}
+@findex lockin_has_reference()
+@item lockin_has_reference()
+This function can only be used with the @ref{sr510, SR510} and
+@ref{sr530, SR530} lock-in amplifiers and only as a query, i.e.@: it
+does not allows arguments. If called it returns if the lock-in detects
+a reference input.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
 
 
 @anchor{lockin_rg()}
