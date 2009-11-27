@@ -754,6 +754,10 @@ scan_args( int   * argc,
 
     while ( cur_arg < *argc )
     {
+        /* Check for option that's mostly used for debugging when everything
+         (mostly shared libraries) is to be loaded from the current directory
+         (and below) instead of what's installed in the usual places */
+
         if (    strlen( argv[ cur_arg ] ) == 11
              && ! strcmp( argv[ cur_arg ], "-local_exec" ) )
         {
@@ -763,6 +767,10 @@ scan_args( int   * argc,
             *argc -= 1;
             continue;
         }
+
+        /* Check for '-t' option that means "do a test run without graphics".
+           If it's given test for options that aren't compatible and start
+           the test and return its result */
 
         if (    strlen( argv[ cur_arg ] ) == 2
              && ! strcmp( argv[ cur_arg ], "-t" ) )
@@ -788,7 +796,7 @@ scan_args( int   * argc,
                 usage( EXIT_FAILURE );
             }
 
-            /* no file name with "-t" option ? */
+            /* Missing file name with "-t" option? */
 
             if ( ! argv[ ++cur_arg ] )
             {
@@ -809,6 +817,10 @@ scan_args( int   * argc,
             exit( scan_main( EDL.files->name, In_file_fp ) ?
                   EXIT_SUCCESS : EXIT_FAILURE );
         }
+
+        /* Check for '-nw' and '-ng' option (they are identical) that tells
+           to run the script passed as another argument without graphics.
+           The option must be followed directly by the script file name. */
 
         if (    strlen( argv[ cur_arg ] ) == 3
              && (    ! strcmp( argv[ cur_arg ], "-ng" )
@@ -867,10 +879,16 @@ scan_args( int   * argc,
             return flags;
         }
 
+        /* Check for the '-h' or '--help' option (they are identical) and
+           just make the program output usage information */
+
         if (    (    strlen( argv[ cur_arg ] ) == 2
                   && ! strcmp( argv[ cur_arg ], "-h" ) )
              || ! strcmp( argv[ cur_arg ], "--help" ) )
             usage( EXIT_SUCCESS );
+
+        /* Check for '-s' flag that instructs the program to send a SIGUSR1
+           signal to the parent process when initialization is finished */
 
         if (    strlen( argv[ cur_arg ] ) == 2
              && ! strcmp( argv[ cur_arg ], "-s" ) )
@@ -882,6 +900,11 @@ scan_args( int   * argc,
             continue;
         }
 
+        /* Check for '--delete' flag that tells us to remove the EDL script
+           file when done with it (typically used by scripts that generate
+           a temporary file and then start fsc2) */
+
+
         if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
         {
             flags |= DO_DELETE;
@@ -891,6 +914,9 @@ scan_args( int   * argc,
             continue;
         }
 
+        /* Check for '-noCrashMail' flag that tells us not to try to send
+           an email if fsc2 crashed */
+
         if ( ! strcmp( argv[ cur_arg ], "-noCrashMail" ) )
         {
             flags |= NO_MAIL;
@@ -899,6 +925,10 @@ scan_args( int   * argc,
             *argc -= 1;
             continue;
         }
+
+        /* Check for '--noBalloons' flag that tells us not to show help
+           messages ("ballons") when the mouse hovers over a button for some
+           time */
 
         if ( ! strcmp( argv[ cur_arg ], "-noBalloons" ) )
         {
@@ -917,6 +947,10 @@ scan_args( int   * argc,
             *argc -= 1;
             continue;
         }
+
+        /* Check for '-S' flag that tells us the user wants the EDL script
+           (which name has to be the next argument) to be tested and run
+           immediately without any further interaction */
 
         if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
         {
@@ -973,6 +1007,10 @@ scan_args( int   * argc,
             break;
         }
 
+        /* Check for '-T' flag that tells us the user wants the EDL script
+           (which name has to be the next argument) to be tested immediately
+           without any further interaction */
+
         if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
         {
             if ( flags & DO_CHECK )
@@ -1020,6 +1058,11 @@ scan_args( int   * argc,
             flags |= DO_LOAD | DO_TEST;
             break;
         }
+
+        /* Test for the '-B' flag that tells us to run in batch mode (i.e
+           all following arguments are taken to be EDL script file names
+           that are tested and run, one after another, without any user
+           interaction */
 
         if (    strlen( argv[ cur_arg ] ) == 2
              && ! strcmp( argv[ cur_arg ], "-B" ) )
@@ -1070,6 +1113,10 @@ scan_args( int   * argc,
 
             break;
         }
+
+        /* Check for the '-I' option that requests the EDL script (which name
+           nust be the next argument to be tested and run immediately with
+           the main window being iconified */
 
         if (    strlen( argv[ cur_arg ] ) == 2
              && ! strcmp( argv[ cur_arg ], "-I" ) )
@@ -1127,6 +1174,10 @@ scan_args( int   * argc,
 
             break;
         }
+
+        /* Check for the '-X' option. This is for test purposes only and
+           tells how many times a script (which must be the next argument)
+           is to be run */
 
         if ( ! strncmp( argv[ cur_arg ], "-X", 2 ) )
         {
@@ -1242,7 +1293,7 @@ final_exit_handler( void )
 
     fsc2_save_conf( );
 
-    /* Do everything necessary to end the program */
+    /* Do everything required to end the program */
 
     T_free( EDL.File_List );
 
@@ -1256,6 +1307,7 @@ final_exit_handler( void )
     {
         snprintf( sock_file, len, P_tmpdir "/fsc2_%lu.uds", ( long ) getpid );
         unlink( sock_file );
+        TRY_SUCCESS;
     }
     OTHERWISE
     {

@@ -723,6 +723,7 @@ sr510_init( const char * name )
     char buffer[ 20 ];
     long length = sizeof buffer;
     int i;
+    unsigned long stb = 0;
 
 
     if ( gpib_init_device( name, &sr510.device ) == FAILURE )
@@ -737,12 +738,30 @@ sr510_init( const char * name )
          || gpib_read( sr510.device, buffer, &length ) == FAILURE )
         return FAIL;
 
-    /* Check that there's reference input and the internal reference is
-       locked to it, if not print a warning */
+    /* Check that there's a reference input and the internal reference is
+       locked to it, if not print a warning (note: status byte gets returned
+       as a ASCII coded decimal and not a binary value as Ivo Alxneit pointed
+       out) */
 
-    if ( buffer[ 0 ] & 4 )
+    buffer[ length - 2 ] = '\0';
+    for ( i = 0; buffer[ i ] != '\0'; i++ )
+    {
+        if ( ! isdigit( ( unsigned char ) buffer[ i ] ) )
+        {
+            print( FATAL, "Device sent unexpected data for status byte.\n" );
+            return FAIL;
+        }
+        stb = 10 * stb + buffer[ i ] - '0';
+    }
+
+    if ( stb > 0xFF )
+    {
+        print( FATAL, "Device sent unexpected data for status byte.\n" );
+        return FAIL;
+    }
+    if ( stb & 4 )
         print( SEVERE, "No reference input detected.\n" );
-    if ( buffer[ 0 ] & 8 )
+    if ( stb & 8 )
         print( SEVERE, "Reference oszillator not locked to reference "
                "input.\n" );
 
