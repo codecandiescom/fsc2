@@ -60,6 +60,7 @@ Var_T * lockin_phase(         Var_T * v );
 Var_T * lockin_ref_freq(      Var_T * v );
 Var_T * lockin_dac_voltage(   Var_T * v );
 Var_T * lockin_lock_keyboard( Var_T * v );
+Var_T * lockin_is_overload(   Var_T * v );
 Var_T * lockin_command(       Var_T * v );
 
 
@@ -108,32 +109,20 @@ static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 /* Declaration of all functions used only in this file */
 
 static bool sr510_init( const char * name );
-
 static double sr510_get_data( void );
-
 static double sr510_get_adc_data( long channel );
-
 static double sr510_get_sens( void );
-
 static void sr510_set_sens( int sens_index );
-
 static double sr510_get_tc( void );
-
 static void sr510_set_tc( int tc_index );
-
 static double sr510_get_phase( void );
-
 static double sr510_set_phase( double phase );
-
 static double sr510_get_ref_freq( void );
-
 static double sr510_set_dac_voltage( long   channel,
                                      double voltage );
-
+static bool sr510_get_overload( void );
 static void sr510_lock_state( bool lock );
-
 static bool sr510_command( const char * cmd );
-
 static bool sr510_talk( const char * cmd,
                         char *       reply,
                         long *       length );
@@ -654,6 +643,19 @@ lockin_dac_voltage( Var_T * v )
  *---------------------------------------------------------------*/
 
 Var_T *
+lockin_is_overload( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, 0L );
+
+    return vars_push( INT_VAR, ( long ) sr510_get_overload( ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
 lockin_lock_keyboard( Var_T * v )
 {
     bool lock;
@@ -1042,6 +1044,21 @@ sr510_set_dac_voltage( long   channel,
         sr510_failure( );
 
     return voltage;
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+static bool
+sr510_get_overload( void )
+{
+    char buffer[ 20 ];
+    long length = sizeof buffer;
+
+
+    sr510_talk( "Y4\n", buffer, &length );
+    return buffer[ 0 ] == '1';
 }
 
 

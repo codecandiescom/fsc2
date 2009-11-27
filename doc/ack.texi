@@ -50,15 +50,16 @@ role has been Axel Weber in Frankfurt/Main, who already dealt with the
 bugs and shortcomings of the very first version (when the program was
 still named @code{fsc} and the @code{f} stood for Frankfurt). Later
 also Burkhard Endeward, now in Thomas Prisner's group in Frankfurt,
-had to deal with it. Then, in Berlin, Stefan Weber, Chris W.@: M.@:
-Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling, Michael Fuhs,
-Anton Savitsky, Alexander Schnegg, Radek Kowalczyk, Martin Fuchs,
-Celine Els@"asser, Marc Brecht, Hauke Studier, Jana Nieder, Irina
-Karyagina, Sergey Veber, Christian Teutloff, Ringo Wenzel and Rolf
-Simon Schoenfeld took over. Iwo Gatlik, Tomasz Motylewski, Daniela
-Hristova (Basel/Graz), Huib Block, Peter Gast and Silvia Sottini
-(Leiden) and Clinton McCrowey and Jussi Eloranta (Cal State
-Northridge) got their share of the fun. (There are some more people
+had to deal with it. Then, at the FU Berlin, Stefan Weber, Chris W.@:
+M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling, Michael
+Fuhs, Anton Savitsky, Alexander Schnegg, Radek Kowalczyk, Martin
+Fuchs, Celine Els@"asser, Marc Brecht, Hauke Studier, Jana Nieder,
+Irina Karyagina, Sergey Veber, Christian Teutloff, Ringo Wenzel and
+Rolf Simon Schoenfeld took over. Iwo Gatlik, Tomasz Motylewski,
+Daniela Hristova (Basel/TU Graz), Huib Block, Peter Gast and Silvia
+Sottini (Leiden, Netherlands), Clinton McCrowey and Jussi Eloranta
+(Cal State Northridge, USA) and Ivo Alxneit (Paul Scherrer Institut,
+Switzerland) got their share of the fun. (There are some more people
 that have used the program and that I may have forgotten - please
 complain to me if I did.) I would like to thank them not only for the
 constant stream of bug reports and proposals for improvements or new

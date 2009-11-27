@@ -1502,15 +1502,15 @@ an argument, i.e.@: as a query.
 @anchor{lockin_is_overload()}
 @findex lockin_is_overload()
 @item lockin_is_overload()
-This function exists for the @ref{er023m, Bruker ER023M} signal
-channel only and can only be used as a query, i.e.@: it does not
-allows arguments. It can be called before a new data value is fetched
-from the lock-in to find out if an overload has occurred while the
-data value was measured (where a return value of @code{1} indicates
-that an overload happened, otherwise @code{0} is returned). Calling
-this function (or fetching the data value) will reset the overload
-condition and calls of the function will return @code{0} as long as no
-further overloads occur.
+This can only be used as a query, i.e.@: it does not allows arguments.
+It can be called before a new data value is fetched from the lock-in
+to find out if an overload has occurred since the start of the
+experiment or since the function was called the last time. A return
+value of @code{1} indicates that an overload happened, otherwise
+@code{0} is returned. Calling this function (or in the case of the
+@ref{er023m, Bruker ER023M} fetching the data value) will reset the
+overload condition and calls of the function will return @code{0} as
+long as no further overloads occur.
 
 The function can only be used in the @code{EXPERIMENT} section.
 

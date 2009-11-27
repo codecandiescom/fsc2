@@ -104,6 +104,7 @@ Var_T * lockin_ref_level(        Var_T * v );
 Var_T * lockin_auto_setup(       Var_T * v );
 Var_T * lockin_get_sample_time(  Var_T * v );
 Var_T * lockin_auto_acquisition( Var_T * v );
+Var_T * lockin_is_overload(      Var_T * v );
 Var_T * lockin_lock_keyboard(    Var_T * v );
 Var_T * lockin_command(          Var_T * v );
 
@@ -206,72 +207,44 @@ static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
 /* Declaration of all functions used only within this file */
 
 static bool sr830_init( const char * name );
-
 static double sr830_get_data( void );
-
 static void sr830_get_xy_data( double * data,
                                long *   channels,
                                int      num_channels,
                                bool     using_dummy_data );
-
 static void sr830_get_xy_auto_data( double * data,
                                     long *   channels,
                                     int      num_channels );
-
 static double sr830_get_adc_data( long channel );
-
 static double sr830_set_dac_data( long   channel,
                                   double voltage );
-
 static double sr830_get_dac_data( long port );
-
 static double sr830_get_sens( void );
-
 static void sr830_set_sens( int sens_index );
-
 static double sr830_get_tc( void );
-
 static void sr830_set_tc( int tc_index );
-
 static double sr830_get_phase( void );
-
 static double sr830_set_phase( double phase );
-
 static double sr830_get_mod_freq( void );
-
 static double sr830_set_mod_freq( double freq );
-
 static long sr830_get_mod_mode( void );
-
 static long sr830_get_harmonic( void );
-
 static long sr830_set_harmonic( long harmonic );
-
 static double sr830_get_mod_level( void );
-
 static double sr830_set_mod_level( double level );
-
 static long sr830_set_sample_time( long st_index );
-
 static long sr830_get_sample_time( void );
-
 static void sr830_set_display_channel( int  channel,
                                        long type );
-
 static long sr830_get_display_channel( int channel );
-
 static void sr830_auto( int flag );
-
 static double sr830_get_auto_data( int type );
-
+static bool sr830_get_overload( void );
 static void sr830_lock_state( bool lock );
-
 static bool sr830_command( const char * cmd );
-
 static bool sr830_talk( const char * cmd,
                         char *       reply,
                         long *       length );
-
 static void sr830_failure( void );
 
 
@@ -1337,6 +1310,19 @@ lockin_auto_acquisition( Var_T * v )
  *---------------------------------------------------------------*/
 
 Var_T *
+lockin_is_overload( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, 0L );
+
+    return vars_push( INT_VAR, ( long ) sr830_get_overload( ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
 lockin_lock_keyboard( Var_T * v )
 {
     bool lock;
@@ -2279,6 +2265,21 @@ sr830_get_auto_data( int type )
     sr830_talk( cmd, buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+static bool
+sr830_get_overload( void )
+{
+    char buffer[ 20 ];
+    long length = sizeof buffer;
+
+
+    sr830_talk( "LIAS?1\n", buffer, &length );
+    return buffer[ 0 ] == '1';
 }
 
 

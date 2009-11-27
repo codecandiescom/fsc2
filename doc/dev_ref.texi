@@ -3800,6 +3800,7 @@ In the GPIB configuration file use @code{"SR510"} as the device name,
 @item @ref{lockin_phase()}
 @item @ref{lockin_ref_freq()}
 @item @ref{lockin_dac_voltage()}
+@item @ref{lockin_is_overload()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 
@@ -3842,6 +3843,7 @@ In the GPIB configuration file use @code{"SR530"} as the device name,
 @item @ref{lockin_phase()}
 @item @ref{lockin_ref_freq()}
 @item @ref{lockin_dac_voltage()}
+@item @ref{lockin_is_overload()}
 @item @ref{lockin_lock_keyboard()}
 @end table
 
