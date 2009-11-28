@@ -186,7 +186,7 @@ lockin_offset, -1, ALL;            // Check for overload
 lockin_lock_keyboard, -1, EXP;     // Lock or unlock the keyboard (SRxy0)
 lockin_command, 1, EXP;
 
-lockin_is_locked, 0. EXP;          // SR510, SR530, SR810, SR830
+lockin_is_locked, 0, EXP;          // SR510, SR530, SR810, SR830
 lockin_has_reference, 0, EXP;      // SR510, SR530
 
 lockin_auto_setup, -1, ALL;        // (SR830)
