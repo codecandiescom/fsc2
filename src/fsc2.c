@@ -467,6 +467,9 @@ fsc2_save_conf( void )
     FILE *fp;
 
 
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        return;
+
     if (    ! ( ue = getpwuid( getuid( ) ) )
          || ! ue->pw_dir
          || ! *ue->pw_dir )
