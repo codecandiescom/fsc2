@@ -1,0 +1,12 @@
+DEVICES:
+
+ffc;
+
+EXPERIMENT:
+
+FOREVER {
+    freq_contr_change_freq( "UP" );
+    wait( 0.5 s );
+    freq_contr_change_freq( "DOWN" );
+    wait( 0.5 s );
+}

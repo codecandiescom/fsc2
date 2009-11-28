@@ -1160,7 +1160,7 @@ open_serial_log( int sn )
                                     slash( SERIAL_LOG_DIR ),
                                     Serial_Ports[ sn ].dev_name );
 #else
-        log_file_name = get_string( P_tmpdir "/%sfsc2_%s.log",
+        log_file_name = get_string( P_tmpdir "/fsc2_%s.log",
                                     Serial_Ports[ sn ].dev_name );
 #endif
         TRY_SUCCESS;
