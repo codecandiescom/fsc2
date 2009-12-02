@@ -42,6 +42,8 @@
  *                                scopes and LECROY_WR_CH4 for 4-channel scopes
  * LECROY_WR_MAX_BW_IS_200MHz     define this only if the device has a
  *                                bandwidth of only 200 MHz
+ * LECROY_WR_HAS_GLOBAL_BW        define this only if the device has global
+ *                                bandwidth limiting capability
  * LECROY_WR_NUM_TBAS             total number of existing timebases
  * LECROY_WR_NUM_SS_TBAS          number of timebases in SINGLE SHOT mode
  * LECROY_WR_NUM_RIS_TBAS         number of timebases in RIS mode
@@ -67,6 +69,7 @@
 #if defined LT224
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
 #define LECROY_WR_MAX_BW_IS_200MHz                   /* restricted BW */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     35    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  33    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10    /* # of RIS timebases */
@@ -85,6 +88,7 @@
 
 #elif defined LT322
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     35    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  33    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10    /* # of RIS timebases */
@@ -103,6 +107,7 @@
 
 #elif defined LT342
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -121,6 +126,7 @@
 
 #elif defined LT342L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -139,6 +145,7 @@
 
 #elif defined LT344
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -157,6 +164,7 @@
 
 #elif defined LT344L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -175,6 +183,7 @@
 
 #elif defined LT364
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  35    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -193,6 +202,7 @@
 
 #elif defined LT364L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  35    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 12    /* # of RIS timebases */
@@ -213,6 +223,7 @@
 
 #elif defined LT262
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10    /* # of RIS timebases */
@@ -231,6 +242,7 @@
 
 #elif defined LT264
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10    /* # of RIS timebases */
@@ -249,6 +261,7 @@
 
 #elif defined LT264M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10    /* # of RIS timebases */
@@ -267,6 +280,7 @@
 
 #elif defined LT354
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -285,6 +299,7 @@
 
 #elif defined LT354M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -303,6 +318,7 @@
 
 #elif defined LT354ML
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -321,6 +337,7 @@
 
 #elif defined LT372
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -339,6 +356,7 @@
 
 #elif defined LT372M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -357,6 +375,7 @@
 
 #elif defined LT374
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -375,6 +394,7 @@
 
 #elif defined LT374M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -393,6 +413,7 @@
 
 #elif defined LT374L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -411,6 +432,7 @@
 
 #elif defined LT584
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -429,6 +451,7 @@
 
 #elif defined LT584M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */
@@ -447,6 +470,7 @@
 
 #elif defined LT584L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
+#define LECROY_WR_HAS_GLOBAL_BW
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 11    /* # of RIS timebases */

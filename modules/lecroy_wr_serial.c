@@ -622,9 +622,9 @@ lecroy_wr_get_bandwidth_limiter( int channel )
     char buf[ 30 ] = "BWL?";
     long length = sizeof buf;
     int mode = -1;
-    char *ptr;
-    const char *delim = " ";
+    char *ptr = buf;
     int ch;
+    size_t i;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -638,9 +638,6 @@ lecroy_wr_get_bandwidth_limiter( int channel )
 
     if ( ! strchr( buf, ',' ) )
     {
-        size_t i;
-
-
         if ( buf[ 1 ] == 'F' )           /* OFF */
             mode = LECROY_WR_BWL_OFF;
         else if ( buf[ 1 ] == 'N' )      /* ON */
@@ -656,36 +653,37 @@ lecroy_wr_get_bandwidth_limiter( int channel )
         return mode;
     }
 
-    if ( ( ptr = strtok( buf, delim ) ) == NULL )
-    {
-        print( FATAL, "Can't determine bandwidth limiter settings.\n" );
-        THROW( EXCEPTION );
-    }
-
-    delim = ",";
-
-    do
+    for ( i = 0; i <= LECROY_WR_CH_MAX; i++ )
     {
         if (    sscanf( ptr + 1, "%d", &ch ) != 1
-             || ( ptr = strtok( NULL, delim ) ) == NULL )
+             || ( --ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) )
         {
             print( FATAL, "Can't determine bandwidth limiter settings.\n" );
             THROW( EXCEPTION );
         }
 
-        fsc2_assert( --ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX );
+        ptr += 3;
 
         if ( ptr[ 1 ] == 'F' )           /* OFF */
+        {
             mode = LECROY_WR_BWL_OFF;
+            ptr += 4;
+        }
         else if ( ptr[ 1 ] == 'N' )      /* ON */
+        {
             mode = LECROY_WR_BWL_ON;
+            ptr += 3;
+        }
         else if ( ptr[ 0 ] == '2' )      /* 200MHZ */
+        {
             mode = LECROY_WR_BWL_200MHZ;
+            ptr += 7;
+        }
         else
             fsc2_impossible( );
 
         lecroy_wr.bandwidth_limiter[ ch ] = mode;
-    } while ( ( ptr = strtok( NULL, delim ) ) != NULL );
+    }
 
     return lecroy_wr.bandwidth_limiter[ channel ];
 }
@@ -701,14 +699,19 @@ lecroy_wr_set_bandwidth_limiter( int channel,
 {
     char buf[ 50 ] = "GBWL?";
     long length = sizeof buf;
-    int i;
     ssize_t to_send;
+#if defined LECROY_WR_HAS_GLOBAL_BW
+    int i;
+#endif
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
     fsc2_assert( bwl >= LECROY_WR_BWL_OFF && bwl <= LECROY_WR_BWL_200MHZ );
 
-    /* We first need to check if the global bandwidth limiter is on or off. */
+#if defined LECROY_WR_HAS_GLOBAL_BW
+
+    /* We first need to check if the global bandwidth limiter is on or off
+       (if the device is able to set a global bandwidth). */
 
     lecroy_wr_talk( buf, buf, &length );
 
@@ -729,7 +732,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
 
     if ( buf[ 1 ] == 'F' )
     {
-        sprintf( buf, "BWL C%d,", channel + 1 );
+        sprintf( buf, "BWL C%1d,", channel + 1 );
         if ( bwl == LECROY_WR_BWL_OFF )
             strcat( buf, "OFF\r" );
         else if ( bwl == LECROY_WR_BWL_ON )
@@ -761,7 +764,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
 
     for ( i = 0; i <= LECROY_WR_CH_MAX; i++ )
     {
-        sprintf( buf + strlen( buf ), "C%d,", i );
+        sprintf( buf + strlen( buf ), "C%1d,", i + 1 );
         if ( i != channel || bwl == LECROY_WR_BWL_ON )
             strcat( buf, "ON," );
         else if ( bwl == LECROY_WR_BWL_ON )
@@ -770,8 +773,16 @@ lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "200MHZ," );
     }
 
-    buf[ strlen( buf ) - 2 ] = '\r';
-    buf[ strlen( buf ) - 1 ] = '\0';
+    buf[ strlen( buf ) - 1 ] = '\r';
+#else
+    sprintf( buf, "BWL C%1d,", channel + 1 );
+    if ( bwl == LECROY_WR_BWL_ON )
+        strcat( buf, "ON\r" );
+    else if ( bwl == LECROY_WR_BWL_ON )
+        strcat( buf, "OFF\r" );
+    else
+        strcat( buf, "200MHZ\r" );
+#endif
 
     to_send = strlen( buf );
     if ( fsc2_serial_write( lecroy_wr.sn, buf, to_send,
@@ -1323,7 +1334,7 @@ lecroy_wr_start_acquisition( void )
 
         do_averaging = SET;
 
-        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\r",
+        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%1ld)',MAXPTS,%ld,SWEEPS,%ld\r",
                   'A' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
@@ -1713,7 +1724,7 @@ lecroy_wr_copy_curve( long src,
 
 
     if ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
-        sprintf( cmd + strlen( cmd ), "C%ld,", src - LECROY_WR_CH1 + 1 );
+        sprintf( cmd + strlen( cmd ), "C%1ld,", src - LECROY_WR_CH1 + 1 );
     else
         sprintf( cmd + strlen( cmd ), "T%c,",
                  ( char ) ( src - LECROY_WR_TA + 'A' ) );
@@ -1791,7 +1802,7 @@ lecroy_wr_get_int_value( int          ch,
     CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%1d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
@@ -1840,7 +1851,7 @@ lecroy_wr_get_float_value( int          ch,
     CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%1d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )

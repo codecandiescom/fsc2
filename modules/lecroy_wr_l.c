@@ -169,7 +169,7 @@ lecroy_wr_l_exp_hook( void )
 
     if ( ! lecroy_wr_init( DEVICE_NAME ) )
     {
-        print( FATAL, "Initialization of device failed.n" );
+        print( FATAL, "Initialization of device failed\n" );
         THROW( EXCEPTION );
     }
 
