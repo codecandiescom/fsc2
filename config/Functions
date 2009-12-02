@@ -228,6 +228,7 @@ digitizer_trigger_position, -1, ALL;    // set or get trigger position (deprec)
 digitizer_trigger_delay, -1, ALL;       // set pre/post trigger position
 digitizer_start_acquisition, 0, EXP;
 digitizer_offset, -1, EXP;
+digitizer_bandwidth_limiter, -1, EXP;
 digitizer_get_area, -1, EXP;
 digitizer_get_area_fast, -1, EXP;
 digitizer_get_curve, -1, EXP;
