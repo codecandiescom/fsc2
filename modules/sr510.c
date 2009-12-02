@@ -783,6 +783,7 @@ sr510_init( const char * name )
             print( FATAL, "Device sent unexpected data for status byte.\n" );
             return FAIL;
         }
+
         stb = 10 * stb + buffer[ i ] - '0';
     }
 
