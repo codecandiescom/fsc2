@@ -60,6 +60,7 @@ void func_listset_in( FILE * );
 void func_listset_out( FILE * );
 int func_listget_debug( void );
 void func_listset_debug( int );
+int func_listlex_destroy( void );
 #endif
 
 

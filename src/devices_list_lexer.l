@@ -46,6 +46,7 @@ void devices_listset_in( FILE * );
 void devices_listset_out( FILE * );
 int devices_listget_debug( void );
 void devices_listset_debug( int );
+int devices_listlex_destroy( void );
 #endif
 
 

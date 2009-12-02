@@ -62,6 +62,7 @@ void splitset_in( FILE * );
 void splitset_out( FILE * );
 int splitget_debug( void );
 void splitset_debug( int );
+int splitlex_destroy( void );
 #endif
 
 

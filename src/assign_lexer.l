@@ -72,6 +72,7 @@ void assignset_in( FILE * );
 void assignset_out( FILE * );
 int assignget_debug( void );
 void assignset_debug( int );
+int assignlex_destroy(void );
 #endif
 
 

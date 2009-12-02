@@ -52,6 +52,7 @@ void epr_mod_set_in( FILE * );
 void epr_mod_set_out( FILE * );
 int epr_mod_get_debug( void );
 void epr_mod_set_debug( int );
+int epr_mod_lex_destroy( void );
 #endif
 
 

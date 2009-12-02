@@ -69,6 +69,7 @@ void expset_in( FILE * );
 void expset_out( FILE * );
 int expget_debug( void );
 void expset_debug( int );
+int explex_destroy( void );
 #endif
 
 

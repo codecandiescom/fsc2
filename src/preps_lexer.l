@@ -71,6 +71,7 @@ void prepsset_in( FILE * );
 void prepsset_out( FILE * );
 int prepsget_debug( void );
 void prepsset_debug( int );
+int prepslex_destroy( void );
 #endif
 
 

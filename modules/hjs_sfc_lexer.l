@@ -49,6 +49,7 @@ void hjs_sfc_set_in( FILE * );
 void hjs_sfc_set_out( FILE * );
 int hjs_sfc_get_debug( void );
 void hjs_sfc_set_debug( int );
+int hjs_sfc_lex_destroy( void );
 #endif
 
 %}

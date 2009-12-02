@@ -72,6 +72,7 @@ void varsset_in( FILE * );
 void varsset_out( FILE * );
 int varsget_debug( void );
 void varsset_debug( int );
+int varslex_destroy( void );
 #endif
 
 

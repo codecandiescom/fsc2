@@ -69,6 +69,7 @@ void phasesset_in( FILE * );
 void phasesset_out( FILE * );
 int phasesget_debug( void );
 void phasesset_debug( int );
+int phaseslex_destroy( void );
 #endif
 
 
