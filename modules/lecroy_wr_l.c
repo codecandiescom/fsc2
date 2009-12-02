@@ -32,6 +32,8 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 LECROY_WR_T lecroy_wr;
+static LECROY_WR_T lecroy_wr_stored;
+
 
 const char *LECROY_WR_Channel_Names[ 15 ] = { "CH1",     "CH2",
                                               "CH3",     "CH4",
@@ -50,7 +52,6 @@ double fixed_sens[ ] = { 1.0e-1, 1.0, 10.0 };
 
 double max_offsets[ ] = { 1.0, 10.0, 100.0 };
 
-static LECROY_WR_T lecroy_wr_stored;
 
 
 

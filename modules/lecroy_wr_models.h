@@ -81,10 +81,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT322
+#elif defined LT322
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
 #define LECROY_WR_NUM_TBAS                     35    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  33    /* # of SS timebases */
@@ -100,10 +99,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT342
+#elif defined LT342
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
@@ -119,10 +117,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT342L
+#elif defined LT342L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
@@ -138,10 +135,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT344
+#elif defined LT344
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
@@ -157,10 +153,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT344L
+#elif defined LT344L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  34    /* # of SS timebases */
@@ -176,10 +171,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT364
+#elif defined LT364
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  35    /* # of SS timebases */
@@ -195,10 +189,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT364L
+#elif defined LT364L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channnels */
 #define LECROY_WR_NUM_TBAS                     37    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  35    /* # of SS timebases */
@@ -214,12 +207,11 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
 /* Waverunner-2 models */
 
-#if defined LT262
+#elif defined LT262
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
@@ -235,10 +227,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT264
+#elif defined LT264
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
@@ -254,10 +245,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT264M
+#elif defined LT264M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  37    /* # of SS timebases */
@@ -273,10 +263,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT354
+#elif defined LT354
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -292,10 +281,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT354M
+#elif defined LT354M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -311,10 +299,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT354ML
+#elif defined LT354ML
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -330,10 +317,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT372
+#elif defined LT372
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -349,10 +335,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT372M
+#elif defined LT372M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -368,10 +353,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT374
+#elif defined LT374
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -387,10 +371,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT374M
+#elif defined LT374M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -406,10 +389,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT374L
+#elif defined LT374L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -425,10 +407,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT584
+#elif defined LT584
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -444,10 +425,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT584M
+#elif defined LT584M
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -463,10 +443,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined LT584L
+#elif defined LT584L
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     38    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  38    /* # of SS timebases */
@@ -482,10 +461,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        5.0    /* 5 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.5    /* 500 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         5.0    /* 5 V */
-#endif
 
 
-#if defined _44Xi
+#elif defined _44Xi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -501,10 +479,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _62Xi
+#elif defined _62Xi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH2    /* 2 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -520,10 +497,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _64Xi
+#elif defined _64Xi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -539,10 +515,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _104Xi
+#elif defined _104Xi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -558,10 +533,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _204Xi
+#elif defined _204Xi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -577,10 +551,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _44MXi
+#elif defined _44MXi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -596,10 +569,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _64MXi
+#elif defined _64MXi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -615,10 +587,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _104MXi
+#elif defined _104MXi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -634,10 +605,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
-#endif
 
 
-#if defined _204MXi
+#elif defined _204MXi
 #define LECROY_WR_CH_MAX            LECROY_WR_CH4    /* 4 channels */
 #define LECROY_WR_NUM_TBAS                     31    /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  31    /* # of SS timebases */
@@ -653,6 +623,9 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+
+#else
+#error "Unknown model of LeCroy WaveRunner"
 #endif
 
 
