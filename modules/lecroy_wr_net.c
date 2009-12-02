@@ -615,8 +615,6 @@ lecroy_wr_get_bandwidth_limiter( int channel )
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
 
-    fprintf( stderr, "BWL = %s\n", buf );
-
     /* We have to distinguish two cases: if the global bandwidth limiter is
        on or if all channels have the same limiter setting only a single
        value gets returned, otherwise the setting for each channel will be
@@ -642,7 +640,8 @@ lecroy_wr_get_bandwidth_limiter( int channel )
     for ( i = 0; i <= LECROY_WR_CH_MAX; i++ )
     {
         if (    sscanf( ptr + 1, "%d", &ch ) != 1
-             || ( --ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) )
+             || --ch < LECROY_WR_CH1
+             || ch > LECROY_WR_CH_MAX )
         {
             print( FATAL, "Can't determine bandwidth limiter settings.\n" );
             THROW( EXCEPTION );
