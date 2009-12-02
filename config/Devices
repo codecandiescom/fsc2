@@ -56,13 +56,14 @@ lecroy9424    // LeCroy 9424
 lecroy9424e   // LeCroy 9424e
 lecroy9450    // LeCroy 9450
 lecroy_wr     // LeCroy Waverunner and Waverunner 2 (GPIB)
+lecroy_wr_l   // LeCroy Waverunner and Waverunner 2 (LAN)
 lecroy_wr_s   // LeCroy Waverunner and Waverunner 2 (serial)
 lecroy_ws     // LeCroy WaveSurfer (LAN)
 ag54830b      // Agilent 54830B oscilloscope controlled via GPIB
 ag54830b_l    // Agilent 54830B oscilloscope controlled via LAN
 
 
-// Lock-In amplifiers
+// Lock-in amplifiers
 
 sr510         // Stanford Research 510
 sr530         // Stanford Research 530
