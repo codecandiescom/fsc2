@@ -1665,10 +1665,11 @@ The digitizing oscilloscopes currently implemented are:
 9370, 9370C, 9370CM, 9370CL,
 9374, 9374C, 9374CM, 9374CL, 9374TM, 9374CTM,
 9384, 9384A, 9384AM, 9384AL, 9384C, 9384CM, 9384CL, 9384TM, 9384CTM
-@item Waverunner and Waverunner-2 series
+@item Waverunner, Waverunner-2 and X-Stream series
 LT224, LT322, LT342, LT342L, LT344, LT344L, LT364, LT364L,@*
 LT262, LT264, LT264M, LT354M, LT354ML, LT372, LT372M, LT374, LT374M,
-LT374L, LT584, LT584M and LT584L
+LT374L, LT584, LT584M and LT584L, 44Xi, 44MXi, 62Xi, 64Xi, 64MXi,
+104Xi, 104MXi, 204Xi, 204MXi
 @item WaveSurfer series
 422, 424, 432, 434, 452 and 454
 @end table
@@ -1694,9 +1695,9 @@ lecroy9424
 lecroy9424e
 lecroy9450
 lecroy93xx
-lecroy_wr   (GPIB)
-lecroy_wr_l (LAN)
-lecroy_wr_s (serial port)
+lecroy_wr   (Waveruner and X-Stream, GPIB)
+lecroy_wr_l (Waveruner and X-Stream, LAN)
+lecroy_wr_s (Waveruner and X-Stream, serial port)
 lecroy_ws   (LAN)
 lecroy_ws_g (GPIB)
 @end example
@@ -1705,7 +1706,9 @@ When specifying digitizer channels or trigger inputs you should use only
 the following symbolic names (internally these symbolic names get
 replaced by integer numbers, so the functions expecting channel numbers
 accept integers, but the relation between a channel specified by its
-symbolic name and the corresponding number isn't trivial).
+symbolic name and the corresponding number isn't trivial). Note that
+Lecroy X-Stream oscilloscopes aren't specially mentioned since the
+same module as for the Waverunner model is used.
 @table @samp
 @item CH1
 First digitizer channel (all models)

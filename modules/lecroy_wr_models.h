@@ -649,7 +649,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
 
 #else
-#error "Unknown model of LeCroy WaveRunner"
+#error "Unknown model of LeCroy WaveRunner/X-Stream"
 #endif
 
 

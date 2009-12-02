@@ -69,7 +69,7 @@
 * lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
 * lecroy9450::      LeCroy Digitizing Oscilloscope 9450
 * lecroy93xx::      LeCroy Digitizing Oscilloscope 93xx series
-* lecroy_wr::       LeCroy Digitizing Oscilloscope Waverunner and Waverunner-2
+* lecroy_wr::       LeCroy Digitizing Oscilloscope Waverunner, Waverunner-2 and X-Stream
 * lecroy_ws::       LeCroy Digitizing Oscilloscope WaveSurfer
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
@@ -2515,10 +2515,10 @@ have such a model and you experience problems.
 
 @node lecroy_wr, lecroy_ws, lecroy93xx, Device Reference
 @iftex
-@subheading LeCroy Digitizing Oscilloscope Waverunner and Waverunner-2
+@subheading LeCroy Digitizing Oscilloscope Waverunner, Waverunner-2 and X-Stream
 @end iftex
 @ifnottex
-@section LeCroy Digitizing Oscilloscope Waverunner and Waverunner-2
+@section LeCroy Digitizing Oscilloscope Waverunner, Waverunner-2 and X-Stream
 @end ifnottex
 
 @paragraphindent 0
@@ -2527,7 +2527,7 @@ have such a model and you experience problems.
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
-Oscilloscope Waverunner models
+Oscilloscope @strong{Waverunner} models
 @table @samp
 @item LT224
 4 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS) / 10 GS/s (RIS),
@@ -2554,7 +2554,7 @@ acquisition memory 500 kpts/channel
 4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
 acquisition memory 2 Mpts/channel
 @end table
-and Waverunner-2 models
+@strong{Waverunner-2} models
 @table @samp
 @item LT262
 2 channels, bandwidth 350 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
@@ -2598,6 +2598,9 @@ acquisition memory 1 Mpts/channel
 @item LT584L
 4 channels, bandwidth 1 GHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
 acquisition memory 4 Mpts/channel
+@end table
+and @strong{X-Stream} models
+@table @samp
 @item 44Xi
 @item 44MXi
 4 channels, bandwidth 400 MHz, sample rate 5 GS/s, 12.5 Mpts/channel
