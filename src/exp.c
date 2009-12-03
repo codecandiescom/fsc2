@@ -1330,7 +1330,16 @@ test_condition( Prg_Token_T * cur )
     conditionparser_init( );
     conditionparse( );                          /* get the value */
     fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
-    fsc2_assert( EDL.cur_prg_token->token == '{' );
+
+    /* Make sure there's a block after the condition */
+
+    if ( EDL.cur_prg_token->token != '{' )
+    {
+        eprint( FATAL, UNSET, "%s:%ld: Missing block (enclosed by '{' and "
+                "'}') after %s.\n",
+                cur->Fname, cur->Lc, get_construct_name( cur->token ) );
+        THROW( EXCEPTION );
+    }
 
     /* Make sure returned value is either integer or float */
 
