@@ -1659,12 +1659,16 @@ lecroy_wr_get_data( long * len )
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    length = 7;
+    length = 5;
+	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
+        lecroy_wr_lan_failure( );
+
+    length = 2;
 	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
         lecroy_wr_lan_failure( );
 
     len_str [ length ] = '\0';
-    length = T_atol( len_str + 6 );
+    length = T_atol( len_str + 1 );
 
     fsc2_assert( length > 0 );
 
