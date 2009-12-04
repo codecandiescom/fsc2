@@ -1771,9 +1771,7 @@ lecroy_wr_get_float_value( int          ch,
     else
         fsc2_impossible( );
 
-    lecroy_wr_talk( cmd, cmd, &length );
-
-    if ( length == 1 )
+    if ( lecroy_wr_talk( cmd, cmd, &length ) == SUCCESS_BUT_MORE )
     {
         bool with_eoi;
 
