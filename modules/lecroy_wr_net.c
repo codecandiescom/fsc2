@@ -1656,8 +1656,10 @@ lecroy_wr_get_data( long * len )
     ssize_t length;
 
 
-    /* First thing we read is something like "DAT1,#[0-9]" where the number
-       following the '#' is the number of bytes to be read next */
+    /* First thing we read is something like "DAT1,", then "#[0-9]" where
+       the number following the '#' is the number of bytes to be read next
+       (doing two reads instead of one seems to be necessaty for the X-Stream
+       oscilloscopes) */
 
     length = 5;
 	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
@@ -1752,9 +1754,10 @@ lecroy_wr_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    ssize_t length = sizeof cmd;
+    ssize_t length;
     char *ptr = cmd;
     double val = 0.0;
+    bool with_eoi = UNSET;
 
 
     CLOBBER_PROTECT( ptr );
@@ -1769,7 +1772,17 @@ lecroy_wr_get_float_value( int          ch,
     else
         fsc2_impossible( );
 
-    lecroy_wr_talk( cmd, cmd, &length );
+    length = strlen( cmd );
+    if ( vicp_write( cmd, &length, SET, UNSET ) != SUCCESS )
+        THROW( EXCEPTION );
+
+    while ( ! with_eoi )
+    {
+        length = sizeof cmd;
+        if ( vicp_read( cmd, &length, &with_eoi, UNSET ) != SUCCESS )
+            THROW( EXCEPTION );
+    }
+
     cmd[ length - 1 ] = '\0';
 
     while ( *ptr && *ptr++ != ':' )
