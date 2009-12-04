@@ -1754,10 +1754,9 @@ lecroy_wr_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    ssize_t length;
+    ssize_t length = sizeof cmd;
     char *ptr = cmd;
     double val = 0.0;
-    bool with_eoi = UNSET;
 
 
     CLOBBER_PROTECT( ptr );
@@ -1772,15 +1771,15 @@ lecroy_wr_get_float_value( int          ch,
     else
         fsc2_impossible( );
 
-    length = strlen( cmd );
-    if ( vicp_write( cmd, &length, SET, UNSET ) != SUCCESS )
-        THROW( EXCEPTION );
+    lecroy_wr_talk( cmd, cmd, &length );
 
-    while ( ! with_eoi )
+    if ( length == 1 )
     {
+        bool with_eoi;
+
         length = sizeof cmd;
         if ( vicp_read( cmd, &length, &with_eoi, UNSET ) != SUCCESS )
-            THROW( EXCEPTION );
+            lecroy_wr_lan_failure( );
     }
 
     cmd[ length - 1 ] = '\0';
