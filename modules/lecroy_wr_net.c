@@ -1686,11 +1686,15 @@ lecroy_wr_get_data( long   * len,
         lecroy_wr_lan_failure( );
     *len = length;
 
-    /* Finally read the trailing '\n' the device sends */
+    /* Finally read the trailing '\n' the device may send */
 
-    length = 1;
-	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS )
-        lecroy_wr_lan_failure( );
+    if ( ! with_eoi )
+    {
+        length = 1;
+        if (    vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS
+             || ! with_eoi )
+            lecroy_wr_lan_failure( );
+    }
 
     return data;
 }
