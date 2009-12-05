@@ -24,7 +24,9 @@
 #include "vicp.h"
 
 
-static unsigned char * lecroy_wr_get_data( long * len );
+static unsigned char * lecroy_wr_get_data( long   * len,
+                                           double * gain,
+                                           double * offset );
 
 static unsigned int lecroy_wr_get_inr( void );
 
@@ -1355,16 +1357,15 @@ lecroy_wr_start_acquisition( void )
        the user requested it, also AUTO, or, if there's no averaging setup,
        even SINGLE mode will do) */
 
-    strcpy( cmd, "TRMD NORM" );
+    strcpy( cmd, "TRMD NORM\n" );
     if (    ! do_averaging
          && lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_SINGLE )
-        strcpy( cmd + 5, "SINGLE" );
+        strcpy( cmd + 5, "SINGLE\n" );
     else if ( lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_AUTO )
-        strcpy( cmd + 5, "AUTO" );
+        strcpy( cmd + 5, "AUTO\n" );
     else
         lecroy_wr.trigger_mode = LECROY_WR_TRG_MODE_NORMAL;
 
-	strcat( cmd, "\n" );
 	len = strlen( cmd );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -1469,13 +1470,8 @@ lecroy_wr_get_prep( int              ch,
 
         /* ...and fetch 'em */
 
-        *data = lecroy_wr_get_data( length );
+        *data = lecroy_wr_get_data( length, gain, offset );
         *length /= 2;          /* we got word sized (16 bit) data, LSB first */
-
-        /* Get the gain factor and offset for the date we just fetched */
-
-        *gain = lecroy_wr_get_float_value( ch, "VERTICAL_GAIN" );
-        *offset = lecroy_wr_get_float_value( ch, "VERTICAL_OFFSET" );
 
         TRY_SUCCESS;
     }
@@ -1648,32 +1644,43 @@ lecroy_wr_copy_curve( long src,
  *---------------------------------------------------------------------*/
 
 static unsigned char *
-lecroy_wr_get_data( long * len )
+lecroy_wr_get_data( long   * len,
+                    double * gain,
+                    double * offset )
 {
     unsigned char *data;
     char len_str[ 10 ];
     bool with_eoi;
     ssize_t length;
+    ssize_t desc_len;
+    unsigned buf[ LECROY_WR_DESC_LENGTH ];
+    int i, j;
+    double e, f;
 
 
-    /* First thing we read is "DAT1,", followed by "#[0-9]", where the number
+    /* First thing we read is "ALL,", followed by "#[0-9]", where the number
        after the '#' is the number of bytes to be read next (doing two reads
        instead of one seems to be necessary for the X-Stream oscilloscopes) */
 
-    length = 5;
-	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
+    length = 4;
+	if (    vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE
+         || length != 4
+         || strncmp( len_str, "ALL,", 4 ) )
         lecroy_wr_lan_failure( );
 
     length = 2;
-	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
+	if (    vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE
+         || length != 2
+         || *len_str != '#'
+         || ! isdigit( ( unsigned char ) len_str[ 1 ] ) )
         lecroy_wr_lan_failure( );
 
-    len_str [ length ] = '\0';
-    length = T_atol( len_str + 1 );
+    length = len_str[ 1 ] - '0';;
 
     fsc2_assert( length > 0 );
 
-    /* Now get the number of bytes to read */
+    /* Now get the number of bytes to read - this includes the descriptor
+       for the curve which we read first */
 
 	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
         lecroy_wr_lan_failure( );
@@ -1681,7 +1688,43 @@ lecroy_wr_get_data( long * len )
     len_str[ length ] = '\0';
     length = T_atol( len_str );
 
-    fsc2_assert( length > 0 );
+    fsc2_assert( length - LECROY_WR_DESC_LENGTH > 0 );
+    length -= LECROY_WR_DESC_LENGTH;
+
+    desc_len = LECROY_WR_DESC_LENGTH;
+	if (    vicp_read( ( char * ) buf, &desc_len, &with_eoi, UNSET ) != SUCCESS
+         || desc_len != LECROY_WR_DESC_LENGTH )
+        lecroy_wr_lan_failure( );
+
+    e = buf[ LECROY_WR_VGAIN_INDEX ] & 0x80 ? -1.0 : 1.0;
+    e *= pow( 2.0, (   ( buf[ LECROY_WR_VGAIN_INDEX     ] << 1 )
+                     | ( buf[ LECROY_WR_VGAIN_INDEX + 1 ] >> 7 ) ) - 126.0 );
+
+    buf[ LECROY_WR_VGAIN_INDEX + 1 ] |= 0x80;
+    f = 0.0;
+    for ( i = 3; i > 0; i++ )
+    {
+        unsigned char x = buf[ LECROY_WR_VGAIN_INDEX + i ];
+        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
+            f += x & 1;
+    }
+
+    *gain = e * f;
+
+    e = buf[ LECROY_WR_VOFFSET_INDEX ] & 0x80 ? -1.0 : 1.0;
+    e *= pow( 2.0, (   ( buf[ LECROY_WR_VOFFSET_INDEX     ] << 1 )
+                     | ( buf[ LECROY_WR_VOFFSET_INDEX + 1 ] >> 7 ) ) - 126.0 );
+
+    buf[ LECROY_WR_VOFFSET_INDEX + 1 ] |= 0x80;
+    f = 0.0;
+    for ( i = 3; i > 0; i++ )
+    {
+        unsigned char x = buf[ LECROY_WR_VOFFSET_INDEX + i ];
+        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
+            f += x & 1;
+    }
+
+    *offset = e * f;
 
     /* Obtain enough memory and then read all the data */
 
@@ -1691,7 +1734,7 @@ lecroy_wr_get_data( long * len )
         lecroy_wr_lan_failure( );
     *len = length;
 
-    /* Now also read the trailing '\n' the device sends */
+    /* Finally read the trailing '\n' the device sends */
 
     length = 1;
 	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS )
@@ -1816,7 +1859,7 @@ lecroy_wr_command( const char * cmd )
  * Function fetches (thereby reseting!) the INR register from the device.
  * It sets all bits in the INR element of the structure for the device
  * where a bit in the INR is set. Functions making use of the fact that
- * a bit is set must reset it when the action they take invalidate the
+ * a bit is set must reset it when the action they take invalidates the
  * condition that led to the bit becoming set.
  *-----------------------------------------------------------------------*/
 

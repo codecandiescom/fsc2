@@ -137,6 +137,11 @@
 #define LECROY_WR_MIN_MEMORY_SIZE    500
 
 
+#define LECROY_WR_DESC_LENGTH        346
+#define LECROY_WR_VGAIN_INDEX        156
+#define LECROY_WR_VOFFSET_INDEX      160
+
+
 /* Include a file with model dependend settings (it needs to be included
  * here since it relies on some of the above definitions. This only is to
  * be included after the configuration file for the device! */
