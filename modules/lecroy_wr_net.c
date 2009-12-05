@@ -1463,7 +1463,7 @@ lecroy_wr_get_prep( int              ch,
         /* Ask the device for the data... */
 
         strcpy( cmd, ch_str );
-        strcat( cmd, ":WF? DAT1\n" );
+        strcat( cmd, ":WF?\n" );
 		len = strlen( cmd );
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_wr_lan_failure( );
@@ -1725,6 +1725,8 @@ lecroy_wr_get_data( long   * len,
     }
 
     *offset = e * f;
+
+    fprintf( stderr, "VG = %f, VO = %f\n", *gain, *offset );
 
     /* Obtain enough memory and then read all the data */
 
