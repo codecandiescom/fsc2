@@ -159,6 +159,7 @@ oriel_matrix
 // Monochromators
 
 spectrapro_300i     // Acton SpectaPro-300i
+spectrapro_275      // Acton SpectaPro-275
 spex_cd2a           // SPEX monocromator with CD2A interface
 spex232             // SPEX monocromator with SPEX232 interface
 

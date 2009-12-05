@@ -39,10 +39,12 @@ Special thanks go to Anton Savitsky (Freie Universit@"at Berlin) for
 writing the modules for the @w{Thurlby 330} and @w{F.u.E. Elektronik}
 @w{MCN 700-2000} power supplies, Sergey Veber (International
 Tomography Center, Novosibirsk), who wrote the the module for the
-@w{Schlumberger 7510} multimeter, and Clinton Jermaine McCrowey
+@w{Schlumberger 7510} multimeter, Clinton Jermaine McCrowey
 (California State University, Northridge) for contributing the module
-for the Newport Oriel Matrix Spectrometer. Christoph Oelm@"uller
-(Freie Universit@"at Berlin) wrote the @code{EDL} mode for @code{vim}.
+for the Newport Oriel Matrix Spectrometer, Ivo Alxneit (Paul Scherrer
+Institute, Villingen, Switzerland) for writing the module for the
+SpectraPro-275 monochromator and Christoph Oelm@"uller (Freie
+Universit@"at Berlin), who wrote the @code{EDL} mode for @code{vim}.
 
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant
@@ -58,13 +60,11 @@ Irina Karyagina, Sergey Veber, Christian Teutloff, Ringo Wenzel and
 Rolf Simon Schoenfeld took over. Iwo Gatlik, Tomasz Motylewski,
 Daniela Hristova (Basel/TU Graz), Huib Block, Peter Gast and Silvia
 Sottini (Leiden, Netherlands), Clinton McCrowey and Jussi Eloranta
-(Cal State Northridge, USA) and Ivo Alxneit (Paul Scherrer Institut,
-Switzerland) got their share of the fun. (There are some more people
-that have used the program and that I may have forgotten - please
-complain to me if I did.) I would like to thank them not only for the
-constant stream of bug reports and proposals for improvements or new
-features (and I sometimes needed quite a bit of convincing even though
-they where right) but especially for their enduring patience. Much too
-often, when they had to do an important experiment, things didn't work
-and they had to wait until I got it fixed. Lots of thanks to all of
-them!
+(Cal State Northridge, USA). (There are some more people that have
+used the program and that I may have forgotten - please complain to me
+if I did.) I would like to thank them not only for the constant stream
+of bug reports and proposals for improvements or new features (and I
+sometimes needed quite a bit of convincing even though they where
+right) but especially for their enduring patience. Much too often,
+when they had to do an important experiment, things didn't work and
+they had to wait until I got it fixed. Lots of thanks to all of them!

@@ -88,6 +88,7 @@
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
 * schlum7150::      Schlumberger Solartron 7150 Multimeter
+* spectrapro_275::  Acton Research SpectraPro-275 Monochromator
 * spectrapro_300i:: Acton Research SpectraPro-300i Monochromator
 * spex_cd2a::       SPEX Monochromators with CD2A Compudrive
 * spex232::         SPEX Monochromators with SPEX232 interface
@@ -3573,7 +3574,7 @@ to @w{1479.5 G} with a resolution of @w{0.1 G}.
 
 @c #############################################################
 
-@node schlum7150, spectrapro_300i, s_band_magnet_narrow, Device Reference
+@node schlum7150, spectrapro_275, s_band_magnet_narrow, Device Reference
 @iftex
 @subheading Schlumberger Solartron 7150 Multimeter
 @end iftex
@@ -3593,9 +3594,8 @@ voltage and current measurements
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{"SPECTRAPRO_300I"} as the device
-name, @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos}
-to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"SCHLUM7510"} as the device
+name.
 
 @paragraphindent 0
 @strong{Status}: Tested
@@ -3613,7 +3613,44 @@ to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @c #############################################################
 
-@node spectrapro_300i, spex_cd2a, schlum7150, Device Reference
+@node spectrapro_275, spectrapro_300i, schlum7150, Device Reference
+@iftex
+@subheading Acton Research SpectraPro-275 Monochromator
+@end iftex
+@ifnottex
+@section Acton Research SpectraPro-275 Monochromator
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{spectrapro_275}
+
+@paragraphindent 0
+@strong{Author}: Ivo Alxneit (Paul Scherrer Institute, Villingen,
+Switzerland)
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.acton-research.com/,Acton
+Research} SpectraPro-275 monochromator, up to 3 gratings, wavelength
+range @w{0 nm} to @w{10000 nm}.
+
+@paragraphindent 0
+@strong{Controlled via}:  Serial port
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{monochromator_name()}
+@item @ref{monochromator_grating()}
+@item @ref{monochromator_wavelength()}
+@end table
+
+
+@c #############################################################
+
+@node spectrapro_300i, spex_cd2a, spectrapro_275, Device Reference
 @iftex
 @subheading Acton Research SpectraPro-300i Monochromator
 @end iftex
