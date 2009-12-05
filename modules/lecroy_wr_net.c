@@ -38,6 +38,8 @@ static long lecroy_wr_get_int_value( int          ch,
 static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
 
+static double lecroy_wr_bin_2_float( unsigned char *buf );
+
 static void lecroy_wr_get_prep( int              ch,
                                 Window_T       * w,
                                 unsigned char ** data,
@@ -1653,9 +1655,7 @@ lecroy_wr_get_data( long   * len,
     bool with_eoi;
     ssize_t length;
     ssize_t desc_len;
-    unsigned buf[ LECROY_WR_DESC_LENGTH ];
-    int i, j;
-    double e, f;
+    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
 
 
     /* First thing we read is "ALL,", followed by "#[0-9]", where the number
@@ -1691,44 +1691,19 @@ lecroy_wr_get_data( long   * len,
     fsc2_assert( length - LECROY_WR_DESC_LENGTH > 0 );
     length -= LECROY_WR_DESC_LENGTH;
 
+    /* Read the waveform descriptor and determine the vertical gain and
+       offset setting (this much faster than using the "INSP?" command) */
+
     desc_len = LECROY_WR_DESC_LENGTH;
 	if (    vicp_read( ( char * ) buf, &desc_len, &with_eoi, UNSET ) != SUCCESS
          || desc_len != LECROY_WR_DESC_LENGTH )
         lecroy_wr_lan_failure( );
 
-    e = buf[ LECROY_WR_VGAIN_INDEX ] & 0x80 ? -1.0 : 1.0;
-    e *= pow( 2.0, (   ( buf[ LECROY_WR_VGAIN_INDEX     ] << 1 )
-                     | ( buf[ LECROY_WR_VGAIN_INDEX + 1 ] >> 7 ) ) - 126.0 );
-
-    buf[ LECROY_WR_VGAIN_INDEX + 1 ] |= 0x80;
-    f = 0.0;
-    for ( i = 3; i > 0; i-- )
-    {
-        unsigned char x = buf[ LECROY_WR_VGAIN_INDEX + i ];
-        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
-            f += x & 1;
-    }
-
-    *gain = e * f;
-
-    e = buf[ LECROY_WR_VOFFSET_INDEX ] & 0x80 ? -1.0 : 1.0;
-    e *= pow( 2.0, (   ( buf[ LECROY_WR_VOFFSET_INDEX     ] << 1 )
-                     | ( buf[ LECROY_WR_VOFFSET_INDEX + 1 ] >> 7 ) ) - 126.0 );
-
-    buf[ LECROY_WR_VOFFSET_INDEX + 1 ] |= 0x80;
-    f = 0.0;
-    for ( i = 3; i > 0; i-- )
-    {
-        unsigned char x = buf[ LECROY_WR_VOFFSET_INDEX + i ];
-        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
-            f += x & 1;
-    }
-
-    *offset = e * f;
-
+    *gain   = lecroy_wr_bin_2_float( buf + LECROY_WR_VGAIN_INDEX );
+    *offset = lecroy_wr_bin_2_float( buf + LECROY_WR_VOFFSET_INDEX );
     fprintf( stderr, "VG = %f, VO = %f\n", *gain, *offset );
 
-    /* Obtain enough memory and then read all the data */
+    /* Obtain enough memory and then read all data of the waveform */
 
     data = T_malloc( length );
 
@@ -1839,6 +1814,38 @@ lecroy_wr_get_float_value( int          ch,
         lecroy_wr_lan_failure( );
 
     return val;
+}
+
+
+/*----------------------------------------------------------------------*       
+ *---------------------------------------------------------------------*/
+
+static double
+lecroy_wr_bin_2_float( unsigned char *buf )
+{
+    int i, j;
+    double e, f;
+
+    fprintf( stderr, "%02x %02x %02x %02x\n",
+             buf[ 0 ], buf[ 1 ], buf[ 2 ], buf[ 3 ] );
+
+    e = buf[ 3 ] & 0x80 ? -1.0 : 1.0;
+    e *= pow( 2.0, (   ( ( buf[ 3 ] & 0x7F ) << 1 )
+                     | ( ( buf[ 2 ] & 0x80 ) >> 7 ) ) - 126.0 );
+
+    fprintf( stderr, "%d, e = %f\n",
+             ( ( buf[ 3 ] & 0x7F ) << 1 ) | ( ( buf[ 2 ] & 0x80 ) >> 7 ), e );
+
+    buf[ 2 ] |= 0x80;
+    f = 0.0;
+    for ( i = 0; i < 3; i++ )
+    {
+        unsigned char x = buf[ i ];
+        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
+            f += x & 1;
+    }
+
+    return e * f;
 }
 
 
