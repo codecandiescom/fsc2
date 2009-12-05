@@ -751,11 +751,8 @@ vicp_read( char *    buffer,
                 break;
         }
 
-        if ( *with_eoi || bytes_read == 0 )
-        {
-            *length = total_length;
+        if ( *with_eoi || total_length == *length || bytes_read == 0 )
             return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
-        }
     }
 
     /* Loop until either EOI is set or we got as many bytes as asked to read */
