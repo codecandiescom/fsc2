@@ -69,9 +69,9 @@ lecroy_wr_init( const char * name )
     if ( gpib_init_device( name, &lecroy_wr.device ) == FAILURE )
         return FAIL;
 
-    /* Disable the local button, set digitizer to short form of replies,
-       transmit data in one block in binary word (2 byte) format with LSB
-       first. Then ask for the status byte to make sure the device reacts. */
+    /* Set digitizer to short form of replies, transmit data in one block in
+       binary word (2 byte) format with LSB first. Then ask for the status
+       byte to make sure the device reacts. */
 
     if (    gpib_write( lecroy_wr.device,
                         "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )

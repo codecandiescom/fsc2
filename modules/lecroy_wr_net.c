@@ -1656,10 +1656,9 @@ lecroy_wr_get_data( long * len )
     ssize_t length;
 
 
-    /* First thing we read is something like "DAT1,", then "#[0-9]" where
-       the number following the '#' is the number of bytes to be read next
-       (doing two reads instead of one seems to be necessaty for the X-Stream
-       oscilloscopes) */
+    /* First thing we read is "DAT1,", followed by "#[0-9]", where the number
+       after the '#' is the number of bytes to be read next (doing two reads
+       instead of one seems to be necessary for the X-Stream oscilloscopes) */
 
     length = 5;
 	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
@@ -1690,8 +1689,14 @@ lecroy_wr_get_data( long * len )
 
 	if ( vicp_read( ( char * ) data, &length, &with_eoi, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
-
     *len = length;
+
+    /* Now also read the trailing '\n' the device sends */
+
+    length = 1;
+	if ( vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
+
     return data;
 }
 
@@ -1772,16 +1777,6 @@ lecroy_wr_get_float_value( int          ch,
         fsc2_impossible( );
 
     lecroy_wr_talk( cmd, cmd, &length );
-
-    if ( length == 1 && *cmd == '\n' )
-    {
-        bool with_eoi;
-
-        length = sizeof cmd;
-        if ( vicp_read( cmd, &length, &with_eoi, UNSET ) != SUCCESS )
-            lecroy_wr_lan_failure( );
-    }
-
     cmd[ length - 1 ] = '\0';
 
     while ( *ptr && *ptr++ != ':' )
