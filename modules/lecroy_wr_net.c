@@ -1433,7 +1433,7 @@ lecroy_wr_get_prep( int              ch,
         while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
         {
             stop_on_user_request( );
-            fsc2_usleep( 20000, UNSET );
+            fsc2_usleep( 1000, UNSET );
         }
 
     TRY
