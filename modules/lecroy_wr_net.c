@@ -1702,7 +1702,7 @@ lecroy_wr_get_data( long   * len,
 
     buf[ LECROY_WR_VGAIN_INDEX + 1 ] |= 0x80;
     f = 0.0;
-    for ( i = 3; i > 0; i++ )
+    for ( i = 3; i > 0; i-- )
     {
         unsigned char x = buf[ LECROY_WR_VGAIN_INDEX + i ];
         for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
