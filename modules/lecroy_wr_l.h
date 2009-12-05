@@ -137,6 +137,9 @@
 #define LECROY_WR_MIN_MEMORY_SIZE    500
 
 
+/* Define the length of the waveform descriptor and the positions of the
+   vertical gain and offset values within the descriptor */
+
 #define LECROY_WR_DESC_LENGTH        346
 #define LECROY_WR_VGAIN_INDEX        156
 #define LECROY_WR_VOFFSET_INDEX      160

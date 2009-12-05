@@ -1635,23 +1635,16 @@ lecroy_wr_get_data( long   * len,
 
 
     /* First thing we read is "ALL,", followed by "#[0-9]", where the number
-       after the '#' is the number of bytes to be read next (doing two reads
-       instead of one seems to be necessary for the X-Stream oscilloscopes) */
+       after the '#' is the number of bytes to be read next */
 
-    length = 4;
+    length = 6;
 	if (    vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE
-         || length != 4
-         || strncmp( len_str, "ALL,", 4 ) )
+         || length != 6
+         || strncmp( len_str, "ALL,#", 5 )
+         || ! isdigit( ( unsigned char ) len_str[ 5 ] ) )
         lecroy_wr_lan_failure( );
 
-    length = 2;
-	if (    vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE
-         || length != 2
-         || *len_str != '#'
-         || ! isdigit( ( unsigned char ) len_str[ 1 ] ) )
-        lecroy_wr_lan_failure( );
-
-    length = len_str[ 1 ] - '0';;
+    length = len_str[ 5 ] - '0';
 
     fsc2_assert( length > 0 );
 
@@ -1664,11 +1657,12 @@ lecroy_wr_get_data( long   * len,
     len_str[ length ] = '\0';
     length = T_atol( len_str );
 
-    fsc2_assert( length - LECROY_WR_DESC_LENGTH > 0 );
+    fsc2_assert( length > LECROY_WR_DESC_LENGTH );
     length -= LECROY_WR_DESC_LENGTH;
 
     /* Read the waveform descriptor and determine the vertical gain and
-       offset setting (this much faster than using the "INSP?" command) */
+       offset setting (this much faster than using the "INSP?" command,
+       which takes about 100 ms) */
 
     desc_len = LECROY_WR_DESC_LENGTH;
 	if (    vicp_read( ( char * ) buf, &desc_len, &with_eoi, UNSET ) != SUCCESS
@@ -1682,18 +1676,30 @@ lecroy_wr_get_data( long   * len,
 
     data = T_malloc( length );
 
-	if ( vicp_read( ( char * ) data, &length, &with_eoi, UNSET ) != SUCCESS )
-        lecroy_wr_lan_failure( );
-    *len = length;
-
-    /* Finally read the trailing '\n' the device may send */
-
-    if ( ! with_eoi )
+    TRY
     {
-        length = 1;
-        if (    vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS
-             || ! with_eoi )
+        if ( vicp_read( ( char * ) data, &length, &with_eoi, UNSET )
+                                                                  != SUCCESS )
             lecroy_wr_lan_failure( );
+
+        *len = length;
+
+        /* Finally read the trailing '\n' the device may send */
+
+        if ( ! with_eoi )
+        {
+            length = 1;
+            if (    vicp_read( len_str, &length, &with_eoi, UNSET ) != SUCCESS
+                    || ! with_eoi )
+                lecroy_wr_lan_failure( );
+        }
+
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( data );
+        RETHROW( );
     }
 
     return data;
@@ -1804,7 +1810,6 @@ lecroy_wr_talk( const char * cmd,
 static void
 lecroy_wr_lan_failure( void )
 {
-    vicp_close( );
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
 }

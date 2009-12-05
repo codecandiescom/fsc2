@@ -380,6 +380,7 @@ vicp_open( const char * dev_name,
     if ( bytes_written <= 0 )
     {
         vicp_close_without_header( );
+        print( FATAL, "Error in communication with LAN device.\n" );
         THROW( EXCEPTION );
     }
 
@@ -397,7 +398,8 @@ vicp_open( const char * dev_name,
 static void
 vicp_close_without_header( void )
 {
-    fsc2_lan_close( vicp.handle );
+    if ( vicp.handle >= 0 )
+        fsc2_lan_close( vicp.handle );
 
     vicp.handle = -1;
 
@@ -485,6 +487,7 @@ vicp_lock_out( bool lock_state )
     if ( bytes_written <= 0 )
     {
         vicp_close_without_header( );
+        print( FATAL, "Error in communication with LAN device.\n" );
         THROW( EXCEPTION );
     }
 
@@ -610,7 +613,10 @@ vicp_write( const char * buffer,
                                      us_timeout, quit_on_signal );
 
     if ( bytes_written < 0 )
+    {
+        print( FATAL, "Error in communication with LAN device.\n" );
         THROW( EXCEPTION );
+    }
 
     if ( bytes_written == 0 )
     {
@@ -629,7 +635,10 @@ vicp_write( const char * buffer,
                       - ( before.tv_sec * 1000000 + before.tv_usec );
 
         if ( us_timeout <= 0 )
+        {
+            print( FATAL, "Timeout while writing to LAN device.\n" );
             THROW( EXCEPTION );
+        }
 
         before = after;
 
@@ -640,7 +649,10 @@ vicp_write( const char * buffer,
                                         quit_on_signal );
 
         if ( bytes_written < 0 )
+        {
+            print( FATAL, "Error in communication with LAN device.\n" );
             THROW( EXCEPTION );
+        }
 
         total_length += bytes_written;
 
@@ -730,7 +742,11 @@ vicp_read( char *    buffer,
                           - ( before.tv_sec * 1000000 + before.tv_usec );
 
             if ( us_timeout <= 0 )
+            {
+                print( FATAL, "Timeout while reading from LAN device.\n" );
                 THROW( EXCEPTION );
+            }
+
             before = after;
 
             bytes_read = fsc2_lan_read( vicp.handle, buffer,
@@ -738,7 +754,10 @@ vicp_read( char *    buffer,
                                         us_timeout, quit_on_signal );
 
             if ( bytes_read < 0 )
+            {
+                print( FATAL, "Error in communication with LAN device.\n" );
                 THROW( EXCEPTION );
+            }
 
             if ( bytes_read > 0 )
             {
@@ -764,7 +783,10 @@ vicp_read( char *    buffer,
                                     quit_on_signal );
 
         if ( bytes_read < 0 )
+        {
+            print( FATAL, "Error in communication with LAN device.\n" );
             THROW( EXCEPTION );
+        }
 
         if ( bytes_read == 0 )
         {
@@ -778,13 +800,19 @@ vicp_read( char *    buffer,
            have gone seriously wrong */
 
         if ( vicp_get_version( header ) != VICP_HEADER_VERSION_VALUE )
+        {
+            print( FATAL, "LAN device sent unexpected data.\n" );
             THROW( EXCEPTION );
+        }
 
         /* The header tells us how many bytes we can expect - if there are
            none something must really be going wrong */
 
         if ( ( bytes_to_expect = vicp_get_length( header ) ) == 0 )
+        {
+            print( FATAL, "LAN device sent unexpected data.\n" );
             THROW( EXCEPTION );
+        }
 
         /* Examine and store the EOI bit */
 
@@ -807,7 +835,10 @@ vicp_read( char *    buffer,
                           - ( before.tv_sec * 1000000 + before.tv_usec );
 
             if ( us_timeout <= 0 )
+            {
+                print( FATAL, "Timeout while reading from LAN device.\n" );
                 THROW( EXCEPTION );
+            }
             before = after;
 
             bytes_read = fsc2_lan_read( vicp.handle, buffer, bytes_to_expect,
@@ -820,7 +851,10 @@ vicp_read( char *    buffer,
             }
 
             if ( bytes_read < 0 )
+            {
+                print( FATAL, "Error in communication with LAN device.\n" );
                 THROW( EXCEPTION );
+            }
 
             buffer += bytes_read;
             total_length += bytes_read;
@@ -876,7 +910,7 @@ vicp_device_clear( void )
 
     if ( bytes_written <= 0 )
     {
-        vicp_close( );
+        print( FATAL, "Error in communication with LAN device.\n" );
         THROW( EXCEPTION );
     }
 
@@ -893,14 +927,14 @@ vicp_device_clear( void )
     /* Next we seem to have to close the connection and reopen it again */
 
     fsc2_lan_close( vicp.handle );
+    vicp.handle = -1;
 
     if ( ( fd = fsc2_lan_open( vicp.name, vicp.address, VICP_PORT,
                                VICP_DEFAULT_CONNECT_TIMEOUT, UNSET ) ) == -1 )
     {
         print( FATAL, "Failed to clear device - can't reopen connection.\n" );
-        T_free( vicp.name );
-        T_free( vicp.address );
-        vicp.handle = -1;
+        vicp.name = T_free( vicp.name );
+        vicp.address = T_free( vicp.address );
         THROW( EXCEPTION );
     }
 
