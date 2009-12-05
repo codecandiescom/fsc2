@@ -737,6 +737,9 @@ vicp_read( char *    buffer,
                                         ss_min( vicp.remaining, *length ),
                                         us_timeout, quit_on_signal );
 
+            if ( bytes_read < 0 )
+                THROW( EXCEPTION );
+
             if ( bytes_read > 0 )
             {
                 vicp.remaining -= bytes_read;
@@ -744,83 +747,87 @@ vicp_read( char *    buffer,
                 buffer += bytes_read;
             }
 
-            if ( bytes_read < 0 )
-                THROW( EXCEPTION );
-
             if ( bytes_read == 0 )
                 break;
         }
 
-        return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
-    }
-
-    gettimeofday( &before, NULL );
-    bytes_read = fsc2_lan_read( vicp.handle, ( char * ) header,
-                                VICP_HEADER_SIZE, us_timeout, quit_on_signal );
-
-    if ( bytes_read < 0 )
-        THROW( EXCEPTION );
-
-    if ( bytes_read == 0 )
-    {
-        *length = 0;
-        return FAILURE;
-    }
-
-    fsc2_assert( bytes_read == VICP_HEADER_SIZE );
-
-    /* Check the version field - if this is not correct something must
-       have gone seriously wrong */
-
-    if ( vicp_get_version( header ) != VICP_HEADER_VERSION_VALUE )
-        THROW( EXCEPTION );
-
-    /* The header tells us how many bytes we can expect - if there are
-       none something must really be going wrong */
-
-    if ( ( bytes_to_expect = vicp_get_length( header ) ) == 0 )
-        THROW( EXCEPTION );
-
-    /* Examine and store the EOI bit */
-
-    *with_eoi = vicp.eoi_was_set = vicp_get_operation( header ) & VICP_EOI;
-
-    /* Otherwise we can now start to read the real data. Make sure we don't
-       try to read more than the user asked for. If we could read more we
-       store the number of bytes we couldn't fetch. */
-
-    if ( ( ssize_t ) bytes_to_expect - total_length > *length )
-    {
-        vicp.remaining = bytes_to_expect - *length + total_length;
-        bytes_to_expect = *length - total_length;
-    }
-
-    while ( bytes_to_expect > 0 )
-    {
-        gettimeofday( &after, NULL );
-        us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-                      - ( before.tv_sec * 1000000 + before.tv_usec );
-
-        if ( us_timeout <= 0 )
-            THROW( EXCEPTION );
-        before = after;
-
-        bytes_read = fsc2_lan_read( vicp.handle, buffer, bytes_to_expect,
-                                    us_timeout, quit_on_signal );
-
-        if ( bytes_read == 0 )
+        if ( *with_eoi )
         {
-            vicp.remaining += bytes_to_expect;
-            break;
+            *length = total_length;
+            return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
         }
+    }
+
+    do
+    {
+        bytes_read = fsc2_lan_read( vicp.handle, ( char * ) header,
+                                    VICP_HEADER_SIZE, us_timeout,
+                                    quit_on_signal );
 
         if ( bytes_read < 0 )
             THROW( EXCEPTION );
 
-        buffer += bytes_read;
-        total_length += bytes_read;
-        bytes_to_expect -= bytes_read;
-    }
+        if ( bytes_read == 0 )
+        {
+            *length = total_length;
+            return FAILURE;
+        }
+
+        fsc2_assert( bytes_read == VICP_HEADER_SIZE );
+
+        /* Check the version field - if this is not correct something must
+           have gone seriously wrong */
+
+        if ( vicp_get_version( header ) != VICP_HEADER_VERSION_VALUE )
+            THROW( EXCEPTION );
+
+        /* The header tells us how many bytes we can expect - if there are
+           none something must really be going wrong */
+
+        if ( ( bytes_to_expect = vicp_get_length( header ) ) == 0 )
+            THROW( EXCEPTION );
+
+        /* Examine and store the EOI bit */
+
+        *with_eoi = vicp.eoi_was_set = vicp_get_operation( header ) & VICP_EOI;
+
+        /* Otherwise we can now start to read the real data. Make sure we don't
+           try to read more than the user asked for. If we could read more we
+           store the number of bytes we couldn't fetch. */
+
+        if ( ( ssize_t ) bytes_to_expect - total_length > *length )
+        {
+            vicp.remaining = bytes_to_expect - *length + total_length;
+            bytes_to_expect = *length - total_length;
+        }
+
+        while ( bytes_to_expect > 0 )
+        {
+            gettimeofday( &after, NULL );
+            us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                          - ( before.tv_sec * 1000000 + before.tv_usec );
+
+            if ( us_timeout <= 0 )
+                THROW( EXCEPTION );
+            before = after;
+
+            bytes_read = fsc2_lan_read( vicp.handle, buffer, bytes_to_expect,
+                                        us_timeout, quit_on_signal );
+
+            if ( bytes_read == 0 )
+            {
+                vicp.remaining += bytes_to_expect;
+                break;
+            }
+
+            if ( bytes_read < 0 )
+                THROW( EXCEPTION );
+
+            buffer += bytes_read;
+            total_length += bytes_read;
+            bytes_to_expect -= bytes_read;
+        }
+    } while ( ! *with_eoi && total_length < *length );
 
     *length = total_length;
 

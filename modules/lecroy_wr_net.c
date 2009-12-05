@@ -1677,7 +1677,6 @@ lecroy_wr_get_data( long   * len,
 
     *gain   = lecroy_wr_bin_2_float( buf + LECROY_WR_VGAIN_INDEX );
     *offset = lecroy_wr_bin_2_float( buf + LECROY_WR_VOFFSET_INDEX );
-    fprintf( stderr, "VG = %f, VO = %f\n", *gain, *offset );
 
     /* Obtain enough memory and then read all data of the waveform */
 
@@ -1706,7 +1705,7 @@ static double
 lecroy_wr_bin_2_float( unsigned char * buf )
 {
     int i, j;
-    double e, f - 0.0;
+    double e, f = 0.0;
 
 
     /* The binary floating point valu is stored LSB first, MSB last, witt
