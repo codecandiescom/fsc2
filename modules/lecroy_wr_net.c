@@ -30,15 +30,7 @@ static unsigned char * lecroy_wr_get_data( long   * len,
 
 static unsigned int lecroy_wr_get_inr( void );
 
-#if 0
-static long lecroy_wr_get_int_value( int          ch,
-                                     const char * name );
-#endif
-
-static double lecroy_wr_get_float_value( int          ch,
-                                         const char * name );
-
-static double lecroy_wr_bin_2_float( unsigned char *buf );
+static double lecroy_wr_bin_2_float( unsigned char * buf );
 
 static void lecroy_wr_get_prep( int              ch,
                                 Window_T       * w,
@@ -102,30 +94,27 @@ lecroy_wr_init( const char * name )
         lecroy_wr.num_used_channels = 0;
 
         for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
-        {
-            lecroy_wr.is_displayed[ i ] = UNSET;
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
                 lecroy_wr.num_used_channels++;
             }
-        }
+            else
+                lecroy_wr.is_displayed[ i ] = UNSET;
 
         for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
             lecroy_wr.is_displayed[ i ] = UNSET;
 
         for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
-        {
-            lecroy_wr.is_displayed[ i ] = UNSET;
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
                 lecroy_wr.num_used_channels++;
             }
-        }
+            else
+                lecroy_wr.is_displayed[ i ] = UNSET;
 
         /* Make sure the internal timebase is used */
-
 
 		len = 9;
 		if ( vicp_write( "SCLK INT\n", &len, SET, UNSET ) != SUCCESS )
@@ -1420,19 +1409,6 @@ lecroy_wr_get_prep( int              ch,
     else
         fsc2_impossible( );
 
-#if 0
-    /* We probably have to check if two or mor channels are combined - I found
-       no way this can be checked via the program and we can only look for
-       the number of points and compare that with what we expect. To make
-       things a bit more interesting, the device always seems to send us 2 more
-       points than it should and I don't know if that become 4 when to curves
-       are combined ... */
-
-    /* Get the number of byztes of the curve */
-
-    len = lecroy_wr_get_int_value( ch, "WAVE_ARRAY_1" ) / 2;
-#endif
-
     /* Set up the number of points to be fetched - take care: the device
        always measures an extra point before and after the displayed region,
        thus we start with one point later than we could get from it.*/
@@ -1721,128 +1697,33 @@ lecroy_wr_get_data( long   * len,
 }
 
 
-/*----------------------------------------------------------------------*
- * Function for obtaining an integer value from the waveform descriptor
- *----------------------------------------------------------------------*/
-
-#if 0
-static long
-lecroy_wr_get_int_value( int          ch,
-                         const char * name )
-{
-    char cmd[ 100 ];
-    ssize_t length = sizeof cmd;
-    char *ptr = cmd;
-    long val = 0;
-
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
-
-    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%1d:INSP? '%s'\n", ch - LECROY_WR_CH1 + 1, name );
-    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WR_M1 + 1, name );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'\n", ch - LECROY_WR_TA + 'A', name );
-    else
-        fsc2_impossible( );
-
-    lecroy_wr_talk( cmd, cmd, &length );
-    cmd[ length - 1 ] = '\0';
-
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
-
-    if ( ! *ptr )
-        lecroy_wr_lan_failure( );
-
-    TRY
-    {
-        val = T_atol( ptr );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-        lecroy_wr_lan_failure( );
-
-    return val;
-}
-#endif
-
-
-/*-------------------------------------------------------------------*
- * Function for obtaining a float value from the waveform descriptor
- *-------------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Converts a binary floating point value from the wavedescriptor
+ * at the position passed to the function
+ *----------------------------------------------------------------*/
 
 static double
-lecroy_wr_get_float_value( int          ch,
-                           const char * name )
-{
-    char cmd[ 100 ];
-    ssize_t length = sizeof cmd;
-    char *ptr = cmd;
-    double val = 0.0;
-
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
-
-    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%1d:INSP? '%s'\n", ch - LECROY_WR_CH1 + 1, name );
-    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WR_M1 + 1, name );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'\n", ch - LECROY_WR_TA + 'A', name );
-    else
-        fsc2_impossible( );
-
-    lecroy_wr_talk( cmd, cmd, &length );
-    cmd[ length - 1 ] = '\0';
-
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
-
-    if ( ! *ptr )
-        lecroy_wr_lan_failure( );
-
-    TRY
-    {
-        val = T_atod( ptr );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-        lecroy_wr_lan_failure( );
-
-    return val;
-}
-
-
-/*----------------------------------------------------------------------*       
- *---------------------------------------------------------------------*/
-
-static double
-lecroy_wr_bin_2_float( unsigned char *buf )
+lecroy_wr_bin_2_float( unsigned char * buf )
 {
     int i, j;
-    double e, f;
+    double e, f - 0.0;
 
-    fprintf( stderr, "%02x %02x %02x %02x\n",
-             buf[ 0 ], buf[ 1 ], buf[ 2 ], buf[ 3 ] );
+
+    /* The binary floating point valu is stored LSB first, MSB last, witt
+       the topmost bit being the sign, the following 8 bits the power of
+       2 (shifted by 127) and the remaining bits the fractional value
+       (with the topmost bit, which is always set, left out) */
 
     e = buf[ 3 ] & 0x80 ? -1.0 : 1.0;
     e *= pow( 2.0, (   ( ( buf[ 3 ] & 0x7F ) << 1 )
-                     | ( ( buf[ 2 ] & 0x80 ) >> 7 ) ) - 126.0 );
-
-    fprintf( stderr, "%d, e = %f\n",
-             ( ( buf[ 3 ] & 0x7F ) << 1 ) | ( ( buf[ 2 ] & 0x80 ) >> 7 ), e );
+                     | ( ( buf[ 2 ] & 0x80 ) >> 7 ) ) - 127.0 );
 
     buf[ 2 ] |= 0x80;
-    f = 0.0;
     for ( i = 0; i < 3; i++ )
     {
         unsigned char x = buf[ i ];
-        for ( j = 0; j < 8; x>>= 1, f *= 0.5, j++ )
-            f += x & 1;
+        for ( j = 0; j < 8; x>>= 1, j++ )
+            f = 0.5 * f + ( x & 1 );
     }
 
     return e * f;
