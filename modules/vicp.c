@@ -687,7 +687,7 @@ vicp_read( char *    buffer,
 {
     unsigned char   header[ VICP_HEADER_SIZE ];
     ssize_t         total_length = 0;
-    ssize_t         bytes_read;
+    ssize_t         bytes_read = 0;
     unsigned long   bytes_to_expect;
     struct timeval  before,
                     after;
@@ -714,8 +714,8 @@ vicp_read( char *    buffer,
     }
 
     /* Check if there are still outstanding bytes, i.e. bytes of wich we know
-       from reading the last received header that they are in the process of
-       being sent by the device. Get them first. */
+       from reading the last header that they are in the process of being sent 
+       by the device. Get them first. */
 
     gettimeofday( &before, NULL );
 
@@ -751,12 +751,14 @@ vicp_read( char *    buffer,
                 break;
         }
 
-        if ( *with_eoi )
+        if ( *with_eoi || bytes_read == 0 )
         {
             *length = total_length;
             return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
         }
     }
+
+    /* Loop until either EOI is set or we got as many bytes as asked to read */
 
     do
     {
@@ -827,7 +829,7 @@ vicp_read( char *    buffer,
             total_length += bytes_read;
             bytes_to_expect -= bytes_read;
         }
-    } while ( ! *with_eoi && total_length < *length );
+    } while ( ! *with_eoi && total_length < *length && bytes_read != 0 );
 
     *length = total_length;
 
