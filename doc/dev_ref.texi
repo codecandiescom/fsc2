@@ -2776,7 +2776,8 @@ paragraphindent 0
 @strong{Module name}: @code{mcn700_2000}
 
 @paragraphindent 0
-@strong{Author}: Anton Savitsky (Freie Universit@''at Berlin)
+@strong{Author}: Anton Savitsky (MPI for Bioorganic Chemistry,
+M@"ulheim/Freie Universit@"at Berlin)
 
 @paragraphindent 0
 @strong{Description}: Power supply by
@@ -4331,7 +4332,8 @@ and @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 @end ifnottex
 
 @paragraphindent 0
-@strong{Author}: Anton Savitsky (Freie Universit@''at Berlin)
+@strong{Author}: Anton Savitsky (MPI for Bioorganic Chemistry,
+M@"ulheim/Freie Universit@"at Berlin)
 
 @paragraphindent 0
 @strong{Module name}: @code{tegam2714a_p}
