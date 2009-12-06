@@ -1430,11 +1430,19 @@ lecroy_wr_get_prep( int              ch,
 
     if (    ! is_mem_ch
          && ! ( can_fetch & bit_to_test ) )
+    {
         while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
         {
             stop_on_user_request( );
             fsc2_usleep( 1000, UNSET );
         }
+
+        /* Stop acquisition */
+
+        len = 5;
+        if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
+    }
 
     TRY
     {

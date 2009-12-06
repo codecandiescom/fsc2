@@ -88,7 +88,7 @@
                     bool         with_eoi,
                     bool         quit_on_signal )
 
-    int vicp_read( char *    buffer,
+    int vicp_read( char    * buffer,
                    ssize_t * length,
                    bool    * with_eoi,
                    bool      quit_on_signal )
@@ -682,28 +682,31 @@ vicp_write( const char * buffer,
  *    possible return values:
  *     a) SUCCESS_BUT_MORE (1)  data have successfully received but
  *                              there are still data the device wants
- *                              to transmit but which wouldn't hav
- *                              fit into the user supplied buffer
+ *                              to transmit but which didn't fit into
+ *                              the user supplied buffer
  *     b) SUCCESS (0)           all data have been received successfully
  *     c) FAILURE (-1)          transmission was aborted due to a
  *                              signal
- *    If a timeout happens during the transmission an exception gets
- *    thrown.
+ * If a timeout happens during the transmission an exception gets
+ * thrown.
+ * Reading stops when either we got as many data as the user asked
+ * for or the end of a message was reached (as determined from the
+ * EOI flag in the header) or a read was interrupted by a signal.
  *---------------------------------------------------------------------*/
 
 int
-vicp_read( char *    buffer,
+vicp_read( char    * buffer,
            ssize_t * length,
-           bool *    with_eoi,
+           bool    * with_eoi,
            bool      quit_on_signal )
 {
-    unsigned char   header[ VICP_HEADER_SIZE ];
-    ssize_t         total_length = 0;
-    ssize_t         bytes_read = 0;
-    unsigned long   bytes_to_expect;
-    struct timeval  before,
-                    after;
-    long            us_timeout = vicp.us_read_timeout;
+    unsigned char  header[ VICP_HEADER_SIZE ];
+    ssize_t        total_length = 0;
+    ssize_t        bytes_read = 0;
+    unsigned long  bytes_to_expect;
+    struct timeval before,
+                   after;
+    long           us_timeout = vicp.us_read_timeout;
 
 
     /* Do nothing if no data are to be read */
@@ -770,14 +773,23 @@ vicp_read( char *    buffer,
                 break;
         }
 
+        /* If we're at the end of a message or have already read as many
+           data as was asked for or if the read was interrupted by a
+           signal (bytes_read is 0) return */
+
         if ( *with_eoi || total_length == *length || bytes_read == 0 )
             return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
     }
 
-    /* Loop until either EOI is set or we got as many bytes as asked to read */
+    /* Loop until either EOI is set or we got as many bytes as we were asked
+       to read (or a read was interrupted by a signal). We need to loop since
+       a message from the device can be split into several chunks, each
+       starting with a new header. */
 
     do
     {
+        /* Read a new header */
+
         bytes_read = fsc2_lan_read( vicp.handle, ( char * ) header,
                                     VICP_HEADER_SIZE, us_timeout,
                                     quit_on_signal );
@@ -818,9 +830,9 @@ vicp_read( char *    buffer,
 
         *with_eoi = vicp.eoi_was_set = vicp_get_operation( header ) & VICP_EOI;
 
-        /* Otherwise we can now start to read the real data. Make sure we don't
-           try to read more than the user asked for. If we could read more we
-           store the number of bytes we couldn't fetch. */
+        /* Now read the real data. Make sure we don't try to read more than
+           the user asked for. If we could read more we store the number of
+           bytes we could have but didn't fetch. */
 
         if ( ( ssize_t ) bytes_to_expect - total_length > *length )
         {

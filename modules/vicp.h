@@ -49,7 +49,7 @@ int vicp_write( const char * /* buffer         */,
                 bool         /* with_eoi       */,
                 bool         /* quit_on_signal */  );
 
-int vicp_read( char *    /* buffer         */,
+int vicp_read( char    * /* buffer         */,
                ssize_t * /* length         */,
                bool    * /* with_eoi       */,
                bool      /* quit_on_signal */  );
