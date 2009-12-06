@@ -1347,9 +1347,13 @@ lecroy_wr_start_acquisition( void )
 
     lecroy_wr_get_inr( );
 
+#if ! defined LECROY_WR_IS_XSTREAM
     can_fetch &= ~ ( LECROY_WR_PROC_DONE_TA | LECROY_WR_PROC_DONE_TB |
                      LECROY_WR_PROC_DONE_TC | LECROY_WR_PROC_DONE_TD |
                      LECROY_WR_SIGNAL_ACQ );
+#else
+    can_fetch &= ~ LECROY_WR_SIGNAL_ACQ;
+#endif
 
     /* Switch digitizer back on to running state by switching to a trigger
        mode where the digitizer is running (i.e. typically NORMAL, but, if
