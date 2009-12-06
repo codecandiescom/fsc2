@@ -1085,7 +1085,7 @@ fsc2_lan_cleanup( void )
 static void
 timeout_init( int                dir,
               LAN_List_T       * ll,
-              long *             us_timeout,
+              long             * us_timeout,
               struct sigaction * old_sact,
               struct timeval   * now )
 {
@@ -1180,7 +1180,7 @@ timeout_init( int                dir,
 static bool
 timeout_reset( int                dir,
                LAN_List_T       * ll,
-               long *             us_timeout,
+               long             * us_timeout,
                struct sigaction * old_sact,
                struct timeval   * before )
 {
@@ -1234,7 +1234,7 @@ timeout_exit( LAN_List_T       * ll,
 
     /* Nothing to be done if timeouts are dealt with by socket options */
 
-    if ( ! ll->so_timeo_avail )
+    if ( ll->so_timeo_avail )
         return;
 
     ret = setitimer( ITIMER_REAL, &iwait, NULL );
