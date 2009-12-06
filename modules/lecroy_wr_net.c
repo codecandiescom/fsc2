@@ -1430,8 +1430,6 @@ lecroy_wr_get_prep( int              ch,
 
     if ( ! is_mem_ch && ! ( can_fetch & bit_to_test ) )
     {
-        fprintf( stderr, "BTT %0xx\n", bit_to_test );
-
         while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
         {
             stop_on_user_request( );
