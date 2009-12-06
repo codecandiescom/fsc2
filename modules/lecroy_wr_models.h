@@ -541,7 +541,7 @@
 #endif
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
-#define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V *
+#define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
 #define LECROY_WR_IS_XSTREAM
 
 

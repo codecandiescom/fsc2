@@ -1309,7 +1309,7 @@ lecroy_wr_start_acquisition( void )
                   '1' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr.num_avg[ ch ] );
-#fi
+#endif
 
 		len = strlen( cmd );
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
