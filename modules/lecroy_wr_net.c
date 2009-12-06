@@ -1378,7 +1378,7 @@ lecroy_wr_get_prep( int              ch,
                     double         * gain,
                     double         * offset )
 {
-    unsigned int bit_to_test;
+    unsigned int bit_to_test = 0;
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
@@ -1393,7 +1393,7 @@ lecroy_wr_get_prep( int              ch,
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
     {
-        bit_to_test = LECROY_WR_SIGNAL_ACQ;
+        bit_to_test |= LECROY_WR_SIGNAL_ACQ;
         sprintf( ch_str, "C%1d", ch - LECROY_WR_CH1 + 1 );
     }
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
@@ -1403,7 +1403,7 @@ lecroy_wr_get_prep( int              ch,
     }
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
     {
-        bit_to_test = LECROY_WR_PROC_DONE( ch );
+        bit_to_test |= LECROY_WR_PROC_DONE( ch );
         sprintf( ch_str, "T%c", ch - LECROY_WR_TA + 'A' );
     }
     else
@@ -1428,8 +1428,7 @@ lecroy_wr_get_prep( int              ch,
        finished yet poll until the bit that tells that the acquisition for
        the requested channel is finished has become set */
 
-    if (    ! is_mem_ch
-         && ! ( can_fetch & bit_to_test ) )
+    if ( ! is_mem_ch && can_fetch & bit_to_test )
     {
         while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
         {
