@@ -1305,7 +1305,8 @@ lecroy_wr_start_acquisition( void )
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
 #else
-        snprintf( cmd, 100, "F%c:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,%ld\n",
+        snprintf( cmd, 100, "F%c:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,"
+                  "SWEEPS,%ld\n",
                   '1' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr.num_avg[ ch ] );
