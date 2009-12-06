@@ -1437,7 +1437,7 @@ lecroy_wr_get_prep( int              ch,
             fsc2_usleep( 1000, UNSET );
         }
 
-        /* Stop acquisition */
+        /* Stop acquisition (speeds up reading the data a bit) */
 
         len = 5;
         if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )

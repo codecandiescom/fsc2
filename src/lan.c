@@ -225,13 +225,12 @@ fsc2_lan_open( const char * dev_name,
        other than SIGALRM and we are not supposed to return on such signals
        retry the connect() call */
     do
-    {
         conn_ret = connect( sock_fd, ( const struct sockaddr * ) &dev_addr,
                             sizeof dev_addr );
-    } while (    conn_ret == -1
-              && errno == EINTR
-              && ! quit_on_signal
-              && ! got_sigalrm );
+    while (    conn_ret == -1
+            && errno == EINTR
+            && ! quit_on_signal
+            && ! got_sigalrm );
 
     /* Stop the timer for the timeout and reset the signal handler */
 
@@ -1250,7 +1249,7 @@ timeout_exit( LAN_List_T       * ll,
  *------------------------------------------------------------------*/
 
 static void
-wait_alarm_handler( int sig_no  UNUSED_ARG )
+wait_alarm_handler( int sig_no )
 {
     if ( sig_no == SIGALRM )
         got_sigalrm = 1;

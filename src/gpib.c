@@ -808,6 +808,7 @@ start_gpibd( void )
 	if ( ( pid = fork( ) ) < 0 )
 	{
 		lower_permissions( );
+        sigaction( SIGUSR1, &old_sact, NULL );
 		return -2;
 	}
 
