@@ -61,6 +61,7 @@
  *                                than the current sensitivity setting
  * LECROY_WR_TRG_MAX_LEVEL_EXT    max. trigger level for EXT trigger input
  * LECROY_WR_TRG_MAX_LEVEL_EXT10  max. trigger level for EXT10 trigger input
+ * LECROY_WR_IS_XSTREAM           define this if this is a X-Stream device
  */
 
 
@@ -503,6 +504,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _62Xi
@@ -521,6 +523,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _64Xi
@@ -538,7 +541,8 @@
 #endif
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
-#define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V *
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _104Xi
@@ -557,6 +561,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _204Xi
@@ -575,6 +580,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _44MXi
@@ -593,6 +599,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _64MXi
@@ -611,6 +618,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _104MXi
@@ -629,6 +637,7 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
 
 
 #elif defined _204MXi
@@ -647,6 +656,8 @@
 #define LECROY_WR_TRG_MAX_LEVEL_CH_FAC        4.1    /* 4.1 times sensitivity */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT           0.4    /* 400 mV */
 #define LECROY_WR_TRG_MAX_LEVEL_EXT10         4.0    /* 4 V */
+#define LECROY_WR_IS_XSTREAM
+
 
 #else
 #error "Unknown model of LeCroy WaveRunner/X-Stream"

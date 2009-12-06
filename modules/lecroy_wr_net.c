@@ -1298,11 +1298,18 @@ lecroy_wr_start_acquisition( void )
 
         do_averaging = SET;
 
+#if ! defined LECROY_WR_IS_XSTREAM
         snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%1ld)',MAXPTS,%ld,SWEEPS,%ld\n",
                   'A' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
+#else
+        snprintf( cmd, 100, "F%c:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,%ld\n",
+                  '1' + LECROY_WR_TA - ch,
+                  lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
+                  lecroy_wr.num_avg[ ch ] );
+#fi
 
 		len = strlen( cmd );
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
