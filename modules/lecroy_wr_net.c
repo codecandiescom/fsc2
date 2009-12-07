@@ -39,6 +39,8 @@ static void lecroy_wr_get_prep( int              ch,
                                 double         * gain,
                                 double         * offset );
 
+static bool lecroy_wr_can_fetch( int ch );
+
 static int lecroy_wr_talk( const char * cmd,
 						   char       * reply,
 						   ssize_t    * length );
@@ -46,7 +48,7 @@ static int lecroy_wr_talk( const char * cmd,
 static void lecroy_wr_lan_failure( void );
 
 
-static unsigned int can_fetch = 0;
+static bool is_running = UNSET;
 
 
 
@@ -1347,14 +1349,6 @@ lecroy_wr_start_acquisition( void )
 
     lecroy_wr_get_inr( );
 
-#if ! defined LECROY_WR_IS_XSTREAM
-    can_fetch &= ~ ( LECROY_WR_PROC_DONE_TA | LECROY_WR_PROC_DONE_TB |
-                     LECROY_WR_PROC_DONE_TC | LECROY_WR_PROC_DONE_TD |
-                     LECROY_WR_SIGNAL_ACQ );
-#else
-    can_fetch &= ~ LECROY_WR_SIGNAL_ACQ;
-#endif
-
     /* Switch digitizer back on to running state by switching to a trigger
        mode where the digitizer is running (i.e. typically NORMAL, but, if
        the user requested it, also AUTO, or, if there's no averaging setup,
@@ -1373,6 +1367,7 @@ lecroy_wr_start_acquisition( void )
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
+    is_running = SET;
 }
 
 
@@ -1440,12 +1435,12 @@ lecroy_wr_get_prep( int              ch,
        finished yet poll until the bit that tells that the acquisition for
        the requested channel is finished has become set */
 
-    if ( ! is_mem_ch && ! ( can_fetch & bit_to_test ) )
+    if ( ! is_mem_ch && is_running )
     {
-        while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
+        while ( ! lecroy_wr_can_fetch( ch ) )
         {
             stop_on_user_request( );
-            fsc2_usleep( 1000, UNSET );
+            fsc2_usleep( 5000, UNSET );
         }
 
         /* Stop acquisition (speeds up reading the data a bit) */
@@ -1453,6 +1448,7 @@ lecroy_wr_get_prep( int              ch,
         len = 5;
         if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
             lecroy_wr_lan_failure( );
+        is_running = UNSET;
     }
 
     TRY
@@ -1478,6 +1474,82 @@ lecroy_wr_get_prep( int              ch,
             T_free( *data );
         RETHROW( );
     }
+}
+
+
+/*----------------------------------------------------------------------*
+ * Function for obtaining an integer value from the waveform descriptor
+ *----------------------------------------------------------------------*/
+
+static long
+lecroy_wr_get_int_value( int          ch,
+                         const char * name )
+{
+    char cmd[ 100 ];
+    long length = sizeof cmd;
+    char *ptr = cmd;
+    long val = 0;
+
+
+    CLOBBER_PROTECT( ptr );
+    CLOBBER_PROTECT( val );
+
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        sprintf( cmd, "C%1d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
+    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
+        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
+    else
+        fsc2_impossible( );
+
+    lecroy_wr_talk( cmd, cmd, &length );
+    cmd[ length - 1 ] = '\0';
+
+    while ( *ptr && *ptr++ != ':' )
+        /* empty */ ;
+
+    if ( ! *ptr )
+        lecroy_wr_lan_failure( );
+
+    TRY
+    {
+        val = T_atol( ptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        lecroy_wr_lan_failure( );
+
+    return val;
+}
+
+
+/*--------------------------------------------------------------------*
+ * Function for checking if data of a channel are ready to be fetched
+ *--------------------------------------------------------------------*/
+
+static bool
+lecroy_wr_can_fetch( int ch )
+{
+#if ! defined LECROY_WR_IS_XSTREAM
+    unsigned int bit_to_test = 0;
+
+
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        bit_to_test |= LECROY_WR_SIGNAL_ACQ;
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+        bit_to_test |= LECROY_WR_PROC_DONE( ch );
+    else
+        fsc2_impossible( );
+
+    return ( lecroy_wr_get_inr( ) ) & bit_to_test ) ? SET : UNSET;
+#else
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
+
+    return lecroy_wr_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
+                                                       lecroy_wr.num_avg[ ch ];
+#endif
 }
 
 
