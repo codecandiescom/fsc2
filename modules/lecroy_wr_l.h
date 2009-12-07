@@ -141,6 +141,7 @@
    vertical gain and offset values within the descriptor */
 
 #define LECROY_WR_DESC_LENGTH        346
+#define LECROY_WR_AVG_INDEX          148
 #define LECROY_WR_VGAIN_INDEX        156
 #define LECROY_WR_VOFFSET_INDEX      160
 

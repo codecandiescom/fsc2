@@ -1482,45 +1482,59 @@ lecroy_wr_get_prep( int              ch,
  *----------------------------------------------------------------------*/
 
 static long
-lecroy_wr_get_int_value( int          ch,
-                         const char * name )
+lecroy_wr_get_avg_count( int ch )
 {
     char cmd[ 100 ];
-    long length = sizeof cmd;
-    char *ptr = cmd;
-    long val = 0;
+    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
+    ssize_t length = sizeof buf;
+    long len = 0;
+    int i;
+    bool with_eoi;
 
 
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
+    fsc2_assert( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD );
 
-    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%1d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
-    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
-    else
-        fsc2_impossible( );
-
-    lecroy_wr_talk( cmd, cmd, &length );
-    cmd[ length - 1 ] = '\0';
-
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
-
-    if ( ! *ptr )
+    sprintf( cmd, "T%c:WF? DESC\n", ch - LECROY_WR_TA + 'A' );
+    length = strlen( cmd );
+    if ( vicp_write( cmd, &length, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
-    TRY
-    {
-        val = T_atol( ptr );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
+    /* First thing we read is "DESC,", followed by "#[0-9]", where the number
+       after the '#' is the number of bytes to be read next */
+
+    length = 7;
+	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) == FAILURE
+         || length != 6
+            || strncmp( ( char * ) buf, "DESC,#", 6 )
+         || ! isdigit( buf[ 6 ] ) )
         lecroy_wr_lan_failure( );
 
-    return val;
+    length = buf[ 6 ] - '0';
+
+    fsc2_assert( length > 0 );
+
+    /* Now get the number of bytes to read */
+
+	if ( vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) == FAILURE )
+        lecroy_wr_lan_failure( );
+
+    buf[ length ] = '\0';
+    length = T_atol( ( char * ) buf );
+
+    fsc2_assert( length == LECROY_WR_DESC_LENGTH );
+
+    /* Read the waveform descriptor and determine the vertical gain and
+       offset setting (this much faster than using the "INSP?" command,
+       which takes about 100 ms) */
+
+	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) != SUCCESS
+         || length != LECROY_WR_DESC_LENGTH )
+        lecroy_wr_lan_failure( );
+
+    for ( i = 3; i >= 0; i++ )
+        len = 256 * len + buf[ LECROY_WR_AVG_INDEX + i ];
+
+    return len;
 }
 
 
@@ -1547,8 +1561,7 @@ lecroy_wr_can_fetch( int ch )
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
 
-    return lecroy_wr_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
-                                                       lecroy_wr.num_avg[ ch ];
+    return lecroy_wr_get_avg_count( ch ) >= lecroy_wr.num_avg[ ch ];
 #endif
 }
 
