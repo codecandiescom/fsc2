@@ -1502,14 +1502,20 @@ lecroy_wr_get_avg_count( int ch )
     /* First thing we read is "DESC,", followed by "#[0-9]", where the number
        after the '#' is the number of bytes to be read next */
 
-    length = 7;
+    length = 5;
 	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) == FAILURE
-         || length != 6
-            || strncmp( ( char * ) buf, "DESC,#", 6 )
-         || ! isdigit( buf[ 6 ] ) )
+         || length != 5
+         || strncmp( ( char * ) buf, "DESC,", 5 ) )
         lecroy_wr_lan_failure( );
 
-    length = buf[ 6 ] - '0';
+    length = 2;
+	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) == FAILURE
+         || length != 2
+         || buf[ 0 ] != '#'
+         || ! isdigit( buf[ 1 ] ) )
+        lecroy_wr_lan_failure( );
+
+    length = buf[ 1 ] - '0';
 
     fsc2_assert( length > 0 );
 
