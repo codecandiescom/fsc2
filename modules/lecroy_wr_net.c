@@ -1537,8 +1537,16 @@ lecroy_wr_get_avg_count( int ch )
          || length != LECROY_WR_DESC_LENGTH )
         lecroy_wr_lan_failure( );
 
-    for ( i = 3; i >= 0; i++ )
+    for ( i = 3; i >= 0; i-- )
         len = 256 * len + buf[ LECROY_WR_AVG_INDEX + i ];
+
+    if ( ! with_eoi )
+    {
+        length = 1;
+        if (    vicp_read( ( char *) buf, &length, &with_eoi, UNSET ) != SUCCESS
+             || ! with_eoi )
+            lecroy_wr_lan_failure( );
+    }
 
     return len;
 }
