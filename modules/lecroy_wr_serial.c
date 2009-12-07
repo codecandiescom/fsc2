@@ -834,7 +834,7 @@ lecroy_wr_get_trigger_source( void )
 bool
 lecroy_wr_set_trigger_source( int channel )
 {
-    char cmd[ 40 ] = "TRSE STD,SR,";
+    char cmd[ 40 ] = "TRSE EDGE,SR,";
     ssize_t to_send;
 
 
@@ -1442,11 +1442,14 @@ lecroy_wr_get_prep( int              ch,
     /* When a non-memory curve is to be fetched and an acquisition was started
        check if it's finished */
 
-    if (    ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-         && is_running
-         && (    ch >= LECROY_WR_TA
-              && ch <= LECROY_WR_TD
-              && lecroy_wr.is_displayed[ ch ] ) )
+    if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH4 )
+         && ! lecroy_wr.is_displayed[ ch ] )
+    {
+        lecroy_wr_display( ch, SET );
+        lecroy_wr.is_displayed[ ch ] = SET;
+    }
+
+    if ( ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 ) && is_running )
     {
         while ( ! lecroy_wr_can_fetch( ch ) )
             stop_on_user_request( );

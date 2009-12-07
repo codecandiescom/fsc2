@@ -814,7 +814,7 @@ lecroy_wr_get_trigger_source( void )
 bool
 lecroy_wr_set_trigger_source( int channel )
 {
-    char cmd[ 40 ] = "TRSE STD,SR,";
+    char cmd[ 40 ] = "TRSE EDGE,SR,";
 	ssize_t len;
 
 
@@ -1195,10 +1195,7 @@ lecroy_wr_is_displayed( int ch )
         THROW( EXCEPTION );
     }
     else
-    {
-        print( FATAL, "Internal error detected.\n" );
-        THROW( EXCEPTION );
-    }
+        fsc2_impossible( );
 
     lecroy_wr_talk( cmd, cmd, &length );
     return cmd[ 1 ] == 'N';
@@ -1231,10 +1228,7 @@ lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
     else
-    {
-        print( FATAL, "Internal error detected.\n" );
-        THROW( EXCEPTION );
-    }
+        fsc2_inmpossible( );
 
     if (    on_off
          && lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
@@ -1404,6 +1398,13 @@ lecroy_wr_get_prep( int              ch,
 
 
     CLOBBER_PROTECT( data );
+
+    if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH4 )
+         && ! lecroy_wr.is_displayed[ ch ] )
+    {
+        lecroy_wr_display( ch, SET );
+        lecroy_wr.is_displayed[ ch ] = SET;
+    }
 
     /* When a non-memory curve is to be fetched and an acquisition was started
        check if it's finished */
@@ -1772,7 +1773,12 @@ lecroy_wr_get_data( long   * len,
     len_str[ length ] = '\0';
     length = T_atol( len_str );
 
-    fsc2_assert( length > LECROY_WR_DESC_LENGTH );
+    if ( length <= LECROY_WR_DESC_LENGTH )
+    {
+        print( FATAL, "Device sent invalid data.\n" );
+        THROW( EXCPEPTION );
+    }
+
     length -= LECROY_WR_DESC_LENGTH;
 
     /* Read the waveform descriptor and determine the vertical gain and

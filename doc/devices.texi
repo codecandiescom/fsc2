@@ -2582,19 +2582,20 @@ window width is going to be requested during the experiment.
 @anchor{digitizer_display_channel()}
 @findex digitizer_display_channel()
 @item digitizer_display_channel()
-This function can be used during the @code{PREPARATIONS} section to tell
-the program that you want a certain channel or a set of channels to be
-displayed in any case. It expects a channel name or number (or a comma
-separated list of channel specifiers) as defined above. There are only
-certain circumstances where this function is really needed. Normally,
-the program will not switch off channels. Only if in the test run it is
+This function is only implemented for the Tektronix oscilloscopes and
+can be used during the @code{PREPARATIONS} section to tell the program
+that you want a certain channel or a set of channels to be displayed
+in any case. It expects a channel name or number (or a comma separated
+list of channel specifiers) as defined above. There are only certain
+circumstances where this function is really needed. Normally, the
+program will not switch off channels. Only if in the test run it is
 found that some channels are needed for the experiment which aren't
 switched on but there are already too many other channels displayed
 which don't seem to be needed the program has to switch off some of
-them. If in this case the program switches off a channel that you don't
-want to be off (or that the program erroneously assumes to be useless)
-you may have to use this function to make sure the channel stays
-switched on.
+them. If in this case the program switches off a channel that you
+don't want to be off (or that the program erroneously assumes to be
+useless) you may have to use this function to make sure the channel
+stays switched on.
 
 
 
