@@ -39,6 +39,10 @@ static void lecroy_wr_get_prep( int              ch,
                                 double         * gain,
                                 double         * offset );
 
+#if defined LECROY_WR_IS_XSTREAM
+static long lecroy_wr_get_avg_count( int ch );
+#endif
+
 static bool lecroy_wr_can_fetch( int ch );
 
 static int lecroy_wr_talk( const char * cmd,
@@ -1385,36 +1389,27 @@ lecroy_wr_get_prep( int              ch,
                     double         * gain,
                     double         * offset )
 {
-    unsigned int bit_to_test = 0;
     char cmd[ 100 ];
-    char ch_str[ 3 ];
-    bool is_mem_ch = UNSET;
 	ssize_t len;
 
 
     CLOBBER_PROTECT( data );
-    CLOBBER_PROTECT( bit_to_test );
 
-    /* Figure out which channel is to be used and set a few variables
-       needed later accordingly */
+    /* When a non-memory curve is to be fetched and an acquisition was started
+       check if it's finished */
 
-    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+    if ( ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 ) && is_running )
     {
-        bit_to_test |= LECROY_WR_SIGNAL_ACQ;
-        sprintf( ch_str, "C%1d", ch - LECROY_WR_CH1 + 1 );
+        while ( ! lecroy_wr_can_fetch( ch ) )
+            stop_on_user_request( );
+
+        /* Stop acquisition (seems to speed up reading the data a bit) */
+
+        len = 5;
+        if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
+        is_running = UNSET;
     }
-    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-    {
-        is_mem_ch = SET;
-        sprintf( ch_str, "M%d", ch - LECROY_WR_M1 + 1 );
-    }
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-    {
-        bit_to_test |= LECROY_WR_PROC_DONE( ch );
-        sprintf( ch_str, "T%c", ch - LECROY_WR_TA + 'A' );
-    }
-    else
-        fsc2_impossible( );
 
     /* Set up the number of points to be fetched - take care: the device
        always measures an extra point before and after the displayed region,
@@ -1431,56 +1426,36 @@ lecroy_wr_get_prep( int              ch,
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
-    /* When a non-memory curve is to be fetched and the acquisition isn't
-       finished yet poll until the bit that tells that the acquisition for
-       the requested channel is finished has become set */
+    /* Ask the device for the data... */
 
-    if ( ! is_mem_ch && is_running )
-    {
-        while ( ! lecroy_wr_can_fetch( ch ) )
-        {
-            stop_on_user_request( );
-            fsc2_usleep( 5000, UNSET );
-        }
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        sprintf( cmd, "C%1d:WF?\n", ch - LECROY_WR_CH1 + 1 );
+    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
+        sprintf( cmd, "M%d:WF?\n", ch - LECROY_WR_M1 + 1 );
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+        sprintf( cmd, "T%c:WF?\n", ch - LECROY_WR_TA + 'A' );
+    else
+        fsc2_impossible( );
 
-        /* Stop acquisition (speeds up reading the data a bit) */
+    len = strlen( cmd );
+    if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
-        len = 5;
-        if ( vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
-            lecroy_wr_lan_failure( );
-        is_running = UNSET;
-    }
+    /* ...and fetch 'em */
 
-    TRY
-    {
-        /* Ask the device for the data... */
-
-        strcpy( cmd, ch_str );
-        strcat( cmd, ":WF?\n" );
-		len = strlen( cmd );
-		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
-            lecroy_wr_lan_failure( );
-
-        /* ...and fetch 'em */
-
-        *data = lecroy_wr_get_data( length, gain, offset );
-        *length /= 2;          /* we got word sized (16 bit) data, LSB first */
-
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-    {
-        if ( *data != NULL )
-            T_free( *data );
-        RETHROW( );
-    }
+    *data = lecroy_wr_get_data( length, gain, offset );
+    *length /= 2;          /* we got word sized (16 bit) data, LSB first */
 }
 
 
-/*----------------------------------------------------------------------*
- * Function for obtaining an integer value from the waveform descriptor
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for obtaining the number of averages done since the start of
+ * an acquisition. This is done by insepecting the waveform descriptor
+ * instead of using the "INSP?" command since it's a lot faster this way
+ * (even though a lot of data have to be transfered).
+ *-----------------------------------------------------------------------*/
 
+#if defined LECROY_WR_IS_XSTREAM
 static long
 lecroy_wr_get_avg_count( int ch )
 {
@@ -1519,7 +1494,8 @@ lecroy_wr_get_avg_count( int ch )
 
     fsc2_assert( length > 0 );
 
-    /* Now get the number of bytes to read */
+    /* Now get the number of bytes to read (which must be the size of the
+       wave descriptor) */
 
 	if ( vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) == FAILURE )
         lecroy_wr_lan_failure( );
@@ -1529,9 +1505,7 @@ lecroy_wr_get_avg_count( int ch )
 
     fsc2_assert( length == LECROY_WR_DESC_LENGTH );
 
-    /* Read the waveform descriptor and determine the vertical gain and
-       offset setting (this much faster than using the "INSP?" command,
-       which takes about 100 ms) */
+    /* Read the waveform descriptor and determine the average count */
 
 	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) != SUCCESS
          || length != LECROY_WR_DESC_LENGTH )
@@ -1550,11 +1524,12 @@ lecroy_wr_get_avg_count( int ch )
 
     return len;
 }
+#endif
 
 
-/*--------------------------------------------------------------------*
- * Function for checking if data of a channel are ready to be fetched
- *--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for checking if data of a channel are ready for fetching
+ *-------------------------------------------------------------------*/
 
 static bool
 lecroy_wr_can_fetch( int ch )
