@@ -823,15 +823,19 @@ lecroy_wr_translate_channel( int  dir,
                 return LECROY_WR_CH4;
 #endif
             case CHANNEL_TRACE_A :
+            case CHANNEL_F1:
                 return LECROY_WR_TA;
 
             case CHANNEL_TRACE_B :
+            case CHANNEL_F2:
                 return LECROY_WR_TB;
 
             case CHANNEL_TRACE_C :
+            case CHANNEL_F3:
                 return LECROY_WR_TC;
 
             case CHANNEL_TRACE_D :
+            case CHANNEL_F4:
                 return LECROY_WR_TD;
 
             case CHANNEL_M1 :
@@ -885,16 +889,32 @@ lecroy_wr_translate_channel( int  dir,
                 return CHANNEL_CH4;
 #endif
             case LECROY_WR_TA :
+#if ! defined LECROY_WR_XSTREAM
                 return CHANNEL_TRACE_A;
+#else
+                return CHANNEL_F1;
+#endif
 
             case LECROY_WR_TB :
+#if ! defined LECROY_WR_IS_XSTREAM
                 return CHANNEL_TRACE_B;
+#else
+                return CHANNEL_F2;
+#endif
 
             case LECROY_WR_TC :
+#if ! defined LECROY_WR_XSTREAM
                 return CHANNEL_TRACE_C;
+#else
+                return CHANNEL_F3;
+#endif
 
             case LECROY_WR_TD :
+#if ! defined LECROY_WR_XSTREAM
                 return CHANNEL_TRACE_D;
+#else
+                return CHANNEL_F4;
+#endif
 
             case LECROY_WR_M1 :
                 return CHANNEL_M1;

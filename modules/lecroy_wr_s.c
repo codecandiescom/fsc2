@@ -35,8 +35,13 @@ LECROY_WR_T lecroy_wr;
 
 const char *LECROY_WR_Channel_Names[ 15 ] = { "CH1",     "CH2",
                                               "CH3",     "CH4",
+#if ! defined LECROY_WR_IS_XSTREAM
                                               "TRACE_A", "TRACE_B",
                                               "TRACE_C", "TRACE_D",
+#else
+                                              "F1",      "F2",
+                                              "F3",      "F4"
+#endif
                                               "M1",      "M2",
                                               "M3",      "M4"
                                               "LINE",    "EXT",
@@ -1725,8 +1730,13 @@ digitizer_copy_curve( Var_T * v )
          && ! ( src >= LECROY_WR_TA && src >= LECROY_WR_TD ) )
     {
         print( FATAL, "Invalid source channel %s, must be one of the "
-               "measurement or TRACE channels.\n",
-               LECROY_WR_Channel_Names[ src ] );
+               "measurement or "
+#if ! defined LECROY_WR_IS_XSTREAM
+               "TRACE"
+#else
+               "FUNCTION"
+#endif
+               " channels.\n", LECROY_WR_Channel_Names[ src ] );
         THROW( EXCEPTION );
     }
 

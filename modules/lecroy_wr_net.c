@@ -27,28 +27,21 @@
 static unsigned char * lecroy_wr_get_data( long   * len,
                                            double * gain,
                                            double * offset );
-
 static unsigned int lecroy_wr_get_inr( void );
-
 static double lecroy_wr_bin_2_float( unsigned char * buf );
-
 static void lecroy_wr_get_prep( int              ch,
                                 Window_T       * w,
                                 unsigned char ** data,
                                 long           * length,
                                 double         * gain,
                                 double         * offset );
-
 #if defined LECROY_WR_IS_XSTREAM
 static long lecroy_wr_get_avg_count( int ch );
 #endif
-
 static bool lecroy_wr_can_fetch( int ch );
-
 static int lecroy_wr_talk( const char * cmd,
 						   char       * reply,
 						   ssize_t    * length );
-
 static void lecroy_wr_lan_failure( void );
 
 
@@ -1191,7 +1184,11 @@ lecroy_wr_is_displayed( int ch )
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRA?\n", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA?\n", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:TRA?\n", ch - LECROY_WR_TA + 1 );
+#endif
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "A memory channel can't be displayed.\n");
@@ -1223,7 +1220,11 @@ lecroy_wr_display( int ch,
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRA ", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA ", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:TRA ", ch - LECROY_WR_TA + 1 );
+#endif
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "Memory channels can't be displayed.\n" );
@@ -1306,14 +1307,14 @@ lecroy_wr_start_acquisition( void )
 
 #if ! defined LECROY_WR_IS_XSTREAM
         snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%1ld)',MAXPTS,%ld,SWEEPS,%ld\n",
-                  'A' + LECROY_WR_TA - ch,
+                  ch - LECROY_WR_TA + 'A',
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
 #else
-        snprintf( cmd, 100, "F%c:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,"
+        snprintf( cmd, 100, "F%1d:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,"
                   "SWEEPS,%ld\n",
-                  '1' + LECROY_WR_TA - ch,
+                  ch - LECROY_WR_TA + 1,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr.num_avg[ ch ] );
 #endif
@@ -1331,8 +1332,13 @@ lecroy_wr_start_acquisition( void )
         /* Switch off horizontal zoom and shift - if it's on the curve fetched
            from the device isn't what one would expect... */
 
-        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\n", 'A' + LECROY_WR_TA - ch,
-                 'A' + LECROY_WR_TA - ch ) ;
+#if ! defined LECROY_WR_IS_XSTREAM
+        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\n", ch - LECROY_WR_TA + 'A',
+                 ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:HMAG 1;F%1d:HPOS 5\n", ch - LECROY_WR_TA + 1,
+                 ch - LECROY_WR_TA + 1 ) ;
+#endif
 
 		len = strlen( cmd );
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
@@ -1341,7 +1347,11 @@ lecroy_wr_start_acquisition( void )
         /* Finally reset what's currently stored in the trace (otherwise a
            new acquisition may not get started) */
 
-        sprintf( cmd, "T%c:FRST\n", 'A' + LECROY_WR_TA - ch );
+#if ! defined LECROY_WR_IS_XSTREAM
+        sprintf( cmd, "T%c:FRST\n", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:FRST\n", ch - LECROY_WR_TA + 1 );
+#endif
 
 		len = strlen( cmd );
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
@@ -1433,7 +1443,11 @@ lecroy_wr_get_prep( int              ch,
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%d:WF?\n", ch - LECROY_WR_M1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:WF?\n", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:WF?\n", ch - LECROY_WR_TA + 1 );
+#endif
     else
         fsc2_impossible( );
 
@@ -1469,7 +1483,11 @@ lecroy_wr_get_avg_count( int ch )
 
     fsc2_assert( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD );
 
+#if ! defined LECROY_WR_IS_XSTREAM
     sprintf( cmd, "T%c:WF? DESC\n", ch - LECROY_WR_TA + 'A' );
+#else
+    sprintf( cmd, "F%1d:WF? DESC\n", ch - LECROY_WR_TA + 1 );
+#endif
     length = strlen( cmd );
     if ( vicp_write( cmd, &length, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -1527,9 +1545,9 @@ lecroy_wr_get_avg_count( int ch )
 #endif
 
 
-/*-------------------------------------------------------------------*
- * Function for checking if data of a channel are ready for fetching
- *-------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for checking if data of a channel are ready to be fetched
+ *--------------------------------------------------------------------*/
 
 static bool
 lecroy_wr_can_fetch( int ch )
@@ -1545,7 +1563,7 @@ lecroy_wr_can_fetch( int ch )
     else
         fsc2_impossible( );
 
-    return ( lecroy_wr_get_inr( ) ) & bit_to_test ) ? SET : UNSET;
+    return ( lecroy_wr_get_inr( ) & bit_to_test ) ? SET : UNSET;
 #else
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
@@ -1700,8 +1718,12 @@ lecroy_wr_copy_curve( long src,
     if ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
         sprintf( cmd + strlen( cmd ), "C%1ld,", src - LECROY_WR_CH1 + 1 );
     else
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd + strlen( cmd ), "T%c,",
                  ( char ) ( src - LECROY_WR_TA + 'A' ) );
+#else
+        sprintf( cmd + strlen( cmd ), "F%1ld,", src - LECROY_WR_TA + 1 );
+#endif
 
     sprintf( cmd + strlen( cmd ), "M%ld\n", dest - LECROY_WR_M1 + 1 );
 

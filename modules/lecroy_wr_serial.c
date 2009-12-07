@@ -24,38 +24,30 @@
 
 
 static unsigned char * lecroy_wr_get_data( long * len );
-
 static unsigned int lecroy_wr_get_inr( void );
-
-#if 0
+static bool lecroy_wr_can_fetch( int ch );
+#if defined LECROY_WR_IS_XSTREAM
 static long lecroy_wr_get_int_value( int          ch,
                                      const char * name );
 #endif
-
 static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
-
 static void lecroy_wr_get_prep( int              ch,
                                 Window_T       * w,
                                 unsigned char ** data,
                                 long           * length,
                                 double         * gain,
                                 double         * offset );
-
 static int lecroy_wr_s_hex_to_int( unsigned char * dp );
-
 static inline unsigned int lecroy_wr_s_hex_to_nibble( unsigned char c );
-
 static bool lecroy_wr_talk( const char * cmd,
                             char       * reply,
                             long       * length );
-
 static void lecroy_wr_comm_failure( void );
-
 static bool lecroy_wr_serial_open( void );
 
 
-static unsigned int can_fetch = 0;
+static bool is_running = UNSET;
 
 
 /* The following variable and defines are for calculating the upper limit
@@ -1219,7 +1211,11 @@ lecroy_wr_is_displayed( int ch )
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%d:TRA?\r", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA?\r", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:TRA?\r", ch - LECROY_WR_TA + 1 );
+#endif
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "Memory channels can't be displayed.\n");
@@ -1251,7 +1247,11 @@ lecroy_wr_display( int ch,
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%d:TRA ", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA ", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:TRA ", ch - LECROY_WR_TA + 1 );
+#endif
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "Memory channels can't be displayed.\n" );
@@ -1335,11 +1335,19 @@ lecroy_wr_start_acquisition( void )
 
         do_averaging = SET;
 
+#if ! defined LECROY_WR_IS_XSTREAM
         snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%1ld)',MAXPTS,%ld,SWEEPS,%ld\r",
-                  'A' + LECROY_WR_TA - ch,
+                  ch - LECROY_WR_TA + 'A',
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
+#else
+        snprintf( cmd, 100, "F%1d:DEF EQN,'AVG(C%1ld)',AVGTYPE,SUMMED,"
+                  "SWEEPS,%ld\n",
+                  ch - LECROY_WR_TA + 1,
+                  lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
+                  lecroy_wr.num_avg[ ch ] );
+#endif
 
         to_send = strlen( cmd );
         if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
@@ -1356,8 +1364,13 @@ lecroy_wr_start_acquisition( void )
         /* Switch off horizontal zoom and shift - if it's on the curve fetched
            from the device isn't what one would expect... */
 
-        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\r", 'A' + LECROY_WR_TA - ch,
-                 'A' + LECROY_WR_TA - ch ) ;
+#if ! defined LECROY_WR_IS_XSTREAM
+        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\r", ch - LECROY_WR_TA + 'A',
+                 ch - LECROY_WR_TA + 'A' ) ;
+#else
+        sprintf( cmd, "F%1d:HMAG 1;F%1d:HPOS 5\r", ch - LECROY_WR_TA + 1,
+                 ch - LECROY_WR_TA + 1 ) ;
+#endif
 
         to_send = strlen( cmd );
         if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
@@ -1368,8 +1381,11 @@ lecroy_wr_start_acquisition( void )
         /* Finally reset what's currently stored in the trace (otherwise a
            new acquisition may not get started) */
 
-        sprintf( cmd, "T%c:FRST\r", 'A' + LECROY_WR_TA - ch );
-
+#if ! defined LECROY_WR_IS_XSTREAM
+        sprintf( cmd, "T%c:FRST\r", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:FRST\r", ch - LECROY_WR_TA + 1 );
+#endif
         to_send = strlen( cmd );
         if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET )
@@ -1377,14 +1393,10 @@ lecroy_wr_start_acquisition( void )
             lecroy_wr_comm_failure( );
     }
 
-    /* Reset the bits in the word that tells us later that the data in the
-       corresponding channel are ready to be fetched */
+    /* Reset the bits in the register that tells us if fresh data are
+       available */
 
     lecroy_wr_get_inr( );
-
-    can_fetch &= ~ ( LECROY_WR_PROC_DONE_TA | LECROY_WR_PROC_DONE_TB |
-                     LECROY_WR_PROC_DONE_TC | LECROY_WR_PROC_DONE_TD |
-                     LECROY_WR_SIGNAL_ACQ );
 
     /* Switch digitizer back on to running state by switching to a trigger
        mode where the digitizer is running (i.e. typically NORMAL, but, if
@@ -1405,6 +1417,7 @@ lecroy_wr_start_acquisition( void )
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
+    is_running = SET;
 }
 
 
@@ -1422,46 +1435,30 @@ lecroy_wr_get_prep( int              ch,
                     double         * gain,
                     double         * offset )
 {
-    unsigned int bit_to_test = 0;
     char cmd[ 100 ];
-    char ch_str[ 3 ];
-    bool is_mem_ch = UNSET;
     ssize_t to_send;
 
 
-    /* Figure out which channel is to be used and set a few variables
-       needed later accordingly */
+    /* When a non-memory curve is to be fetched and an acquisition was started
+       check if it's finished */
 
-    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+    if (    ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
+         && is_running
+         && (    ch >= LECROY_WR_TA
+              && ch <= LECROY_WR_TD
+              && lecroy_wr.is_displayed[ ch ] ) )
     {
-        bit_to_test = LECROY_WR_SIGNAL_ACQ;
-        sprintf( ch_str, "C%1d", ch - LECROY_WR_CH1 + 1 );
-    }
-    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-    {
-        is_mem_ch = SET;
-        sprintf( ch_str, "M%1d", ch - LECROY_WR_M1 + 1 );
-    }
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-    {
-        bit_to_test = LECROY_WR_PROC_DONE( ch );
-        sprintf( ch_str, "T%c", ch - LECROY_WR_TA + 'A' );
-    }
-    else
-        fsc2_impossible( );
+        while ( ! lecroy_wr_can_fetch( ch ) )
+            stop_on_user_request( );
 
-#if 0
-    /* We probably have to check if two or mor channels are combined - I found#
-       no way this can be checked via the program and we can only loogk for
-       the number of points and compare that with what we expect. To make
-       things a bit more exciting, the device always seems to send us 2 more
-       points than it should and I don't know if that become 4 when to curves
-       are combined ... */
+        /* Stop acquisition (seems to speed up reading the data a bit) */
 
-    /* Get the number of byztes of the curve */
+        if ( fsc2_serial_write( lecroy_wr.sn, "STOP\r", 5,
+                                TIMEOUT_FROM_LENGTH( 5 ), SET ) != 5 )
+            lecroy_wr_comm_failure( );
 
-    len = lecroy_wr_get_int_value( ch, "WAVE_ARRAY_1" ) / 2;
-#endif
+        is_running = UNSET;
+    }
 
     /* Set up the number of points to be fetched - take care: the device
        always measures an extra point before and after the displayed region,
@@ -1474,54 +1471,78 @@ lecroy_wr_get_prep( int              ch,
         sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\r",
                  lecroy_wr_curve_length( ) );
 
+	to_send = strlen( cmd );
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+            lecroy_wr_comm_failure( );
+
+    /* Ask the device for the data... */
+
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        sprintf( cmd, "C%1d:WF? DAT1\r", ch - LECROY_WR_CH1 + 1 );
+    else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
+        sprintf( cmd, "M%d:WF? DAT1\r", ch - LECROY_WR_M1 + 1 );
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
+        sprintf( cmd, "T%c:WF? DAT1\r", ch - LECROY_WR_TA + 'A' );
+#else
+        sprintf( cmd, "F%1d:WF? DAT1\r", ch - LECROY_WR_TA + 1 );
+#endif
+    else
+        fsc2_impossible( );
+
     to_send = strlen( cmd );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
-    /* When a non-memory curve is to be fetched and the acquisition isn't
-       finished yet poll until the bit that tells that the acquisition for
-       the requested channel is finished has become set */
+    /* ...and fetch 'em */
 
-    if (    ! is_mem_ch
-         && ! ( can_fetch & bit_to_test ) )
-        while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
-        {
-            stop_on_user_request( );
-            fsc2_usleep( 20000, UNSET );
-        }
+    *data = lecroy_wr_get_data( length );
+    *length /= 2;          /* we got word sized (16 bit) data, LSB first */
+
+    /* Get the gain factor and offset for the date we just fetched */
 
     TRY
     {
-        /* Ask the device for the data... */
-
-        strcpy( cmd, ch_str );
-        strcat( cmd, ":WF? DAT1\r" );
-        to_send = strlen( cmd );
-        if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
-                                TIMEOUT_FROM_LENGTH( to_send ), SET )
-                                                                   != to_send )
-            lecroy_wr_comm_failure( );
-
-        /* ...and fetch 'em */
-
-        *data = lecroy_wr_get_data( length );
-        *length = ( *length - 2 ) / 4; /* we get hex encoded 16 bit data
-                                          (MSB first) with trailing <LF><CR> */
-
-        /* Get the gain factor and offset for the date we just fetched */
-
         *gain = lecroy_wr_get_float_value( ch, "VERTICAL_GAIN" );
         *offset = lecroy_wr_get_float_value( ch, "VERTICAL_OFFSET" );
-
         TRY_SUCCESS;
     }
     OTHERWISE
     {
-        if ( *data != NULL )
-            T_free( *data );
+        T_free( data );
         RETHROW( );
     }
+}
+
+
+/*--------------------------------------------------------------------*
+ * Function for checking if data of a channel are ready to be fetched
+ *--------------------------------------------------------------------*/
+
+static bool
+lecroy_wr_can_fetch( int ch )
+{
+#if ! defined LECROY_WR_IS_XSTREAM
+    unsigned int bit_to_test = 0;
+
+
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        bit_to_test |= LECROY_WR_SIGNAL_ACQ;
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+        bit_to_test |= LECROY_WR_PROC_DONE( ch );
+    else
+        fsc2_impossible( );
+
+    return ( lecroy_wr_get_inr( ) & bit_to_test ) ? SET : UNSET;
+#else
+    if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+        return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
+
+	return lecroy_wr_get_get_int_value( ch, "SWEEPS_PER_ACQ" )
+                                                    >= lecroy_wr.num_avg[ ch ];
+#endif
 }
 
 
@@ -1666,8 +1687,8 @@ lecroy_wr_get_amplitude( int        ch,
 
 
 /*---------------------------------------------------------------------*
- * Converts an array of 4 hexadecimal chars to a 16 bit signed integer *
- * (with the mostt sinificant byte in the first two chars)
+ * Converts an array of 4 hexadecimal chars to a 16 bit signed integer
+ * (with the most sinificant byte in the first two chars)
  *---------------------------------------------------------------------*/
 
 static int
@@ -1727,8 +1748,12 @@ lecroy_wr_copy_curve( long src,
     if ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
         sprintf( cmd + strlen( cmd ), "C%1ld,", src - LECROY_WR_CH1 + 1 );
     else
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd + strlen( cmd ), "T%c,",
                  ( char ) ( src - LECROY_WR_TA + 'A' ) );
+#else
+        sprintf( cmd + strlen( cmd ), "F%1ld,", src - LECROY_WR_TA + 1 );
+#endif
 
     sprintf( cmd + strlen( cmd ), "M%ld\r", dest - LECROY_WR_M1 + 1 );
 
@@ -1788,7 +1813,7 @@ lecroy_wr_get_data( long * len )
  * Function for obtaining an integer value from the waveform descriptor
  *----------------------------------------------------------------------*/
 
-#if 0
+#if defined LECROY_WR_IS_XSTREAM
 static long
 lecroy_wr_get_int_value( int          ch,
                          const char * name )
@@ -1807,7 +1832,11 @@ lecroy_wr_get_int_value( int          ch,
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:INSP? '%s'\r", ch - LECROY_WR_TA + 'A', name );
+#else
+        sprintf( cmd, "F%1d:INSP? '%s'\r", ch - LECROY_WR_TA + 1, name );
+#endif
     else
         fsc2_impossible( );
 
@@ -1856,7 +1885,11 @@ lecroy_wr_get_float_value( int          ch,
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+#if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:INSP? '%s'\r", ch - LECROY_WR_TA + 'A', name );
+#else
+        sprintf( cmd, "F%1d:INSP? '%s'\r", ch - LECROY_WR_TA + 1, name );
+#endif
     else
         fsc2_impossible( );
 
