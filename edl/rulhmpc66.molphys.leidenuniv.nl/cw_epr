@@ -1134,20 +1134,34 @@ IF magnet_sweep( ) {
 }
 
 IF J != 0 {
-	IF J == 1 {
-		FOR K = 1 : I - 1 {";
+	IF J == 1 {";
 	if ( $start_field < $end_field ) {
 		print F "
-			fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * step_size,";
+		FOR K = 1 : I - 1 {
+			fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * step_size,
+				   data[ 1, K ] );
+        }
+        end_field = start_field + ( I - 2 ) * step_size;
+		Num_Points = I - 1;";
 	} else {
 		print F "
-			fsave( File1, \"#,#\\n\", end_field - ( K - 1 ) * step_size,";
+		FOR K = 1 : Num_Points - I {
+			fsave( File1, \"#,#\\n\", end_field - ( I + K - 1 ) * step_size,
+				   data[ 1, I + K ] );
+	    }
+        end_field -= I * step_size;
+		Num_Points -= I;";
 	}
 	print F "
-				   data[ 1, K ] );
-		}
-	} ELSE {
-		IF I <= Num_Points {
+	} ELSE {";
+	if ( $start_field < $end_field ) {
+		print F "
+		IF ( J % 2 AND I <= Num_Points ) OR ( J % 2 == 0 AND I > 0 ) {";
+	} else {
+		print F "
+		IF ( J % 2 == 0 AND I <= Num_Points ) OR ( J % 2 AND I > 0 ) {";
+	}
+		print F "
 			J -= 1;
 		}
 
@@ -1189,7 +1203,7 @@ IF J != 0 {
 			       \"% Temperature at start:    # K\\n\"
 	    		   \"% Temperature at end:      # K\\n\",
 				   date(), time(),
-				   start_field, start_field + ( Num_Points - 1 ) * step_size,
+				   start_field, end_field,
 				   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
 			       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 				   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
@@ -1230,7 +1244,7 @@ IF J != 0 {
 	       \"% Temperature at start:    # K\\n\"
     	   \"% Temperature at end:      # K\\n\",
 		   date(), time(),
-		   start_field, start_field + ( Num_Points - 1 ) * step_size,
+		   start_field, end_field,
 		   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
 	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
