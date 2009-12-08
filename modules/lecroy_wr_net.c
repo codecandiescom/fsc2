@@ -1228,7 +1228,7 @@ lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
     else
-        fsc2_inmpossible( );
+        fsc2_impossible( );
 
     if (    on_off
          && lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
@@ -1317,8 +1317,11 @@ lecroy_wr_start_acquisition( void )
 		if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
             lecroy_wr_lan_failure( );
 
-        /* If we want to use a trace it must be switched on (but not the
-           channel that gets averaged) */
+        /* If we want to use a trace it must be switched on (not sure if
+           the source channel also must be on, but better take no risks) */
+
+        if ( ! lecroy_wr_is_displayed( lecroy_wr.source_ch[ ch ] ) )
+            lecroy_wr_display( lecroy_wr.source_ch[ ch ], SET );
 
         if ( ! lecroy_wr_is_displayed( ch ) )
             lecroy_wr_display( ch, SET );
@@ -1776,7 +1779,7 @@ lecroy_wr_get_data( long   * len,
     if ( length <= LECROY_WR_DESC_LENGTH )
     {
         print( FATAL, "Device sent invalid data.\n" );
-        THROW( EXCPEPTION );
+        THROW( EXCEPTION );
     }
 
     length -= LECROY_WR_DESC_LENGTH;
