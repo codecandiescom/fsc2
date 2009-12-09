@@ -35,7 +35,7 @@ LECROY_WR_T lecroy_wr;
 static LECROY_WR_T lecroy_wr_stored;
 
 
-const char *LECROY_WR_Channel_Names[ 15 ] = { "CH1",     "CH2",
+const char *LECROY_WR_Channel_Names[ 19 ] = { "CH1",     "CH2",
                                               "CH3",     "CH4",
 #if ! defined LECROY_WR_IS_XSTREAM
                                               "TRACE_A", "TRACE_B",
@@ -44,6 +44,8 @@ const char *LECROY_WR_Channel_Names[ 15 ] = { "CH1",     "CH2",
                                               "F1",      "F2",
                                               "F3",      "F4",
 #endif
+                                              "F5",      "F6",
+                                              "F7",      "F8",
                                               "M1",      "M2",
                                               "M3",      "M4"
                                               "LINE",    "EXT",
@@ -119,7 +121,7 @@ lecroy_wr_l_init_hook( void )
         lecroy_wr.bandwidth_limiter[ i ]    = LECROY_WR_TEST_BWL;
     }
 
-    for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
+    for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
     {
         lecroy_wr.channels_in_use[ i ] = UNSET;
         lecroy_wr.source_ch[ i ]       = LECROY_WR_CH1;
@@ -719,7 +721,8 @@ digitizer_sensitivity( Var_T * v )
     }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
@@ -800,7 +803,8 @@ digitizer_offset( Var_T * v )
     }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
@@ -881,7 +885,8 @@ digitizer_bandwidth_limiter( Var_T * v )
     }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
@@ -987,7 +992,8 @@ digitizer_coupling( Var_T * v )
     }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
@@ -1085,7 +1091,8 @@ digitizer_trigger_channel( Var_T * v )
         }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     switch ( channel )
     {
@@ -1133,7 +1140,8 @@ digitizer_trigger_level( Var_T * v )
 
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
     v = vars_pop( v );
 
     if ( channel == LECROY_WR_LIN ) {
@@ -1248,7 +1256,8 @@ digitizer_trigger_slope( Var_T * v )
 
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
     v = vars_pop( v );
 
     if ( channel == LECROY_WR_LIN ) {
@@ -1330,7 +1339,8 @@ digitizer_trigger_coupling( Var_T * v )
 
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
     v = vars_pop( v );
 
@@ -1563,13 +1573,14 @@ digitizer_averaging( Var_T * v )
     /* Get the channel to use for averaging */
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                               get_strict_long( v, "channel" ),
+                                           UNSET );
 
-    if ( channel < LECROY_WR_TA && channel > LECROY_WR_TD )
+    if ( channel < LECROY_WR_TA && channel > LECROY_WR_MAX_FTRACE )
     {
         print( FATAL, "Averaging can only be done with channels %s to %s.\n",
                LECROY_WR_Channel_Names[ LECROY_WR_TA ],
-               LECROY_WR_Channel_Names[ LECROY_WR_TD ] );
+               LECROY_WR_Channel_Names[ LECROY_WR_MAX_FTRACE ] );
         THROW( EXCEPTION );
     }
 
@@ -1592,7 +1603,8 @@ digitizer_averaging( Var_T * v )
     }
 
     source_ch = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                             get_strict_long( v, "channel" ),
+                                             UNSET );
 
     if ( source_ch < LECROY_WR_CH1 || source_ch > LECROY_WR_CH_MAX )
     {
@@ -1662,13 +1674,14 @@ digitizer_num_averages( Var_T * v )
     }
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                           get_strict_long( v, "channel" ),
+                                           UNSET );
 
-    if ( channel < LECROY_WR_TA || channel > LECROY_WR_TD )
+    if ( channel < LECROY_WR_TA || channel > LECROY_WR_MAX_FTRACE )
     {
         print( FATAL, "Averaging can only be done using channels %s to %s.\n",
                LECROY_WR_Channel_Names[ LECROY_WR_TA ],
-               LECROY_WR_Channel_Names[ LECROY_WR_TD ] );
+               LECROY_WR_Channel_Names[ LECROY_WR_MAX_FTRACE ] );
         THROW( EXCEPTION );
     }
 
@@ -1704,7 +1717,8 @@ digitizer_meas_channel_ok( Var_T * v )
     flag = v->next != NULL;
 
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                                get_strict_long( v, "channel number" ), flag );
+                                           get_strict_long( v, "channel" ),
+                                           flag );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         return vars_push( INT_VAR, 1L );
@@ -1725,10 +1739,11 @@ digitizer_copy_curve( Var_T * v )
 
 
     src = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                        get_strict_long( v, "source channel number" ), UNSET );
+                                       get_strict_long( v, "source channel" ),
+                                       UNSET );
 
     if (    ! ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
-         && ! ( src >= LECROY_WR_TA && src >= LECROY_WR_TD ) )
+         && ! ( src >= LECROY_WR_TA && src >= LECROY_WR_MAX_FTRACE ) )
     {
         print( FATAL, "Invalid source channel %s, must be one of the "
                "measurement or "
@@ -1744,7 +1759,7 @@ digitizer_copy_curve( Var_T * v )
     v = vars_pop( v );
 
     dest = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                   get_strict_long( v, "destination channel number" ), UNSET );
+                           get_strict_long( v, "destination channel" ), UNSET );
 
     if (    dest != LECROY_WR_M1 && dest != LECROY_WR_M2
          && dest != LECROY_WR_M3 && dest != LECROY_WR_M4 )
@@ -1799,18 +1814,19 @@ digitizer_get_curve( Var_T * v )
     }
 
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                              get_strict_long( v, "channel" ),
+                                              UNSET );
 
     if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
              || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
-             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) ) )
     {
         print( FATAL, "Can't fetch curve from channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE
          && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
@@ -1897,18 +1913,19 @@ digitizer_get_area( Var_T * v )
     }
 
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                              get_strict_long( v, "channel" ),
+                                              UNSET );
 
     if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
              || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
-             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) ) )
     {
         print( FATAL, "Can't determine area from channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE
          && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
@@ -2052,18 +2069,19 @@ digitizer_get_amplitude( Var_T * v )
     }
 
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
-                               get_strict_long( v, "channel number" ), UNSET );
+                                              get_strict_long( v, "channel" ),
+                                              UNSET );
 
     if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
              || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
-             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) ) )
     {
         print( FATAL, "Can't determine amplitude for channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE
          && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "

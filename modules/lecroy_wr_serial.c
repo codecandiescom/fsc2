@@ -1355,8 +1355,11 @@ lecroy_wr_start_acquisition( void )
                                                                    != to_send )
             lecroy_wr_comm_failure( );
 
-        /* If we want to use a trace it must be switched on (but not the
-           channel that gets averaged) */
+        /* If we want to use a trace it must be switched on (not sure if
+           the source channel also must be on, but better take no risks) */
+
+        if ( ! lecroy_wr_is_displayed( lecroy_wr.source_ch[ ch ] ) )
+            lecroy_wr_display( lecroy_wr.source_ch[ ch ], SET );
 
         if ( ! lecroy_wr_is_displayed( ch ) )
             lecroy_wr_display( ch, SET );

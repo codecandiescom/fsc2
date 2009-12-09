@@ -104,7 +104,7 @@ lecroy_wr_init( const char * name )
         for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
             lecroy_wr.is_displayed[ i ] = UNSET;
 
-        for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
+        for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
@@ -1183,7 +1183,7 @@ lecroy_wr_is_displayed( int ch )
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRA?\n", ch - LECROY_WR_CH1 + 1 );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE )
 #if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA?\n", ch - LECROY_WR_TA + 'A' );
 #else
@@ -1216,7 +1216,7 @@ lecroy_wr_display( int ch,
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRA ", ch - LECROY_WR_CH1 + 1 );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE )
 #if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:TRA ", ch - LECROY_WR_TA + 'A' );
 #else
@@ -1292,7 +1292,7 @@ lecroy_wr_start_acquisition( void )
     /* Set up the parameter to be used for averaging for the function channels
        (as far as they have been set by the user) */
 
-    for ( ch = LECROY_WR_TA; ch <= LECROY_WR_TD; ch++ )
+    for ( ch = LECROY_WR_TA; ch <= LECROY_WR_MAX_FTRACE; ch++ )
     {
         if ( ! lecroy_wr.is_avg_setup[ ch ] )
             continue;
@@ -1446,7 +1446,7 @@ lecroy_wr_get_prep( int              ch,
         sprintf( cmd, "C%1d:WF?\n", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
         sprintf( cmd, "M%d:WF?\n", ch - LECROY_WR_M1 + 1 );
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE )
 #if ! defined LECROY_WR_IS_XSTREAM
         sprintf( cmd, "T%c:WF?\n", ch - LECROY_WR_TA + 'A' );
 #else
@@ -1485,7 +1485,7 @@ lecroy_wr_get_avg_count( int ch )
     bool with_eoi;
 
 
-    fsc2_assert( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD );
+    fsc2_assert( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE );
 
 #if ! defined LECROY_WR_IS_XSTREAM
     sprintf( cmd, "T%c:WF? DESC\n", ch - LECROY_WR_TA + 'A' );
@@ -1562,7 +1562,7 @@ lecroy_wr_can_fetch( int ch )
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         bit_to_test |= LECROY_WR_SIGNAL_ACQ;
-    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
+    else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE )
         bit_to_test |= LECROY_WR_PROC_DONE( ch );
     else
         fsc2_impossible( );
@@ -1715,7 +1715,7 @@ lecroy_wr_copy_curve( long src,
 
 
     fsc2_assert(    ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
-                 || ( src >= LECROY_WR_TA && src <= LECROY_WR_TD ) );
+                 || ( src >= LECROY_WR_TA && src <= LECROY_WR_MAX_FTRACE ) );
     fsc2_assert( dest >= LECROY_WR_M1 && dest <= LECROY_WR_M4 );
 
 
