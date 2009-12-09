@@ -190,7 +190,9 @@ main( void )
     fd_set fds;
     struct timeval timeout;
     char err_msg[ GPIB_ERROR_BUFFER_LENGTH ];
-
+#ifndef NDEBUG
+    const char *gd;
+#endif
 
     /* Ignore all signals */
 
@@ -221,6 +223,18 @@ main( void )
         unlink( GPIBD_SOCK_FILE );
         return EXIT_FAILURE;
     }
+
+#ifndef NDEBUG
+    /* Setting the environment variable GPIBD_DEBUG to a non-empty string
+       will induce the program to stop, making it possible to attach with
+       a debugger at this point. */
+
+    if ( ( gd = getenv( "GPIBD_DEBUG" ) ) != NULL && *gd != '\0' )
+    {
+        fprintf( stderr, "gpibd process pid = %d\n", getpid( ) );
+        raise( SIGSTOP );
+    }
+#endif
 
     /* Send parent a signal to tell it we're listening on the socket */
 
