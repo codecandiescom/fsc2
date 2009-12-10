@@ -1381,14 +1381,29 @@ lecroy_wr_get_prep( int              ch,
 
     if ( ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 ) && is_running )
     {
+        int i;
+
         while ( ! lecroy_wr_can_fetch( ch ) )
             stop_on_user_request( );
 
-        /* Stop acquisition (seems to speed up reading the data a bit) */
+        /* Stop acquisition (seems to speed up reading the data a bit) -
+           but only if no other channel may need continued averaging! */
 
-        if ( gpib_write( lecroy_wr.device, "STOP", 4 ) == FAILURE )
-            lecroy_wr_comm_failure( );
-        is_running = UNSET;
+        for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
+            if (    (    ch >= LECROY_WR_CH1
+                      && ch <= LECROY_WR_CH_MAX
+                      && lecroy_wr.is_avg_setup[ i ] )
+                 || (    ch >= LECROY_WR_TA
+                      && ch <= LECROY_WR_TD
+                      && lecroy_wr.num_avg[ ch ] > lecroy_wr.num_avg[ i ] ) )
+                break;
+
+        if ( i > LECROY_WR_TD )
+        {
+            if ( gpib_write( lecroy_wr.device, "STOP", 4 ) == FAILURE )
+                lecroy_wr_comm_failure( );
+            is_running = UNSET;
+        }
     }
 
     /* Set up the number of points to be fetched - take care: the device
