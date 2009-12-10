@@ -1442,8 +1442,7 @@ lecroy_wr_get_prep( int              ch,
     ssize_t to_send;
 
 
-    /* When a non-memory curve is to be fetched and an acquisition was started
-       check if it's finished */
+    /* Make sure a normal channel is switched on, otherwise no data ge send */
 
     if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH4 )
          && ! lecroy_wr.is_displayed[ ch ] )
@@ -1451,6 +1450,9 @@ lecroy_wr_get_prep( int              ch,
         lecroy_wr_display( ch, SET );
         lecroy_wr.is_displayed[ ch ] = SET;
     }
+
+    /* When a non-memory curve is to be fetched and an acquisition was started
+       check if it's finished */
 
     if ( ! ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 ) && is_running )
     {
@@ -1463,12 +1465,12 @@ lecroy_wr_get_prep( int              ch,
            but only if no other channel may need continued averaging! */
 
         for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
-            if (    (    ch >= LECROY_WR_CH1
-                      && ch <= LECROY_WR_CH_MAX
-                      && lecroy_wr.is_avg_setup[ i ] )
-                 || (    ch >= LECROY_WR_TA
-                      && ch <= LECROY_WR_TD
-                      && lecroy_wr.num_avg[ ch ] > lecroy_wr.num_avg[ i ] ) )
+            if (    lecroy_wr.is_avg_setup[ i ]
+                 && (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+                      || (    ch >= LECROY_WR_TA
+                           && ch <= LECROY_WR_TD
+                           && lecroy_wr.num_avg[ i ] >
+                                                 lecroy_wr.num_avg[ ch ] ) ) )
                 break;
 
         if ( i > LECROY_WR_TD )
