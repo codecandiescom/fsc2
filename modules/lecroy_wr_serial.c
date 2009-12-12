@@ -89,7 +89,7 @@ bool
 lecroy_wr_init( void )
 {
     int i;
-    int extra_needed_channels
+    int extra_needed_channels;
 
 
     if ( ! lecroy_wr_serial_open( ) )
