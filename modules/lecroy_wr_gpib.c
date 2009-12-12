@@ -58,6 +58,7 @@ lecroy_wr_init( const char * name )
     char buf[ 100 ];
     long len = sizeof buf;
     int i;
+    int extra_needed_channels = 0;
 
 
     if ( gpib_init_device( name, &lecroy_wr.device ) == FAILURE )
@@ -86,27 +87,61 @@ lecroy_wr_init( const char * name )
         lecroy_wr.num_used_channels = 0;
 
         for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
-        {
-            lecroy_wr.is_displayed[ i ] = UNSET;
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
                 lecroy_wr.num_used_channels++;
             }
-        }
+            else
+            {
+                lecroy_wr.is_displayed[ i ] = UNSET;
+                if ( lecroy_wr.is_used[ i ] )
+                    extra_needed_channels++;
+            }
 
         for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
             lecroy_wr.is_displayed[ i ] = UNSET;
 
         for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
-        {
-            lecroy_wr.is_displayed[ i ] = UNSET;
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
                 lecroy_wr.num_used_channels++;
             }
+            else
+            {
+                lecroy_wr.is_displayed[ i ] = UNSET;
+                if ( lecroy_wr.is_used[ i ] )
+                    extra_needed_channels++;
+            }
+
+        if ( lecroy_wr.num_used_channels + extra_needed_channels >
+                                                  LECROY_WR_MAX_USED_CHANNELS )
+        {
+            print( FATAL, "Not all channels needed for the experiment can be "
+                   "displayed, switch off at least %d unused channels.\n",
+                   lecroy_wr.num_used_channels + extra_needed_channels
+                   - LECROY_WR_MAX_USED_CHANNELS );
+            THROW( EXCEPTION );
         }
+
+        /* Switch on all channels we know from the test run will be needed */
+
+        for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
+            if ( lecroy_wr.is_used[ i ] && ! lecroy_wr.is_displayed[ i ] )
+            {
+                lecroy_wr_display( i, SET );
+                lecroy_wr.is_displayed[ i ] = SET;
+                lecroy_wr.num_used_channels++;
+            }
+
+        for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
+            if ( lecroy_wr.is_used[ i ] && ! lecroy_wr.is_displayed[ i ] )
+            {
+                lecroy_wr_display( i, SET );
+                lecroy_wr.is_displayed[ i ] = SET;
+                lecroy_wr.num_used_channels++;
+            }
 
         /* Make sure the internal timebase is used */
 

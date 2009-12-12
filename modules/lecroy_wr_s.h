@@ -284,11 +284,12 @@ extern int trg_channels[ 5 ];
 
 /* declaration of exported functions */
 
-int lecroy_wr_s_init_hook(       void );
-int lecroy_wr_s_test_hook(       void );
-int lecroy_wr_s_exp_hook(        void );
-int lecroy_wr_s_end_of_exp_hook( void );
-void lecroy_wr_s_exit_hook(      void );
+int lecroy_wr_s_init_hook(        void );
+int lecroy_wr_s_test_hook(        void );
+int lecroy_wr_s_end_of_test_hook( void );
+int lecroy_wr_s_exp_hook(         void );
+int lecroy_wr_s_end_of_exp_hook(  void );
+void lecroy_wr_s_exit_hook(       void );
 
 
 Var_T * digitizer_name(              Var_T * /* v */ );

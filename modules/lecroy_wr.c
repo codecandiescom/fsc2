@@ -128,7 +128,7 @@ lecroy_wr_init_hook( void )
         lecroy_wr.coupling[ i ]             = LECROY_WR_TEST_COUPLING;
         lecroy_wr.is_bandwidth_limiter[ i ] = UNSET;
         lecroy_wr.bandwidth_limiter[ i ]    = LECROY_WR_TEST_BWL;
-        lecroy_wr.is_used[ i ]              = UNSET;
+        lecroy_wr_stored.is_used[ i ]       = UNSET;
     }
 
     for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
@@ -136,7 +136,7 @@ lecroy_wr_init_hook( void )
         lecroy_wr.channels_in_use[ i ] = UNSET;
         lecroy_wr.source_ch[ i ]       = LECROY_WR_CH1;
         lecroy_wr.is_avg_setup[ i ]    = UNSET;
-        lecroy_wr.is_used[ i ]         = UNSET;
+        lecroy_wr_stored.is_used[ i ]  = UNSET;
     }
 
     for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
@@ -169,6 +169,26 @@ int
 lecroy_wr_test_hook( void )
 {
     lecroy_wr_store_state( &lecroy_wr_stored, &lecroy_wr );
+    return 1;
+}
+
+
+/*------------------------------------------*
+ * End of test hook function for the module
+ *------------------------------------------*/
+
+int
+lecroy_wr_end_of_test_hook( void )
+{
+    int i;
+
+
+    for ( i = LECROY_WR_CH1; i < LECROY_WR_CH_MAX; i++ )
+        lecroy_wr_stored.is_used[ i ] = lecroy_wr.is_used[ i ];
+
+    for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
+        lecroy_wr_stored.is_used[ i ] = lecroy_wr.is_used[ i ];
+
     return 1;
 }
 
