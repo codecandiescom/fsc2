@@ -1233,8 +1233,9 @@ lecroy_wr_display( int ch,
     if (    on_off
          && lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
     {
-        print( FATAL, "Can't switch on another trace, there are already as "
+        print( FATAL, "Can't switch on channel %s, there are already as "
                "many as possible (%d) displayed.\n",
+               LECROY_WR_Channel_Names[ ch ],
                LECROY_WR_MAX_USED_CHANNELS );
         THROW( EXCEPTION );
     }

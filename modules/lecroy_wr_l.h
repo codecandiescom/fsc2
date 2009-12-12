@@ -203,6 +203,7 @@ struct LECROY_WR {
     bool is_displayed[ LECROY_WR_MAX_CHANNELS ];
 
     int num_used_channels;
+    bool is_used[ LECROY_WR_MAX_CHANNELS ];
 
     double timebase;
     int tb_index;           /* index into 'tbas' for current timebase */
@@ -252,7 +253,7 @@ struct LECROY_WR {
     long source_ch[ LECROY_WR_MAX_CHANNELS ];
     long num_avg[ LECROY_WR_MAX_CHANNELS ];
 
-    Window_T *w;           /* start element of list of windows               */
+    Window_T *w;           /* start element of list of windows */
     int num_windows;
 
     bool channels_in_use[ LECROY_WR_MAX_CHANNELS ];
@@ -278,31 +279,12 @@ enum {
 };
 
 
-#if defined LECROY_WR_MAIN_
-#if defined LECROY_WR_CH3 && defined LECROY_WR_CH4
-int trg_channels[ 7 ] = { LECROY_WR_CH1,
-                          LECROY_WR_CH2,
-                          LECROY_WR_CH3,
-                          LECROY_WR_CH4,
-                          LECROY_WR_LIN,
-                          LECROY_WR_EXT,
-                          LECROY_WR_EXT10
-                        };
-#else
-int trg_channels[ 5 ] = { LECROY_WR_CH1,
-                          LECROY_WR_CH2,
-                          LECROY_WR_LIN,
-                          LECROY_WR_EXT,
-                          LECROY_WR_EXT10
-                        };
-#endif
-#else
 #if defined LECROY_WR_CH3 && defined LECROY_WR_CH4
 extern int trg_channels[ 7 ];
 #else
 extern int trg_channels[ 5 ];
 #endif
-#endif
+
 
 /* declaration of exported functions */
 

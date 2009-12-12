@@ -20,7 +20,6 @@
  */
 
 
-#define LECROY_WR_MAIN_
 #include "lecroy_wr_l.h"
 
 
@@ -35,21 +34,32 @@ LECROY_WR_T lecroy_wr;
 static LECROY_WR_T lecroy_wr_stored;
 
 
-const char *LECROY_WR_Channel_Names[ 19 ] = { "CH1",     "CH2",
-                                              "CH3",     "CH4",
+const char *LECROY_WR_Channel_Names[ ] = { "CH1",     "CH2",
+                                           "CH3",     "CH4",
 #if ! defined LECROY_WR_IS_XSTREAM
-                                              "TRACE_A", "TRACE_B",
-                                              "TRACE_C", "TRACE_D",
+                                           "TRACE_A", "TRACE_B",
+                                           "TRACE_C", "TRACE_D",
 #else
-                                              "F1",      "F2",
-                                              "F3",      "F4",
+                                           "F1",      "F2",
+                                           "F3",      "F4",
 #endif
-                                              "F5",      "F6",
-                                              "F7",      "F8",
-                                              "M1",      "M2",
-                                              "M3",      "M4"
-                                              "LINE",    "EXT",
-                                              "EXT10" };
+                                           "F5",      "F6",
+                                           "F7",      "F8",
+                                           "M1",      "M2",
+                                           "M3",      "M4"
+                                           "LINE",    "EXT",
+                                           "EXT10" };
+
+int trg_channels[ ] = { LECROY_WR_CH1,
+                        LECROY_WR_CH2,
+#if defined LECROY_WR_CH3 && defined LECROY_WR_CH4
+                        LECROY_WR_CH3,
+                        LECROY_WR_CH4,
+#endif
+                        LECROY_WR_LIN,
+                        LECROY_WR_EXT,
+                        LECROY_WR_EXT10
+                      };
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
@@ -119,6 +129,7 @@ lecroy_wr_l_init_hook( void )
         lecroy_wr.coupling[ i ]             = LECROY_WR_TEST_COUPLING;
         lecroy_wr.is_bandwidth_limiter[ i ] = UNSET;
         lecroy_wr.bandwidth_limiter[ i ]    = LECROY_WR_TEST_BWL;
+        lecroy_wr.is_used[ i ]              = UNSET;
     }
 
     for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
@@ -126,6 +137,7 @@ lecroy_wr_l_init_hook( void )
         lecroy_wr.channels_in_use[ i ] = UNSET;
         lecroy_wr.source_ch[ i ]       = LECROY_WR_CH1;
         lecroy_wr.is_avg_setup[ i ]    = UNSET;
+        lecroy_wr.is_used[ i ]         = UNSET;
     }
 
     for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
@@ -1878,10 +1890,21 @@ digitizer_get_curve( Var_T * v )
         else
             length = lecroy_wr_curve_length( );
         array = T_malloc( length * sizeof *array );
+
         for ( i = 0; i < length; i++ )
             array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+
         nv = vars_push( FLOAT_ARR, array, length );
         nv->flags |= IS_DYNAMIC;
+
+        /* Mark all involved channels as used */
+
+        if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) )
+            lecroy_wr.is_used[ ch ] = SET;
+
+        if ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE )
+            lecroy_wr.is_used[ lecroy_wr.source_ch[ ch ] ] = SET;
     }
 
     T_free( array );
@@ -2002,6 +2025,15 @@ digitizer_get_area( Var_T * v )
                 ret->val.dpnt[ i++ ] = 1.234e-8;
             }
         }
+
+        /* Mark all involved channels as used */
+
+        if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) )
+            lecroy_wr.is_used[ ch ] = SET;
+
+        if ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE )
+            lecroy_wr.is_used[ lecroy_wr.source_ch[ ch ] ] = SET;
 
         return ret;
     }
@@ -2157,6 +2189,15 @@ digitizer_get_amplitude( Var_T * v )
                 ret->val.dpnt[ i++ ] = 1.234e-7;
             }
         }
+
+        /* Mark all involved channels as used */
+
+        if (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE ) )
+            lecroy_wr.is_used[ ch ] = SET;
+
+        if ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_MAX_FTRACE )
+            lecroy_wr.is_used[ lecroy_wr.source_ch[ ch ] ] = SET;
 
         return ret;
     }

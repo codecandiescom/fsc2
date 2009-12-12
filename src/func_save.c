@@ -166,7 +166,8 @@ f_openf( Var_T * v )
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
         goto got_file;
 
-    if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+    if (    Fsc2_Internals.cmdline_flags & BATCH_MODE
+         || Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return batch_mode_file_open( *fn == '\0' ? NULL : fn );
 
     if ( *fn == '\0' )
@@ -192,23 +193,23 @@ f_openf( Var_T * v )
         switch( errno )
         {
             case EMFILE :
-                show_message( "Sorry, you have too many open files!\n"
+                show_message( "   You have too many open files!\n"
                               "Please close at least one and retry." );
                 break;
 
             case ENFILE :
-                show_message( "Sorry, system limit for open files exceeded!\n"
+                show_message( "The system limit for open files is exceeded!\n"
                               " Please try to close some files and retry." );
                 break;
 
             case ENOSPC :
-                show_message( "Sorry, no space left on device for more file!\n"
-                              "    Please delete some files and retry." );
+                show_message( "No space left on device for more file!\n"
+                              "  Please delete some files and retry." );
                 break;
 
             default :
-                show_message( "Sorry, can't open selected file for writing!\n"
-                              "       Please select a different file." );
+                show_message( "Can't open selected file for writing!\n"
+                              "    Please select a different file." );
         }
 
         return f_getf( v->next );
@@ -345,7 +346,8 @@ f_getf( Var_T * v )
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
         goto got_file;
 
-    if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+    if (    Fsc2_Internals.cmdline_flags & BATCH_MODE
+         || Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return batch_mode_file_open( NULL );
 
     /* First string is the message */
@@ -753,6 +755,10 @@ batch_mode_file_open( char * name )
     }
 
     /* Now try to open the new file, if this fails we must give up */
+
+    if ( strcmp( name, new_name ) )
+        fprintf( stderr, "Opening file '%s' instead of requested file '%s'!\n",
+                 new_name, name );
 
     if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
     {
