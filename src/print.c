@@ -736,6 +736,8 @@ print_header( FILE       * fp,
     struct utsname un;
 
 
+    CLOBBER_PROTECT( fp );
+
     /* Writes EPS header plus some routines into the file */
 
     d = time( NULL );
