@@ -35,10 +35,10 @@
 /*--------------------------------*/
 
 
-/* MAGIC_WL / grooves_per_mm defines the maximum wavelength allowed.
+/* MAGIC_WL / grooves_per_mm defines the maximum wavelength [m] allowed,
    some safety margin included */
 
-#define MAGIC_WL 1650000.0
+#define MAGIC_WL 1.65e-3
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -59,7 +59,7 @@ Var_T * monochromator_wavelength(       Var_T * /* v */ );
 
 
 /* ------------------------------------------- */
-/* structure to keep track of current settimgs */
+/* Structure to keep track of current settimgs */
 /* ------------------------------------------- */
 
 struct SPECTRAPRO_275 {
@@ -67,18 +67,17 @@ struct SPECTRAPRO_275 {
     bool is_needed;         /* is the monochromator needed at all? */
     bool is_open;           /* is the device file open ? */
     struct termios *tio;    /* serial port terminal interface structure */
-    double wavelength;      /* current wavelength [nm]*/
+    double wavelength;      /* current wavelength [m]*/
     bool is_wavelength;     /* wavelength has been set */
     long current_gn;        /* current grating number, range 1-3 */
-    double max_wl;          /* maximum wavelength of current grating */
-    bool is_grating;        /* grating has been set */
+    double max_wl;          /* maximum wavelength [m] of current grating */
 };
 
 static struct SPECTRAPRO_275 spectrapro_275, spectrapro_275_stored;
 
 
 /* -------------------------- */
-/* local, low level functions */
+/* Local, low level functions */
 /* -------------------------- */
 
 static double spectrapro_275_get_wavelength( void );
@@ -127,10 +126,10 @@ spectrapro_275_init_hook( void )
     spectrapro_275.is_needed = SET;
     spectrapro_275.is_open = UNSET;
 
-    /* initialize grating / wavelength with some default values used in TEST
-       but mark them as ununsed. in PREPARATION they can be set in this
-       structure, but not yet transmitted to the monochromator. in this
-       case they will be marked as SET und the data will be tranferred
+    /* Initialize structure with reasonable values used in TEST.
+       in PREPARATION the wavelength can be set in this structure,
+       but not yet transmitted to the monochromator. in this
+       case it will be marked as SET und the data will be tranferred
        in the 'exp_hook'. */
 
     spectrapro_275.wavelength = 0.0;
@@ -138,7 +137,6 @@ spectrapro_275_init_hook( void )
 
     spectrapro_275.current_gn = 1;
     spectrapro_275.max_wl = 1.0e-5;    /* 10 um */
-    spectrapro_275.is_grating = UNSET;
 
     return 1;
 }
@@ -176,14 +174,10 @@ spectrapro_275_exp_hook( void )
     else
         spectrapro_275.wavelength = spectrapro_275_get_wavelength( );
 
-    /* If a grating was set during the PREPARATIONS section set it now.
-       otherwise set the current value in the structure */
+    /* Query currently selected grating and set its maximum wavelength
+       allowed */
 
-    if ( spectrapro_275.is_grating )
-        spectrapro_275_set_grating( spectrapro_275.current_gn );
-    else
-        spectrapro_275.current_gn = spectrapro_275_get_grating( );
-
+    spectrapro_275.current_gn = spectrapro_275_get_grating( );
     spectrapro_275_store_max_wl( );
 
     return 1;
@@ -202,7 +196,6 @@ spectrapro_275_end_of_exp_hook( void )
     spectrapro_275_close( );
 
     spectrapro_275.is_wavelength = UNSET;
-    spectrapro_275.is_grating = UNSET;
 
     return 1;
 }
@@ -250,18 +243,12 @@ monochromator_grating( Var_T * v )
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE == EXPERIMENT ) {
+    if ( FSC2_MODE == EXPERIMENT )
+    {
         spectrapro_275_set_grating( gn );
         spectrapro_275.current_gn = gn;
         spectrapro_275_store_max_wl( );
     }
-    
-    if ( FSC2_MODE == PREPARATION )  /* only store in structure and mark SET */
-	{
-        spectrapro_275.current_gn = gn;
-        spectrapro_275.is_grating = SET;
-    }
-
     return vars_push( INT_VAR, gn );
 }
 
@@ -305,13 +292,15 @@ monochromator_wavelength( Var_T * v )
     {
         if ( FSC2_MODE == TEST )
         {
-            print( FATAL, "Wavelength of %.2f nm is too large, maximum "
-                   "wavelength is %.2f nm.\n",  wl, spectrapro_275.max_wl );
+            print( FATAL, "Wavelength of %.2f nm is too large, "
+	           "maximum wavelength is %.2f nm.\n",
+		   1.0e9 * wl, 1.0e9 * spectrapro_275.max_wl );
             THROW( EXCEPTION );
         }
 
-        print( SEVERE, "Wavelength of %.2f nm is too large, using %.2f nm "
-               "instead.\n", wl, spectrapro_275.max_wl );
+        print( SEVERE, "Wavelength of %.2f nm is too large, "
+	       "using %.2f nm instead.\n",
+	       1.0e9 * wl, 1.0e9 * spectrapro_275.max_wl );
         wl = spectrapro_275.max_wl;
     }
 
@@ -345,7 +334,7 @@ spectrapro_275_get_wavelength( void )
     reply = spectrapro_275_talk( "?NM", 100 );
     wl =  T_atod( reply );
     T_free( reply );
-    return wl;
+    return 1.0e-9 * wl;
 }
 
 
@@ -464,6 +453,11 @@ spectrapro_275_store_max_wl( void )
 
     start += 2;
     
+    /* ...skip spaces... */
+
+    while ( isspace( ( unsigned char ) *start ) )
+        start++;
+
     /* ...and read the next number as grooves per mm */
 
     gr_mm = 0;

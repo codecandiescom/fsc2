@@ -1,11 +1,4 @@
 TODO:
-- setting / checking the maximum wavelength allowed does not work yet.
-  the data are not stored in the structure or ar being overwritten by
-  the initial settings.
-  the device returns 'BAD' in this case but does not get damaged but
-  the experiment unexpectedly terminates.
-- setting the grating should probably be allowed (and done) in the
-  PREPARATION section as it takes about 50-60 seconds.
 - all low level communication functions are identical with the 300i.
   this part of the code should probably be refactored.
 
