@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2002-2009 Jens Thoms Toerring
+ *  Copyright (C) 2002-2010 Jens Thoms Toerring
  * 
  *  This library should simplify accessing ME6000 and ME6100 DAC boards
  *  by Meilhaus Electronic GmbH by avoiding to be forced to make ioctl()
