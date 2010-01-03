@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2009 Sergey Veber, Jens Thoms Toerring
+ *  Copyright (C) 2006-2010 Sergey Veber, Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *

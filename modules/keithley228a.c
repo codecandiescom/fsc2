@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2009 Jens Thoms Toerring
+ *  Copyright (C) 1999-2010 Jens Thoms Toerring
  *
  *  Thanks to Anton Savitsky for re-measuring the data for the corrections
  *  and including them into the code.

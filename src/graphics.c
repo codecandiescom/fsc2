@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2009 Jens Thoms Toerring
+ *  Copyright (C) 1999-2010 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -22,7 +22,7 @@
 
 #include "fsc2.h"
 
-#include "cursor1.xbm"             /* bitmaps for cursors */
+#include "cursor1.xbm"             /* bitmaps for different cursors */
 #include "cursor2.xbm"
 #include "cursor3.xbm"
 #include "cursor4.xbm"
@@ -63,22 +63,21 @@ static Graphics_2d_T *G_2d_stored = NULL;
 static bool display_has_been_shown = UNSET;
 
 static struct {
-    unsigned int WIN_MIN_1D_WIDTH;
-    unsigned int WIN_MIN_2D_WIDTH;
-    unsigned int WIN_MIN_HEIGHT;
-    unsigned int CURVE_BUTTON_HEIGHT;
+    unsigned int   win_min_1d_width;
+    unsigned int   win_min_2d_width;
+    unsigned int   win_min_height;
+    unsigned int   curve_button_height;
 
-    int SMALL_FONT_SIZE;
+    int            small_font_size;
 
-    const char *DEFAULT_AXISFONT_1;
-    const char *DEFAULT_AXISFONT_2;
-    const char *DEFAULT_AXISFONT_3;
+    const char   * default_axisfont_1;
+    const char   * default_axisfont_2;
+    const char   * default_axisfont_3;
 
-    int display_x,
-        display_y;
-
-    unsigned int display_w,
-                 display_h;
+    int            display_x,
+                   display_y;
+    unsigned int   display_w,
+                   display_h;
 } GI;
 
 
@@ -201,21 +200,21 @@ start_graphics( void )
     if ( G.dim & 1 || ! G.is_init )
     {
         if ( ! G.is_init || G_1d.nc == 1 )
-            diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+            diff = MAX_CURVES * GI.curve_button_height;
         else
-            diff = ( MAX_CURVES - G_1d.nc ) * GI.CURVE_BUTTON_HEIGHT;
+            diff = ( MAX_CURVES - G_1d.nc ) * GI.curve_button_height;
         fl_winminsize( GUI.run_form_1d->run_1d->window,
-                       GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
+                       GI.win_min_1d_width, GI.win_min_height - diff );
     }
 
     if ( G.dim & 2 )
     {
         if ( G_2d.nc == 1 )
-            diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+            diff = MAX_CURVES * GI.curve_button_height;
         else
-            diff = ( MAX_CURVES - G_2d.nc ) * GI.CURVE_BUTTON_HEIGHT;
+            diff = ( MAX_CURVES - G_2d.nc ) * GI.curve_button_height;
         fl_winminsize( GUI.run_form_2d->run_2d->window,
-                       GI.WIN_MIN_2D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
+                       GI.win_min_2d_width, GI.win_min_height - diff );
     }
 
     if ( G.dim & 1 )
@@ -276,7 +275,8 @@ start_graphics( void )
 
 /*-----------------------------------------------------------------------*
  * Loads user defined font for the axis and label. If this font can't be
- * loaded tries some default fonts hopefully available on all machines.
+ * loaded some default fonts hopefully available on all machines are
+ * tried instead.
  *-----------------------------------------------------------------------*/
 
 static void
@@ -297,11 +297,11 @@ fonts_init( void )
     /* If that didn't work out try to use one of the default fonts */
 
     if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
+        G.font = XLoadQueryFont( G.d, GI.default_axisfont_1 );
     if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
+        G.font = XLoadQueryFont( G.d, GI.default_axisfont_2 );
     if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
+        G.font = XLoadQueryFont( G.d, GI.default_axisfont_3 );
 
     /* Try to figure out how much the font extends above and below the
        baseline (if it was possible to load a font) */
@@ -349,42 +349,42 @@ set_default_sizes( void )
 
         if ( * ( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
         {
-            flags = XParseGeometry(
-                               ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var,
-                               &x, &y, &w, &h );
+            flags =
+                XParseGeometry( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var,
+                                &x, &y, &w, &h );
 
             if ( WidthValue & flags && HeightValue & flags )
             {
-                GUI.display_1d_width  = w;
-                GUI.display_1d_height = h;
+                GUI.display_1d_width    = w;
+                GUI.display_1d_height   = h;
                 GUI.display_1d_has_size = SET;
             }
 
             if ( XValue & flags && YValue & flags )
             {
-                GUI.display_1d_x = x;
-                GUI.display_1d_y = y;
+                GUI.display_1d_x       = x;
+                GUI.display_1d_y       = y;
                 GUI.display_1d_has_pos = SET;
             }
         }
 
         if ( * ( ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var ) != '\0' )
         {
-            flags = XParseGeometry(
-                               ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var,
-                               &x, &y, &w, &h );
+            flags =
+                XParseGeometry( ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var,
+                                &x, &y, &w, &h );
 
             if ( WidthValue & flags && HeightValue & flags )
             {
-                GUI.display_2d_width = w;
-                GUI.display_2d_height = h;
+                GUI.display_2d_width    = w;
+                GUI.display_2d_height   = h;
                 GUI.display_2d_has_size = SET;
             }
 
             if ( XValue & flags && YValue & flags )
             {
-                GUI.display_2d_x = x;
-                GUI.display_2d_y = y;
+                GUI.display_2d_x       = x;
+                GUI.display_2d_y       = y;
                 GUI.display_2d_has_pos = SET;
             }
         }
@@ -394,15 +394,15 @@ set_default_sizes( void )
     {
         if ( ( G.dim & 1 || ! G.is_init ) && ! GUI.display_1d_has_pos )
         {
-            GUI.display_1d_x = GI.display_x;
-            GUI.display_1d_y = GI.display_y;
+            GUI.display_1d_x       = GI.display_x;
+            GUI.display_1d_y       = GI.display_y;
             GUI.display_1d_has_pos = SET;
         }
 
         if ( G.dim & 2 && ! GUI.display_2d_has_pos )
         {
-            GUI.display_2d_x = GI.display_x;
-            GUI.display_2d_y = GI.display_y;
+            GUI.display_2d_x       = GI.display_x;
+            GUI.display_2d_y       = GI.display_y;
             GUI.display_2d_has_pos = SET;
         }
     }
@@ -410,35 +410,35 @@ set_default_sizes( void )
     if ( has_size || GUI.display_1d_has_size )
     {
         if ( ! G.is_init || G_1d.nc == 1 )
-            diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+            diff = MAX_CURVES * GI.curve_button_height;
         else
-            diff = ( MAX_CURVES - G_1d.nc ) * GI.CURVE_BUTTON_HEIGHT;
+            diff = ( MAX_CURVES - G_1d.nc ) * GI.curve_button_height;
 
         if ( has_size )
             GUI.display_1d_width = GI.display_w;
 
-        if ( GUI.display_1d_width < GI.WIN_MIN_1D_WIDTH )
-            GUI.display_1d_width = GI.WIN_MIN_1D_WIDTH;
+        if ( GUI.display_1d_width < GI.win_min_1d_width )
+            GUI.display_1d_width = GI.win_min_1d_width;
 
-        if ( GUI.display_1d_height < GI.WIN_MIN_HEIGHT - diff )
-            GUI.display_1d_height = GI.WIN_MIN_HEIGHT - diff;
+        if ( GUI.display_1d_height < GI.win_min_height - diff )
+            GUI.display_1d_height = GI.win_min_height - diff;
     }
 
     if ( has_size || GUI.display_2d_has_size )
     {
         if ( ! G.is_init || G_2d.nc == 1 )
-            diff = MAX_CURVES * GI.CURVE_BUTTON_HEIGHT;
+            diff = MAX_CURVES * GI.curve_button_height;
         else
-            diff = ( MAX_CURVES - G_2d.nc ) * GI.CURVE_BUTTON_HEIGHT;
+            diff = ( MAX_CURVES - G_2d.nc ) * GI.curve_button_height;
 
         if ( has_size )
             GUI.display_2d_width = GI.display_w;
 
-        if ( GUI.display_2d_width < GI.WIN_MIN_2D_WIDTH )
-            GUI.display_2d_width = GI.WIN_MIN_2D_WIDTH;
+        if ( GUI.display_2d_width < GI.win_min_2d_width )
+            GUI.display_2d_width = GI.win_min_2d_width;
 
-        if ( GUI.display_2d_height < GI.WIN_MIN_HEIGHT - diff )
-            GUI.display_2d_height = GI.WIN_MIN_HEIGHT - diff;
+        if ( GUI.display_2d_height < GI.win_min_height - diff )
+            GUI.display_2d_height = GI.win_min_height - diff;
     }
 
     if ( G.dim & 1 || ! G.is_init )
@@ -477,14 +477,14 @@ set_defaults( void )
 {
     if ( GUI.G_Funcs.size == LOW )
     {
-        GI.WIN_MIN_1D_WIDTH    = 300;
-        GI.WIN_MIN_2D_WIDTH    = 350;
-        GI.WIN_MIN_HEIGHT      = 360;
-        GI.CURVE_BUTTON_HEIGHT = 35;
-        GI.SMALL_FONT_SIZE     = FL_TINY_SIZE;
-        GI.DEFAULT_AXISFONT_1  = "*-lucida-bold-r-normal-sans-10-*";
-        GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-10";
-        GI.DEFAULT_AXISFONT_3  = "fixed";
+        GI.win_min_1d_width    = 300;
+        GI.win_min_2d_width    = 350;
+        GI.win_min_height      = 360;
+        GI.curve_button_height = 35;
+        GI.small_font_size     = FL_TINY_SIZE;
+        GI.default_axisfont_1  = "*-lucida-bold-r-normal-sans-10-*";
+        GI.default_axisfont_2  = "lucidasanstypewriter-10";
+        GI.default_axisfont_3  = "fixed";
 
         G.scale_tick_dist      =  4;
         G.short_tick_len       =  3;
@@ -500,14 +500,14 @@ set_defaults( void )
     }
     else
     {
-        GI.WIN_MIN_1D_WIDTH    = 400;
-        GI.WIN_MIN_2D_WIDTH    = 500;
-        GI.WIN_MIN_HEIGHT      = 460;
-        GI.CURVE_BUTTON_HEIGHT = 40;
-        GI.SMALL_FONT_SIZE     = FL_SMALL_SIZE;
-        GI.DEFAULT_AXISFONT_1  = "*-lucida-bold-r-normal-sans-14-*";
-        GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-14";
-        GI.DEFAULT_AXISFONT_3  = "fixed";
+        GI.win_min_1d_width    = 400;
+        GI.win_min_2d_width    = 500;
+        GI.win_min_height      = 460;
+        GI.curve_button_height = 40;
+        GI.small_font_size     = FL_SMALL_SIZE;
+        GI.default_axisfont_1  = "*-lucida-bold-r-normal-sans-14-*";
+        GI.default_axisfont_2  = "lucidasanstypewriter-14";
+        GI.default_axisfont_3  = "fixed";
 
         G.scale_tick_dist      =   6;
         G.short_tick_len       =   5;
@@ -564,10 +564,10 @@ forms_adapt( void )
 
             if ( G.dim & 1 )
                 fl_set_object_lsize( GUI.run_form_1d->undo_button_1d,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
             if ( G.dim & 2 )
                 fl_set_object_lsize( GUI.run_form_2d->undo_button_2d,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
 
             if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             {
@@ -584,7 +584,7 @@ forms_adapt( void )
                 fl_set_pixmapbutton_file( GUI.cut_form->cut_undo_button,
                                           pixmap_file );
                 fl_set_object_lsize( GUI.cut_form->cut_undo_button,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
                 if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
                     fl_set_object_helper( GUI.cut_form->cut_undo_button,
                                           "Undo last rescaling operation" );
@@ -609,10 +609,10 @@ forms_adapt( void )
 
             if ( G.dim & 1 )
                 fl_set_object_lsize( GUI.run_form_1d->print_button_1d,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
             if ( G.dim & 2 )
                 fl_set_object_lsize( GUI.run_form_2d->print_button_2d,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
 
             if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             {
@@ -629,7 +629,7 @@ forms_adapt( void )
                 fl_set_pixmapbutton_file( GUI.cut_form->cut_print_button,
                                           pixmap_file );
                 fl_set_object_lsize( GUI.cut_form->cut_print_button,
-                                     GI.SMALL_FONT_SIZE );
+                                     GI.small_font_size );
                 if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
                     fl_set_object_helper( GUI.cut_form->cut_print_button,
                                           "Print window" );
@@ -803,7 +803,7 @@ forms_adapt( void )
  * Function that gets invoked when the close button (not the one in
  * the display window but the one from the windows menu) is clicked
  * on. While the experiment is still running it ignores the event,
- * while, when the experiment is already finished. it does the same
+ * while, when the experiment is already finished, it does the same
  * as clicking  on the "Close" button within the display window.
  *------------------------------------------------------------------*/
 
@@ -1681,9 +1681,9 @@ delete_pixmap( Canvas_T * c )
 }
 
 
-/*------------------------------------------------------------------*
- * Function for redrawing the axis areas of a the 1D display window
- *------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Redraws the axis areas of a the 1D display window.
+ *----------------------------------------------------*/
 
 void
 redraw_axis_1d( int coord )
@@ -1742,9 +1742,9 @@ redraw_axis_1d( int coord )
 }
 
 
-/*------------------------------------------------------------------*
- * Function for redrawing the axis areas of a the 2D display window
- *------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Redraws the axis areas of a the 2D display window.
+ *----------------------------------------------------*/
 
 void
 redraw_axis_2d( int coord )
@@ -1798,10 +1798,10 @@ redraw_axis_2d( int coord )
 }
 
 
-/*-----------------------------------------------------*
- * Function creates number strings for labels with the
+/*--------------------------------------------------*
+ * Creates number strings for axis labels with the
  * correct number of digits after the decimal point
- *-----------------------------------------------------*/
+ *--------------------------------------------------*/
 
 void
 make_label_string( char   * lstr,
@@ -1852,7 +1852,7 @@ make_label_string( char   * lstr,
  * more of the mouse buttons. Otherwise, after these functions are finished
  * (usually with all mouse buttons released) the drawing routines would
  * think that the buttons are still pressed, forcing the user to press the
- * buttons again, just to get the ButtonRelease event.
+ * buttons again just to receive the ButtonRelease event.
  *---------------------------------------------------------------------------*/
 
 void
@@ -1918,7 +1918,7 @@ switch_off_special_cursors( void )
 
 
 /*-------------------------------------------------------------*
- * Undoes the last action in the 1d window as far as possible.
+ * Undoes the last action in the 1D window as far as possible.
  *-------------------------------------------------------------*/
 
 void
@@ -1973,7 +1973,7 @@ undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
 
 
 /*-------------------------------------------------------------*
- * Undoes the last action in the 2d window as far as possible.
+ * Undoes the last action in the 2D window as far as possible.
  *-------------------------------------------------------------*/
 
 void

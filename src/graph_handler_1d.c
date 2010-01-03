@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2009 Jens Thoms Toerring
+ *  Copyright (C) 1999-2010 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -97,10 +97,10 @@ canvas_handler_1d( FL_OBJECT * obj,
 }
 
 
-/*-------------------------------------------------------*
- * Handler that gets called for pressing on of the mouse
+/*--------------------------------------------------------*
+ * Handler that gets called for pressing one of the mouse
  * buttons in the axis areas or the camvas
- *-------------------------------------------------------*/
+ *--------------------------------------------------------*/
 
 static void
 press_handler_1d( FL_OBJECT * obj,
@@ -280,10 +280,10 @@ press_handler_1d( FL_OBJECT * obj,
 }
 
 
-/*--------------------------------------------------------*
- * Handler that gets called for releasing on of the mouse
+/*---------------------------------------------------------*
+ * Handler that gets called for releasing one of the mouse
  * buttons in the axis areas or the camvas
- *--------------------------------------------------------*/
+ *---------------------------------------------------------*/
 
 static void
 release_handler_1d( FL_OBJECT * obj  UNUSED_ARG,

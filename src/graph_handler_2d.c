@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2009 Jens Thoms Toerring
+ *  Copyright (C) 1999-2010 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -2417,9 +2417,9 @@ set_marker_2d( long x_pos,
 }
 
 
-/*------------------------------------------------------------------*
- * Function gets called to delete a 2D marker at a certain position
- *------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Gets called to delete a 2D marker at a certain position
+ *---------------------------------------------------------*/
 
 static void
 delete_marker_2d( long x_pos,

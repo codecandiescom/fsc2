@@ -2,7 +2,7 @@
  *  This file is drectly taken from
  *
  *  VMEbus Extensions for Instrumentation
- *  TCP/IP Instroment Protocol Specifications
+ *  TCP/IP Instrument Protocol Specifications
  *  VXI-11
  *  Revision 1.0
  *  July 17, 1995
