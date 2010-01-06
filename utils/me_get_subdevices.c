@@ -3,16 +3,22 @@
 #include <medriver/medriver.h>
 
 
-struct dio_type {
+struct me_types {
 	int type;
 	const char *name;
-} types[ ] = { { ME_TYPE_DI,  "DI" },
-			   { ME_TYPE_DO,  "DO" },
+} types[ ] = { { ME_TYPE_AI,  "AI"  },
+			   { ME_TYPE_AO,  "AO"  },
+			   { ME_TYPE_DI,  "DI"  },
+			   { ME_TYPE_DO,  "DO"  },
 			   { ME_TYPE_DIO, "DIO" } };
 
 
-void query_subdevice( int dev_no, struct dio_type *type );
+static void query_subdevice( int               dev_no,
+							 struct me_types * type );
 
+
+/*---------------------------------------------*
+ *---------------------------------------------*/
 
 int
 main( int    argc,
@@ -26,7 +32,7 @@ main( int    argc,
 
 	if ( argc < 2 || ! *argv[ 1 ] )
 	{
-		fprintf( stderr, "me_di_get_devices  DEVNO\n" );
+		fprintf( stderr, "me_get_devices devno\n" );
 		return EXIT_FAILURE;
 	}
 
@@ -34,7 +40,7 @@ main( int    argc,
 
 	if ( dev_no < 0 || *ep )
 	{
-		fprintf( stderr, "me_di_get_devices  DEVNO\n" );
+		fprintf( stderr, "me_get_devices devno\n" );
 		return EXIT_FAILURE;
 	}
 
@@ -47,9 +53,10 @@ main( int    argc,
 		return EXIT_FAILURE;
     }
 
-	if ( ( retval = meQueryDescriptionDevice( dev_no, desc,
-											ME_DEVICE_DESCRIPTION_MAX_COUNT ) )
-		                                                  != ME_ERRNO_SUCCESS )
+	if ( ( retval =
+		   meQueryDescriptionDevice( dev_no, desc,
+									 ME_DEVICE_DESCRIPTION_MAX_COUNT ) )
+		                                                   != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
@@ -75,9 +82,12 @@ main( int    argc,
 }
 
 
-void
-query_subdevice( int dev_no,
-				 struct dio_type *type )
+/*---------------------------------------------*
+ *---------------------------------------------*/
+
+static void
+query_subdevice( int               dev_no,
+				 struct me_types * type )
 {
 	int sd = 0;
 	int retval;
@@ -86,12 +96,13 @@ query_subdevice( int dev_no,
 
 	while ( 1 )
 	{
-		if ( ( retval = meQuerySubdeviceByType( dev_no, sd, type->type,
-												ME_SUBTYPE_SINGLE, &sd ) )
-		                                                  != ME_ERRNO_SUCCESS )
+		if ( meQuerySubdeviceByType( dev_no, sd, type->type,
+									 ME_SUBTYPE_ANY, &sd )
+			                                              != ME_ERRNO_SUCCESS )
 			return;
 
-		if ( meQueryNumberChannels( dev_no, sd, &ch ) != ME_ERRNO_SUCCESS )
+		if ( ( retval = meQueryNumberChannels( dev_no, sd, &ch ) )
+			                                               != ME_ERRNO_SUCCESS )
 		{
 			char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
@@ -111,8 +122,8 @@ query_subdevice( int dev_no,
 			exit( EXIT_FAILURE );
 		}
 
-		printf( "Subdevice %d:  TYPE = %3s  MAX_CHANNELS = %d  CAPABILITIES"
-				" = %d\n", sd, type->name, ch, caps );
+		printf( "Subdevice %d:  TYPE = %3s  MAX_CHANNELS = %2d  CAPABILITIES"
+				" = %2d\n", sd, type->name, ch, caps );
 		sd++;
 	}
 }

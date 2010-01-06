@@ -35,7 +35,7 @@ all:
 
 
 ifdef WITH_MEDRIVER
-utils: edl-mod.elc edl.vim me_dio_get_subdevices
+utils: edl-mod.elc edl.vim me_get_subdevices
 else
 utils: edl-mod.elc edl.vim
 endif
@@ -56,7 +56,7 @@ edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
 
 
 ifdef WITH_MEDRIVER
-me_dio_get_subdevices: me_dio_get_subdevices.c
+me_get_subdevices: me_get_subdevices.c
 	gcc -o $@ $< -I$(medriver_incl_path) -L$(medriver_lib_path) -lmedriver
 endif
 
@@ -106,4 +106,4 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	-$(RM) $(RMFLAGS) me_dio_get_subdevices edl-mod.elc edl-mod.el edl.vim
+	-$(RM) $(RMFLAGS) me_get_subdevices edl-mod.elc edl-mod.el edl.vim
