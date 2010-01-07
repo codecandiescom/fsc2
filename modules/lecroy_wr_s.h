@@ -42,21 +42,13 @@
 #define LECROY_WR_TB       5
 #define LECROY_WR_TC       6
 #define LECROY_WR_TD       7
-#define LECROY_WR_F1       LECROY_WR_TA
-#define LECROY_WR_F2       LECROY_WR_TB
-#define LECROY_WR_F3       LECROY_WR_TC
-#define LECROY_WR_F4       LECROY_WR_TD
-#define LECROY_WR_F5       8
-#define LECROY_WR_F6       9
-#define LECROY_WR_F7      10
-#define LECROY_WR_F8      11
-#define LECROY_WR_M1      12
-#define LECROY_WR_M2      13
-#define LECROY_WR_M3      14
-#define LECROY_WR_M4      15
-#define LECROY_WR_LIN     16
-#define LECROY_WR_EXT     17
-#define LECROY_WR_EXT10   18
+#define LECROY_WR_M1       8
+#define LECROY_WR_M2       9
+#define LECROY_WR_M3      10
+#define LECROY_WR_M4      11
+#define LECROY_WR_LIN     12
+#define LECROY_WR_EXT     13
+#define LECROY_WR_EXT10   14
 
 
 #define GENERAL_TO_LECROY_WR 0
@@ -125,8 +117,10 @@
 
 /* Total number of channels */
 
-#define LECROY_WR_MAX_CHANNELS       16
-#define LECROY_WR_TOTAL_CHANNELS     19
+#define LECROY_WR_MAX_CHANNELS       12
+#define LECROY_WR_TOTAL_CHANNELS     15
+
+#define LECROY_WR_MAX_FTRACE         LECROY_WR_TD
 
 
 /* Maximum and minimum sensitivity (in V/div) */
@@ -151,12 +145,6 @@
  * be included after the configuration file for the device! */
 
 #include "lecroy_wr_models.h"
-
-#if ! defined LECROY_WR_IS_XSTREAM
-#define LECROY_WR_MAX_FTRACE     LECROY_WR_TD
-#else
-#define LECROY_WR_MAX_FTRACE     LECROY_WR_F4
-#endif
 
 
 /* Some typedefs used below */
