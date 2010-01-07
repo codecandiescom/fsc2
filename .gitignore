@@ -113,7 +113,7 @@ src/gpib_if.h
 utils/edl-mod.el
 utils/edl-mod.elc
 utils/edl.vim
-utils/me_dio_get_subdevices
+utils/me_get_subdevices
 edl/aiesr6.hmi-domain/cw_epr_bruker
 edl/aiesr6.hmi-domain/cw_epr_sr
 edl/aiesr6.hmi-domain/monitor_bruker

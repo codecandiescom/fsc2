@@ -42,6 +42,10 @@
 #define LECROY_WR_TB       5
 #define LECROY_WR_TC       6
 #define LECROY_WR_TD       7
+#define LECROY_WR_F1       LECROY_WR_TA
+#define LECROY_WR_F2       LECROY_WR_TB
+#define LECROY_WR_F3       LECROY_WR_TC
+#define LECROY_WR_F4       LECROY_WR_TD
 #define LECROY_WR_F5       8
 #define LECROY_WR_F6       9
 #define LECROY_WR_F7      10
@@ -151,7 +155,7 @@
 #if ! defined LECROY_WR_IS_XSTREAM
 #define LECROY_WR_MAX_FTRACE     LECROY_WR_TD
 #else
-#define LECROY_WR_MAX_FTRACE     LECROY_WR_F8
+#define LECROY_WR_MAX_FTRACE     LECROY_WR_F4
 #endif
 
 
