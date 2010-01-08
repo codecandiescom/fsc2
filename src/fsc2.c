@@ -121,12 +121,6 @@ main( int    argc,
         fname = argv[ 1 ];
     }
 
-    /* If '--delete' was given on the command line set flags that says that
-       the input files needs to be deleted */
-
-    if ( fname != NULL && Fsc2_Internals.cmdline_flags & DO_DELETE )
-        Delete_file = Delete_old_file = SET;
-
     /* If there is a file argument try to load it */
 
     if ( Fsc2_Internals.cmdline_flags & DO_LOAD )
@@ -144,6 +138,12 @@ main( int    argc,
         else
             load_file( GUI.main_form->browser, 1 );
     }
+
+    /* If '--delete' was given on the command line set flags that says that
+       the input files needs to be deleted */
+
+    if ( fname != NULL && Fsc2_Internals.cmdline_flags & DO_DELETE )
+        Delete_file = Delete_old_file = SET;
 
     /* In batch mode try to get the next file if the first input file
        could not be accessed until we have one. */
@@ -907,7 +907,6 @@ scan_args( int   * argc,
            file when done with it (typically used by scripts that generate
            a temporary file and then start fsc2) */
 
-
         if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
         {
             flags |= DO_DELETE;
@@ -1361,7 +1360,7 @@ final_exit_handler( void )
 /*-------------------------------------------------------------------*
  * load_file() is used for loading or reloading a file, depending on
  * the value of the flag 'reload'. It's also the callback function
- * for the Load- and Reload-buttons.
+ * for the "Load" and "Reload" buttons.
  * reload == 0: read new file, reload == 1: reload file
  *-------------------------------------------------------------------*/
 

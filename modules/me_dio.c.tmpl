@@ -499,7 +499,6 @@ dio_value( Var_T * v )
 static void
 me_dio_#_init( void )
 {
-    int retval;
     int type;
     int subtype;
     int caps;
@@ -508,13 +507,12 @@ me_dio_#_init( void )
 
     /* Try to find the device */
 
-    if ( ( retval =
-           	   meQuerySubdeviceType( DEVICE_NUMBER, SUBDEVICE_NUMBER,
-                                     &type, &subtype ) ) != ME_ERRNO_SUCCESS )
+    if ( meQuerySubdeviceType( DEVICE_NUMBER, SUBDEVICE_NUMBER,
+                               &type, &subtype ) != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Failed to locate DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -527,13 +525,12 @@ me_dio_#_init( void )
 
     /* Query capabilities */
 
-    if ( ( retval =
-              meQuerySubdeviceCaps( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                    &caps ) ) != ME_ERRNO_SUCCESS )
+    if ( meQuerySubdeviceCaps( me_dio_#.dev_no, me_dio_#.subdev_no,
+                               &caps ) != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Failed to query DIO capabilities: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -547,13 +544,12 @@ me_dio_#_init( void )
 
     /* Query the number of channels */
 
-    if ( ( retval =
-              meQueryNumberChannels( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                     &ch ) ) != ME_ERRNO_SUCCESS )
+    if ( meQueryNumberChannels( me_dio_#.dev_no, me_dio_#.subdev_no,
+                                &ch ) != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Failed to query number of DIO channels: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -567,14 +563,13 @@ me_dio_#_init( void )
 
     /* Try to get a lock on the subdevice */
 
-    if ( ( retval =
-           	   meLockSubdevice( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                ME_LOCK_SET, ME_LOCK_SUBDEVICE_NO_FLAGS ) )
+    if ( meLockSubdevice( me_dio_#.dev_no, me_dio_#.subdev_no,
+                          ME_LOCK_SET, ME_LOCK_SUBDEVICE_NO_FLAGS )
                                                           != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Failed to lock DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -589,18 +584,14 @@ me_dio_#_init( void )
 static void
 me_dio_#_exit( void )
 {
-    int retval;
-
-
-    if ( me_dio_#.is_locked
-         && ( retval =
-           	    meLockSubdevice( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                 ME_LOCK_RELEASE, ME_LOCK_SUBDEVICE_NO_FLAGS ) )
+    if (    me_dio_#.is_locked
+         && meLockSubdevice( me_dio_#.dev_no, me_dio_#.subdev_no,
+                             ME_LOCK_RELEASE, ME_LOCK_SUBDEVICE_NO_FLAGS )
                                                           != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Failed to unlock DIO: %s\n", msg );
     }
 
@@ -614,7 +605,6 @@ me_dio_#_exit( void )
 static unsigned long
 me_dio_#_in( int ch )
 {
-    int retval;
     int i;
     meIOSingle_t list = { me_dio_#.dev_no, me_dio_#.subdev_no, ch,
                           ME_DIR_INPUT, 0, 0, me_dio_#.single_flags, 0 };
@@ -622,15 +612,15 @@ me_dio_#_in( int ch )
     /* Configure the channel if necessary */
 
     if (    me_dio_#.dir[ ch ] != DIO_IN
-         && ( retval = meIOSingleConfig( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                         me_dio_#.caps[ 0 ] ? ch : 0,
-                                         ME_SINGLE_CONFIG_DIO_INPUT,
-                                         0, 0, 0, 0, me_dio_#.config_flags ) )
+         && meIOSingleConfig( me_dio_#.dev_no, me_dio_#.subdev_no,
+                              me_dio_#.caps[ 0 ] ? ch : 0,
+                              ME_SINGLE_CONFIG_DIO_INPUT,
+                              0, 0, 0, 0, me_dio_#.config_flags )
                                                            != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Error while setting up DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -643,8 +633,7 @@ me_dio_#_in( int ch )
 
     /* Prepare input and send to DIO */
 
-    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) )
-                                                          != ME_ERRNO_SUCCESS )
+    if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
@@ -664,7 +653,6 @@ static void
 me_dio_#_out( int           ch,
             unsigned long val )
 {
-    int retval;
     int i;
     meIOSingle_t list = { me_dio_#.dev_no, me_dio_#.subdev_no, ch,
                           ME_DIR_OUTPUT, val, 0, me_dio_#.single_flags, 0 };
@@ -672,15 +660,15 @@ me_dio_#_out( int           ch,
     /* Configure the channel if necessary */
 
     if (    me_dio_#.dir[ ch ] != DIO_OUT
-         && ( retval = meIOSingleConfig( me_dio_#.dev_no, me_dio_#.subdev_no,
-                                         me_dio_#.caps[ 0 ] ? ch : 0,
-                                         ME_SINGLE_CONFIG_DIO_OUTPUT,
-                                         0, 0, 0, 0, me_dio_#.config_flags ) )
+         && meIOSingleConfig( me_dio_#.dev_no, me_dio_#.subdev_no,
+                              me_dio_#.caps[ 0 ] ? ch : 0,
+                              ME_SINGLE_CONFIG_DIO_OUTPUT,
+                              0, 0, 0, 0, me_dio_#.config_flags )
                                                           != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetLastMessage( msg, sizeof msg );
         print( FATAL, "Error while setting up DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -693,8 +681,7 @@ me_dio_#_out( int           ch,
 
     /* Prepare output and send to DIO */
 
-    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) )
-                                                           != ME_ERRNO_SUCCESS )
+    if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
