@@ -1029,6 +1029,7 @@ src:
 modules:
 	$(MAKE) config
 	$(MAKE) -C $(mdir) modules
+	$(MAKE) -C $(mdir) bmwb
 
 
 utils:
@@ -1191,6 +1192,15 @@ tags:
 
 test:
 	$(MAKE) -C tests
+
+
+# List simple or complicated modules to be created
+
+list_simp_modules
+	$(MAKE) -C modules list_simp
+
+list_comp_modules:
+	$(MAKE) -C modules list_comp
 
 
 # Clean up everything for a distribution and create a zipped tarball

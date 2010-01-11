@@ -36,7 +36,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # List of modules that are to be made from a single source file only (as
 # far as they don't require some additional software)
 
-simp_modules    := User_Functions gg_chopper
+simp_modules    := User_Functions gg_chopper t
 
 
 # For each of the "complicated" modules a list of all source files they are
@@ -228,6 +228,14 @@ export        # export all symbols to the sub-makefiles
 all:
 	$(MAKE) -C .. modules
 
+bmwb: bmwb.c bmwb_meilhaus.c bmwb_utils.c bmwb_rsc.c
+	$(CC) -ggdb $(CFLAGS) -I.. -I../src -o $@ $^ -lforms -lmedriver
+
+list_simp:
+	@echo $(simp_modules)
+
+list_comp:
+	@echo $(comp_modules)
 
 modules:
 	$(MAKE) $(vxi11_list) vxi11.h
