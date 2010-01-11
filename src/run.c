@@ -317,17 +317,12 @@ start_comm_libs( void )
 #endif
 
 #if defined WITH_MEDRIVER
-    /* If there are devices that are controlled via the Meilhaus library */
+    /* Initialize Meilhaus library if there are devices that are controlled
+       via it - no locking is needed, this is done during the initialization
+       of the required subdevice */
 
     if ( Need_MEDRIVER )
     {
-        if ( fsc2_obtain_lock( "meilhaus" ) == FAIL )
-        {
-            eprint( FATAL, UNSET, "Meilhaus system is already locked by "
-                    "another process.\n" );
-            goto medriver_fail;
-        }
-
         raise_permissions( );
 
         if ( ( retval = meOpen( ME_OPEN_NO_FLAGS ) ) != ME_ERRNO_SUCCESS )
@@ -336,7 +331,6 @@ start_comm_libs( void )
 
             meErrorGetMessage( retval, msg, sizeof msg );
             lower_permissions( );
-            fsc2_release_lock( "meilhaus" );
             eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
                     "%s\n", msg );
             goto medriver_fail;
@@ -456,8 +450,6 @@ no_prog_to_run( void )
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
-
-        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
@@ -624,8 +616,6 @@ init_devs_and_graphics( void )
                 eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n",
                         msg );
             }
-
-            fsc2_release_lock( "meilhaus" );
         }
 #endif
 
@@ -783,8 +773,6 @@ fork_failure( int stored_errno )
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
-
-        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
@@ -1118,8 +1106,6 @@ run_sigchld_callback( FL_OBJECT * a,
             meErrorGetMessage( retval, msg, sizeof msg );
             eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
         }
-
-        fsc2_release_lock( "meilhaus" );
     }
 #endif
 
