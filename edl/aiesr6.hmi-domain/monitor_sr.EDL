@@ -126,7 +126,7 @@ Phase = input_create( "FLOAT_INPUT", phase, "Modulation phase" );
 PAO = button_create( "PUSH_BUTTON",
 			         "Use phase as relative\nto calibration setting" );
 button_state( PAO, 0 );
-PAO_state = epr_modulation_has_phase( "RESONATOR" " (ER023M)", mod_freq );
+PAO_state = epr_modulation_has_phase( "RESONATOR" " (SR830)", mod_freq );
 IF ! PAO_state {
    object_enable( PAO, "OFF" );
 }
@@ -417,7 +417,7 @@ FOREVER {
 	IF button_changed( PAO ) {
 		phase = lockin_phase( );
 		IF button_state( PAO ) {
-			phase -= epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
+			phase -= epr_modulation_phase( "RESONATOR" " (SR830)", mod_freq );
 		} 
 		input_value( Phase, phase % 360.0 );
 	}

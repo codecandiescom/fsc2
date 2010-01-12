@@ -897,6 +897,7 @@ gpib_read( int    device,
     }
 
     gpib_rd( device, buffer, expected );
+    *length = gpib_count;
 
     if ( ll > LL_NONE )
         gpib_read_end( dev_name, buffer, *length, expected );

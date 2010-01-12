@@ -126,36 +126,39 @@ load_all_drivers( void )
             saved_need_MEDRIVER = Need_MEDRIVER;
 #endif
 
-            if ( cd->is_loaded && cd->driver.is_init_hook )
+            if ( cd->is_loaded )
             {
                 if (    cd->generic_type != NULL
                      && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
                     Cur_Pulser++;
 
-                call_push( NULL, cd, cd->device_name, cd->count );
+                if ( cd->driver.is_init_hook )
+                {
+                    call_push( NULL, cd, cd->device_name, cd->count );
 
-                TRY
-                {
-                    if ( ! cd->driver.init_hook( ) )
-                        eprint( WARN, UNSET, "Initialisation of module "
-                                "'%s.fsc2_so' did not return successfully.\n",
-                                cd->name );
-                    TRY_SUCCESS;
-                }
-                OTHERWISE
-                {
-                    eprint( FATAL, UNSET, "Failed to initialize module "
-                            "'%s'.\n", cd->name );
+                    TRY
+                    {
+                        if ( ! cd->driver.init_hook( ) )
+                            eprint( WARN, UNSET, "Initialisation of module "
+                                    "'%s.fsc2_so' did not return "
+                                    "successfully.\n", cd->name );
+                        TRY_SUCCESS;
+                    }
+                    OTHERWISE
+                    {
+                        eprint( FATAL, UNSET, "Failed to initialize module "
+                                "'%s'.\n", cd->name );
+                        call_pop( );
+                        vars_del_stack( );
+                        dlclose( cd->driver.handle );
+                        RETHROW( );
+                    }
+
                     call_pop( );
                     vars_del_stack( );
-                    dlclose( cd->driver.handle );
-                    RETHROW( );
+
+                    cd->driver.init_hook_is_run = SET;
                 }
-
-                call_pop( );
-                vars_del_stack( );
-
-                cd->driver.init_hook_is_run = SET;
             }
 
             if ( ! Need_GPIB && saved_need_GPIB )

@@ -1,5 +1,5 @@
 # -*-Makefile-*-
 
-OWNER              := fsc2
-GROUP              := uucp
+OWNER              := nobody
+GROUP              := dialout
 GPIB_LIBRARY       := JTT

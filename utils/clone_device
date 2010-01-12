@@ -227,7 +227,7 @@ sub make_comp_clone{
     my $j = 0;
     for my $fn ( @fl ) {
         if ( $fn eq "$d" ) {
-            $nn = "$nd"
+            $nn = $nd;
         } else {
             for my $i ( 1..100000 ) {
                 $nn = $fn;
