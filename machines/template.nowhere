@@ -343,11 +343,18 @@ BROWSER            := firefox
 # line starting with 'medriver_lib_path and change the what it gets set
 # to. You must make sure that the library supplied by Meilhaus is
 # already properly installed if you want to build fsc2 with support for
-# it.
+# it. Finally, the variable 'medriver_lib' should indicate which
+# library to use - there exists an older driver and library package
+# from Meilhaus where the library was named 'libmedriver.so' while
+# in the newer version it's called 'libMEiDS.so'. According to
+# which version you have installed specify either 'NEW' if you use
+# the new version or 'OLD' when you still use the old version. If
+# the variable is not given the new version is used per default.
 
 # WITH_MEDRIVER      := yes
 # medriver_incl_path := /usr/local/include/medriver
 # medriver_lib_path  := /usr/lib/local
+# medriver_version   := NEW
 
 
 # If there are libraries to be linked against that for some reason

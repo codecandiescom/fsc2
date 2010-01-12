@@ -23,7 +23,6 @@
 
 use strict;
 use warnings;
-use Cwd;
 
 
 my ( $dev, $dev_name, $new_dev, $new_dev_name, $line );
@@ -290,9 +289,6 @@ sub make_comp_clone{
 
 sub replace_txt {
     my ( $ofn, $nfn, $os, $ns ) =  @_;
-
-
-    print getcwd(), ": ", $ofn, " -> ", $nfn, "\n";
 
     open my $fin,  '<', $ofn or die "Can't open file $ofn for reading.\n";
     open my $fout, '>', $nfn or die "Can't open file $nfn for writing.\n";
