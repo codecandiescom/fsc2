@@ -228,6 +228,9 @@ export        # export all symbols to the sub-makefiles
 all:
 	$(MAKE) -C .. modules
 
+bmwb: bmwb.c bmwb_meilhaus.c bmwb_utils.c bmwb_rsc.c
+	$(CC) -ggdb $(CFLAGS) -I.. -I../src -o $@ $^ -lforms $(MEDRIVER_LIB)
+
 list_simp:
 	@echo $(simp_modules)
 
