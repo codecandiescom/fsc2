@@ -4904,33 +4904,29 @@ f_mean_part_array( Var_T * v )
     if ( size == v->len )
         return f_float( v );
 
-    m = T_malloc( size * sizeof *m );
-    for ( i = 0; i < size; i++ )
-        m[ i ] = 0.0;
     par = v->len / size;
+    nv = vars_push( FLOAT_ARR, NULL, par );
+    m = nv->val.dpnt;
 
     if ( v->type == INT_ARR )
     {
         lfrom = v->val.lpnt;
         for ( i = 0; i < par; i++ )
             for ( j = 0; j < size; j++ )
-                m[ j ] += *lfrom++;
+                m[ i ] += *lfrom++;
     }
     else
     {
-        memcpy( m, v->val.dpnt, size * sizeof *m );
-        dfrom = v->val.dpnt + size;
-        for ( i = 1; i < par; i++ )
+        dfrom = v->val.dpnt;
+        for ( i = 0; i < par; i++ )
             for ( j = 0; j < size; j++ )
-                m[ j ] += *dfrom++;
+                m[ i ] += *dfrom++;
     }
 
-    ipar = 1.0 / par;
-    for ( i = 0; i < size; i++ )
+    ipar = 1.0 / size;
+    for ( i = 0; i < par; i++ )
         m[ i ] *= ipar;
 
-    nv = vars_push( FLOAT_ARR, m, size );
-    T_free( m );
     return nv;
 }
 
