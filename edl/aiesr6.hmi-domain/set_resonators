@@ -1,11 +1,17 @@
 #!/usr/bin/perl
 
+# Script for extracting the names of resonators (either for use
+# with the ER023M or the SR830) from the data file used by the
+# epr_mod module and putting them into the line for selection
+# of resonators in an EDL script
+
 use strict;
 use warnings;
 
 unless ( @ARGV == 2 ) {
 	print "Usage: set_resonators type file\n" .
-		  "       with type [ER023M|SR830]\n";
+		  "       with 'type' being either ER023M or SR830\n" .
+		  "       and 'file' an .EDL file.\n";
 	exit 1;
 }
 
@@ -20,7 +26,7 @@ my @content;
 my $lino = 0;
 while ( <$f> ) {
 	push @content, $_;
-	next unless /^=== RESONATOR .*? "Resonator"$/;
+	next unless /^===\s+RESONATOR\s+.*?\s+"Resonator"$/;
 	$lino = $.;
 }
 
@@ -44,4 +50,4 @@ $line .= " ] [ 1 ] \"Resonator\"\n";
 
 $content[ $lino - 1 ] = $line;
 
-print $_ for @content;
+print for @content;
