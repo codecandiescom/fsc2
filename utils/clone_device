@@ -53,8 +53,8 @@ print "\nThis program allows you to automatically create a new device\n" .
       "Do you want to continue [y/n]? ";
 
 while ( <> ) {
-    exit if $_ =~ /^[nN][oO]?$/;
-    last if $_ =~ /^[yY]((es)|(ES))?$/;
+    exit if $_ =~ /^no?$/i;
+    last if $_ =~ /^y(es)?$/i;
     print "Sorry, I didn't understand your reply.\n" .
           "Do you want to continue [y/n]? ";
 }
@@ -68,40 +68,46 @@ die "Sorry, no module with this name seems to exist.\n"
            -e "../modules/$dev.c";
 
 print "\nPlease enter the name for the new module:      ";
+
 $new_dev = <>;
 chomp $new_dev;
-die "Sorry, invalid module name, it doesn't consists of just letters\n" .
-    "numbers and underscores.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
-die "Sorry, old and new module name are identical.\n" if $dev eq $new_dev;
-die "Sorry, a module with the name $new_dev already seems to exist.\n"
-    if -e "../config/$new_dev.conf" or
-       -e "../config/$new_dev.c";
 
+die "Sorry, invalid module name, it doesn't consists of just letters\n" .
+    "numbers and underscores.\n" unless $new_dev =~ /^\w+$/;
+
+die "Sorry, old and new module name are identical.\n" if $dev eq $new_dev;
+
+die "Sorry, a module with the name $new_dev already seems to exist.\n"
+    if -e "../config/$new_dev.conf" or -e "../config/$new_dev.c";
 
 open my $f, '<', "../config/$dev.conf"
     or die "Can't open configuration file $dev.conf.\n";
+
 while ( defined( $line = <$f> ) ) {
-    if ( $line =~ /#define\s+DEVICE_NAME\s+"([A-Za-z0-9_]+)"/ ) {
+    if ( $line =~ /#define\s+DEVICE_NAME\s+"(\w+)"/ ) {
         $dev_name = $1;
         last;
     }
 }
 close $f;
 
-die "Sorry, can't find device name (a #defined DEVICE_NAME) in\n" .
-    "configuration file ../config/$dev.conf.\n" unless defined $dev_name;
+die "Sorry, can't find device name (a line with #define DEVICE_NAME)\n" .
+    "in configuration file ../config/$dev.conf.\n" unless defined $dev_name;
 
 print "\nAlso a device name (to be used in error messages and\n" .
       "possibly in the GPIB configuration file) is needed.\n\n" .
       "Please enter a new device name (the old name is $dev_name):   ";
+
 $new_dev_name = <>;
 chomp $new_dev_name;
-die "Sorry, invalid device name, it doesn't consists of just letters\n" .
-    "numbers and underscores.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
+
 die "Sorry, the old and the new device name are identical.\n"
     if $dev_name eq $new_dev_name;
+die "Sorry, invalid device name, it doesn't consists of just letters\n" .
+    "numbers and underscores or starts with a number.\n"
+    unless $new_dev =~ /^[A-Za-z_]\w+$/;
 
-print "\nThanks, that were all the required informations...\n\n";
+print "\nThanks, that's all the informations I needed...\n\n";
 
 
 #
@@ -111,7 +117,7 @@ print "\nThanks, that were all the required informations...\n\n";
 #              looking into the module makefile.
 #
 
-open my $f, '-|', 'cd ..; make -s list_simp_modules'
+open $f, '-|', 'cd ..; make -s list_simp_modules'
     or die "Sorry, can't run makefile ../Makefile.\n";
 
 my $list = <$f>;
@@ -135,15 +141,15 @@ if ( $list =~ /\b$dev\b/ ) {
 # Finally append the new device to the device data base
 #
 
-rename "../config/Devices", "../config/Devices.old" or die
-    "Can't create new files in ../config, please check permissions.\n";
+rename "../config/Devices", "../config/Devices.old"
+    or die "Can't create new files in ../config, please check permissions.\n";
 open my $fin, '<', '../config/Devices.old';
 open my $fout, '>', '../config/Devices';
 
 while ( defined( $line = <$fin> ) ) {
     print $fout $line;
 }
-print $fout "$new_dev      // added automatically by clone_device\n";
+print $fout "\n$new_dev      // added automatically by clone_device\n";
 
 close $fin;
 close $fout;
@@ -152,34 +158,38 @@ close $fout;
 # Say good bye to the user
 #
 
-print "Everything worked out well. Now you simply have to re-make fsc2\n" .
-      "(just cd back to the main directory and type 'make' and, when\n" .
-      "this succeeds, become root and type 'make install').\n\n" .
-      "If the device is controlled via the GPIB bus you still have to\n" .
-      "update the GPIB configuration file manually (usually, it's\n" .
-      "/etc/gpib.conf). Just copy the section for the old device,\n" .
-      "replace the device name by \`$new_dev_name\' and change the GPIB\n" .
-      "address to the one of the new device.\n\n" .
-      "If the device is accessed via the serial port you will have to\n" .
-      "edit its configuration file ($dev.conf the \'config\'\n" .
-      "directory) to set the serial port it\'s attached to *before* you\n" .
-      "compile and install the new module.\n\n";
+print <<'EOT';
+Everything worked out well. Now you simply have to re-make fsc2
+(just cd back to the main directory and type 'make' and, when
+this succeeds, become root and type 'make install').
+
+But before you run 'make' you should take a look at the confi-
+guration file ($new_dev.conf the 'config' directory) which
+might need some tweaking (e.g. serial port parameters, IP
+addresses or model specific settings etc.).
+
+If the device is controlled via the GPIB bus you still have to
+update the GPIB configuration file manually (usually, it's
+/etc/gpib.conf). Just copy the section for the old device,
+replace the device name by '$new_dev_name' and change the GPIB
+address to the one of the new device.
+EOT
 
 #
-# That's all...
+# That's it...
 #
 
 
 #####################################################
 
 sub make_simple_clone{
-    my ( $d, $dn, $nd, $ndn ) = @_;
+    my ( $dev, $dev_name, $new_dev, $new_dev_name ) = @_;
     my $line;
 
-    replace_txt( "../modules/$d.c", "../modules/$nd.c",
-                 "\"$d.conf\"", "\"$nd.conf\"" );
-    replace_txt( "../config/$d.conf", "../config/$nd.conf",
-                 "\"$dn\"", "\"$ndn\"" );
+    replace_hooks_and_h( "../modules/$dev.c", "../modules/$new_dev.c",
+                         $dev, $new_dev );
+    replace_txt( "../config/$dev.conf", "../config/$new_dev.conf",
+                 "\"$dev_name\"", "\"$new_dev_name\"" );
 
     rename "../modules/Makefile", "../modules/Makefile.old" or die
         "Can't create new files in ../module, please check permissions.\n";
@@ -195,7 +205,7 @@ sub make_simple_clone{
             }
 
             chomp $line;
-            print $fout "$line $nd\n";
+            print $fout "$line $new_dev\n";
             next;
         }
 
@@ -210,38 +220,38 @@ sub make_simple_clone{
 #####################################################
 
 sub make_comp_clone{
-    my ( $d, $dn, $nd, $ndn ) = @_;
-    my ( $line, $nn );
+    my ( $dev, $dev_name, $new_dev, $new_dev_name ) = @_;
+    my ( $line, $new_name );
 
+    die "Sorry, file ../modules/$new_dev.h already exists.\n"
+        if -e "../modules/$new_dev.h";
 
-    die "Sorry, file ../modules/$nd.h already exists.\n"
-        if -e "../modules/$nd.h";
+    my @fl = get_mod_list( $dev );
 
-    my @fl = get_mod_list( $d );
-
-    replace_txt( "../config/$d.conf", "../config/$nd.conf",
-                 "\"$dn\"", "\"$ndn\"" );
-    replace_txt( "../modules/$d.h", "../modules/$nd.h",
-                 "\"$d.conf\"", "\"$nd.conf\"" );
+    replace_txt( "../config/$dev.conf", "../config/$new_dev.conf",
+                 "\"$dev_name\"", "\"$new_dev_name\"" );
+    replace_txt( "../modules/$dev.h", "../modules/$new_dev.h",
+                 "\"$dev.conf\"", "\"$new_dev.conf\"" );
 
     my $j = 0;
     for my $fn ( @fl ) {
-        if ( $fn eq "$d" ) {
-            $nn = $nd;
+        if ( $fn eq $dev ) {
+            $new_name = $new_dev;
         } else {
             for my $i ( 1..100000 ) {
-                $nn = $fn;
-                $nn =~ s/\.c$//;
-                $nn .= "_" . $i . ".c";
-                last unless -e "../modules/$nn";
+                ( $new_name = $fn ) =~ s/(.*?)\.c$/$1_$i.c/;
+                last unless -e "../modules/$new_name";
             }
         }
 
-        replace_txt( "../modules/$fn", "../modules/$nn",
-                     "\"$d.h\"", "\"$nd.h\"" );
+        replace_hooks_and_h( "../modules/$fn", "../modules/$new_name",
+                             $dev, $new_dev );
 
-        $fl[ $j++ ] = $nn;
+        $fl[ $j++ ] = $new_name;
     }
+
+    replace_hooks_and_h( "../modules/$dev.h", "../modules/$new_dev.h",
+                         $dev, $new_dev );
 
     rename "../modules/Makefile", "../modules/Makefile.old" or die
         "Can't create new files in ../module, please check permissions.\n";
@@ -251,13 +261,13 @@ sub make_comp_clone{
 
     while ( defined( $line = <$fin> ) ) {
 
-        if ( $line =~ /^\s*$d\s*:*=/ ) {
+        if ( $line =~ /^\s*$dev\s*:*=/ ) {
             print $fout $line;
             while ( $line =~ /\\$/ and defined( $line = <$fin> ) ) {
                 print $fout $line;
             }
 
-            print $fout "$nd :=";
+            print $fout "$new_dev :=";
             for ( @fl ) {
                 print $fout " $_";
             }
@@ -273,7 +283,7 @@ sub make_comp_clone{
             }
 
             chomp $line;
-            print $fout "$line $nd\n";
+            print $fout "$line $new_dev\n";
             next;
         }
 
@@ -295,6 +305,26 @@ sub replace_txt {
 
     while ( defined( $line = <$fin> ) ) {
         $line =~ s/$os/$ns/;
+        print $fout $line;
+    }
+
+    close $fin;
+    close $fout;
+}
+
+
+#####################################################
+
+sub replace_hooks_and_h {
+    my ( $ofn, $nfn , $dev, $new_dev) = @_;
+
+    open my $fin,  '<', $ofn or die "Can't open file $ofn for reading.\n";
+    open my $fout, '>', $nfn or die "Can't open file $nfn for writing.\n";
+
+    while ( defined( $line = <$fin> ) ) {
+        $line =~ s/#include\s+\"$dev\.h\"/#include \"$new_dev\.h\"/;
+        $line =~ s/#include\s+\"$dev\.conf\"/#include \"$new_dev\.conf\"/;
+        $line =~ s/\b$dev\_(init|test|end_of_test|exp|end_of_exp|exit|child_exit)_hook(\W)/$new_dev\_$1_hook$2/g;
         print $fout $line;
     }
 
