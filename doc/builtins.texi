@@ -2252,8 +2252,10 @@ The following mathematical function can be used in all section of an
 @item @ref{mean_part_array()}
 @item @ref{min_of()}
 @item @ref{random()}
+@item @ref{random2()}
 @item @ref{rms()}
 @item @ref{set_seed()}
+@item @ref{shuffle()}
 @item @ref{sin()}
 @item @ref{sinh()}
 @item @ref{sqrt()}
@@ -2509,9 +2511,22 @@ numbers an integer number is returned, otherwise a floating point value.
 @findex random()
 @item random()
 If called with no argument the function returns a single pseudo-random
-number in the interval @w{[0, 1]}. If called with a non-zero, positive
-argument it returns an array of random numbers where the argument
-specifies the size of the array.
+number in the interval @w{[0, 1]} (i.e. values larger or equal to 0
+and less or equal to 1). If called with a non-zero, positive argument
+it returns an array of random numbers where the argument specifies the
+size of the array. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
+
+
+@anchor{random2()}
+@findex random2()
+@item random2()
+If called with no argument the function returns a single pseudo-random
+number in the interval @w{[0, 1[} (i.e. values larger or equal to 0
+and less than 1). If called with a non-zero, positive argument it
+returns an array of random numbers where the argument specifies the
+size of the array. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
 
 
 @anchor{rms()}
@@ -2532,10 +2547,19 @@ sub-matrices as specified by the third argument are used..
 @findex set_seed()
 @item set_seed()
 Sets a seed for the random number generator used in the functions
-@code{@ref{random()}} and @code{@ref{grandom()}}. The argument has to
-be a positive integer. Alternatively, when no argument is given, the
-time in seconds since 00:00:00 UTC, January 1, 1970 is used as the
-seed.
+@code{@ref{random()}}, @code{@ref{random2()}}, @code{@ref{shuffle()}}
+and @code{@ref{grandom()}}. The argument has to be a positive integer.
+Alternatively, when no argument is given, the time in seconds since
+00:00:00 UTC, January 1, 1970 is used as the seed.
+
+
+@anchor{shuffle()}
+@findex{shuffle()}
+@item shuffle()
+This function expects a 1-dimensional array as its input an returns
+an array of the same length with the elements of the input array
+randomly shuffled. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
 
 
 @anchor{sin()}

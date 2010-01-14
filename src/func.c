@@ -102,6 +102,8 @@ static Func_T Def_fncts[ ] =                  /* List of built-in functions */
     { "log",                 f_log,              1, ACCESS_ALL,  NULL, UNSET },
     { "sqrt",                f_sqrt,             1, ACCESS_ALL,  NULL, UNSET },
     { "random",              f_random,          -1, ACCESS_ALL,  NULL, UNSET },
+    { "random2",             f_random2,         -1, ACCESS_ALL,  NULL, UNSET },
+    { "shuffle",             f_shuffle,          1, ACCESS_ALL,  NULL, UNSET },
     { "grandom",             f_grand,           -1, ACCESS_ALL,  NULL, UNSET },
     { "set_seed",            f_setseed,         -1, ACCESS_ALL,  NULL, UNSET },
     { "add_to_average",      f_add2avg,          3, ACCESS_ALL,  NULL, UNSET },

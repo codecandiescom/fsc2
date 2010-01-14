@@ -186,10 +186,10 @@ vars_check_rhs_indices( Var_T ** v,
         if ( cv->val.lval < 0 )
         {
             if ( cv->next != NULL && cv->next->type == STR_VAR )
-                print( FATAL, "Invalid negative start of range %ld for array "
-                       "'%s'.\n", cv->val.lval + ARRAY_OFFSET, ( *a )->name );
+                print( FATAL, "Invalid start of range %ld for array '%s'.\n",
+                       cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             else
-                print( FATAL, "Invalid negative index %ld for array '%s'.\n",
+                print( FATAL, "Invalid index %ld into array '%s'.\n",
                        cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             THROW( EXCEPTION );
         }

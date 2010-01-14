@@ -54,6 +54,8 @@ Var_T * f_ln(      Var_T * /* v */ );
 Var_T * f_log(     Var_T * /* v */ );
 Var_T * f_sqrt(    Var_T * /* v */ );
 Var_T * f_random(  Var_T * /* v */ );
+Var_T * f_random2( Var_T * /* v */ );
+Var_T * f_shuffle( Var_T * /* v */ );
 Var_T * f_grand(   Var_T * /* v */ );
 Var_T * f_setseed( Var_T * /* v */ );
 Var_T * f_time(    Var_T * /* v */ );

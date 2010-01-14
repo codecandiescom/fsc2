@@ -1791,16 +1791,16 @@ f_sqrt( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------*
- * Returns a random number between 0 and 1 (i.e. result is float)
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Returns random numbers from the interval [0:1] (i.e. larger
+ * or equal to 0 and less or equal to 1)
+ *-------------------------------------------------------------*/
 
 Var_T *
 f_random( Var_T * v )
 {
     long len;
     long i;
-    double *arr;
     Var_T *new_var = NULL;
 
 
@@ -1816,14 +1816,88 @@ f_random( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    arr = T_malloc( len * sizeof *arr );
+    new_var = vars_push( FLOAT_ARR, NULL, len );
     for ( i = 0; i < len; i++ )
-        *( arr + i ) = random( ) / ( double ) RAND_MAX;
-
-    new_var = vars_push( FLOAT_ARR, arr, len );
-    T_free( arr );
+        new_var->val.dpnt[ i ] = random( ) / ( double ) RAND_MAX;
 
     return new_var;
+}
+
+
+/*-------------------------------------------------------------*
+ * Returns random numbers from the interval [0:1[ (i.e. larger
+ * or equal to 0 and less than 1)
+ *-------------------------------------------------------------*/
+
+Var_T *
+f_random2( Var_T * v )
+{
+    long len;
+    long i;
+    Var_T *new_var = NULL;
+
+
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, random( ) / ( RAND_MAX + 1.0 ) );
+
+    len = get_long( v, "number of points" );
+
+    if ( len <= 0 )
+    {
+        print( FATAL, "Zero or negative number (%ld) of points specified.\n",
+               len );
+        THROW( EXCEPTION );
+    }
+
+    new_var = vars_push( FLOAT_ARR, NULL, len );
+    for ( i = 0; i < len; i++ )
+        new_var->val.dpnt[ i ] = random( ) / ( RAND_MAX + 1.0 );
+
+    return new_var;
+}
+
+
+/*-----------------------------------*
+ * Shuffles the elements of an array
+ *-----------------------------------*/
+
+Var_T *
+f_shuffle( Var_T * v )
+{
+    Var_T * nv = NULL;
+    long n;
+
+
+    vars_check( v, INT_ARR | FLOAT_ARR );
+
+    if ( v->type == INT_ARR )
+    {
+        nv = vars_push( INT_ARR, v->val.lpnt, v->len );
+
+        for ( n = v->len - 1; n > 0; n-- )
+        {
+            long k = ( long ) ( ( n + 1 ) * random( ) / ( RAND_MAX + 1.0 ) );
+            long tmp = nv->val.lpnt[ n ];
+
+            nv->val.lpnt[ n ] = nv->val.lpnt[ k ];
+            nv->val.lpnt[ k ] = tmp;
+        }                
+    }
+    else
+    {
+        nv = vars_push( FLOAT_ARR, v->val.lpnt, v->len );
+
+        for ( n = v->len - 1; n > 0; n-- )
+        {
+            long k = ( long ) ( ( n + 1 ) * random( ) / ( RAND_MAX + 1.0 ) );
+            double tmp = nv->val.dpnt[ n ];
+
+            nv->val.dpnt[ n ] = nv->val.dpnt[ k ];
+            nv->val.dpnt[ k ] = tmp;
+        }                
+    }
+
+    return nv;
 }
 
 
@@ -1897,11 +1971,11 @@ gauss_random( void )
 }
 
 
-/*---------------------------------------------------------------------------*
- * Sets a seed for the random number generator. It expects either a positive
- * integer as argument or none, in which case the current time (in seconds
- * since 00:00:00 UTC, January 1, 1970) is used.
- *---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Sets a seed for the random number generator. It expects either a
+ * positive integer as its argument or none, in which case the current
+ * time (in seconds since 00:00:00 UTC, January 1, 1970) is used.
+ *---------------------------------------------------------------------*/
 
 Var_T *
 f_setseed( Var_T * v )
