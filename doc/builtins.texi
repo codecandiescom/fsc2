@@ -2554,7 +2554,7 @@ Alternatively, when no argument is given, the time in seconds since
 
 
 @anchor{shuffle()}
-@findex{shuffle()}
+@findex shuffle()
 @item shuffle()
 This function expects a 1-dimensional array as its input an returns
 an array of the same length with the elements of the input array
