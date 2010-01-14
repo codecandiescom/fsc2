@@ -788,25 +788,31 @@ vicp_read( char    * buffer,
 
     do
     {
+        char *h = ( char * ) header;
+        ssize_t ar = 0;
+
         /* Read a new header */
 
-        bytes_read = fsc2_lan_read( vicp.handle, ( char * ) header,
-                                    VICP_HEADER_SIZE, us_timeout,
-                                    quit_on_signal );
-
-        if ( bytes_read < 0 )
+        do
         {
-            print( FATAL, "Error in communication with LAN device.\n" );
-            THROW( EXCEPTION );
-        }
+            bytes_read = fsc2_lan_read( vicp.handle, h, VICP_HEADER_SIZE - ar,
+                                        us_timeout, quit_on_signal );
 
-        if ( bytes_read == 0 )
-        {
-            *length = total_length;
-            return FAILURE;
-        }
+            if ( bytes_read < 0 )
+            {
+                print( FATAL, "Error in communication with LAN device.\n" );
+                THROW( EXCEPTION );
+            }
 
-        fsc2_assert( bytes_read == VICP_HEADER_SIZE );
+            if ( bytes_read == 0 )
+            {
+                *length = total_length;
+                return FAILURE;
+            }
+
+            ar += bytes_read;
+            h += bytes_read;
+        } while ( ar < VICP_HEADER_SIZE );
 
         /* Check the version field - if this is not correct something must
            have gone seriously wrong */
