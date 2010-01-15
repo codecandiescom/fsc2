@@ -83,7 +83,8 @@ f_is_file( Var_T * v )
 
     return vars_push( INT_VAR,
                       (    fn < FILE_NUMBER_OFFSET
-                        || fn >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) ?
+                        || fn >= EDL.File_List_Len + FILE_NUMBER_OFFSET
+                        || ! EDL.File_List[ fn ].fp ) ?
                       0L : 1L );
 }
 
@@ -106,7 +107,7 @@ Var_T *
 f_openf( Var_T * v )
 {
     Var_T *cur;
-    int i;
+    long i;
     char *fn;
     char *m;
     struct stat stat_buf;
@@ -130,12 +131,19 @@ f_openf( Var_T * v )
     if ( No_File_Numbers )
     {
         print( FATAL, "Function can't be called if one of the functions for "
-               "writing data to a file already has been invoked.\n" );
+               "writing data to a file already has been invoked without "
+               "opening a file explicitely.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing argument(s).\n" );
         THROW( EXCEPTION );
     }
 
     /* If there's only a single integer argument and its value is 1 or 2
-       we're asked for "opening" stdout or stderr */
+       we're asked to "open" stdout or stderr */
 
     if (    v->type == INT_VAR
          && v->next == NULL
@@ -173,6 +181,24 @@ f_openf( Var_T * v )
     if ( *fn == '\0' )
         return f_getf( v->next );
 
+    /* Check if the file is already open */
+
+    for ( i = 0; i < EDL.File_List_Len; i++ )
+        if ( ! strcmp( EDL.File_List[ i ].name, fn ) )
+        {
+            m = get_string( "The specified file is already open:\n%s\n"
+                            "\nOpen another file instead?", fn );
+
+            if ( 1 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+            {
+                T_free( m );
+                return f_getf( v->next );
+            }
+            
+            T_free( m );
+            return vars_push( INT_VAR, i + FILE_NUMBER_OFFSET );
+        }
+
     /* Now ask for confirmation if the file already exists and try to open
        it for writing */
 
@@ -180,11 +206,13 @@ f_openf( Var_T * v )
     {
         m = get_string( "The specified file already exists:\n%s\n"
                         "\nDo you really want to overwrite it?", fn );
+
         if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
         {
             T_free( m );
             return f_getf( v->next );
         }
+
         T_free( m );
     }
 
@@ -295,8 +323,8 @@ Var_T *
 f_getf( Var_T * v )
 {
     Var_T *cur;
-    int i;
-    char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
+    long i;
+    char *s[ ] = { NULL, NULL, NULL, NULL, NULL };
     FILE *fp;
     struct stat stat_buf;
     char *r = NULL;
@@ -422,6 +450,31 @@ f_getf( Var_T * v )
         r = new_r;
     }
 
+    /* Check if the file is already open */
+
+    for ( i = 0; i < EDL.File_List_Len; i++ )
+        if ( ! strcmp( EDL.File_List[ i ].name, r ) )
+        {
+            m = get_string( "The specified file is already open:\n%s\n"
+                            "\nOpen another file instead?", r );
+
+            if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+            {
+                T_free( m );
+                return vars_push( INT_VAR, i + FILE_NUMBER_OFFSET );
+            }
+            
+            T_free( m );
+            goto getfile_retry;
+        }
+
+    for ( i = 0; i < EDL.File_List_Len; i++ )
+        if ( ! strcmp( EDL.File_List[ i ].name, r ) )
+        {
+            print( SEVERE, "File '%s' is already open.\n", r );
+            return vars_push( INT_VAR, i + FILE_NUMBER_OFFSET );
+        }
+
     /* Now ask for confirmation if the file already exists and try to open
        it for writing */
 
@@ -501,6 +554,7 @@ f_getf( Var_T * v )
         EDL.File_List[ EDL.File_List_Len ].fp = stdout;
     else
         EDL.File_List[ EDL.File_List_Len ].fp = fp;
+
     EDL.File_List[ EDL.File_List_Len ].name = r;
 
     /* Switch off buffering so we're sure everything gets written to disk
@@ -843,8 +897,7 @@ get_save_file( Var_T ** v )
     /* If the first argument is an integer variable and has the value 1
        or 2 return the index for stdout or stderr - but only if they have
        been "opened" either via an explicit call of f_openf() with 1 or 2
-       as the single argument or indirectly by calling f_getf() or f_openf()
-       for opening a real file. */
+       as the single argument. */
 
     if (    *v != NULL
          && ( *v )->type == INT_VAR
@@ -855,8 +908,7 @@ get_save_file( Var_T ** v )
         if ( ! STD_Is_Open )
         {
             print( FATAL, "The std%s handle must have been opened, either by "
-                   "an explicit call of open_file() or by explicitely opening "
-                   "a normal file.\n",
+                   "an explicit call of open_file().\n",
                    ( *v )->val.lval == STDOUT_FILENO ? "out" : "err" );
             THROW( EXCEPTION );
         }

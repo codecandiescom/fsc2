@@ -789,13 +789,15 @@ vicp_read( char    * buffer,
     do
     {
         char *h = ( char * ) header;
-        ssize_t ar = 0;
+        ssize_t header_read = 0;
 
-        /* Read a new header */
+        /* Read a new header - also here we must expect to get only
+           part of the header on a single read */
 
         do
         {
-            bytes_read = fsc2_lan_read( vicp.handle, h, VICP_HEADER_SIZE - ar,
+            bytes_read = fsc2_lan_read( vicp.handle, h,
+                                        VICP_HEADER_SIZE - header_read,
                                         us_timeout, quit_on_signal );
 
             if ( bytes_read < 0 )
@@ -810,9 +812,9 @@ vicp_read( char    * buffer,
                 return FAILURE;
             }
 
-            ar += bytes_read;
+            header_read += bytes_read;
             h += bytes_read;
-        } while ( ar < VICP_HEADER_SIZE );
+        } while ( header_read < VICP_HEADER_SIZE );
 
         /* Check the version field - if this is not correct something must
            have gone seriously wrong */

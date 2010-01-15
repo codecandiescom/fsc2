@@ -1103,8 +1103,8 @@ file handles for @i{stdout} and @i{stderr}.
 
 @item get_file()
 Opens a new file and returns a unique identifier for the file that can
-be stored in an integer variable and is to be used in calls to functions
-of the @w{@code{save_xxx()}}-family. Usually a file selector gets shown
+be stored in an integer variable. This variable can then be used in
+all the file output functions. Usually a file selector gets shown
 that lets the user choose a file. If opening the selected file fails the
 user is asked to select a different file name. If the user cancels the
 selection of a file (s)he is asked for confirmation since data may get
@@ -1126,12 +1126,11 @@ name already has this extension. This way one can enforce an extension
 for the file name.
 
 If @code{@ref{get_file()}} has never been called on the first call to
-a function from the @code{save_xxx()}-family the user is asked to
-select a file and this file is used exclusively in further
-@code{save_xxx()}-calls. That means that calling
-@code{@ref{get_file()}} after the default file has already been opened
-is not allowed, call it either before the first save-operation or
-never at all!
+a file output function the user is asked to select a file and this
+file is used exclusively in all further calls of file output
+functions. This means that calling @code{@ref{get_file()}} after the
+default file has already been opened is not allowed, it must be either
+called before the first output operation to a file or never at all!
 
 In batch mode (i.e.@: if @code{fsc2} got started with the '@code{-B}'
 option) no file select box gets shown because the script is supposed to
@@ -1156,10 +1155,11 @@ that one may specify an hard-coded file name in the script. The
 function will use its first argument as a file name and try to open
 this file. If the file already exists (or can't be opened) a warning
 will be shown and, on user request will show up a file selector to
-allow selecting a different file, just as the @code{@ref{get_file()}}.
-Thus the arguments that the function accepts are identical to the ones
-of @code{@ref{get_file()}} with the only exception that the first
-argument is an additional argument with a string for the file name.
+allow selecting a different file, just as the @code{@ref{get_file()}}
+function. Thus the arguments that the function accepts are identical
+to the ones of @code{@ref{get_file()}} with the only exception that
+the first argument is an additional argument with a string for the
+file name.
 
 This function can also be used to explicitely open @i{stdout} and
 @i{stderr}. To do so call the function with a single integer argument
