@@ -1876,7 +1876,7 @@ f_shuffle( Var_T * v )
 
         for ( n = v->len - 1; n > 0; n-- )
         {
-            long k = ( long ) ( ( n + 1 ) * random( ) / ( RAND_MAX + 1.0 ) );
+            long k = ( n + 1 ) * ( random( ) / ( RAND_MAX + 1.0 ) );
             long tmp = nv->val.lpnt[ n ];
 
             nv->val.lpnt[ n ] = nv->val.lpnt[ k ];
@@ -1889,7 +1889,7 @@ f_shuffle( Var_T * v )
 
         for ( n = v->len - 1; n > 0; n-- )
         {
-            long k = ( long ) ( ( n + 1 ) * random( ) / ( RAND_MAX + 1.0 ) );
+            long k = ( n + 1 ) * ( random( ) / ( RAND_MAX + 1.0 ) );
             double tmp = nv->val.dpnt[ n ];
 
             nv->val.dpnt[ n ] = nv->val.dpnt[ k ];
