@@ -301,7 +301,7 @@ interval (as set in the configuration file for the module) and that
 a modulattion phase is known for this calibration and frequency. Otherwise
 the script is aborted.
 
-If there's nother argument this is taken to be a modulation phase.
+If there's no other argument this is taken to be a modulation phase.
 This requires that a ration already has been set for the frequency
 given as the second argument (or for a frequency within the confidence
 interval). Please note that setting the phase for a new frequency only

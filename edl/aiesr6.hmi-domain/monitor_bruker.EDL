@@ -25,6 +25,9 @@ DOWN = -1;
 
 min_ampl = 0.001;
 max_ampl = 100.0;
+=== if RESONATOR ne "Unspecified"
+max_level;
+=== endif
 
 tc;
 sens;
@@ -89,6 +92,8 @@ mod_freq = lockin_ref_freq( );
 mod_ampl = lockin_ref_level( );
 phase = lockin_phase( );
 
+max_level = epr_modulation_calibration_amplitude_limit( "RESONATOR" " (ER023M)" );
+
 /* Finally, create the form with the buttons for sweeping etc. */
 
 hide_toolbox( "ON" );
@@ -151,9 +156,14 @@ FOR I = 2 : size( freqs ) {
 }
 mod_freq = freqs[ menu_choice( MF ) ];
 lockin_ref_freq( mod_freq );
+=== if RESONATOR ne "Unspecified"
 mod_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
 min_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
 max_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+IF max_level != 0.0 AND max_ampl > max_level {
+	max_ampl = max_level;
+}
+=== endif
 MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [G]" );
 === endif
 
@@ -309,10 +319,14 @@ FOREVER {
 === else
 		mod_freq = freqs[ menu_choice( MF ) ];
 		lockin_ref_freq( mod_freq );
-		min_ampl = 0.001 *
-		              epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
-        max_ampl = 100.0 *
-                      epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+		min_ampl = 0.001
+		           * epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+        max_ampl = 100.0
+                   * epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+		IF max_level != 0.0 AND max_ampl > max_level {
+			max_ampl = max_level;
+		}
+=== endif
 		lockin_ref_level( mod_ampl /
                     epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
 
@@ -332,17 +346,20 @@ FOREVER {
 
 	IF input_changed( MA ) {
 		dval = input_value( MA );
-		IF dval < min_ampl OR dval > max_ampl {
-			input_value( MA, mod_ampl );
-		} ELSE {
-		    mod_ampl = dval;
+		IF dval < min_ampl OR  {
+			dval = min_ampl;
+			input_value( MA, min_ampl );
+		} ELSE IF dval > max_ampl {
+			dval = mas_ampl;
+			input_value( MA, max_ampl );
+		}
+	    mod_ampl = dval;
 === if RESONATOR eq "Unspecified"
-			lockin_ref_level( mod_ampl );
+		lockin_ref_level( mod_ampl );
 === else
-			lockin_ref_level( mod_ampl /
+		lockin_ref_level( mod_ampl /
 			        epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
 === endif
-		}
 	}
 
 	IF input_changed( Phase ) {

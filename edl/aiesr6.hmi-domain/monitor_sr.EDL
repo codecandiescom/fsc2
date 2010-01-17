@@ -25,6 +25,9 @@ Can_interpolate = 0;
 raw_ampl, new_raw_ampl, mod_ampl;
 min_ampl = 0.004 V;
 max_ampl = 5.0 V;
+=== if RESONATOR ne "Unspecified"
+max_level;
+=== endif
 
 mod_freq, new_mod_freq;
 min_freq = 1 mHz,
@@ -80,6 +83,9 @@ button_state( Sweep_Stop, "ON" );
 
 mod_freq = lockin_ref_freq( );
 raw_ampl = lockin_ref_level( );
+
+max_level =
+	epr_modulation_calibration_amplitude_limit( "RESONATOR" " (SR830)" );
 
 IF epr_modulation_calibration_can_extrapolate( "RESONATOR" " (SR830)" ) {
     Can_extrapolate = 1;
@@ -215,10 +221,12 @@ FOREVER {
 			}
 			input_value( MF, new_mod_freq / 1 kHz);
 			mod_freq = new_mod_freq;
-			mod_ampl = output_value( MA );
+			mod_ampl = input_value( MA );
+			IF max_level != 0.0 AND mod_ampl > max_level {
+				mod_ampl = max_level;
+			}
 			raw_ampl =   mod_ampl
                     / epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
-			print( "raw #\n", raw_ampl );
 			IF raw_ampl > max_ampl {
 				raw_ampl = max_ampl;
 			} ELSE IF raw_ampl < min_ampl {
@@ -228,7 +236,7 @@ FOREVER {
 			lockin_ref_level( raw_ampl );
 			mod_ampl = raw_ampl
                    * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
-			output_value( MA, mod_ampl );
+			input_value( MA, mod_ampl );
 		}
 
 		PAO_state = epr_modulation_has_phase( "RESONATOR" " (SR830)",
@@ -249,7 +257,7 @@ FOREVER {
 		raw_ampl = new_raw_ampl;
 		mod_ampl =   raw_ampl
                    * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
-		output_value( MA, mod_ampl );
+		input_value( MA, mod_ampl );
 	}
 
 	IF raw_phase != new_phase {
@@ -347,11 +355,14 @@ FOREVER {
 === if RESONATOR ne 'Unspecified'
 	/* If the modulation amplitude input field was changed set the new
 	   amplitude at the lock-in after making sure the new value is within
-	   the limits the lock-in can produce */
+	   the limits for the resonator and the lock-in */
 
 	IF input_changed( MA ) {
-		raw_ampl = input_value( MA )
-                   / epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		raw_ampl = input_value( MA );
+		IF max_level != 0.0 AND raw_ampl > max_level {
+			raw_ampl = max_level;
+		}
+		raw_ampl /= epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
 		IF raw_ampl > max_ampl {
 			raw_ampl = max_ampl;
 		} ELSE IF raw_ampl < min_ampl {

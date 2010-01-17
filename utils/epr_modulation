@@ -154,6 +154,8 @@ sub create_edit_win {
 
     my $ew = $mw->Toplevel;
 
+    # Frame for resonator name
+
     my $rf = $ew->Frame->pack( -anchor => 'nw',
                                -expand => 1,
                                -fill   => 'both',
@@ -183,10 +185,43 @@ sub create_edit_win {
                                   -pady   => 3 );
 
     my $rne = $rnf->Entry( -textvariable    => \$cal->{ name },
+                           -width           => 24,
+                           -relief          => 'sunken',
+                           -background      => 'white'
+                         )->pack( -side => 'left' );
+
+    # Frame for resonator maximum modulation amplitude
+
+    my $rmf = $rd->Frame( -background => 'white'
+                        )->pack( -anchor => 'nw' );
+
+    my $rml = $rmf->Label( -text       => 'Max. amplitude:',
+                           -width      => 15,
+                           -anchor     => 'w',
+                           -background => 'white'
+                         )->pack( -side   => 'left',
+                                  -anchor => 'w',
+                                  -padx   => 3,
+                                  -pady   => 3 );
+
+    my $rme = $rmf->Entry( -textvariable    => \$cal->{ max_amp },
+                           -validate        => 'key',
+                           -validatecommand => [ \&ufloat_check ],
                            -width           => 20,
                            -relief          => 'sunken',
                            -background      => 'white'
                          )->pack( -side => 'left' );
+
+    my $rml2 = $rmf->Label( -text       => 'G',
+                            -width      => 1,
+                            -anchor     => 'w',
+                            -background => 'white'
+                          )->pack( -side   => 'left',
+                                   -anchor => 'w',
+                                   -padx   => 3,
+                                   -pady   => 3 );
+
+    # Frame for resonator 'interpolate' property
 
     my $rif = $rd->Frame( -background => 'white'
                         )->pack( -anchor => 'nw' );
@@ -206,6 +241,8 @@ sub create_edit_win {
                                 -background    => 'white'
                               )->pack( -side => 'left' );
 
+    # Frame for resonator 'extrapolate' property
+
     my $ref = $rd->Frame( -background => 'white'
                         )->pack( -anchor => 'nw' );
 
@@ -223,6 +260,8 @@ sub create_edit_win {
                                 -width        => 5,
                                 -background   => 'white'
                               )->pack( -side => 'left' );
+
+    # Frames for all modulation frequencies
 
     add_entry( $cal, $_, $rd ) for @{ $cal->{ freqs } };
 
@@ -287,7 +326,7 @@ sub add_entry {
 
     my $fv = $ff->Entry( -textvariable    => \$cf->{ freq },
 						 -validate        => 'key',
-						 -validatecommand => [ \&freq_check ],
+						 -validatecommand => [ \&ufloat_check ],
 						 -width           => 20,
 						 -relief          => 'sunken',
 						 -background      => 'white'
@@ -312,7 +351,7 @@ sub add_entry {
 
     my $rv = $fr->Entry( -textvariable    => \$cf->{ ratio },
 						 -validate        => 'key',
-						 -validatecommand => [ \&ratio_phase_check ],
+						 -validatecommand => [ \&float_check ],
 						 -width           => 20,
 						 -relief          => 'sunken',
 						 -background      => 'white'
@@ -337,7 +376,7 @@ sub add_entry {
 
     my $pv = $fl->Entry( -textvariable    => \$cf->{ phase },
 						 -validate        => 'key',
-						 -validatecommand => [ \&ratio_phase_check ],
+						 -validatecommand => [ \&float_check ],
 						 -width           => 20,
 						 -relief          => 'sunken',
 						 -background      => 'white'
@@ -393,14 +432,14 @@ sub done {
 
 ################################################
 
-sub freq_check {
+sub ufloat_check {
     return shift( ) =~ /^(\d+(\.(\d+)?)?)?$/;
 }
 
 
 ################################################
 
-sub ratio_phase_check {
+sub float_check {
     return shift( ) =~ /^[+-]?(\d+(\.(\d+)?)?)?$/;
 }
 
@@ -459,19 +498,21 @@ I, J;
 f[ * ];
 EXPERIMENT:
 FOR I = 1 : epr_modulation_calibration_count( ) {
-print( "calibration: \\"#\\"\\n", epr_modulation_calibration_name( I ) );
-print( "interpolate: #\\n", epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no");
-print( "extrapolate: #\\n", epr_modulation_calibration_extrapolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no" );
-epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ), "OFF" );
-f = epr_modulation_calibration_frequencies( epr_modulation_calibration_name( I ) );
-FOR J = 1 : size( f ) {
-print( "freq: # kHz\\n", f[ J ] / 1 kHz );
-print( "ratio: # G/V\\n", epr_modulation_ratio( epr_modulation_calibration_name( I ), f[ J ] ) );
-IF ( epr_modulation_has_phase( epr_modulation_calibration_name( I ), f[ J ] ) ) {
-print( "phase: #\\n", epr_modulation_phase( epr_modulation_calibration_name( I ), f[ J ] ) );
-}
-}
-print( "\n" );
+    print( "calibration: \\"#\\"\\n", epr_modulation_calibration_name( I ) );
+    print( "interpolate: #\\n", epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no");
+    print( "extrapolate: #\\n", epr_modulation_calibration_extrapolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no" );
+    epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ), "OFF" );
+    IF epr_modulation_calibration_amplitude_limit( epr_modulation_calibration_name( I ) ) != 0.0 {
+	    print( "maximum amplitude: # G\\n", epr_modulation_calibration_amplitude_limit( epr_modulation_calibration_name( I ) ) );
+    }
+    f = epr_modulation_calibration_frequencies( epr_modulation_calibration_name( I ) );
+    FOR J = 1 : size( f ) {
+        print( "freq: # kHz\\n", f[ J ] / 1 kHz );
+        print( "ratio: # G/V\\n", epr_modulation_ratio( epr_modulation_calibration_name( I ), f[ J ] ) );
+        IF ( epr_modulation_has_phase( epr_modulation_calibration_name( I ), f[ J ] ) ) {
+            print( "phase: #\\n", epr_modulation_phase( epr_modulation_calibration_name( I ), f[ J ] ) );
+        }
+    }
 }
 EOT
 
@@ -492,8 +533,10 @@ EOT
 			$cal = $self->add_calibration( $1 );
 		} elsif ( /^interpolate: *(yes|no|1|0)$/ ) {
 			$cal->interpolate( $1 );
-		} elsif  ( /^extrapolate:\s*(yes|no|1|0)$/ ) {
+		} elsif ( /^extrapolate:\s*(yes|no|1|0)$/ ) {
 			$cal->extrapolate( $1 );
+        } elsif ( /^maximum amplitude: (\d+(\.(\d+)?)?) G$/ ) {
+            $cal->max_amp( $1 );
 		} elsif ( /^freq: ([^ ]+) *((G|M|k|m|u|n)?)Hz$/ ) {
 			$freq = $cal->add_freq( Freq->new( $1 * ( $2 ? $u{ $2 } : 1 ) ) );
 		} elsif ( /^ratio: ([^ ]+) G\/V$/ ) {
@@ -542,6 +585,8 @@ EOT
 
 	for my $cal ( @$self ) {
 		print $f 'epr_modulation_add_calibration( "' . $cal->name . "\" );\n";
+        print $f 'epr_modulation_calibration_amplitude_limit( "' . $cal->name .
+			     '", ' . $cal->max_amp . " G );\n" if $cal->max_amp ne '';
 		print $f 'epr_modulation_calibration_interpolate( "' . $cal->name .
 			     '", ' .
 			     ( $cal->interpolate eq 'yes' ? '"ON"' : '"OFF"' ) . " );\n";
@@ -694,6 +739,13 @@ sub new {
 	}
 
 	if ( @_ and defined $_[ 0 ] ) {
+		$self->max_amp( shift );
+	} else {
+		$self->{ max_amp } = "";
+		shift;
+	}
+
+	if ( @_ and defined $_[ 0 ] ) {
 		$self->freqs( shift );
 	} else {
 		$self->{ freqs } = [ ];
@@ -737,7 +789,7 @@ sub check {
 sub copy {
 	my $self = shift;
 	my $nr = Calibration->new( $self->name, $self->interpolate,
-                               $self->extrapolate );
+                               $self->extrapolate, $self->max_amp );
 
 	$nr->add_freq( $_->copy ) for @{ $self->freqs };
 	return $nr;
@@ -777,6 +829,17 @@ sub extrapolate {
 	$extrapolate =~ s/1/yes/i;
 	$extrapolate =~ s/0/no/i;
 	return $self->{ extrapolate } = $extrapolate;
+}
+
+
+###################################
+
+sub max_amp {
+	my ( $self, $max_amp ) = @_;
+	return $self->{ max_amp } unless defined $max_amp;
+	die "Invalid maximum amplitude.\n"
+		unless main::ufloat_check( $max_amp );
+	return $self->{ max_amp } = $max_amp;
 }
 
 

@@ -71,7 +71,7 @@ int epr_mod_exp_hook( void )
 int epr_mod_exit_hook( void )
 {
     epr_mod_clear( &epr_mod_stored );
-    epr_mod_clear( &epr_mod);
+    epr_mod_clear( &epr_mod );
     return 1;
 }
 
@@ -330,8 +330,9 @@ epr_modulation_add_calibration( Var_T * v )
 		res->name = T_strdup( v->val.sptr );
         res->interpolate = UNSET;
         res->extrapolate = UNSET;
-        res->fe = NULL;
-		res->count = 0;
+        res->max_amp     = 0.0;
+        res->fe          = NULL;
+		res->count       = 0;
 
 		epr_mod.calibrations =
 			realloc( epr_mod.calibrations,
@@ -522,9 +523,78 @@ epr_modulation_calibration_can_extrapolate( Var_T * v  UNUSED_ARG )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for query of number of entries for a calibration
- *-----------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function to set or query the modulation amplitude limit
+ *---------------------------------------------------------*/
+
+Var_T *
+epr_modulation_calibration_amplitude_limit( Var_T * v )
+{
+	Calibration_T *res = epr_mod_find( v );
+
+
+    if ( ( v = vars_pop( v ) ) != NULL )
+    {
+        double max_amp = get_double( v, "modulation amplitude limit" );
+
+        if ( max_amp < 0.0 )
+        {
+            print( FATAL, "Invalid negative modulation amplitude limit.\n" );
+            THROW( EXCEPTION );
+        }
+
+        res->max_amp = max_amp;
+        too_many_arguments( v );
+    }
+
+    return vars_push( FLOAT_VAR, res->max_amp );
+}
+
+
+/*-------------------------------------------------------*
+ * Function to check a modulation amplitude against the
+ * limit for the resonator.  Returns 1 if everything is
+ * well (i.e. amplitude isn't over the limit, 0 if no
+ * limit has been set (in that case also a warning is
+ * printed out) and throws an exception if the amplitude
+ * is too high.
+ *-------------------------------------------------------*/
+
+Var_T *
+epr_modulation_calibration_check_amplitude( Var_T * v )
+{
+	Calibration_T *res = epr_mod_find( v );
+    double amp = get_double( v->next, "modulation amplitude" );
+
+
+    if ( amp < 0.0 )
+    {
+        print( FATAL, "Invalid negative modulation amplitude.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( res->max_amp == 0.0 )
+    {
+        print( WARN, "No modulation amplitude limit has been set for "
+               "resonator '%s'.\n", res->name );
+        return vars_push( INT_VAR, 0L );
+    }
+
+    if ( amp > res->max_amp )
+    {
+        print( FATAL, "Modulation amplitude of %.1f G higher than limit of "
+               "%.1f G set for resonator '%s'.\n",
+               amp, res->max_amp, res->name );
+        THROW( EXCEPTION );
+    }
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------------*
+ * Function to query of number of entries for a calibration
+ *----------------------------------------------------------*/
 
 Var_T *
 epr_modulation_calibration_frequencies( Var_T * v )

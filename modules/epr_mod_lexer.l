@@ -70,6 +70,8 @@ typedef struct CAL_T {
     char   * name;
     size_t   count;
     FE_T   * fe;
+    double   max_amp;
+    bool     is_max_amp;
     bool     interpolate;
     bool     is_interpolate;
     bool     extrapolate;
@@ -85,25 +87,28 @@ static int epr_mod_cal_data( int tok );
 static int epr_mod_get_name( int tok );
 static int epr_mod_get_ip( int tok );
 static int epr_mod_get_ep( int tok );
+static int epr_mod_get_max_amp( int tok );
 static int epr_mod_get_freq( int tok );
-static int epr_mod_get_val( int tok );
+static int epr_mod_get_freq_val( int tok );
 static int epr_mod_get_ratio( int tok );
 static int epr_mod_get_phase( int tok );
 static void epr_mod_state_file_err( int print_what );
 
 
-#define END_TOK    0
-#define YN_TOK     1
-#define CAL_TOK    2
-#define FREQ_TOK   3
-#define RATIO_TOK  4
-#define PHASE_TOK  5
-#define IP_TOK     6
-#define EP_TOK     7
-#define FUNIT_TOK  8
-#define RUNIT_TOK  9
-#define NAME_TOK  10
-#define NUM_TOK   11
+#define END_TOK       0
+#define YN_TOK        1
+#define CAL_TOK       2
+#define FREQ_TOK      3
+#define RATIO_TOK     4
+#define PHASE_TOK     5
+#define IP_TOK        6
+#define EP_TOK        7
+#define MAX_AMP_TOK   8
+#define AUNIT_TOK     9
+#define FUNIT_TOK    10
+#define RUNIT_TOK    11
+#define NAME_TOK     12
+#define NUM_TOK      13
 
 %}
 
@@ -127,12 +132,14 @@ CAL      "calibration"[\t ]*":"
 FREQ     "freq"[\t ]*":"
 RATIO    "ratio"[\t ]*":"
 PHASE    "phase"[\t ]*":"
+MAX_AMP  "maximum amplitude"[\t ]*":"
 IS_IP    "interpolate"[\t ]*":"
 IS_EP    "extrapolate"[\t ]*":"
 YES      "yes"
 NO       "no"
 RUNIT    "G"[\t ]*"/"[\t ]*"V"
 FUNIT    (G|M|k|m|u|n)?"Hz"
+AUNIT    (G|M|k|m|u|n)?"G"
 NAME_VAL "\""[^\"]*"\""
 
 %x      comm
@@ -221,6 +228,8 @@ NAME_VAL "\""[^\"]*"\""
 
 {IS_EP}     return EP_TOK;
 
+{MAX_AMP}   return MAX_AMP_TOK;
+
 {RUNIT}     return RUNIT_TOK;
 
 {FUNIT}     {
@@ -261,6 +270,46 @@ NAME_VAL "\""[^\"]*"\""
                 }
 
                 return FUNIT_TOK;
+            }
+
+{AUNIT}     {
+                char *u = epr_mod_text;
+
+                while ( isspace( ( unsigned char ) *u ) )
+                    u++;
+
+                switch ( *u )
+                {
+                    case 'G' :
+                        dval = u[ 1 ] == '\0' ? 1.0 : 1.0e9;
+                        break;
+
+                    case 'M' :
+                        dval = 1.0e6;
+                        break;
+
+                    case 'k' :
+                        dval = 1.0e3;
+                        break;
+
+                    case 'H' :
+                        dval = 1.0;
+                        break;
+
+                    case 'm' :
+                        dval = 1.0e-3;
+                        break;
+
+                    case 'u' :
+                        dval = 1.0e-6;
+                        break;
+
+                    case 'n' :
+                        dval = 1.0e-9;
+                        break;
+                }
+
+                return AUNIT_TOK;
             }
 
 {D}         {
@@ -341,12 +390,13 @@ epr_mod_read_state( void )
 
     epr_mod_Lc = 1;
 
-    cal. name = NULL;
-    cal.count = 0;
-    cal.fe = NULL;
-    cal.interpolate = SET;
+    cal. name          = NULL;
+    cal.count          = 0;
+    cal.fe             = NULL;
+    cal.is_max_amp     = UNSET;
+    cal.interpolate    = SET;
     cal.is_interpolate = UNSET;
-    cal.extrapolate = UNSET;
+    cal.extrapolate    = UNSET;
     cal.is_extrapolate = UNSET;
 
     tok = epr_mod_lex( );
@@ -393,6 +443,8 @@ epr_mod_get_new_cal( int tok )
         cal.name = NULL;
         epr_mod.calibrations[ last ].interpolate = cal.interpolate;
         epr_mod.calibrations[ last ].extrapolate = cal.extrapolate;
+        epr_mod.calibrations[ last ].max_amp =
+                                            cal.is_max_amp ? cal.max_amp : 0.0;
         epr_mod.calibrations[ last ].fe = NULL;
         epr_mod.calibrations[ last ].count = cal.count;
 
@@ -427,8 +479,9 @@ epr_mod_get_new_cal( int tok )
     CATCH ( OUT_OF_MEMORY_EXCEPTION )
         epr_mod_state_file_err( 0 );
 
-    cal.is_interpolate = 0;
-    cal.is_extrapolate = 0;
+    cal.is_interpolate = UNSET;
+    cal.is_extrapolate = UNSET;
+    cal.is_max_amp     = UNSET;
 
     return tok;
 }
@@ -445,6 +498,10 @@ epr_mod_cal_data( int tok )
         {
             case NAME_TOK :
                 tok = epr_mod_get_name( tok );
+                break;
+
+            case MAX_AMP_TOK :
+                tok = epr_mod_get_max_amp( tok );
                 break;
 
             case IP_TOK :
@@ -576,6 +633,58 @@ epr_mod_get_ep( int tok )
  *--------------------------------------------------------*/
 
 static int
+epr_mod_get_max_amp( int tok )
+{
+    double max_amp;
+
+
+    if ( tok != MAX_AMP_TOK )
+        epr_mod_state_file_err( 3 );
+
+    if ( cal.is_max_amp )
+        print( SEVERE, "Maximum amplitude setting found more than once in "
+               "state file '%s' at line %d, keeping first definition.\n",
+               epr_mod.state_file, epr_mod_Lc );
+
+    if ( ( tok = epr_mod_lex( ) ) != NUM_TOK )
+    {
+        print( FATAL, "Incomplete data for maximum amplitude in state file "
+               "'%s' at line %d detected.\n",
+               epr_mod.state_file, epr_mod_Lc );
+        epr_mod_state_file_err( 0 );
+    }
+
+    max_amp = dval;
+
+    if ( ( tok = epr_mod_lex( ) ) != AUNIT_TOK )
+    {
+        print( FATAL, "Incomplete data for maximum amplitude in state file "
+               "'%s' at line %d detected.\n",
+               epr_mod.state_file, epr_mod_Lc );
+        epr_mod_state_file_err( 0 );
+    }
+    
+    max_amp *= dval;
+
+    if ( max_amp < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for maximum amplitude in state "
+               "file '%s' at line %d detected.\n",
+               epr_mod.state_file, epr_mod_Lc );
+        epr_mod_state_file_err( 0 );
+    }
+
+    cal.max_amp    = max_amp;
+    cal.is_max_amp = SET;
+
+    return epr_mod_lex( );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+static int
 epr_mod_get_freq( int tok )
 {
     size_t last = cal.count;
@@ -600,7 +709,7 @@ epr_mod_get_freq( int tok )
         switch ( tok )
         {
             case NUM_TOK :
-                tok = epr_mod_get_val( tok );
+                tok = epr_mod_get_freq_val( tok );
                 break;
 
             case RATIO_TOK :
@@ -632,7 +741,7 @@ epr_mod_get_freq( int tok )
  *--------------------------------------------------------*/
 
 static int
-epr_mod_get_val( int tok )
+epr_mod_get_freq_val( int tok )
 {
     size_t last = cal.count - 1;
     size_t i;
@@ -716,7 +825,7 @@ epr_mod_get_ratio( int tok )
     if ( ( tok = epr_mod_lex( ) ) != NUM_TOK )
         epr_mod_state_file_err( 1 );
 
-    cal.fe[ last ].ratio = dval;
+    cal.fe[ last ].ratio    = dval;
     cal.fe[ last ].is_ratio = SET;
 
     /* Allow an optional "G/V" after the number */

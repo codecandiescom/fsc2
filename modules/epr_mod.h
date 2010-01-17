@@ -40,6 +40,7 @@ typedef struct Calibration {
 	char         * name;
 	size_t         count;               /* number of frequency entries */
 	FREQ_ENTRY_T * fe;
+    double         max_amp;
     bool           interpolate;
     bool           extrapolate;
 	double         r2;
@@ -76,6 +77,8 @@ Var_T * epr_modulation_calibration_interpolate(     Var_T * /* v */ );
 Var_T * epr_modulation_calibration_can_interpolate( Var_T * /* v */ );
 Var_T * epr_modulation_calibration_extrapolate(     Var_T * /* v */ );
 Var_T * epr_modulation_calibration_can_extrapolate( Var_T * /* v */ );
+Var_T * epr_modulation_calibration_amplitude_limit( Var_T * /* v */ );
+Var_T * epr_modulation_calibration_check_amplitude( Var_T * /* v */ );
 Var_T * epr_modulation_calibration_frequencies(     Var_T * /* v */ );
 Var_T * epr_modulation_store(                       Var_T * /* v */ );
 
