@@ -230,6 +230,8 @@ in the configuration file for the module.
 @item @ref{epr_modulation_calibration_count()}
 @item @ref{epr_modulation_calibration_name()}
 @item @ref{epr_modulation_calibration_frequencies()}
+@item @ref{epr_modulation_calibration_amplitude_limit()}
+@item @ref{epr_modulation_calibration_check_amplitude()}
 @item @ref{epr_modulation_store()}
 
 
@@ -444,6 +446,33 @@ known calibrations.
 This function returns an array of all frequencies known for a certain
 calibration (in ascending order). It takes a single argument, the name
 of a calibration (as a string).
+
+
+@anchor{epr_modulation_calibration_amplitude_limit()}
+@findex epr_modulation_calibration_amplitude_limit()
+@item epr_modulation_calibration_amplitude_limit()
+This function allows to store and retrieve a upper limit for the
+modulation amplitude to be used with a certain calibration
+(resonator). It takes at least one argument, the name of a
+calibration. If no further argument is given it returns the modulation
+amplitude limit in Gauss for that calibration (@code{0.0} if none is
+set). If there's a second argument it is taken to be a new limit to be
+set.
+
+
+@anchor{epr_modulation_calibration_check_amplitude()}
+@findex epr_modulation_calibration_check_amplitude()
+@item epr_modulation_calibration_check_amplitude()
+This function allows to check if a modulation amplitude is allowed
+(i.e.@: not to high) for a certain calibration (resonator). It expects
+two arguments, first the name of the calibration and then the
+modulation amplitude (in Gauss) to be checked. The function returns
+@code{1} if the modulation amplitude is within the limit set via
+@code{@ref{epr_modulation_calibration_amplitude_limit()}}. If there
+isn't a limit set for the calibration it returns @code{0} and prints
+out a warning. If the modulation amplitude is above the limit set for
+the calibration an error message is printed out and the experiment is
+aborted.
 
 
 @anchor{epr_modulation_store()}
