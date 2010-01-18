@@ -191,7 +191,9 @@ lecroy93xx_trigger_delay_check( void )
                 p = p->next;
             }
 
+        p->next  = NULL;
         p->delay = delay;
+
         return delay;
     }
 
@@ -379,6 +381,8 @@ lecroy93xx_window_check( Window_T * w,
             p->next = T_malloc( sizeof *p );
             p = p->next;
         }
+
+        p->next = NULL;
 
         /* Store the current settings as far as they are known */
 

@@ -166,6 +166,7 @@ lecroy_ws_trigger_delay_check( bool from )
                 p = p->next;
             }
 
+        p->next  = NULL;
         p->delay = delay;
         return delay;
     }
@@ -351,6 +352,8 @@ lecroy_ws_window_check( Window_T * w,
             p->next = T_malloc( sizeof *p );
             p = p->next;
         }
+
+        p->next = NULL;
 
         /* Store the current settings as far as they are known */
 
