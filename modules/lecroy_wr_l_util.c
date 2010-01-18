@@ -720,11 +720,11 @@ lecroy_wr_hori_res_prep( void )
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
             if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
-                                                      lecroy_wr.mem_sizes[ i ] )
+                                                     lecroy_wr.mem_sizes[ i ] )
             {
                 if ( lrnd( 1.0e-6 * ss_res ) == 5000 )
                 {
-                    ss_res *= .5;
+                    ss_res *= 0.2;
                     k = 1;
                 }
                 else

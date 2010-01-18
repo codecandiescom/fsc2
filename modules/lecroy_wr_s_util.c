@@ -1,4 +1,4 @@
-/*
+s/*
  *  Copyright (C) 1999-2010 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
@@ -724,7 +724,7 @@ lecroy_wr_hori_res_prep( void )
             {
                 if ( lrnd( 1.0e-6 * ss_res ) == 5000 )
                 {
-                    ss_res *= .5;
+                    ss_res *= 0.2;
                     k = 1;
                 }
                 else
