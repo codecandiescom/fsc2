@@ -313,12 +313,9 @@ FOREVER {
 	}
 
 	IF menu_changed( MF ) {
-=== if RESONATOR eq "Unspecified"
 		mod_freq = freqs[ menu_choice( MF ) ];
 		lockin_ref_freq( mod_freq );
-=== else
-		mod_freq = freqs[ menu_choice( MF ) ];
-		lockin_ref_freq( mod_freq );
+=== if RESONATOR ne "Unspecified"
 		min_ampl = 0.001
 		           * epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
         max_ampl = 100.0
@@ -326,7 +323,6 @@ FOREVER {
 		IF max_level != 0.0 AND max_ampl > max_level {
 			max_ampl = max_level;
 		}
-=== endif
 		lockin_ref_level( mod_ampl /
                     epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
 

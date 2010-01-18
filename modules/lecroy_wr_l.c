@@ -679,8 +679,8 @@ digitizer_memory_size( Var_T *v )
                mem_size, lecroy_wr.mem_sizes[ ms_index ] );
     }
 
-    lecroy_wr.mem_size = lecroy_wr.mem_sizes[ ms_index ];
-    lecroy_wr.ms_index = ms_index;
+    lecroy_wr.mem_size    = lecroy_wr.mem_sizes[ ms_index ];
+    lecroy_wr.ms_index    = ms_index;
     lecroy_wr.is_mem_size = SET;
     lecroy_wr.cur_hres =
                      lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;

@@ -87,7 +87,7 @@ change_scale_1d( end_field, field_step );
 lockin_sensitivity( SENS1 * SENS2 );
 === endif
 
-=== if defined MODPHASE
+=== if defined PHASE
 ===   if PHASE_AS_OFFSET and RESONATOR ne "Unspecified"
 phase += epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
 ===   endif

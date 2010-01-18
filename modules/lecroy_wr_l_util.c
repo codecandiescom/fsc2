@@ -369,8 +369,11 @@ lecroy_wr_window_check( Window_T * w,
         LECROY_WR_PTC_WINDOW_T *p = lecroy_wr_ptc_window;
 
         if ( lecroy_wr_ptc_window == NULL )
+        {
             p = lecroy_wr_ptc_window =
                 					  T_malloc( sizeof *lecroy_wr_ptc_window );
+            p->next = NULL;
+        }
         else
         {
             while ( p->next != NULL )
