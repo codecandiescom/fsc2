@@ -719,12 +719,23 @@ lecroy_wr_hori_res_prep( void )
 
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
-            if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
+            while ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
                                                     lecroy_wr.mem_sizes[ i ] )
             {
-                if ( lrnd( 1.0e-6 * ss_res ) == 5000 )
+                /* Note: Waverunners with a maximum sample rate of 2 GHz
+                   (0.5 ns) switch from there to 1 Gz (1 ns) while XStreams,
+                   with a maximum rate of 5 GHz (0.2 Hz) switch to 2.5 GHz
+                   (0.4 ns) and only then to 1 GHz (1 ns). Afterwards for
+                   both use a 5-2-1 scheme is used, e.g. 500 MHz (2 ns),
+                   200 MHz (5 ns), 100 MHz (10 ns) etc. */
+
+                if ( lrnd( 1.0e-6 * ss_res ) > 1000 )
                 {
-                    ss_res *= 0.2;
+                    if ( k == 5 || k == 2 )
+                        ss_res *= 0.5;
+                    else
+                        ss_res *= 0.4;
+
                     k = 1;
                 }
                 else
