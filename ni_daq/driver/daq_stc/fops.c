@@ -231,8 +231,8 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 	else
 		mask |= POLLHUP;
 	
-	if ( board->data_buffer[ NI_DAQ_AO_SUBSYSTEM ] != NULL &&
-	     board->func->data_get_available( board, NI_DAQ_AO_SUBSYSTEM ) )
+	if (    board->data_buffer[ NI_DAQ_AO_SUBSYSTEM ] != NULL
+	     && board->func->data_get_available( board, NI_DAQ_AO_SUBSYSTEM ) )
 		mask |= POLLOUT | POLLWRNORM;
 
 	up( &board->use_mutex );
@@ -298,8 +298,8 @@ static ssize_t ni_daq_read( struct file * file_p,
 	/* If an acquisition has been set up but hasn't been started yet
 	   trying to read data triggers the start of the acquisition */
 
-	if ( board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] == NULL &&
-	     ( ret = AI_start_acq( board ) ) < 0 ) {
+	if (    board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] == NULL
+	     && ( ret = AI_start_acq( board ) ) < 0 ) {
 		up( &board->use_mutex );
 		return ret;
 	}
@@ -310,14 +310,14 @@ static ssize_t ni_daq_read( struct file * file_p,
 	   wait for it (or for the SC TC interrupt, which is raised at the
 	   end of the acquisition). */
 
-	if ( ! ( file_p->f_flags & O_NONBLOCK ) &&
-	     ! board->func->data_get_available( board,
-						NI_DAQ_AI_SUBSYSTEM ) ) {
+	if (    ! ( file_p->f_flags & O_NONBLOCK )
+	     && ! board->func->data_get_available( board,
+						   NI_DAQ_AI_SUBSYSTEM ) ) {
 		daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
 
 		if ( wait_event_interruptible( board->AI.waitqueue,
-			   board->irq_hand[ IRQ_AI_SC_TC ].raised ||
-			   board->irq_hand[ IRQ_AI_STOP ].raised ) ) {
+			           board->irq_hand[ IRQ_AI_SC_TC ].raised
+			        || board->irq_hand[ IRQ_AI_STOP ].raised ) ) {
 			daq_irq_disable( board, IRQ_AI_STOP );
 			up( &board->use_mutex );
 			return -EINTR;
@@ -345,7 +345,7 @@ static ssize_t ni_daq_read( struct file * file_p,
 	   transfer from the DAQ to the bufers (possibly via DMA) and releasing
 	   the associated buffers. */
 
-	if ( ret != 0 && board->AI.is_running ){
+	if ( ret != 0 && board->AI.is_running ) {
 		board->AI.is_running = 0;
 		daq_irq_disable( board, IRQ_AI_SC_TC );
 		MSC_PFI_setup( board, NI_DAQ_AI_SUBSYSTEM, NI_DAQ_ALL,
@@ -418,9 +418,9 @@ static long ni_daq_ioctl( struct file *  file_p,
 		return -EBADF;
 	}
 
-	if ( _IOC_TYPE( cmd ) != NI_DAQ_MAGIC_IOC || 
-	     _IOC_NR( cmd ) < NI_DAQ_MIN_NR ||
-	     _IOC_NR( cmd ) > NI_DAQ_MAX_NR ) {
+	if (    _IOC_TYPE( cmd ) != NI_DAQ_MAGIC_IOC
+	     || _IOC_NR( cmd ) < NI_DAQ_MIN_NR
+	     || _IOC_NR( cmd ) > NI_DAQ_MAX_NR ) {
 		PDEBUG( "Invalid ioctl() call %d\n", cmd );
 		return -EINVAL;
 	}

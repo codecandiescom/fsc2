@@ -184,8 +184,8 @@ void daq_irq_enable( Board *  board,
 		/* Enable the the interrupt */
 
 		board->func->stc_writew( board, STC_Interrupt_A_Enable,
-				   board->stc.Interrupt_A_Enable |
-				   board->irq_hand[ irq ].enable_bit_pattern );
+				   board->stc.Interrupt_A_Enable
+				 | board->irq_hand[ irq ].enable_bit_pattern );
 
 		/* Check if interrupts for group A are already enabled and
 		   if they aren't enable them by setting the "master" bit */
@@ -197,8 +197,8 @@ void daq_irq_enable( Board *  board,
 		if ( i > IRQ_AI_START ) {
 			board->irq_group_A_enabled = 1;
 			board->func->stc_writew( board, STC_Interrupt_Control,
-						 board->stc.Interrupt_Control |
-						 Interrupt_A_Enable_Bit );
+						   board->stc.Interrupt_Control
+					         | Interrupt_A_Enable_Bit );
 		}
 
 	} else {                          /* Interrupt group B */
@@ -207,8 +207,8 @@ void daq_irq_enable( Board *  board,
 				      board->irq_hand[ irq ].ack_bit_pattern );
 
 		board->func->stc_writew( board, STC_Interrupt_B_Enable,
-				   board->stc.Interrupt_B_Enable |
-				   board->irq_hand[ irq ].enable_bit_pattern );
+				   board->stc.Interrupt_B_Enable
+				 | board->irq_hand[ irq ].enable_bit_pattern );
 
 		for ( i = IRQ_AO_FIFO; i <= IRQ_AO_START; i++ )
 			if ( i != irq && board->irq_hand[ i ].handler )
@@ -217,8 +217,8 @@ void daq_irq_enable( Board *  board,
 		if ( i > IRQ_AO_START ) {
 			board->irq_group_B_enabled = 1;
 			board->func->stc_writew( board, STC_Interrupt_Control,
-						 board->stc.Interrupt_Control |
-						 Interrupt_B_Enable_Bit );
+						   board->stc.Interrupt_Control
+						 | Interrupt_B_Enable_Bit );
 		}
 	}
 }
@@ -254,8 +254,8 @@ void daq_irq_disable( Board * board,
 		if ( i > IRQ_AI_START ) {
 			board->irq_group_A_enabled = 0;
 			board->func->stc_writew( board, STC_Interrupt_Control,
-						 board->stc.Interrupt_Control &
-						 ~ Interrupt_A_Enable_Bit );
+						   board->stc.Interrupt_Control
+						 & ~ Interrupt_A_Enable_Bit );
 		}
 
 		/* Disable the interrupt and acknowledge an old interrupt
@@ -265,8 +265,8 @@ void daq_irq_disable( Board * board,
 				      board->irq_hand[ irq ].ack_bit_pattern );
 
 		board->func->stc_writew( board, STC_Interrupt_A_Enable,
-				 board->stc.Interrupt_A_Enable &
-				 ~ board->irq_hand[ irq ].enable_bit_pattern );
+			         board->stc.Interrupt_A_Enable
+			       & ~ board->irq_hand[ irq ].enable_bit_pattern );
 
 	} else {                          /* Interrupt group B */
 
@@ -277,16 +277,16 @@ void daq_irq_disable( Board * board,
 		if ( i > IRQ_AO_START ) {
 			board->irq_group_B_enabled = 0;
 			board->func->stc_writew( board, STC_Interrupt_Control,
-						 board->stc.Interrupt_Control &
-						 ~ Interrupt_B_Enable_Bit );
+						   board->stc.Interrupt_Control
+						 & ~ Interrupt_B_Enable_Bit );
 		}
 
 		board->func->stc_writew( board, STC_Interrupt_B_Ack,
 				      board->irq_hand[ irq ].ack_bit_pattern );
 
 		board->func->stc_writew( board, STC_Interrupt_B_Enable,
-				 board->stc.Interrupt_B_Enable &
-				 ~ board->irq_hand[ irq ].enable_bit_pattern );
+				 board->stc.Interrupt_B_Enable
+			       & ~ board->irq_hand[ irq ].enable_bit_pattern );
 	}
 
 	/* Finally remove the handler for the interrupt and reset the
@@ -348,8 +348,8 @@ int MSC_PFI_setup( Board *          board,
 
 	ch = channel - NI_DAQ_PFI0;
 
-	if ( PFI_state[ ch ].sub_system != NI_DAQ_NO_SUBSYSTEM &&
-	     PFI_state[ ch ].sub_system != sub_system ) {
+	if (    PFI_state[ ch ].sub_system != NI_DAQ_NO_SUBSYSTEM
+	     && PFI_state[ ch ].sub_system != sub_system ) {
 		PDEBUG( "PFI%d already used by other subsystem\n", ch );
 		return 1;
 	}
@@ -534,9 +534,10 @@ static int MSC_trigger_setup( Board *          board,
 			      int              trigger_high,
 			      int              trigger_low )
 {
-	u16 ate = board->stc.Analog_Trigger_Etc &
-		  ~ ( Analog_Trigger_Mode_Field | Analog_Trigger_Drive |
-		      Analog_Trigger_Enable );
+	u16 ate =   board->stc.Analog_Trigger_Etc
+		  & ~ (   Analog_Trigger_Mode_Field
+		        | Analog_Trigger_Drive
+		        | Analog_Trigger_Enable );
 	u16 max_trig;
 	u16 th = 0;
 	u16 tl = 0;
@@ -569,15 +570,15 @@ static int MSC_trigger_setup( Board *          board,
 				break;
 		}
 
-		if ( trigger_low > trigger_high ||
-		     trigger_low < - max_trig / 2 ||
-		     trigger_high > max_trig / 2 - 1 ) {
+		if (    trigger_low > trigger_high
+		     || trigger_low < - max_trig / 2
+		     || trigger_high > max_trig / 2 - 1 ) {
 			PDEBUG( "Invalid trigger level\n" );
 			return -EINVAL;
 		}
 
-		ate |= ( trigger_type & Analog_Trigger_Mode_Field ) |
-		       Analog_Trigger_Enable;
+		ate |=   ( trigger_type & Analog_Trigger_Mode_Field )
+		       | Analog_Trigger_Enable;
 
 	} else
 		ate |= Analog_Trigger_Drive;
@@ -622,12 +623,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_1 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 5000;
 					p.ai_mV_ranges[ 1 ][ i ] = 10000;
 				} else
@@ -636,12 +637,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_2 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 2500;
 					p.ai_mV_ranges[ 1 ][ i ] = 5000;
 				} else
@@ -650,12 +651,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_5 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 1000;
 					p.ai_mV_ranges[ 1 ][ i ] = 2000;
 				} else
@@ -664,12 +665,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_10 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 500;
 					p.ai_mV_ranges[ 1 ][ i ] = 1000;
 				} else
@@ -678,12 +679,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_20 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 250;
 					p.ai_mV_ranges[ 1 ][ i ] = 500;
 				} else
@@ -692,12 +693,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_50 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 100;
 					p.ai_mV_ranges[ 1 ][ i ] = 200;
 				} else
@@ -706,12 +707,12 @@ int MSC_board_properties( Board *                   board,
 				break;
 
 			case NI_DAQ_GAIN_100 :
-				if ( ! strcmp( board->type->name,
-					       "pci-mio-16e-1" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-mio-16e-4" ) ||
-				     ! strcmp( board->type->name,
-					       "pci-6071e" ) ) {
+				if (    ! strcmp( board->type->name,
+						  "pci-mio-16e-1" )
+				     || ! strcmp( board->type->name,
+						  "pci-mio-16e-4" )
+				     || ! strcmp( board->type->name,
+						  "pci-6071e" ) ) {
 					p.ai_mV_ranges[ 0 ][ i ] = 50;
 					p.ai_mV_ranges[ 1 ][ i ] = 100;
 				} else

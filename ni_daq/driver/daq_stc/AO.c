@@ -85,49 +85,48 @@ void AO_reset_all( Board * board )
 
 	/* Disable all interrupts */
 
-	data = board->stc.Interrupt_B_Enable &
-	       ~ ( AO_FIFO_Interrupt_Enable   |
-		   AO_UC_TC_Interrupt_Enable  |
-		   AO_Error_Interrupt_Enable  |
-		   AO_STOP_Interrupt_Enable   |
-		   AO_START_Interrupt_Enable  |
-		   AO_UPDATE_Interrupt_Enable |
-		   AO_START1_Interrupt_Enable |
-		   AO_BC_TC_Interrupt_Enable    );
+	data =   board->stc.Interrupt_B_Enable
+	       & ~ (   AO_FIFO_Interrupt_Enable
+		     | AO_UC_TC_Interrupt_Enable
+		     | AO_Error_Interrupt_Enable
+		     | AO_STOP_Interrupt_Enable
+		     | AO_START_Interrupt_Enable
+		     | AO_UPDATE_Interrupt_Enable
+		     | AO_START1_Interrupt_Enable
+		     | AO_BC_TC_Interrupt_Enable );
 
 	board->func->stc_writew( board, STC_Interrupt_B_Enable, data );
 
 	/* The following bit must always be set */
 
 	board->func->stc_writew( board, STC_AO_Personal,
-				board->stc.AO_Personal | AO_BC_Source_Select );
+				   board->stc.AO_Personal
+				 | AO_BC_Source_Select );
 
 	/* Acknowledge (and thereby clear) all interrupt conditions */
 
-	data = board->stc.Interrupt_B_Ack      |
-	       AO_Error_Interrupt_Ack          |
-	       AO_STOP_Interrupt_Ack           |
-	       AO_START_Interrupt_Ack          |
-	       AO_UPDATE_Interrupt_Ack         |
-	       AO_START1_Interrupt_Ack         |
-	       AO_BC_TC_Interrupt_Ack          |
-	       AO_UC_TC_Interrupt_Ack          |
-	       AO_BC_TC_Trigger_Error_Confirm  |
-	       AO_BC_TC_Error_Confirm          |
-	       AO_BC_TC_Trigger_Error_Confirm ;
+	data =   board->stc.Interrupt_B_Ack
+	       | AO_Error_Interrupt_Ack
+	       | AO_STOP_Interrupt_Ack
+	       | AO_START_Interrupt_Ack
+	       | AO_UPDATE_Interrupt_Ack
+	       | AO_START1_Interrupt_Ack
+	       | AO_BC_TC_Interrupt_Ack
+	       | AO_UC_TC_Interrupt_Ack
+	       | AO_BC_TC_Error_Confirm
+	       | AO_BC_TC_Trigger_Error_Confirm;
 
 	board->func->stc_writew( board, STC_Interrupt_B_Ack, data );
 
-	board->stc.Interrupt_B_Ack &= ~ ( AO_Error_Interrupt_Ack         |
-					  AO_STOP_Interrupt_Ack          |
-					  AO_START_Interrupt_Ack         |
-					  AO_UPDATE_Interrupt_Ack        |
-					  AO_START1_Interrupt_Ack        |
-					  AO_BC_TC_Interrupt_Ack         |
-					  AO_UC_TC_Interrupt_Ack         |
-					  AO_BC_TC_Trigger_Error_Confirm |
-					  AO_BC_TC_Error_Confirm         |
-					  AO_BC_TC_Trigger_Error_Confirm   );
+	board->stc.Interrupt_B_Ack &= ~ (   AO_Error_Interrupt_Ack
+					  | AO_STOP_Interrupt_Ack
+					  | AO_START_Interrupt_Ack
+					  | AO_UPDATE_Interrupt_Ack
+					  | AO_START1_Interrupt_Ack
+					  | AO_BC_TC_Interrupt_Ack
+					  | AO_UC_TC_Interrupt_Ack
+					  | AO_BC_TC_Error_Confirm
+					  | AO_BC_TC_Trigger_Error_Confirm );
 
 	/* Configuration is done, set the bit indicating this to the card */
 
@@ -203,22 +202,22 @@ static int AO_channel_setup( Board *                  board,
 
 	/* Some boards don't allow an external reference */
 
-	if ( a.external_ref != NI_DAQ_DISABLED &&
-	     ! board->type->ao_has_ext_ref )
+	if (    a.external_ref != NI_DAQ_DISABLED
+	     && ! board->type->ao_has_ext_ref )
 		return -EINVAL;
 
 	/* Some boards don't allow setting the ground reference bit */
 
-	if ( a.ground_ref == NI_DAQ_DISABLED &&
-	     ( ! strcmp( board->type->name, "pci-mio-16xe-50" ) ||
-	       ! strcmp( board->type->name, "pci-mio-16xe-10" ) ||
-	       ! strcmp( board->type->name, "pci-6031e" ) ) )
+	if (    a.ground_ref == NI_DAQ_DISABLED
+	     && (    ! strcmp( board->type->name, "pci-mio-16xe-50" )
+		  || ! strcmp( board->type->name, "pci-mio-16xe-10" )
+		  || ! strcmp( board->type->name, "pci-6031e" ) ) )
 		return -EINVAL;
 
 	/* Some boards can only do bipolar output */
 
-	if ( a.polarity == NI_DAQ_UNIPOLAR &&
-	     ! board->type->ao_unipolar )
+	if (    a.polarity == NI_DAQ_UNIPOLAR
+	     && ! board->type->ao_unipolar )
 		return -EINVAL;
 
 	return board->func->ao_configuration( board, channel, a.ground_ref,
