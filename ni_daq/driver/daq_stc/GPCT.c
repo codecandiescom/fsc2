@@ -97,8 +97,9 @@ void GPCT_reset_all( Board * board )
 
 
 	board->func->stc_writew( board, STC_Joint_Reset,
-				 board->stc.Joint_Reset |
-				 Gi_Reset( 0 ) | Gi_Reset( 1 ) );
+				   board->stc.Joint_Reset
+				 | Gi_Reset( 0 )
+				 | Gi_Reset( 1 ) );
 	board->stc.Joint_Reset &= ~ ( Gi_Reset( 0 ) | Gi_Reset( 1 ) );
 
 	for ( i = 0; i < 2; i++ ) {
@@ -110,54 +111,55 @@ void GPCT_reset_all( Board * board )
 	/* Disable interrupts */
 
 	board->func->stc_writew( board, STC_Interrupt_A_Enable,
-				 board->stc.Interrupt_A_Enable &
-				 ~ ( G0_Gate_Interrupt_Enable |
-				     G0_TC_Interrupt_Enable ) );
+				   board->stc.Interrupt_A_Enable
+				 & ~ (   G0_Gate_Interrupt_Enable
+				       | G0_TC_Interrupt_Enable ) );
 
 	board->func->stc_writew( board, STC_Interrupt_B_Enable,
-				 board->stc.Interrupt_B_Enable &
-				 ~ ( G1_Gate_Interrupt_Enable |
-				     G1_TC_Interrupt_Enable ) );
+				   board->stc.Interrupt_B_Enable
+				 & ~ (   G1_Gate_Interrupt_Enable
+				       | G1_TC_Interrupt_Enable ) );
 
 	for ( i = 0; i < 2; i++ )
 		board->func->stc_writew( board, STC_Gi_Command ( i ),
-					 board->stc.Gi_Command[ i ] |
-					 Gi_Synchronized_Gate );
+					   board->stc.Gi_Command[ i ]
+					 | Gi_Synchronized_Gate );
 
 	/* Acknowledge (and thereby clear) all interrupt conditions */
 
-	data = board->stc.Interrupt_A_Ack |
-	       G0_Gate_Interrupt_Ack      |
-	       G0_TC_Interrupt_Ack        |
-	       G0_TC_Error_Confirm        |
-	       G0_Gate_Error_Confirm;
+	data =   board->stc.Interrupt_A_Ack
+	       | G0_Gate_Interrupt_Ack
+	       | G0_TC_Interrupt_Ack
+	       | G0_TC_Error_Confirm
+	       | G0_Gate_Error_Confirm;
 
 	board->func->stc_writew( board, STC_Interrupt_A_Ack, data );
 
-	board->stc.Interrupt_A_Ack &= ~ ( G0_Gate_Interrupt_Ack |
-					  G0_TC_Interrupt_Ack   |
-					  G0_TC_Error_Confirm   |
-					  G0_Gate_Error_Confirm   );
+	board->stc.Interrupt_A_Ack &= ~ (   G0_Gate_Interrupt_Ack
+					  | G0_TC_Interrupt_Ack
+					  | G0_TC_Error_Confirm
+					  | G0_Gate_Error_Confirm );
 
-	data = board->stc.Interrupt_B_Ack |
-	       G1_Gate_Interrupt_Ack      |
-	       G1_TC_Interrupt_Ack        |
-	       G1_TC_Error_Confirm        |
-	       G1_Gate_Error_Confirm;
+	data =   board->stc.Interrupt_B_Ack
+	       | G1_Gate_Interrupt_Ack
+	       | G1_TC_Interrupt_Ack
+	       | G1_TC_Error_Confirm
+	       | G1_Gate_Error_Confirm;
 
 	board->func->stc_writew( board, STC_Interrupt_B_Ack, data );
 
-	board->stc.Interrupt_B_Ack &= ~ ( G1_Gate_Interrupt_Ack |
-					  G1_TC_Interrupt_Ack   |
-					  G1_TC_Error_Confirm   |
-					  G1_Gate_Error_Confirm   );
+	board->stc.Interrupt_B_Ack &= ~ (   G1_Gate_Interrupt_Ack
+					  | G1_TC_Interrupt_Ack
+					  | G1_TC_Error_Confirm
+					  | G1_Gate_Error_Confirm );
 
 	/* Disable output of both counters and select the G_OUT signal as
 	   the default output for both counters */
 
-	  board->stc.Analog_Trigger_Etc &=
-		       ~ ( GPFO_0_Output_Enable | GPFO_1_Output_Enable |
-		           GPFO_0_Output_Select_Field | GPFO_1_Output_Select );
+	  board->stc.Analog_Trigger_Etc &= ~ (   GPFO_0_Output_Enable
+					       | GPFO_1_Output_Enable
+					       | GPFO_0_Output_Select_Field
+					       | GPFO_1_Output_Select );
 
 	  board->func->stc_writew( board, STC_Analog_Trigger_Etc,
 				   board->stc.Analog_Trigger_Etc );
@@ -204,8 +206,8 @@ int GPCT_ioctl_handler( Board *           board,
 			return GPCT_clock_speed( board, a.speed );
 
 		case NI_DAQ_GPCT_GET_CLOCK_SPEED :
-			a.speed = ( board->stc.Clock_and_FOUT &
-				    G_Source_Divide_By_2 ) ?
+			a.speed = (   board->stc.Clock_and_FOUT
+				    & G_Source_Divide_By_2 ) ?
 				   NI_DAQ_HALF_SPEED : NI_DAQ_FULL_SPEED;
 			break;
 
@@ -250,8 +252,8 @@ int GPCT_ioctl_handler( Board *           board,
 			return -EINVAL;
 	}
 
-	if ( ret == 0 &&
-	     copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
+	if (    ret == 0
+	     && copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EFAULT;
 	}
@@ -299,10 +301,10 @@ static int GPCT_counter_output_state( Board *      board,
 
 	if ( output_state == NI_DAQ_ENABLED )
 		board->stc.Analog_Trigger_Etc |=
-			GPFO_i_Output_Enable( counter );
+			                   GPFO_i_Output_Enable( counter );
 	else
 		board->stc.Analog_Trigger_Etc &=
-			~ GPFO_i_Output_Enable( counter );
+			                 ~ GPFO_i_Output_Enable( counter );
 		
 	board->func->stc_writew( board, STC_Analog_Trigger_Etc,
 				 board->stc.Analog_Trigger_Etc );
@@ -327,12 +329,12 @@ static int GPCT_counter_disarm( Board *      board,
 			return 0;
 
 		case 2 :
-			board->stc.Joint_Reset |=
-						 Gi_Reset( 0 ) | Gi_Reset( 1 );
+			board->stc.Joint_Reset |=   Gi_Reset( 0 )
+				                  | Gi_Reset( 1 );
 			board->func->stc_writew( board, STC_Joint_Reset,
 						 board->stc.Joint_Reset );
-			board->stc.Joint_Reset &=
-					   ~ ( Gi_Reset( 0 ) | Gi_Reset( 1 ) );
+			board->stc.Joint_Reset &= ~ (   Gi_Reset( 0 )
+						      | Gi_Reset( 1 ) );
 			return 0;
 	}
 
@@ -546,8 +548,9 @@ static int GPCT_start_pulses( Board *         board,
 	   output on TC condition and set register A as the first register
 	   to load from. */
 
-	mode |= Gi_Reload_Source_Switching | Gi_Loading_On_TC |
-		( 2 << Gi_Output_Mode_Shift );
+	mode |=   Gi_Reload_Source_Switching
+		| Gi_Loading_On_TC
+		| ( 2 << Gi_Output_Mode_Shift );
 
 	/* In non-continuous mode (i.e. when creating just a single pulse)
 	   stop on second TC condition */
@@ -602,12 +605,13 @@ static int GPCT_arm( Board *      board,
 			return 0;
 
 		case 2 :                      /* both counters at once! */
-			cmd = board->stc.Gi_Command[ 0 ] |
-			      Gi_Arm | Gi_Arm_Copy;
+			cmd =   board->stc.Gi_Command[ 0 ]
+			      | Gi_Arm
+			      | Gi_Arm_Copy;
 			board->func->stc_writew( board, STC_Gi_Command( 0 ),
 						 cmd );
-			board->stc.Gi_Command[ 0 ] &=
-						    ~ ( Gi_Arm | Gi_Arm_Copy );
+			board->stc.Gi_Command[ 0 ] &= ~ (   Gi_Arm
+							  | Gi_Arm_Copy );
 			return 0;
 	}
 
@@ -709,8 +713,8 @@ static int GPCT_is_busy( Board *  board,
 
 	/* Test if the counter is armed */
 
-	*is_armed =  ( board->func->stc_readw( board, STC_G_Status ) &
-		       Gi_Armed_St( counter ) ) ? 1 : 0;
+	*is_armed = (   board->func->stc_readw( board, STC_G_Status )
+		      & Gi_Armed_St( counter ) ) ? 1 : 0;
 	
 	return 0;
 }
@@ -746,8 +750,9 @@ static int GPCT_input_source( int   source,
 		return 0;
 	}
 
-	if ( source > NI_DAQ_G_TC_OTHER && source != NI_DAQ_LOW &&
-	     source != NI_DAQ_IN_TIMEBASE2 )
+	if (    source > NI_DAQ_G_TC_OTHER
+	     && source != NI_DAQ_LOW
+	     && source != NI_DAQ_IN_TIMEBASE2 )
 		return -EINVAL;
 
 	if ( source == NI_DAQ_IN_TIMEBASE2 )

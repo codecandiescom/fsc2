@@ -164,49 +164,49 @@ static void AI_daq_reset( Board * board )
 	board->stc.Joint_Reset &= ~ AI_Reset;
 	/* Disable interrupts by the AI subsystem */
 
-	data = board->stc.Interrupt_A_Enable &
-	       ~ ( AI_FIFO_Interrupt_Enable   |
-		   AI_Error_Interrupt_Enable  |
-		   AI_STOP_Interrupt_Enable   |
-		   AI_START_Interrupt_Enable  |
-		   AI_START1_Interrupt_Enable |
-		   AI_START2_Interrupt_Enable |
-		   AI_SC_TC_Interrupt_Enable );
+	data =    board->stc.Interrupt_A_Enable
+		& ~ (   AI_FIFO_Interrupt_Enable
+		      | AI_Error_Interrupt_Enable
+		      | AI_STOP_Interrupt_Enable
+		      | AI_START_Interrupt_Enable
+		      | AI_START1_Interrupt_Enable
+		      | AI_START2_Interrupt_Enable
+		      | AI_SC_TC_Interrupt_Enable );
 
 	board->func->stc_writew( board, STC_Interrupt_A_Enable, data );
 
-	data = board->stc.Second_Irq_A_Enable &
-	       ~ ( AI_FIFO_Second_Irq_Enable   |
-		   AI_Error_Second_Irq_Enable  |
-		   AI_STOP_Second_Irq_Enable   |
-		   AI_START_Second_Irq_Enable  |
-		   AI_START1_Second_Irq_Enable |
-		   AI_START2_Second_Irq_Enable |
-		   AI_SC_TC_Second_Irq_Enable );
+	data =    board->stc.Second_Irq_A_Enable
+		& ~ (   AI_FIFO_Second_Irq_Enable
+		       | AI_Error_Second_Irq_Enable
+		       | AI_STOP_Second_Irq_Enable
+		       | AI_START_Second_Irq_Enable
+		       | AI_START1_Second_Irq_Enable
+		       | AI_START2_Second_Irq_Enable
+		       | AI_SC_TC_Second_Irq_Enable );
 
 	board->func->stc_writew( board, STC_Second_Irq_A_Enable, data );
 
 	/* Set all interrupt acknowledge flags (thereby clearing the
 	   condition) */
 
-	data = board->stc.Interrupt_A_Ack |
-	       AI_Error_Interrupt_Ack     |
-	       AI_STOP_Interrupt_Ack      |
-	       AI_START_Interrupt_Ack     |
-	       AI_START1_Interrupt_Ack    |
-	       AI_START2_Interrupt_Ack    |
-	       AI_SC_TC_Interrupt_Ack     |
-	       AI_SC_TC_Error_Confirm;
+	data =   board->stc.Interrupt_A_Ack
+	       | AI_Error_Interrupt_Ack
+	       | AI_STOP_Interrupt_Ack
+	       | AI_START_Interrupt_Ack
+	       | AI_START1_Interrupt_Ack
+	       | AI_START2_Interrupt_Ack
+	       | AI_SC_TC_Interrupt_Ack
+	       | AI_SC_TC_Error_Confirm;
 
 	board->func->stc_writew( board, STC_Interrupt_A_Ack, data );
 
-	board->stc.Interrupt_A_Ack &= ~ ( AI_Error_Interrupt_Ack  |
-					  AI_STOP_Interrupt_Ack   |
-					  AI_START_Interrupt_Ack  |
-					  AI_START1_Interrupt_Ack |
-					  AI_START2_Interrupt_Ack |
-					  AI_SC_TC_Interrupt_Ack  |
-					  AI_SC_TC_Error_Confirm    );
+	board->stc.Interrupt_A_Ack &= ~ (   AI_Error_Interrupt_Ack
+					  | AI_STOP_Interrupt_Ack
+					  | AI_START_Interrupt_Ack
+					  | AI_START1_Interrupt_Ack
+					  | AI_START2_Interrupt_Ack
+					  | AI_SC_TC_Interrupt_Ack
+					  | AI_SC_TC_Error_Confirm );
 
 	/* Clear all private copies of registers that have been reset by
 	   the above actions */
@@ -233,15 +233,17 @@ static void AI_daq_reset( Board * board )
 	/* Set up the Personal and Output Control Register */
 
 	board->func->stc_writew( board, STC_AI_Personal,
-				 AI_SHIFTIN_Pulse_Width | AI_SOC_Polarity |
-				 AI_CONVERT_Pulse_Width | AI_Overrun_Mode |
-				 AI_LOCALMUX_CLK_Pulse_Width );
+				   AI_SHIFTIN_Pulse_Width
+				 | AI_SOC_Polarity
+				 | AI_CONVERT_Pulse_Width
+				 | AI_Overrun_Mode
+				 | AI_LOCALMUX_CLK_Pulse_Width );
 
 	board->func->stc_writew( board, STC_AI_Output_Control,
-				 ( 3 << AI_SCAN_IN_PROG_Output_Select_Shift ) |
-				 ( 2 << AI_LOCALMUX_CLK_Output_Select_Shift ) |
-				 ( 3 << AI_SC_TC_Output_Select_Shift ) |
-				 ( 2 << AI_CONVERT_Output_Select_Shift ) );
+				   ( 3 << AI_SCAN_IN_PROG_Output_Select_Shift )
+				 | ( 2 << AI_LOCALMUX_CLK_Output_Select_Shift )
+				 | ( 3 << AI_SC_TC_Output_Select_Shift )
+				 | ( 2 << AI_CONVERT_Output_Select_Shift ) );
 }
 
 
@@ -267,9 +269,9 @@ int AI_ioctl_handler( Board *         board,
 			break;
 
 		case NI_DAQ_AI_GET_CLOCK_SPEED :
-			a.speed = ( board->stc.Clock_and_FOUT &
-				    AI_Source_Divide_By_2 ) ?
-				   NI_DAQ_HALF_SPEED : NI_DAQ_FULL_SPEED;
+			a.speed = (   board->stc.Clock_and_FOUT
+				    & AI_Source_Divide_By_2 ) ?
+				  NI_DAQ_HALF_SPEED : NI_DAQ_FULL_SPEED;
 			break;
 
 		case NI_DAQ_AI_CHANNEL_SETUP :
@@ -366,8 +368,8 @@ static int AI_channel_setup( Board *                  board,
 
 	board->AI.is_acq_setup = 0;
 
-	if ( num_channels == 0 ||
-	     num_channels > board->type->ai_num_channels ) {
+	if (    num_channels == 0
+	     || num_channels > board->type->ai_num_channels ) {
 		PDEBUG( "Invalid number of channels\n" );
 		return -EINVAL;
 	}
@@ -433,17 +435,17 @@ static int AI_channel_setup( Board *                  board,
 		if ( ch_types[ i ] == NI_DAQ_AI_TYPE_UNASSIGNED )
 			continue;
 
-		if ( i % 16 < 8 &&
-		     ch_types[ i ] == NI_DAQ_AI_TYPE_Differential &&
-		     ch_types[ i  + 8 ] != NI_DAQ_AI_TYPE_UNASSIGNED ) {
+		if (    i % 16 < 8
+		     && ch_types[ i ] == NI_DAQ_AI_TYPE_Differential
+		     && ch_types[ i  + 8 ] != NI_DAQ_AI_TYPE_UNASSIGNED ) {
 			PDEBUG( "Channel belonging to channel %u with "
 				"differential coupling isn't unused\n", i );
 			board->func->clear_configuration_memory( board );
 			return -EINVAL;
 		}
 
-		if ( i % 16 >= 8 &&
-		     ch_types[ i ] == NI_DAQ_AI_TYPE_Differential ) {
+		if (    i % 16 >= 8
+		     && ch_types[ i ] == NI_DAQ_AI_TYPE_Differential ) {
 			PDEBUG( "Channel %u can't be of type "
 				"\"Differential\"\n", i );
 			board->func->clear_configuration_memory( board );
@@ -557,8 +559,8 @@ static int AI_START_STOP_setup( Board *            board,
 {
 	/* Check the START source setting isn't bogus */
 
-	if ( a->START_source > NI_DAQ_GOUT_0 &&
-	     a->START_source != NI_DAQ_LOW ) {
+	if (    a->START_source > NI_DAQ_GOUT_0
+	     && a->START_source != NI_DAQ_LOW ) {
 		PDEBUG( "Invalid START source\n" );
 		return -EINVAL;
 	}
@@ -571,9 +573,9 @@ static int AI_START_STOP_setup( Board *            board,
 	/* Set the START polarity (unless it's the internal SI_TC source
 	   or a software strobe) */
 
-	if ( a->START_polarity == NI_DAQ_INVERTED &&
-	     a->START_source != NI_DAQ_SI_TC &&
-	     a->START_source != NI_DAQ_AI_START_Pulse )
+	if (    a->START_polarity == NI_DAQ_INVERTED
+	     && a->START_source != NI_DAQ_SI_TC
+	     && a->START_source != NI_DAQ_AI_START_Pulse )
 		acq_setup.start_stop |= AI_START_Polarity;
 
 	/* The STOP pulse is always coming from the Configuration FIFO for
@@ -606,9 +608,9 @@ static int AI_SI_setup( Board *            board,
 
 	/* Check that what the SI counter is going to count is reasonable */
 
-	if ( a->SI_source > NI_DAQ_RTSI_6 &&
-	     a->SI_source != NI_DAQ_IN_TIMEBASE2 &&
-	     a->SI_source != NI_DAQ_LOW ) {
+	if (    a->SI_source > NI_DAQ_RTSI_6
+	     && a->SI_source != NI_DAQ_IN_TIMEBASE2
+	     && a->SI_source != NI_DAQ_LOW ) {
 		PDEBUG( "Invalid SI source\n" );
 		return -EINVAL;
 	}
@@ -640,8 +642,8 @@ static int AI_SI_setup( Board *            board,
 	   time bases the spacing between the resulting START pulses isn't
 	   too fast for the board */
 
-	if ( a->SI_source == NI_DAQ_AI_IN_TIMEBASE1 ||
-	     a->SI_source == NI_DAQ_IN_TIMEBASE2 ) {
+	if (    a->SI_source == NI_DAQ_AI_IN_TIMEBASE1
+	     || a->SI_source == NI_DAQ_IN_TIMEBASE2 ) {
 		len =   ( a->SI_source == NI_DAQ_AI_IN_TIMEBASE1 ?
 			  board->AI.timebase1 : board->timebase2 )
 		      * ( a->SI_start_delay
@@ -668,9 +670,9 @@ static int AI_SI_setup( Board *            board,
 	/* If what the counter is going to count is some external signal
 	   set the polarity according to what the user told us */
 
-	if ( a->SI_polarity == NI_DAQ_INVERTED &&
-	     a->SI_source != NI_DAQ_AI_IN_TIMEBASE1 &&
-	     a->SI_source != NI_DAQ_IN_TIMEBASE2 )
+	if (    a->SI_polarity == NI_DAQ_INVERTED
+	     && a->SI_source != NI_DAQ_AI_IN_TIMEBASE1
+	     && a->SI_source != NI_DAQ_IN_TIMEBASE2 )
 		acq_setup.mode_1 |= AI_SI_Source_Polarity;
 
 	/* The start delay (i.e. the number of counts before the first SI TC
@@ -700,9 +702,9 @@ static int AI_START1_setup( Board *            board,
 {
 	/* Check that the source for START1 is reasonable */
 
-	if (  a->START1_source > NI_DAQ_RTSI_6 &&
-	      a->START1_source != NI_DAQ_GOUT_0 &&
-	      a->START1_source != NI_DAQ_LOW ) {
+	if (    a->START1_source > NI_DAQ_RTSI_6
+	     && a->START1_source != NI_DAQ_GOUT_0
+	     && a->START1_source != NI_DAQ_LOW ) {
 		PDEBUG( "Invalid START1 source\n ");
 		return -EINVAL;
 	}
@@ -720,8 +722,8 @@ static int AI_START1_setup( Board *            board,
 	/* If the START1 trigger isn't a software strobe the user specified
 	   polarity has to be used */
 
-	if ( a->START1_polarity == NI_DAQ_INVERTED &&
-	     a->START1_source != NI_DAQ_AI_START1_Pulse )
+	if (    a->START1_polarity == NI_DAQ_INVERTED
+	     && a->START1_source != NI_DAQ_AI_START1_Pulse )
 		acq_setup.trig |= AI_START1_Polarity;
 
 	return 0;
@@ -737,9 +739,9 @@ static int AI_CONVERT_setup( Board *            board,
 {
 	/* Check that the source of CONVERT signals is reasonable */
 
-	if ( a->CONVERT_source > NI_DAQ_RTSI_6 &&
-	     a->CONVERT_source != NI_DAQ_GOUT_0 &&
-	     a->CONVERT_source != NI_DAQ_LOW ) {
+	if (    a->CONVERT_source > NI_DAQ_RTSI_6
+	     && a->CONVERT_source != NI_DAQ_GOUT_0
+	     && a->CONVERT_source != NI_DAQ_LOW ) {
 		PDEBUG( "Invalid CONVERT source\n" );
 		return -EINVAL;
 	}
@@ -754,8 +756,8 @@ static int AI_CONVERT_setup( Board *            board,
 	/* If not in internal CONVERT mode set the the polarity of the
 	   signal to what the user told us. Then also set the source. */
 
-	if ( a->CONVERT_source != NI_DAQ_SI2_TC &&
-	     a->CONVERT_polarity == NI_DAQ_INVERTED )
+	if (    a->CONVERT_source != NI_DAQ_SI2_TC
+	     && a->CONVERT_polarity == NI_DAQ_INVERTED )
 		acq_setup.mode_1 |= AI_CONVERT_Source_Polarity;
 
 	board->AI.CONVERT_source = a->CONVERT_source;
@@ -870,17 +872,17 @@ static void AI_acq_register_setup( Board * board )
 					 acq_setup.si_load_b );
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 board->stc.AI_Mode_2 &
-					 ~ AI_SI_Initial_Load_Source );
+					   board->stc.AI_Mode_2
+					 & ~ AI_SI_Initial_Load_Source );
 
 		board->func->stc_writew( board, STC_AI_Command_1,
-					 board->stc.AI_Command_1 |
-					 AI_SI_Load );
+					   board->stc.AI_Command_1
+					 | AI_SI_Load );
 		board->stc.AI_Command_1 &= ~ AI_SI_Load;
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 board->stc.AI_Mode_2 |
-					 AI_SI_Initial_Load_Source );
+					   board->stc.AI_Mode_2
+					 | AI_SI_Initial_Load_Source );
 	}
 
 	if ( acq_setup.need_si2_load ) {
@@ -895,19 +897,19 @@ static void AI_acq_register_setup( Board * board )
 					 acq_setup.si2_load_b );
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 ( board->stc.AI_Mode_2 |
-					   AI_SI2_Reload_Mode ) &
-					 ~ AI_SI2_Initial_Load_Source );
+					   (   board->stc.AI_Mode_2
+					     | AI_SI2_Reload_Mode )
+					 & ~ AI_SI2_Initial_Load_Source );
 
 		board->func->stc_writew( board, STC_AI_Command_1,
-					 board->stc.AI_Command_1 |
-					 AI_SI2_Load );
+					   board->stc.AI_Command_1
+					 | AI_SI2_Load );
 		board->stc.AI_Command_1 &= ~ AI_SI2_Load;
 
 		board->func->stc_writew( board, STC_AI_Mode_2,
-					 board->stc.AI_Mode_2 |
-					 AI_SI2_Reload_Mode |
-					 AI_SI2_Initial_Load_Source );
+					   board->stc.AI_Mode_2
+					 | AI_SI2_Reload_Mode
+					 | AI_SI2_Initial_Load_Source );
 	}
 }
 
@@ -1004,18 +1006,18 @@ int AI_start_acq( Board * board )
 	AI_acq_register_setup( board );
 
 	cmd_1 = ( board->stc.AI_Command_1 | AI_SC_Arm ) & ~ AI_DIV_Arm;
-	cmd_2 = board->stc.AI_Command_2 &
-		~ ( AI_START1_Disable | AI_End_On_End_Of_Scan );
+	cmd_2 =   board->stc.AI_Command_2
+		& ~ ( AI_START1_Disable | AI_End_On_End_Of_Scan );
 
 	/* Set the number of scans - that's done here and not in AI_SC_setup()
 	   because when an acquisition is restarted without another setup the
 	   SC counter would still hold the end value from the previous run */
 
 	board->func->stc_writew( board, STC_AI_Mode_2,
-				 board->stc.AI_Mode_2 &
-				 ~ ( AI_SC_Initial_Load_Source |
-				     AI_SC_Reload_Mode  |
-				     AI_Pre_Trigger ) );
+				   board->stc.AI_Mode_2
+				 & ~ (   AI_SC_Initial_Load_Source
+				       | AI_SC_Reload_Mode
+				       | AI_Pre_Trigger ) );
 
 	/* Write the number of scans (minus 1) to the the Load A register
 	   and then push this value into the SC counter */
@@ -1064,8 +1066,8 @@ int AI_start_acq( Board * board )
 
 	if ( board->AI.START1_source == NI_DAQ_AI_START1_Pulse ) {
 		board->func->stc_writew( board, STC_AI_Command_2,
-					 board->stc.AI_Command_2 |
-					 AI_START1_Pulse );
+					   board->stc.AI_Command_2
+					 | AI_START1_Pulse );
 		board->stc.AI_Command_2 &= ~ AI_START1_Pulse;
 	}
 
@@ -1086,8 +1088,8 @@ static int AI_acq_wait( Board * board )
 
 	/* Wait for the SC TC interrupt, indicating end of acquisition */
 
-	if ( board->AI.is_running &&
-	     wait_event_interruptible( board->AI.waitqueue,
+	if (    board->AI.is_running
+	     && wait_event_interruptible( board->AI.waitqueue,
 				   board->irq_hand[ IRQ_AI_SC_TC ].raised ) ) {
 		PDEBUG( "Aborted by signal\n" );
 		return -EINTR;

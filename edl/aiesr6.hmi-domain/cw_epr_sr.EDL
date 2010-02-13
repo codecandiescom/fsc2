@@ -91,27 +91,23 @@ change_scale_1d( end_field, field_step );
 /* Set up the lock-in and get its settings */
 
 li_tc = lockin_time_constant( );
-
 === if defined MODPHASE
 ===   if PHASE_AS_OFFSET and RESONATOR ne "Unspecified"
 phase += epr_modulation_phase( "RESONATOR" " (SR830)", mod_freq );
 ===   endif
 lockin_phase( phase );
 === endif
-
 lockin_ref_freq( mod_freq );
-
 === if RESONATOR ne "Unspecified"
+epr_modulation_calibration_check_amplitude( "RESONATOR" " (SR830)", mod_amp );
 lockin_ref_level( mod_amp / epr_modulation_ratio( "RESONATOR" " (SR830)",
-                                                 mod_freq ) );
+                                                  mod_freq ) );
+mod_amp =   lockin_ref_level( )
+          * epr_modulation_ratio( "RESONATOR" " (SR830)", lockin_ref_freq( ) );
 === else
 lockin_ref_level( mod_amp );
 === endif
 li_sens = lockin_sensitivity( ) / 1 mV;
-=== if RESONATOR ne "Unspecified"
-mod_amp =   lockin_ref_level( ) 
-          * epr_modulation_ratio( "RESONATOR" " (SR830)", lockin_ref_freq( ) );
-=== endif
 li_amp = lockin_ref_level( );
 li_freq = lockin_ref_freq( ) / 1kHz;
 li_phase = lockin_phase( );

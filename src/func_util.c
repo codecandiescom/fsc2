@@ -4859,19 +4859,22 @@ f_index_of_min( Var_T * v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Averages sub-arrays of length of second argument of input array
+ *-  to be used in case the input array contains repetitions of a
+ * signal measured several times in one go.
+ *-----------------------------------------------------------------*/
 
 Var_T *
 f_mean_part_array( Var_T * v )
 {
     long size;
     double *m;
-    long par;
+    long num_subarrays;
     long i, j;
     long *lfrom;
     double *dfrom;
-    double ipar;
+    double fac;
     Var_T *nv;
 
 
@@ -4883,18 +4886,18 @@ f_mean_part_array( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    size = get_strict_long( v->next, "size of partition" );
+    size = get_strict_long( v->next, "sub-array length" );
 
     if ( size <= 0 )
     {
-        print( FATAL, "Invalid zero or negative partition size.\n" );
+        print( FATAL, "Invalid zero or negative sub-array length.\n" );
         THROW( EXCEPTION );
     }
 
     if ( v->len % size != 0 )
     {
         print( FATAL, "Length of array isn't an integer multiple of the "
-               "sub-partition size.\n" );
+               "sub-array length.\n" );
         THROW( EXCEPTION );
     }
 
@@ -4904,15 +4907,14 @@ f_mean_part_array( Var_T * v )
     if ( size == v->len )
         return f_float( v );
 
-    m = T_malloc( size * sizeof *m );
-    for ( i = 0; i < size; i++ )
-        m[ i ] = 0.0;
-    par = v->len / size;
+    nv = vars_push( FLOAT_ARR, NULL, size );
+    num_subarrays = v->len / size;
+    m = nv->val.dpnt;
 
     if ( v->type == INT_ARR )
     {
         lfrom = v->val.lpnt;
-        for ( i = 0; i < par; i++ )
+        for ( i = 0; i < num_subarrays; i++ )
             for ( j = 0; j < size; j++ )
                 m[ j ] += *lfrom++;
     }
@@ -4920,17 +4922,91 @@ f_mean_part_array( Var_T * v )
     {
         memcpy( m, v->val.dpnt, size * sizeof *m );
         dfrom = v->val.dpnt + size;
-        for ( i = 1; i < par; i++ )
+        for ( i = 1; i < num_subarrays; i++ )
             for ( j = 0; j < size; j++ )
                 m[ j ] += *dfrom++;
     }
 
-    ipar = 1.0 / par;
+    fac = 1.0 / num_subarrays;
     for ( i = 0; i < size; i++ )
-        m[ i ] *= ipar;
+        m[ i ] *= fac;
 
-    nv = vars_push( FLOAT_ARR, m, size );
-    T_free( m );
+    return nv;
+}
+
+
+/*----------------------------------------------------------------*
+ * For cases where the resolution of data in an array is too high
+ * this function can be handy - it averages as many of points as
+ * given by the second argument of the input array, thus lowering
+ * the resolution of the input data by this factor.
+ *----------------------------------------------------------------*/
+
+Var_T *
+f_condense( Var_T * v )
+{
+    long size;
+    double *m;
+    long new_size;
+    long i, j;
+    long *lfrom;
+    double *dfrom;
+    double fac;
+    Var_T *nv;
+
+
+    vars_check( v, INT_ARR | FLOAT_ARR );
+
+    if ( v->len == 0 )
+    {
+        print( FATAL, "Size of array isn't known (yet).\n" );
+        THROW( EXCEPTION );
+    }
+
+    size = get_strict_long( v->next, "sub-array length" );
+
+    if ( size <= 0 )
+    {
+        print( FATAL, "Invalid zero or negative sub-array length.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( v->len % size != 0 )
+    {
+        print( FATAL, "Length of array isn't an integer multiple of the "
+               "sub-array length.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( size == 1 )
+        return f_float( v );
+
+    if ( size == v->len )
+        return f_mean( v );
+
+    new_size = v->len / size;
+    nv = vars_push( FLOAT_ARR, NULL, new_size );
+    m = nv->val.dpnt;
+
+    if ( v->type == INT_ARR )
+    {
+        lfrom = v->val.lpnt;
+        for ( i = 0; i < new_size; i++ )
+            for ( j = 0; j < size; j++ )
+                m[ i ] += *lfrom++;
+    }
+    else
+    {
+        dfrom = v->val.dpnt;
+        for ( i = 0; i < new_size; i++ )
+            for ( j = 0; j < size; j++ )
+                m[ i ] += *dfrom++;
+    }
+
+    fac = 1.0 / size;
+    for ( i = 0; i < new_size; i++ )
+        m[ i ] *= fac;
+
     return nv;
 }
 

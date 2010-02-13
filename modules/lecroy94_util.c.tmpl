@@ -247,6 +247,8 @@ lecroy94_tmpl_window_check( Window_T * w,
             p = p->next;
         }
 
+        p->next = NULL;
+
         /* Store the current settings as far as they are known */
 
         p->is_timebase = lecroy94_tmpl.is_timebase;
@@ -463,6 +465,7 @@ lecroy94_tmpl_trigger_delay_check( void )
                 p = p->next;
             }
 
+        p->next  = NULL;
         p->delay = delay;
         return delay;
     }

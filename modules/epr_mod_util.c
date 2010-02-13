@@ -126,10 +126,12 @@ epr_mod_save( void )
     {
 		Calibration_T *res = epr_mod.calibrations + i;
 
-        fprintf( fp, "\ncalibration: \"%s\"\n"
-				 "  interpolate: %s\n"
-				 "  extrapolate: %s\n",
-				 res->name, res->interpolate ? "yes" : "no",
+        fprintf( fp, "\ncalibration:  \"%s\"\n", res->name );
+        if ( res->max_amp != 0.0 )
+            fprintf( fp, "  maximum amplitude: %lf G\n", res->max_amp );
+        fprintf( fp, "  interpolate: %s\n"
+				     "  extrapolate: %s\n",
+				 res->interpolate ? "yes" : "no",
 				 res->extrapolate ? "yes" : "no" );
 		for ( j = 0; j < res->count; j++ )
 		{

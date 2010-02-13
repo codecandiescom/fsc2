@@ -191,6 +191,7 @@ lecroy_wr_trigger_delay_check( void )
                 p = p->next;
             }
 
+        p->next  = NULL;
         p->delay = delay;
         return delay;
     }
@@ -379,6 +380,8 @@ lecroy_wr_window_check( Window_T * w,
             p->next = T_malloc( sizeof *p );
             p = p->next;
         }
+
+        p->next = NULL;
 
         /* Store the current settings as far as they are known */
 
@@ -677,7 +680,8 @@ lecroy_wr_hori_res_prep( void )
         for ( j = 0; j < LECROY_WR_NUM_RIS_TBAS; j++ )
         {
             if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ris_res ) >
-                                                   lecroy_wr.mem_sizes[ i ] ) {
+                                                    lecroy_wr.mem_sizes[ i ] )
+            {
                 if ( k == 5 )
                 {
                     ris_res *= 0.4;
@@ -692,7 +696,7 @@ lecroy_wr_hori_res_prep( void )
 
             lecroy_wr.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
             lecroy_wr.hres[ i ][ j ].cl_ris =
-                                    lrnd( 10 * lecroy_wr.tbas[ j ] * ris_res );
+                                     lrnd( 10 * lecroy_wr.tbas[ j ] * ris_res );
         }
 
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
@@ -715,17 +719,37 @@ lecroy_wr_hori_res_prep( void )
 
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
-            if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
-                                                   lecroy_wr.mem_sizes[ i ] ) {
-                if ( k == 5 )
+            while ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
+                                                    lecroy_wr.mem_sizes[ i ] )
+            {
+                /* Note: Waverunners with a maximum sample rate of 2 GHz
+                   (0.5 ns) switch from there to 1 Gz (1 ns) while XStreams,
+                   with a maximum rate of 5 GHz (0.2 Hz) switch to 2.5 GHz
+                   (0.4 ns) and only then to 1 GHz (1 ns). Afterwards for
+                   both use a 5-2-1 scheme is used, e.g. 500 MHz (2 ns),
+                   200 MHz (5 ns), 100 MHz (10 ns) etc. */
+
+                if ( lrnd( 1.0e-6 * ss_res ) > 1000 )
                 {
-                    ss_res *= 0.4;
-                    k = 2;
+                    if ( k == 5 || k == 2 )
+                        ss_res *= 0.5;
+                    else
+                        ss_res *= 0.4;
+
+                    k = 1;
                 }
                 else
                 {
-                    ss_res *= 0.5;
-                    k = k == 2 ? 1 : 5;
+                    if ( k == 5 )
+                    {
+                        ss_res *= 0.4;
+                        k = 2;
+                    }
+                    else
+                    {
+                        ss_res *= 0.5;
+                        k = k == 2 ? 1 : 5;
+                    }
                 }
             }
 

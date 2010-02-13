@@ -38,8 +38,8 @@
 
 void DIO_reset_all( Board * board )
 {
-	board->stc.DIO_Control &= ~ ( DIO_HW_Serial_Enable |
-				      DIO_Pins_Dir_Field );
+	board->stc.DIO_Control &= ~ (   DIO_HW_Serial_Enable
+				      | DIO_Pins_Dir_Field );
 	board->func->stc_writew( board, STC_DIO_Control,
 				 board->stc.DIO_Control );
 }
@@ -74,8 +74,8 @@ int DIO_ioctl_handler( Board *          board,
 			return -EINVAL;
 	}
 
-	if ( ret == 0 &&
-	     copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
+	if (    ret == 0
+	     && copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EFAULT;
 	}

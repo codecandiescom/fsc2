@@ -1045,7 +1045,6 @@ src:
 modules:
 	$(MAKE) config
 	$(MAKE) -C $(mdir) modules
-	$(MAKE) -C $(mdir) bmwb
 
 
 utils:

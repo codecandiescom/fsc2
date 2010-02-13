@@ -30,8 +30,8 @@
 typedef struct File_List File_List_T;
 
 struct File_List {
-    FILE *fp;
-    char *name;
+    FILE * fp;
+    char * name;
 };
 
 

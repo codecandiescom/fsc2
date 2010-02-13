@@ -2389,7 +2389,9 @@ If called with an argument the value passed to the function will be
 rounded up to the nearest allowed values if necessary.
 
 For all @strong{LeCroy} oscilloscopes the function can only be called
-in query mode, i.e.@: without an argument.
+in query mode, i.e.@: without an argument. And changing the memory
+size via @code{@ref{digitizer_memory_size()}} afterwards may
+invalidate the returned value.
 
 Except for the @strong{LeCroy} oscilloscopes, the function can be called
 in query mode (i.e.@: without an argument) only if either it has already
@@ -2411,11 +2413,12 @@ scheme the next larger memory size is used and a warning is printed.
 If called without an argument the function returns the currently set
 memory size.
 
-Please note that changing the memory size may also change the time resolution
-(but not the timebase), i.e.@: when going to a lower memory size the time
-distance between adjacent measured data points may become larger and vice
-versa. This in turn may have an effect on the exact positions of previously
-set windows (see below).
+Please note that changing the memory size may also change the time
+resolution (but not the timebase), i.e.@: when going to a lower memory
+size the time distance between adjacent measured data points may
+become larger and vice versa. This in turn may have an effect on the
+exact positions of previously set windows (see below) as well on the
+record length as determined by @code{@ref{digitizer_record_length()}}.
 
 
 @anchor{digitizer_trigger_position()}

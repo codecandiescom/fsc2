@@ -72,6 +72,7 @@ Var_T * f_find_peak(       Var_T * /* v */ );
 Var_T * f_index_of_max(    Var_T * /* v */ );
 Var_T * f_index_of_min(    Var_T * /* v */ );
 Var_T * f_mean_part_array( Var_T * /* v */ );
+Var_T * f_condense(        Var_T * /* v */ );
 Var_T * f_spike_rem(       Var_T * /* v */ );
 
 

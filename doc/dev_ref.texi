@@ -711,6 +711,8 @@ edit the settings for already existing resonators and create new ones.
 @item @ref{epr_modulation_calibration_count()}
 @item @ref{epr_modulation_calibration_name()}
 @item @ref{epr_modulation_calibration_frequencies()}
+@item @ref{epr_modulation_calibration_amplitude_limit()}
+@item @ref{epr_modulation_calibration_check_amplitude()}
 @item @ref{epr_modulation_store()}
 @end table
 

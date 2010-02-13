@@ -13,7 +13,7 @@
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
 === MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz",  \
 === "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
-=== MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
+=== MODAMP float [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === PHASE float_empty [ -360.0 : 360.0 ] [ 0.0 ] "Modulation phase"
 === PHASE_AS_OFFSET button [ OFF ] "Use phase as relative\nto calibration setting"
 DEVICES:
@@ -42,10 +42,11 @@ freq[ 2 ];
 avg_freq = 0.0;
 Stop_Button;
 Scan_No;
+mod_amp = MODAMP G;
+mod_freq = MODFREQ;
 li_tc;
 li_sens;
 li_amp;
-mod_amp;
 li_freq;
 li_phase;
 CT;
@@ -66,22 +67,6 @@ init_1d( 2, Num_Points, end_field, field_step, "Field [G]", "Signal [uV]" );
 === endif
 
 EXPERIMENT:
-
-=== if PHASE_AS_OFFSET
-===   if RESONATOR eq "Unspecified"
-show_message( "Resonator is unspecified,\nso no phase calibration exists." );
-abort( );
-===   else
-===     if MODFREQ eq "Don't set" 
-IF ! epr_modulation_has_phase( "RESONATOR" " (ER023M)", lockin_ref_freq( ) ) {
-===     else
-IF ! epr_modulation_has_phase( "RESONATOR" " (ER023M)", MODFREQ ) {
-===     endif
-   show_message( "No calibration phase exists\nfor the selected resonator\nand modulation frequency." );
-   abort( );
-}
-===   endif
-=== endif
 
 /* Set up magnet related stuff */
 
@@ -104,27 +89,20 @@ lockin_sensitivity( SENS1 * SENS2 );
 
 === if defined PHASE
 ===   if PHASE_AS_OFFSET and RESONATOR ne "Unspecified"
-===     if MODFREQ eq "Don't set"
-phase += epr_modulation_phase( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
-===     else
-phase += epr_modulation_phase( "RESONATOR" " (ER023M)", MODFREQ );
-===     endif
+phase += epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
 ===   endif
 lockin_phase( phase );
 === endif
 
-=== if MODFREQ ne "Don't set"
-lockin_ref_freq( MODFREQ );
-=== endif
-
-=== if defined MODAMP
 ===   if RESONATOR ne "Unspecified"
-lockin_ref_level( MODAMP G / epr_modulation_ratio( "RESONATOR" " (ER023M)",
-                                                   lockin_ref_freq( ) ) );
+epr_modulation_calibration_check_amplitude( "RESONATOR" " (ER023M)", mod_amp );
+lockin_ref_level( mod_amp / epr_modulation_ratio( "RESONATOR" " (ER023M)",
+                                                  lockin_ref_freq( ) ) );
+mod_amp =   lockin_ref_level( ) 
+          * epr_modulation_ratio( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
 ===   else
-lockin_ref_level( MODAMP G );
+lockin_ref_level( mod_amp );
 ===   endif
-=== endif
 
 === if TC ne "Don't set"
 li_tc = lockin_time_constant( TC );
@@ -140,10 +118,6 @@ li_tc = lockin_time_constant( );
 === endif
 
 li_sens = lockin_sensitivity( );
-=== if RESONATOR ne "Unspecified"
-mod_amp =   lockin_ref_level( ) 
-          * epr_modulation_ratio( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
-=== endif
 
 li_amp = lockin_ref_level( );
 li_freq = lockin_ref_freq( ) / 1kHz;

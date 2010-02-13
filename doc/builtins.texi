@@ -1103,8 +1103,8 @@ file handles for @i{stdout} and @i{stderr}.
 
 @item get_file()
 Opens a new file and returns a unique identifier for the file that can
-be stored in an integer variable and is to be used in calls to functions
-of the @w{@code{save_xxx()}}-family. Usually a file selector gets shown
+be stored in an integer variable. This variable can then be used in
+all the file output functions. Usually a file selector gets shown
 that lets the user choose a file. If opening the selected file fails the
 user is asked to select a different file name. If the user cancels the
 selection of a file (s)he is asked for confirmation since data may get
@@ -1126,12 +1126,11 @@ name already has this extension. This way one can enforce an extension
 for the file name.
 
 If @code{@ref{get_file()}} has never been called on the first call to
-a function from the @code{save_xxx()}-family the user is asked to
-select a file and this file is used exclusively in further
-@code{save_xxx()}-calls. That means that calling
-@code{@ref{get_file()}} after the default file has already been opened
-is not allowed, call it either before the first save-operation or
-never at all!
+a file output function the user is asked to select a file and this
+file is used exclusively in all further calls of file output
+functions. This means that calling @code{@ref{get_file()}} after the
+default file has already been opened is not allowed, it must be either
+called before the first output operation to a file or never at all!
 
 In batch mode (i.e.@: if @code{fsc2} got started with the '@code{-B}'
 option) no file select box gets shown because the script is supposed to
@@ -1156,10 +1155,11 @@ that one may specify an hard-coded file name in the script. The
 function will use its first argument as a file name and try to open
 this file. If the file already exists (or can't be opened) a warning
 will be shown and, on user request will show up a file selector to
-allow selecting a different file, just as the @code{@ref{get_file()}}.
-Thus the arguments that the function accepts are identical to the ones
-of @code{@ref{get_file()}} with the only exception that the first
-argument is an additional argument with a string for the file name.
+allow selecting a different file, just as the @code{@ref{get_file()}}
+function. Thus the arguments that the function accepts are identical
+to the ones of @code{@ref{get_file()}} with the only exception that
+the first argument is an additional argument with a string for the
+file name.
 
 This function can also be used to explicitely open @i{stdout} and
 @i{stderr}. To do so call the function with a single integer argument
@@ -2248,11 +2248,14 @@ The following mathematical function can be used in all section of an
 @item @ref{round()}
 @item @ref{max_of()}
 @item @ref{mean()}
+@item @ref{condense_array()}
 @item @ref{mean_part_array()}
 @item @ref{min_of()}
 @item @ref{random()}
+@item @ref{random2()}
 @item @ref{rms()}
 @item @ref{set_seed()}
+@item @ref{shuffle()}
 @item @ref{sin()}
 @item @ref{sinh()}
 @item @ref{sqrt()}
@@ -2443,21 +2446,57 @@ the more-dimensional array are used, otherwise only the number of
 elements or sub-arrays specified as the third argument are used.
 .
 
+@anchor{condense_array()}
+@findex condense_array()
+@item condense_array()
+The function expects as its arguments a 1-dimensional arrays of
+integers or floats and a positive (non-zero) integer, the "chunk size"
+@code{N}. It returns a new array where each element consists of the
+average of @code{N} (consecutive) elements of the original array. The
+length of this array is the length of the original array divided by
+@code{N} and the first element of this result array is the average of
+the first @code{N} elements of the original array, the second element
+is the average of the second set of @code{N} elements of the input
+array etc.
+
+The function is meant to speed up calculations in cases where the
+resolution of measured data is higher than required and you want to
+calculate an array with a lower resolution by combining sets of
+sub-arrays of the original array. I.e.@: if a digitizer returns a
+curve with each measured point representing a time interval of just
+@w{1 ns} but you only need a time resolution of @w{20 ns} you can call
+this function with @code{N} equal to @code{20} to average over each
+set of 20 points. This returns an array that's shorter by a factor of
+20 and with data that represent data for @w{20 ns} time intervals.
+
+Calling the function with a chunk size @code{N} of @code{1} is
+equivalent to invoking the @code{@ref{float()}} function while calling
+it with a sub-partition size @code{N} equal to the length of the
+original array itself is equivalent to calling the @code{@ref{mean()}}
+function on the array.
+
+
 @anchor{mean_part_array()}
 @findex mean_part_array()
 @item mean_part_array()
-The function expects as its arguments an 1-dimensional arrays of integers
-or floats and a positive integer, with the length of the array being an
-integer multiple of this number. The array is now split into chunks of
-this size and the chunks are averaged. The resulting 1-dimensional float
-array is returned. This function is meant to speed up calculations in
-cases where a repeated signal, that has been sampled several times and
-is stored in a flat array, is to be averaged.
+The function expects as its arguments a 1-dimensional array of
+integers or floats and a positive (non-zero) integer, the "chunk size"
+@code{M}. The array is split up into sub-arrays with @code{M} elements
+and these sub-arrays are averaged together. The resulting
+1-dimensional float array with @code{M} elements is returned, the 1st
+element of the result array being the average of all the 1st elements
+of the (@code{M}-sized) sub-arrays of the original arrays, the 2nd
+element being the average of all the 2nd elements of the sub-arrays
+etc.
+
+The function is meant to speed up calculations in cases where a
+repeated signal that has been sampled several times in one go and
+stored in a flat array, is to be averaged.
 
 Calling the function with a chunk size of @code{1} is equivalent to
 invoking the @code{@ref{mean()}} function while calling it with a
-sub-partition size equal to the length of the array itself is
-equivalent to calling the @code{@ref{float()}} function on the array.
+chunk size equal to the length of the array itself is equivalent to
+calling the @code{@ref{float()}} function on the array.
 
 
 @anchor{min_of()}
@@ -2472,9 +2511,22 @@ numbers an integer number is returned, otherwise a floating point value.
 @findex random()
 @item random()
 If called with no argument the function returns a single pseudo-random
-number in the interval @w{[0, 1]}. If called with a non-zero, positive
-argument it returns an array of random numbers where the argument
-specifies the size of the array.
+number in the interval @w{[0, 1]} (i.e. values larger or equal to 0
+and less or equal to 1). If called with a non-zero, positive argument
+it returns an array of random numbers where the argument specifies the
+size of the array. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
+
+
+@anchor{random2()}
+@findex random2()
+@item random2()
+If called with no argument the function returns a single pseudo-random
+number in the interval @w{[0, 1[} (i.e. values larger or equal to 0
+and less than 1). If called with a non-zero, positive argument it
+returns an array of random numbers where the argument specifies the
+size of the array. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
 
 
 @anchor{rms()}
@@ -2495,10 +2547,19 @@ sub-matrices as specified by the third argument are used..
 @findex set_seed()
 @item set_seed()
 Sets a seed for the random number generator used in the functions
-@code{@ref{random()}} and @code{@ref{grandom()}}. The argument has to
-be a positive integer. Alternatively, when no argument is given, the
-time in seconds since 00:00:00 UTC, January 1, 1970 is used as the
-seed.
+@code{@ref{random()}}, @code{@ref{random2()}}, @code{@ref{shuffle()}}
+and @code{@ref{grandom()}}. The argument has to be a positive integer.
+Alternatively, when no argument is given, the time in seconds since
+00:00:00 UTC, January 1, 1970 is used as the seed.
+
+
+@anchor{shuffle()}
+@findex shuffle()
+@item shuffle()
+This function expects a 1-dimensional array as its input an returns
+an array of the same length with the elements of the input array
+randomly shuffled. Note that you can initialize the random generator
+used by calling @code{@ref{set_seed()}}.
 
 
 @anchor{sin()}
