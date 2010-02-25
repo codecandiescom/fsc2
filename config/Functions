@@ -538,6 +538,26 @@ freq_contr_name, 0, ALL;
 freq_contr_change_freq, 1, EXP;
 
 
+/* Function exported by the microwave bridge modules */
+
+mw_bridge_name, 0, ALL;
+mw_bridge_run, 0, PREP;
+mw_bridge_frequency, -1, EXP;
+mw_bridge_attenuation, -1, EXP;
+mw_bridge_signal_phase, -1, EXP;
+mw_bridge_bias, -1, EXP;
+mw_bridge_lock_phase, -1, EXP;
+mw_bridge_mode, -1, EXP;
+mw_bridge_detector_current, 0, EXP;
+mw_bridge_afc_signal, 0, EXP;
+mw_bridge_unlocked_signal, 0, EXP;
+mw_bridge_uncalibrated_signal, 0, EXP;
+mw_bridge_afc_state, 0, EXP;
+mw_bridge_iris, 2, EXP;
+mw_bridge_max_frequency, 0, EXP;
+mw_bridge_min_frequency, 0, EXP;
+
+
 /* Functions exported by the FFT pseudo-module */
 
 fft_name, 0, ALL;

@@ -1,22 +1,40 @@
-#ifndef FD_bmbw_rsc_h_
-#define FD_bmbw_rsc_h_
+/*
+ *  Copyright (C) 1999-2010 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
+
+
+#ifndef FD_bmwb_rsc_h_
+#define FD_bmwb_rsc_h_
 
 #include <forms.h>
 
-/* Callbacks, globals and object handlers */
 
 extern void mode_cb( FL_OBJECT *, long );
 extern void freq_cb( FL_OBJECT *, long );
 extern void attenuation_cb( FL_OBJECT *, long );
-extern void attenuation_button_cb( FL_OBJECT *, long );
 extern void signal_phase_cb( FL_OBJECT *, long );
 extern void bias_cb( FL_OBJECT *, long );
 extern void lock_phase_cb( FL_OBJECT *, long );
 extern void iris_cb( FL_OBJECT *, long );
 extern void quit_cb( FL_OBJECT *, long );
 
-
-/* Forms and Objects */
 
 typedef struct {
     FL_FORM   * form;
@@ -36,7 +54,6 @@ typedef struct {
 	FL_OBJECT * freq_text;
 	FL_OBJECT * attenuation_group;
     FL_OBJECT * attenuation_counter;
-    FL_OBJECT * attenuation_button;
 	FL_OBJECT * signal_phase_group;
     FL_OBJECT * signal_phase_slider;
 	FL_OBJECT * secondary_frame;
@@ -47,8 +64,28 @@ typedef struct {
 	FL_OBJECT * iris_group;
     FL_OBJECT * iris_up;
     FL_OBJECT * iris_down;
-} FD_bmbw_rsc;
+} FD_bmwb_rsc;
 
-extern FD_bmbw_rsc * create_form_bmbw_rsc( void );
 
-#endif /* FD_bmbw_rsc_h_ */
+typedef struct {
+	Display   * d;
+	FL_OBJECT * obj;
+	Pixmap      pm;
+    GC          gc;
+	int         w,
+	            h;
+} Canvas_T;
+
+
+extern FD_bmwb_rsc * create_form_bmwb_rsc( void );
+
+#endif
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

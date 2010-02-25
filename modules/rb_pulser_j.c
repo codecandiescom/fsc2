@@ -24,7 +24,7 @@
 
 
 /*--------------------------------*
- * global variables of the module *
+ * Global variables of the module *
  *--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
@@ -37,7 +37,7 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
 
 /*-------------------------------*
- * local functions and variables *
+ * Local functions and variables *
  *-------------------------------*/
 
 static void rb_pulser_j_card_setup( void );

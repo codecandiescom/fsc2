@@ -457,7 +457,7 @@ VERSION          := 2.4.0
 
 # Set the optimization level
 
-OPTIMIZATION     := -O2
+OPTIMIZATION     := -O0
 
 
 # Define this in order to use mpatrol
@@ -1017,8 +1017,8 @@ ifdef LIBUSB_FAIL
 	exit 2;
 endif
 	$(MAKE) config
-	$(MAKE) -C $(sdir) src
-	$(MAKE) -C $(sdir) modules
+	$(MAKE) src
+	$(MAKE) modules
 	$(MAKE) http_server
 	$(MAKE) utils
 	$(MAKE) -C $(edir)
@@ -1045,6 +1045,9 @@ src:
 modules:
 	$(MAKE) config
 	$(MAKE) -C $(mdir) modules
+ifdef WITH_MEDRIVER
+	$(MAKE) -C $(mdir) bmwb
+endif
 
 
 utils:

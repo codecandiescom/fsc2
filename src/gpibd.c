@@ -118,7 +118,7 @@ static device_T devices[ MAX_DEVICES ];
 
 /* Mutex for protecting accssesto the GPIB bus */
 
-static pthread_mutex_t gpib_mutex   = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t gpib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static size_t thread_count = 0;
 static size_t device_count = 0;
@@ -350,7 +350,7 @@ new_client( int fd )
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
     if ( pthread_create( &thread_data[ thread_count ].tid,
-                         &attr,gpib_handler, NULL ) )
+                         &attr, gpib_handler, NULL ) )
     {
         shutdown( cli_fd, SHUT_RDWR );
         close( cli_fd );

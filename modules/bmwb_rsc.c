@@ -5,11 +5,11 @@
 /***************************************
  ***************************************/
 
-FD_bmbw_rsc *
-create_form_bmbw_rsc( void )
+FD_bmwb_rsc *
+create_form_bmwb_rsc( void )
 {
     FL_OBJECT *obj;
-    FD_bmbw_rsc *fdui = fl_malloc( sizeof *fdui );
+    FD_bmwb_rsc *fdui = fl_malloc( sizeof *fdui );
 	double freq;
 	char buf[ 100 ];
 
@@ -23,8 +23,6 @@ create_form_bmbw_rsc( void )
 		fdui->form = fl_bgn_form( FL_NO_BOX, 880, 490 );
 
     obj = fl_add_box( FL_UP_BOX, 0, 0, 880, 565, "" );
-    fl_set_object_lsize( obj, FL_NORMAL_SIZE );
-    fl_set_object_lalign( obj, FL_ALIGN_LEFT_BOTTOM );
 
     fdui->dc_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 30, 30, 170, 50,
 										   "Diode current" );
@@ -55,13 +53,10 @@ create_form_bmbw_rsc( void )
 
 	if ( bmwb.type == X_BAND )
 	{
-		int r;
-
 		fdui->unlocked_indicator = obj =
 			fl_add_roundbutton( FL_PUSH_BUTTON, 600, 35, 120, 30, "Unlocked" );
 		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
 		fl_set_object_lstyle( obj, FL_BOLD_STYLE );
-		fl_mapcolor( FL_FREE_COL1, 255 * bmwb.unlocked_state, 0, 0 );
 		fl_set_object_color( obj, FL_WHITE, FL_FREE_COL1 );
 		fl_set_button( obj, 1 );
 		fl_deactivate_object( obj );
@@ -71,9 +66,6 @@ create_form_bmbw_rsc( void )
 								"Uncalibrated" );
 		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
 		fl_set_object_lstyle( obj, FL_BOLD_STYLE );
-		r = irnd( 255 * ( bmwb.uncalibrated - UNCALIBRATED_MIN )
-                  / ( UNCALIBRATED_MAX - UNCALIBRATED_MIN ) );
-		fl_mapcolor( FL_FREE_COL2, r, 0, 0 );
 		fl_set_object_color( obj, FL_WHITE, FL_FREE_COL2 );
 		fl_set_button( obj, 1 );
 		fl_deactivate_object( obj );
@@ -85,7 +77,6 @@ create_form_bmbw_rsc( void )
 														"AFC" );
 		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
 		fl_set_object_lstyle( obj, FL_BOLD_STYLE );
-		fl_mapcolor( FL_FREE_COL3, 0, 255 * bmwb.afc_state, 0 );
 		fl_set_object_color( obj, FL_WHITE, FL_FREE_COL3 );
 		fl_set_button( obj, 1 );
 		fl_deactivate_object( obj );
@@ -169,24 +160,21 @@ create_form_bmbw_rsc( void )
     fl_set_object_callback( obj, attenuation_cb, 2 );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
 
-    fdui->attenuation_button = obj = fl_add_button( FL_HIDDEN_BUTTON, 545, 195,
-													220, 30, "" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, attenuation_button_cb, 0 );
-
 	fl_end_group( );
 
 	fdui->signal_phase_group = fl_bgn_group( );
 
     fdui->signal_phase_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER,
-													 539, 265, 230, 30,
-													 "Signal phase" );
+													 539, 265, 230, 30, "" );
+
     fl_set_object_color( obj, FL_WHITE, FL_COL1 );
     fl_set_object_lsize( obj, FL_NORMAL_SIZE );
     fl_set_object_lstyle( obj, FL_BOLD_STYLE );
     fl_set_object_callback( obj, signal_phase_cb, 0 );
 	fl_set_slider_value( obj, bmwb.signal_phase );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * bmwb.signal_phase ) );
+	fl_set_object_label( obj, buf );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 510, 265, 30, 30, "@<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
@@ -220,13 +208,15 @@ create_form_bmbw_rsc( void )
 	fdui->bias_group = fl_bgn_group( );
 
     fdui->bias_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER, 543, 357,
-											 230, 30, "Microwave bias" );
+											 230, 30, "" );
     fl_set_object_color( obj, FL_WHITE, FL_COL1 );
     fl_set_object_lsize( obj, FL_NORMAL_SIZE );
     fl_set_object_lstyle( obj, FL_BOLD_STYLE );
     fl_set_object_callback( obj, bias_cb, 0 );
 	fl_set_slider_value( obj, bmwb.bias );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * bmwb.bias ) );
+	fl_set_object_label( obj, buf );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 513, 357, 30, 30, "@<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
@@ -255,14 +245,15 @@ create_form_bmbw_rsc( void )
 		fdui->lock_phase_group = fl_bgn_group( );
 
 		fdui->lock_phase_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER,
-													   543, 420, 230, 30,
-													   "Lock phase" );
+													   543, 420, 230, 30, "" );
 		fl_set_object_color( obj, FL_WHITE, FL_COL1 );
 		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
 		fl_set_object_lstyle( obj, FL_BOLD_STYLE );
 		fl_set_object_callback( obj, lock_phase_cb, 0 );
 		fl_set_slider_value( obj, bmwb.lock_phase );
 		fl_set_object_return( obj, FL_RETURN_CHANGED );
+		sprintf( buf, "Lock phase (%d%%)", irnd( 100.0 * bmwb.lock_phase ) );
+		fl_set_object_label( obj, buf );
 
 		obj = fl_add_button( FL_TOUCH_BUTTON, 513, 420, 30, 30, "@<" );
 		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
@@ -291,17 +282,17 @@ create_form_bmbw_rsc( void )
 	{
 		fdui->iris_group = fl_bgn_group( );
 
-		fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 70, 500, 40, 40,
-											 "@2<" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, iris_cb, 1 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-		fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON, 110, 500,
-											   40, 40, "@8<" );
-		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
+		fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON, 70, 500, 40, 40,
+											   "@8<" );
 		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
 		fl_set_object_callback( obj, iris_cb, -1 );
+		fl_set_object_return( obj, FL_RETURN_CHANGED );
+
+		fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 110, 500,
+											   40, 40, "@2<" );
+		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
+		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+		fl_set_object_callback( obj, iris_cb, 1 );
 		fl_set_object_return( obj, FL_RETURN_CHANGED );
 
 		obj = fl_add_text( FL_NORMAL_TEXT, 160, 505, 120, 30,

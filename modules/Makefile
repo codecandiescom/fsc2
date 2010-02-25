@@ -36,7 +36,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # List of modules that are to be made from a single source file only (as
 # far as they don't require some additional software)
 
-simp_modules    := User_Functions gg_chopper
+simp_modules    := User_Functions gg_chopper x_bmwb q_bmwb
 
 
 # For each of the "complicated" modules a list of all source files they are
@@ -182,6 +182,8 @@ endif
 ifdef WITH_MEDRIVER
 me_dio          :=  $(patsubst $(cdir)/%.conf,%,$(wildcard $(cdir)/me_dio_*.conf))
 simp_modules    += $(me_dio) er218
+bmwb_src        := bmwb.c bmwb_meilhaus.c bmwb_graph.c bmwb_measure.c  \
+				   bmwb_utils.c bmwb_rsc.c bmwb_sock.c
 endif
 
 
@@ -228,8 +230,8 @@ export        # export all symbols to the sub-makefiles
 all:
 	$(MAKE) -C .. modules
 
-bmwb: bmwb.c bmwb_meilhaus.c bmwb_utils.c bmwb_rsc.c
-	$(CC) -ggdb $(CFLAGS) -I.. -I../src -o $@ $^ -lforms $(MEDRIVER_LIB)
+bmwb: $(bmwb_src) bmwb.h bmwb_rsc.h
+	$(CC) -ggdb $(CFLAGS) -o $@ $(bmwb_src) $(INCLUDES) $(LIBS) -pthread
 
 list_simp:
 	@echo $(simp_modules)
@@ -385,6 +387,9 @@ install:
 		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
 				install-$(machine_name);               \
 	fi
+ifdef WITH_MEDRIVER
+	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) bmwb $(bindir)
+endif
 
 
 # How to uninstall the modules
@@ -397,6 +402,7 @@ uninstall:
 		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
 				uninstall-$(machine_name);             \
 	fi
+	$(RM) $(RMFLAGS) $(bindir)/bmwb
 
 
 # How to clean up the mess we created
@@ -432,6 +438,7 @@ clean:
 		$(RM) $(RMFLAGS) $$n.c;                   \
 	done;
 	$(RM) $(RMFLAGS) *.fsc2_so
+	$(RM) $(RMFLAGS) bmwb
 
 
 # Don't automatically delete intermediate files created by flex or rpcgen

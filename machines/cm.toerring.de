@@ -24,6 +24,7 @@ WITH_RULBUS          := yes
 rulbus_incl_path     := /usr/local/include
 rulbus_lib_path      := /usr/local/lib
 WITH_MEDRIVER        := yes
+medriver_version     := NEW
 medriver_incl_path   := /usr/include/medriver
 medriver_lib_path    := /usr/lib
 #WITH_LIBUSB_0_1      := yes
