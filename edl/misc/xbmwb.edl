@@ -1,0 +1,29 @@
+DEVICES:
+
+x_bmwb;
+
+
+PREPARATIONS:
+
+mw_bridge_run( );
+
+EXPERIMENT:
+
+print( "att # dB\n", mw_bridge_attenuation( ) );
+mw_bridge_attenuation( 17 );
+print( "freq # GHz\n", mw_bridge_frequency( ) / 1 GHz);
+mw_bridge_frequency( 9.55 GHz );
+print( "signal phase #\n", mw_bridge_signal_phase( ) );
+mw_bridge_signal_phase( 0.33 );
+print( "bias #\n", mw_bridge_bias( ) );
+mw_bridge_bias( 0.75 );
+print( "lock phase #\n", mw_bridge_lock_phase( ) );
+mw_bridge_lock_phase( 0.123 );
+print( "mode #\n", mw_bridge_mode( ) );
+mw_bridge_mode( "OPERATE" );
+print( "dc #\n", mw_bridge_detector_current( ) );
+print( "afc #\n", mw_bridge_afc_signal( ) );
+print( "uncal #\n", mw_bridge_uncalibrated_signal( ) );
+print( "unlock #\n", mw_bridge_unlocked_signal( ) );
+mw_bridge_iris( "UP", 1 s );
+mw_bridge_iris( "DOWN", 1 s );
