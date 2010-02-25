@@ -78,6 +78,7 @@
 * oriel_matrix::    Newport Oriel MMS Spectrometer
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
+* q_bmwb::          Bruker ER 051 QG Q-Band Bridge
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rb8509::          Rulbus 12-bit ADC Card
@@ -104,6 +105,7 @@
 * tds754a::         Tektronix Digitizing Oscilloscope TDS754A
 * tegam2714a_p::    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
+* x_bmwb::          Bruker ER 046 X-Band Bridge
 * witio_48::        Wasco WITIO-48 DIO card
 @end menu
 
@@ -3044,7 +3046,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, rs_sml01, pci_mio_16e_1, Device Reference
+@node pt2025, q_bmwb, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -3084,7 +3086,53 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 @c #############################################################
 
-@node rs_sml01, rs_spec10, pt2025, Device Reference
+@node q_bmwb, rs_sml01, pt2025, Device Reference
+@iftex
+@subheading Bruker ER 051 QG Q-Band Bridge
+@end iftex
+@ifnottex
+@section Bruker ER 051 QG Q-Band Bridge
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{x_bmwb}
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+Q-band microwave bridge
+
+@paragraphindent 0
+@strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
+Electronic GmbH} ME-4680 card and additional, home-built electronics
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{mw_bridge_name()}
+@item @ref{mw_bridge_run()}
+@item @ref{mw_bridge_frequency()}
+@item @ref{mw_bridge_attenuation()}
+@item @ref{mw_bridge_signal_phase()}
+@item @ref{mw_bridge_bias()}
+@item @ref{mw_bridge_lock_phase()}
+@item @ref{mw_bridge_mode()}
+@item @ref{mw_bridge_detector_current()}
+@item @ref{mw_bridge_afc_signal()}
+@item @ref{mw_bridge_unlocked_signal()}
+@item @ref{mw_bridge_uncalibrated_signal()}
+@item @ref{mw_bridge_afc_state()}
+@item @ref{mw_bridge_iris()}
+@item @ref{mw_bridge_max_frequency()}
+@item @ref{mw_bridge_min_frequency()}
+@end table
+
+
+@c #############################################################
+
+@node rs_sml01, rs_spec10, q_bmwb, Device Reference
 @iftex
 @subheading Rohde & Schwarz SML01 Signal Generator 
 @end iftex
@@ -4385,7 +4433,7 @@ In the GPIB configuration file use @code{"TEGAM2714A"} as the device name,
 
 @c #############################################################
 
-@node thurlby330, witio_48, tegam2714a_p, Device Reference
+@node thurlby330, x_bmwb, tegam2714a_p, Device Reference
 @iftex
 @subheading Thurlby & Thandar Power Supply PL330DP
 @end iftex
@@ -4426,7 +4474,53 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 
 @c #############################################################
 
-@node witio_48, , thurlby330, Device Reference
+@node x_bmwb, witio_48, thurlby330, Device Reference
+@iftex
+@subheading Bruker ER 046 X-Band Bridge
+@end iftex
+@ifnottex
+@section Bruker ER 046 X-Band Bridge
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{x_bmwb}
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+X-band microwave bridge
+
+@paragraphindent 0
+@strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
+Electronic GmbH} ME-4680 card and additional, home-built electronics
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{mw_bridge_name()}
+@item @ref{mw_bridge_run()}
+@item @ref{mw_bridge_frequency()}
+@item @ref{mw_bridge_attenuation()}
+@item @ref{mw_bridge_signal_phase()}
+@item @ref{mw_bridge_bias()}
+@item @ref{mw_bridge_lock_phase()}
+@item @ref{mw_bridge_mode()}
+@item @ref{mw_bridge_detector_current()}
+@item @ref{mw_bridge_afc_signal()}
+@item @ref{mw_bridge_unlocked_signal()}
+@item @ref{mw_bridge_uncalibrated_signal()}
+@item @ref{mw_bridge_afc_state()}
+@item @ref{mw_bridge_iris()}
+@item @ref{mw_bridge_max_frequency()}
+@item @ref{mw_bridge_min_frequency()}
+@end table
+
+
+@c #############################################################
+
+@node witio_48, , x_bmwb, Device Reference
 @iftex
 @subheading Wasco WITIO-48 DIO card
 @end iftex

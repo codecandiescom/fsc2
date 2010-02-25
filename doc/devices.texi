@@ -46,7 +46,7 @@
 * Microwave Attenuator Functions::
 * Light Chopper Functions::
 * Goniometer Functions::
-* EPR Modulation Functions::
+* Microwave Bridge Functions::
 * Multi-Device Functions::
 @end menu
 
@@ -8127,7 +8127,7 @@ e.g.@: to trigger an acquisition.
 @end table
 
 
-@node Goniometer Functions, Multi-Device Functions, Light Chopper Functions, Device Functions
+@node Goniometer Functions, Microwave Bridge Functions, Light Chopper Functions, Device Functions
 @section Goniometer Functions
 @cindex Goniometer Functions
 
@@ -8254,7 +8254,232 @@ This function can only be used in the @code{EXPERIMENT} section.
 @end table
 
 
-@node Multi-Device Functions, , Goniometer Functions, Device Functions
+@node Microwave Bridge Functions, Multi-Device Functions, Goniometer Functions, Device Functions
+@section Microwave Bridge Functions
+@cindex Microwave Bridge Functions
+
+Currently the @code{ER 046} X-band and the @code{ER 051 QG} Q-band
+bridges by Bruker are supported. Since these bridges don't have a
+computer interface additional hardware is required, a @code{Meilhaus
+4680} card and some additional, home-built electronics. This module is
+also different from others since there is an extra utility program,
+@code{bmwb}, for controlling the bridge which interacts with these
+modules (it gets started automatically when needed). The @code{bmwb}
+program can also be used to control the bridges manually via a
+graphical user interface.
+
+The modules for the microwave bridges get loaded by specifying
+@example
+x_bmwb
+q_bmwb
+@end example
+@noindent
+in the @code{DEVICES} section.
+
+@noindent
+@strong{List of microwave bridge functions}:
+@table @samp
+@item @ref{mw_bridge_name()}
+@item @ref{mw_bridge_run()}
+@item @ref{mw_bridge_frequency()}
+@item @ref{mw_bridge_attenuation()}
+@item @ref{mw_bridge_signal_phase()}
+@item @ref{mw_bridge_bias()}
+@item @ref{mw_bridge_lock_phase()}
+@item @ref{mw_bridge_mode()}
+@item @ref{mw_bridge_detector_current()}
+@item @ref{mw_bridge_afc_signal()}
+@item @ref{mw_bridge_unlocked_signal()}
+@item @ref{mw_bridge_uncalibrated_signal()}
+@item @ref{mw_bridge_afc_state()}
+@item @ref{mw_bridge_iris()}
+@item @ref{mw_bridge_max_frequency()}
+@item @ref{mw_bridge_min_frequency()}
+@end table
+
+@noindent
+@strong{Descriptions of microwave bridge functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{mw_bridge_name()}
+@findex mw_bridge_name()
+
+@table @samp
+@item mw_bridge_name()
+Returns a string with the name of the microwave bridge being used.
+
+
+@anchor{mw_bridge_run()}
+@findex mw_bridge_run()
+@item mw_bridge_run()
+This function allows to start the program that controls the microwave
+bridge, @code{bmwb}, from the @code{PREPARATIONS} section of an
+@code{EDL} script. When the program is running coupling of the
+resonator etc.@ can be done before the experiment is started. If the
+@code{bmwb} is already running nothing happens (except that in case
+it is detected that the required microwave bridge isn't connected
+an error message is printed out).
+
+
+
+@anchor{mw_bridge_frequency()}
+@findex mw_bridge_frequency()
+@item mw_bridge_frequency()
+This function allows to set or query of the microwave bridge. If
+called woth no argument the currently set microwave frequency is
+returned. If called with an argument the microwave frequency is
+set to that value. To find about the range of frequencies that can
+be set use the functions @code{@ref{mw_bridge_min_frequency()}} and
+@code{@ref{mw_bridge_min_frequency()}}. Note that the frequencies are
+only rough approximations of the real microwave frequencies.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+@anchor{mw_bridge_attenuation()}
+@findex mw_bridge_attenuation()
+@item mw_bridge_attenuation()
+This function allows to set or query the current microwave attenuation
+settings. If called with no argument the attenuation set at the bridge
+is returned. If called with an argument the attenuation is set to this
+value. The allowed range of attenuation is @code{0 dB} to @code{60 dB}.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_signal_phase()}
+@findex mw_bridge_signal_phase()
+@item mw_bridge_signal_phase()
+This function allows to set or query the signal phase. If called with
+no argument the current setting of the signal phase is returned as a
+value between @code{0.0} and @code{1.0}. If a value in this range is
+passed to the function the signal phase is set accordingly.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_bias()}
+@findex mw_bridge_bias()
+@item mw_bridge_bias()
+This function allows to set and query the microwave bias level. If
+called with no argument the current setting of the bias level is
+returned as a value between @code{0.0} and @code{1.0}. If a value in
+this range is passed to the function the bias level is set
+accordingly.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_lock_phase()}
+@findex mw_bridge_lock_phase()
+@item mw_bridge_lock_phase()
+This function can only be used for the @code{ER 046} X-band bridge and
+allows to set and query the microwave lock phase. If called with no
+argument the current setting of thelock phase is returned as a value
+between @code{0.0} and @code{1.0}. If a value in this range is passed
+to the function the lock phase is set accordingly.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_mode()}
+@findex mw_bridge_mode()
+@item mw_bridge_mode()
+This function allows to set or query the mode of the bridge. If called
+with no argument the current mode setting is returned as an integer
+number, where @code{0} indicates standby mode, @code{1} tune mode
+and @code{2} operate mode. If called with one of these integers or
+one of the strings @code{"STANDBY"}, @code{"TUNE"} or @code{"OPERATE"}
+the bridge is switched to the requested mode
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_detector_current()}
+@findex mw_bridge_detector_current()
+@item mw_bridge_detector_current()
+This function takes no arguments and returns the measured value for
+the detector current as a value between @code{0.0} (minimum detector
+current) and @code{1.0} (maximum detector current).
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_afc_signal()}
+@findex mw_bridge_afc_signal()
+@item mw_bridge_afc_signal()
+This function takes no arguments and returns the measured value for
+the AFC signal as a value between @code{-1.0} (most negative AFC
+signal) and @code{1.0} (most positive AFC signal).
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_unlocked_signal()}
+@findex mw_bridge_unlocked_signal()
+@item mw_bridge_unlocked_signal()
+This function can only be used with the @code{ER 046} X-band bridge
+and takes no arguments. It returns the measured signal from the bridge
+that indicates how unlocked it is as a value between @code{0.0}
+(locked) and @code{1.0} (unlocked).
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_uncalibrated_signal()}
+@findex mw_bridge_uncalibrated_signal()
+@item mw_bridge_uncalibrated_signal()
+This function can only be used with the @code{ER 046} X-band bridge
+and takes no arguments. It returns the measured signal from the bridge
+that indicates how uncalibrated it is as a value between @code{0.0}
+(calibrated) and @code{1.0} (uncalibrated).
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_afc_state()}
+@findex mw_bridge_afc_state()
+@item mw_bridge_afc_state()
+This function can only be used with the @code{ER 051 QG} Q-bandbridge
+and takes no arguments. It returns @code{1} if the AFC is switched on,
+otherwise @code{0}.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_iris()}
+@findex mw_bridge_iris()
+@item mw_bridge_iris()
+This function can only be used with the @code{ER 046} X-band bridge
+and allows to move the iris coupling up and down. It expects two
+arguments, a direction and a time. The direction can be either a
+string, @code{"UP"} or @code{"DOWN"}, or an integer of @code{1} and
+@code{-1}, indicating if the iris motor should decrease ("up") or
+increase ("down") coupling. The second argument is the time the
+iris motor is to be run, this must be at least @code{1 ms}.
+
+The function can be used in the @code{EXPERIMENT} section only.
+
+
+@anchor{mw_bridge_max_frequency()}
+@findex mw_bridge_max_frequency()
+@item @ref{mw_bridge_max_frequency()}
+This function takes no arguments and returns a rough estimate of the
+maximum microwave frequency the bridge can produce.
+
+
+@anchor{mw_bridge_min_frequency()}
+@findex mw_bridge_min_frequency()
+@item @ref{mw_bridge_min_frequency()}
+This function takes no arguments and returns a rough estimate of the
+minimum microwave frequency the bridge can produce.
+
+@end table
+
+
+
+@node Multi-Device Functions, , Microwave Bridge Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
