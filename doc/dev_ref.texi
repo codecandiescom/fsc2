@@ -3127,6 +3127,7 @@ Electronic GmbH} ME-4680 card and additional, home-built electronics
 @item @ref{mw_bridge_iris()}
 @item @ref{mw_bridge_max_frequency()}
 @item @ref{mw_bridge_min_frequency()}
+@item @ref{mw_bridge_lock()}
 @end table
 
 
@@ -4515,6 +4516,7 @@ Electronic GmbH} ME-4680 card and additional, home-built electronics
 @item @ref{mw_bridge_iris()}
 @item @ref{mw_bridge_max_frequency()}
 @item @ref{mw_bridge_min_frequency()}
+@item @ref{mw_bridge_lock()}
 @end table
 
 

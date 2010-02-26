@@ -113,6 +113,7 @@ typedef struct {
     gid_t             EGID;           /* started with */
     pthread_t         tid;            /* thread for dealing with connections */
     pthread_mutex_t   mutex;
+    int               is_locked;
 	int               type;
 	int               mode;
 	double            freq;
@@ -190,6 +191,7 @@ void graphics_init( void );
 int update_display( XEvent * xev   UNUSED_ARG ,
                     void   * data  UNUSED_ARG );
 void display_mode_pic( int mode );
+void lock_objects( int state );
 
 int meilhaus_init( void );
 int meilhaus_finish( void );

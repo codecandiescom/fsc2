@@ -60,6 +60,8 @@ static int maxfrq_req( int    fd,
 					   char * req );
 static int minfrq_req( int    fd,
 					   char * req );
+static int lck_req( int    fd,
+                    char * req );
 static ssize_t swrite( int          d,
 					   const char * buf,
 					   ssize_t      len );
@@ -216,6 +218,7 @@ client_handler( void * null  UNUSED_ARG )
     shutdown( client_fd, SHUT_RDWR );
     close( client_fd );
     client_fd = -1;
+    lock_objects( 0 );
 	pthread_exit( NULL );
 }
 
@@ -249,6 +252,7 @@ handle_request( int fd )
 			{ "AFCST?",  6, afcst_req  },   /* get AFC state */
 			{ "MAXFRQ?", 7, maxfrq_req },   /* get max. microwave frequency */
 			{ "MINFRQ?", 7, minfrq_req },   /* get min. microwave frequency */
+            { "LCK ",    4, lck_req }       /* set/elease lock */
 		  };
 
 
@@ -615,7 +619,8 @@ detsig_req( int    fd,
 	pthread_mutex_unlock( &bmwb.mutex );
 
 	sprintf( buf, "%.5f\n", val );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
 }
 
 
@@ -645,7 +650,8 @@ afcsig_req( int    fd,
 
 	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
 }
 
 
@@ -675,7 +681,8 @@ unlck_req( int    fd,
 
 	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
 }
 
 
@@ -705,7 +712,8 @@ uncal_req( int    fd,
 
 	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
 }
 
 
@@ -735,7 +743,8 @@ afcst_req( int    fd,
 
 	sprintf( buf, "%d\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf )  ?
+           0 : 1;
 }
 
 
@@ -754,7 +763,8 @@ maxfrq_req( int    fd,
 		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
 	sprintf( buf, "%.3f\n", bmwb.max_freq );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
 }
 
 
@@ -773,7 +783,27 @@ minfrq_req( int    fd,
 		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
 	sprintf( buf, "%.3f\n", bmwb.min_freq );
-	return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+           0 : 1;
+}
+
+
+/*------------------------------------------------------------------*
+ * Handles a request to lock or unlock the graphical user interface
+ *------------------------------------------------------------------*/
+
+static int
+lck_req( int    fd,
+         char * req )
+{
+    if ( ! strcmp( req, "1\n" ) )
+        lock_objects( 1 );
+    else if ( ! strcmp( req, "0\n" ) )
+        lock_objects( 0 );
+    else
+		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+
+	return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
 }
 
 

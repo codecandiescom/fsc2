@@ -66,6 +66,7 @@ Var_T * mw_bridge_uncalibrated_signal( Var_T * v );
 Var_T * mw_bridge_iris(                Var_T * v );
 Var_T * mw_bridge_max_frequency(       Var_T * v );
 Var_T * mw_bridge_min_frequency(       Var_T * v );
+Var_T * mw_bridge_lock(                Var_T * v );
 
 
 static int x_bmwb_connect( void );
@@ -740,6 +741,31 @@ mw_bridge_min_frequency( Var_T * v  UNUSED_ARG )
 		x_bmwb_comm_failure( );
 
 	return vars_push( FLOAT_VAR, 1.0e9 * T_atod( buf ) );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+mw_bridge_lock( Var_T * v )
+{
+    bool state = get_boolean( v );
+    char buf[ 10 ];
+
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        sprintf( buf, "LCK %c\n", state ? '1' : '0' );
+        if ( x_bmwb_write( x_bmwb.fd, buf, 5 ) != 5 )
+            x_bmwb_comm_failure( );
+
+		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
+             || strncmp( buf, "OK\n", 3 ) )
+			x_bmwb_comm_failure( );
+	}
+
+    return vars_push( INT_VAR, state ? 1L : 0L );
 }
 
 

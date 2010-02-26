@@ -63,6 +63,7 @@ Var_T * mw_bridge_afc_signal(       Var_T * v );
 Var_T * mw_bridge_afc_state(        Var_T * v );
 Var_T * mw_bridge_max_frequency(    Var_T * v );
 Var_T * mw_bridge_min_frequency(    Var_T * v );
+Var_T * mw_bridge_lock(             Var_T * v );
 
 
 static int q_bmwb_connect( void );
@@ -661,6 +662,31 @@ mw_bridge_min_frequency( Var_T * v  UNUSED_ARG )
 }
 
 
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+mw_bridge_lock( Var_T * v )
+{
+    bool state = get_boolean( v );
+    char buf[ 10 ];
+
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        sprintf( buf, "LCK %c\n", state ? '1' : '0' );
+        if ( q_bmwb_write( q_bmwb.fd, buf, 5 ) != 5 )
+            q_bmwb_comm_failure( );
+
+		if (    q_bmwb_read( q_bmwb.fd, buf, 3 ) != 3
+             || strncmp( buf, "OK\n", 3 ) )
+			q_bmwb_comm_failure( );
+	}
+
+    return vars_push( INT_VAR, state ? 1L : 0L );
+}
+
+
 /*--------------------------------------------------------------*
  * Signal handler for SIGUSR1 and SIGUSR2, one of which will be
  * raised when the process controlling the microwave bridge
@@ -805,7 +831,7 @@ q_bmwb_connect( void )
 	   the server thinks is controlling, or 'B' if the server is busy or
        'Z" if the server has problems (can't create a thread). */
 
-	if ( x_bmwb_read( sock_fd, buf, 2 ) != 2 || buf[ 1 ] != '\n' )
+	if ( q_bmwb_read( sock_fd, buf, 2 ) != 2 || buf[ 1 ] != '\n' )
         *buf = '\0';
 
     switch ( *buf )

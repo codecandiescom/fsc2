@@ -8295,6 +8295,7 @@ in the @code{DEVICES} section.
 @item @ref{mw_bridge_iris()}
 @item @ref{mw_bridge_max_frequency()}
 @item @ref{mw_bridge_min_frequency()}
+@item @ref{mw_bridge_lock()}
 @end table
 
 @noindent
@@ -8474,6 +8475,21 @@ maximum microwave frequency the bridge can produce.
 @item @ref{mw_bridge_min_frequency()}
 This function takes no arguments and returns a rough estimate of the
 minimum microwave frequency the bridge can produce.
+
+
+@anchor{mw_bridge_lock()}
+@findex mw_bridge_lock()
+@item @ref{mw_bridge_lock()}
+This function takes one argument, either a string of @code{"ON"} or
+@code{"OFF"} or an integer of @code{1} or @code{0}, and locks or
+unlocks the graphical interface of the @code{bmwb} program
+accordingly. This can be used to keep users from changing the
+microwave brdge settings manually while an experiment is running
+(the @code{Quit} will still be usable to allow to switch off the
+bridge in emergencies).
+
+The function can be used in the @code{EXPERIMENT} section only.
+
 
 @end table
 

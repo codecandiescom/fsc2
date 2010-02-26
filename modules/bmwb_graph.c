@@ -184,6 +184,7 @@ mode_cb( FL_OBJECT * obj,
 {
 	FL_POPUP_RETURN *r;
 
+
     pthread_mutex_lock( &bmwb.mutex );
 
     r =  fl_get_select_item( obj );
@@ -836,6 +837,37 @@ canvas_expose( FL_OBJECT * obj,
         display_afc_signal( );
 
     return 0;
+}
+
+
+/*---------------------------------------*
+ *---------------------------------------*/
+
+void
+lock_objects( int state )
+{
+    if ( state )
+    {
+        fl_deactivate_object( bmwb.rsc->mode_select );
+        fl_deactivate_object( bmwb.rsc->freq_group );
+        fl_deactivate_object( bmwb.rsc->attenuation_group );
+        fl_deactivate_object( bmwb.rsc->signal_phase_group );
+        fl_deactivate_object( bmwb.rsc->bias_group );
+        if ( bmwb.type == X_BAND )
+            fl_deactivate_object( bmwb.rsc->lock_phase_group );
+        fl_deactivate_object( bmwb.rsc->iris_group );
+    }
+    else
+    {
+        fl_activate_object( bmwb.rsc->mode_select );
+        fl_activate_object( bmwb.rsc->freq_group );
+        fl_activate_object( bmwb.rsc->attenuation_group );
+        fl_activate_object( bmwb.rsc->signal_phase_group );
+        fl_activate_object( bmwb.rsc->bias_group );
+        if ( bmwb.type == X_BAND )
+            fl_activate_object( bmwb.rsc->lock_phase_group );
+        fl_activate_object( bmwb.rsc->iris_group );
+    }
 }
 
 

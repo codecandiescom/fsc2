@@ -44,6 +44,7 @@ main( int     argc,
 
     pthread_mutex_init( &bmwb.mutex, NULL );
     *bmwb.error_msg = '\0';
+    bmwb.is_locked = 0;
 
     if ( ! fl_initialize( &argc, argv, "bmwb", NULL, 0 ) )
 	{
