@@ -33,7 +33,6 @@ extern void signal_phase_cb( FL_OBJECT *, long );
 extern void bias_cb( FL_OBJECT *, long );
 extern void lock_phase_cb( FL_OBJECT *, long );
 extern void iris_cb( FL_OBJECT *, long );
-extern void quit_cb( FL_OBJECT *, long );
 
 
 typedef struct {

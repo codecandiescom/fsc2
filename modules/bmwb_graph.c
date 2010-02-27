@@ -594,19 +594,6 @@ static int
 close_handler( FL_FORM * a  UNUSED_ARG,
                void    * b  UNUSED_ARG )
 {
-    quit_cb( NULL, 0 );
-    return FL_OK;
-}
-
-
-/*------------------------------*
- * Callback for the quit button
- *------------------------------*/
-
-void
-quit_cb( FL_OBJECT * obj   UNUSED_ARG,
-		 long        data  UNUSED_ARG )
-{
     pthread_mutex_lock( &bmwb.mutex );
 
     /* Kill all threads that may still be running */

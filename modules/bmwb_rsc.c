@@ -19,13 +19,13 @@ create_form_bmwb_rsc( void )
 
 	if ( bmwb.type == X_BAND )
 	{
-		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 460 );
-		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 460, "" );
+		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 420 );
+		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 420, "" );
 	}
 	else
 	{
-		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 405 );
-		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 405, "" );
+		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 365 );
+		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 365, "" );
 	}
 
     fdui->dc_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 10, 10, 120, 40,
@@ -287,13 +287,6 @@ create_form_bmwb_rsc( void )
 
 		fl_end_group( );
 	}
-
-	if ( bmwb.type == X_BAND )
-		obj = fl_add_button( FL_NORMAL_BUTTON, 510, 420, 100, 30, "Quit" );
-	else
-		obj = fl_add_button( FL_NORMAL_BUTTON, 510, 365, 100, 30, "Quit" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, quit_cb, 0 );
 
     fl_end_form( );
 
