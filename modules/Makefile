@@ -388,7 +388,19 @@ install:
 				install-$(machine_name);               \
 	fi
 ifdef WITH_MEDRIVER
-	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) bmwb $(bindir)
+ifdef ONLY_SETGID
+	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) bmwb $(bindir)
+else
+ifdef ONLY_SETUID
+	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) bmwb $(bindir)
+else
+	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) bmwb $(bindir)
+endif
+endif
+	$(RM) $(RMFLAGS) $(bindir)/xbmwb
+	$(LN) $(LNFLAGS) $(bindir)/bmwb $(bindir)/xbmwb
+	$(RM) $(RMFLAGS) $(bindir)/qbmwb
+	$(LN) $(LNFLAGS) $(bindir)/bmwb $(bindir)/qbmwb
 endif
 
 
@@ -402,6 +414,8 @@ uninstall:
 		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
 				uninstall-$(machine_name);             \
 	fi
+	$(RM) $(RMFLAGS) $(bindir)/xbmwb
+	$(RM) $(RMFLAGS) $(bindir)/qbmwb
 	$(RM) $(RMFLAGS) $(bindir)/bmwb
 
 

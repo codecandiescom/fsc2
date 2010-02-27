@@ -5,7 +5,7 @@ x_bmwb;
 
 PREPARATIONS:
 
-mw_bridge_run( );
+print( "\TX #\n", mw_bridge_run( ) );
 
 EXPERIMENT:
 
@@ -27,3 +27,10 @@ print( "uncal #\n", mw_bridge_uncalibrated_signal( ) );
 print( "unlock #\n", mw_bridge_unlocked_signal( ) );
 mw_bridge_iris( "UP", 1 s );
 mw_bridge_iris( "DOWN", 1 s );
+print( "XXX\n" );
+mw_bridge_lock( "ON" );
+print( "YYY\n" );
+wait( 5 s );
+print( "ZZZ\n" );
+mw_bridge_lock( "OFF" );
+print( "TTT\n" );

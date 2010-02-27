@@ -21,9 +21,6 @@
 
 
 #include "bmwb.h"
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/stat.h>
 
 
 static int listen_fd;
@@ -56,12 +53,9 @@ static int uncal_req( int    fd,
 					  char * req );
 static int afcst_req( int    fd,
 					  char * req );
-static int maxfrq_req( int    fd,
-					   char * req );
-static int minfrq_req( int    fd,
-					   char * req );
 static int lck_req( int    fd,
                     char * req );
+static void write_sig_handler( int sig_no );
 static ssize_t swrite( int          d,
 					   const char * buf,
 					   ssize_t      len );
@@ -69,6 +63,8 @@ static ssize_t sread( int       d,
 					  char    * buf,
 					  ssize_t   len );
 static int finish_with_update( int fd );
+
+static volatile sig_atomic_t client_died = 0;
 
 
 /*-----------------------------------------------------*
@@ -80,7 +76,6 @@ int
 bmwb_open_sock( void )
 {
     struct sockaddr_un serv_addr;
-    pthread_t tid;
     pthread_attr_t attr;
 
 
@@ -90,6 +85,7 @@ bmwb_open_sock( void )
 
     if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
 	{
+        lower_permissions( );
 		sprintf( bmwb.error_msg, "Can't create a socket." );
         return 1;
 	}
@@ -123,7 +119,7 @@ bmwb_open_sock( void )
     pthread_attr_init( &attr );
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-    if ( pthread_create( &tid, &attr, conn_handler, NULL ) )
+    if ( pthread_create( &bmwb.a_thread, &attr, conn_handler, NULL ) )
 	{
         pthread_attr_destroy( &attr );
         close( listen_fd );
@@ -133,6 +129,7 @@ bmwb_open_sock( void )
 		return 1;
 	}
 
+    lower_permissions( );
 	pthread_attr_destroy( &attr );
 	return 0;
 }
@@ -151,6 +148,8 @@ conn_handler( void * null  UNUSED_ARG )
     pthread_attr_t attr;
 
 
+    bmwb.a_is_active = 1;
+
     pthread_attr_init( &attr );
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
@@ -165,7 +164,7 @@ conn_handler( void * null  UNUSED_ARG )
 
         if ( client_fd != -1 )
         {
-            swrite( fd, "B\n", 2 );
+            swrite( fd, "B\n", 2 );         /* "B\n" indicates busy */
             shutdown( fd, SHUT_RDWR );
 			close( fd );
 			continue;
@@ -176,9 +175,9 @@ conn_handler( void * null  UNUSED_ARG )
 
         client_fd = fd;
 
-        if ( pthread_create( &bmwb.tid, &attr, client_handler, NULL ) )
+        if ( pthread_create( &bmwb.c_thread, &attr, client_handler, NULL ) )
         {
-            swrite( fd, "Z\n", 2 );
+            swrite( fd, "Z\n", 2 );         /* "Z\n" indicates failure */
             shutdown( fd, SHUT_RDWR );
 			close( fd );
             client_fd = -1;
@@ -186,6 +185,7 @@ conn_handler( void * null  UNUSED_ARG )
     }		
 
 	pthread_attr_destroy( &attr );
+    bmwb.a_is_active = 0;
 	pthread_exit( NULL );
 }
 
@@ -198,7 +198,20 @@ static void *
 client_handler( void * null  UNUSED_ARG )
 {
     fd_set fds;
+    struct sigaction sact;
 
+
+    bmwb.c_is_active = 1;
+
+    sact.sa_handler = write_sig_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    if ( sigaction( SIGPIPE, &sact, NULL ) == -1 )
+    {
+        client_fd = -1;
+        bmwb.c_is_active = 0;
+        pthread_exit( NULL );
+    }
 
     if ( swrite( client_fd, bmwb.type == Q_BAND ? "Q\n" : "X\n", 2 ) == 2 )
     {
@@ -210,15 +223,22 @@ client_handler( void * null  UNUSED_ARG )
             /* Wait request from the client*/
 
             if (    select( client_fd + 1, &fds, NULL, NULL, NULL ) != 1
-                  || handle_request( client_fd ) )
+                 || handle_request( client_fd ) )
                 break;
         }
     }
 
     shutdown( client_fd, SHUT_RDWR );
     close( client_fd );
-    client_fd = -1;
+
+    pthread_mutex_lock( &bmwb.mutex );
+    set_iris( 0 );
     lock_objects( 0 );
+    pthread_mutex_unlock( &bmwb.mutex );
+
+    client_fd = -1;
+
+    bmwb.c_is_active = 0;
 	pthread_exit( NULL );
 }
 
@@ -250,13 +270,11 @@ handle_request( int fd )
 			{ "UNLCK?",  6, unlck_req  },   /* get unlocked signal */
 			{ "UNCAL?",  6, uncal_req  },   /* get uncalibrated signal */
 			{ "AFCST?",  6, afcst_req  },   /* get AFC state */
-			{ "MAXFRQ?", 7, maxfrq_req },   /* get max. microwave frequency */
-			{ "MINFRQ?", 7, minfrq_req },   /* get min. microwave frequency */
-            { "LCK ",    4, lck_req }       /* set/elease lock */
+            { "LCK ",    4, lck_req    }    /* set/release lock */
 		  };
 
 
-	if ( ( n = sread( fd, buf, sizeof buf ) ) == -1 )
+	if ( ( n = sread( fd, buf, sizeof buf ) ) <= 0 )
 		return 1;
 
 	buf[ n - 1 ] = '\0';
@@ -265,6 +283,7 @@ handle_request( int fd )
 		if ( ! strncasecmp( buf, cmds[ i ].cmd, cmds[ i ].len ) )
 			return cmds[ i ].fnc( fd, buf + cmds[ i ].len );
 
+    fprintf( stderr, "Unknown \"%s\"\n", buf );
 	return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 }
 
@@ -538,7 +557,7 @@ mode_req( int    fd,
 
 static int
 iris_req( int    fd,
-		  char * req )
+		  char * req  UNUSED_ARG )
 {
 	int dir;
 	long val;
@@ -548,7 +567,7 @@ iris_req( int    fd,
 
 	if ( ! strncasecmp( req, "UP ", 3 ) )
 	{
-		req += 3;
+	    req += 3;
 		dir = 1;
 	}
 	else if ( ! strncasecmp( req, "DOWN ", 5 ) )
@@ -579,7 +598,11 @@ iris_req( int    fd,
 			   1 : 0;
 	}
 
+    pthread_mutex_unlock( &bmwb.mutex );
+
 	nanosleep( &t, NULL );
+
+    pthread_mutex_lock( &bmwb.mutex );
 
 	if ( set_iris( 0 ) )
 	{
@@ -648,8 +671,9 @@ afcsig_req( int    fd,
 			   1 : 0;
 	}
 
-	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
+
+	sprintf( buf, "%.5f\n", val );
 	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
@@ -679,8 +703,9 @@ unlck_req( int    fd,
 			   1 : 0;
 	}
 
-	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
+
+	sprintf( buf, "%.5f\n", val );
 	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
@@ -710,8 +735,9 @@ uncal_req( int    fd,
 			   ? 1 : 0;
 	}
 
-	sprintf( buf, "%.5f\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
+
+	sprintf( buf, "%.5f\n", val );
 	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
@@ -741,49 +767,10 @@ afcst_req( int    fd,
 			   ? 1 : 0;
 	}
 
-	sprintf( buf, "%d\n", val );
 	pthread_mutex_unlock( &bmwb.mutex );
+
+	sprintf( buf, "%d\n", val );
 	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf )  ?
-           0 : 1;
-}
-
-
-/*-------------------------------------------------------------*
- * Handles a request to return the maximum microwave frequency
- *-------------------------------------------------------------*/
-
-static int
-maxfrq_req( int    fd,
-			char * req )
-{
-	char buf[ 20 ];
-
-
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
-
-	sprintf( buf, "%.3f\n", bmwb.max_freq );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
-           0 : 1;
-}
-
-
-/*-------------------------------------------------------------*
- * Handles a request to return the minimum microwave frequency
- *-------------------------------------------------------------*/
-
-static int
-minfrq_req( int    fd,
-			char * req )
-{
-	char buf[ 20 ];
-
-
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
-
-	sprintf( buf, "%.3f\n", bmwb.min_freq );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
 
@@ -796,14 +783,34 @@ static int
 lck_req( int    fd,
          char * req )
 {
-    if ( ! strcmp( req, "1\n" ) )
+    pthread_mutex_lock( &bmwb.mutex );
+
+    if ( ! strcmp( req, "1" ) )
         lock_objects( 1 );
-    else if ( ! strcmp( req, "0\n" ) )
+    else if ( ! strcmp( req, "0" ) )
         lock_objects( 0 );
     else
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
 		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    }
+
+    pthread_mutex_unlock( &bmwb.mutex );
 
 	return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
+}
+
+
+/*-------------------------------------------------------*
+ * Handler for SIGPIPE signal that may be received when
+ * trying to write to the client
+ *-------------------------------------------------------*/
+
+static void
+write_sig_handler( int sig_no )
+{
+    if ( sig_no == SIGPIPE )
+        client_died = 1;
 }
 
 
@@ -824,11 +831,13 @@ swrite( int          d,
     if ( len == 0 )
         return 0;
 
+    client_died = 0;
+
     do
     {
         if ( ( ret = write( d, buf, n ) ) < 1 )
         {
-            if ( ret == -1 && errno != EINTR )
+            if ( ret == -1 && ( client_died || errno != EINTR ) )
                 return -1;
             continue;
         }

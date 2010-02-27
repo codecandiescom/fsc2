@@ -23,7 +23,7 @@
 #if ! defined BMWB_HEADER_
 #define BMWB_HEADER_
 
-//#define BMWB_TEST 1
+#define BMWB_TEST 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +33,9 @@
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/stat.h>
 
 #include "fsc2_config.h"
 #include <medriver.h>
@@ -111,9 +114,11 @@
 typedef struct {
     uid_t             EUID;           /* user and group ID the program got */
     gid_t             EGID;           /* started with */
-    pthread_t         tid;            /* thread for dealing with connections */
+    pthread_t         a_thread;       /* threads for dealing with connections */
+    int               a_is_active;
+    pthread_t         c_thread;
+    int               c_is_active;
     pthread_mutex_t   mutex;
-    int               is_locked;
 	int               type;
 	int               mode;
 	double            freq;

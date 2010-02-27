@@ -55,15 +55,15 @@ measure_dc_signal( double * val )
 
     *val = ( *val - min ) / ( max - min );
 #else
-    static double signal = 0;
+    static double tval = 0;
 
-    signal += 0.02 * ( rand( ) / ( 1.0 * RAND_MAX ) - 0.5 );
-    if ( signal < 0.0 )
-        signal = 0.0;
-    if ( signal > 1.0 )
-        signal = 1.0;
+    tval += 0.02 * ( rand( ) / ( 1.0 * RAND_MAX ) - 0.5 );
+    if ( tval < 0.0 )
+        tval = 0.0;
+    if ( tval > 1.0 )
+        tval = 1.0;
 
-	*val = signal;
+	*val = tval;
 #endif
 
     return 0;
@@ -102,15 +102,15 @@ measure_afc_signal( double * val )
 
     *val = ( *val - min ) / ( max - min );
 #else
-	static double signal = 0.0;
+	static double tval = 0.0;
 
-    signal += 0.02 * ( ( rand( ) / ( 1.0 * RAND_MAX ) ) - 0.5 );
-    if ( signal < -1.0 )
-        signal = -1.0;
-    else if ( signal > 1.0 )
-        signal = 1.0;
+    tval += 0.02 * ( ( rand( ) / ( 1.0 * RAND_MAX ) ) - 0.5 );
+    if ( tval < -1.0 )
+        tval = -1.0;
+    else if ( tval > 1.0 )
+        tval = 1.0;
 
-	*val = signal;
+	*val = tval;
 #endif
 
     return 0;

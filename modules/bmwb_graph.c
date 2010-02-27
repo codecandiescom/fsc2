@@ -26,6 +26,7 @@ Canvas_T tune_canvas,
          afc_canvas,
          dc_canvas;
 
+
 static void init_canvas( void );
 static void display_detector_current( void );
 static void display_afc_signal( void );
@@ -38,6 +39,8 @@ static int canvas_expose( FL_OBJECT * obj,
                           int         win_height,
                           XEvent    * xev,
                           void      * user_data );
+static int close_handler( FL_FORM * a,
+                          void    * b );
 
 
 /*---------------------------------------------------*
@@ -51,6 +54,7 @@ graphics_init( void )
 
 	fl_set_idle_callback( update_display, NULL );
 	bmwb.rsc = create_form_bmwb_rsc( );
+    fl_set_atclose( close_handler, NULL );
 	fl_show_form( bmwb.rsc->form, FL_PLACE_CENTER, FL_FULLBORDER, title );
 
     init_canvas( );
@@ -66,7 +70,7 @@ init_canvas( void )
     int i;
 
 
-    /* Initialize the canvase for the tune mode display */
+    /* Initialize the canvases for the tune mode display */
 
     tune_canvas.obj = bmwb.rsc->tune_canvas;
     tune_canvas.d   = FL_FormDisplay( bmwb.rsc->form );
@@ -225,6 +229,24 @@ freq_cb( FL_OBJECT * obj  UNUSED_ARG,
 
 	switch ( data )
 	{
+		case -2 :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case -1 :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.005 );
+			break;
+
 		case 1 :
 			if ( val >= 1.0 )
             {
@@ -241,24 +263,6 @@ freq_cb( FL_OBJECT * obj  UNUSED_ARG,
 				return;
             }
 			val = d_min( 1.0, val + 0.05 );
-			break;
-
-		case -1 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.005 );
-			break;
-
-		case -2 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
 			break;
 	}
 
@@ -294,6 +298,24 @@ attenuation_cb( FL_OBJECT * obj  UNUSED_ARG,
 
 	switch ( data )
 	{
+		case -2 :
+			if ( val <= MIN_ATTENUATION )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( MIN_ATTENUATION, val - 5 );
+			break;
+
+		case -1 :
+			if ( val <= MIN_ATTENUATION )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( MIN_ATTENUATION, val - 1 );
+			break;
+
 		case 1 :
 			if ( val >= MAX_ATTENUATION )
             {
@@ -309,25 +331,7 @@ attenuation_cb( FL_OBJECT * obj  UNUSED_ARG,
                 pthread_mutex_unlock( &bmwb.mutex );
                 return;
             }
-			val = d_min( MAX_ATTENUATION, val + 10 );
-			break;
-
-		case -1 :
-			if ( val <= MIN_ATTENUATION )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( MIN_ATTENUATION, val - 1 );
-			break;
-
-		case -2 :
-			if ( val <= MIN_ATTENUATION )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( MIN_ATTENUATION, val - 10 );
+			val = d_min( MAX_ATTENUATION, val + 5 );
 			break;
 	}
 
@@ -360,6 +364,24 @@ signal_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 
 	switch ( data )
 	{
+		case -2 :
+			if ( val <= 0.01 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case -1 :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.01 );
+			break;
+
 		case 1 :
 			if ( val >= 1.0 )
             {
@@ -376,24 +398,6 @@ signal_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 				return;
             }
 			val = d_min( 1.0, val + 0.05 );
-			break;
-
-		case -1 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.01 );
-			break;
-
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
 			break;
 	}
 
@@ -429,6 +433,24 @@ bias_cb( FL_OBJECT * obj  UNUSED_ARG,
 
 	switch ( data )
 	{
+		case -2 :
+			if ( val <= 0.01 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case -1 :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.01 );
+			break;
+
 		case 1 :
 			if ( val >= 1.0 )
             {
@@ -445,24 +467,6 @@ bias_cb( FL_OBJECT * obj  UNUSED_ARG,
 				return;
             }
 			val = d_min( 1.0, val + 0.05 );
-			break;
-
-		case -1 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.01 );
-			break;
-
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
 			break;
 	}
 
@@ -498,6 +502,24 @@ lock_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 
 	switch ( data )
 	{
+		case -2 :
+			if ( val <= 0.01 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case -1 :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+			val = d_max( 0.0, val - 0.01 );
+			break;
+
 		case 1 :
 			if ( val >= 1.0 )
             {
@@ -514,24 +536,6 @@ lock_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 				return;
             }
 			val = d_min( 1.0, val + 0.05 );
-			break;
-
-		case -1 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.01 );
-			break;
-
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
 			break;
 	}
 
@@ -582,6 +586,19 @@ iris_cb( FL_OBJECT * obj  UNUSED_ARG,
 }
 
 
+/*----------------------------------------------------------------*
+ * Function that gets invoked when the close button is clicked on
+ *----------------------------------------------------------------*/
+
+static int
+close_handler( FL_FORM * a  UNUSED_ARG,
+               void    * b  UNUSED_ARG )
+{
+    quit_cb( NULL, 0 );
+    return FL_OK;
+}
+
+
 /*------------------------------*
  * Callback for the quit button
  *------------------------------*/
@@ -592,13 +609,45 @@ quit_cb( FL_OBJECT * obj   UNUSED_ARG,
 {
     pthread_mutex_lock( &bmwb.mutex );
 
+    /* Kill all threads that may still be running */
+
+    if ( bmwb.c_is_active )
+    {
+        pthread_cancel( bmwb.c_thread );
+        bmwb.c_is_active = 0;
+    }
+
+    if ( bmwb.a_is_active )
+    {
+        pthread_cancel( bmwb.a_thread );
+        bmwb.a_is_active = 0;
+    }
+
+    /* Make sure iris motor is off and then switch bridge to standby mode */
+
+    set_iris( 0 );
 	set_mode( MODE_STANDBY );
+
+    /* Store it's current state in a file */
+
 	save_state( );
+
+    /* Release the Meilhaus card */
+
 	meilhaus_finish( );
+
+    /* Close the graphical user interface */
+
 	fl_finish( );
+
+    /* Delete the socket file */
+
     raise_permissions( );
     unlink( P_tmpdir "/bmwb.uds" );
     lower_permissions( );
+
+    pthread_mutex_unlock( &bmwb.mutex );
+
 	exit( EXIT_SUCCESS );
 }
 
@@ -698,6 +747,7 @@ display_afc_signal( void )
     int x;
     double val;
     double old_val = -2.0;
+
 
     if ( measure_afc_signal( &val ) )
     {
@@ -810,7 +860,8 @@ display_afc_state( void )
 
     if ( state != old_state )
     {
-        fl_mapcolor( FL_FREE_COL3, 255 * state, 0, 0 );
+        fl_mapcolor( FL_FREE_COL3, state ? FL_RED : 173,
+                     state ? 0 : 173, state ? 0 : 173 );
         fl_redraw_object( bmwb.rsc->afc_indicator );
         old_state = state;
     }
@@ -829,6 +880,9 @@ canvas_expose( FL_OBJECT * obj,
                XEvent    * xev         UNUSED_ARG,
                void      * user_data   UNUSED_ARG )
 {
+    pthread_mutex_lock( &bmwb.mutex );
+
+
     if ( obj == tune_canvas.obj )
         display_mode_pic( bmwb.mode );
     else if ( obj == dc_canvas.obj )
@@ -836,38 +890,52 @@ canvas_expose( FL_OBJECT * obj,
     else if ( obj == afc_canvas.obj )
         display_afc_signal( );
 
+    pthread_mutex_unlock( &bmwb.mutex );
+
     return 0;
 }
 
 
-/*---------------------------------------*
- *---------------------------------------*/
+/*----------------------------------------------*
+ * Disables or enables the user control objects
+ *----------------------------------------------*/
 
 void
 lock_objects( int state )
 {
-    if ( state )
+    static int is_locked = 0;
+    void ( * f ) ( FL_OBJECT * ) =
+                           state ? fl_deactivate_object : fl_activate_object;
+    FL_COLOR c = state ? FL_INACTIVE : FL_BLACK;
+	
+
+    if ( state == is_locked )
+        return;
+    is_locked = state;
+
+    fl_freeze_form( bmwb.rsc->form );
+
+    f( bmwb.rsc->mode_select );
+    fl_set_object_lcol( bmwb.rsc->mode_select, c );
+    fl_set_select_text_color( bmwb.rsc->mode_select, c );
+    f( bmwb.rsc->freq_group );
+    fl_set_object_lcol( bmwb.rsc->freq_group, c );
+    fl_set_object_lcol( bmwb.rsc->freq_text, c );
+    f( bmwb.rsc->attenuation_group );
+    fl_set_object_lcol( bmwb.rsc->attenuation_group, c );
+    f( bmwb.rsc->signal_phase_group );
+    fl_set_object_lcol( bmwb.rsc->signal_phase_group, c );
+    f( bmwb.rsc->bias_group );
+    fl_set_object_lcol( bmwb.rsc->bias_group, c );
+    if ( bmwb.type == X_BAND )
     {
-        fl_deactivate_object( bmwb.rsc->mode_select );
-        fl_deactivate_object( bmwb.rsc->freq_group );
-        fl_deactivate_object( bmwb.rsc->attenuation_group );
-        fl_deactivate_object( bmwb.rsc->signal_phase_group );
-        fl_deactivate_object( bmwb.rsc->bias_group );
-        if ( bmwb.type == X_BAND )
-            fl_deactivate_object( bmwb.rsc->lock_phase_group );
-        fl_deactivate_object( bmwb.rsc->iris_group );
+        f( bmwb.rsc->lock_phase_group );
+        fl_set_object_lcol( bmwb.rsc->lock_phase_group, c );
+        f( bmwb.rsc->iris_group );
+        fl_set_object_lcol( bmwb.rsc->iris_group, c );
     }
-    else
-    {
-        fl_activate_object( bmwb.rsc->mode_select );
-        fl_activate_object( bmwb.rsc->freq_group );
-        fl_activate_object( bmwb.rsc->attenuation_group );
-        fl_activate_object( bmwb.rsc->signal_phase_group );
-        fl_activate_object( bmwb.rsc->bias_group );
-        if ( bmwb.type == X_BAND )
-            fl_activate_object( bmwb.rsc->lock_phase_group );
-        fl_activate_object( bmwb.rsc->iris_group );
-    }
+
+    fl_unfreeze_form( bmwb.rsc->form );
 }
 
 

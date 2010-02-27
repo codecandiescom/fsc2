@@ -76,20 +76,19 @@ meilhaus_init( void )
     char buf[ 32 ];
 
 
-	raise_permissions( );
-
     /* Try to open library */
 
 	if ( meOpen( ME_OPEN_NO_FLAGS ) != ME_ERRNO_SUCCESS )
 	{
 		meErrorGetLastMessage( msg, sizeof msg );
-		lower_permissions( );
 		sprintf( bmwb.error_msg, "Failed to initialize Meilhaus driver: %s.\n",
                  msg );
         return 1;
 	}
   
 #if ! defined BMWB_TEST
+
+    lower_permissions( );
 
     /* Try to get a lock on the whole device */
 
@@ -150,9 +149,9 @@ meilhaus_init( void )
 		lower_permissions( );
         return 1;
     }
-#endif
 
 	lower_permissions( );
+#endif
 
 	return 0;
 }
@@ -165,24 +164,21 @@ meilhaus_init( void )
 int
 meilhaus_finish( void )
 {
-	raise_permissions( );
 
 #if ! defined BMWB_TEST
-
+	raise_permissions( );
     meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-
+    lower_permissions( );
 #endif
 
 	if ( meClose( ME_CLOSE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
 	{
 		meErrorGetLastMessage( msg, sizeof msg );
-        lower_permissions( );
 		sprintf( bmwb.error_msg, "Failed to close Meilhaus driver: %s.\n",
                  msg );
         return 1;
 	}
 
-	lower_permissions( );
     return 0;
 }
 
@@ -200,12 +196,15 @@ setup_ai( void )
     int n;
 
 
+	raise_permissions( );
+
     if ( meQuerySubdeviceByType( DEV_ID, AI, sub_dev[ AI ].id,
                                  ME_SUBTYPE_ANY, &n ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to query subdevice %d: %s.\n",
                  AI, msg );
+        lower_permissions( );
         return 1;
     }
 
@@ -213,6 +212,7 @@ setup_ai( void )
     {
         sprintf( bmwb.error_msg, "AI subdevice %d does not have expected "
                  "type.\n", AI );
+        lower_permissions( );
         return 1;
     }
 
@@ -224,6 +224,7 @@ setup_ai( void )
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to query number of output ranges "
                  "for AI subdevice %d: %s.\n", AI, msg );
+        lower_permissions( );
         return 1;
     }
 
@@ -231,6 +232,7 @@ setup_ai( void )
     {
         sprintf( bmwb.error_msg, "Unexpected number of output ranges "
                  "for AI subdevice %d.\n", AI );
+        lower_permissions( );
         return 1;
     }
 
@@ -244,8 +246,11 @@ setup_ai( void )
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to query range %d for subdevice "
                      "%d: %s.\n", i, AI, msg );
+            lower_permissions( );
             return 1;
         }
+
+    lower_permissions( );
 
     return 0;
 }
@@ -378,6 +383,8 @@ meilhaus_ai_single( int      channel,
                           ME_IO_SINGLE_TYPE_NO_FLAGS, 0 };
 
 
+	raise_permissions( );
+
     /* Find proper range for expected signal */
 
     if ( meQueryRangeByMinMax( DEV_ID, AI, sub_dev[ AI ].range[ 0 ].unit,
@@ -387,6 +394,7 @@ meilhaus_ai_single( int      channel,
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to find range for AI subdevice "
                  "%d: %s.\n", AI, msg );
+        lower_permissions( );
         return 1;
     }
         
@@ -400,6 +408,7 @@ meilhaus_ai_single( int      channel,
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to set up AI subdevice %d: %s.\n",
                  AI, msg );
+        lower_permissions( );
         return 1;
     }
 
@@ -410,6 +419,7 @@ meilhaus_ai_single( int      channel,
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to measure on AI subdevice %d: %s.\n",
                  AI, msg );
+        lower_permissions( );
         return 1;
     }
 
@@ -424,8 +434,11 @@ meilhaus_ai_single( int      channel,
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to convert measured value from AI "
                  "subdevice %d: %s.\n", AI, msg );
+        lower_permissions( );
         return 1;
     }
+
+    lower_permissions( );
 
     return 0;
 }
@@ -487,13 +500,18 @@ meilhaus_ao( int    ao,
 #if ! defined BMWB_TEST
     /* Make the AO output the voltage */
 
+	raise_permissions( );
+
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "D/A failure for AO_%d: %s.\n",
                  ao, msg );
+        lower_permissions( );
         return 1;
     }
+
+    lower_permissions( );
 #endif
 
     return 0;
@@ -521,13 +539,18 @@ meilhaus_dio_in( int             dio,
     }
 
 #if ! defined BMWB_TEST
+	raise_permissions( );
+
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Error while reading from DIO %d: %s.\n",
                  dio, msg );
+        lower_permissions( );
         return 1;
     }
+
+    lower_permissions( );
 
     *val = list.iValue;
 #else
@@ -582,6 +605,8 @@ meilhaus_dio_out( int           dio,
     }
 
 #if ! defined BMWB_TEST
+	raise_permissions( );
+
     /* Fetch a value from the card */
 
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
@@ -589,8 +614,12 @@ meilhaus_dio_out( int           dio,
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Error while writing to DIO %d: %s.\n",
                  dio, msg );
+        lower_permissions( );
+
         return 1;;
     }
+
+    lower_permissions( );
 #endif
 
     /* Store what we just output for later requests */

@@ -554,8 +554,9 @@ mw_bridge_unlocked_signal, 0, EXP;
 mw_bridge_uncalibrated_signal, 0, EXP;
 mw_bridge_afc_state, 0, EXP;
 mw_bridge_iris, 2, EXP;
-mw_bridge_max_frequency, 0, EXP;
-mw_bridge_min_frequency, 0, EXP;
+mw_bridge_max_frequency, 0, ALL;
+mw_bridge_min_frequency, 0, ALL;
+mw_bridge_lock, 1, EXP;
 
 
 /* Functions exported by the FFT pseudo-module */

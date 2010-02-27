@@ -69,7 +69,9 @@ Var_T * mw_bridge_min_frequency(       Var_T * v );
 Var_T * mw_bridge_lock(                Var_T * v );
 
 
+static void x_bmwb_start_sig_handler( int sig_no );
 static int x_bmwb_connect( void );
+static void x_bmwb_write_sig_handler( int sig_no );
 static ssize_t x_bmwb_write( int          d,
                              const char * buf,
                              ssize_t      len );
@@ -81,6 +83,7 @@ static void x_bmwb_comm_failure( void );
 
 static volatile sig_atomic_t start_finished = 0;
 static volatile sig_atomic_t start_failed = 0;
+static volatile sig_atomic_t bmwb_died = 0;
 
 
 /*--------------------------------------------------------*
@@ -168,11 +171,14 @@ mw_bridge_name( Var_T * v  UNUSED_ARG )
 Var_T *
 mw_bridge_run( Var_T * v  UNUSED_ARG )
 {
-	if ( x_bmwb.fd != -1 )
-		return vars_push( INT_VAR, 1L );
-
-	if ( x_bmwb_connect( ) )
-		THROW( EXCEPTION );
+    TRY
+    {
+        if ( x_bmwb_connect( ) )
+            THROW( EXCEPTION );
+        TRY_SUCCESS;
+    }
+    CATCH( EXCEPTION )
+        return vars_push( INT_VAR, 0L );
 
 	shutdown( x_bmwb.fd, SHUT_RDWR );
 	close( x_bmwb.fd );
@@ -202,7 +208,7 @@ mw_bridge_frequency( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "FREQ?\n", 6 ) != 6 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n'
 			 || ! isdigit( ( unsigned char ) *buf ) )
 			x_bmwb_comm_failure( );
@@ -237,7 +243,8 @@ mw_bridge_frequency( Var_T * v )
 	else
 	{
 		sprintf( buf, "FREQ %.5f\n", freq );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -268,7 +275,7 @@ mw_bridge_attenuation( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "ATT?\n", 5 ) != 5 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n'
 			 || ! isdigit( ( unsigned char ) *buf ) )
 			x_bmwb_comm_failure( );
@@ -293,7 +300,8 @@ mw_bridge_attenuation( Var_T * v )
 	else
 	{
 		sprintf( buf, "ATT %ld\n", att );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -324,7 +332,7 @@ mw_bridge_signal_phase( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "SIGPH?\n", 7 ) != 7 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n'
 			 || ! isdigit( ( unsigned char ) *buf ) )
 			x_bmwb_comm_failure( );
@@ -349,7 +357,8 @@ mw_bridge_signal_phase( Var_T * v )
 	else
 	{
 		sprintf( buf, "SIGPH %.5f\n", phase );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -380,7 +389,7 @@ mw_bridge_bias( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "BIAS?\n", 6 ) != 6 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n'
 			 || ! isdigit( ( unsigned char ) *buf ) )
 			x_bmwb_comm_failure( );
@@ -405,7 +414,8 @@ mw_bridge_bias( Var_T * v )
 	else
 	{
 		sprintf( buf, "BIAS %.5f\n", bias );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -436,7 +446,7 @@ mw_bridge_lock_phase( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "LCKPH?\n", 7 ) != 7 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n'
 			 || ! isdigit( ( unsigned char ) *buf ) )
 			x_bmwb_comm_failure( );
@@ -461,7 +471,8 @@ mw_bridge_lock_phase( Var_T * v )
 	else
 	{
 		sprintf( buf, "LCKPH %.5f\n", lock_phase );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -493,7 +504,7 @@ mw_bridge_mode( Var_T * v )
 		if ( x_bmwb_write( x_bmwb.fd, "MODE?\n", 6 ) != 6 )
 			x_bmwb_comm_failure( );
 
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) == -1
+		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
 			 || buf[ len - 1 ] != '\n' )
 			x_bmwb_comm_failure( );
 
@@ -528,7 +539,8 @@ mw_bridge_mode( Var_T * v )
 	else
 	{
 		sprintf( buf + 5, "%s\n", mstr[ mode ] );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
+		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                    ( ssize_t ) strlen( buf ) )
 			x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -556,7 +568,7 @@ mw_bridge_detector_current( Var_T * v  UNUSED_ARG )
 	if ( x_bmwb_write( x_bmwb.fd, "DETSIG?\n", 8 ) != 8 )
 		x_bmwb_comm_failure( );
 
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
+	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) <= 0
 		 || buf[ len - 1 ] != '\n'
 		 || ! isdigit( ( unsigned char ) *buf ) )
 		x_bmwb_comm_failure( );
@@ -581,7 +593,7 @@ mw_bridge_afc_signal( Var_T * v  UNUSED_ARG )
 	if ( x_bmwb_write( x_bmwb.fd, "AFCSIG?\n", 8 ) != 8 )
 		x_bmwb_comm_failure( );
 
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
+	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) <= 0
 		 || buf[ len - 1 ] != '\n'
 		 || ( *buf != '-' && ! isdigit( ( unsigned char ) *buf ) ) )
 		x_bmwb_comm_failure( );
@@ -606,7 +618,7 @@ mw_bridge_unlocked_signal( Var_T * v  UNUSED_ARG )
 	if ( x_bmwb_write( x_bmwb.fd, "UNLCK?\n", 7 ) != 7 )
 		x_bmwb_comm_failure( );
 
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
+	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) <= 0
 		 || buf[ len - 1 ] != '\n'
 		 || ! isdigit( ( unsigned char ) *buf ) )
 		x_bmwb_comm_failure( );
@@ -631,7 +643,7 @@ mw_bridge_uncalibrated_signal( Var_T * v  UNUSED_ARG )
 	if ( x_bmwb_write( x_bmwb.fd, "UNCAL?\n", 7 ) != 7 )
 		x_bmwb_comm_failure( );
 
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
+	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) <= 0
 		 || buf[ len - 1 ] != '\n'
 		 || ! isdigit( ( unsigned char ) *buf ) )
 		x_bmwb_comm_failure( );
@@ -663,7 +675,7 @@ mw_bridge_iris( Var_T * v )
 
 	if ( dir != 1 && dir != -1 )
 	{
-		print( FATAL, "Invalid iris move direction argument.\n" );
+		print( FATAL, "Invalid iris movement direction argument.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -671,7 +683,7 @@ mw_bridge_iris( Var_T * v )
 
 	dur = get_double( v, "duration" );
 
-	if ( dur <= 1.0e-3 || 1.0e3 * dur > LONG_MAX )
+	if ( dur < 1.0e-3 || 1.0e3 * dur > LONG_MAX )
 	{
 		print( FATAL, "Invalid iris move duration argument.\n" );
 		THROW( EXCEPTION );
@@ -681,10 +693,9 @@ mw_bridge_iris( Var_T * v )
 	{
 		sprintf( buf, "IRIS %s %ld\n", dir == 1 ? "UP" : "DOWN",
 				 lrnd( 1000.0 * dur ) );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) == -1 )
-			x_bmwb_comm_failure( );
-
-		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
+		if (    x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
+                                                      ( ssize_t ) strlen( buf )
+		     || x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
 			 || strncmp( buf, "OK\n", 3 ) )
 			x_bmwb_comm_failure( );
 	}
@@ -699,24 +710,8 @@ mw_bridge_iris( Var_T * v )
 Var_T *
 mw_bridge_max_frequency( Var_T * v  UNUSED_ARG )
 {
-	char buf[ 30 ];
-	ssize_t len;
-
-
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, 1.0e9 * X_BAND_MAX_FREQ );
-
-	if ( x_bmwb_write( x_bmwb.fd, "MAXFRQ?\n", 8 ) != 8 )
-		x_bmwb_comm_failure( );
-
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
-		 || buf[ len - 1 ] != '\n'
-		 || ! isdigit( ( unsigned char ) *buf ) )
-		x_bmwb_comm_failure( );
-
-	return vars_push( FLOAT_VAR, 1.0e9 * T_atod( buf ) );
+    return vars_push( FLOAT_VAR, 1.0e9 * X_BAND_MAX_FREQ );
 }
-	
 
 
 /*--------------------------------------------------------*
@@ -725,22 +720,7 @@ mw_bridge_max_frequency( Var_T * v  UNUSED_ARG )
 Var_T *
 mw_bridge_min_frequency( Var_T * v  UNUSED_ARG )
 {
-	char buf[ 30 ];
-	ssize_t len;
-
-
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, 1.0e-9 * X_BAND_MIN_FREQ );
-
-	if ( x_bmwb_write( x_bmwb.fd, "MINFRQ?\n", 8 ) != 8 )
-		x_bmwb_comm_failure( );
-
-	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) == -1
-		 || buf[ len - 1 ] != '\n'
-		 || ! isdigit( ( unsigned char ) *buf ) )
-		x_bmwb_comm_failure( );
-
-	return vars_push( FLOAT_VAR, 1.0e9 * T_atod( buf ) );
+    return vars_push( FLOAT_VAR, 1.0e-9 * X_BAND_MIN_FREQ );
 }
 
 
@@ -751,13 +731,13 @@ Var_T *
 mw_bridge_lock( Var_T * v )
 {
     bool state = get_boolean( v );
-    char buf[ 10 ];
+    char buf[ 7 ] = "LCK x\n";
 
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        sprintf( buf, "LCK %c\n", state ? '1' : '0' );
-        if ( x_bmwb_write( x_bmwb.fd, buf, 5 ) != 5 )
+        buf[ 4 ] = state ? '1' : '0';
+        if ( x_bmwb_write( x_bmwb.fd, buf, 6 ) != 6 )
             x_bmwb_comm_failure( );
 
 		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
@@ -776,11 +756,11 @@ mw_bridge_lock( Var_T * v )
  *--------------------------------------------------------------*/
 
 static void
-x_bmwb_sig_handler( int signo )
+x_bmwb_start_sig_handler( int sig_no )
 {
-	if ( signo == SIGUSR1 )
+	if ( sig_no == SIGUSR1 )
 		start_finished = 1;
-	else if ( signo == SIGUSR2 )
+	else if ( sig_no == SIGUSR2 )
 		start_failed = 1;
 }
 
@@ -835,7 +815,7 @@ x_bmwb_connect( void )
 		   send SIGUSR1 if it's up and running and SIGUSR2 on failure. Set
 		   handlers for both signals. */
 
-		sact.sa_handler = x_bmwb_sig_handler;
+		sact.sa_handler = x_bmwb_start_sig_handler;
 		sigemptyset( &sact.sa_mask );
 		sact.sa_flags = 0;
 		if ( sigaction( SIGUSR1, &sact, &old_s1_act ) == -1 )
@@ -950,6 +930,19 @@ x_bmwb_connect( void )
 }
 
 
+/*-------------------------------------------------------*
+ * Handler for SIGPIPE signal that may be received when
+ * trying to write to the process controlling the bridge
+ *-------------------------------------------------------*/
+
+static void
+x_bmwb_write_sig_handler( int sig_no )
+{
+    if ( sig_no == SIGPIPE )
+        bmwb_died = 1;
+}
+
+
 /*-----------------------------------------------------------*
  * Writes as many bytes as was asked for to file descriptor,
  * returns the number of bytes on success and -1 otherwise.
@@ -962,21 +955,36 @@ x_bmwb_write( int          d,
 {
     ssize_t n = len,
             ret;
+    struct sigaction sact;
+    struct sigaction old_sact;
 
 
     if ( len == 0 )
         return 0;
 
+    bmwb_died = 0;
+
+    sact.sa_handler = x_bmwb_write_sig_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    if ( sigaction( SIGPIPE, &sact, &old_sact ) == -1 )
+        return -1;
+
     do
     {
         if ( ( ret = write( d, buf, n ) ) < 1 )
         {
-            if ( ret == -1 && errno != EINTR )
+            if ( ret == -1 && ( bmwb_died || errno != EINTR ) )
+            {
+                sigaction( SIGPIPE, &old_sact, NULL );
                 return -1;
+            }
             continue;
         }
         buf += ret;
     } while ( ( n -= ret ) > 0 );
+
+    sigaction( SIGPIPE, &old_sact, NULL );
 
     return len;
 }
