@@ -1,8 +1,8 @@
 # -*-Makefile-*-
 
 OWNER                   := fsc2
-GROUP                   := uucp
-GPIB_LIBRARY            := NI_OLD
+GROUP                   := dialout
+GPIB_LIBRARY            := SLG
 BROWSER                 := mozilla
 SERIAL_LOCK_DIR         := /var/lock
 WITH_RULBUS             := yes
