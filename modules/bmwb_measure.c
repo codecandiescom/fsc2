@@ -37,7 +37,7 @@ measure_dc_signal( double * val )
                  DC_SIGNAL_MAX_X_BAND : DC_SIGNAL_MAX_Q_BAND;
 
 
-    if ( meilhaus_ai_single( min, max, AI_CH0, val ) )
+    if ( meilhaus_ai_single( min, max, DETECTOR_CURRENT_AI, val ) )
         return 1;
 
     if ( *val < min )
@@ -84,7 +84,7 @@ measure_afc_signal( double * val )
                  AFC_SIGNAL_MAX_X_BAND : AFC_SIGNAL_MAX_Q_BAND;
 
 
-    if ( meilhaus_ai_single( min, max, AI_CH1, val ) )
+    if ( meilhaus_ai_single( min, max, AFC_SIGNAL_AI, val ) )
         return 1;
 
     if ( *val < min )
@@ -148,7 +148,8 @@ measure_unlocked_signal( double * val )
     }
 
 #if ! defined BMWB_TEST
-    if ( meilhaus_ai_single( UNLOCKED_MIN, UNLOCKED_MAX, AI_CH2, val ) )
+    if ( meilhaus_ai_single( UNLOCKED_MIN, UNLOCKED_MAX,
+                             UNLOCKED_SIGNAL_AI, val ) )
         return 1;
 
     if ( *val < UNLOCKED_MIN )
@@ -189,7 +190,8 @@ measure_uncalibrated_signal( double * val )
     }
 
 #if ! defined BMWB_TEST
-    if ( meilhaus_ai_single( UNCALIBRATED_MIN, UNCALIBRATED_MAX, AI_CH3, val ) )
+    if ( meilhaus_ai_single( UNCALIBRATED_MIN, UNCALIBRATED_MAX,
+                             UNCALIBRATED_SIGNAL_AI, val ) )
         return 1;
 
     if ( *val < UNCALIBRATED_MIN )

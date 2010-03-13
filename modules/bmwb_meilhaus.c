@@ -23,6 +23,12 @@
 #include "bmwb.h"
 
 
+#define AO_0    5
+#define AO_1    5
+#define AO_2    6
+#define AO_3    7
+
+
 static char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
 

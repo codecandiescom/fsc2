@@ -148,15 +148,16 @@ error_handling( void )
 }
 
 
-/*-------------------------------------------*
- * Determines the bridge type (X- or Q-band)
- *-------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for determining the bridge type (X- or Q-band)
+ *---------------------------------------------------------*/
 
 static int
 get_bridge_type( void )
 {
 #if ! defined BMWB_TEST
     unsigned char v;
+
 
     if ( meilhaus_dio_in( DIO_A, &v ) )
         return TYPE_FAIL;
@@ -168,7 +169,7 @@ get_bridge_type( void )
 
     if ( meilhaus_dio_out( DIO_B, bmwb.type == X_BAND ?
                            X_BAND_ATT_BITS : Q_BAND_ATT_BITS ) )
-        return TYPE_FAIL;
+        return TYPE_FAIL;u
 
     return bmwb.mode;
 #else
@@ -177,9 +178,9 @@ get_bridge_type( void )
 }
 
 
-/*--------------------------------*
- * Sets a new microwave frequency
- *--------------------------------*/
+/*------------------------------------------------*
+ * Function for setting a new microwave frequency
+ *------------------------------------------------*/
 
 int
 set_mw_freq( double val )
@@ -190,7 +191,7 @@ set_mw_freq( double val )
         return 1;
     }
 
-    if ( meilhaus_ao( AO_0, val ) )
+    if ( meilhaus_ao( FREQUENCY_AO, val ) )
         return 1;
 
 	bmwb.freq = val;
@@ -199,9 +200,9 @@ set_mw_freq( double val )
 }
 
 
-/*----------------------------------*
- * Sets a new microwave attenuation
- *----------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting a new microwave attenuation
+ *--------------------------------------------------*/
 
 int
 set_mw_attenuation( int val )
@@ -216,7 +217,7 @@ set_mw_attenuation( int val )
         return 1;
     }
 
-    byte = (val / 10 ) << 8 | ( val % 10 );
+    byte = ( val / 10 ) << 8 | ( val % 10 );
 
     if ( meilhaus_dio_out( DIO_C, byte ) )
         return 1;
@@ -227,9 +228,9 @@ set_mw_attenuation( int val )
 }
 
 
-/*-------------------------*
- * Sets a new signal phase
- *-------------------------*/
+/*-----------------------------------------*
+ * Function for setting a new signal phase
+ *-----------------------------------------*/
 
 int
 set_signal_phase( double val )
@@ -240,7 +241,7 @@ set_signal_phase( double val )
         return 1;
     }
 
-    if ( meilhaus_ao( AO_2, - val ) )
+    if ( meilhaus_ao( SIGNAL_PHASE_AO, - val ) )
         return 1;
 
 	bmwb.signal_phase = val;
@@ -249,9 +250,9 @@ set_signal_phase( double val )
 }
 
 
-/*---------------------------------*
- * Sets a new microwave bias power 
- *---------------------------------*/
+/*-------------------------------------------------*
+ * Function for setting a new microwave bias power 
+ *-------------------------------------------------*/
 
 int
 set_mw_bias( double val )
@@ -262,7 +263,7 @@ set_mw_bias( double val )
         return 1;
     }
 
-    if ( meilhaus_ao( AO_1, - val ) )
+    if ( meilhaus_ao( BIAS_AO, - val ) )
         return 1;
 
 	bmwb.bias = val;
@@ -271,9 +272,9 @@ set_mw_bias( double val )
 }
 
 
-/*-----------------------*
- * Sets a new lock phase 
- *-----------------------*/
+/*---------------------------------------*
+ * Function for setting a new lock phase 
+ *---------------------------------------*/
 
 int
 set_lock_phase( double val )
@@ -284,7 +285,7 @@ set_lock_phase( double val )
         return 1;
     }
 
-    if ( meilhaus_ao( AO_3, - val ) )
+    if ( meilhaus_ao( LOCK_PHASE_AO, - val ) )
         return 1;
 
 	bmwb.lock_phase = val;
@@ -293,9 +294,9 @@ set_lock_phase( double val )
 }
 
 
-/*-------------------------*
- * Controls the iris motor
- *-------------------------*/
+/*-----------------------------------------*
+ * Function for controlling the iris motor
+ *-----------------------------------------*/
 
 int
 set_iris( int state )
@@ -340,9 +341,9 @@ set_iris( int state )
 }
 
 
-/*------------------------*
- * Switches to a new mode 
- *------------------------*/
+/*-------------------------------------*
+ * Function for witching to a new mode 
+ *-------------------------------------*/
 
 int
 set_mode( int mode )

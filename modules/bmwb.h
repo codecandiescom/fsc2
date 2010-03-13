@@ -52,9 +52,6 @@
 #undef DEVICE_TYPE
 
 
-#define DEV_ID   0
-
-
 #define BMWB_X_BAND_STATE_FILE    "bmwb_x_band.state"
 #define BMWB_Q_BAND_STATE_FILE    "bmwb_q_band.state"
 
@@ -140,23 +137,28 @@ extern BMWB bmwb;
 #define DIO_C   2         /* used for microwave attenuation */
 #define DIO_D   3         /* used for iris control */
 
-#define AI      4
 
-#define AO_0    5         /* used for microwave frequency */
-#define AO_1    6         /* used for microwave bias */
-#define AO_2    7         /* used for signal phase */
-#define AO_3    8         /* used for lock phase */
+/* Define sudevice IDs for analog outputs */
+
+#define FREQUENCY_AO            5         /* used for microwave frequency */
+#define BIAS_AO                 6         /* used for microwave bias */
+#define SIGNAL_PHASE_AO         7         /* used for signal phase */
+#define LOCK_PHASE_AO           8         /* used for lock phase */
 
 
-#define AI_CH0  0         /* used for detector current */
-#define AI_CH1  1         /* used for afc signal */
-#define AI_CH2  2         /* used for unlocked signal */
-#define AI_CH3  3         /* used for uncalibrated signal */
-#define AI_CH4  4         /* used (together with AI_CH5) */
-#define AI_CH5  5         /* for tune mode x-signal */
-#define AI_CH6  6         /* used (together with AI_CH7) */
-#define AI_CH7  7         /* for tune mode y-signal */
-#define AI_CH8  8         /* used for overheat signal */
+/* Define subdevice ID for alanog input and the different channels */
+
+#define AI                      4         /* subdevice ID for analog input */
+
+#define DETECTOR_CURRENT_AI     0         /* used for detector current */
+#define AFC_SIGNAL_AI           1         /* used for afc signal */
+#define UNLOCKED_SIGNAL_AI      2         /* used for unlocked signal */
+#define UNCALIBRATED_SIGNAL_AI  3         /* used for uncalibrated signal */
+#define TUNE_MODE_X_SIGNAL_AI   4         /* used (together with AI_CH5) */
+#define TUNE_MODE_X_GNG_AI      5         /* for tune mode x-signal */
+#define TUNE_MODE_Y_SIGNAL_AI   6         /* used (together with AI_CH7) */
+#define TUNE_MODE_Y_GND_AI      7         /* for tune mode y-signal */
+#define OVERHEAT_SIGNAL_AI      8         /* used for overheat signal */
 
 
 #define AFC_STATE_BIT       0x01
