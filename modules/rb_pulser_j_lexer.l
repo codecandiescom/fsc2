@@ -56,6 +56,7 @@ void rb_pulser_j_set_in( FILE * );
 void rb_pulser_j_set_out( FILE * );
 int rb_pulser_j_get_debug( void );
 void rb_pulser_j_set_debug( int );
+int rb_pulser_j_lex_destroy( void );
 #endif
 
 %}
