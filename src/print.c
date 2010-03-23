@@ -58,25 +58,26 @@ static char *pc_string = NULL;
 static int print_form_close_handler( FL_FORM * a,
                                      void *    b );
 static int print_comment_close_handler( FL_FORM * a,
-                                        void *    b );
-static bool get_print_file( FILE ** fp,
+                                        void    * b );
+static void save_print_command( void );
+static bool get_print_file( FILE  ** fp,
                             char ** name,
                             long    data );
 static void get_print_comm( long    data );
-static void start_printing( FILE *       fp,
+static void start_printing( FILE       * fp,
                             const char * name,
                             long         what );
-static void print_header( FILE *       fp,
+static void print_header( FILE       * fp,
                           const char * name );
 static void do_1d_printing( FILE * fp,
-                            long  what );
+                            long   what );
 static void do_2d_printing( FILE * fp );
 static void eps_make_scale( FILE * fp,
                             void * cv,
                             int    coord,
                             long   dim );
 static void eps_color_scale( FILE * fp );
-static void eps_draw_curve_1d( FILE *       fp,
+static void eps_draw_curve_1d( FILE       * fp,
                                Curve_1d_T * cv,
                                int          i,
                                long         dir );
@@ -167,9 +168,7 @@ get_print_command( void )
     size_t len;
 
 
-    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
-         || ue->pw_dir == NULL
-         || *ue->pw_dir == '\0' )
+    if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
          return NULL;
 
     TRY
@@ -215,6 +214,42 @@ get_print_command( void )
 
 
 /*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static void
+save_print_command( void )
+{
+    char *fname;
+    FILE *fp;
+    struct passwd *ue;
+
+
+    if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
+        return;
+
+    TRY
+    {
+        fname = get_string( "%s/.fsc2/print_command", ue->pw_dir );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return;
+
+    if ( ! ( fp = fopen( fname, "w" ) ) )
+    {
+        T_free( fname );
+        return;
+    }
+
+    T_free( fname );
+
+    fprintf( fp, "# Note: only the first non-empty line will be taken into "
+             "account\n\n%s\n", cmd );
+    fclose( fp );
+}
+
+
+/*--------------------------------------------------------------*
  * Shows a form that allows the user to select the way to print
  * and, for printing to file mode, select the file
  *--------------------------------------------------------------*/
@@ -247,8 +282,8 @@ get_print_file( FILE ** fp,
     }
 
     /* If a printer command has already been set put it into the input object,
-       otherwise use what's set via the 'FSC2_PRINT_COMMAND; or the default
-       'lpr' command */
+       otherwise use what's set via the 'FSC2_PRINT_COMMAND' environment
+       variable or the default 'lpr' command */
 
     if ( cmd != NULL )
     {
@@ -462,7 +497,7 @@ get_print_file( FILE ** fp,
 
 static int
 print_form_close_handler( FL_FORM * a  UNUSED_ARG,
-                          void *    b  UNUSED_ARG )
+                          void    * b  UNUSED_ARG )
 {
     return FL_IGNORE;
 }
@@ -630,7 +665,7 @@ print_comment_close_handler( FL_FORM * a  UNUSED_ARG,
  *--------------------------------------------------------------*/
 
 static void
-start_printing( FILE *       fp,
+start_printing( FILE       * fp,
                 const char * name,
                 long         what )
 {
@@ -659,7 +694,10 @@ start_printing( FILE *       fp,
        takes care of all the rest */
 
     if ( pid > 0 )
+    {
+        save_print_command( );
         return;
+    }
 
     if ( GUI.is_init )
         close( ConnectionNumber( GUI.d ) );
@@ -1394,7 +1432,7 @@ eps_color_scale( FILE * fp )
  *-------------------------------------------------------*/
 
 static void
-eps_draw_curve_1d( FILE *       fp,
+eps_draw_curve_1d( FILE       * fp,
                    Curve_1d_T * cv,
                    int          i,
                    long         dir )

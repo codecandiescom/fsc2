@@ -142,7 +142,7 @@ main( int    argc,
     /* If '--delete' was given on the command line set flags that says that
        the input files needs to be deleted */
 
-    if ( fname != NULL && Fsc2_Internals.cmdline_flags & DO_DELETE )
+    if ( fname && Fsc2_Internals.cmdline_flags & DO_DELETE )
         Delete_file = Delete_old_file = SET;
 
     /* In batch mode try to get the next file if the first input file
@@ -327,7 +327,7 @@ globals_init( const char * pname )
 
     fsc2_get_conf( );
 
-    if ( pname != NULL )
+    if ( pname )
         Prog_Name = pname;
     else
         Prog_Name = "fsc2";
@@ -422,7 +422,7 @@ fsc2_get_conf( void )
     OTHERWISE
     {
         fclose( fsc2_confin );
-        if ( Fsc2_Internals.def_directory != NULL )
+        if ( Fsc2_Internals.def_directory )
             Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );
         return;
@@ -467,14 +467,12 @@ fsc2_save_conf( void )
     FILE *fp;
 
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return;
 
-    if (    ! ( ue = getpwuid( getuid( ) ) )
-         || ! ue->pw_dir
-         || ! *ue->pw_dir )
+    if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
     {
-         if ( Fsc2_Internals.def_directory != NULL )
+         if ( Fsc2_Internals.def_directory )
              Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );
          return;
@@ -491,8 +489,8 @@ fsc2_save_conf( void )
     if ( ! ( fp = fopen( fname, "w" ) ) )
     {
         T_free( fname );
-         if ( Fsc2_Internals.def_directory != NULL )
-             Fsc2_Internals.def_directory =
+        if ( Fsc2_Internals.def_directory )
+            Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );
         return;
     }
@@ -502,15 +500,13 @@ fsc2_save_conf( void )
     fprintf( fp, "# Don't edit this file - it gets overwritten "
              "automatically\n\n" );
 
-    if (    Fsc2_Internals.use_def_directory
-         && Fsc2_Internals.def_directory != NULL )
+    if ( Fsc2_Internals.use_def_directory && Fsc2_Internals.def_directory )
         fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Fsc2_Internals.def_directory );
     else
         fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
 
-    if ( Fsc2_Internals.def_directory != NULL )
-             Fsc2_Internals.def_directory =
-                                        T_free( Fsc2_Internals.def_directory );
+    if ( Fsc2_Internals.def_directory )
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
     fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
              GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
@@ -747,7 +743,7 @@ scan_args( int   * argc,
            char  * argv[ ],
            char ** fname )
 {
-    int flags = getenv( "FSC2_LOCAL_EXEC" ) != NULL ? LOCAL_EXEC : 0;
+    int flags = getenv( "FSC2_LOCAL_EXEC" ) ? LOCAL_EXEC : 0;
     int cur_arg = 1;
     int i;
 
@@ -1275,7 +1271,7 @@ scan_args( int   * argc,
  * fsc2 returns from main(). Here some cleanup is done that
  * is necessary even if the program crashed. Please take
  * care: this function also gets called when the processes
- * foing the experiment are finished!
+ * doing the experiment are finished!
  *----------------------------------------------------------*/
 
 static void
@@ -1285,7 +1281,7 @@ final_exit_handler( void )
     char sock_file[ len ];
 
 
-    /* Stop the hild process and the HTTP server */
+    /* Stop the child process and the HTTP server */
 
     if ( Fsc2_Internals.child_pid > 0 )
         kill( Fsc2_Internals.child_pid, SIGTERM );
@@ -1299,7 +1295,7 @@ final_exit_handler( void )
 
     T_free( EDL.File_List );
 
-    if ( In_file_fp != NULL )
+    if ( In_file_fp )
         fclose( In_file_fp );
 
     if ( Delete_old_file && EDL.files->name )
@@ -1433,7 +1429,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             return;
         }
 
-        if ( In_file_fp != NULL )
+        if ( In_file_fp )
         {
             fclose( In_file_fp );
             In_file_fp = NULL;
@@ -1954,8 +1950,7 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
             fl_trigger_object( GUI.main_form->quit );
         }
         else
-            fl_show_alert( "Error", "Test of file failed.",
-                           NULL, 1 );
+            fl_show_alert( "Error", "Test of file failed.", NULL, 1 );
         return;
     }
 

@@ -195,7 +195,7 @@ fsc2_release_lock( const char * name )
 
 	raise_permissions( );
 	if ( unlink( fn ) < 0 )
-		print( SEVERE, "Can't remove lock file '%s'\n", fn );
+		print( SEVERE, "Can't remove lock file '%s'.\n", fn );
 	lower_permissions( );
 	T_free( fn );
 }

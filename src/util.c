@@ -99,7 +99,7 @@ string_to_lower( char * str )
     char *ptr;
 
 
-    if ( str == NULL )
+    if ( ! str )
         return NULL;
     for ( ptr = str; *ptr; ptr++ )
         if ( isupper( ( unsigned char ) *ptr ) )
@@ -141,7 +141,7 @@ correct_line_breaks( char * str )
          *p2;
 
 
-    while ( ( p1 = strstr( p1, "\\n" ) ) != NULL )
+    while ( ! ( p1 = strstr( p1, "\\n" ) ) )
     {
         p2 = p1++;
         *p2 = '\n';
@@ -164,7 +164,7 @@ strip_path( const char * path )
     char *cp;
 
 
-    if ( ( cp = strrchr( path, '/' ) ) == NULL )
+    if ( ! ( cp = strrchr( path, '/' ) ) )
         return path;
     else
         return ++cp;
@@ -417,11 +417,11 @@ print( int          severity,
 
         if ( space_left <= 0 )
             strcpy( buffer, "Message too long to be displayed!\n" );
-        else if ( EDL.Call_Stack != NULL )
+        else if ( EDL.Call_Stack )
         {
-            if ( EDL.Call_Stack->f == NULL )
+            if ( ! EDL.Call_Stack->f )
             {
-                if ( EDL.Call_Stack->dev_name != NULL )
+                if ( EDL.Call_Stack->dev_name )
                 {
                     count = snprintf( cp, ( size_t ) space_left, "%s: ",
                                       EDL.Call_Stack->dev_name );
@@ -431,7 +431,7 @@ print( int          severity,
             }
             else
             {
-                if ( EDL.Call_Stack->f->device != NULL )
+                if ( EDL.Call_Stack->f->device )
                 {
                     count = snprintf( cp, ( size_t ) space_left, "%s: ",
                                       EDL.Call_Stack->f->device->name );
@@ -439,7 +439,7 @@ print( int          severity,
                     cp += count;
                 }
 
-                if ( EDL.Call_Stack->f->name != NULL )
+                if ( EDL.Call_Stack->f->name )
                 {
                     count = snprintf( cp, ( size_t ) space_left, "%s(): ",
                                       EDL.Call_Stack->f->name );
@@ -486,21 +486,21 @@ print( int          severity,
             fprintf( severity == NO_ERROR ? stdout : stderr,
                      "%s:%ld: ", EDL.Fname, EDL.Lc );
 
-        if ( EDL.Call_Stack != NULL )
+        if ( EDL.Call_Stack )
         {
-            if ( EDL.Call_Stack->f == NULL )
+            if ( ! EDL.Call_Stack->f )
             {
-                if ( EDL.Call_Stack->dev_name != NULL )
+                if ( EDL.Call_Stack->dev_name )
                     fprintf( severity == NO_ERROR ? stdout : stderr,
                              "%s: ", EDL.Call_Stack->dev_name );
             }
             else
             {
-                if ( EDL.Call_Stack->f->device != NULL )
+                if ( EDL.Call_Stack->f->device )
                     fprintf( severity == NO_ERROR ? stdout : stderr,
                              "%s: ", EDL.Call_Stack->f->device->name );
 
-                if ( EDL.Call_Stack->f->name != NULL )
+                if ( EDL.Call_Stack->f->name )
                     fprintf( severity == NO_ERROR ? stdout : stderr,
                              "%s(): ", EDL.Call_Stack->f->name );
             }
@@ -558,7 +558,7 @@ handle_escape( char * str )
 
     fsc2_assert( str != NULL );
 
-    while ( ( cp = strchr( cp, '\\' ) ) != NULL )
+    while ( ( cp = strchr( cp, '\\' ) ) )
         switch ( *( cp + 1 ) )
         {
             case '\0' :
@@ -1446,14 +1446,14 @@ fsc2_show_fselector( const char * message,
     /* If no directory is specified and this is the first invocation use
        the directory from the user specific configuration file */
 
-    if ( ( dir == NULL || *dir == '\0' ) && Fsc2_Internals.use_def_directory )
+    if ( ( ! dir || ! *dir ) && Fsc2_Internals.use_def_directory )
         dir = Fsc2_Internals.def_directory;
 
     Fsc2_Internals.use_def_directory = UNSET;
 
     ret = fl_show_fselector( message, dir, pattern, def_name );
 
-    if ( Fsc2_Internals.def_directory != NULL )
+    if ( Fsc2_Internals.def_directory )
         Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
     return ret;
@@ -1481,7 +1481,7 @@ fsc2_fline( FILE * fp )
     CLOBBER_PROTECT( line );
     CLOBBER_PROTECT( p );
 
-    if ( fp == NULL )
+    if ( ! fp )
         THROW( EXCEPTION );
 
     line = p = T_malloc( FGETS_START_LEN );
