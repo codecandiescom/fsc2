@@ -39,7 +39,7 @@ open $f, '<', '/usr/local/lib/fsc2/epr_mod.state'
 my @res;
 
 for ( <$f> ) {
-	next unless /^calibration:\s"(.*?) \($ARGV[0]\)"$/;
+	next unless /^calibration:\s*"(.*?) \($ARGV[0]\)"$/;
 	push @res, $1;
 }
 close $f;
