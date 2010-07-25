@@ -1456,6 +1456,10 @@ fsc2_show_fselector( const char * message,
     if ( Fsc2_Internals.def_directory )
         Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
+    /* Save the possibly new setting to the configuration file */
+
+    fsc2_save_conf( );
+
     return ret;
 }
 
@@ -1695,6 +1699,98 @@ get_form_position( FL_FORM * form,
     *y -= top;
     if ( *y < 0 )
         *y += top + h + bottom - fl_scrh;
+}
+
+
+/*-------------------------------------*
+ * Save some configuration information
+ *-------------------------------------*/
+
+void
+fsc2_save_conf( void )
+{
+    char *fname;
+    struct passwd *ue;
+    FILE *fp = NULL;
+
+
+    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+        return;
+
+    if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
+    {
+         if ( Fsc2_Internals.def_directory )
+             Fsc2_Internals.def_directory =
+                                        T_free( Fsc2_Internals.def_directory );
+         return;
+    }
+
+    TRY
+    {
+        fname = get_string( "%s/.fsc2/fsc2_config", ue->pw_dir );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return;
+
+    if (    ! ( fp = fopen( fname, "w" ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
+    {
+        if ( fp )
+            fclose( fp );
+        T_free( fname );
+        if ( Fsc2_Internals.def_directory )
+            Fsc2_Internals.def_directory =
+                                        T_free( Fsc2_Internals.def_directory );
+        return;
+    }
+
+    T_free( fname );
+
+    fprintf( fp, "# Don't edit this file - it gets overwritten "
+             "automatically\n\n" );
+
+    if ( Fsc2_Internals.use_def_directory && Fsc2_Internals.def_directory )
+        fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Fsc2_Internals.def_directory );
+    else
+        fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
+
+    if ( Fsc2_Internals.def_directory )
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
+
+    fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
+             GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
+
+    if ( GUI.display_1d_has_pos )
+        fprintf( fp, "DISPLAY_1D_WINDOW_POSITION: %+d%+d\n", GUI.display_1d_x,
+                 GUI.display_1d_y );
+
+    if ( GUI.display_1d_has_size )
+        fprintf( fp, "DISPLAY_1D_WINDOW_SIZE: %ux%u\n", GUI.display_1d_width,
+                 GUI.display_1d_height );
+
+    if ( GUI.display_2d_has_pos )
+        fprintf( fp, "DISPLAY_2D_WINDOW_POSITION: %+d%+d\n", GUI.display_2d_x,
+                 GUI.display_2d_y );
+
+    if ( GUI.display_2d_has_size )
+        fprintf( fp, "DISPLAY_2D_WINDOW_SIZE: %ux%u\n", GUI.display_2d_width,
+                 GUI.display_2d_height );
+
+    if ( GUI.cut_win_has_pos )
+        fprintf( fp, "CUT_WINDOW_POSITION: %+d%+d\n", GUI.cut_win_x,
+                 GUI.cut_win_y );
+
+    if ( GUI.cut_win_has_size )
+        fprintf( fp,"CUT_WINDOW_SIZE: %ux%u\n", GUI.cut_win_width,
+                 GUI.cut_win_height );
+
+    if ( GUI.toolbox_has_pos )
+        fprintf( fp, "TOOLBOX_POSITION: %+d%+d\n", GUI.toolbox_x,
+                 GUI.toolbox_y );
+
+    fsc2_release_fcntl_lock( fp );
+    fclose( fp );
 }
 
 

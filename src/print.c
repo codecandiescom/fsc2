@@ -161,7 +161,7 @@ static char *
 get_print_command( void )
 {
     char *fname;
-    FILE *fp;
+    FILE *fp = NULL;
     struct passwd *ue;
     char *line;
     char *p;
@@ -179,8 +179,11 @@ get_print_command( void )
     OTHERWISE
         return NULL;
 
-    if ( ( fp = fopen( fname, "r" ) ) == NULL )
+    if (    ! ( fp = fopen( fname, "r" ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, SET ) )
     {
+        if ( fp )
+            fclose( fp );
         T_free( fname );
         return NULL;
     }
@@ -189,7 +192,7 @@ get_print_command( void )
 
     while ( 1 )
     {
-        if ( ! ( line = fsc2_fline( fp ) ) )
+        if ( ( line = fsc2_fline( fp ) ) )
         {
             fclose( fp );
             return NULL;
@@ -204,6 +207,7 @@ get_print_command( void )
         T_free( line );
     }
 
+    fsc2_release_fcntl_lock( fp );
     fclose( fp );
     len = strlen( line );
     if ( line[ len - 1 ] == '\n' )
@@ -220,7 +224,7 @@ static void
 save_print_command( void )
 {
     char *fname;
-    FILE *fp;
+    FILE *fp = NULL;
     struct passwd *ue;
 
 
@@ -235,8 +239,11 @@ save_print_command( void )
     OTHERWISE
         return;
 
-    if ( ! ( fp = fopen( fname, "w" ) ) )
+    if (    ! ( fp = fopen( fname, "w" ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
     {
+        if ( fp )
+            fclose( fp );
         T_free( fname );
         return;
     }
@@ -245,6 +252,7 @@ save_print_command( void )
 
     fprintf( fp, "# Note: only the first non-empty line will be taken into "
              "account\n\n%s\n", cmd );
+    fsc2_release_fcntl_lock( fp );
     fclose( fp );
 }
 

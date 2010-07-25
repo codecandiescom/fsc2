@@ -351,8 +351,8 @@ tegam2714a_p_dump_pulses( void )
     {
         TRY
         {
-            name = T_strdup( fl_show_fselector( "File for dumping pulses:",
-                                                "./", "*.pls", NULL ) );
+            name = T_strdup( fsc2_show_fselector( "File for dumping pulses:",
+                                                  NULL, "*.pls", NULL ) );
             TRY_SUCCESS;
         }
         OTHERWISE

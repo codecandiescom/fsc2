@@ -38,7 +38,7 @@
  *----------------------------------------------------------------*/
 
 bool
-fsc2_obtain_lock( const char * name )
+fsc2_obtain_uucp_lock( const char * name )
 {
     int fd;
 	char *fn = NULL;
@@ -175,12 +175,12 @@ fsc2_obtain_lock( const char * name )
 }
 
 
-/*----------------------------------------*
- * Deletes a previously created lock file
- *----------------------------------------*/
+/*---------------------------------------------------*
+ * Deletes a previously created UUCP style lock file
+ *---------------------------------------------------*/
 
 void
-fsc2_release_lock( const char * name )
+fsc2_release_uucp_lock( const char * name )
 {
 	char *fn = NULL;
 
@@ -198,6 +198,50 @@ fsc2_release_lock( const char * name )
 		print( SEVERE, "Can't remove lock file '%s'.\n", fn );
 	lower_permissions( );
 	T_free( fn );
+}
+
+
+/*----------------------------------------------------------------*
+ * Tries to obtain a fcntl() write or read lock on a file.
+ *----------------------------------------------------------------*/
+
+bool
+fsc2_obtain_fcntl_lock( FILE * fp,
+                        int    lock_type,
+                        bool   wait_for_lock )
+{
+    struct flock fl;
+
+
+    fsc2_assert( fp && ( lock_type == F_RDLCK || lock_type == F_WRLCK ) );
+
+    fl.l_type   = lock_type;
+    fl.l_whence = SEEK_SET;
+    fl.l_start  = 0;
+    fl.l_len    = 0;
+
+    return fcntl( fileno( fp ), wait_for_lock ? F_SETLKW : F_SETLK, &fl ) == 0;
+}
+
+    
+/*-------------------------------*
+ * Releases a fcntl() on a file.
+ *-------------------------------*/
+
+void
+fsc2_release_fcntl_lock( FILE * fp )
+{
+    struct flock fl;
+
+
+    fsc2_assert( fp  );
+
+    fl.l_type   = F_UNLCK;
+    fl.l_whence = SEEK_SET;
+    fl.l_start  = 0;
+    fl.l_len    = 0;
+
+    fcntl( fileno( fp ), F_SETLK, &fl );
 }
 
 

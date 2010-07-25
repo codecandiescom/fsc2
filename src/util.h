@@ -100,6 +100,8 @@ void get_form_position( FL_FORM * /* form */,
                         int     * /* x */,
                         int     * /* y */ );
 
+void fsc2_save_conf( void );
+
 #endif  /* ! UTIL_HEADER */
 
 

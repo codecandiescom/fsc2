@@ -104,7 +104,7 @@ fsc2_lan_open( const char * dev_name,
 
     /* Try to get a lock on the device */
 
-    if ( ! fsc2_obtain_lock( dev_name ) )
+    if ( ! fsc2_obtain_uucp_lock( dev_name ) )
     {
         print( FATAL, "Device %s is already locked by another process.\n",
                dev_name );
@@ -126,7 +126,7 @@ fsc2_lan_open( const char * dev_name,
                               "Error: invalid IP address: %s\n", address );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -138,7 +138,7 @@ fsc2_lan_open( const char * dev_name,
                               port );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -150,7 +150,7 @@ fsc2_lan_open( const char * dev_name,
                               strerror( errno ) );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -167,7 +167,7 @@ fsc2_lan_open( const char * dev_name,
                               "option for socket\n" );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -184,7 +184,7 @@ fsc2_lan_open( const char * dev_name,
                               "option for socket\n" );
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -267,7 +267,7 @@ fsc2_lan_open( const char * dev_name,
 
         fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
         fsc2_lan_close_log( log_fp );
-        fsc2_release_lock( dev_name );
+        fsc2_release_uucp_lock( dev_name );
         return -1;
     }
 
@@ -310,7 +310,7 @@ fsc2_lan_open( const char * dev_name,
         if ( need_close )
         {
             fsc2_lan_close_log( log_fp );
-            fsc2_release_lock( dev_name );
+            fsc2_release_uucp_lock( dev_name );
         }
         RETHROW( );
     }
@@ -401,7 +401,7 @@ fsc2_lan_close( int handle )
 
     if ( ll->name )
     {
-        fsc2_release_lock( ll->name );
+        fsc2_release_uucp_lock( ll->name );
         T_free( ( char * ) ll->name );
     }
 
@@ -1059,7 +1059,7 @@ fsc2_lan_cleanup( void )
 
             fsc2_lan_close_log( ll->log_fp );
             if ( ll->name )
-                fsc2_release_lock( ll->name );
+                fsc2_release_uucp_lock( ll->name );
         }
 
         lan_list = ll->next;

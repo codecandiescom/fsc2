@@ -108,7 +108,7 @@ ni6601_exp_hook( void )
     int ret;
 
 
-    if ( ! fsc2_obtain_lock( device_name ) )
+    if ( ! fsc2_obtain_uucp_lock( device_name ) )
     {
         print( FATAL, "Can't obtain lock for device.\n" );
         return 0;
@@ -163,7 +163,7 @@ ni6601_exp_hook( void )
             break;
     }
 
-    fsc2_release_lock( device_name );
+    fsc2_release_uucp_lock( device_name );
 
     return 0;
 }
@@ -181,7 +181,7 @@ ni6601_end_of_exp_hook( void )
 
     buffered_counter = NI6601_COUNTER_0 - 1;
 
-    fsc2_release_lock( device_name );
+    fsc2_release_uucp_lock( device_name );
 
     return 1;
 }

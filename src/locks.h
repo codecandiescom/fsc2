@@ -24,9 +24,15 @@
 #define LOCKS_HEADER
 
 
-bool fsc2_obtain_lock( const char * /* name */ );
-void fsc2_release_lock( const char * /* name */ );
+bool fsc2_obtain_uucp_lock( const char * /* name */ );
 
+void fsc2_release_uucp_lock( const char * /* name */ );
+
+bool fsc2_obtain_fcntl_lock( FILE * /* fp */,
+                             int    /* lock_type */,
+                             bool   /* wait_for_lock */ );
+
+void fsc2_release_fcntl_lock( FILE * /* fp */ );
 
 #endif  /* ! LOCKS_HEADER */
 

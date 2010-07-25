@@ -257,7 +257,7 @@ start_comm_libs( void )
 
     if ( Need_RULBUS )
     {
-        if ( fsc2_obtain_lock( "rulbus" ) == FAIL )
+        if ( fsc2_obtain_uucp_lock( "rulbus" ) == FAIL )
         {
             eprint( FATAL, UNSET, "RULBUS system is already locked by another "
                     "process.\n" );
@@ -269,7 +269,7 @@ start_comm_libs( void )
         if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
         {
             lower_permissions( );
-            fsc2_release_lock( "rulbus" );
+            fsc2_release_uucp_lock( "rulbus" );
             eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
                     rulbus_strerror( ) );
             goto rulbus_fail;
@@ -284,7 +284,7 @@ start_comm_libs( void )
 
     if ( Need_USB )
     {
-        if ( fsc2_obtain_lock( "libusb" ) == FAIL )
+        if ( fsc2_obtain_uucp_lock( "libusb" ) == FAIL )
         {
             eprint( FATAL, UNSET, "USB system is already locked by another "
                     "process.\n" );
@@ -301,7 +301,7 @@ start_comm_libs( void )
         if ( libusb_init( NULL ) != 0 )
         {
             lower_permissions( );
-            fsc2_release_lock( "libusb" );
+            fsc2_release_uucp_lock( "libusb" );
             eprint( FATAL, UNSET, "Failed to initialize USB.\n" );
             goto libusb_fail;
         }
@@ -362,7 +362,7 @@ start_comm_libs( void )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "libusb" );
+        fsc2_release_uucp_lock( "libusb" );
     }
  libusb_fail:
 #endif
@@ -371,7 +371,7 @@ start_comm_libs( void )
     if ( Need_RULBUS )
     {
         rulbus_close( );
-        fsc2_release_lock( "rulbus" );
+        fsc2_release_uucp_lock( "rulbus" );
     }
 
  rulbus_fail:
@@ -464,7 +464,7 @@ no_prog_to_run( void )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "libusb" );
+        fsc2_release_uucp_lock( "libusb" );
     }
 #endif
 
@@ -472,7 +472,7 @@ no_prog_to_run( void )
     if ( Need_RULBUS )
     {
         rulbus_close( );
-        fsc2_release_lock( "rulbus" );
+        fsc2_release_uucp_lock( "rulbus" );
     }
 #endif
 
@@ -630,7 +630,7 @@ init_devs_and_graphics( void )
         if ( Need_USB )
         {
             libusb_exit( NULL );
-            fsc2_release_lock( "libusb" );
+            fsc2_release_uucp_lock( "libusb" );
         }
 #endif
 
@@ -638,7 +638,7 @@ init_devs_and_graphics( void )
         if ( Need_RULBUS )
         {
             rulbus_close( );
-            fsc2_release_lock( "rulbus" );
+            fsc2_release_uucp_lock( "rulbus" );
         }
 #endif
 
@@ -787,7 +787,7 @@ fork_failure( int stored_errno )
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "libusb" );
+        fsc2_release_uucp_lock( "libusb" );
     }
 #endif
 
@@ -795,7 +795,7 @@ fork_failure( int stored_errno )
     if ( Need_RULBUS )
     {
         rulbus_close( );
-        fsc2_release_lock( "rulbus" );
+        fsc2_release_uucp_lock( "rulbus" );
     }
 #endif
 
@@ -1120,7 +1120,7 @@ run_sigchld_callback( FL_OBJECT * a,
     if ( Need_USB )
     {
         libusb_exit( NULL );
-        fsc2_release_lock( "libusb" );
+        fsc2_release_uucp_lock( "libusb" );
     }
 #endif
 
@@ -1128,7 +1128,7 @@ run_sigchld_callback( FL_OBJECT * a,
     if ( Need_RULBUS )
     {
         rulbus_close( );
-        fsc2_release_lock( "rulbus" );
+        fsc2_release_uucp_lock( "rulbus" );
     }
 #endif
 

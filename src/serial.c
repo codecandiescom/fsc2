@@ -151,7 +151,7 @@ fsc2_serial_exp_init( int log_level )
     for ( i = 0; i < Num_Serial_Ports; i++ )
     {
         if ( ! ( Serial_Ports[ i ].have_lock =
-	             		fsc2_obtain_lock( strrchr( Serial_Ports[ i ].dev_file,
+	               fsc2_obtain_uucp_lock( strrchr( Serial_Ports[ i ].dev_file,
                                                    '/' ) + 1 ) ) )
         {
             print( FATAL, "Device %s is locked by another process.\n",
@@ -160,8 +160,8 @@ fsc2_serial_exp_init( int log_level )
             for ( i--; i > 0; i-- )
             {
                 close_serial_log( i );
-                fsc2_release_lock( strrchr( Serial_Ports[ i ].dev_file, '/' )
-                                   + 1 );
+                fsc2_release_uucp_lock( strrchr( Serial_Ports[ i ].dev_file,
+                                                 '/' ) + 1 );
                 Serial_Ports[ i ].have_lock = UNSET;
             }
 
@@ -281,7 +281,8 @@ fsc2_serial_open( int sn,
                                  Serial_Ports[ sn ].dev_file );
         fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
 
-        fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' ) + 1 );
+        fsc2_release_uucp_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' )
+                                + 1 );
         Serial_Ports[ sn ].have_lock = UNSET;
 
         close_serial_log( sn );
@@ -367,7 +368,8 @@ fsc2_serial_close( int sn )
 
     if ( Serial_Ports[ sn ].have_lock )
     {
-        fsc2_release_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' ) + 1 );
+        fsc2_release_uucp_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' )
+                                + 1 );
         Serial_Ports[ sn ].have_lock = UNSET;
     }
 }

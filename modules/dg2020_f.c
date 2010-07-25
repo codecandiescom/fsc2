@@ -460,8 +460,8 @@ pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 
     do
     {
-        name = T_strdup( fl_show_fselector( "File for dumping pulses:", "./",
-                                            "*.pls", NULL ) );
+        name = T_strdup( fsc2_show_fselector( "File for dumping pulses:", NULL,
+                                              "*.pls", NULL ) );
         if ( name == NULL || *name == '\0' )
         {
             if ( name != NULL )

@@ -107,7 +107,7 @@ rs_spec10_exp_hook( void )
 
     rs_spec10_read_state( );
 
-    if ( ! fsc2_obtain_lock( device_name ) )
+    if ( ! fsc2_obtain_uucp_lock( device_name ) )
     {
         print( FATAL, "Can't obtain lock for device.\n" );
         THROW( EXCEPTION );
@@ -122,7 +122,7 @@ rs_spec10_exp_hook( void )
     }
     OTHERWISE
     {
-        fsc2_release_lock( device_name );
+        fsc2_release_uucp_lock( device_name );
         rs_spec10->has_lock = UNSET;
         RETHROW( );
     }
@@ -158,7 +158,7 @@ rs_spec10_end_of_exp_hook( void )
 
     if ( rs_spec10->has_lock )
     {
-        fsc2_release_lock( device_name );
+        fsc2_release_uucp_lock( device_name );
         rs_spec10->has_lock = UNSET;
     }
 
@@ -193,7 +193,7 @@ rs_spec10_exit_hook( void )
 
     if ( rs_spec10->has_lock )
     {
-        fsc2_release_lock( device_name );
+        fsc2_release_uucp_lock( device_name );
         rs_spec10->has_lock = UNSET;
     }
 }

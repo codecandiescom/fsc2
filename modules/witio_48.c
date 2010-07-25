@@ -121,7 +121,7 @@ witio_48_exp_hook( void )
     int i;
 
 
-    if ( ! fsc2_obtain_lock( device_name ) )
+    if ( ! fsc2_obtain_uucp_lock( device_name ) )
     {
         print( FATAL, "Can't obtain lock for device.\n" );
         THROW( EXCEPTION );
@@ -154,7 +154,7 @@ witio_48_exp_hook( void )
             witio_48.is_open = UNSET;
         }
 
-        fsc2_release_lock( device_name );
+        fsc2_release_uucp_lock( device_name );
 
         RETHROW( );
     }
@@ -174,7 +174,7 @@ witio_48_end_of_exp_hook( void )
     {
         witio_48_close( );
         witio_48.is_open = UNSET;
-        fsc2_release_lock( device_name );
+        fsc2_release_uucp_lock( device_name );
     }
     return 1;
 }
