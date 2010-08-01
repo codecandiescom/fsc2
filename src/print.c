@@ -64,6 +64,8 @@ static bool get_print_file( FILE  ** fp,
                             char ** name,
                             long    data );
 static void get_print_comm( long    data );
+static void read_print_comment( void );
+static void write_print_comment( void );
 static void start_printing( FILE       * fp,
                             const char * name,
                             long         what );
@@ -119,7 +121,7 @@ print_it( FL_OBJECT * obj,
         return;
     }
 
-    /* There's a race condition here, if the user is extremely fast she might
+    /* There's a race condition here: if the user is extremely fast she might
        already press another print button before it gets deactivated, but
        chances are very low and I'm too busy at the moment to implement a 100%
        safe method... */
@@ -607,6 +609,9 @@ get_print_comm( long data )
     if ( ! print_with_comment )
         return;
 
+    if ( pc_string == NULL )
+        read_print_comment( );
+
     if ( pc_string != NULL )
         fl_set_input( GUI.print_comment->pc_input, pc_string );
 
@@ -643,12 +648,120 @@ get_print_comm( long data )
 
     res = fl_get_input( GUI.print_comment->pc_input );
     if ( res != NULL && *res != '\0' )
+    {
         pc_string = T_strdup( res );
+        write_print_comment( );
+    }
 
     if ( fl_form_is_visible( GUI.print_comment->print_comment ) )
         fl_hide_form( GUI.print_comment->print_comment );
 
     locked = UNSET;
+}
+
+
+/*---------------------------------------------------------------------*
+ * Reads in the file with the print comment.
+ *---------------------------------------------------------------------*/
+
+static void
+read_print_comment( void )
+{
+    char *fname;
+    FILE *fp = NULL;
+    struct passwd *ue;
+    size_t len;
+
+
+    if ( ! ( ( ue = getpwuid( getuid( ) ) ) && ue->pw_dir && *ue->pw_dir ) )
+         return;
+
+    TRY
+    {
+        fname = get_string( "%s/.fsc2/print_comment", ue->pw_dir );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return;
+
+    if (    ! ( fp = fopen( fname, "r" ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, SET ) )
+    {
+        if ( fp )
+            fclose( fp );
+        T_free( fname );
+        return;
+    }
+
+    T_free( fname );
+
+    TRY
+    {
+        struct stat buf;
+
+        if ( fstat( fileno( fp ), &buf ) || buf.st_size == 0 )
+            THROW( EXCEPTION );
+
+        pc_string = T_malloc( buf.st_size + 1 );
+        if ( ! ( len = fread( pc_string, 1, buf.st_size, fp ) ) )
+            THROW( EXCEPTION );
+        pc_string[ len - 1 ] = '\0';
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        if ( pc_string != NULL )
+            pc_string = T_free( pc_string );
+        fsc2_release_fcntl_lock( fp );
+        fclose( fp );
+        return;
+    }
+
+    fsc2_release_fcntl_lock( fp );
+    fclose( fp );
+}
+
+
+/*---------------------------------------------------------------------*
+ * Writes out the file with the print comment.
+ *---------------------------------------------------------------------*/
+
+static void
+write_print_comment( void )
+{
+    char *fname;
+    FILE *fp = NULL;
+    struct passwd *ue;
+
+
+    if (    ! pc_string
+         || ! *pc_string
+         || ! ( ( ue = getpwuid( getuid( ) ) ) && ue->pw_dir && *ue->pw_dir ) )
+         return;
+
+    TRY
+    {
+        fname = get_string( "%s/.fsc2/print_comment", ue->pw_dir );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return;
+
+    if (    ! ( fp = fopen( fname, "w" ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
+    {
+        if ( fp )
+            fclose( fp );
+        T_free( fname );
+        return;
+    }
+
+    T_free( fname );
+
+    fwrite( pc_string, strlen( pc_string ), 1, fp );
+
+    fsc2_release_fcntl_lock( fp );
+    fclose( fp );
 }
 
 
