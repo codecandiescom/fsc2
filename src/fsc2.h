@@ -214,7 +214,6 @@ struct Internals {
     volatile sig_atomic_t http_server_died; /* set when the http server dies */
 
     char *title;                 /* string with title of the main window */
-    bool use_def_directory;
     char *def_directory;         /* default directory for file open dialog */
 };
 

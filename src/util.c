@@ -1429,9 +1429,8 @@ writen( int          fd,
 
 
 /*-----------------------------------------------------------------------*
- * This function is just a wrapper around fl_show_fselector() to set the
- * start directory on the very first invokation if no start directory is
- * specified by the user.
+ * This function is just a wrapper around fl_show_fselector() to be able
+ * to write out the new directory setting afterwards.
  *-----------------------------------------------------------------------*/
 
 const char *
@@ -1443,18 +1442,10 @@ fsc2_show_fselector( const char * message,
     const char *ret;
 
 
-    /* If no directory is specified and this is the first invocation use
-       the directory from the user specific configuration file */
-
-    if ( ( ! dir || ! *dir ) && Fsc2_Internals.use_def_directory )
-        dir = Fsc2_Internals.def_directory;
-
-    Fsc2_Internals.use_def_directory = UNSET;
+    if ( dir && ! *dir )
+        dir = NULL;
 
     ret = fl_show_fselector( message, dir, pattern, def_name );
-
-    if ( Fsc2_Internals.def_directory )
-        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
     /* Save the possibly new setting to the configuration file */
 
@@ -1718,12 +1709,7 @@ fsc2_save_conf( void )
         return;
 
     if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
-    {
-         if ( Fsc2_Internals.def_directory )
-             Fsc2_Internals.def_directory =
-                                        T_free( Fsc2_Internals.def_directory );
          return;
-    }
 
     TRY
     {
@@ -1739,24 +1725,15 @@ fsc2_save_conf( void )
         if ( fp )
             fclose( fp );
         T_free( fname );
-        if ( Fsc2_Internals.def_directory )
-            Fsc2_Internals.def_directory =
-                                        T_free( Fsc2_Internals.def_directory );
         return;
     }
 
     T_free( fname );
 
     fprintf( fp, "# Don't edit this file - it gets overwritten "
-             "automatically\n\n" );
+             "automatically at irregular times\n\n" );
 
-    if ( Fsc2_Internals.use_def_directory && Fsc2_Internals.def_directory )
-        fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Fsc2_Internals.def_directory );
-    else
-        fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
-
-    if ( Fsc2_Internals.def_directory )
-        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
+    fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
 
     fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
              GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
