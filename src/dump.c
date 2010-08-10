@@ -157,7 +157,7 @@ write_dump( int  * pipe_fd,
 
     if ( info.dli_fname[ 0 ] == '/' )
     {
-        /* For fsc2 itself we need the address as it is, for librries we
+        /* For fsc2 itself we need the address as it is, for libraries we
            have to subtract the base address */
 
         if ( strcmp( info.dli_fname + strlen( info.dli_fname ) - 4, "fsc2" ) )
