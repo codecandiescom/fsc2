@@ -3,7 +3,7 @@
 === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
 === TRACE_LEN menu [ "500", "1000", "2500", "5000", "10000", "25000", \
 === "50000", "100000" ] [ 2 ] "Trace length" "pts"
-=== SIGNAL_FIELD float [ 0 : 120019 ] [ 80050 ] \
+=== SIGNAL_FIELD float [ 0 : 135000 ] [ 80050 ] \
 === "Signal start field\n(for laser correction)" "G"
 === PRETRIGGER  float [ 0.0 : 100.0 ] [ 10.0 ] "Pre-trigger" "in %"
 === NUM_AVG     int [ 1 : 1000000 ] [ 10 ] "Number of averages"
@@ -64,7 +64,7 @@ PREPARATIONS:
 
 /* Initialize graphics */
 
-init_2d( 3, 0, Num_Traces, 0, 1, start_field, field_step, "Time [µs]",
+init_2d( 3, 0, Num_Traces, 0, 1, start_field, field_step, "Time [us]",
          "Field [G]", "Signal [mV]" );
 
 
