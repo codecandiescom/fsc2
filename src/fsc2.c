@@ -1201,8 +1201,6 @@ final_exit_handler( void )
     if ( Fsc2_Internals.http_pid > 0 )
         kill( Fsc2_Internals.http_pid, SIGTERM );
 
-    fsc2_save_conf( );
-
     /* Do everything required to end the program */
 
     T_free( EDL.File_List );
@@ -2048,6 +2046,10 @@ clean_up( void )
     int i;
 
 
+    /* Store some settings of the program */
+
+    fsc2_save_conf( );
+
     /* Get rid of the last remains of graphics */
 
     for ( i = X; i <= Y; i++ )
@@ -2106,7 +2108,7 @@ clean_up( void )
 
     vars_clean_up( );
 
-    /* delete stored program */
+    /* Delete stored program */
 
     forget_prg( );
 }

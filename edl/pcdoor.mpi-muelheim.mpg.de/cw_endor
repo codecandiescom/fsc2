@@ -69,15 +69,15 @@ my $f0 = $mw->Frame( )->pack( '-side' => 'top',
 
 
 my $f1 = $mw->Frame( );
-my $f1_l1 = $f1->Label( '-text' => 'Start frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f1_v = $f1->Entry( '-textvariable' => \$start_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f1_l1 = $f1->Label( '-text'   => 'Start frequency:',
+						'-width'  => '20',
+						'-anchor' => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f1_l2 = $f1->Label( '-text' => 'MHz',
+					   '-relief'          => 'sunken' );
+my $f1_l2 = $f1->Label( '-text'  => 'MHz',
 						'-width' => 3 );
 
 $f1->pack( %fp );
@@ -87,15 +87,15 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l1 = $f2->Label( '-text' => 'End frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f2_v = $f2->Entry( '-textvariable' => \$end_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f2_l1 = $f2->Label( '-text'   => 'End frequency:',
+						'-width'  => '20',
+						'0anchor' => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'    => \$end_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f2_l2 = $f2->Label( '-text' => 'MHz',
+					   '-relief'          => 'sunken' );
+my $f2_l2 = $f2->Label( '-text'  => 'MHz',
 						'-width' => 3 );
 
 $f2->pack( %fp );
@@ -105,15 +105,15 @@ $f2_l2->pack( %wp );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l1 = $f3->Label( '-text' => 'Step frequency:',
-						'-width' => '20',
-						'anchor' => 'w' );
-my $f3_v = $f3->Entry( '-textvariable' => \$step_freq,
-					   '-width' => '6',
-					   '-validate' => 'key',
+my $f3_l1 = $f3->Label( '-text'   => 'Step frequency:',
+						'-width'  => '20',
+						'-anchor' => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$step_freq,
+					   '-width'           => '6',
+					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
-					   '-relief' => 'sunken' );
-my $f3_l2 = $f3->Label( '-text' => 'kHz',
+					   '-relief'           => 'sunken' );
+my $f3_l2 = $f3->Label( '-text'  => 'kHz',
 						'-width' => 3 );
 
 $f3->pack( %fp );
@@ -125,7 +125,7 @@ $f3_l2->pack( %wp );
 my $f4 = $mw->Frame( );
 my $f4_l1 = $f4->Label( '-text' => 'Attenuation:',
 						'-width' => '20',
-						'anchor' => 'w' );
+						'-anchor' => 'w' );
 my $f4_v = $f4->Entry( '-textvariable' => \$atten,
 					   '-width' => '6',
 					   '-validate' => 'key',
@@ -143,7 +143,7 @@ $f4_l2->pack( %wp );
 my $f5 = $mw->Frame( );
 my $f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
 						'-width' => '20',
-						'anchor' => 'w' );
+						'-anchor' => 'w' );
 my $f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
 					   '-width' => '6',
 					   '-validate' => 'key',
@@ -161,7 +161,7 @@ $f5->{ is_shown } = 1;
 my $f6 = $mw->Frame( );
 my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude:',
 						'-width' => '20',
-						'anchor' => 'w' );
+						'-anchor' => 'w' );
 my $f6_v = $f6->Entry( '-textvariable' => \$mod_ampl,
 					   '-width' => '6',
 					   '-validate' => 'key',
@@ -179,7 +179,7 @@ $f6_l2->pack( %wp );
 my $f7 = $mw->Frame( );
 my $f7_l1 = $f7->Label( '-text' => 'Number of runs:',
 						'-width' => '20',
-						'anchor' => 'w' );
+						'-anchor' => 'w' );
 my $f7_v = $f7->Entry( '-textvariable' => \$N_runs,
 					   '-width' => '6',
 					   '-validate' => 'key',
@@ -197,7 +197,7 @@ $f7_l2->pack( %wp );
 my $f8 = $mw->Frame( );
 my $f8_l = $f8->Label( '-text'              => 'Lock-in amplifier:',
 					   '-width'             => '20',
-					   'anchor'             => 'w' );
+					   '-anchor'            => 'w' );
 my $f8_m = $f8->Optionmenu( '-options'      =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width'        => 9,
@@ -209,9 +209,9 @@ $f8_m->pack( %wp );
 
 
 my $f9 = $mw->Frame( );
-my $f9_l = $f9->Label( '-text' => 'Time constant:',
-					   '-width' => '20',
-					   'anchor' => 'w' );
+my $f9_l = $f9->Label( '-text'   => 'Time constant:',
+					   '-width'  => '20',
+					   '-anchor' => 'w' );
 my $f9_m = $f9->Optionmenu( '-options' =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
@@ -224,9 +224,9 @@ $f9_m->pack( %wp );
 
 
 my $f10 = $mw->Frame( );
-my $f10_l = $f10->Label( '-text' => 'Sensitivity:',
-						'-width' => '20',
-						'anchor' => 'w' );
+my $f10_l = $f10->Label( '-text'  => 'Sensitivity:',
+						'-width'  => '20',
+						'-anchor' => 'w' );
 my $f10_m = $f10->Optionmenu( '-options' =>
                             [ ( "Don't set", '500 mV', '200 mV', '100 mV',
                                 ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
@@ -244,8 +244,8 @@ $f10_m->pack( %wp );
 
 my $f11 = $mw->Frame( );
 my $f11_l1 = $f11->Label( '-text' => 'Field current:',
-						'-width' => '20',
-						'anchor' => 'w' );
+						'-width'  => '20',
+						'-anchor' => 'w' );
 my $f11_v = $f11->Entry( '-textvariable' => \$current,
 					   '-width' => '6',
 					   '-validate' => 'key',
@@ -275,8 +275,8 @@ my $f12_q = $mw->Button( '-text' => 'Quit',
 $f12->pack( '-side' => 'top',
 			'-fill' => 'x',
 			'-padx' => '4m' );
-$f12_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f12_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f12_a->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+$f12_q->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
 
 
 MainLoop;
@@ -398,9 +398,9 @@ sub li_conf {
 
 	if ( $li =~ /^SR8/ ) {
 		unless ( $f5->{ is_shown } == 1 ) {
-			$f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
-								 '-width' => '20',
-								 'anchor' => 'w' );
+			$f5_l1 = $f5->Label( '-text'   => 'Modulation frequency:',
+								 '-width'  => '20',
+								 '-anchor' => 'w' );
 			$f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
 								'-width' => '6',
 								'-validate' => 'key',

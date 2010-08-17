@@ -64,7 +64,7 @@ my $ballon = $mw->Balloon( );
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text'           => 'Start current:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f1_v = $f1->Entry( '-textvariable'    => \$start_cur,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -84,7 +84,7 @@ $f1_l2->pack( %wp );
 my $f2 = $mw->Frame( );
 my $f2_l1 = $f2->Label( '-text'           => 'End current:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f2_v = $f2->Entry( '-textvariable'    => \$end_cur,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -104,7 +104,7 @@ $f2_l2->pack( %wp );
 my $f3 = $mw->Frame( );
 my $f3_l1 = $f3->Label( '-text'           => 'Current step size:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f3_v = $f3->Entry( '-textvariable'    => \$cur_step,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -124,7 +124,7 @@ $f3_l2->pack( %wp );
 my $f4 = $mw->Frame( );
 my $f4_l1 = $f4->Label( '-text'           => 'Number of runs:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f4_v = $f4->Entry( '-textvariable'    => \$num_runs,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -143,7 +143,7 @@ $f4_l2->pack( %wp );
 my $f5 = $mw->Frame( '-width'             => '29' );
 my $f5_l1 = $f5->Label( '-text'           => 'Waiting time:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f5_v = $f5->Entry( '-textvariable'    => \$tc_fact,
 					   '-width'           => '7',
 					   '-validate'        => 'key',
@@ -165,7 +165,7 @@ $f5_l2->pack( %wp );
 my $f8 = $mw->Frame( );
 my $f8_l = $f8->Label( '-text'              => 'Lock-in amplifier:',
 					   '-width'             => '20',
-					   'anchor'             => 'w' );
+					   '-anchor'            => 'w' );
 my $f8_m = $f8->Optionmenu( '-options'      =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width'        => 9,
@@ -181,7 +181,7 @@ $f8_m->pack( %wp );
 my $f6 = $mw->Frame( );
 my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
 					   '-width'         => '20',
-					   'anchor'         => 'w' );
+					   '-anchor'        => 'w' );
 my $f6_m = $f6->Optionmenu( '-options'  =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
@@ -199,7 +199,7 @@ $f6_m->pack( %wp );
 my $f7 = $mw->Frame( );
 my $f7_l = $f7->Label( '-text'          => 'Sensitivity:',
 					   '-width'         => '20',
-					   'anchor'         => 'w' );
+					   '-anchor'        => 'w' );
 my $f7_m = $f7->Optionmenu( '-options'  =>
 							[ ( "Don't set", '500 mV', '200 mV', '100 mV',
 								' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
@@ -235,10 +235,10 @@ $f10->pack( '-side'                 => 'top',
 			'-fill'                 => 'x',
 			'-padx'                 => '4m' );
 $f10_a->pack( %wp,
-			  'padx'                => '5m',
+			  '-padx'               => '5m',
 			  '-pady'               => '3m' );
 $f10_q->pack( %wp,
-			  'padx'                => '5m',
+			  '-padx'               => '5m',
 			  '-pady'               => '3m' );
 
 
