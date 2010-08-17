@@ -1,5 +1,5 @@
-=== START_FIELD float [ 0 : 120019 ] [ 80000 ] "Start field" "G"
-=== END_FIELD float [ 0 : 120019 ] [ 80500 ] "End field" "G"
+=== START_FIELD float [ 0 : 135000 ] [ 80000 ] "Start field" "G"
+=== END_FIELD float [ 0 : 135000 ] [ 82000 ] "End field" "G"
 === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
 === TRACE_LEN menu [ "500", "1000", "2500", "5000", "10000", "25000", \
 === "50000", "100000" ] [ 2 ] "Trace length" "pts"
