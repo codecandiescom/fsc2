@@ -520,6 +520,29 @@ xforms_init( int  * argc,
 
     G.is_fully_drawn = UNSET;
 
+    /* Set a default directory for the file selector but only when it's not
+       either obviously invalid (i.e. just an empty string, which shouldn't
+       be possible), a stat() on it works, and if it's a directory and not
+       a symbolic link (we better don't try to follow symbolic links, we could
+       end up in a loop and it's not worth trying to implement a detection
+       mechanism) or if not at least one of the permissions allows read access
+       (we can't know here if the directory is going to be used for reading
+       only or also writing, so we only check for the lowest hurdle). */
+
+    if ( Fsc2_Internals.def_directory )
+    {
+        struct stat buf;
+
+        if (    *Fsc2_Internals.def_directory
+             && ! stat( Fsc2_Internals.def_directory, &buf ) < 0
+             && S_ISDIR( buf.st_mode )
+             && ! S_ISLNK( buf.st_mode )
+             && buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) )
+            fl_set_directory( Fsc2_Internals.def_directory);
+
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
+    }
+
     return OK;
 }
 
