@@ -1735,6 +1735,10 @@ fsc2_save_conf( void )
 
     fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
 
+    get_form_position( GUI.main_form->fsc2, &GUI.win_x, &GUI.win_y );
+    GUI.win_width  = GUI.main_form->fsc2->w;
+    GUI.win_height = GUI.main_form->fsc2->h;
+
     fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
              GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
 
