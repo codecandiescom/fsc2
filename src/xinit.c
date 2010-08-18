@@ -534,7 +534,7 @@ xforms_init( int  * argc,
         struct stat buf;
 
         if (    *Fsc2_Internals.def_directory
-             && ! stat( Fsc2_Internals.def_directory, &buf ) < 0
+             && ! stat( Fsc2_Internals.def_directory, &buf )
              && S_ISDIR( buf.st_mode )
              && ! S_ISLNK( buf.st_mode )
              && buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) )
