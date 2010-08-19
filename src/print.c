@@ -253,7 +253,7 @@ save_print_command( void )
     T_free( fname );
 
     fprintf( fp, "# Note: only the first non-empty line will be taken into "
-             "account\n\n%s\n", cmd );
+             "account\n%s\n", cmd );
     fsc2_release_fcntl_lock( fp );
     fclose( fp );
 }
@@ -705,7 +705,6 @@ read_print_comment( void )
         pc_string = T_malloc( buf.st_size + 1 );
         if ( ! ( len = fread( pc_string, 1, buf.st_size, fp ) ) )
             THROW( EXCEPTION );
-        pc_string[ len - 1 ] = '\0';
         TRY_SUCCESS;
     }
     OTHERWISE

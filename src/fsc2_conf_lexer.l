@@ -72,7 +72,7 @@ int fsc2_conflex_destroy( void );
 "CUT_WINDOW_POSITION"         return CW_POS;
 "CUT_WINDOW_SIZE"             return CW_SZ;
 "TOOLBOX_POSITION"            return TB_POS;
-":"|"="                       return SEPARATOR;
+[ \t]*[:=]+[ \t]*             return SEPARATOR;
 [+-]*[0-9]+[+-][0-9]+         {
                                   fsc2_conflval.sval = fsc2_conftext;
                                   return POS;
@@ -81,8 +81,9 @@ int fsc2_conflex_destroy( void );
                                   fsc2_conflval.sval = fsc2_conftext;
                                   return SZ;
                               }
-[^#\t\n:= ]+                  {
-                                  fsc2_conflval.sval = fsc2_conftext;
+"\""[^\"]+"\""[ \t]*"\n"              {
+                                  *strrchr( fsc2_conftext, '"' ) = '\0';
+                                  fsc2_conflval.sval = fsc2_conftext + 1;
                                   return TEXT;
                               }
 <<EOF>>                       return 0;
