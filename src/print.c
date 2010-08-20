@@ -703,7 +703,7 @@ read_print_comment( void )
             THROW( EXCEPTION );
 
         pc_string = T_malloc( buf.st_size + 1 );
-        if ( ! ( len = fread( pc_string, 1, buf.st_size, fp ) ) )
+        if ( ( len = fread( pc_string, 1, buf.st_size, fp ) ) != buf.st_size )
             THROW( EXCEPTION );
         pc_string[ len ] = '\0';
         TRY_SUCCESS;
