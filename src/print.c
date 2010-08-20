@@ -705,6 +705,7 @@ read_print_comment( void )
         pc_string = T_malloc( buf.st_size + 1 );
         if ( ! ( len = fread( pc_string, 1, buf.st_size, fp ) ) )
             THROW( EXCEPTION );
+        pc_string[ len ] = '\0';
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -757,7 +758,7 @@ write_print_comment( void )
 
     T_free( fname );
 
-    fwrite( pc_string, strlen( pc_string ), 1, fp );
+    fputs( pc_string, fp );
 
     fsc2_release_fcntl_lock( fp );
     fclose( fp );
