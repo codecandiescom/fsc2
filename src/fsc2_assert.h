@@ -17,6 +17,9 @@
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
+ *
+ * Thanks to Robert Wessel <robertwessel2@yahoo.com> and Eric Sosman
+ * <esosman@ieee.org> for suggestions on how to imprive it on c.l.c.
  */
 
 
@@ -40,10 +43,19 @@ int fsc2_assert_print( const char * /* expression */,
 int fsc2_impossible_print( const char * /* filename */,
                            int          /* line     */  );
 
+#endif   /* ! FSC2_ASSERT__HEADER */
+
+
+/* Note: like the real <assert.h> it should be possibe to include
+   the file more than once with different settings for NDEBUG */
+
+#undef fsc2_assert
+#undef fsc2_impossible
+
 
 #ifdef NDEBUG
-#define fsc2_assert( expression ) do { } while ( 0 )
-#define fsc2_impossible( ) do { } while ( 0 )
+#define fsc2_assert( expression ) ( ( void ) ( 0 ) )
+#define fsc2_impossible( ) ( ( void ) ( 0 ) )
 #else
 #define fsc2_assert( expression )                                     \
        ( ( void ) ( ( expression ) ?                                  \
@@ -51,9 +63,6 @@ int fsc2_impossible_print( const char * /* filename */,
 #define fsc2_impossible( )                                            \
        ( ( void ) fsc2_impossible_print( __FILE__, __LINE__ ) )
 #endif
-
-
-#endif   /* ! FSC2_ASSERT__HEADER */
 
 
 /*

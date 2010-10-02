@@ -670,7 +670,6 @@ read_print_comment( void )
     char *fname;
     FILE *fp = NULL;
     struct passwd *ue;
-    size_t len;
 
 
     if ( ! ( ( ue = getpwuid( getuid( ) ) ) && ue->pw_dir && *ue->pw_dir ) )
@@ -698,12 +697,13 @@ read_print_comment( void )
     TRY
     {
         struct stat buf;
+        size_t len;
 
         if ( fstat( fileno( fp ), &buf ) || buf.st_size == 0 )
             THROW( EXCEPTION );
 
         pc_string = T_malloc( buf.st_size + 1 );
-        if ( ( len = fread( pc_string, 1, buf.st_size, fp ) ) != buf.st_size )
+        if ( ( len = fread( pc_string, 1, buf.st_size, fp ) ) != ( size_t ) buf.st_size )
             THROW( EXCEPTION );
         pc_string[ len ] = '\0';
         TRY_SUCCESS;
