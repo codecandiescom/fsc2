@@ -1188,29 +1188,22 @@ static void
 gpib_log_error( const char * type )
 {
     int i;
-    static int state[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
-                               0x0800, 0x0400, 0x0200, 0x0100,
-                               0x0080, 0x0040, 0x0020, 0x0010,
-                               0x0008, 0x0004, 0x0002, 0x0001 };
-    static char is[ 16 ][ 6 ] = { "IBERR", "TIMO",  "END",   "SRQI",
-                                  "RQS",   "SPOLL", "EVENT", "CMPL",
-                                  "LOK",   "REM",   "CIC",   "ATN",
-                                  "TACS",  "LACS",  "DTAS",  "DCAS" };
-    static char ie[ 21 ][ 5 ] = { "EDVR", "ECIC", "ENOL", "EADR",
-                                  "EARG", "ESAC", "EABO", "ENEB",
-                                  "EDMA", "",     "EOIP", "ECAP",
-                                  "EFSO", "",     "EBUS", "ESTB",
-                                  "ESRQ" };
+    static const char *is[ ] = { "IBERR", "TIMO",  "END",   "SRQI",
+                                 "RQS",   "SPOLL", "EVENT", "CMPL",
+                                 "LOK",   "REM",   "CIC",   "ATN",
+                                 "TACS",  "LACS",  "DTAS",  "DCAS" };
+    static const char *ie[ ] = { "EDVR", "ECIC", "ENOL", "EADR",
+                                 "EARG", "ESAC", "EABO", "ENEB",
+                                 "EDMA", "",     "EOIP", "ECAP",
+                                 "EFSO", "",     "EBUS", "ESTB",
+                                 "ESRQ" };
 
 
     gpib_log_date( );
     fprintf( gpib_log, "Error in function %s(): <", type );
     for ( i = 15; i >= 0; i-- )
-    {
-        if ( ibsta & state[ 15 - i ] )
+        if ( ibsta & ( 1 << i ) )
             fprintf( gpib_log, " %s", is[ 15 - i ] );
-    }
-
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
     fflush( gpib_log );
 }
