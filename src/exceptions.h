@@ -25,7 +25,7 @@
  * by Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It *
  * has been changed a lot thanks to very constructive criticism by *
  * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c (which     *
- * doesn't mean that he would be responsible for the flaws!)       *
+ * doesn't mean that he would be responsible for any flaws!)       *
  *                                                                 *
  * In order to avoid overflows of the fixed size exception frame   *
  * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is *
@@ -100,13 +100,13 @@ Exception_Types_T get_exception_type( const char * /* file */,
 
 /* Automatic variables are not necessarily restored after a longjmp() when
    they were stored in registers, so we have to keep the compiler from
-   putting automatic variable that could be clobbered into a register.
+   putting automatic variable that could be clobbered into registers.
    The following hack seems to do the trick for all gcc versions. */
 
-#define CLOBBER_PROTECT( a )                                 \
-     do {                                                    \
-         unsigned char *xI3_2sYzii = ( unsigned char * ) &a; \
-         * ( unsigned char * ) &a = *xI3_2sYzii;             \
+#define CLOBBER_PROTECT( a )                                  \
+     do {                                                     \
+         unsigned char *xI3_2sYzii = ( unsigned char * ) &a;  \
+         * ( unsigned char * ) &a = *xI3_2sYzii;              \
      } while( 0 )
 
 

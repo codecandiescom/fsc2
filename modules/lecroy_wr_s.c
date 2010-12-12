@@ -507,7 +507,8 @@ digitizer_timebase( Var_T * v )
         }
 
     if (    tb_index >= 0
-         && fabs( timebase - lecroy_wr.tbas[ tb_index ] ) > timebase * 1.0e-2 )
+         && fabs( timebase - lecroy_wr.tbas[ tb_index ] ) >
+                                         1.0e-2 * lecroy_wr.tbas[ tb_index ] )
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
                lecroy_wr_ptime( timebase ),
                lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
@@ -517,16 +518,20 @@ digitizer_timebase( Var_T * v )
         if ( timebase < lecroy_wr.tbas[ 0 ] )
         {
             tb_index = 0;
-            print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   lecroy_wr_ptime( timebase ),
-                   lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
+            if ( fabs( timebase - lecroy_wr.tbas[ 0 ] )
+                                               > 1.0e-2 * lecroy_wr.tbas[ 0 ] )
+                print( WARN, "Timebase of %s is too short, using %s instead.\n",
+                       lecroy_wr_ptime( timebase ),
+                       lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
         }
         else
         {
             tb_index = lecroy_wr.num_tbas - 1;
-            print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   lecroy_wr_ptime( timebase ),
-                   lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
+            if ( fabs( timebase - lecroy_wr.tbas[ tb_index ] ) 
+                                        > 1.0e-2 * lecroy_wr.tbas[ tb_index ] )
+                print( WARN, "Timebase of %s is too long, using %s instead.\n",
+                       lecroy_wr_ptime( timebase ),
+                       lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
         }
     }
 

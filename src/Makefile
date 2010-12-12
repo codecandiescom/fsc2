@@ -199,15 +199,21 @@ install:
 	$(INSTALL) -d $(libdir)
 
 ifdef ONLY_SETGID
-	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+ifneq ($(GPIB_LIBRARY),none)
 	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
+endif
+	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 else
 ifdef ONLY_SETUID
-	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+ifneq ($(GPIB_LIBRARY),none)
 	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
+endif
+	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 else
-	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+ifneq ($(GPIB_LIBRARY),none)
 	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) gpibd $(bindir)
+endif
+	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 endif
 endif
 	$(INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
@@ -225,10 +231,15 @@ endif
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
 uninstall:
-	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/gpibd $(bindir)/fsc2_clean  \
+	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean                  \
 					 $(bindir)/fsc2_connect $(bindir)/fsc2_start          \
-					 $(bindir)/fsc2_test $(bindir)/fsc2_load              \
-					 $(bindir)/fsc2_addr2line
+					 $(bindir)/fsc2_test $(bindir)/fsc2_load
+ifneq ($(GPIB_LIBRARY),none)
+	$(RM) $(RMFLAGS) $(bindir)/gpibd
+endif
+ifdef ADDR2LINE
+	$(RM) $(RMFLAGS) $(bindir)/fsc2_addr2line
+endif
 	for f in *.fsc2_so; do                                                \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                                   \
 	done
@@ -237,8 +248,9 @@ uninstall:
 # How to get rid of stuff not needed anymore
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c    \
-		  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out svn-* *~
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c       \
+		             gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out  \
+	                 svn-* *~
 
 clean:
 	$(MAKE) cleanup

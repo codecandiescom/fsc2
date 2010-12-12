@@ -1,0 +1,8 @@
+DEVICES:
+lecroy_wr_l;
+
+
+EXPERIMENT:
+
+digitizer_timebase( 1 ns );
+digitizer_memory_size( 12500000 );

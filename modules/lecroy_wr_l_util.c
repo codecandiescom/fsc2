@@ -569,8 +569,9 @@ lecroy_wr_calc_pos( double t )
  * Function allocates and sets up the array with the possible
  * memory sizes, using the LECROY_WR_MAX_MEMORY_SIZE macro
  * defined in the configuration file. Assumes that the memory
- * sizes always follow an 1-2.5-5 scheme and that the smallest
- * memory size is 500 (LECROY_WR_MIN_MEMORY_SIZE) samples.
+ * sizes always follow an 1-2.5-5 scheme (except for the very
+ * last one) and that the smallest memory size is 500 samples
+ * (LECROY_WR_MIN_MEMORY_SIZE).
  *-------------------------------------------------------------*/
 
 void
@@ -580,7 +581,7 @@ lecroy_wr_numpoints_prep( void )
     long len;
 
 
-    for ( len = 0; cur_mem_size < LECROY_WR_MAX_MEMORY_SIZE; len++ )
+    for ( len = 0; cur_mem_size <= LECROY_WR_MAX_MEMORY_SIZE; len++ )
         if ( len % 3 == 1 )
             cur_mem_size = ( 5 * cur_mem_size ) / 2;
         else
@@ -600,6 +601,8 @@ lecroy_wr_numpoints_prep( void )
         else
             cur_mem_size *= 2;
     }
+
+    lecroy_wr.mem_sizes[ len - 1 ] = LECROY_WR_MAX_MEMORY_SIZE;
 }
 
 
