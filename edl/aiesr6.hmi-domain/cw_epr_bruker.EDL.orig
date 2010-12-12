@@ -2,7 +2,7 @@
 === END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
 === NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
-=== RESONATOR menu [ "Unspecified", "Cavity 4104 OR/8415", "Cavity 4102ST/9707", "DualCavity 4105DR/0504-front", "DualCavity 4105DR/0504-back" ] [ 1 ] "Resonator"
+=== RESONATOR menu [ "Unspecified" ] [ 1 ] "Resonator"
 === SENS1 menu [ "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0",  \
 === "6.0", "8.0" ][ 1 ] "Receiver gain\n(factor)"
 === SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ]  \
