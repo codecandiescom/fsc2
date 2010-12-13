@@ -118,24 +118,32 @@ measure_afc_signal( double * val )
 
 
 /*---------------------------------------------------*
- * Returns an array with the measured tune mode data
+ * Returns an array with the measured tune mode data, made
+ * to fit the buffer and with values between 0.0 and 1.0
  *---------------------------------------------------*/
 
 size_t
-measure_tune_mode( double ** data )
+measure_tune_mode( double * data,
+                   size_t   size )
 {
 #if ! defined BMWB_TEST
 	return 0;
 #else
+    size_t i;
+
+    for ( i = 0; i < size; i++ )
+        data[ i ] =   0.2 + ( 0.6 * i ) / size
+                    + 0.1 * ( rand( ) / ( 1.0 * RAND_MAX ) - 0.5 );
+
 	return 0;
 #endif
 }
 
 
-/*--------------------------------------------------*
+/*----------------------------------------------------*
  * Returns a value between 0 or 1.0, indicating the
- * "unlocked-ness" if the bridge
- *--------------------------------------------------*/
+ * "unlocked-ness" of the bridge (X-band bridge only)
+ *----------------------------------------------------*/
 
 int
 measure_unlocked_signal( double * val )
@@ -174,10 +182,10 @@ measure_unlocked_signal( double * val )
 }
 
 
-/*---------------------------------------------------*
+/*-------------------------------------------------------*
  * Returns a value between 0 and 1.0, indicating the
- * "uncalibrated-ness" of the bridge
- *---------------------------------------------------*/
+ * "uncalibrated-ness" of the bridge (X-band bridge only)
+ *--------------------------------------------------------*/
 
 int
 measure_uncalibrated_signal( double * val )
@@ -215,14 +223,14 @@ measure_uncalibrated_signal( double * val )
 }
 
 
-/*-------------------------------*
- * Determine if AFC is on or off
- *-------------------------------*/
+/*----------------------------------------------------*
+ * Determine if AFC is on or off (Q-band bridge only)
+ *----------------------------------------------------*/
 
 int
 measure_afc_state( int * state )
 {
-    unsigned char v;
+    unsigned char v = 0;
 
 
     if ( bmwb.type == X_BAND )

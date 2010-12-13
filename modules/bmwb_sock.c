@@ -25,52 +25,71 @@
 
 static int listen_fd;
 static volatile int client_fd = -1;
-
-static void * conn_handler( void * null );
-static void * client_handler( void * null );
-static int handle_request( int fd );
-static int freq_req( int    fd,
-					 char * req );
-static int att_req( int    fd,
-					char * req );
-static int sigph_req( int    fd,
-					  char * req );
-static int bias_req( int    fd,
-					 char * req );
-static int lckph_req( int    fd,
-					  char * req );
-static int mode_req( int    fd,
-					 char * req );
-static int iris_req( int    fd,
-					 char * req );
-static int detsig_req( int    fd,
-					   char * req );
-static int afcsig_req( int    fd,
-					   char * req );
-static int unlck_req( int    fd,
-					  char * req );
-static int uncal_req( int    fd,
-					  char * req );
-static int afcst_req( int    fd,
-					  char * req );
-static int lck_req( int    fd,
-                    char * req );
-static void write_sig_handler( int sig_no );
-static ssize_t swrite( int          d,
-					   const char * buf,
-					   ssize_t      len );
-static ssize_t sread( int       d,
-					  char    * buf,
-					  ssize_t   len );
-static int finish_with_update( int fd );
-
 static volatile sig_atomic_t client_died = 0;
 
 
-/*-----------------------------------------------------*
- * Opens a socket we're going to listen on and creates
+static void * conn_handler( void * null );
+
+static void * client_handler( void * null );
+
+static int handle_request( int fd );
+
+static int req_compare( const void * what,
+                        const void * req );
+
+static int freq_req( int          fd,
+                     const char * req );
+
+static int att_req( int          fd,
+                    const char * req );
+
+static int sigph_req( int          fd,
+                      const char * req );
+
+static int bias_req( int          fd,
+                     const char * req );
+
+static int mode_req( int          fd,
+                     const char * req );
+
+static int iris_req( int          fd,
+                     const char * req );
+
+static int detsig_req( int          fd,
+                       const char * req );
+
+static int afcsig_req( int          fd,
+                       const char * req );
+
+static int unlck_req( int          fd,
+                      const char * req );
+
+static int uncal_req( int          fd,
+                      const char * req );
+
+static int afcst_req( int          fd,
+                      const char * req );
+
+static int lck_req( int          fd,
+                    const char * req );
+
+static void write_sig_handler( int sig_no );
+
+static ssize_t swrite( int          fd,
+                       const char * buf,
+                       ssize_t      len );
+
+static ssize_t sread( int       fd,
+                      char    * buf,
+                      ssize_t   len );
+
+static int finish_with_update( int fd );
+
+
+/*-------------------------------------------------------*
+ * Opens the socket we're going to listen on and creates
  * a thread for dealing with external connections.
- *-----------------------------------------------------*/
+ *-------------------------------------------------------*/
 
 int
 bmwb_open_sock( void )
@@ -81,14 +100,14 @@ bmwb_open_sock( void )
 
     raise_permissions( );
 
-    /* Create UNIX domain socket */
+    /* Create a UNIX domain socket */
 
     if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
-	{
+    {
         lower_permissions( );
-		sprintf( bmwb.error_msg, "Can't create a socket." );
+        sprintf( bmwb.error_msg, "Can't create a socket." );
         return 1;
-	}
+    }
 
     unlink( P_tmpdir "/bmwb.uds" );
     memset( &serv_addr, 0, sizeof serv_addr );
@@ -103,7 +122,7 @@ bmwb_open_sock( void )
         close( listen_fd );
         unlink( P_tmpdir "/bmwb.uds" );
         lower_permissions( );
-		sprintf( bmwb.error_msg, "Can't bind to socket." );
+        sprintf( bmwb.error_msg, "Can't bind to socket." );
         return 1;
     }
 
@@ -112,7 +131,7 @@ bmwb_open_sock( void )
         close( listen_fd );
         unlink( P_tmpdir "/bmwb.uds" );
         lower_permissions( );
-		sprintf( bmwb.error_msg, "Can't listen on socket." );
+        sprintf( bmwb.error_msg, "Can't listen on socket." );
         return 1;
     }
 
@@ -120,24 +139,24 @@ bmwb_open_sock( void )
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
     if ( pthread_create( &bmwb.a_thread, &attr, conn_handler, NULL ) )
-	{
+    {
         pthread_attr_destroy( &attr );
         close( listen_fd );
         unlink( P_tmpdir "/bmwb.uds" );
         lower_permissions( );
-		sprintf( bmwb.error_msg, "Can't create thread." );
-		return 1;
-	}
+        sprintf( bmwb.error_msg, "Can't create thread." );
+        return 1;
+    }
 
     lower_permissions( );
-	pthread_attr_destroy( &attr );
-	return 0;
+    pthread_attr_destroy( &attr );
+    return 0;
 }
 
 
-/*----------------------------------------------------------*
+/*------------------------------------------------------*
  * Thread function that deals with incoming connections
- *----------------------------------------------------------*/
+ *------------------------------------------------------*/
 
 static void *
 conn_handler( void * null  UNUSED_ARG )
@@ -153,11 +172,11 @@ conn_handler( void * null  UNUSED_ARG )
     pthread_attr_init( &attr );
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-	while ( 1 )
-	{
-		if ( ( fd = accept( listen_fd, ( struct sockaddr * ) &cli_addr,
+    while ( 1 )
+    {
+        if ( ( fd = accept( listen_fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
-			continue;
+            continue;
 
         /* If client_fd isn't -1 some other process is still using the
            device, signal this to the caller and close connection */
@@ -166,12 +185,12 @@ conn_handler( void * null  UNUSED_ARG )
         {
             swrite( fd, "B\n", 2 );         /* "B\n" indicates busy */
             shutdown( fd, SHUT_RDWR );
-			close( fd );
-			continue;
-		}
+            close( fd );
+            continue;
+        }
 
-        /* Set global client fd and create a thread that deals with the
-           client */
+        /* Set global client file descriptor and create a thread that deals
+           with the client */
 
         client_fd = fd;
 
@@ -179,14 +198,14 @@ conn_handler( void * null  UNUSED_ARG )
         {
             swrite( fd, "Z\n", 2 );         /* "Z\n" indicates failure */
             shutdown( fd, SHUT_RDWR );
-			close( fd );
+            close( fd );
             client_fd = -1;
         }
-    }		
+    }       
 
-	pthread_attr_destroy( &attr );
+    pthread_attr_destroy( &attr );
     bmwb.a_is_active = 0;
-	pthread_exit( NULL );
+    pthread_exit( NULL );
 }
 
 
@@ -239,53 +258,68 @@ client_handler( void * null  UNUSED_ARG )
     client_fd = -1;
 
     bmwb.c_is_active = 0;
-	pthread_exit( NULL );
+    pthread_exit( NULL );
 }
 
 
-/*------------------------------------------------*
- * Handles a request by the client, one at a time
- *------------------------------------------------*/
+/*-----------------------------------------------*
+ * Handles requests by the client, one at a time
+ *-----------------------------------------------*/
+
+typedef struct {
+    const char * req;
+    size_t       len;
+    int          ( * fnc ) ( int, const char * );
+} req_type;
+
 
 static int
 handle_request( int fd )
 {
-	char buf[ 256 ];
-	ssize_t n;
-	size_t i;
-	struct {
-		const char * cmd;
-		size_t       len;
-		int          ( * fnc ) ( int, char * );
-	} cmds[ ] =
-		  { { "FREQ",    4, freq_req   },   /* set /get microwave frequency */
-			{ "ATT",     3, att_req    },   /* set/get attenuation */
-			{ "SIGPH",   5, sigph_req  },   /* set/get signal phase */
-			{ "BIAS",    4, bias_req   },   /* set/get microwave bias */
-			{ "LCKPH",   5, lckph_req  },   /* set/get lock phase */
-			{ "MODE",    4, mode_req   },   /* set/get mode */
-			{ "IRIS ",   5, iris_req   },   /* change iris request */
-			{ "DETSIG?", 7, detsig_req },   /* get detector signal */
-			{ "AFCSIG?", 7, afcsig_req },   /* get AFC signal */
-			{ "UNLCK?",  6, unlck_req  },   /* get unlocked signal */
-			{ "UNCAL?",  6, uncal_req  },   /* get uncalibrated signal */
-			{ "AFCST?",  6, afcst_req  },   /* get AFC state */
-            { "LCK ",    4, lck_req    }    /* set/release lock */
-		  };
+    char buf[ 64 ];
+    ssize_t n;
+    req_type *res;
+    static req_type reqs[ ] =
+          { { "AFCSIG?", 7, afcsig_req },   /* get AFC signal */
+            { "AFCST?",  6, afcst_req  },   /* get AFC state */
+            { "ATT",     3, att_req    },   /* set/get attenuation */
+            { "BIAS",    4, bias_req   },   /* set/get microwave bias */
+            { "DETSIG?", 7, detsig_req },   /* get detector signal */
+            { "FREQ",    4, freq_req   },   /* set /get microwave frequency */
+            { "IRIS ",   5, iris_req   },   /* change iris request */
+            { "LCK ",    4, lck_req    },   /* set/release lock */
+            { "MODE",    4, mode_req   },   /* set/get mode */
+            { "SIGPH",   5, sigph_req  },   /* set/get signal phase */
+            { "UNCAL?",  6, uncal_req  },   /* get uncalibrated signal */
+            { "UNLCK?",  6, unlck_req  }   /* get unlocked signal */
+          };
 
 
-	if ( ( n = sread( fd, buf, sizeof buf ) ) <= 0 )
-		return 1;
+    if ( ( n = sread( fd, buf, sizeof buf ) ) <= 0 )
+        return 1;
 
-	buf[ n - 1 ] = '\0';
+    buf[ n - 1 ] = '\0';
 
-	for ( i = 0; i < sizeof cmds / sizeof *cmds; i++ )
-		if ( ! strncasecmp( buf, cmds[ i ].cmd, cmds[ i ].len ) )
-			return cmds[ i ].fnc( fd, buf + cmds[ i ].len );
+    if ( ( res = bsearch( buf, reqs, sizeof( req_type ),
+                          sizeof reqs / sizeof *reqs, req_compare ) ) != NULL )
+        return res->fnc( fd, buf + res->len );
 
-    fprintf( stderr, "Unknown \"%s\"\n", buf );
-	return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    fprintf( stderr, "Received unknown command \"%s\"\n", buf );
+    return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 }
+
+
+/*----------------------------------------------------------------------*
+ *----------------------------------------------------------------------*/
+
+static int
+req_compare( const void * what,
+             const void * req )
+{
+    return strncasecmp( what, 
+                        ( ( req_type * ) req )->req,
+                        ( ( req_type * ) req )->len );
+} 
 
 
 /*----------------------------------------------------------------------*
@@ -293,40 +327,40 @@ handle_request( int fd )
  *----------------------------------------------------------------------*/
 
 static int
-freq_req( int    fd,
-		  char * req )
+freq_req( int          fd,
+          const char * req )
 {
-	char buf[ 100 ];
-	double val;
-	char *eptr = NULL;
+    char buf[ 50 ];
+    double val;
+    char *eptr = NULL;
 
 
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		sprintf( buf, "%.5f\n", bmwb.freq );
+    if ( req[ 0 ] == '?' && req[ 1 ] == '\0' )
+    {
+        pthread_mutex_lock( &bmwb.mutex );
+        sprintf( buf, "%.5f\n", bmwb.freq );
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+    }
 
-	val = strtof( req + 1, &eptr );
+    val = strtof( req + 1, &eptr );
 
-	if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_mw_freq( val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg,strlen(  bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( set_mw_freq( val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg,strlen(  bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	fl_set_slider_value( bmwb.rsc->freq_slider, val );
-	val = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
-	sprintf( buf, "(%.3f GHz / %.0f G)", val, FAC * val );
-	fl_set_object_label( bmwb.rsc->freq_text, buf );
+    fl_set_slider_value( bmwb.rsc->freq_slider, val );
+    val = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
+    sprintf( buf, "(%.3f GHz / %.0f G)", val, FAC * val );
+    fl_set_object_label( bmwb.rsc->freq_text, buf );
 
     return finish_with_update( fd );
 }
@@ -337,41 +371,41 @@ freq_req( int    fd,
  *------------------------------------------------------------------------*/
 
 static int
-att_req( int    fd,
-		  char * req )
+att_req( int          fd,
+         const char * req )
 {
-	char buf[ 20 ];
-	long val;
-	char *eptr = NULL;
+    char buf[ 20 ];
+    long val;
+    char *eptr = NULL;
 
 
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		sprintf( buf, "%d\n", bmwb.attenuation );
+    if ( req[ 0 ] == '?' && req[ 1 ] == '\0' )
+    {
+        pthread_mutex_lock( &bmwb.mutex );
+        sprintf( buf, "%d\n", bmwb.attenuation );
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+    }
 
-	val = strtol( req + 1, &eptr, 10 );
+    val = strtol( req + 1, &eptr, 10 );
 
-	if (    *req != ' '
-		 || eptr == req + 1
-		 || *eptr
-		 || val > MAX_ATTENUATION
-		 || val < MIN_ATTENUATION )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if (    *req != ' '
+         || eptr == req + 1
+         || *eptr
+         || val > MAX_ATTENUATION
+         || val < MIN_ATTENUATION )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_mw_attenuation( val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( set_mw_attenuation( val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	fl_set_counter_value( bmwb.rsc->attenuation_counter, val );
+    fl_set_counter_value( bmwb.rsc->attenuation_counter, val );
 
     return finish_with_update( fd );
 }
@@ -382,38 +416,38 @@ att_req( int    fd,
  *---------------------------------------------------------------*/
 
 static int
-sigph_req( int    fd,
-		   char * req )
+sigph_req( int          fd,
+           const char * req )
 {
-	char buf[ 50 ];
-	double val;
-	char *eptr = NULL;
+    char buf[ 50 ];
+    double val;
+    char *eptr = NULL;
 
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		sprintf( buf, "%.5f\n", bmwb.signal_phase );
+    if ( req[ 0 ] == '?' && req[ 1 ] == '\0' )
+    {
+        pthread_mutex_lock( &bmwb.mutex );
+        sprintf( buf, "%.5f\n", bmwb.signal_phase );
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+    }
 
-	val = strtof( req, &eptr );
+    val = strtof( req, &eptr );
 
-	if ( *req != ' ' || eptr == req || *eptr || val > 1.0 || val < 0.0 )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req != ' ' || eptr == req || *eptr || val > 1.0 || val < 0.0 )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_signal_phase( val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( set_signal_phase( val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	fl_set_slider_value( bmwb.rsc->signal_phase_slider, val );
-	sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->signal_phase_slider, buf );
+    fl_set_slider_value( bmwb.rsc->signal_phase_slider, val );
+    sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * val ) );
+    fl_set_object_label( bmwb.rsc->signal_phase_slider, buf );
 
     return finish_with_update( fd );
 }
@@ -424,80 +458,38 @@ sigph_req( int    fd,
  *-----------------------------------------------------------------*/
 
 static int
-bias_req( int    fd,
-		  char * req )
+bias_req( int          fd,
+          const char * req )
 {
-	char buf[ 50 ];
-	double val;
-	char *eptr = NULL;
+    char buf[ 50 ];
+    double val;
+    char *eptr = NULL;
 
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		sprintf( buf, "%.5f\n", bmwb.bias );
+    if (  req[ 0 ] == '?' && req[ 1 ] == '\0' )
+    {
+        pthread_mutex_lock( &bmwb.mutex );
+        sprintf( buf, "%.5f\n", bmwb.bias );
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
+    }
 
-	val = strtof( req + 1, &eptr );
+    val = strtof( req + 1, &eptr );
 
-	if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_mw_bias( val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
-
-	fl_set_slider_value( bmwb.rsc->bias_slider, val );
-	sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->bias_slider, buf );
-
-    return finish_with_update( fd );
-}
-
-
-/*-------------------------------------------------------------*
- * Handles a request to return the lock phase or set a new one
- *-------------------------------------------------------------*/
-
-static int
-lckph_req( int    fd,
-		   char * req )
-{
-	char buf[ 50 ];
-	double val;
-	char *eptr = NULL;
-
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		sprintf( buf, "%.5f\n", bmwb.lock_phase );
+    if ( set_mw_bias( val ) )
+    {
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	val = strtof( req + 1, &eptr );
-
-	if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
-
-	pthread_mutex_lock( &bmwb.mutex );
-
-	if ( set_lock_phase( val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
-
-	fl_set_slider_value( bmwb.rsc->lock_phase_slider, val );
-	sprintf( buf, "Lock phase (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->lock_phase_slider, buf );
+    fl_set_slider_value( bmwb.rsc->bias_slider, val );
+    sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * val ) );
+    fl_set_object_label( bmwb.rsc->bias_slider, buf );
 
     return finish_with_update( fd );
 }
@@ -508,44 +500,44 @@ lckph_req( int    fd,
  *-------------------------------------------------------------------*/
 
 static int
-mode_req( int    fd,
-		  char * req )
+mode_req( int          fd,
+          const char * req )
 {
-	const char *buf[ ] = { "STANDBY\n", "TUNE\n", "OPERATE\n" };
-	int mode;
-	FL_POPUP_ENTRY *e;
+    const char *buf[ ] = { "STANDBY\n", "TUNE\n", "OPERATE\n" };
+    int mode;
+    FL_POPUP_ENTRY *e;
 
 
-	if ( ! strcmp( req, "?" ) )
-	{
-		pthread_mutex_lock( &bmwb.mutex );
-		mode = bmwb.mode;
+    if (  req[ 0 ] == '?' && req[ 1 ] == '\0' )
+    {
+        pthread_mutex_lock( &bmwb.mutex );
+        mode = bmwb.mode;
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, buf[ mode ], strlen( buf[ mode ] ) ) != -1 ? 0 : 1;
-	}
+        return swrite( fd, buf[ mode ], strlen( buf[ mode ] ) ) != -1 ? 0 : 1;
+    }
 
-	if ( ! strcasecmp( req, " STANDBY" ) )
-		 mode = MODE_STANDBY;
-	else if ( ! strcasecmp( req, " TUNE" ) )
-		mode = MODE_TUNE;
-	else if ( ! strcasecmp( req, " OPERATE" ) )
-		mode = MODE_OPERATE;
-	else
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( ! strcasecmp( req, " STANDBY" ) )
+         mode = MODE_STANDBY;
+    else if ( ! strcasecmp( req, " TUNE" ) )
+        mode = MODE_TUNE;
+    else if ( ! strcasecmp( req, " OPERATE" ) )
+        mode = MODE_OPERATE;
+    else
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_mode( mode ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( set_mode( mode ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	e = fl_get_select_item_by_value( bmwb.rsc->mode_select, mode );
-	fl_set_select_item( bmwb.rsc->mode_select, e );
-	if ( mode != MODE_TUNE )
-		display_mode_pic( mode );
+    e = fl_get_select_item_by_value( bmwb.rsc->mode_select, mode );
+    fl_set_select_item( bmwb.rsc->mode_select, e );
+    if ( mode != MODE_TUNE )
+        display_mode_pic( mode );
 
     return finish_with_update( fd );
 }
@@ -556,60 +548,60 @@ mode_req( int    fd,
  *-------------------------------------------------------*/
 
 static int
-iris_req( int    fd,
-		  char * req  UNUSED_ARG )
+iris_req( int          fd,
+          const char * req )
 {
-	int dir;
-	long val;
-	struct timespec t;
-	char *eptr;
+    int dir;
+    long val;
+    struct timespec t;
+    char *eptr;
 
 
-	if ( ! strncasecmp( req, "UP ", 3 ) )
-	{
-	    req += 3;
-		dir = 1;
-	}
-	else if ( ! strncasecmp( req, "DOWN ", 5 ) )
-	{
-		req += 5;
-		dir = -1;
-	}
-	else
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( ! strncasecmp( req, "UP ", 3 ) )
+    {
+        req += 3;
+        dir = 1;
+    }
+    else if ( ! strncasecmp( req, "DOWN ", 5 ) )
+    {
+        req += 5;
+        dir = -1;
+    }
+    else
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	val = strtol( req, &eptr, 10 );
+    val = strtol( req, &eptr, 10 );
 
-	if (    eptr == req
-		 || *eptr
-		 || val <= 0
-		 || val > LONG_MAX )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if (    eptr == req
+         || *eptr
+         || val <= 0
+         || val > LONG_MAX )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	t.tv_sec  = val / 1000;
-	t.tv_nsec = 1000000 * ( val % 1000 );
-
-	pthread_mutex_lock( &bmwb.mutex );
-
-	if ( set_iris( dir ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
-
-    pthread_mutex_unlock( &bmwb.mutex );
-
-	nanosleep( &t, NULL );
+    t.tv_sec  = val / 1000;
+    t.tv_nsec = 1000000 * ( val % 1000 );
 
     pthread_mutex_lock( &bmwb.mutex );
 
-	if ( set_iris( 0 ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( set_iris( dir ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
+
+    pthread_mutex_unlock( &bmwb.mutex );
+
+    nanosleep( &t, NULL );
+
+    pthread_mutex_lock( &bmwb.mutex );
+
+    if ( set_iris( 0 ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
     return finish_with_update( fd );
 }
@@ -620,29 +612,29 @@ iris_req( int    fd,
  *---------------------------------------------------------*/
 
 static int
-detsig_req( int    fd,
-			char * req )
+detsig_req( int          fd,
+            const char * req )
 {
-	double val;
-	char buf[ 20 ];
+    double val;
+    char buf[ 20 ];
 
 
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( measure_dc_signal( &val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( measure_dc_signal( &val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	pthread_mutex_unlock( &bmwb.mutex );
+    pthread_mutex_unlock( &bmwb.mutex );
 
-	sprintf( buf, "%.5f\n", val );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+    sprintf( buf, "%.5f\n", val );
+    return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
 
@@ -652,29 +644,29 @@ detsig_req( int    fd,
  *--------------------------------------------*/
 
 static int
-afcsig_req( int    fd,
-			char * req )
+afcsig_req( int          fd,
+            const char * req )
 {
-	double val;
-	char buf[ 20 ];
+    double val;
+    char buf[ 20 ];
 
 
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( measure_afc_signal( &val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) )== -1 ?
-			   1 : 0;
-	}
+    if ( measure_afc_signal( &val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) )== -1 ?
+               1 : 0;
+    }
 
-	pthread_mutex_unlock( &bmwb.mutex );
+    pthread_mutex_unlock( &bmwb.mutex );
 
-	sprintf( buf, "%.5f\n", val );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+    sprintf( buf, "%.5f\n", val );
+    return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
 
@@ -684,29 +676,29 @@ afcsig_req( int    fd,
  *-------------------------------------------------*/
 
 static int
-unlck_req( int    fd,
-			char * req )
+unlck_req( int          fd,
+           const char * req )
 {
-	double val;
-	char buf[ 20 ];
+    double val;
+    char buf[ 20 ];
 
 
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( measure_unlocked_signal( &val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-			   1 : 0;
-	}
+    if ( measure_unlocked_signal( &val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+               1 : 0;
+    }
 
-	pthread_mutex_unlock( &bmwb.mutex );
+    pthread_mutex_unlock( &bmwb.mutex );
 
-	sprintf( buf, "%.5f\n", val );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+    sprintf( buf, "%.5f\n", val );
+    return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
 
@@ -716,29 +708,29 @@ unlck_req( int    fd,
  *-----------------------------------------------------*/
 
 static int
-uncal_req( int    fd,
-			char * req )
+uncal_req( int          fd,
+           const char * req )
 {
-	double val;
-	char buf[ 20 ];
+    double val;
+    char buf[ 20 ];
 
 
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( measure_unlocked_signal( &val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
-			   ? 1 : 0;
-	}
+    if ( measure_unlocked_signal( &val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
+               ? 1 : 0;
+    }
 
-	pthread_mutex_unlock( &bmwb.mutex );
+    pthread_mutex_unlock( &bmwb.mutex );
 
-	sprintf( buf, "%.5f\n", val );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
+    sprintf( buf, "%.5f\n", val );
+    return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf ) ?
            0 : 1;
 }
 
@@ -748,29 +740,29 @@ uncal_req( int    fd,
  *-------------------------------------------*/
 
 static int
-afcst_req( int    fd,
-		   char * req )
+afcst_req( int          fd,
+           const char * req )
 {
-	int val;
-	char buf[ 20 ];
+    int val;
+    char buf[ 20 ];
 
 
-	if ( *req )
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+    if ( *req )
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
-	pthread_mutex_lock( &bmwb.mutex );
+    pthread_mutex_lock( &bmwb.mutex );
 
-	if ( measure_afc_state( &val ) )
-	{
-		pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
-			   ? 1 : 0;
-	}
+    if ( measure_afc_state( &val ) )
+    {
+        pthread_mutex_unlock( &bmwb.mutex );
+        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
+               ? 1 : 0;
+    }
 
-	pthread_mutex_unlock( &bmwb.mutex );
+    pthread_mutex_unlock( &bmwb.mutex );
 
-	sprintf( buf, "%d\n", val );
-	return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf )  ?
+    sprintf( buf, "%d\n", val );
+    return swrite( fd, buf, strlen( buf ) ) == ( ssize_t ) strlen( buf )  ?
            0 : 1;
 }
 
@@ -780,31 +772,31 @@ afcst_req( int    fd,
  *------------------------------------------------------------------*/
 
 static int
-lck_req( int    fd,
-         char * req )
+lck_req( int          fd,
+         const char * req )
 {
     pthread_mutex_lock( &bmwb.mutex );
 
-    if ( ! strcmp( req, "1" ) )
+    if (  req[ 0 ] == '1' && req[ 1 ] == '\0' )
         lock_objects( 1 );
-    else if ( ! strcmp( req, "0" ) )
+    else if (  req[ 0 ] == '0' && req[ 1 ] == '\0' )
         lock_objects( 0 );
     else
     {
         pthread_mutex_unlock( &bmwb.mutex );
-		return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
+        return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
     }
 
     pthread_mutex_unlock( &bmwb.mutex );
 
-	return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
+    return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
 }
 
 
-/*-------------------------------------------------------*
+/*------------------------------------------------------*
  * Handler for SIGPIPE signal that may be received when
  * trying to write to the client
- *-------------------------------------------------------*/
+ *------------------------------------------------------*/
 
 static void
 write_sig_handler( int sig_no )
@@ -820,7 +812,7 @@ write_sig_handler( int sig_no )
  *-----------------------------------------------------------*/
 
 static ssize_t
-swrite( int          d,
+swrite( int          fd,
         const char * buf,
         ssize_t      len )
 {
@@ -835,7 +827,7 @@ swrite( int          d,
 
     do
     {
-        if ( ( ret = write( d, buf, n ) ) < 1 )
+        if ( ( ret = write( fd, buf, n ) ) < 1 )
         {
             if ( ret == -1 && ( client_died || errno != EINTR ) )
                 return -1;
@@ -848,13 +840,13 @@ swrite( int          d,
 }
 
 
-/*----------------------------------------------------------------*
+/*------------------------------------------------------------*
  * Reads as many bytes as was asked for from file descriptor,
  * returns the number of bytes on success and -1 otherwise.
- *----------------------------------------------------------------*/
+ *------------------------------------------------------------*/
 
 static ssize_t
-sread( int       d,
+sread( int       fd,
        char    * buf,
        ssize_t   len )
 {
@@ -869,14 +861,14 @@ sread( int       d,
 
     do
     {
-        if ( ( ret = read( d, buf, n ) ) < 1 )
+        if ( ( ret = read( fd, buf, n ) ) < 1 )
         {
             if ( ret == 0 || errno != EINTR )
                 return -1;
             continue;
         }
         buf += ret;
-		len += ret;
+        len += ret;
     } while ( ( n -= ret ) > 0 && buf[ -1 ] != '\n' );
 
     return len;
@@ -891,7 +883,7 @@ finish_with_update( int fd )
 {
     pthread_mutex_unlock( &bmwb.mutex );
 
-	update_display( NULL, NULL );
+    update_display( NULL, NULL );
 
     if ( *bmwb.error_msg )
     {
@@ -901,7 +893,7 @@ finish_with_update( int fd )
         return ret;
     }
 
-	return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
+    return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
 }
     
 

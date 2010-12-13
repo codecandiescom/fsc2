@@ -124,7 +124,6 @@ typedef struct {
 	int               attenuation;
 	double            signal_phase;
 	double            bias;
-	double            lock_phase;
 	FD_bmwb_rsc     * rsc;
 	char              error_msg[ 100 + ME_ERROR_MSG_MAX_COUNT ];
 } BMWB;
@@ -143,7 +142,6 @@ extern BMWB bmwb;
 #define FREQUENCY_AO            5         /* used for microwave frequency */
 #define BIAS_AO                 6         /* used for microwave bias */
 #define SIGNAL_PHASE_AO         7         /* used for signal phase */
-#define LOCK_PHASE_AO           8         /* used for lock phase */
 
 
 /* Define subdevice ID for alanog input and the different channels */
@@ -182,14 +180,14 @@ int set_mw_freq( double val );
 int set_mw_attenuation( int val );
 int set_signal_phase( double val );
 int set_mw_bias( double val );
-int set_lock_phase( double val );
 int set_iris( int state );
 int set_mode( int mode );
 void save_state( void );
 
 int measure_dc_signal( double * val );
 int measure_afc_signal( double * val );
-size_t measure_tune_mode( double ** data );
+size_t measure_tune_mode( double * data,
+                          size_t   size );
 int measure_unlocked_signal( double * val );
 int measure_uncalibrated_signal( double * val );
 int measure_afc_state( int * state );

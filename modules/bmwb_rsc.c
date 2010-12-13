@@ -17,16 +17,8 @@ create_form_bmwb_rsc( void )
     fdui->vdata = fdui->cdata = NULL;
     fdui->ldata = 0;
 
-	if ( bmwb.type == X_BAND )
-	{
-		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 420 );
-		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 420, "" );
-	}
-	else
-	{
-		fdui->form = fl_bgn_form( FL_NO_BOX, 620, 365 );
-		obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 365, "" );
-	}
+	fdui->form = fl_bgn_form( FL_NO_BOX, 620, 365 );
+	obj = fl_add_box( FL_UP_BOX, 0, 0, 620, 365, "" );
 
     fdui->dc_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 10, 10, 120, 40,
 										   "Diode current" );
@@ -36,12 +28,8 @@ create_form_bmwb_rsc( void )
 											"AFC signal" );
     fl_set_object_lalign( obj, FL_ALIGN_BOTTOM );
 
-	if ( bmwb.type == X_BAND )
-		fdui->tune_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 10, 80,
-												 250, 290, "" );
-	else
-		fdui->tune_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 10, 80,
-												 250, 275, "" );
+	fdui->tune_canvas = obj = fl_add_canvas( FL_NORMAL_CANVAS, 10, 80,
+											 250, 230, "" );
 
     fdui->mode_select = obj = fl_add_select( FL_MENU_SELECT, 280, 15, 100, 30,
 											 "Mode" );
@@ -109,9 +97,9 @@ create_form_bmwb_rsc( void )
     fl_set_object_return( obj, FL_RETURN_CHANGED );
 
 	freq = bmwb.min_freq + bmwb.freq * ( bmwb.max_freq - bmwb.min_freq );
-	sprintf( buf, "(%.3f GHz / %.0f G)", freq, FAC * freq );
+	sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
 
-	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 280, 140, 320, 20,
+	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 285, 138, 320, 20,
 										 buf );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
     fl_set_object_lsize( obj, FL_SMALL_SIZE );
@@ -186,12 +174,8 @@ create_form_bmwb_rsc( void )
 
 	fl_end_group( );
 
-	if ( bmwb.type == X_BAND )
-		fdui->secondary_frame = fl_add_frame( FL_ENGRAVED_FRAME, 270, 290,
-											  340, 120, "" );
-	else
-		fdui->secondary_frame = fl_add_frame( FL_ENGRAVED_FRAME, 270, 290,
-											  340, 65, "" );
+	fdui->secondary_frame = fl_add_frame( FL_ENGRAVED_FRAME, 270, 290,
+										  340, 65, "" );
 
 	fdui->bias_group = fl_bgn_group( );
 
@@ -227,66 +211,25 @@ create_form_bmwb_rsc( void )
 
 	fl_end_group( );
 
-	if ( bmwb.type == X_BAND )
-	{
-		fdui->lock_phase_group = fl_bgn_group( );
+	fdui->iris_group = fl_bgn_group( );
 
-		fdui->lock_phase_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER,
-													   340, 355, 200, 30, "" );
-		fl_set_object_color( obj, FL_WHITE, FL_COL1 );
-		fl_set_object_lsize( obj, FL_SMALL_SIZE );
-		fl_set_object_callback( obj, lock_phase_cb, 0 );
-		fl_set_slider_value( obj, bmwb.lock_phase );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-		sprintf( buf, "Lock phase (%d%%)", irnd( 100.0 * bmwb.lock_phase ) );
-		fl_set_object_label( obj, buf );
+	fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON,
+										   104, 320, 30, 30, "@8<" );
+	fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+	fl_set_object_callback( obj, iris_cb, -1 );
+	fl_set_object_return( obj, FL_RETURN_CHANGED );
 
-		obj = fl_add_button( FL_TOUCH_BUTTON, 280, 355, 30, 30, "@<<" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, lock_phase_cb, -2 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 136, 320,
+										 30, 30, "@2<" );
+	fl_set_object_lsize( obj, FL_NORMAL_SIZE );
+	fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+	fl_set_object_callback( obj, iris_cb, 1 );
+	fl_set_object_return( obj, FL_RETURN_CHANGED );
 
-		obj = fl_add_button( FL_TOUCH_BUTTON, 310, 355, 30, 30, "@<" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, lock_phase_cb, -1 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
+	obj = fl_add_text( FL_NORMAL_TEXT, 170, 325, 50, 20, "Iris" );
+	fl_set_object_lsize( obj, FL_SMALL_SIZE );
 
-		obj = fl_add_button( FL_TOUCH_BUTTON, 540, 355, 30, 30, "@>" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, lock_phase_cb, 1 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-		obj = fl_add_button( FL_TOUCH_BUTTON, 570, 355, 30, 30, "@>>" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, lock_phase_cb, 2 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-		fl_end_group( );
-	}
-
-	if ( bmwb.type == X_BAND )
-	{
-		fdui->iris_group = fl_bgn_group( );
-
-		fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON,
-											   60, 380, 30, 30, "@8<" );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, iris_cb, -1 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-		fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 90, 380,
-											   30, 30, "@2<" );
-		fl_set_object_lsize( obj, FL_NORMAL_SIZE );
-		fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-		fl_set_object_callback( obj, iris_cb, 1 );
-		fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-		obj = fl_add_text( FL_NORMAL_TEXT, 130, 385, 100, 20,
-						   "Iris / Coupling" );
-		fl_set_object_lsize( obj, FL_SMALL_SIZE );
-
-		fl_end_group( );
-	}
+	fl_end_group( );
 
     fl_end_form( );
 

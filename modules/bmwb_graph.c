@@ -270,7 +270,7 @@ freq_cb( FL_OBJECT * obj  UNUSED_ARG,
 		fl_set_slider_value( bmwb.rsc->freq_slider, val );
 
 	freq = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
-	sprintf( buf, "(%.3f GHz / %.0f G)", freq, FAC * freq );
+	sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
 	fl_set_object_label( bmwb.rsc->freq_text, buf );
 
 	set_mw_freq( val );
@@ -477,75 +477,6 @@ bias_cb( FL_OBJECT * obj  UNUSED_ARG,
 	fl_set_object_label( bmwb.rsc->bias_slider, buf );
 
 	set_mw_bias( val );
-
-    pthread_mutex_unlock( &bmwb.mutex );
-
-	update_display( NULL, NULL );
-}
-
-
-/*--------------------------------------------*
- * Callback for lock phase slider and buttons
- *--------------------------------------------*/
-
-void
-lock_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
-			   long        data )
-{
-	double val;
-    char buf[ 50 ];
-
-
-    pthread_mutex_lock( &bmwb.mutex );
-
-    val = fl_get_slider_value( bmwb.rsc->lock_phase_slider );
-
-	switch ( data )
-	{
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
-			break;
-
-		case -1 :
-			if ( val <= 0.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.01 );
-			break;
-
-		case 1 :
-			if ( val >= 1.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_min( 1.0, val + 0.01 );
-			break;
-
-		case 2 :
-			if ( val >= 1.0 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_min( 1.0, val + 0.05 );
-			break;
-	}
-
-	if ( data != 0 )
-		fl_set_slider_value( bmwb.rsc->lock_phase_slider, val );
-
-	sprintf( buf, "Lock phase (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->lock_phase_slider, buf );
-
-	set_lock_phase( val );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -763,11 +694,42 @@ display_afc_signal( void )
 void
 display_mode_pic( int mode )
 {
+    FL_COORD w;
+    FL_COORD h;
+    double *data = 0;
+    XPoint *xp;
+    FL_COORD i;
+
+
     XCopyArea( tune_canvas.d, tune_canvas.pm, FL_ObjWin( tune_canvas.obj ),
                tune_canvas.gc, 0, 0, tune_canvas.w, tune_canvas.h, 0, 0 );
 
     if ( mode != MODE_TUNE )
         return;
+
+    fl_get_object_size( tune_canvas.obj, &w, &h );
+
+    if (    ! ( data = malloc( w * sizeof *data ) )
+         || ! ( xp = malloc( w * sizeof *xp ) ) )
+    {
+        if ( data )
+            free( data );
+        return;
+    }
+
+    measure_tune_mode( data, w );
+
+    for ( i = 0; i < w; i++ )
+    {
+        xp[ i ].x = i;
+        xp[ i ].y = irnd( h * ( 1.0 - data[ i ] ) );
+    }
+
+    XDrawLines( tune_canvas.d, FL_ObjWin( tune_canvas.obj ), tune_canvas.gc,
+                xp, w, CoordModeOrigin );
+
+    free( xp );
+    free( data );
 }
 
 
@@ -914,13 +876,9 @@ lock_objects( int state )
     fl_set_object_lcol( bmwb.rsc->signal_phase_group, c );
     f( bmwb.rsc->bias_group );
     fl_set_object_lcol( bmwb.rsc->bias_group, c );
-    if ( bmwb.type == X_BAND )
-    {
-        f( bmwb.rsc->lock_phase_group );
-        fl_set_object_lcol( bmwb.rsc->lock_phase_group, c );
-        f( bmwb.rsc->iris_group );
-        fl_set_object_lcol( bmwb.rsc->iris_group, c );
-    }
+
+    f( bmwb.rsc->iris_group );
+    fl_set_object_lcol( bmwb.rsc->iris_group, c );
 
     fl_unfreeze_form( bmwb.rsc->form );
 }

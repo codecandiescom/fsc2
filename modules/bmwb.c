@@ -55,11 +55,13 @@ main( int     argc,
     bmwb.type = -1;
 
     /* Check the application name to see if the user explicitely want's
-       to use a X-ban or a Q-band bridge, overruling the built-in
+       to use an X-band or a Q-band bridge, overruling the built-in
        automatic determination of the type. */
 
     if ( ( app_name = strrchr( argv[ 0 ], '/' ) ) == NULL )
         app_name = argv[ 0 ];
+    else
+        app_name++;
 
     if ( ! strcmp( app_name, "xbmwb" ) )
         bmwb.type = X_BAND;
@@ -73,7 +75,7 @@ main( int     argc,
         if ( ! strcmp( argv[ i ], "-S" ) )
             do_signal = 1;
 
-    /* Check if an instance of the program is already running */
+    /* Check if another instance of the program is already running */
 
     if ( check_unique( ) )
     {
@@ -82,6 +84,8 @@ main( int     argc,
         return EXIT_FAILURE;
 	}
 
+    /* Initialize graphics */
+
     if ( ! fl_initialize( &argc, argv, "bmwb", NULL, 0 ) )
 	{
 		fprintf( stderr, "Failed to intialize graphics.\n" );
@@ -89,6 +93,8 @@ main( int     argc,
             kill( getppid( ), SIGUSR2 );
         return EXIT_FAILURE;
 	}
+
+    /* Initialize the Meilhaus card */
 
 	if ( meilhaus_init( ) )
 	{
@@ -102,7 +108,7 @@ main( int     argc,
     if (    bmwb.type == -1
          && ( bmwb.type = get_bridge_type( ) ) == TYPE_FAIL )
     {
-        fprintf( stderr, "Can't determine bridge type: %s", bmwb.error_msg );
+        fprintf( stderr, "Can't determine bridge type: %s\n", bmwb.error_msg );
         meilhaus_finish( );
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
@@ -115,14 +121,15 @@ main( int     argc,
 
     if ( bmwb_open_sock( ) )
     {
-        fprintf( stderr, "%s", bmwb.error_msg );
+        fprintf( stderr, "%s\n", bmwb.error_msg );
         meilhaus_finish( );
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
         return EXIT_FAILURE;
     }
 
-    /* Signal invoking process that initialization is finished */
+    /* Signal a process we might be invoked from that initialization is
+       finished */
 
     if ( do_signal )
         kill( getppid( ), SIGUSR1 );
@@ -187,7 +194,7 @@ set_mw_freq( double val )
 {
     if ( val < 0.0 || val > 1.0 )
     {
-        sprintf( bmwb.error_msg, "Invalid argument for set_mw_freq().\n" );
+        sprintf( bmwb.error_msg, "Invalid argument for set_mw_freq()." );
         return 1;
     }
 
@@ -213,7 +220,7 @@ set_mw_attenuation( int val )
     if ( val < MIN_ATTENUATION || val > MAX_ATTENUATION )
     {
         sprintf( bmwb.error_msg, "Invalid argument for "
-                 "set_mw_attenuation().\n" );
+                 "set_mw_attenuation()." );
         return 1;
     }
 
@@ -237,7 +244,7 @@ set_signal_phase( double val )
 {
     if ( val < 0.0 || val > 1.0 )
     {
-        sprintf( bmwb.error_msg, "Invalid argument for set_signal_phase().\n" );
+        sprintf( bmwb.error_msg, "Invalid argument for set_signal_phase()." );
         return 1;
     }
 
@@ -259,7 +266,7 @@ set_mw_bias( double val )
 {
     if ( val < 0.0 || val > 1.0 )
     {
-        sprintf( bmwb.error_msg, "Invalid argument for set_mw_bias().\n" );
+        sprintf( bmwb.error_msg, "Invalid argument for set_mw_bias()." );
         return 1;
     }
 
@@ -267,28 +274,6 @@ set_mw_bias( double val )
         return 1;
 
 	bmwb.bias = val;
-
-    return 0;
-}
-
-
-/*---------------------------------------*
- * Function for setting a new lock phase 
- *---------------------------------------*/
-
-int
-set_lock_phase( double val )
-{
-    if ( val < 0.0 || val > 1.0 )
-    {
-        sprintf( bmwb.error_msg, "Invalid argument for set_lock_phase().\n" );
-        return 1;
-    }
-
-    if ( meilhaus_ao( LOCK_PHASE_AO, - val ) )
-        return 1;
-
-	bmwb.lock_phase = val;
 
     return 0;
 }
@@ -307,7 +292,7 @@ set_iris( int state )
     if ( bmwb.type == Q_BAND )
     {
         sprintf( bmwb.error_msg, "set_iris() can't be used with Q-band "
-                 "bridge.\n" );
+                 "bridge." );
         return 1;
     }
 
@@ -330,7 +315,7 @@ set_iris( int state )
             break;
 
         default :
-            sprintf( bmwb.error_msg, "Invalid argument for set_iris().\n" );
+            sprintf( bmwb.error_msg, "Invalid argument for set_iris()." );
             return 1;
     }
 
@@ -341,9 +326,9 @@ set_iris( int state )
 }
 
 
-/*-------------------------------------*
- * Function for witching to a new mode 
- *-------------------------------------*/
+/*--------------------------------------*
+ * Function for switching to a new mode 
+ *--------------------------------------*/
 
 int
 set_mode( int mode )
@@ -371,7 +356,7 @@ set_mode( int mode )
             break;
 
         default :
-            sprintf( bmwb.error_msg, "Invalid argument for set_mode().\n" );
+            sprintf( bmwb.error_msg, "Invalid argument for set_mode()." );
             return 1;
     }
 
@@ -420,17 +405,15 @@ load_state( void )
 
     if (    ! fn
 		 || ( fp = bmwb_fopen( fn, "r" ) ) == NULL
-		 || fscanf( fp, "%lf %lf %lf %lf", &bmwb.freq, &bmwb.signal_phase,
-					&bmwb.bias, &bmwb.lock_phase ) != 4
+		 || fscanf( fp, "%lf %lf %lf", &bmwb.freq, &bmwb.signal_phase,
+					&bmwb.bias ) != 3
 		 || ! ( bmwb.freq >= 0.0 || bmwb.freq <= 1.0 )
 		 || ! ( bmwb.signal_phase >= 0.0 || bmwb.signal_phase <= 1.0 )
-		 || ! ( bmwb.bias >= 0.0 || bmwb.bias <= 1.0 )
-		 || ! ( bmwb.lock_phase >= 0.0 || bmwb.lock_phase <= 1.0 ) )
+		 || ! ( bmwb.bias >= 0.0 || bmwb.bias <= 1.0 ) )
 	{
 		bmwb.freq         = 0.0;
 		bmwb.signal_phase = 0.0;
 		bmwb.bias         = 0.0;
-		bmwb.lock_phase   = 0.0;
     }
 
     lower_permissions( );
@@ -465,8 +448,8 @@ save_state( void )
 
     if ( fn && ( fp = bmwb_fopen( fn, "w" ) ) )
 	{
-		fprintf( fp, "%f %f %f %f\n", bmwb.freq, bmwb.signal_phase,
-				 bmwb.bias, bmwb.lock_phase );
+		fprintf( fp, "%f %f %f\n", bmwb.freq, bmwb.signal_phase,
+				 bmwb.bias );
 		fclose( fp );
 	}
 

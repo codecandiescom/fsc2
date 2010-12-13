@@ -36,7 +36,6 @@ static struct {
 	long   att;
 	double signal_phase;
 	double bias;
-	double lock_phase;
 	int    mode;
 	double dc_signal;
 	double afc_signal;
@@ -57,7 +56,6 @@ Var_T * mw_bridge_frequency(           Var_T * v );
 Var_T * mw_bridge_attenuation(         Var_T * v );
 Var_T * mw_bridge_signal_phase(        Var_T * v );
 Var_T * mw_bridge_bias(                Var_T * v );
-Var_T * mw_bridge_lock_phase(          Var_T * v );
 Var_T * mw_bridge_mode(                Var_T * v );
 Var_T * mw_bridge_detector_current(    Var_T * v );
 Var_T * mw_bridge_afc_signal(          Var_T * v );
@@ -97,7 +95,6 @@ x_bmwb_init_hook( void )
 	x_bmwb.att                 = 45;
 	x_bmwb.signal_phase        = 0.5;
 	x_bmwb.bias                = 0.5;
-	x_bmwb.lock_phase          = 0.5;
 	x_bmwb.mode                = 2;
 	x_bmwb.dc_signal           = 0.5;
 	x_bmwb.afc_signal          = 0.0;
@@ -188,8 +185,9 @@ mw_bridge_run( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*-------------------------------------------------*
+ * Sets or queries the bridges microwave frequency
+ *-------------------------------------------------*/
 
 Var_T *
 mw_bridge_frequency( Var_T * v )
@@ -256,8 +254,9 @@ mw_bridge_frequency( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Sets or queries the bridges microwave attenuation
+ *---------------------------------------------------*/
 
 Var_T *
 mw_bridge_attenuation( Var_T * v )
@@ -313,8 +312,9 @@ mw_bridge_attenuation( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*------------------------------------------*
+ * Sets or queries the bridges signal phase
+ *------------------------------------------*/
 
 Var_T *
 mw_bridge_signal_phase( Var_T * v )
@@ -370,8 +370,9 @@ mw_bridge_signal_phase( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Sets of queries the bridges microwave bias setting
+ *----------------------------------------------------*/
 
 Var_T *
 mw_bridge_bias( Var_T * v )
@@ -424,63 +425,6 @@ mw_bridge_bias( Var_T * v )
 	}
 
 	return vars_push( FLOAT_VAR, bias );
-}
-
-
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
-
-Var_T *
-mw_bridge_lock_phase( Var_T * v )
-{
-	double lock_phase;
-	ssize_t len;
-	char buf[ 20 ];
-
-
-	if ( v == NULL )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-			return vars_push( INT_VAR, x_bmwb.lock_phase );
-
-		if ( x_bmwb_write( x_bmwb.fd, "LCKPH?\n", 7 ) != 7 )
-			x_bmwb_comm_failure( );
-
-		if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof buf ) ) <= 0
-			 || buf[ len - 1 ] != '\n'
-			 || ! isdigit( ( unsigned char ) *buf ) )
-			x_bmwb_comm_failure( );
-
-		buf[ len -1 ] = '\0';
-		return vars_push( FLOAT_VAR, T_atod( buf ) );
-	}
-
-	lock_phase = get_double( v, "lock phase" );
-
-	if ( lock_phase < 0.0 || lock_phase > 1.0 )
-	{
-		print( FATAL, "Invalid lock phase argument of %.3f, must be "
-			   "between 0 and 1.0.\n", lock_phase );
-		THROW( EXCEPTION );
-	}
-
-	too_many_arguments( v );
-
-	if ( FSC2_MODE != EXPERIMENT )
-		x_bmwb.lock_phase = lock_phase;
-	else
-	{
-		sprintf( buf, "LCKPH %.5f\n", lock_phase );
-		if ( x_bmwb_write( x_bmwb.fd, buf, strlen( buf ) ) !=
-                                                    ( ssize_t ) strlen( buf ) )
-			x_bmwb_comm_failure( );
-
-		if (    x_bmwb_read( x_bmwb.fd, buf, 3 ) != 3
-			 || strncmp( buf, "OK\n", 3 ) )
-			x_bmwb_comm_failure( );
-	}
-
-	return vars_push( FLOAT_VAR, lock_phase );
 }
 
 
@@ -552,8 +496,9 @@ mw_bridge_mode( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*--------------------------------------*
+ * Queries the bridges detector current
+ *--------------------------------------*/
 
 Var_T *
 mw_bridge_detector_current( Var_T * v  UNUSED_ARG )
@@ -577,8 +522,9 @@ mw_bridge_detector_current( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*--------------------------------*
+ * Queries the bridges AFC signal
+ *--------------------------------*/
 
 Var_T *
 mw_bridge_afc_signal( Var_T * v  UNUSED_ARG )
@@ -751,8 +697,8 @@ mw_bridge_lock( Var_T * v )
 
 /*--------------------------------------------------------------*
  * Signal handler for SIGUSR1 and SIGUSR2, one of which will be
- * raised when the process controlling the microwave bridge
- * must be started.
+ * raised when the process controlling the microwave bridge is
+ * started.
  *--------------------------------------------------------------*/
 
 static void
