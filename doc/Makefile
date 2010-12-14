@@ -54,9 +54,9 @@ fsc2.info: $(docs)
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	@if [ "`eval texi2html --help 2>/dev/null`" ]; then  \
-		texi2html --init-file=fsc2.init fsc2.texi;       \
-	else                                                 \
+	@if [ "`eval texi2html --help 2>/dev/null`" ]; then    \
+		LC_ALL=C texi2html --init-file=fsc2.init fsc2.tex; \
+	else                                                   \
 		echo "Can't make HTML documentation, program 'texi2html' not found";  \
 	fi
 
@@ -68,7 +68,7 @@ ps: fsc2.ps.gz
 fsc2.ps.gz: $(docs) $(eps_pics)
 	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
 		  -a "`eval dvips --help 2>/dev/null`"    ]; then  \
-		texi2dvi --ps -c fsc2.texi &&                      \
+		LC_ALL=C texi2dvi --ps -c fsc2.texi &&             \
 		gzip -f -9 fsc2.ps;                                \
 	else                                                   \
 		echo "Can't make PostScript documentation, program 'texi2dvi' or 'dvips' not found";  \
@@ -91,9 +91,9 @@ pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(pdf_pics)
 	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
-	       -a "`eval pdftex --help 2>/dev/null`"   ]; then  \
-		texi2dvi --pdf -c fsc2.texi;                        \
-	else                                                    \
+	      -a "`eval pdftex --help 2>/dev/null`"   ]; then  \
+		LC_All=C texi2dvi --pdf -c fsc2.texi;              \
+	else                                                   \
 		echo "Can't make PDF documentation, program 'texi2dvi' or 'pdftex' not found";  \
 	fi
 
