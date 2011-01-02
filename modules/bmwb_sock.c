@@ -359,7 +359,7 @@ freq_req( int          fd,
 
     fl_set_slider_value( bmwb.rsc->freq_slider, val );
     val = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
-    sprintf( buf, "(%.3f GHz / %.0f G)", val, FAC * val );
+    sprintf( buf, "(ca. %.3f GHz / %.0f G)", val, FAC * val );
     fl_set_object_label( bmwb.rsc->freq_text, buf );
 
     return finish_with_update( fd );

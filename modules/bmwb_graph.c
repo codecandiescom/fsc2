@@ -62,6 +62,9 @@ graphics_init( void )
 
 
 /*---------------------------------------------------*
+ * Function for initializing the canvases used in the graphical display
+ * - these are the canvas for showing mode in tune mode, the canvas for
+ * displaying the detector current and the one for showing the AFC signal
  *---------------------------------------------------*/
 
 static void
@@ -70,7 +73,7 @@ init_canvas( void )
     int i;
 
 
-    /* Initialize the canvases for the tune mode display */
+    /* Initialize the canvas for the tune mode display */
 
     tune_canvas.obj = bmwb.rsc->tune_canvas;
     tune_canvas.d   = FL_FormDisplay( bmwb.rsc->form );
@@ -102,7 +105,7 @@ init_canvas( void )
 
     fl_add_canvas_handler( tune_canvas.obj, Expose, canvas_expose, NULL );
 
-    /* Initialize the canvase for displaying the detector current */
+    /* Initialize the canvas for displaying the detector current */
 
     dc_canvas.obj = bmwb.rsc->dc_canvas;
     dc_canvas.d   = FL_FormDisplay( bmwb.rsc->form );
@@ -179,7 +182,7 @@ init_canvas( void )
 
 
 /*----------------------------*
- * Callback for mode selector
+ * Callback for bridge mode selection
  *----------------------------*/
 
 void
@@ -195,13 +198,18 @@ mode_cb( FL_OBJECT * obj,
 
 	if ( r->val != bmwb.mode )
     {
-        /* Clear canvas if old mode was tune mode */
+		if ( set_mode( r->val ) )
+            fl_set_select_item( obj, fl_get_select_item_by_value( obj,
+                                                                  bmwb.mode ) );
+        else
+        {
+            /* Clear canvas if old mode was tune mode */
 
-        if ( bmwb.mode == MODE_TUNE )
-            display_mode_pic( r->val );
+            if ( bmwb.mode != MODE_TUNE )
+                display_mode_pic( r->val );
 
-        bmwb.mode = r->val;
-		set_mode( bmwb.mode );
+            bmwb.mode = r->val;
+        }
     }
 
     pthread_mutex_unlock( &bmwb.mutex );
@@ -211,7 +219,7 @@ mode_cb( FL_OBJECT * obj,
 
 
 /*-------------------------------------------*
- * Callback for frequency slider and buttons
+ * Callback for the frequency slider and buttons
  *-------------------------------------------*/
 
 void
@@ -227,53 +235,60 @@ freq_cb( FL_OBJECT * obj  UNUSED_ARG,
 
     val = fl_get_slider_value( bmwb.rsc->freq_slider );
 
+    /* If 'data' is non-zero we're called for one of the buttons,
+       calculate the new frequency */
+
 	switch ( data )
 	{
-		case -2 :
+		case COARSE_DECREASE :
 			if ( val <= 0.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_max( 0.0, val - 0.05 );
 			break;
 
-		case -1 :
+		case FINE_DECREASE :
 			if ( val <= 0.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_max( 0.0, val - 0.005 );
 			break;
 
-		case 1 :
+		case FINE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( 1.0, val + 0.005 );
 			break;
 
-		case 2 :
+		case COARSE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( 1.0, val + 0.05 );
 			break;
 	}
 
-	if ( data != 0 )
-		fl_set_slider_value( bmwb.rsc->freq_slider, val );
+    set_mw_freq( val );
+    val = bmwb.freq;
 
-	freq = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
-	sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
-	fl_set_object_label( bmwb.rsc->freq_text, buf );
+    fl_set_slider_value( bmwb.rsc->freq_slider, val );
 
-	set_mw_freq( val );
+    freq = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
+    sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
+    fl_set_object_label( bmwb.rsc->freq_text, buf );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -296,49 +311,54 @@ attenuation_cb( FL_OBJECT * obj  UNUSED_ARG,
 
     val = fl_get_counter_value( bmwb.rsc->attenuation_counter );
 
+    /* If 'data' is non-zero this is for one of the buttons */
+
 	switch ( data )
 	{
-		case -2 :
+		case COARSE_DECREASE :
 			if ( val <= MIN_ATTENUATION )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_max( MIN_ATTENUATION, val - 5 );
 			break;
 
-		case -1 :
+		case FINE_DECREASE :
 			if ( val <= MIN_ATTENUATION )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_max( MIN_ATTENUATION, val - 1 );
 			break;
 
-		case 1 :
+		case FINE_INCREASE :
 			if ( val >= MAX_ATTENUATION )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( MAX_ATTENUATION, val + 1 );
 			break;
 
-		case 2 :
+		case COARSE_INCREASE :
 			if ( val >= MAX_ATTENUATION )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
                 return;
             }
+
 			val = d_min( MAX_ATTENUATION, val + 5 );
 			break;
 	}
 
-	if ( data != 0 )
-		fl_set_counter_value( bmwb.rsc->attenuation_counter, val );
+    set_mw_attenuation( irnd( val ) );
 
-	set_mw_attenuation( irnd( val ) );
+    fl_set_counter_value( bmwb.rsc->attenuation_counter, bmwb.attenuation );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -362,36 +382,41 @@ signal_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 
     val = fl_get_slider_value( bmwb.rsc->signal_phase_slider );
 
+    /* If 'data' is non-zero this is for one of the buttons */
+
 	switch ( data )
 	{
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
-			break;
-
-		case -1 :
+		case COARSE_DECREASE :
 			if ( val <= 0.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case FINE_DECREASE :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+
 			val = d_max( 0.0, val - 0.01 );
 			break;
 
-		case 1 :
+		case FINE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( 1.0, val + 0.01 );
 			break;
 
-		case 2 :
+		case COARSE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
@@ -401,13 +426,14 @@ signal_phase_cb( FL_OBJECT * obj  UNUSED_ARG,
 			break;
 	}
 
-	if ( data != 0 )
-		fl_set_slider_value( bmwb.rsc->signal_phase_slider, val );
-
-	sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->signal_phase_slider, buf );
-
 	set_signal_phase( val );
+
+    val = bmwb.signal_phase;
+
+    fl_set_slider_value( bmwb.rsc->signal_phase_slider, val );
+
+	sprintf( buf, "Signal phase (%2d%%)", irnd( 100.0 * val ) );
+	fl_set_object_label( bmwb.rsc->signal_phase_slider, buf );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -431,52 +457,59 @@ bias_cb( FL_OBJECT * obj  UNUSED_ARG,
 
     val = fl_get_slider_value( bmwb.rsc->bias_slider );
 
+    /* If 'data' is non-zero this is for one of the buttons */
+
 	switch ( data )
 	{
-		case -2 :
-			if ( val <= 0.01 )
-            {
-                pthread_mutex_unlock( &bmwb.mutex );
-				return;
-            }
-			val = d_max( 0.0, val - 0.05 );
-			break;
-
-		case -1 :
+		case COARSE_DECREASE :
 			if ( val <= 0.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
+			val = d_max( 0.0, val - 0.05 );
+			break;
+
+		case FINE_DECREASE :
+			if ( val <= 0.0 )
+            {
+                pthread_mutex_unlock( &bmwb.mutex );
+				return;
+            }
+
 			val = d_max( 0.0, val - 0.01 );
 			break;
 
-		case 1 :
+		case FINE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( 1.0, val + 0.01 );
 			break;
 
-		case 2 :
+		case COARSE_INCREASE :
 			if ( val >= 1.0 )
             {
                 pthread_mutex_unlock( &bmwb.mutex );
 				return;
             }
+
 			val = d_min( 1.0, val + 0.05 );
 			break;
 	}
 
-	if ( data != 0 )
-		fl_set_slider_value( bmwb.rsc->bias_slider, val );
-
-	sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * val ) );
-	fl_set_object_label( bmwb.rsc->bias_slider, buf );
-
 	set_mw_bias( val );
+
+	val = bmwb.bias;
+
+    fl_set_slider_value( bmwb.rsc->bias_slider, val );
+
+	sprintf( buf, "Microwave bias (%2d%%)", irnd( 100.0 * val ) );
+	fl_set_object_label( bmwb.rsc->bias_slider, buf );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -517,14 +550,30 @@ iris_cb( FL_OBJECT * obj  UNUSED_ARG,
 }
 
 
-/*----------------------------------------------------------------*
- * Function that gets invoked when the close button is clicked on
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function that gets invoked when the close button is clicked
+ *-------------------------------------------------------------*/
+
+void
+quit_handler( FL_OBJECT * obj   UNUSED_ARG,
+              long        data  UNUSED_ARG )
+{
+    close_handler( NULL, 0 );
+}
+
+
+/*-------------------------------------------------------------*
+ * Function that gets invoked when the close button is clicked
+ * or the close entry of the window menu is used
+ *-------------------------------------------------------------*/
 
 static int
 close_handler( FL_FORM * a  UNUSED_ARG,
                void    * b  UNUSED_ARG )
 {
+    if ( fl_show_question( "Really switch off microwave bridge?", 0 ) == 0 )
+        return FL_IGNORE;
+
     pthread_mutex_lock( &bmwb.mutex );
 
     /* Kill all threads that may still be running */
@@ -541,10 +590,12 @@ close_handler( FL_FORM * a  UNUSED_ARG,
         bmwb.a_is_active = 0;
     }
 
-    /* Make sure iris motor is off and then switch bridge to standby mode */
+    /* Switch bridge to standby mode, stop iris motor and set maximum
+       attenuation */
 
-    set_iris( 0 );
 	set_mode( MODE_STANDBY );
+    set_iris( 0 );
+	set_mw_attenuation( MAX_ATTENUATION );
 
     /* Store it's current state in a file */
 
@@ -717,16 +768,17 @@ display_mode_pic( int mode )
         return;
     }
 
-    measure_tune_mode( data, w );
-
-    for ( i = 0; i < w; i++ )
+    if ( ! measure_tune_mode( data, w ) )
     {
-        xp[ i ].x = i;
-        xp[ i ].y = irnd( h * ( 1.0 - data[ i ] ) );
-    }
+        for ( i = 0; i < w; i++ )
+        {
+            xp[ i ].x = i;
+            xp[ i ].y = 10 + irnd( ( h - 20 ) * ( 1.0 - data[ i ] ) );
+        }
 
-    XDrawLines( tune_canvas.d, FL_ObjWin( tune_canvas.obj ), tune_canvas.gc,
-                xp, w, CoordModeOrigin );
+        XDrawLines( tune_canvas.d, FL_ObjWin( tune_canvas.obj ), tune_canvas.gc,
+                    xp, w, CoordModeOrigin );
+    }
 
     free( xp );
     free( data );

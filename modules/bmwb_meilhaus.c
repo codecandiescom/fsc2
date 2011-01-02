@@ -79,23 +79,24 @@ static struct {
 int
 meilhaus_init( void )
 {
+#if ! defined BMWB_TEST
+
     char buf[ 32 ];
 
 
-    /* Try to open library */
+    raise_permissions( );
+
+    /* Try to initilaize the library, thereby opening the device file */
 
 	if ( meOpen( ME_OPEN_NO_FLAGS ) != ME_ERRNO_SUCCESS )
 	{
 		meErrorGetLastMessage( msg, sizeof msg );
 		sprintf( bmwb.error_msg, "Failed to initialize Meilhaus driver: %s.\n",
                  msg );
+		lower_permissions( );
         return 1;
 	}
   
-#if ! defined BMWB_TEST
-
-    lower_permissions( );
-
     /* Try to get a lock on the whole device */
 
     if ( meLockDevice( DEV_ID, ME_LOCK_SET, ME_LOCK_DEVICE_NO_FLAGS )
@@ -170,20 +171,23 @@ meilhaus_init( void )
 int
 meilhaus_finish( void )
 {
-
 #if ! defined BMWB_TEST
+
 	raise_permissions( );
+
     meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-    lower_permissions( );
-#endif
 
 	if ( meClose( ME_CLOSE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
 	{
 		meErrorGetLastMessage( msg, sizeof msg );
+        lower_permissions( );
 		sprintf( bmwb.error_msg, "Failed to close Meilhaus driver: %s.\n",
                  msg );
         return 1;
 	}
+
+    lower_permissions( );
+#endif
 
     return 0;
 }
@@ -202,15 +206,12 @@ setup_ai( void )
     int n;
 
 
-	raise_permissions( );
-
     if ( meQuerySubdeviceByType( DEV_ID, AI, sub_dev[ AI ].id,
                                  ME_SUBTYPE_ANY, &n ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to query subdevice %d: %s.\n",
                  AI, msg );
-        lower_permissions( );
         return 1;
     }
 
@@ -218,7 +219,6 @@ setup_ai( void )
     {
         sprintf( bmwb.error_msg, "AI subdevice %d does not have expected "
                  "type.\n", AI );
-        lower_permissions( );
         return 1;
     }
 
@@ -230,7 +230,6 @@ setup_ai( void )
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to query number of output ranges "
                  "for AI subdevice %d: %s.\n", AI, msg );
-        lower_permissions( );
         return 1;
     }
 
@@ -238,7 +237,6 @@ setup_ai( void )
     {
         sprintf( bmwb.error_msg, "Unexpected number of output ranges "
                  "for AI subdevice %d.\n", AI );
-        lower_permissions( );
         return 1;
     }
 
@@ -252,11 +250,8 @@ setup_ai( void )
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to query range %d for subdevice "
                      "%d: %s.\n", i, AI, msg );
-            lower_permissions( );
             return 1;
         }
-
-    lower_permissions( );
 
     return 0;
 }
@@ -578,7 +573,7 @@ meilhaus_dio_out_state( int             dio,
     /* Make sure the requested DIO is in input mode and the second argument
        is reasonable */
 
-    if ( dio < DIO_B || dio > DIO_D || val == NULL )
+    if ( dio < DIO_B || dio > DIO_D || ! val )
     {
         sprintf( bmwb.error_msg, "Invalid argument for "
                  "meilhaus_dio_out_state().\n" );

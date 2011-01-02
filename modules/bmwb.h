@@ -63,8 +63,10 @@
 #define MODE_TUNE         1
 #define MODE_OPERATE      2
 
-#define MIN_ATTENUATION   0
-#define MAX_ATTENUATION   60
+
+#define MIN_ATTENUATION              0
+#define MAX_ATTENUATION             60
+#define SAFE_TUNE_MODE_ATTENUATION  25
 
 
 /* Minimum and maximum expected detector current signal for X- and Q-band
@@ -76,6 +78,7 @@
 #define DC_SIGNAL_MIN_Q_BAND   -0.08
 #define DC_SIGNAL_MAX_Q_BAND    9.5
 
+
 /* Minimum and maximum expected AFC signal for X- and Q-band bridge (measured
    values times 2/3, taking voltage devider into account) */
 
@@ -85,20 +88,80 @@
 #define AFC_SIGNAL_MIN_Q_BAND  -8.67
 #define AFC_SIGNAL_MAX_Q_BAND   8.67
 
+
 /* Minimum and maximum voltage to be expected for "uncalibrated" signal
-   (only for X-band) */
+   (X-band only) */
 
 #define UNCALIBRATED_MIN -0.5
 #define UNCALIBRATED_MAX  2.5
 
+
 /* Minimum and maximum voltage to be expected for "unlocked" signal
-   (only for X-band) */
+   (X-band only) */
 
 #define UNLOCKED_MIN  1.0
 #define UNLOCKED_MAX  3.0
 
 
+/* Minimum and maximum x- and y-voltage masured im tune mode */
+
+#define X_BAND_MIN_TUNE_X_VOLTS   -1.0
+#define X_BAND_MAX_TUNE_X_VOLTS    4.0
+
+#define X_BAND_MIN_TUNE_Y_VOLTS   -1.0
+#define X_BAND_MAX_TUNE_Y_VOLTS    4.0
+
+#define Q_BAND_MIN_TUNE_X_VOLTS   -1.0
+#define Q_BAND_MAX_TUNE_X_VOLTS    4.0
+
+#define Q_BAND_MIN_TUNE_Y_VOLTS   -1.0
+#define Q_BAND_MAX_TUNE_Y_VOLTS    4.0
+
+
+/* Frequency (in Hz) of the sawtooth (x-) voltage in tune mode */
+
+#define X_BAND_TUNE_FREQ         1600
+#define Q_BAND_TUNE_FREQ         1600
+
+
+/* Conversion factors for microwave frequency (in interval [0,1]) to
+   the voltage to be output at the Meilhaus card */
+
+#define X_BAND_FREQ_FACTOR     8.67
+#define Q_BAND_FREQ_FACTOR     9.87
+
+
+/* Conversion factor for microwave signal phase (in interval [0,1]) to the
+   voltage to be output at the Meilhaus card */
+
+#define X_BAND_PHASE_FACTOR   -8.67
+#define Q_BAND_PHASE_FACTOR  -10.00
+
+
+/* Conversion factor for microwave bias (in interval [0,1]) to the
+   voltage to be output at the Meilhaus card */
+
+#define X_BAND_BIAS_FACTOR    -8.67
+#define Q_BAND_BIAS_FACTOR   -10.00
+
+
+/* Conversion factor between microwave frequency (in GHz) and resonance
+   field (in G) */
+
 #define FAC              356.97577
+
+
+/* Constants for buttons beside sliders and counters */
+
+#define COARSE_DECREASE   -2
+#define FINE_DECREASE     -1
+#define FINE_INCREASE      1
+#define COARSE_INCREASE    2
+
+
+#define IRIS_UP            1
+#define IRIS_DOWN         -1
+#define IRIS_STOP          0
 
 
 #if defined __GNUC__
@@ -131,27 +194,27 @@ typedef struct {
 extern BMWB bmwb;
 
 
-#define DIO_A   0         /* used for AFc state and type of bridge detection */
+#define DIO_A   0         /* used for AFC state and type of bridge detection */
 #define DIO_B   1         /* mostly used for mode */
 #define DIO_C   2         /* used for microwave attenuation */
 #define DIO_D   3         /* used for iris control */
 
 
-/* Define sudevice IDs for analog outputs */
+/* Define subdevice IDs for analog outputs */
 
 #define FREQUENCY_AO            5         /* used for microwave frequency */
 #define BIAS_AO                 6         /* used for microwave bias */
 #define SIGNAL_PHASE_AO         7         /* used for signal phase */
 
 
-/* Define subdevice ID for alanog input and the different channels */
+/* Define subdevice ID for analog input and the different channels */
 
 #define AI                      4         /* subdevice ID for analog input */
 
 #define DETECTOR_CURRENT_AI     0         /* used for detector current */
-#define AFC_SIGNAL_AI           1         /* used for afc signal */
-#define UNLOCKED_SIGNAL_AI      2         /* used for unlocked signal */
-#define UNCALIBRATED_SIGNAL_AI  3         /* used for uncalibrated signal */
+#define AFC_SIGNAL_AI           1         /* used for the afc signal */
+#define UNLOCKED_SIGNAL_AI      2         /* used for the unlocked signal */
+#define UNCALIBRATED_SIGNAL_AI  3         /* used for the uncalibrated signal */
 #define TUNE_MODE_X_SIGNAL_AI   4         /* used (together with AI_CH5) */
 #define TUNE_MODE_X_GNG_AI      5         /* for tune mode x-signal */
 #define TUNE_MODE_Y_SIGNAL_AI   6         /* used (together with AI_CH7) */
@@ -186,8 +249,8 @@ void save_state( void );
 
 int measure_dc_signal( double * val );
 int measure_afc_signal( double * val );
-size_t measure_tune_mode( double * data,
-                          size_t   size );
+int measure_tune_mode( double * data,
+                       size_t   size );
 int measure_unlocked_signal( double * val );
 int measure_uncalibrated_signal( double * val );
 int measure_afc_state( int * state );

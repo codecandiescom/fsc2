@@ -54,9 +54,9 @@ main( int     argc,
     bmwb.c_is_active = 0;
     bmwb.type = -1;
 
-    /* Check the application name to see if the user explicitely want's
-       to use an X-band or a Q-band bridge, overruling the built-in
-       automatic determination of the type. */
+    /* Check the application name to see if the user explicitely wants
+       to use the X-band or Q-band bridge, overruling the built-in
+       automatic determination of its type. */
 
     if ( ( app_name = strrchr( argv[ 0 ], '/' ) ) == NULL )
         app_name = argv[ 0 ];
@@ -105,7 +105,10 @@ main( int     argc,
 		return EXIT_FAILURE;
 	}
 
-    if (    bmwb.type == -1
+    /* Unless the user requested a certain type of bridge try to determine
+       its type */
+
+    if (    bmwb.type == TYPE_FAIL
          && ( bmwb.type = get_bridge_type( ) ) == TYPE_FAIL )
     {
         fprintf( stderr, "Can't determine bridge type: %s\n", bmwb.error_msg );
@@ -115,9 +118,14 @@ main( int     argc,
         return EXIT_FAILURE;
     }
 
+    /* Get the last settings of the bridge from  state file */
+
 	load_state( );
 
 	graphics_init( );
+
+    /* Open a socket we're listening on and which might be used to send
+       commands for controling the bridge */
 
     if ( bmwb_open_sock( ) )
     {
@@ -133,6 +141,8 @@ main( int     argc,
 
     if ( do_signal )
         kill( getppid( ), SIGUSR1 );
+
+    /* All intialization done go into the graphics loop */
 
 	fl_do_forms( );
 
@@ -166,10 +176,16 @@ get_bridge_type( void )
     unsigned char v;
 
 
+    /* Get the value from the DIO that receives the bit for determining
+       the bridge type */
+
     if ( meilhaus_dio_in( DIO_A, &v ) )
         return TYPE_FAIL;
 
-    bmwb.type = v & BRIDGE_TYPE_BIT ? Q_BAND : X_BAND;
+    /* If BRIDGE_TYPE_BIT is set this is a Q-band bridge, otherwise a
+       X-band bridge */
+
+    bmwb.type = ( v & BRIDGE_TYPE_BIT ) ? Q_BAND : X_BAND;
 
     /* Set the upper bits of the DIO to the ones needed for setting the
        attenuation, which depend on the bridge type */
@@ -192,13 +208,19 @@ get_bridge_type( void )
 int
 set_mw_freq( double val )
 {
+    double volts;
+
+
     if ( val < 0.0 || val > 1.0 )
     {
         sprintf( bmwb.error_msg, "Invalid argument for set_mw_freq()." );
         return 1;
     }
 
-    if ( meilhaus_ao( FREQUENCY_AO, val ) )
+    volts = val * ( bmwb.type == X_BAND ?
+                    X_BAND_FREQ_FACTOR : Q_BAND_FREQ_FACTOR );
+
+    if ( meilhaus_ao( FREQUENCY_AO, volts ) )
         return 1;
 
 	bmwb.freq = val;
@@ -217,12 +239,18 @@ set_mw_attenuation( int val )
     unsigned char byte;
 
 
+    /* Allowed range is 0 to 60 dB */
+
     if ( val < MIN_ATTENUATION || val > MAX_ATTENUATION )
     {
         sprintf( bmwb.error_msg, "Invalid argument for "
                  "set_mw_attenuation()." );
         return 1;
     }
+
+    /* The bits to set the attenuation are two decimal coded nibbles,
+       one for powers of 10 and one for the remainder of the attenuation
+       in dB */
 
     byte = ( val / 10 ) << 8 | ( val % 10 );
 
@@ -242,13 +270,19 @@ set_mw_attenuation( int val )
 int
 set_signal_phase( double val )
 {
+    double volts;
+
+
     if ( val < 0.0 || val > 1.0 )
     {
         sprintf( bmwb.error_msg, "Invalid argument for set_signal_phase()." );
         return 1;
     }
 
-    if ( meilhaus_ao( SIGNAL_PHASE_AO, - val ) )
+    volts = val * ( bmwb.type == X_BAND ?
+                    X_BAND_PHASE_FACTOR : Q_BAND_PHASE_FACTOR );
+
+    if ( meilhaus_ao( SIGNAL_PHASE_AO, volts ) )
         return 1;
 
 	bmwb.signal_phase = val;
@@ -264,13 +298,19 @@ set_signal_phase( double val )
 int
 set_mw_bias( double val )
 {
+    double volts;
+
+
     if ( val < 0.0 || val > 1.0 )
     {
         sprintf( bmwb.error_msg, "Invalid argument for set_mw_bias()." );
         return 1;
     }
 
-    if ( meilhaus_ao( BIAS_AO, - val ) )
+    volts = val * ( bmwb.type == X_BAND ?
+                    X_BAND_BIAS_FACTOR : Q_BAND_BIAS_FACTOR );
+
+    if ( meilhaus_ao( BIAS_AO, volts ) )
         return 1;
 
 	bmwb.bias = val;
@@ -279,22 +319,16 @@ set_mw_bias( double val )
 }
 
 
-/*-----------------------------------------*
- * Function for controlling the iris motor
- *-----------------------------------------*/
+/*------------------------------------------------------*
+ * Function for controlling the iris motor, argument is
+ * 0 to stop the motor, 1 to go up and -1 to go down.
+ *------------------------------------------------------*/
 
 int
 set_iris( int state )
 {
     unsigned char v;
 
-
-    if ( bmwb.type == Q_BAND )
-    {
-        sprintf( bmwb.error_msg, "set_iris() can't be used with Q-band "
-                 "bridge." );
-        return 1;
-    }
 
     if ( meilhaus_dio_out_state( DIO_D, &v ) )
         return 1;
@@ -303,14 +337,14 @@ set_iris( int state )
                 
     switch ( state )
     {
-        case 0 :
+        case IRIS_STOP :
             break;
 
-        case 1 :
+        case IRIS_UP :
             v |= IRIS_UP_BIT;
             break;
 
-        case -1 :
+        case IRIS_DOWN :
             v |= IRIS_DOWN_BIT;
             break;
 
@@ -348,6 +382,17 @@ set_mode( int mode )
             break;
 
         case MODE_TUNE :
+            /* Security feature: when switching to tune mode make sure
+               that the attenuation isn't too high */
+
+            if ( bmwb.attenuation < SAFE_TUNE_MODE_ATTENUATION )
+            {
+                if ( set_mw_attenuation( SAFE_TUNE_MODE_ATTENUATION ) )
+                    return 1;
+                fl_set_counter_value( bmwb.rsc->attenuation_counter,
+                                      bmwb.attenuation );
+            }
+
             v |= MODE_TUNE_BITS;
             break;
 
@@ -369,9 +414,9 @@ set_mode( int mode )
 }
 
 
-/*---------------------------------------------------------*
- * Reloads the last stored state of the bridge from a file
- *---------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Loads the last stored state of the bridge from a file
+ *-------------------------------------------------------*/
 
 static void
 load_state( void )
@@ -379,6 +424,8 @@ load_state( void )
 	FILE *fp = NULL;
 	char *fn;
 
+
+    /* Make sure the bridge is in a safe state (STANDBY and max. attenuation) */
 
 	set_mode( MODE_STANDBY );
 	set_mw_attenuation( MAX_ATTENUATION );
@@ -416,13 +463,13 @@ load_state( void )
 		bmwb.bias         = 0.0;
     }
 
+	if ( fp )
+		fclose( fp );
+
     lower_permissions( );
 
 	if ( fn )
 		free( fn );
-
-	if ( fp )
-		fclose( fp );
 }
 
 
@@ -462,8 +509,8 @@ save_state( void )
 
 
 /*-------------------------------------------*
- * Tests if there's another instance of the program already running
- * by trying to connect to the socket it's then listening on.
+ * Tests if there's another instance of the program already running by
+ * trying to connect to the socket it's then supposed to listen on.
  *-------------------------------------------*/
 
 static int

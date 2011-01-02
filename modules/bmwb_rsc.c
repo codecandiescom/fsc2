@@ -63,12 +63,58 @@ create_form_bmwb_rsc( void )
 		fl_deactivate_object( obj );
 	}
 
+	obj = fl_add_button( FL_NORMAL_BUTTON, 545, 50, 60, 25, "Quit" );
+	fl_set_object_callback( obj, quit_handler, 0 );
+	fl_set_button_mouse_buttons( obj, 1 );
+
     fdui->main_frame = fl_add_frame( FL_ENGRAVED_FRAME, 270, 80,
 									 340, 200, "" );
 
+	fdui->attenuation_group = fl_bgn_group( );
+
+    fdui->attenuation_counter = obj = fl_add_counter( FL_NORMAL_COUNTER,
+													  280, 90, 320, 30, ""  );
+    fl_set_object_color( obj, FL_WHITE, FL_BLACK );
+	fl_set_object_lsize( obj, FL_MEDIUM_SIZE );
+	fl_set_object_lstyle( obj, FL_BOLD_STYLE );
+    fl_set_object_callback( obj, attenuation_cb, 0 );
+    fl_set_counter_precision( obj, 0 );
+    fl_set_counter_bounds( obj, MIN_ATTENUATION, MAX_ATTENUATION );
+	fl_set_counter_value( obj, bmwb.attenuation );
+
+	obj = fl_add_text( FL_NORMAL_TEXT, 350, 120, 320, 20,
+					   "Microwave attenuation [dB]" );
+
+
+    obj = fl_add_button( FL_TOUCH_BUTTON, 280, 90, 30, 30, "@<<" );
+    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+    fl_set_object_callback( obj, attenuation_cb, COARSE_DECREASE );
+    fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
+
+    obj = fl_add_button( FL_TOUCH_BUTTON, 310, 90, 30, 30, "@<" );
+    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+    fl_set_object_callback( obj, attenuation_cb, FINE_DECREASE );
+    fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
+
+    obj = fl_add_button( FL_TOUCH_BUTTON, 540, 90, 30, 30, "@>" );
+    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+    fl_set_object_callback( obj, attenuation_cb, FINE_INCREASE );
+    fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
+
+    obj = fl_add_button( FL_TOUCH_BUTTON, 570, 90, 30, 30, "@>>" );
+    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+    fl_set_object_callback( obj, attenuation_cb, COARSE_INCREASE );
+    fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
+
+	fl_end_group( );
+
 	fdui->freq_group = fl_bgn_group( );
 
-    fdui->freq_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER, 340, 90,
+    fdui->freq_slider = obj = fl_add_slider( FL_HOR_BROWSER_SLIDER, 340, 151,
 											 200, 30, "Microwave frequency" );
     fl_set_object_lsize( obj, FL_SMALL_SIZE );
     fl_set_object_color( obj, FL_WHITE, FL_COL1 );
@@ -76,66 +122,37 @@ create_form_bmwb_rsc( void )
 	fl_set_slider_value( obj, bmwb.freq );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
 
-    obj = fl_add_button( FL_TOUCH_BUTTON, 280, 90, 30, 30, "@<<" );
+    obj = fl_add_button( FL_TOUCH_BUTTON, 280, 151, 30, 30, "@<<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, freq_cb, -2 );
+    fl_set_object_callback( obj, freq_cb, COARSE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
-    obj = fl_add_button( FL_TOUCH_BUTTON, 310, 90, 30, 30, "@<" );
+    obj = fl_add_button( FL_TOUCH_BUTTON, 310, 151, 30, 30, "@<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, freq_cb, -1 );
+    fl_set_object_callback( obj, freq_cb, FINE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
-    obj = fl_add_button( FL_TOUCH_BUTTON, 540, 90, 30, 30, "@>" );
+    obj = fl_add_button( FL_TOUCH_BUTTON, 540, 151, 30, 30, "@>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, freq_cb, 1 );
+    fl_set_object_callback( obj, freq_cb, FINE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
-    obj = fl_add_button( FL_TOUCH_BUTTON, 570, 90, 30, 30, "@>>" );
+    obj = fl_add_button( FL_TOUCH_BUTTON, 570, 151, 30, 30, "@>>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, freq_cb, 2 );
+    fl_set_object_callback( obj, freq_cb, COARSE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
 	freq = bmwb.min_freq + bmwb.freq * ( bmwb.max_freq - bmwb.min_freq );
 	sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
 
-	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 285, 138, 320, 20,
+	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 285, 199, 320, 20,
 										 buf );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
     fl_set_object_lsize( obj, FL_SMALL_SIZE );
-
-	fl_end_group( );
-
-	fdui->attenuation_group = fl_bgn_group( );
-
-    fdui->attenuation_counter = obj = fl_add_counter( FL_NORMAL_COUNTER,
-													  280, 165, 320, 30,
-												 "Microwave attenuation [dB]" );
-    fl_set_object_color( obj, FL_WHITE, FL_BLACK );
-    fl_set_object_callback( obj, attenuation_cb, 0 );
-    fl_set_counter_precision( obj, 0 );
-    fl_set_counter_bounds( obj, 0, 60 );
-	fl_set_counter_value( obj, bmwb.attenuation );
-
-    obj = fl_add_button( FL_TOUCH_BUTTON, 280, 165, 30, 30, "@<<" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, attenuation_cb, -2 );
-    fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-    obj = fl_add_button( FL_TOUCH_BUTTON, 310, 165, 30, 30, "@<" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, attenuation_cb, -1 );
-    fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-    obj = fl_add_button( FL_TOUCH_BUTTON, 540, 165, 30, 30, "@>" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, attenuation_cb, 1 );
-    fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-    obj = fl_add_button( FL_TOUCH_BUTTON, 570, 165, 30, 30, "@>>" );
-    fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, attenuation_cb, 2 );
-    fl_set_object_return( obj, FL_RETURN_CHANGED );
 
 	fl_end_group( );
 
@@ -149,28 +166,32 @@ create_form_bmwb_rsc( void )
     fl_set_object_callback( obj, signal_phase_cb, 0 );
 	fl_set_slider_value( obj, bmwb.signal_phase );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
-	sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * bmwb.signal_phase ) );
+	sprintf( buf, "Signal phase (%2d%%)", irnd( 100.0 * bmwb.signal_phase ) );
 	fl_set_object_label( obj, buf );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 280, 225, 30, 30, "@<<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, signal_phase_cb, -2 );
+    fl_set_object_callback( obj, signal_phase_cb, COARSE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 310, 225, 30, 30, "@<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, signal_phase_cb, -1 );
+    fl_set_object_callback( obj, signal_phase_cb, FINE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 540, 225, 30, 30, "@>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, signal_phase_cb, 1 );
+    fl_set_object_callback( obj, signal_phase_cb, FINE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 570, 225, 30, 30, "@>>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, signal_phase_cb, 2 );
+    fl_set_object_callback( obj, signal_phase_cb, COARSE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
 	fl_end_group( );
 
@@ -186,45 +207,51 @@ create_form_bmwb_rsc( void )
     fl_set_object_callback( obj, bias_cb, 0 );
 	fl_set_slider_value( obj, bmwb.bias );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
-	sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * bmwb.bias ) );
+	sprintf( buf, "Microwave bias (%2d%%)", irnd( 100.0 * bmwb.bias ) );
 	fl_set_object_label( obj, buf );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 280, 300, 30, 30, "@<<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, bias_cb, -2 );
+    fl_set_object_callback( obj, bias_cb, COARSE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 310, 300, 30, 30, "@<" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, bias_cb, -1 );
+    fl_set_object_callback( obj, bias_cb, FINE_DECREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 540, 300, 30, 30, "@>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, bias_cb, 1 );
+    fl_set_object_callback( obj, bias_cb, FINE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 570, 300, 30, 30, "@>>" );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-    fl_set_object_callback( obj, bias_cb, 2 );
+    fl_set_object_callback( obj, bias_cb, COARSE_INCREASE );
     fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
 	fl_end_group( );
 
 	fdui->iris_group = fl_bgn_group( );
 
-	fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON,
-										   104, 320, 30, 30, "@8<" );
-	fl_set_object_lalign( obj, FL_ALIGN_CENTER );
-	fl_set_object_callback( obj, iris_cb, -1 );
-	fl_set_object_return( obj, FL_RETURN_CHANGED );
-
-	fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 136, 320,
+	fdui->iris_up = obj = fl_add_button( FL_INOUT_BUTTON, 104, 320,
 										 30, 30, "@2<" );
 	fl_set_object_lsize( obj, FL_NORMAL_SIZE );
 	fl_set_object_lalign( obj, FL_ALIGN_CENTER );
 	fl_set_object_callback( obj, iris_cb, 1 );
 	fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
+
+	fdui->iris_down = obj = fl_add_button( FL_INOUT_BUTTON,
+										   136, 320, 30, 30, "@8<" );
+	fl_set_object_lalign( obj, FL_ALIGN_CENTER );
+	fl_set_object_callback( obj, iris_cb, -1 );
+	fl_set_object_return( obj, FL_RETURN_CHANGED );
+	fl_set_button_mouse_buttons( obj, 1 );
 
 	obj = fl_add_text( FL_NORMAL_TEXT, 170, 325, 50, 20, "Iris" );
 	fl_set_object_lsize( obj, FL_SMALL_SIZE );
