@@ -432,9 +432,10 @@ sigph_req( int          fd,
         return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
     }
 
-    val = strtof( req, &eptr );
+    if ( *req == ' ' )
+        val = strtod( req, &eptr );
 
-    if ( *req != ' ' || eptr == req || *eptr || val > 1.0 || val < 0.0 )
+    if ( ! eptr || eptr == req || *eptr || val > 1.0 || val < 0.0 )
         return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
     pthread_mutex_lock( &bmwb.mutex );
@@ -474,9 +475,10 @@ bias_req( int          fd,
         return swrite( fd, buf, strlen( buf ) ) != -1 ? 0 : 1;
     }
 
-    val = strtof( req + 1, &eptr );
+    if ( *req == ' ' )
+        val = strtod( req + 1, &eptr );
 
-    if ( *req != ' ' || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
+    if ( ! eptr || eptr == req + 1 || *eptr || val > 1.0 || val < 0.0 )
         return swrite( fd, "INV\n", 4 ) == 4 ? 0 : 1;
 
     pthread_mutex_lock( &bmwb.mutex );
