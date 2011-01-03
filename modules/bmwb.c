@@ -38,7 +38,7 @@ int
 main( int     argc,
 	  char ** argv )
 {
-    int do_signal;
+    int do_signal = 0;
     int i;
     char *app_name;
     int bad_arg = 0;
