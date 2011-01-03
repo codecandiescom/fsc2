@@ -52,8 +52,8 @@
 #undef DEVICE_TYPE
 
 
-#define BMWB_X_BAND_STATE_FILE    "bmwb_x_band.state"
-#define BMWB_Q_BAND_STATE_FILE    "bmwb_q_band.state"
+#define BMWB_X_BAND_STATE_FILE    "x_bmwb.state"
+#define BMWB_Q_BAND_STATE_FILE    "q_bmwb.state"
 
 #define X_BAND            0
 #define Q_BAND            1

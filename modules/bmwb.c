@@ -503,8 +503,8 @@ load_state( void )
 		 || ! ( bmwb.signal_phase >= 0.0 || bmwb.signal_phase <= 1.0 )
 		 || ! ( bmwb.bias >= 0.0 || bmwb.bias <= 1.0 ) )
 	{
-		bmwb.freq         = 0.0;
-		bmwb.signal_phase = 0.0;
+		bmwb.freq         = 0.5;
+		bmwb.signal_phase = 0.5;
 		bmwb.bias         = 0.0;
     }
 
@@ -518,9 +518,9 @@ load_state( void )
 }
 
 
-/*-------------------------------------------------*
- * Safes the current state of the bridge to a file
- *-------------------------------------------------*/
+/*--------------------------------------------------*
+ * Stores the current state of the bridge to a file
+ *--------------------------------------------------*/
 
 void
 save_state( void )
@@ -529,14 +529,14 @@ save_state( void )
 	FILE *fp;
 
 
-    raise_permissions( );
-
 	if ( bmwb.type == X_BAND )
 		fn = get_string( "%s%s%s", libdir, slash( libdir ),
 						 BMWB_X_BAND_STATE_FILE );
 	else
 		fn = get_string( "%s%s%s", libdir, slash( libdir ),
 						 BMWB_Q_BAND_STATE_FILE );
+
+    raise_permissions( );
 
     if ( fn && ( fp = bmwb_fopen( fn, "w" ) ) )
 	{
@@ -553,10 +553,10 @@ save_state( void )
 }
 
 
-/*-------------------------------------------*
+/*---------------------------------------------------------------------*
  * Tests if there's another instance of the program already running by
  * trying to connect to the socket it's then supposed to listen on.
- *-------------------------------------------*/
+ *---------------------------------------------------------------------*/
 
 static int
 check_unique( void )
