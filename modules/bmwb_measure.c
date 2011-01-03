@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2010 Jens Thoms Toerring
+ *  Copyright (C) 1999-2011 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -168,9 +168,9 @@ generate_dummy_data( double * x,
  * to fit the buffer and with values between 0.0 and 1.0
  *---------------------------------------------------------*/
 
-#define EXTRA_FAC   1.1
-#define AVERAGES    10
-#define MAX_BAD     20
+#define EXTRA_FREQ_FACTOR   1.2
+#define AVERAGES            10
+#define MAX_BAD             20
 
 int
 measure_tune_mode( double * data,
@@ -202,20 +202,24 @@ measure_tune_mode( double * data,
        the measurement starting at the lowest point of the sawtooth, so
        acquiring quite a bit more data keeps us on the safe side. */
 
-    data_len = EXTRA_FAC * ( AVERAGES + MAX_BAD ) * size;
+    data_len = EXTRA_FREQ_FACTOR * ( AVERAGES + 1 + MAX_BAD ) * size;
 
     if ( ! ( x = malloc( 2 * data_len * sizeof *x ) ) )
         return 1;
     y = x + data_len;
 
-    /* Get the two curves from the Meilhaus card */
+    /* Get the two curves from the Meilhaus card - we need a bit higher
+       frequency since we're really only interested in the part were the
+       sawtooth wave is going up and in that range we need about 'size'
+       samples */
 
 #if ! defined BMWB_TEST
-    if ( meilhaus_ai_curves( TUNE_MODE_X_SIGNAL_AI, x,
-                             TUNE_MODE_Y_SIGNAL_AI, y,
-                             data_len,
-                             a.2 * size * bmwb.type == X_BAND ?
-                             X_BAND_TUNE_FREQ : Q_BAND_TUNE_FREQ ) )
+    if ( meilhaus_ai_get_curves( TUNE_MODE_X_SIGNAL_AI, x, min_x_exp, max_x_exp,
+                                 TUNE_MODE_Y_SIGNAL_AI, y, min_y_exp, max_y_exp,
+                                 data_len,
+                                   EXTRA_FREQ_FACTOR * size
+                                 * bmwb.type == X_BAND ?
+                                   X_BAND_TUNE_FREQ : Q_BAND_TUNE_FREQ ) )
     {
         free( x );
         return 1;

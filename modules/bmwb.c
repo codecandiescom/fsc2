@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2010 Jens Thoms Toerring
+ *  Copyright (C) 1999-2011 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -41,6 +41,8 @@ main( int     argc,
     int do_signal;
     int i;
     char *app_name;
+    int bad_arg = 0;
+    int type;
 
 
     bmwb.EUID = geteuid( );
@@ -52,7 +54,7 @@ main( int     argc,
     *bmwb.error_msg = '\0';
     bmwb.a_is_active = 0;
     bmwb.c_is_active = 0;
-    bmwb.type = -1;
+    bmwb.type = TYPE_FAIL;
 
     /* Check the application name to see if the user explicitely wants
        to use the X-band or Q-band bridge, overruling the built-in
@@ -68,12 +70,47 @@ main( int     argc,
     else if ( ! strcmp( app_name, "qbmwb" ) )
         bmwb.type = Q_BAND;
 
-    /* The invoking process may want to get a signal on success (SIGUSR1) or
-       failure (SIGUSR2) */
+    /* Check command line arguments. '-X' or '-Q' allow to select the
+       bridge type and by '-S' the invoking process may tell that it
+       wants to get a signal on success (SIGUSR1) or failure (SIGUSR2) */
 
     for ( i = 1; i < argc; i++ )
-        if ( ! strcmp( argv[ i ], "-S" ) )
+        if ( ! strcmp( argv[ i ], "-X" ) )
+        {
+            if ( bmwb.type == Q_BAND )
+                bad_arg = 1;
+            else
+                bmwb.type = X_BAND;
+        }
+        else if ( ! strcmp( argv[ i ], "-Q" ) )
+        {
+            if ( bmwb.type == X_BAND )
+                bad_arg = 1;
+            else
+                bmwb.type = Q_BAND;
+        }
+        else if ( ! strcmp( argv[ i ], "-S" ) )
             do_signal = 1;
+        else
+        {
+            bad_arg = 1;
+            break;
+        }
+
+    if ( bad_arg )
+    {
+        if ( strcmp( app_name, "qbmwb" ) && strcmp( app_name, "xbmwb" ) )
+            fprintf( stderr, "Usage: %s [ OPTION... ]\n\n"
+                     "  -X Connect to X-band bridge\n"
+                     "  -Q Connect to Q-band bridge\n"
+                     "  -S Send signal after initialization\n", app_name );
+        else
+            fprintf( stderr, "Usage: %s [ OPTION ]\n\n"
+                     "  -S Send signal after initialization\n", app_name );
+        if ( do_signal )
+            kill( getppid( ), SIGUSR2 );
+        return EXIT_FAILURE;
+	}
 
     /* Check if another instance of the program is already running */
 
@@ -105,11 +142,9 @@ main( int     argc,
 		return EXIT_FAILURE;
 	}
 
-    /* Unless the user requested a certain type of bridge try to determine
-       its type */
+    /* Try to determine type of bridge */
 
-    if (    bmwb.type == TYPE_FAIL
-         && ( bmwb.type = get_bridge_type( ) ) == TYPE_FAIL )
+    if ( ( type = get_bridge_type( ) ) == TYPE_FAIL )
     {
         fprintf( stderr, "Can't determine bridge type: %s\n", bmwb.error_msg );
         meilhaus_finish( );
@@ -117,6 +152,16 @@ main( int     argc,
             kill( getppid( ), SIGUSR2 );
         return EXIT_FAILURE;
     }
+
+    /* Check for inconsistencies */
+
+    if ( bmwb.type != TYPE_FAIL && bmwb.type != type )
+        fprintf( stderr, "Warning: Requested bridge type differs from "
+                 "detected type (requested was %s, detected is %s).\n",
+                 bmwb.type == X_BAND ? "X-band" : "Q-band",
+                 type == X_BAND ? "X-band" : "Q-band" );
+    else
+        bmwb.type = type;
 
     /* Get the last settings of the bridge from  state file */
 
@@ -192,7 +237,7 @@ get_bridge_type( void )
 
     if ( meilhaus_dio_out( DIO_B, bmwb.type == X_BAND ?
                            X_BAND_ATT_BITS : Q_BAND_ATT_BITS ) )
-        return TYPE_FAIL;u
+        return TYPE_FAIL;
 
     return bmwb.mode;
 #else

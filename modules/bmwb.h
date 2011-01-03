@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2010 Jens Thoms Toerring
+ *  Copyright (C) 1999-2011 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -23,7 +23,7 @@
 #if ! defined BMWB_HEADER_
 #define BMWB_HEADER_
 
-#define BMWB_TEST 1
+//#define BMWB_TEST 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,9 +64,13 @@
 #define MODE_OPERATE      2
 
 
+/* Minimum and maximum attenuation and attenuation deemed to be safe
+   for tune mode (when switching to tune mode attenuation automatically
+   gets increased to the value if lower before) */
+
 #define MIN_ATTENUATION              0
 #define MAX_ATTENUATION             60
-#define SAFE_TUNE_MODE_ATTENUATION  25
+#define SAFE_TUNE_MODE_ATTENUATION  20
 
 
 /* Minimum and maximum expected detector current signal for X- and Q-band
@@ -103,7 +107,7 @@
 #define UNLOCKED_MAX  3.0
 
 
-/* Minimum and maximum x- and y-voltage masured im tune mode */
+/* Minimum and maximum x- and y-voltages masured in tune mode */
 
 #define X_BAND_MIN_TUNE_X_VOLTS   -1.0
 #define X_BAND_MAX_TUNE_X_VOLTS    4.0
@@ -124,22 +128,22 @@
 #define Q_BAND_TUNE_FREQ         1600
 
 
-/* Conversion factors for microwave frequency (in interval [0,1]) to
-   the voltage to be output at the Meilhaus card */
+/* Conversion factors for microwave frequency given as a value in the
+   interval [0,1] to the voltage to be output at the Meilhaus card */
 
 #define X_BAND_FREQ_FACTOR     8.67
 #define Q_BAND_FREQ_FACTOR     9.87
 
 
-/* Conversion factor for microwave signal phase (in interval [0,1]) to the
-   voltage to be output at the Meilhaus card */
+/* Conversion factor for microwave signal phase given as a value in the
+   interval [0,1] to the voltage to be output at the Meilhaus card */
 
 #define X_BAND_PHASE_FACTOR   -8.67
 #define Q_BAND_PHASE_FACTOR  -10.00
 
 
-/* Conversion factor for microwave bias (in interval [0,1]) to the
-   voltage to be output at the Meilhaus card */
+/* Conversion factor for microwave bias given as a value in the interval
+   [0,1] to the voltage to be output at the Meilhaus card */
 
 #define X_BAND_BIAS_FACTOR    -8.67
 #define Q_BAND_BIAS_FACTOR   -10.00
@@ -194,8 +198,10 @@ typedef struct {
 extern BMWB bmwb;
 
 
+/* Number associated with the different DIs and DOs */
+
 #define DIO_A   0         /* used for AFC state and type of bridge detection */
-#define DIO_B   1         /* mostly used for mode */
+#define DIO_B   1         /* mostly used for bridge mode */
 #define DIO_C   2         /* used for microwave attenuation */
 #define DIO_D   3         /* used for iris control */
 
@@ -211,15 +217,13 @@ extern BMWB bmwb;
 
 #define AI                      4         /* subdevice ID for analog input */
 
-#define DETECTOR_CURRENT_AI     0         /* used for detector current */
-#define AFC_SIGNAL_AI           1         /* used for the afc signal */
-#define UNLOCKED_SIGNAL_AI      2         /* used for the unlocked signal */
-#define UNCALIBRATED_SIGNAL_AI  3         /* used for the uncalibrated signal */
-#define TUNE_MODE_X_SIGNAL_AI   4         /* used (together with AI_CH5) */
-#define TUNE_MODE_X_GNG_AI      5         /* for tune mode x-signal */
-#define TUNE_MODE_Y_SIGNAL_AI   6         /* used (together with AI_CH7) */
-#define TUNE_MODE_Y_GND_AI      7         /* for tune mode y-signal */
-#define OVERHEAT_SIGNAL_AI      8         /* used for overheat signal */
+#define DETECTOR_CURRENT_AI     0         /* detector current */
+#define AFC_SIGNAL_AI           1         /* AFC signal */
+#define UNLOCKED_SIGNAL_AI      2         /* unlocked signal */
+#define UNCALIBRATED_SIGNAL_AI  3         /* uncalibrated signal */
+#define TUNE_MODE_X_SIGNAL_AI   4         /* tune mode x signal */
+#define TUNE_MODE_Y_SIGNAL_AI   6         /* tune mode y signal */
+#define OVERHEAT_SIGNAL_AI      8         /* overheat signal */
 
 
 #define AFC_STATE_BIT       0x01
@@ -247,50 +251,60 @@ int set_iris( int state );
 int set_mode( int mode );
 void save_state( void );
 
-int measure_dc_signal( double * val );
-int measure_afc_signal( double * val );
-int measure_tune_mode( double * data,
-                       size_t   size );
-int measure_unlocked_signal( double * val );
-int measure_uncalibrated_signal( double * val );
-int measure_afc_state( int * state );
+int measure_dc_signal( double * /* val */ );
+int measure_afc_signal( double * /* val */ );
+int measure_tune_mode( double * /* data */,
+                       size_t   /* size */ );
+int measure_unlocked_signal( double * /* val */ );
+int measure_uncalibrated_signal( double * /* val */ );
+int measure_afc_state( int * /* state */ );
 
 void graphics_init( void );
-int update_display( XEvent * xev   UNUSED_ARG ,
-                    void   * data  UNUSED_ARG );
-void display_mode_pic( int mode );
-void lock_objects( int state );
+int update_display( XEvent * /* xev  */,
+                    void   * /* data */ );
+void display_mode_pic( int /* mode */ );
+void lock_objects( int /* state */ );
 
 int meilhaus_init( void );
 int meilhaus_finish( void );
-int meilhaus_ai_single( int      channel,
-                        double   min,
-                        double   max,
-                        double * val );
-int meilhaus_ao( int    ao,
-                 double val );
-int meilhaus_dio_in( int             dio,
-                     unsigned char * val );
-int meilhaus_dio_out_state( int             dio,
-                            unsigned char * val );
-int meilhaus_dio_out( int           dio,
-                      unsigned char val );
+int meilhaus_ai_single( int      /* channel */,
+                        double   /* min     */,
+                        double   /* max     */,
+                        double * /* val     */ );
+int meilhaus_ai_get_curves( int      /* x_channel */,
+                            double * /* x_data    */,
+                            double   /* x_min     */,
+                            double   /* x_max     */,
+                            int      /* y_channel */,
+                            double * /* y_data    */,
+                            double   /* y_min     */,
+                            double   /* y_max     */,
+                            size_t   /* len       */,
+                            double   /* freq      */ );
+int meilhaus_ao( int    /* ao  */,
+                 double /* val */ );
+int meilhaus_dio_in( int             /* dio */,
+                     unsigned char * /* val */ );
+int meilhaus_dio_out_state( int             /* dio */,
+                            unsigned char * /* val */ );
+int meilhaus_dio_out( int           /* dio */,
+                      unsigned char /* val */ );
 
 
 int bmwb_open_sock( void );
 
 void raise_permissions( void );
 void lower_permissions( void );
-FILE * bmwb_fopen( const char *,
-				   const char * );
-double d_max( double  a,
-			  double  b );
-double d_min( double  a,
-			  double  b );
-int irnd( double d );
-char * get_string( const char * fmt,
+FILE * bmwb_fopen( const char * /* path */,
+				   const char * /* mode */ );
+double d_max( double /* a */,
+			  double /* b */ );
+double d_min( double /* a */,
+			  double /* b */ );
+int irnd( double /* d */ );
+char * get_string( const char * /* fmt */,
 				   ... );
-const char * slash( const char * path );
+const char * slash( const char * /* path */ );
 
 
 #endif /* ! defined BMWB_HEADER_*/

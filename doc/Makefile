@@ -54,9 +54,9 @@ fsc2.info: $(docs)
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	@if [ "`eval texi2html --help 2>/dev/null`" ]; then    \
-		LC_ALL=C texi2html --init-file=fsc2.init fsc2.tex; \
-	else                                                   \
+	@if [ "`eval texi2html --help 2>/dev/null`" ]; then                       \
+		LC_ALL=C texi2html --init-file=fsc2.init fsc2.texi;                   \
+	else                                                                      \
 		echo "Can't make HTML documentation, program 'texi2html' not found";  \
 	fi
 

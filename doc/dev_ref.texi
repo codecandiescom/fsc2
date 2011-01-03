@@ -3117,12 +3117,9 @@ Electronic GmbH} ME-4680 card and additional, home-built electronics
 @item @ref{mw_bridge_attenuation()}
 @item @ref{mw_bridge_signal_phase()}
 @item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_lock_phase()}
 @item @ref{mw_bridge_mode()}
 @item @ref{mw_bridge_detector_current()}
 @item @ref{mw_bridge_afc_signal()}
-@item @ref{mw_bridge_unlocked_signal()}
-@item @ref{mw_bridge_uncalibrated_signal()}
 @item @ref{mw_bridge_afc_state()}
 @item @ref{mw_bridge_iris()}
 @item @ref{mw_bridge_max_frequency()}
@@ -4506,13 +4503,11 @@ Electronic GmbH} ME-4680 card and additional, home-built electronics
 @item @ref{mw_bridge_attenuation()}
 @item @ref{mw_bridge_signal_phase()}
 @item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_lock_phase()}
 @item @ref{mw_bridge_mode()}
 @item @ref{mw_bridge_detector_current()}
 @item @ref{mw_bridge_afc_signal()}
 @item @ref{mw_bridge_unlocked_signal()}
 @item @ref{mw_bridge_uncalibrated_signal()}
-@item @ref{mw_bridge_afc_state()}
 @item @ref{mw_bridge_iris()}
 @item @ref{mw_bridge_max_frequency()}
 @item @ref{mw_bridge_min_frequency()}

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2010 Jens Thoms Toerring
+ *  Copyright (C) 1999-2011 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -26,14 +26,22 @@
 #include <forms.h>
 
 
-extern void mode_cb( FL_OBJECT *, long );
-extern void freq_cb( FL_OBJECT *, long );
-extern void attenuation_cb( FL_OBJECT *, long );
-extern void signal_phase_cb( FL_OBJECT *, long );
-extern void bias_cb( FL_OBJECT *, long );
-extern void lock_phase_cb( FL_OBJECT *, long );
-extern void iris_cb( FL_OBJECT *, long );
-extern void quit_handler( FL_OBJECT * ,long );
+void mode_cb( FL_OBJECT *,
+              long );
+void freq_cb( FL_OBJECT *,
+              long );
+void attenuation_cb( FL_OBJECT *,
+                     long );
+void signal_phase_cb( FL_OBJECT *,
+                      long );
+void bias_cb( FL_OBJECT *,
+              long );
+void lock_phase_cb( FL_OBJECT *,
+                    long );
+void iris_cb( FL_OBJECT *,
+              long );
+void quit_handler( FL_OBJECT * ,
+                   long );
 
 
 typedef struct {
@@ -77,7 +85,7 @@ typedef struct {
 } Canvas_T;
 
 
-extern FD_bmwb_rsc * create_form_bmwb_rsc( void );
+FD_bmwb_rsc * create_form_bmwb_rsc( void );
 
 #endif
 

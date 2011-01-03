@@ -8263,10 +8263,14 @@ bridges by Bruker are supported. Since these bridges don't have a
 computer interface additional hardware is required, a @code{Meilhaus
 4680} card and some additional, home-built electronics. This module is
 also different from others since there is an extra utility program,
-@code{bmwb}, for controlling the bridge which interacts with these
-modules (it gets started automatically when needed). The @code{bmwb}
-program can also be used to control the bridges manually via a
-graphical user interface.
+called @code{bmwb}, for controlling the bridge, which interacts with
+the corresponding module (the utility program gets started
+automatically when needed by the module). This utility program can
+also be used as a stand-alone program to control the bridge manually
+via a graphical user interface. If already started the module will
+communicate with it to control the microwave bridge - in a typical EPR
+experiment you will probably start the utility program first to adjust
+the bridge before starting the experiment.
 
 The modules for the microwave bridges get loaded by specifying
 @example
@@ -8285,7 +8289,6 @@ in the @code{DEVICES} section.
 @item @ref{mw_bridge_attenuation()}
 @item @ref{mw_bridge_signal_phase()}
 @item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_lock_phase()}
 @item @ref{mw_bridge_mode()}
 @item @ref{mw_bridge_detector_current()}
 @item @ref{mw_bridge_afc_signal()}
@@ -8320,16 +8323,16 @@ bridge, @code{bmwb}, from the @code{PREPARATIONS} section of an
 @code{EDL} script. When the program is running coupling of the
 resonator etc.@ can be done before the experiment is started. If the
 @code{bmwb} is already running nothing happens (except that in case
-it is detected that the required microwave bridge isn't connected
-an error message is printed out).
-
+it's detected that the required microwave bridge isn't connected
+an error message is printed out and the @code{EDL} script is
+aborted).
 
 
 @anchor{mw_bridge_frequency()}
 @findex mw_bridge_frequency()
 @item mw_bridge_frequency()
 This function allows to set or query of the microwave bridge. If
-called woth no argument the currently set microwave frequency is
+called with no argument the currently set microwave frequency is
 returned. If called with an argument the microwave frequency is
 set to that value. To find about the range of frequencies that can
 be set use the functions @code{@ref{mw_bridge_min_frequency()}} and
@@ -8338,16 +8341,16 @@ only rough approximations of the real microwave frequencies.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
+
 @anchor{mw_bridge_attenuation()}
 @findex mw_bridge_attenuation()
 @item mw_bridge_attenuation()
 This function allows to set or query the current microwave attenuation
-settings. If called with no argument the attenuation set at the bridge
-is returned. If called with an argument the attenuation is set to this
-value. The allowed range of attenuation is @code{0 dB} to @code{60 dB}.
+settings. If called with no argument the attenuation set is returned.
+If called with an argument the attenuation is set to this value. The
+allowed range of attenuation is @code{0 dB} to @code{60 dB}.
 
 The function can be used in the @code{EXPERIMENT} section only.
-
 
 @anchor{mw_bridge_signal_phase()}
 @findex mw_bridge_signal_phase()
@@ -8372,18 +8375,6 @@ accordingly.
 The function can be used in the @code{EXPERIMENT} section only.
 
 
-@anchor{mw_bridge_lock_phase()}
-@findex mw_bridge_lock_phase()
-@item mw_bridge_lock_phase()
-This function can only be used for the @code{ER 046} X-band bridge and
-allows to set and query the microwave lock phase. If called with no
-argument the current setting of thelock phase is returned as a value
-between @code{0.0} and @code{1.0}. If a value in this range is passed
-to the function the lock phase is set accordingly.
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-
 @anchor{mw_bridge_mode()}
 @findex mw_bridge_mode()
 @item mw_bridge_mode()
@@ -8392,7 +8383,11 @@ with no argument the current mode setting is returned as an integer
 number, where @code{0} indicates standby mode, @code{1} tune mode
 and @code{2} operate mode. If called with one of these integers or
 one of the strings @code{"STANDBY"}, @code{"TUNE"} or @code{"OPERATE"}
-the bridge is switched to the requested mode
+the bridge is switched to the requested mode.
+
+Note that, as a security feature to protect the microwave diode,
+when switching to tune mode the attenuation will be automatically
+raised to @code{20 dB} if it was set to a lower value before.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
@@ -8442,7 +8437,7 @@ The function can be used in the @code{EXPERIMENT} section only.
 @anchor{mw_bridge_afc_state()}
 @findex mw_bridge_afc_state()
 @item mw_bridge_afc_state()
-This function can only be used with the @code{ER 051 QG} Q-bandbridge
+This function can only be used with the @code{ER 051 QG} Q-band bridge
 and takes no arguments. It returns @code{1} if the AFC is switched on,
 otherwise @code{0}.
 
@@ -8452,9 +8447,8 @@ The function can be used in the @code{EXPERIMENT} section only.
 @anchor{mw_bridge_iris()}
 @findex mw_bridge_iris()
 @item mw_bridge_iris()
-This function can only be used with the @code{ER 046} X-band bridge
-and allows to move the iris coupling up and down. It expects two
-arguments, a direction and a time. The direction can be either a
+This function allows to move the iris coupling up and down. It expects
+two arguments, a direction and a time. The direction can be either a
 string, @code{"UP"} or @code{"DOWN"}, or an integer of @code{1} and
 @code{-1}, indicating if the iris motor should decrease ("up") or
 increase ("down") coupling. The second argument is the time the
@@ -8465,28 +8459,28 @@ The function can be used in the @code{EXPERIMENT} section only.
 
 @anchor{mw_bridge_max_frequency()}
 @findex mw_bridge_max_frequency()
-@item @ref{mw_bridge_max_frequency()}
+@item mw_bridge_max_frequency()
 This function takes no arguments and returns a rough estimate of the
 maximum microwave frequency the bridge can produce.
 
 
 @anchor{mw_bridge_min_frequency()}
 @findex mw_bridge_min_frequency()
-@item @ref{mw_bridge_min_frequency()}
+@item mw_bridge_min_frequency()
 This function takes no arguments and returns a rough estimate of the
 minimum microwave frequency the bridge can produce.
 
 
 @anchor{mw_bridge_lock()}
 @findex mw_bridge_lock()
-@item @ref{mw_bridge_lock()}
+@item mw_bridge_lock()
 This function takes one argument, either a string of @code{"ON"} or
 @code{"OFF"} or an integer of @code{1} or @code{0}, and locks or
 unlocks the graphical interface of the @code{bmwb} program
 accordingly. This can be used to keep users from changing the
 microwave brdge settings manually while an experiment is running
-(the @code{Quit} will still be usable to allow to switch off the
-bridge in emergencies).
+(the @code{Quit} button will still be usable to allow to switch off
+the bridge in emergencies).
 
 The function can be used in the @code{EXPERIMENT} section only.
 
