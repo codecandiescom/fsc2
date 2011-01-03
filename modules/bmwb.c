@@ -519,7 +519,7 @@ load_state( void )
 
 
 /*--------------------------------------------------*
- * Stores the current state of the bridge to a file
+ * Stores the current state of the bridge in a file
  *--------------------------------------------------*/
 
 void

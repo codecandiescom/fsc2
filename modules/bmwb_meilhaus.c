@@ -460,8 +460,8 @@ meilhaus_ai_single( int      channel,
                            ME_IO_SINGLE_CONFIG_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
-        sprintf( bmwb.error_msg, "Failed to set up AI subdevice %d: %s.",
-                 AI, msg );
+        sprintf( bmwb.error_msg, "Failed to set up AI subdevice %d, channel "
+                 "%d: %s.", AI, channel, msg );
         lower_permissions( );
         return 1;
     }
@@ -471,8 +471,8 @@ meilhaus_ai_single( int      channel,
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
-        sprintf( bmwb.error_msg, "Failed to measure on AI subdevice %d: %s.",
-                 AI, msg );
+        sprintf( bmwb.error_msg, "Failed to measure on AI subdevice %d, "
+                 "channel %d: %s.", AI, channel, msg );
         lower_permissions( );
         return 1;
     }
@@ -487,7 +487,7 @@ meilhaus_ai_single( int      channel,
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to convert measured value from AI "
-                 "subdevice %d: %s.", AI, msg );
+                 "subdevice %d, channel %d: %s.", AI, channel, msg );
         lower_permissions( );
         return 1;
     }
@@ -739,7 +739,7 @@ meilhaus_ai_get_curves( int      x_channel,
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to start acquisition for AI subdevice "
-                 "%d: %s.", AI, msg );
+                 "%d, channels %d and %d: %s.", AI, x_channel, y_channel, msg );
         lower_permissions( );
         return 1;
     }
@@ -760,8 +760,8 @@ meilhaus_ai_get_curves( int      x_channel,
         {
             meErrorGetLastMessage( msg, sizeof msg );
             meIOStreamStop( &stop_list, 1, ME_IO_STREAM_STOP_NO_FLAGS );
-            sprintf( bmwb.error_msg, "Failed to acquisition failed for AI "
-                     "subdevice %d: %s.", AI, msg );
+            sprintf( bmwb.error_msg, "Acquisition failed for AI subdevice %d, "
+                     "channels %d and %d: %s.", AI, x_channel, y_channel, msg );
             lower_permissions( );
             return 1;
         }
