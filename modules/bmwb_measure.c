@@ -218,8 +218,8 @@ measure_tune_mode( double * data,
                                  TUNE_MODE_Y_SIGNAL_AI, y, min_y_exp, max_y_exp,
                                  data_len,
                                    EXTRA_FREQ_FACTOR * size
-                                 * bmwb.type == X_BAND ?
-                                   X_BAND_TUNE_FREQ : Q_BAND_TUNE_FREQ ) )
+                                 * ( bmwb.type == X_BAND ?
+                                     X_BAND_TUNE_FREQ : Q_BAND_TUNE_FREQ ) ) )
     {
         free( x );
         return 1;

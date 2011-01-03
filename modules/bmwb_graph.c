@@ -43,8 +43,9 @@ static int close_handler( FL_FORM * a,
                           void    * b );
 
 
-/*---------------------------------------------------*
- *---------------------------------------------------*/
+/*----------------------------*
+ * Initialization of graphics 
+ *----------------------------*/
 
 void
 graphics_init( void )
@@ -209,6 +210,17 @@ mode_cb( FL_OBJECT * obj,
                 display_mode_pic( r->val );
 
             bmwb.mode = r->val;
+
+            display_detector_current( );
+            display_afc_signal( );
+
+            if ( bmwb.type == X_BAND )
+            {
+                display_unlocked( );
+                display_uncalibrated( );
+            }
+            else
+                display_afc_state( );
         }
     }
 
@@ -218,9 +230,9 @@ mode_cb( FL_OBJECT * obj,
 }
 
 
-/*-------------------------------------------*
+/*-----------------------------------------------*
  * Callback for the frequency slider and buttons
- *-------------------------------------------*/
+ *-----------------------------------------------*/
 
 void
 freq_cb( FL_OBJECT * obj  UNUSED_ARG,
@@ -630,6 +642,9 @@ int
 update_display( XEvent * xev   UNUSED_ARG ,
 				void   * data  UNUSED_ARG )
 {
+    if ( bmwb.mode == MODE_STANDBY )
+        return 0;
+
     pthread_mutex_lock( &bmwb.mutex );
 
 	display_detector_current( );
@@ -660,42 +675,45 @@ static void
 display_detector_current( void )
 {
     int x;
-    double val;
+    double val = 0.0;
     double old_val = -1.0;
     double b, m;
 
-    if ( measure_dc_signal( &val ) )
+    if ( bmwb.mode != MODE_STANDBY )
     {
-        error_handling( );
-        return;
+        if ( measure_dc_signal( &val ) )
+        {
+            error_handling( );
+            return;
+        }
+
+        if ( old_val == val )
+            return;
+
+        old_val = val;
+
+        /* The displayed detector current doesn't cover the whole range of
+           the signal but only a subrange. The following values are from a
+           linear least square fit of the measured values. */
+
+        if ( bmwb.type == Q_BAND )
+        {
+            b = 1.7954;
+            m = 0.0467;
+        }
+        else
+        {
+            b =  2.4665;
+            m = -0.1372;
+        }
+
+        val = b * val + m;
+
+        if ( val > 1.0 )
+            val = 1.0;
+        else if ( val < 0.0 )
+            val = 0.0;
     }
-
-    if ( old_val == val )
-        return;
-
-    old_val = val;
-
-    /* The displayed detector current doesn't cover the whole range of
-       the signal but only a subrange. The following values are from a
-       linear least square fit of the measured values. */
-
-    if ( bmwb.type == Q_BAND )
-    {
-        b = 1.7954;
-        m = 0.0467;
-    }
-    else
-    {
-        b =  2.4665;
-        m = -0.1372;
-    }
-
-    val = b * val + m;
-
-    if ( val > 1.0 )
-        val = 1.0;
-    else if ( val < 0.0 )
-        val = 0.0;
 
     XCopyArea( dc_canvas.d, dc_canvas.pm, FL_ObjWin( dc_canvas.obj ),
                dc_canvas.gc, 0, 0, dc_canvas.w, dc_canvas.h, 0, 0 );
@@ -714,11 +732,11 @@ static void
 display_afc_signal( void )
 {
     int x;
-    double val;
+    double val = 0.0;
     double old_val = -2.0;
 
 
-    if ( measure_afc_signal( &val ) )
+    if ( bmwb.mode != MODE_STANDBY && measure_afc_signal( &val ) )
     {
         error_handling( );
         return;
@@ -793,11 +811,11 @@ display_mode_pic( int mode )
 static void
 display_unlocked( void )
 {
-    double val;
+    double val = 0.0;
     static double old_val = -1.0;
 
 
-    if ( measure_unlocked_signal( &val ) )
+    if ( bmwb.mode != MODE_STANDBY && measure_unlocked_signal( &val ) )
     {
         error_handling( );
         return;
@@ -821,11 +839,11 @@ display_unlocked( void )
 static void
 display_uncalibrated( void )
 {
-    double val;
+    double val = 0.0;
     static double old_val = -1.0;
 
 
-    if ( measure_uncalibrated_signal( &val ) )
+    if ( bmwb.mode != MODE_STANDBY && measure_uncalibrated_signal( &val ) )
     {
         error_handling( );
         return;
@@ -849,11 +867,11 @@ display_uncalibrated( void )
 static void
 display_afc_state( void )
 {
-    int state;
+    int state = 0;
     int old_state = -1;
 
 
-    if ( measure_afc_state( &state ) )
+    if ( bmwb.mode != MODE_STANDBY && measure_afc_state( &state ) )
     {
         error_handling( );
         return;
