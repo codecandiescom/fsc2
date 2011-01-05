@@ -231,7 +231,6 @@ measure_tune_mode( double * data,
     /* Find the maximum and minimum value in the x-values and check that
        they are within the range we expect */
 
-
     for ( i = 0; i < data_len; i++ )
     {
         x_min = d_min( x[ i ], x_min );
