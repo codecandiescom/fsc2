@@ -51,7 +51,7 @@ T_malloc( size_t size )
     if ( size == 0 )
     {
         eprint( FATAL, UNSET,
-                "Internal error detected at %s:%d (malloc with size = 0).\n",
+                "Internal error detected at %s:%d (malloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -101,7 +101,7 @@ T_calloc( size_t nmemb,
     if ( nmemb == 0 )
     {
         eprint( FATAL, UNSET,
-                "Internal error detected at %s:%d (calloc with nmemb = 0).\n",
+                "Internal error detected at %s:%d (calloc with nmemb 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -110,7 +110,7 @@ T_calloc( size_t nmemb,
     if ( size == 0 )
     {
         eprint( FATAL, UNSET,
-                "Internal error detected at %s:%d (calloc with size  = 0).\n",
+                "Internal error detected at %s:%d (calloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
