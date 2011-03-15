@@ -860,20 +860,22 @@ er035m_sas_get_resolution( void )
             er035m_sas_comm_fail( );
     }
 
-	/* The first character we got should tell us about the current resolution
-	   setting */
+	/* There should only be a single character in the reply (after superfluous
+	   stuff has been stripped) and that character should tell us about us the
+	   current resolution setting */
 
-	switch ( *buffer )
-	{
-		case '1' :
-			return LOW_RES;
+	if ( length == 1 )
+		switch ( *buffer )
+		{
+			case '1' :
+				return LOW_RES;
 
-		case '2' :
-			return MEDIUM_RES;
+			case '2' :
+				return MEDIUM_RES;
 
-		case '3' :
-			return HIGH_RES;
-	}
+			case '3' :
+				return HIGH_RES;
+		}
 
     print( FATAL, "Undocumented data received.\n" );
     THROW( EXCEPTION );
@@ -1204,7 +1206,8 @@ er035m_sas_comm( int type,
             }
 
             /* The two most significant bits of each byte the gaussmeter
-               sends seem to be invalid, so let's get rid of them... */
+               sends are irrelevant and reflect the parity setting at the
+			   device, get rid of them... */
 
             *lptr = len;
             for ( len = 0; len < ( ssize_t ) *lptr; len++ )
