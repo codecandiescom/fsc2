@@ -776,10 +776,10 @@ er035m_sas_get_field( void )
 
     do
     {
-        /* Ask gaussmeter to send the current field and read result -
-         sometimes the fucking thing does not answer (i.e. it just seems to
-         send the prompt character and nothing else) so in this case we give
-         it another chance (or even two, see FAIL_RETRIES above) */
+        /* Ask gaussmeter to send the current field and read result - sometimes
+		   the fucking thing does not answer (i.e. it just seems to send the
+		   prompt character and nothing else) so in this case we give it
+		   another chance (or even more, see FAIL_RETRIES above) */
 
         for ( retries = FAIL_RETRIES; ; retries-- )
         {
@@ -860,17 +860,20 @@ er035m_sas_get_resolution( void )
             er035m_sas_comm_fail( );
     }
 
-    switch ( buffer[ 2 ] )
-    {
-        case '1' :
-            return LOW_RES;
+	/* The first character we got should tell us about the current resolution
+	   setting */
 
-        case '2' :
-            return MEDIUM_RES;
+	switch ( *buffer )
+	{
+		case '1' :
+			return LOW_RES;
 
-        case '3' :
-            return HIGH_RES;
-    }
+		case '2' :
+			return MEDIUM_RES;
+
+		case '3' :
+			return HIGH_RES;
+	}
 
     print( FATAL, "Undocumented data received.\n" );
     THROW( EXCEPTION );

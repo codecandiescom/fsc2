@@ -923,7 +923,10 @@ er035m_s_get_resolution( void )
             er035m_s_comm_fail( );
     }
 
-    switch ( buffer[ 2 ] )
+	/* The first character we got should tell us about the current resolution
+	   setting */
+
+    switch ( *buffer )
     {
         case '1' :
             return LOW_RES;
