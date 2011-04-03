@@ -1,0 +1,337 @@
+=== START_FIELD float [ -50 : 23000 ] [ 3000 ] "Start field" "G"
+=== END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
+=== FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
+=== NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
+=== RESONATOR menu [ "Unspecified" ] [ 1 ] "Resonator"
+=== SENS1 menu [ "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0",  \
+=== "6.0", "8.0" ][ 1 ] "Receiver gain\n(factor)"
+=== SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ]  \
+=== "Receiver gain\n(magnitude)"
+=== TC menu [ "Don't set", "2.5 ms", "5 ms", "10 ms", "20 ms", "40 ms",  \
+=== "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s", "2.5 s", "5 s" ] [ 1 ]  \
+=== "Lock-in Time constant"
+=== FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
+=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz",  \
+=== "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
+=== MODAMP float [ 0 : ] [ 1 ] "Modulation amplitude" "G"
+=== PHASE float_empty [ -360.0 : 360.0 ] [ 0.0 ] "Modulation phase"
+=== PHASE_AS_OFFSET button [ OFF ] "Use phase as relative\nto calibration setting"
+DEVICES:
+
+er032m;
+er023m;
+eip371;
+epr_mod;
+
+
+VARIABLES:
+
+start_field = START_FIELD G;
+end_field   = END_FIELD G;
+field_step  = FIELD_STEP G;
+Num_Points = int( abs( end_field - start_field ) / field_step ) + 1;
+field[ Num_Points ];
+data[ Num_Points ];
+avg_data[ Num_Points ];
+Files[ 2 ];
+factor = FACTOR;
+I, J, K;
+Scans_Done = 0;
+Scans_Written = 0;
+freq[ 2 ];
+avg_freq = 0.0;
+Stop_Button;
+Scan_No;
+mod_amp = MODAMP G;
+mod_freq = MODFREQ;
+li_tc;
+li_sens;
+li_amp;
+li_freq;
+li_phase;
+CT;
+TT;
+=== if defined PHASE
+phase = float( PHASE );
+=== else
+phase = 0.0;
+=== endif
+
+PREPARATIONS:
+
+magnet_setup( start_field, field_step );
+=== if START_FIELD <= END_FIELD
+init_1d( 2, Num_Points, start_field, field_step, "Field [G]", "Signal [uV]" );
+=== else
+init_1d( 2, Num_Points, end_field, field_step, "Field [G]", "Signal [uV]" );
+=== endif
+
+EXPERIMENT:
+
+/* Set up magnet related stuff */
+
+start_field = magnet_field( );
+field[ 1 ] = start_field;
+field_step = magnet_field_step_size( field_step );
+=== if START_FIELD <= END_FIELD
+end_field = start_field + ( Num_Points - 1 ) * field_step;
+change_scale_1d( start_field, field_step );
+=== else
+end_field = start_field - ( Num_Points - 1 ) * field_step;
+change_scale_1d( end_field, field_step );
+=== endif
+
+/* Set up the lock-in and get its settings */
+
+=== if SENS1 ne "Don't set"
+lockin_sensitivity( SENS1 * SENS2 );
+=== endif
+
+=== if defined PHASE
+===   if PHASE_AS_OFFSET and RESONATOR ne "Unspecified"
+phase += epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
+===   endif
+lockin_phase( phase );
+=== endif
+
+===   if RESONATOR ne "Unspecified"
+epr_modulation_calibration_check_amplitude( "RESONATOR" " (ER023M)", mod_amp );
+lockin_ref_level( mod_amp / epr_modulation_ratio( "RESONATOR" " (ER023M)",
+                                                  lockin_ref_freq( ) ) );
+mod_amp =   lockin_ref_level( ) 
+          * epr_modulation_ratio( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
+===   else
+lockin_ref_level( mod_amp );
+===   endif
+
+=== if TC ne "Don't set"
+li_tc = lockin_time_constant( TC );
+CT = round( li_tc / 0.32 ms );
+IF CT < 10 {
+    CT = 10;
+} ELSE IF CT > 9999 {
+    CT = 9999;
+}
+lockin_conversion_time( CT * 0.32 ms );
+=== else
+li_tc = lockin_time_constant( );
+=== endif
+
+li_sens = lockin_sensitivity( );
+
+li_amp = lockin_ref_level( );
+li_freq = lockin_ref_freq( ) / 1kHz;
+li_phase = lockin_phase( );
+
+/* Open a file for the averaged data and one for all raw data */
+
+Files[ 1 ] = get_file( "", "*.avg", "", "", "avg" );
+Files[ 2 ] = clone_file( Files[ 1 ], "avg", "scans" );
+
+hide_toolbox( "ON" );
+Scan_No = output_create( "INT_OUTPUT", 0, "Scan Number" );
+Stop_Button = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+hide_toolbox( "OFF" );
+
+IF NUM_SCANS > 0 {
+   TT = ceil( NUM_SCANS * Num_Points * factor * li_tc );
+   print( "Minimum experiment duration: #:# min\n", TT / 60, TT % 60 );
+}
+
+I = 0;
+FOREVER {
+    I += 1;
+    output_value( Scan_No, I );
+    freq[ 1 ] = freq_counter_measure( );
+
+	/* Loop for all field points of a scan */
+
+    FOR J = 1 : Num_Points {
+        wait( factor * li_tc );
+=== if START_FIELD <= END_FIELD
+        data[ J ] = lockin_get_data( );
+        display_1d( J, data[ J ] / 1 uV, 1,
+                    J, add_to_average( avg_data[ J ], data[ J ], I ) / 1 uV,
+                    2 );
+        IF J < Num_Points {
+            field[ J + 1 ] = magnet_sweep_up( );
+        }
+=== else
+        K = Num_Points - J + 1;
+        data[ K ] = lockin_get_data( );
+        display_1d( K, data[ K ] / 1 uV, 1,
+                    K, add_to_average( avg_data[ K ], data[ K ], I ) / 1 uV,
+                    2 );
+        IF K > 1 {
+            field[ J + 1 ] = magnet_sweep_down( );
+        }
+=== endif
+    }
+
+    /* Measure the RF frequency again and calculate the new average */
+
+    freq[ 2 ] = freq_counter_measure( );
+    avg_freq = add_to_average( avg_freq, 0.5 * ( freq[ 1 ] + freq[ 2 ] ), I );
+
+    fsave( Files[ 2 ], "\# Scan: #, MW freq. = # GHz (# GHz, # GHz)\n\n",
+           I, 0.5 * ( freq[ 1 ] + freq[ 2 ] ) / 1 GHz,
+=== if START_FIELD <= END_FIELD
+           freq[ 1 ] / 1 GHz, freq[ 2 ] / 1 GHz );
+=== else
+           freq[ 2 ] / 1 GHz, freq[ 1 ] / 1 GHz );
+=== endif
+
+    /* Append the new data to the raw data file */
+
+    FOR K = 1 : Num_Points {
+=== if START_FIELD <= END_FIELD
+        fsave( Files[ 2 ], "#, #\n", field[ K ], data[ K ] );
+=== else
+        fsave( Files[ 2 ], "#, #\n", field[ Num_Points - K + 1 ], data[ K ] );
+=== endif
+    }
+    fsave( Files[ 2 ], "\n" );
+    Scans_Written = 1;
+
+    /* Calculate the new average data and rewrite the file for the
+       average data */
+
+    avg_data = add_to_average( avg_data, data, I );
+    Scans_Done += 1;
+
+    reset_file( Files[ 1 ] );
+    fsave( Files[ 1 ], "\# Date                : # #\n"
+                       "\# Start field         = # G\n"
+                       "\# End field           = # G\n"
+                       "\# Field step size     = # G\n"
+                       "\# Number of points    = #\n"
+                       "\# No. of scans        = #\n"
+                       "\# MW frequency        = # GHz\n"
+                       "\# Lockin-In           = Bruker ER023M\n"
+                       "\# Sensitivity         = #\n"
+                       "\# Time constant       = # ms\n"
+                       "\# Waiting time factor = #\n"
+=== if RESONATOR ne "Unspecified"
+                       "\# Resonator           = RESONATOR (ER023M)\n"
+                       "\# Modulation ampl.    = # G (raw: # %)\n"
+=== else
+                       "\# Modulation ampl.    = # % (raw)\n"
+=== endif
+                       "\# Modulation freq.    = # kHz\n"
+                       "\# Phase               = #\n",
+           date( ), time( ), start_field,
+=== if START_FIELD <= END_FIELD
+           start_field + ( Num_Points - 1 ) * field_step, field_step,
+=== else
+           start_field - ( Num_Points - 1 ) * field_step, - field_step,
+=== endif
+           Num_Points , Scans_Done, avg_freq / 1 GHz,
+           li_sens, li_tc / 1 ms, factor,
+=== if RESONATOR ne "Unspecified"
+           mod_amp,
+=== endif
+           li_amp, li_freq, li_phase );
+	fsave( Files[ 1 ], "\n" );
+
+    FOR K = 1 : Num_Points {
+=== if START_FIELD <= END_FIELD
+        fsave( Files[ 1 ], "#, #\n", field[ K ], avg_data[ K ] );
+=== else
+        fsave( Files[ 1 ], "#, #\n", field[ Num_Points - K + 1 ],
+               avg_data[ K ] );
+=== endif
+    }
+
+    /* Update the displayed average data */
+
+    display_1d( 1, avg_data / 1 uV, 2 );
+
+    IF button_state( Stop_Button ) OR Scans_Done == NUM_SCANS {
+        BREAK;
+    }
+    magnet_reset_field( );
+    field[ 1 ] = magnet_field( );
+}
+
+ON_STOP:
+
+hide_toolbox( "ON" );
+
+IF ! Scans_Written {
+    Num_Points = J - 1;
+    IF Num_Points <= 1 {
+        abort( );
+    }
+
+    freq[ 2 ] = freq_counter_measure( );
+    avg_freq = 0.5 * ( freq[ 1 ] + freq[ 2 ] );
+
+    fsave( Files[ 2 ], "\# Scan: 1, MW freq. = # GHz (# GHz, # GHz)\n\n",
+           0.5 * ( freq[ 1 ] + freq[ 2 ] ) / 1 GHz,
+=== if START_FIELD <= END_FIELD
+           freq[ 1 ] / 1 GHz, freq[ 2 ] / 1 GHz );
+=== else
+           freq[ 2 ] / 1 GHz, freq[ 1 ] / 1 GHz );
+=== endif
+
+    FOR K = 1 : Num_Points {
+=== if START_FIELD <= END_FIELD
+        fsave( Files[ 2 ], "#, #\n", field[ K ], data[ K ] );
+=== else
+        fsave( Files[ 2 ], "#, #\n", field[ Num_Points - K + 1 ], data[ K ] );
+=== endif
+    }
+    fsave( Files[ 2 ], "\n" );
+    avg_data = data;
+    Scans_Done = 1;
+}
+
+reset_file( Files[ 1 ] );
+FOR K = 1 : 2 {
+    fsave( Files[ K ], "\# Date                : # #\n"
+                       "\# Start field         = # G\n"
+                       "\# End field           = # G\n"
+                       "\# Field step size     = # G\n"
+                       "\# Number of points    = #\n"
+                       "\# No. of scans        = #\n"
+                       "\# MW frequency        = # GHz\n"
+                       "\# Lockin-In           = Bruker ER023M\n"
+                       "\# Sensitivity         = #\n"
+                       "\# Time constant       = # ms\n"
+                       "\# Waiting time factor = #\n"
+=== if RESONATOR ne "Unspecified"
+                       "\# Resonator           = RESONATOR (ER023M)\n"
+                       "\# Modulation ampl.    = # G (raw: # %)\n"
+=== else
+                       "\# Modulation ampl.    = # % (raw)\n"
+=== endif
+                       "\# Modulation freq.    = # kHz\n"
+                       "\# Phase               = #\n",
+           date( ), time( ), start_field,
+=== if START_FIELD <= END_FIELD
+           start_field + ( Num_Points - 1 ) * field_step, field_step,
+=== else
+           start_field - ( Num_Points - 1 ) * field_step, - field_step,
+=== endif
+           Num_Points , Scans_Done, avg_freq / 1 GHz,
+           li_sens, li_tc / 1 ms, factor,
+=== if RESONATOR ne "Unspecified"
+           mod_amp,
+=== endif
+           li_amp, li_freq, li_phase );
+}
+
+=== if RESONATOR ne "Unspecified"
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: " );
+=== else
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nResonator: " );
+=== endif
+
+FOR K = 1 : Num_Points {
+=== if START_FIELD <= END_FIELD
+    fsave( Files[ 1 ], "#, #\n", field[ K ], avg_data[ K ] );
+=== else
+    fsave( Files[ 1 ], "#, #\n", field[ Num_Points - K + 1 ],
+           avg_data[ K ] );
+=== endif
+}

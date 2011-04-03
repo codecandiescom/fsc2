@@ -1,0 +1,208 @@
+#!/usr/local/bin/fsc2 -S
+/*
+  Copyright (C) 2008-2010 Jens Thoms Toerring
+
+  This file is part of fsc2.
+
+  Fsc2 is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  Fsc2 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with fsc2; see the file COPYING.  If not, write to
+  the Free Software Foundation, 59 Temple Place - Suite 330,
+  Boston, MA 02111-1307, USA.
+*/
+
+DEVICES:
+
+er032m;
+sr830;
+
+
+VARIABLES:
+
+current_field;
+max_field = 23000 G;
+min_field = -50 G;
+field_step = 0.25 G;
+min_field_step = 1 mG;
+max_field_step = 1600 G;
+Sweep_State = 0;
+
+Acq_State = 0,
+STOPPED = 0;
+UP = 1;
+DOWN = -1;
+
+I = 1;
+data[ 2 ];
+dval;
+
+Current_Field,
+New_Field,
+Set_Field,
+Field_Step,
+Sweep_Up,
+Sweep_Stop,
+Sweep_Down,
+Pause,
+Clear;
+
+
+PREPARATIONS:
+
+init_1d( 2, 64, "Points", "Signal [uV]" );
+
+
+EXPERIMENT:
+
+/* Get current field and write it into the corresponding output field */
+
+current_field = magnet_field( );
+lockin_lock_keyboard( "OFF" );
+
+/* Finally, create the form with the buttons for sweeping etc. */
+
+hide_toolbox( "ON" );
+Current_Field = output_create( "FLOAT_OUTPUT", current_field,
+                               "Current field [G]" );
+New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
+Set_Field  = button_create( "NORMAL_BUTTON", "Set new field" );
+Field_Step = input_create( "FLOAT_INPUT", field_step, "Field step size [G]" );
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+Pause = button_create( "PUSH_BUTTON", "Pause acquisition" );
+button_state( Pause, Acq_State ? 0 : 1 );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+hide_toolbox( "OFF" );
+
+FOREVER {
+	IF Acq_State == 0 AND Sweep_State == 0 {
+		toolbox_wait( );
+	}
+
+	IF Acq_State {
+		wait( lockin_time_constant( ) );
+		data = lockin_get_data( 1, 2 ) / 1uV;
+		display_1d( I, data[ 1 ], 1,
+		            I, data[ 2 ], 2 );
+		I += 1;
+	}
+
+    IF Sweep_State != STOPPED {
+		IF Sweep_State == UP {
+			IF current_field + field_step <= max_field {
+				current_field = magnet_field( current_field + field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Up, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		} ELSE {
+			IF current_field - field_step >= min_field {
+				current_field = magnet_field( current_field - field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Down, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		}
+	}
+
+	IF ! toolbox_changed( ) {
+		NEXT;
+	}
+
+	IF input_changed( New_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+		} ELSE {
+			object_enable( Set_Field, "ON" );
+		}
+	}
+
+	IF button_changed( Set_Field ) AND button_state( Set_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+			NEXT;
+		}
+		IF dval < max_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF dval > min_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+
+		current_field = magnet_field( dval );
+		output_value( Current_Field, current_field );
+		draw_marker( I, "BLUE" );
+	}
+
+	IF input_changed( Field_Step ) {
+		dval = input_value( Field_Step );
+		IF dval < min_field_step OR dval > max_field_step {
+			input_value( Field_Step, field_step );
+			NEXT;
+		}
+
+		field_step = dval;
+	}
+
+	IF     button_changed( Sweep_Up )
+	   AND button_state( Sweep_Up )
+       AND current_field < max_field {
+		Sweep_State = UP;
+        draw_marker( I, "RED" );
+		object_enable( Sweep_Down, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF     button_changed( Sweep_Down )
+	   AND button_state( Sweep_Down )
+	   AND current_field > min_field {
+		Sweep_State = DOWN;
+        draw_marker( I, "GREEN" );
+		object_enable( Sweep_Up, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF button_changed( Sweep_Stop ) AND button_state( Sweep_Stop ) {
+	    Sweep_State = STOPPED;
+	    draw_marker( I, "YELLOW" );
+		IF current_field > min_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF current_field - field_step < max_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+	}
+
+	IF button_changed( Pause ) {
+		Acq_State = button_state( Pause ) ? 0 : 1;
+	}
+
+	IF button_changed( Clear ) {
+	    button_state( Clear );
+        clear_curve_1d( 1, 2 );
+        clear_marker_1d( );
+        I = 1;
+        rescale_1d( 64 );
+    }
+}

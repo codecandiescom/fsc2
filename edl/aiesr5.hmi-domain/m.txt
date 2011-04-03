@@ -1,0 +1,9 @@
+a) scan the whole field region
+     1) on overflow reduce sensitivity and and start again (plus set flag)
+b) get highest and lowest point
+c) if flag not set go to highest of abs() of highest and lowest point
+     1) increment sensitivity until overload is reached
+     2) reduce sensitivity again
+     3) if new sensitivity is different from initial one rescan
+d) (after first scan) set center field to average of field of highest and
+   lowest point

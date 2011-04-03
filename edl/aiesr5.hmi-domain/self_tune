@@ -1,0 +1,204 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+#  Copyright (C) 1999-2010 Jens Thoms Toerring
+#
+#  This file is part of fsc2.
+#
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+
+use strict;
+use warnings;
+use Tk;
+use IPC::Open2;
+use File::Temp ':mktemp';
+
+
+# Create a script for reading the relevant device parameters
+
+my ( $f, $fn ) = mkstemp( "/tmp/set_temperature.XXXXXX" );
+
+print $f <<EOT;
+DEVICES:
+
+bvt3000;
+
+VARIABLES:
+
+Flow_rates[ * ] = {    0,  135,  270,  400,  535,  670,  800,  935,
+					1070, 1200, 1335, 1470, 1600, 1735, 1870, 2000 };
+cf;
+FI;
+
+EXPERIMENT:
+
+cf = temp_contr_gas_flow( );
+FOR FI = 1 : 16  {
+	IF Flow_rates[ FI ] == int( cf ) {
+		BREAK;
+	}
+}
+
+print( "# # # # # # #\n", temp_contr_setpoint( ),
+                          temp_contr_proportional_band( ),
+                          temp_contr_integral_time( ),
+                          temp_contr_derivative_time( ),
+                          temp_contr_heater_power_limit( ),
+                          FI,
+                          temp_contr_tune_state( ) & 1 ? "ON" : "OFF" );
+EOT
+
+# Run the script and extract the parameters from the reply
+
+unless ( open $f, '-|', "fsc2 -nw $fn 2>&1" ) {
+	close $f;
+	unlink $fn;
+	show_error( "Can't start fsc2" );
+	exit 1;
+}
+
+my $reply = <$f>;
+close $f;
+unlink $fn;
+
+if ( ! defined $reply )
+{
+	show_error( "Unexpected error" );
+	exit 0;
+}
+
+if ( $reply =~ /^(F|S|W) / ) {
+	$reply =~ s/^(F|S|W) //;
+	show_error( $reply );
+	exit 0;
+}
+
+my ( $sp, $pb, $it, $dt, $hl, $fi, $ts ) = split / /, $reply;
+$fi += 1;
+
+# Create a script suitable for fsc2_guify for running a self tune
+
+my $edl = <<"EOT";
+=== TEMPERATURE float [ 73.0 : 1000.0 ] [ $sp ] "Setpoint temperature" "K"
+=== GAS_FLOW menu [ "Don't set", "0", "135", "270", "400", "535", "670", "800", "935", "1070", "1200", "1335", "1470", "1600", "1735", "1870", "2000" ][ $fi ] "Gas flow" "l/h"
+=== HEATER_LIMIT float_empty [ 0.0 : 100.0 ][ $hl ] "Heater power limit" "%"
+=== PROPORTIONAL_BAND float_empty [ 0 : 999.9 ][ $pb ] "Proportional band" "K"
+=== INTEGRAL_TIME float_empty [ 0 : 9999.0 ][ $it ] "Integral time" "s"
+=== DERIVATIVE_TIME float_empty [ 0 : 999.0 ][ $dt ] "Derivative time" "s"
+=== ADAPTIVE_TUNE button [ $ts ] "Enable adaptive tune"
+DEVICES:
+
+bvt3000;
+
+VARIABLES:
+
+TUNE_STATE;
+flow[ * ] = { 0.0, 135.0, 270.0, 400.0, 535.0, 670.0, 800.0, 935.0, 1070.0,
+	          1200.0, 1335.0, 1470.0, 1600.0, 1735.0, 1870.0, 2000.0 };
+t;
+T, HL;
+I = 1;
+
+PREPARATIONS:
+
+init_1d( "Time [s]", "Temperature [K]" );
+
+EXPERIMENT:
+
+temp_contr_heater_state( "OFF" );
+TUNE_STATE = temp_contr_tune_state( );
+temp_contr_tune_state( "OFF" );
+=== if defined HEATER_LIMIT
+temp_contr_heater_power_limit( HEATER_LIMIT );
+=== endif
+=== if defined PROPORTIONAL_BAND
+temp_contr_proportional_band( PROPORTIONAL_BAND K );
+=== endif
+=== if defined INTEGRAL_TIME
+temp_contr_integral_time( INTEGRAL_TIME s );
+=== endif
+=== if defined DERIVATIVE_TIME
+temp_contr_derivative_time( DERIVATIVE_TIME s );
+=== endif
+temp_contr_setpoint( TEMPERATURE K );
+temp_contr_heater_state( "ON" );
+=== if defined GAS_FLOW and GAS_FLOW ne "Don't set"
+temp_contr_gas_flow( GAS_FLOW );
+=== endif
+=== if ADAPTIVE_TUNE
+temp_contr_tune_state( "SELF+ADAPTIVE" );
+=== else
+temp_contr_tune_state( "SELF" );
+=== endif
+
+hide_toolbox( "ON" );
+T = output_create( "FLOAT_OUTPUT", temp_contr_temperature( ), "Temperature [K]" );
+HL = output_create( "FLOAT_OUTPUT", temp_contr_heater_power( ), "Heater power [%]" );
+hide_toolbox( "OFF" );
+
+// Loop until self tune is finished
+
+WHILE temp_contr_tune_state( ) >= 2 {
+    t = temp_contr_temperature( );
+    display_1d( I, t );
+    output_value( T, t );
+    output_value( HL, temp_contr_heater_power( ) );
+    I += 1;
+	wait( 1 s );
+}
+
+print( "Self tune complete.\\n"
+       "  Temperature:        # K\\n"
+       "  Gas flow:           # l/h\\n"
+       "  Heater power limit: # %\\n"
+       "  Proportional band:  # K\\n"
+       "  Integral time:      # s\\n"
+       "  Derivative time:    # s\\n",
+       temp_contr_setpoint( ),
+       temp_contr_gas_flow( ),
+       temp_contr_heater_power_limit( ),
+       temp_contr_proportional_band( ),
+       temp_contr_integral_time( ),
+       temp_contr_derivative_time( ) );
+EOT
+
+# Run it through fsc2_guify
+
+open2 my $rd, my $wd, 'fsc2_guify -ns' or die "Failure\n";
+print $wd $edl;
+close $wd;
+$edl = join '', <$rd>;
+close $rd;
+
+# Run the resulting script
+
+eval $edl;
+
+
+#############################################
+# Displays a message box
+
+sub show_error {
+	my $text = shift;
+
+	my $mw = MainWindow->new( );
+	$mw->geometry( "0x0+0+0" );
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+	$mw->destroy;
+}

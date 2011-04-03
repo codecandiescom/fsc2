@@ -1,0 +1,119 @@
+DEVICES:
+
+er032m;
+er023m;
+
+VARIABLES:
+
+FIELD = 3415;
+
+center_field = FIELD;
+start_field  = center_field - 5 G;
+end_field    = center_field - 5 G;
+field_step   = 0.1 G;
+field;
+
+mods[ * ] = { 0.1 G, 0.2 G , 0.391 G, 0.7813 G, 1.563 G, 3.13 G,
+	          6.25 G, 12.5 G, 25 G, 50 G, 100 G };
+ratios[ * ];
+Num_rations = 0;
+
+sens_num[ * ] = { 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0 };
+sens_exp[ * ] = { 1.0e1, 1.0e2, 1.0e3, 1.0e3, 1.0e4, 1.0e5, 1.0e6, 1.0e7 };
+Senses[ * ];
+Cur_sens;
+Cur_sens_index;
+
+max_sig = -1.0e37;
+min_sig =  1.0e37;
+Max_sig_index,
+Min_sig_index;
+max_sig_field,
+min_sig_field;
+
+data[ * ];
+
+I, J, K;
+
+PREPARATIONS:
+
+EXPERIMENT:
+
+/* Built a list of all lock-in snsitivities and try to figure out the
+   sensitivity currently being set */
+
+K = 1;
+FOR I = 1 : size( sens_exp ) {
+	FOR J = 1 : size( sens_num ) {
+		Senses[ K ] = int( sens_num[ J ] * sens_exp[ I ] );
+		K += 1;
+	}
+}
+
+Cur_sens = int( lockin_sensitivity( ) );
+FOR K = 1 : size( Senses ) {
+	IF Cur_sens == Senses[ K ] {
+		BREAK;
+	}
+}
+
+IF K > size( Senses ) {
+	print( "Can't determine the lock-in's sensitivity\n" );
+	show_message( "Can't determine the lock-in's sensitivity" );
+	end( );
+}
+
+Cur_sens_index = K;
+
+/* Do one scan over the spectrum and try to find the highest and lowest
+   point of the spectrum. We assume that the positive peak comes first! *
+
+FOREVER {
+	field = magnet_field( start_field );
+
+	I = 1;
+	WHILE field < end_field {
+		/* If we get an overload reduce the sensitivity until overload vanishes
+           and then start anew */
+
+		IF lockin_is_overload( ) {
+			WHILE lockin_is_overload( ) {
+				IF Cur_sens_index <= 1 {
+					print( "Can't make login sensitivity small enough\n" );
+					abort( );
+				}
+				Cur_sens_index -= 1;
+				lockin_sensitivity( ( float ) Senses[ Cur_sens_index ] );
+				wait( 0.5 s );
+			}
+
+			max_sig = -1.0e37;
+			min_sig = +1.0e37;
+			field = magnet_field( start_field );
+			clear_curve( 1 );
+			NEXT;
+		}
+
+		/* Get a new data value and check if it's larger or smaller than all
+           points recorded before */
+
+		data[ I ] = lockin_get_data( );
+		display( I, data[ I ] );
+		IF data[ I ] > max_sig {
+			max_sig       = data[ I ];
+			max_sig_field = field;
+			Max_sig_index = I;
+		} ELSE IF data[ I ] < min_sig {
+			min_sig       = data[ I ];
+			min_sig_field = field;
+			Min_sig_index = I;
+		}
+
+		field = magnet_field( field + field_step );
+		I += 1;
+		wait( lockin_time_constant( ) );
+	}
+		
+	IF Max_sig_index < 5 OR Min_sig_index > I - 6 {
+	}
+}
