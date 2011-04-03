@@ -343,10 +343,10 @@ fsc2_serial_open( int sn,
 
     /* Determine the mode and store it */
 
-    if ( ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) == O_WRONLY )
-        Serial_Ports[ sn ].mode == WRITE_MODE;
-    else if ( ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) == O_RDONLY )
-        Serial_Ports[ sn ].mode == READ_MODE;
+    if ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) == O_WRONLY )
+        Serial_Ports[ sn ].mode = WRITE_MODE;
+    else if ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) == O_RDONLY )
+        Serial_Ports[ sn ].mode = READ_MODE;
     else
         Serial_Ports[ sn ].mode = READ_MODE | WRITE_MODE;
 
