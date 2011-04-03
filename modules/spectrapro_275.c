@@ -734,16 +734,11 @@ spectrapro_275_comm( int type,
 
     switch ( type )
     {
-        case SERIAL_INIT :               /* open and initialize serial port */
-            /* We need exclussive access to the serial port and we also need
-               non-blocking mode to avoid hanging indefinitely if the other
-               side does not react. O_NOCTTY is set because the serial port
-               should not become the controlling terminal, otherwise line
-               noise read as CTRL-C might kill the program. */
+        case SERIAL_INIT :
+            /* Open the serial port for reading and writing. */
 
-            if ( ( spectrapro_275.tio =
-                        fsc2_serial_open( spectrapro_275.sn,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+            if ( ( spectrapro_275.tio = fsc2_serial_open( spectrapro_275.sn,
+                                                          O_RDWR ) ) == NULL )
                 return FAIL;
 
             /* Set transfer mode to 8 bit, no parity and 1 stop bit (8-N-1)

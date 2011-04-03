@@ -359,9 +359,10 @@ mw_attenuator_attenuation( Var_T * v )
 static bool
 hjs_attenuator_serial_init( void )
 {
+    /* Open the serial port for reading and writing. */
+
     if ( ( hjs_attenuator.tio = fsc2_serial_open( hjs_attenuator.sn,
-                                 O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
-                                                                      == NULL )
+                                                  O_RDWR ) ) == NULL )
         return FAIL;
 
     /* The device uses 6 bit transfers, no parity and one stop bit (6-N-1),

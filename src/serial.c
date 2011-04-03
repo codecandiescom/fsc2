@@ -27,12 +27,18 @@
 
 #if ! defined WITHOUT_SERIAL_PORTS
 
+
+#define READ_MODE   1
+#define WRITE_MODE  2
+
 static struct {
     char           * dev_file;
     char           * dev_name;
     bool             is_open;
     bool             have_lock;
     int              fd;
+    int              flags;
+    int              mode;
     struct termios   old_tio,
                      new_tio;
     FILE           * log_fp;
@@ -159,10 +165,10 @@ fsc2_serial_exp_init( int log_level )
 
             for ( i--; i > 0; i-- )
             {
-                close_serial_log( i );
                 fsc2_release_uucp_lock( strrchr( Serial_Ports[ i ].dev_file,
                                                  '/' ) + 1 );
                 Serial_Ports[ i ].have_lock = UNSET;
+                close_serial_log( i );
             }
 
             return FAIL;
@@ -186,11 +192,22 @@ fsc2_serial_cleanup( void )
     int i = Num_Serial_Ports;
 
 
-    /* Close the device and log files and release the locks for all devices */
+    /* Close the device files and log files and release the locks for
+       all devices */
 
-    while ( --i >= 0 )
+    while ( i-- > 0 )
+    {
         if ( Serial_Ports[ i ].is_open )
             fsc2_serial_close( i );
+        else if ( Serial_Ports[ i ].have_lock )
+        {
+            fsc2_release_uucp_lock( strrchr( Serial_Ports[ i ].dev_file, '/' )
+                                    + 1 );
+            Serial_Ports[ i ].have_lock = UNSET;
+        }
+
+        close_serial_log( i );
+    }
 }
 
 
@@ -205,7 +222,7 @@ fsc2_serial_final_reset( void )
     int i = Num_Serial_Ports;
 
 
-    while ( --i >= 0 )
+    while ( i-- > 0 )
     {
         if ( Serial_Ports[ i ].dev_name )
             Serial_Ports[ i ].dev_name  = T_free( Serial_Ports[ i ].dev_name );
@@ -221,10 +238,11 @@ fsc2_serial_final_reset( void )
 
 /*--------------------------------------------------------------------*
  * This function should be called by device modules that need to open
- * a serial port device file. Instead of the device file name as in
- * the open() function this routine expects the number of the serial
- * port. The second parameter is, as in the open() function, the
- * flags used for opening the device file.
+ * a serial port device file. Instead of the device file name as the open()
+ * function expects this routine is to receive the number of the serial
+ * port. The second parameter is, as for the open() function, the flags
+ * used for opening the device file (this will normally be either O_RDONLY,
+ * O_WRONLY or O_RDWR, further necessary flags get set automatically).
  *--------------------------------------------------------------------*/
 
 struct termios *
@@ -252,42 +270,104 @@ fsc2_serial_open( int sn,
         THROW( EXCEPTION );
     }
 
+    /* Check that the flags contain either O_WRONLY, O_RDONLY or O_RDWR */
+
+    if (    ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) != O_WRONLY
+         && ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) != O_RDONLY
+         && ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) != O_RDWR )
+    {
+        print( FATAL, "Invalid flags specified for serial port '%s' for "
+               "device %s in call of fsc2_serial_open()\n",
+               Serial_Ports[ sn ].dev_file, Serial_Ports[ sn ].dev_name );
+        THROW( EXCEPTION );
+    }
+
     fsc2_serial_log_function_start( sn, "fsc2_serial_open" );
 
-    /* If the port has already been opened just return the structure with the
-       current terminal settings */
+    /* First make sure we have a lock for the device file */
+
+    if ( ! Serial_Ports[ sn ].have_lock )
+    {
+        fsc2_serial_log_message( sn, "Don't hold lock Serial port '%s' for "
+                                 "module\n", Serial_Ports[ sn ].dev_file );
+        fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+
+        print( FATAL, "Not holding a lock for serial port '%s' of module\n",
+               Serial_Ports[ sn ].dev_file );
+        THROW( EXCEPTION );
+    }
+
+    /* If the port has already been opened with the same flags just return
+       the structure with the current terminal settings. If the flags differ
+       close the port (after flushing it and resetting the attributes to the
+       original state) and afterwards re-open it with the new flags. */
 
     if ( Serial_Ports[ sn ].is_open )
     {
-        raise_permissions( );
-        tcgetattr( Serial_Ports[ sn ].fd, &Serial_Ports[ sn ].new_tio );
-        lower_permissions( );
-        fsc2_serial_log_message( sn, "Serial port for module is already "
-                                 "open\n" );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
-        return &Serial_Ports[ sn ].new_tio;
+        if ( flags == Serial_Ports[ sn ].flags )
+        {
+            raise_permissions( );
+            tcgetattr( Serial_Ports[ sn ].fd, &Serial_Ports[ sn ].new_tio );
+            lower_permissions( );
+            fsc2_serial_log_message( sn, "Serial port for module is already "
+                                     "open\n" );
+            fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+            return &Serial_Ports[ sn ].new_tio;
+        }
+        else
+        {
+            raise_permissions( );
+            tcflush( Serial_Ports[ sn ].fd, TCIFLUSH );
+            tcsetattr( Serial_Ports[ sn ].fd, TCSANOW,
+                       &Serial_Ports[ sn ].old_tio );
+            close( Serial_Ports[ sn ].fd );
+            lower_permissions( );
+            Serial_Ports[ sn ].is_open = UNSET;
+            Serial_Ports[ sn ].fd = -1;
+            fsc2_serial_log_message( sn, "Closed alteady open serial port "
+                                     "for device '%s', to be re-opened in the "
+                                     "following with different flags\n",
+                                     Serial_Ports[ sn ].dev_name );
+        }
     }
 
-    /* Try to open the serial port */
+    /* We need exclussive access to the serial port and we also need
+       non-blocking mode (already to avoid hanging indefinitely if the
+       other side does not react). O_NOCTTY is set because the serial
+       port should not become the controlling terminal, otherwise line
+       noise read as a CTRL-C might kill the program. */
+
+    Serial_Ports[ sn ].flags = flags;
+
+    flags |= O_EXCL | O_NONBLOCK | O_NOCTTY;
+
+    /* Determine the mode and store it */
+
+    if ( ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) == O_WRONLY )
+        Serial_Ports[ sn ].mode == WRITE_MODE;
+    else if ( ( flags & ( O_WRONLY | O_RDONLY | O_RDWR ) ) == O_RDONLY )
+        Serial_Ports[ sn ].mode == READ_MODE;
+    else
+        Serial_Ports[ sn ].mode = READ_MODE | WRITE_MODE;
+
+    /* Now try to open the serial port */
 
     raise_permissions( );
 
     if ( ( fd = open( Serial_Ports[ sn ].dev_file, flags ) ) < 0 )
     {
+        int stored_errno = errno;
+
         lower_permissions( );
 
         fsc2_serial_log_message( sn, "Error: Failed to open serial port '%s' "
-                                 "in function fsc2_serial_open()\n",
-                                 Serial_Ports[ sn ].dev_file );
+                                 "for device %s in function "
+                                 "fsc2_serial_open()\n",
+                                 Serial_Ports[ sn ].dev_file,
+                                 Serial_Ports[ sn ].dev_name );
         fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
 
-        fsc2_release_uucp_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' )
-                                + 1 );
-        Serial_Ports[ sn ].have_lock = UNSET;
-
-        close_serial_log( sn );
-
-        errno = EACCES;
+        errno = stored_errno;
         return NULL;
     }
 
@@ -298,7 +378,7 @@ fsc2_serial_open( int sn,
     fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
     /* Get the the current terminal settings and copy them to a structure
-       that gets passed back to the caller */
+       that gets passed back to the caller. */
 
     tcgetattr( fd, &Serial_Ports[ sn ].old_tio );
     memcpy( &Serial_Ports[ sn ].new_tio, &Serial_Ports[ sn ].old_tio,
@@ -360,11 +440,7 @@ fsc2_serial_close( int sn )
         fsc2_serial_log_function_end( sn, "fsc2_serial_close" );
     }
 
-    /* Close the log file */
-
-    close_serial_log( sn );
-
-    /* Relase the lock */
+    /* Relase the lock on the device file */
 
     if ( Serial_Ports[ sn ].have_lock )
     {
@@ -412,7 +488,7 @@ fsc2_serial_write( int          sn,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    /* Check that serial port number is reasonable */
+    /* Check if serial port number is reasonable */
 
     if ( sn < 0 || sn >= Num_Serial_Ports )
     {
@@ -427,6 +503,14 @@ fsc2_serial_write( int          sn,
                                  "of function fsc2_serial_write()\n" );
         errno = EBADF;
         return -1;
+    }
+
+    if ( ! ( Serial_Ports[ sn ].mode | WRITE_MODE ) )
+    {
+        print( FATAL, "Attempt to write to serial port '%s' of device %s "
+               "opened in read-only mode.\n",
+               Serial_Ports[ sn ].dev_file, Serial_Ports[ sn ].dev_name );
+        THROW( EXCEPTION );
     }
 
     fsc2_serial_log_function_start( sn, "fsc2_serial_write" );
@@ -589,6 +673,14 @@ fsc2_serial_read( int          sn,
         return -1;
     }
 
+    if ( ! ( Serial_Ports[ sn ].mode | READ_MODE ) )
+    {
+        print( FATAL, "Attempt to read from serial port '%s' of device %s "
+               "opened in write-only mode.\n",
+               Serial_Ports[ sn ].dev_file, Serial_Ports[ sn ].dev_name );
+        THROW( EXCEPTION );
+    }
+
     fsc2_serial_log_function_start( sn, "fsc2_serial_read" );
 
     if ( ll == LL_ALL )
@@ -658,8 +750,8 @@ fsc2_serial_read( int          sn,
                         break;
                 }
 
-                fsc2_serial_log_message( sn, "Error: select() aborted due to "
-                                         "receipt of signal\n" );
+                fsc2_serial_log_message( sn, "Error: select() call aborted due "
+                                         "to receipt of signal\n" );
                 fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
                 return 0;
             }
@@ -689,7 +781,7 @@ fsc2_serial_read( int          sn,
 
         raise_permissions( );
 
-        /* Now we finally come to really trying to read from the serial port.
+        /* We've finally come to really trying to read from the serial port.
            If there's no termination string be prepared to read as many bytes
            as fit into the buffer. Otherwise we can read only one byte to be
            able to check if, with this byte, we got the the termination string

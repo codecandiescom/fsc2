@@ -33,10 +33,9 @@ extern BVT3000 bvt3000;
 void
 bvt3000_init( void )
 {
-	/* Try to open the device file */
+	/* Open the serial port for reading and writing. */
 
-    if ( ( bvt3000.tio = fsc2_serial_open( bvt3000.sn,
-						   O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    if ( ( bvt3000.tio = fsc2_serial_open( bvt3000.sn, O_RDWR ) ) == NULL )
     {
         print( FATAL, "Can't open device file for device.\n" );
         THROW( EXCEPTION );

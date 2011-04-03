@@ -1637,14 +1637,9 @@ fsps25_open( void )
 {
 #ifndef FSPS25_TEST
 
-    /* We need exclusive access to the serial port and we also need non-
-       blocking mode to avoid hanging indefinitely if the other side does not
-       react. O_NOCTTY is set because the serial port should not become the
-       controlling terminal, otherwise line noise read as a CTRL-C might kill
-       the program. */
+    /* Open the serial port for reading and writing. */
 
-    if ( ( fsps25.tio = fsc2_serial_open( fsps25.sn,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    if ( ( fsps25.tio = fsc2_serial_open( fsps25.sn, O_RDWR ) ) == NULL )
     {
         print( FATAL, "Can't open device file for power supply.\n" );
         THROW( EXCEPTION );

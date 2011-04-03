@@ -426,14 +426,9 @@ spex_cd2a_open( void )
 {
 #ifndef SPEX_CD2A_TEST
 
-    /* We need exclusive access to the serial port and we also need non-
-       blocking mode to avoid hanging indefinitely if the other side does not
-       react. O_NOCTTY is set because the serial port should not become the
-       controlling terminal, otherwise line noise read as a CTRL-C might kill
-       the program. */
+    /* Open the serial port for reading and writing. */
 
-    if ( ( spex_cd2a.tio = fsc2_serial_open( spex_cd2a.sn,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    if ( ( spex_cd2a.tio = fsc2_serial_open( spex_cd2a.sn, O_RDWR ) ) == NULL )
     {
         print( FATAL, "Can't open device file for monochromator.\n" );
         SPEX_CD2A_THROW( EXCEPTION );

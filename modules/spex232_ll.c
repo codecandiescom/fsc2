@@ -639,14 +639,9 @@ spex232_open( void )
 {
 #ifndef SPEX232_TEST
 
-    /* We need exclusive access to the serial port and we also need non-
-       blocking mode to avoid hanging indefinitely if the other side does not
-       react. O_NOCTTY is set because the serial port should not become the
-       controlling terminal, otherwise line noise read as a CTRL-C might kill
-       the program. */
+    /* Open the serial port for reading and writing. */
 
-    if ( ( spex232.tio = fsc2_serial_open( spex232.sn,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    if ( ( spex232.tio = fsc2_serial_open( spex232.sn, O_RDWR ) ) == NULL )
     {
         print( FATAL, "Can't open device file for monochromator.\n" );
         SPEX232_THROW( EXCEPTION );

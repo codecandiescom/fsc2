@@ -2128,8 +2128,9 @@ lecroy_wr_serial_open( void )
             return FAIL;
     }
 
-    if ( ( lecroy_wr.tio = fsc2_serial_open( lecroy_wr.sn,
-                        O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    /* Open the serial port for reading and writing. */
+
+    if ( ( lecroy_wr.tio = fsc2_serial_open( lecroy_wr.sn, O_RDWR ) ) == NULL )
         return FAIL;
 
     /* Set up serial port according to settings in the configuration file  */

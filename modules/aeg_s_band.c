@@ -1083,15 +1083,11 @@ magnet_do( int command )
 
     switch ( command )
     {
-        case SERIAL_INIT :               /* open and initialize serial port */
-            /* We need exclussive access to the serial port and we also need
-               non-blocking mode to avoid hanging indefinitely if the other
-               side does not react. O_NOCTTY is set because the serial port
-               should not become the controlling terminal, otherwise line
-               noise read as a CTRL-C might kill the program. */
+        case SERIAL_INIT :
+            /* Open the serial port (for writing only). */
 
-            if ( ( magnet.tio = fsc2_serial_open( magnet.sn,
-                        O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+            if ( ( magnet.tio = fsc2_serial_open( magnet.sn, O_WRONLY ) )
+                                                                      == NULL )
                 return FAIL;
 
             /* Use 8-N-1, allow flow control and set the baud rate */

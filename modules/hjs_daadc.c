@@ -651,9 +651,9 @@ hjs_daadc_val_to_ad_volts( int val )
 static bool
 hjs_daadc_serial_init( void )
 {
-    if ( ( hjs_daadc.tio = fsc2_serial_open( hjs_daadc.sn,
-                                 O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
-         == NULL )
+    /* Open the serial port for reading and writing. */
+
+    if ( ( hjs_daadc.tio = fsc2_serial_open( hjs_daadc.sn, O_RDWR ) ) == NULL )
         return FAIL;
 
     /* The device uses 8 bit transfers, no parity and one stop bit (8-N-1),

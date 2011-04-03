@@ -778,14 +778,10 @@ lecroy9400_talk( const char * cmd,
 static bool
 lecroy9400_serial_init( void )
 {
-    /* We need exclussive access to the serial port and we also need
-       non-blocking mode to avoid hanging indefinitely if the other
-       side does not react. O_NOCTTY is set because the serial port
-       should not become the controlling terminal, otherwise line
-       noise read as a CTRL-C might kill the program. */
+    /* Open the serial port for reading and writing. */
 
-    if ( ( lecroy9400.tio = fsc2_serial_open( lecroy9400.device,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    if ( ( lecroy9400.tio = fsc2_serial_open( lecroy9400.device, O_RDWR ) )
+                                                                      == NULL )
         return FAIL;
 
     /* Use 8-N-1, allow flow control, ignore modem lines, enable

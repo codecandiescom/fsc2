@@ -254,7 +254,10 @@ er035m_s_exp_hook( void )
         return 1;
 
     if ( ! er035m_s_open( ) )
-        er035m_s_comm_fail( );
+    {
+        print( FATAL, "Failed to open serial port for the NMR gaussmeter.\n" );
+        THROW( EXCEPTION );
+    }
     fsc2_usleep( ER035M_S_WAIT, UNSET );
 
     if ( er035m_s_write( "REM" ) == FAIL )
@@ -1210,14 +1213,9 @@ er035m_s_comm( int type,
     switch ( type )
     {
         case SERIAL_INIT :
-            /* We need exclussive access to the serial port and we also need
-               non-blocking mode to avoid hanging indefinitely if the other
-               side does not react. O_NOCTTY is set because the serial port
-               should not become the controlling terminal, otherwise line
-               noise read as a CTRL-C might kill the program. */
+            /* Open the serial port for reading and writing. */
 
-            if ( ( nmr.tio = fsc2_serial_open( nmr.sn,
-                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+            if ( ( nmr.tio = fsc2_serial_open( nmr.sn, O_RDWR ) ) == NULL )
                 return FAIL;
 
             /* Use 8-N-1, allow flow control, ignore modem lines, enable

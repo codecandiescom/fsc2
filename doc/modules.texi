@@ -1224,7 +1224,10 @@ struct termios * fsc2_serial_open( int sn,
 @noindent
 where @code{sn} is the handle for the serial port as returned by
 @ref{fsc2_request_serial_port()} and @code{flags} are the same flags
-you would pass to a normal @code{open()} call. The function opens the
+you would pass to a normal @code{open()} call to determine if the
+port is to be used for writing only (@code{O_WRONLY}), for reading
+only (@code{O_RDONLY}) or for reading and writing (@code{O_RDWR}),
+other necessary flags are set automatically. The function opens the
 file and determines the current communication parameter settings for
 the serial port. These are returned via a pointer to a @code{termios}
 structure, that can be freely changed within the module. If the
