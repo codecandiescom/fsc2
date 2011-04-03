@@ -106,6 +106,7 @@ hp8647a       // HP RF synthesizer
 hp8648b       // HP RF synthesizer
 hp8672a       // HP RF synthesizer
 rs_sml01      // Rohde&Schwarz SML01 Signal Generator
+rs_smb100a    // Rohde&Schwarz SMB100A Signal Generator
 
 
 // Box-car integrators

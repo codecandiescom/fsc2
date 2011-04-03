@@ -44,7 +44,7 @@
 
 /* Client and link for core channel */
 
-static CLIENT          * core_client   = NULL;
+static CLIENT          * core_client = NULL;
 static Create_LinkResp * core_link;
 
 /* Client and link for async channel (needed for device_abort()), optional */
