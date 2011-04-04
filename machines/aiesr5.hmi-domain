@@ -2,18 +2,11 @@
 
 OWNER                   := fsc2
 GROUP                   := dialout
-#GPIB_LIBRARY            := SLG
-#GPIB_CARD_NAME          := "gpib0"
-#GPIB_CONF_FILE          := /etc/gpib.conf
-#GPIB_LOG_LEVEL          := HIGH
-#GPIB_HEADER_DIR         := /usr/local/include/gpib
+GPIB_LIBRARY            := NONE
 SERIAL_LOG_LEVEL        := HIGH
 LAN_LOG_LEVEL           := HIGH
 EDITOR                  := vi
 BROWSER                 := firefox
-# WITH_MEDRIVER           := yes
-# medriver_incl_path      := /usr/include/medriver
-# medriver_lib_path       := /usr/lib
 WITH_HTTP_SERVER        := yes
 DEFAULT_HTTP_PORT       := 8080
 MAIL_ADDRESS            := jens
