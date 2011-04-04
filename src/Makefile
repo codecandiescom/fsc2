@@ -145,7 +145,6 @@ gpibd: gpibd.c gpib_if.c $(GPIB_HELPER) gpibd.h gpib_if.h ../fsc2_config.h
 	$(CC) $(CFLAGS) $(INCLUDES) -o gpibd gpibd.c gpib_if.c $(GPIB_HELPER)  \
 		  -lpthread $(GPIB_LIBS)
 
-
 # Create files and links needed for the GPIB interface - they need making if
 # either gpib_if.[ch] doesn't exit or the files they're made from are newer.
 # When using the NI library also the parser and lexer for the GPIB

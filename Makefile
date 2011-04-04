@@ -47,7 +47,7 @@
 # The following variable determines under which directory the program
 # and its auxiliary files will be installed (defaults to /usr/local)
 
-prefix             := /usr/local
+# prefix             := /usr/local
 
 
 # Next the owner and the group of fsc2 all files that will be installed
@@ -105,7 +105,7 @@ prefix             := /usr/local
 # cards. Alternatively, if no GPIB support is needed, define
 # GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
-GPIB_LIBRARY       := JTT
+# GPIB_LIBRARY       := JTT
 
 
 # If you're using the SourceForge GPIB driver and library you need to
@@ -123,7 +123,7 @@ GPIB_LIBRARY       := JTT
 # is needed for the National Instruments GPIB library only, if not set
 # GPIB_CONF_FILE defaults to /etc/gpib.conf).
 
-GPIB_CONF_FILE     := /etc/gpib.conf
+# GPIB_CONF_FILE     := /etc/gpib.conf
 
 
 # Next set the file for writing logs about the activity on the GPIB bus.
@@ -136,7 +136,7 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 # written to stderr (unless @code{GPIB_LOG_LEVEL} is set to @{OFF}, see
 # below).
 
-GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
+# GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 
 
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the
@@ -146,7 +146,7 @@ GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 # function calls and errors are logged. When set to 'LOW' only errors
 # messages get written to the log file. If not set it defaults to 'LOW'.
 
-GPIB_LOG_LEVEL     := HIGH
+# GPIB_LOG_LEVEL     := HIGH
 
 
 # Finally, if the header files for the GPIB library won't get found
@@ -197,7 +197,7 @@ GPIB_LOG_LEVEL     := HIGH
 # set to 'LOW' only errors messages get written to the log file. If not
 # set it defaults to 'LOW'.
 
-SERIAL_LOG_LEVEL   := HIGH
+# SERIAL_LOG_LEVEL   := HIGH
 
 
 # Next set the directory were log files for LAN devices are created.
@@ -219,7 +219,7 @@ SERIAL_LOG_LEVEL   := HIGH
 # function calls are logged. When set to 'LOW' only errors messages will
 # be written to the log file. If not set it defaults to 'LOW'.
 
-LAN_LOG_LEVEL   := HIGH
+# LAN_LOG_LEVEL   := HIGH
 
 
 # One of the two next lines must be uncommented if you want support for
@@ -253,7 +253,7 @@ LAN_LOG_LEVEL   := HIGH
 # gets pressed or for writing a bug report (but a user can still
 # override this by setting the 'EDITOR' environment variable).
 
-EDITOR             := vi
+# EDITOR             := vi
 
 
 # Define the default browser to use when the "Help" button gets pressed
@@ -262,7 +262,7 @@ EDITOR             := vi
 # can still override this by setting the 'BROWSER' environment variable
 # named).
 
-BROWSER            := firefox
+# BROWSER            := firefox
 
 
 # Both the next two lines must be uncommented if you want support for
@@ -396,8 +396,8 @@ BROWSER            := firefox
 # be set via the second variable, DEFAULT_HTTP_PORT, which must be a
 # number between 1024 and 65535.
 
-WITH_HTTP_SERVER   := yes
-DEFAULT_HTTP_PORT  := 8080
+# WITH_HTTP_SERVER   := yes
+# DEFAULT_HTTP_PORT  := 8080
 
 
 # Uncomment the following if there are lots of warnings about undeclared
@@ -435,7 +435,7 @@ DEFAULT_HTTP_PORT  := 8080
 # (in which case sending bug reports or emails about crashes to me
 # wouldn't make too much sense).
 
-MAIL_ADDRESS       := fsc2@toerring.de
+# MAIL_ADDRESS       := fsc2@toerring.de
 
 
 ##############################################################################
@@ -661,6 +661,8 @@ CONFFLAGS += -DLOCK_DIR=\"$(patsubst % ,%,$(LOCK_DIR))\"
 
 ifdef GPIB_LIBRARY
 	GPIB_LIBRARY   := $(patsubst % ,%,$(GPIB_LIBRARY))
+else
+	GPIB_LIBRARY   := NONE
 endif
 
 ifneq ($(GPIB_LIBRARY),NONE)
@@ -1008,7 +1010,7 @@ export            # export all variables to sub-makes
 # via the Makefile in src), the HTTP server, and then the documentation and
 # some other, more or less useful stuff
 
-all release debug mdebug:
+all release debug mdebug: fsc2_config.h
 ifdef LIBUSB_FAIL
 	@echo "************************************************";    \
 	echo "*   Either WITH_LIBUSB_0_1 or WITH_LIBUSB_1_0  *";     \
@@ -1016,16 +1018,7 @@ ifdef LIBUSB_FAIL
 	echo "************************************************";     \
 	exit 2;
 endif
-	$(MAKE) config
-	$(MAKE) src
-	$(MAKE) modules
-	$(MAKE) http_server
-	$(MAKE) utils
-	$(MAKE) -C $(edir)
-	$(MAKE) docs
 
-config: fsc2_config.h
-	echo $(CONFFLAGS)
 	@if [ -n "$(machine_name)" ]; then                     \
 		echo "Configuring for machine $(machine_name)";    \
 		if [ -r $(mchdir)/$(machine_name)-config ]; then   \
@@ -1036,14 +1029,19 @@ config: fsc2_config.h
 	fi
 	$(MAKE) -C $(sdir) gpib_setup
 
+	$(MAKE) src
+	$(MAKE) modules
+	$(MAKE) http_server
+	$(MAKE) utils
+	$(MAKE) -C $(edir)
+	$(MAKE) docs
+
 
 src:
-	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 
 
 modules:
-	$(MAKE) config
 	$(MAKE) -C $(mdir) modules
 ifdef WITH_MEDRIVER
 	$(MAKE) -C $(mdir) bmwb

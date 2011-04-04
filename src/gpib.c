@@ -33,8 +33,10 @@ static char err_msg[ GPIB_ERROR_BUFFER_LENGTH + 1 ];
 
 static int simple_gpib_call( int dev,
                              int func_id );
+#ifndef GPIB_LIBRARY_NONE
 static int connect_to_gpibd( void );
 static int start_gpibd( void );
+#endif
 static ssize_t swrite( int          fd,
                        const char * buf,
                        ssize_t      len );
@@ -50,7 +52,9 @@ static int extract_long( char * line,
 static int extract_int( char * line,
                         char   ec,
                         int  * val );
+#ifndef GPIB_LIBRARY_NONE
 static void gpib_sig_handler( int signo );
+#endif
 
 
 /*--------------------------------------------------*
@@ -711,6 +715,7 @@ simple_gpib_call( int dev,
  * -2 on failure.
  *--------------------------------------------------------*/
 
+#ifndef GPIB_LIBRARY_NONE
 static int
 connect_to_gpibd( void )
 {
@@ -769,6 +774,7 @@ connect_to_gpibd( void )
         
     return sock_fd;
 }
+#endif
 
 
 /*-----------------------------------------------------------*
@@ -777,6 +783,7 @@ connect_to_gpibd( void )
  * or -1 on failure.
  *-----------------------------------------------------------*/
 
+#ifndef GPIB_LIBRARY_NONE
 static int
 start_gpibd( void )
 {
@@ -844,6 +851,7 @@ start_gpibd( void )
 
 	return connect_to_gpibd( );
 }
+#endif
 
 
 /*----------------------------------------------------------------*
@@ -996,12 +1004,14 @@ extract_int( char * line,
  * it's done with its initialization
  *---------------------------------------------------*/
 
+#ifndef GPIB_LIBRARY_NONE
 static void
 gpib_sig_handler( int signo )
 {
     if ( signo == SIGUSR1 )
         Gpibd_replied = 1;
 }
+#endif
 
 
 /*
