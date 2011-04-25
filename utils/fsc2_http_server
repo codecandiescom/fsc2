@@ -22,7 +22,7 @@
 
 
 use strict;
-use Sys::Hostname;
+use Net::Domain qw ( hostfqdn );
 use warnings;
 use IO::Socket::INET;
 use POSIX;
@@ -42,8 +42,8 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline character
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_pnmtojpeg;     # does the pnmtojpeg utility exist?
-my $version = 0.5;
-my $hostname = hostname;
+my $version = 0.6;
+my $hostname = hostfqdn;
 
 
 # Check if we got a port number as the first command line argument...

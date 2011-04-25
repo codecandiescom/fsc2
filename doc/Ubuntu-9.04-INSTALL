@@ -1,5 +1,5 @@
 The following additiona; packages were required with a freshly installed
-Ubuntu 9.04 (Jaunty) in order to make the program and the documentation:
+Ubuntu 10.04 in order to make the program and the documentation:
 
   dialog
   bison
@@ -10,7 +10,7 @@ Ubuntu 9.04 (Jaunty) in order to make the program and the documentation:
   libforms-bin
   tetex-bin
   texinfo
-  texlive-generic-recommended
+  texlive
   texi2html
   perl-tk
 
@@ -20,8 +20,6 @@ the superfluous entry for the fl_hide_fselector() function at line
 
 You also will need to install a driver and library for your GPIB card
 unless you switch off GPIB support.
-
-
 
 
 To install it download the compressed archive
