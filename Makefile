@@ -926,15 +926,16 @@ endif
 
 ifndef GROUP
 	GROUP := root
-ifdef OWNER
-	ONLY_SETUID := 1
+	ifdef OWNER
+		ONLY_SETUID := 1
+	else
+		OWNER := root
+	endif
 else
-	OWNER := root
-endif
-else
-ifndef OWNER
-	ONLY_SETGID := 1
-endif
+	ifndef OWNER
+		ONLY_SETGID := 1
+		OWNER := root
+	endif
 endif
 
 
