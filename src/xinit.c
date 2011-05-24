@@ -271,7 +271,7 @@ xforms_init( int  * argc,
             GUI.G_Funcs.size = ( bool ) HIGH;
     }
 
-    if ( GUI.G_Funcs.size == LOW )
+    if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         XI_Sizes.WIN_MIN_WIDTH    = 200;
         XI_Sizes.WIN_MIN_HEIGHT   = 320;
@@ -654,7 +654,7 @@ dl_fsc2_rsc( void )
        variable "LD_LIBRARY_PATH". If this fails (and this is not part of the
        testing procedure) we also try the compiled-in path to the libraries. */
 
-    if ( GUI.G_Funcs.size == LOW )
+    if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
             lib_name = srcdir "fsc2_rsc_lr.fsc2_so";

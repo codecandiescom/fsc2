@@ -1,7 +1,6 @@
 # -*-Makefile-*-
 
-OWNER                   := fsc2
-GROUP                   := uucp
+GROUP                   := dialout
 GPIB_LIBRARY            := SLG
 GPIB_CARD_NAME          := "gpib0"
 GPIB_CONF_FILE          := /etc/gpib.conf
