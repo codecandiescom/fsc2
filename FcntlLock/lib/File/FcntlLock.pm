@@ -3,7 +3,7 @@
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
-# Copyright (C) 2002-2010 Jens Thoms Toerring <jt@toerring.de>
+# Copyright (C) 2002-2011 Jens Thoms Toerring <jt@toerring.de>
 
 
 package File::FcntlLock;

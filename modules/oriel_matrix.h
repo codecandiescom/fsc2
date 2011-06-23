@@ -11,7 +11,7 @@
  * communications and control information specification provided by
  * Centice Corporation (http://www.centice.com)
  *
- * Copyright (c) 2008-2010, Clinton McCrowey <clinton.mccrowey.18@csun.edu>.
+ * Copyright (c) 2008-2011, Clinton McCrowey <clinton.mccrowey.18@csun.edu>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

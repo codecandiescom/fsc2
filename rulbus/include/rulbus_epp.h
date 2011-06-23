@@ -2,7 +2,7 @@
  *  In clude file for the driver for the Rulbus (Rijksuniversiteit Leiden
  *  BUS) EPP interface
  *
- *  Copyright (C) 2003-2010 Jens Thoms Toerring
+ *  Copyright (C) 2003-2011  Jens Thoms Toerring
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
