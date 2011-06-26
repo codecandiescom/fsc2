@@ -205,37 +205,37 @@
 
 /* Port the VICP server is listening on */
 
-#define VICP_PORT                        1861
+#define VICP_PORT   1861
 
 
 /* Constants for the bits in the headers operation byte */
 
-#define VICP_DATA                        ( 1 << 7 )
-#define VICP_REMOTE                      ( 1 << 6 )
-#define VICP_LOCKOUT                     ( 1 << 5 )
-#define VICP_CLEAR                       ( 1 << 4 )
-#define VICP_SRQ                         ( 1 << 3 )
-#define VICP_SERIAL_POLL                 ( 1 << 2 )
-#define VICP_EOI                         ( 1 << 0 )
+#define VICP_DATA          ( 1 << 7 )
+#define VICP_REMOTE        ( 1 << 6 )
+#define VICP_LOCKOUT       ( 1 << 5 )
+#define VICP_CLEAR         ( 1 << 4 )
+#define VICP_SRQ           ( 1 << 3 )
+#define VICP_SERIAL_POLL   ( 1 << 2 )
+#define VICP_EOI           ( 1 << 0 )
 
 
 /* Size of the header to be sent or received with each data package */
 
-#define VICP_HEADER_SIZE                 8
+#define VICP_HEADER_SIZE   8
 
 
 /* Header version */
 
-#define VICP_HEADER_VERSION_VALUE        1
+#define VICP_HEADER_VERSION_VALUE   1
 
 
 /* Positions of the different entries in the header */
 
-#define VICP_HEADER_OPERATION_OFFSET     0
-#define VICP_HEADER_VERSION_OFFSET       1
-#define VICP_HEADER_SEQUENCE_OFFSET      2
-#define VICP_HEADER_MSB_OFFSET           4
-#define VICP_HEADER_LSB_OFFSET           7
+#define VICP_HEADER_OPERATION_OFFSET   0
+#define VICP_HEADER_VERSION_OFFSET     1
+#define VICP_HEADER_SEQUENCE_OFFSET    2
+#define VICP_HEADER_MSB_OFFSET         4
+#define VICP_HEADER_LSB_OFFSET         7
 
 
 /* Default timeout for connect() call */
@@ -312,9 +312,9 @@ vicp_open( const char * dev_name,
            long         us_timeout,
            bool         quit_on_signal )
 {
-    int            fd;
-    unsigned char  header[ VICP_HEADER_SIZE ] = { 0 };
-    ssize_t        bytes_written;
+    int           fd;
+    unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
+    ssize_t       bytes_written;
 
 
     CLOBBER_PROTECT( us_timeout );
@@ -563,7 +563,7 @@ vicp_write( const char * buffer,
                    after;
 
 
-    /* Do nothing if there are no data to send */
+    /* Do nothing if there are no data to be sent */
 
     if ( *length == 0 )
         return SUCCESS;
@@ -577,8 +577,8 @@ vicp_write( const char * buffer,
 
     if ( vicp.handle < 0 )
     {
-        print( FATAL, "Internal error in module, connection "
-               "already closed.\n" );
+        print( FATAL, "Internal error in module, connection is already "
+               "closed.\n" );
         THROW( EXCEPTION );
     }
 

@@ -37,12 +37,14 @@ struct Device_Error {
     Device_ErrorCode  error;
 };
 
+
 struct Create_LinkParms {
     long            clientId;       /* implementation specific value */
     bool            lockDevice;     /* attempt to lock the device */
     unsigned long   lock_timeout;   /* time to wait for lock */
     string          device<>;       /* name of device */
 };
+
 
 struct Create_LinkResp {
     Device_ErrorCode  error;
@@ -52,6 +54,7 @@ struct Create_LinkResp {
                                        device will accept on a write */
 };
 
+
 struct Device_WriteParms {
     Device_Link     lid;            /* link id from create_link */
     unsigned long   io_timeout;     /* time to wait for I/O */
@@ -60,10 +63,12 @@ struct Device_WriteParms {
     opaque          data<>;         /* the data length and the data itself */
 };
 
+
 struct Device_WriteResp {
     Device_ErrorCode    error;
     unsigned long       size;       /* number of bytes written */
 };
+
 
 struct Device_ReadParms {
     Device_Link     lid;            /* link id from create_link */
@@ -74,16 +79,19 @@ struct Device_ReadParms {
     char            termChar;       /* valid if flags & termchrset */
 };
 
+
 struct Device_ReadResp {
     Device_ErrorCode    error;
     long                reason;     /* reason(s) read completed */
     opaque              data<>;     /* data length and data itself */
 };
 
+
 struct Device_ReadStbResp {
     Device_ErrorCode    error;      /* error code */
     unsigned char       stb;        /* the returned status byte */
 };
+
 
 struct Device_GenericParms {
     Device_Link     lid;            /* link id from create_link */
@@ -91,6 +99,7 @@ struct Device_GenericParms {
     unsigned long   lock_timeout;   /* time to wait for lock */
     unsigned long   io_timeout;     /* time to wait for I/O */
 };
+
 
 struct Device_RemoteFunc {
     unsigned long       hostAddr;   /* host servicing interrupt */
@@ -100,17 +109,20 @@ struct Device_RemoteFunc {
     Device_AddrFamily   progFamily; /* DEVICE_UDP | DEVICE_TCP */
 };
 
+
 struct Device_EnableSrqParms {
     Device_Link     lid;            /* link id from create_link */
     bool            enable;         /* enable or disable intr's */
     opaque          handle<40>;     /* host specific data */
 };
 
+
 struct Device_LockParms {
     Device_Link     lid;            /* link id from create_link */
     Device_Flags    flags;          /* contains the waitlock flag */
     unsigned long   lock_timeout;   /* time to wait to acquire lock */
 };
+
 
 struct Device_DocmdParms {
     Device_Link     lid;            /* link id from create_link */
@@ -123,16 +135,19 @@ struct Device_DocmdParms {
     opaque          data_in<>;      /* docmd data parameters */
 };
 
+
 struct Device_DocmdResp {
     Device_ErrorCode  error;        /* returned status */
     opaque            data_out<>;   /* returned data parameters */
 };
+
 
 program DEVICE_ASYNC {
     version DEVICE_ASYNC_VERSION {
         Device_Error        device_abort        (Device_Link)           = 1;
     } = 1;
 } = 0x0607B0;
+
 
 program DEVICE_CORE {
     version DEVICE_CORE_VERSION {
@@ -162,6 +177,7 @@ program DEVICE_CORE {
 struct Device_SrqParms {
     opaque  handle<>;
 };
+
 
 program DEVICE_INTR {
     version DEVICE_INTR_VERSION     {

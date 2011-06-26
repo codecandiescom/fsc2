@@ -60,11 +60,11 @@ graphics_init( void )
 }
 
 
-/*---------------------------------------------------*
- * Function for initializing the canvases used in the graphical display
- * - these are the canvas for showing mode in tune mode, the canvas for
+/*------------------------------------------------------------------------*
+ * Function for initializing the canvases used in the graphical display -
+ * these are the canvas for showing the mode in tune mode, the canvas for
  * displaying the detector current and the one for showing the AFC signal
- *---------------------------------------------------*/
+ *------------------------------------------------------------------------*/
 
 static void
 init_canvas( void )
@@ -180,9 +180,9 @@ init_canvas( void )
 }
 
 
-/*----------------------------*
+/*------------------------------------*
  * Callback for bridge mode selection
- *----------------------------*/
+ *------------------------------------*/
 
 void
 mode_cb( FL_OBJECT * obj,
@@ -675,7 +675,10 @@ display_detector_current( void )
     int x;
     double val = 0.0;
     double old_val = -1.0;
-    double b, m;
+    double b = bmwb.type == Q_BAND ?
+               DC_SIGNAL_SLOPE_Q_BAND : DC_SIGNAL_SLOPE_X_BAND;
+    double m = bmwb.type == Q_BAND ?
+               DC_SIGNAL_OFFSET_Q_BAND : DC_SIGNAL_OFFSET_X_BAND;
 
     if ( bmwb.mode != MODE_STANDBY )
     {
@@ -691,19 +694,8 @@ display_detector_current( void )
         old_val = val;
 
         /* The displayed detector current doesn't cover the whole range of
-           the signal but only a subrange. The following values are from a
+           the signal but only a subrange. The values used are from a
            linear least square fit of the measured values. */
-
-        if ( bmwb.type == Q_BAND )
-        {
-            b = 1.7954;
-            m = 0.0467;
-        }
-        else
-        {
-            b =  2.4665;
-            m = -0.1372;
-        }
 
         val = b * val + m;
 
@@ -813,6 +805,9 @@ display_unlocked( void )
     static double old_val = -1.0;
 
 
+    if ( bmwb.type == Q_BAND )
+        return;
+
     if ( bmwb.mode != MODE_STANDBY && measure_unlocked_signal( &val ) )
     {
         error_handling( );
@@ -841,6 +836,9 @@ display_uncalibrated( void )
     static double old_val = -1.0;
 
 
+    if ( bmwb.type == Q_BAND )
+        return;
+
     if ( bmwb.mode != MODE_STANDBY && measure_uncalibrated_signal( &val ) )
     {
         error_handling( );
@@ -868,6 +866,9 @@ display_afc_state( void )
     int state = 0;
     int old_state = -1;
 
+
+    if ( bmwb.type == X_BAND )
+        return;
 
     if ( bmwb.mode != MODE_STANDBY && measure_afc_state( &state ) )
     {

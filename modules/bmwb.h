@@ -74,11 +74,15 @@
 /* Minimum and maximum expected detector current signal for X- and Q-band
    bridge (measured values times 2/3, taking voltage devider into account) */
 
-#define DC_SIGNAL_MIN_X_BAND    0.0
-#define DC_SIGNAL_MAX_X_BAND    0.24
+#define DC_SIGNAL_MIN_X_BAND      0.0
+#define DC_SIGNAL_MAX_X_BAND      0.24
+#define DC_SIGNAL_SLOPE_X_BAND    2.4665
+#define DC_SIGNAL_OFFSET_X_BAND  -0.1372
 
-#define DC_SIGNAL_MIN_Q_BAND   -0.08
-#define DC_SIGNAL_MAX_Q_BAND    9.5
+#define DC_SIGNAL_MIN_Q_BAND     -0.08
+#define DC_SIGNAL_MAX_Q_BAND      9.5
+#define DC_SIGNAL_SLOPE_Q_BAND    1.7954
+#define DC_SIGNAL_OFFSET_Q_BAND   0.0467
 
 
 /* Minimum and maximum expected AFC signal for X- and Q-band bridge (measured

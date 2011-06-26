@@ -20,6 +20,7 @@
 
 #include "bmwb.h"
 
+
 /*---------------------------------------------------------------------*
  * The program starts with the EUID and EGID set to the ones of fsc2,
  * but these privileges get dropped immediately. Only for some special

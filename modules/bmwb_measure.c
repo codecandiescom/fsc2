@@ -20,6 +20,7 @@
 
 #include "bmwb.h"
 
+
 static size_t
 find_trigger( double * data,
               double * end_p,
@@ -341,10 +342,10 @@ measure_tune_mode( double * data,
 
 /*-------------------------------------------------------------------------*
  * Function for finding the position of a trigger level (at raising slope)
- * in a rather well-behaved data set (i.e. not too much noise). Start
- * looking at 'data' but not further than 'end_p'. Return 0 if no fitting
- * position could be found, otherwise the index of the point at which the
- * trigger level was reached.
+ * in a rather well-behaved data set (i.e. not too much noise). Starts
+ * looking through the data pointed to by 'data' but not further than
+ * 'end_p'. Returns 0 if no fitting position could be found, otherwise
+ * the index of the point at which the trigger level was reached.
  *-------------------------------------------------------------------------*/
 
 static size_t
@@ -367,7 +368,7 @@ find_trigger( double * data,
            off by noise */
 
         s1 = data[ -1 ] + 2 * data[ 0 ] + 3 * data[ 1 ] + 4 * data[ 2 ];
-        s2 = data[ - 2 ] + data[ -1 ] + data[ 0 ] + data[ 1 ] + data[ 2 ];
+        s2 = data[ -2 ] + data[ -1 ] + data[ 0 ] + data[ 1 ] + data[ 2 ];
  
         a = 0.02 * ( 5 * s1 - 10.0 * s2 );
 
@@ -471,9 +472,9 @@ measure_uncalibrated_signal( double * val )
 }
 
 
-/*----------------------------------------------------*
- * Determine if AFC is on or off (Q-band bridge only)
- *----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Determines if AFC is on or off (Q-band bridge only)
+ *-----------------------------------------------------*/
 
 int
 measure_afc_state( int * state )

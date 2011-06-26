@@ -223,6 +223,7 @@ client_handler( void * null  UNUSED_ARG )
     sact.sa_handler = write_sig_handler;
     sigemptyset( &sact.sa_mask );
     sact.sa_flags = 0;
+
     if ( sigaction( SIGPIPE, &sact, NULL ) == -1 )
     {
         client_fd = -1;
@@ -237,7 +238,7 @@ client_handler( void * null  UNUSED_ARG )
             FD_ZERO( &fds );
             FD_SET( client_fd, &fds );
 
-            /* Wait request from the client*/
+            /* Wait for next request from the client and deal with it */
 
             if (    select( client_fd + 1, &fds, NULL, NULL, NULL ) != 1
                  || handle_request( client_fd ) )
@@ -260,9 +261,9 @@ client_handler( void * null  UNUSED_ARG )
 }
 
 
-/*-----------------------------------------------*
- * Handles requests by the client, one at a time
- *-----------------------------------------------*/
+/*---------------------------------*
+ * Handles a request by the client
+ *---------------------------------*/
 
 typedef struct {
     const char * req;

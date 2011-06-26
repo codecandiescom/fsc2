@@ -481,7 +481,6 @@ meilhaus_ai_single( int      channel,
                                      list.iValue, ME_MODULE_TYPE_MULTISIG_NONE,
                                      ME_VALUE_NOT_USED, val )
                                                           != ME_ERRNO_SUCCESS )
-
     {
         meErrorGetLastMessage( msg, sizeof msg );
         sprintf( bmwb.error_msg, "Failed to convert measured value from AI "
@@ -882,9 +881,9 @@ meilhaus_ao( int    ao,
     return 0;
 }
 
-/*--------------------------------------------*
- * Returns the bit pattern measured at the DI
- *--------------------------------------------*/
+/*-------------------------------------------------------*
+ * Returns the bit pattern measured at the digital input
+ *-------------------------------------------------------*/
 
 int
 meilhaus_dio_in( int             dio,
@@ -935,9 +934,10 @@ meilhaus_dio_in( int             dio,
 }
 
 
-/*-----------------------------------------------*
- * Returns the bit pattern currently set at a DO
- *-----------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Returns the bit pattern currently set at a digital output
+ * (not measured but from has been set before)
+ *-----------------------------------------------------------*/
 
 int
 meilhaus_dio_out_state( int             dio,
@@ -965,9 +965,9 @@ meilhaus_dio_out_state( int             dio,
 }
 
 
-/*-------------------------------*
- * Outputs a bit pattern at a DO
- *-------------------------------*/
+/*-------------------------------------------*
+ * Outputs a bit pattern at a digital output
+ *-------------------------------------------*/
 
 int
 meilhaus_dio_out( int           dio,
