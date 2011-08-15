@@ -1,0 +1,18 @@
+VARIABLES:
+
+I;
+File1, File2;
+
+EXPERIMENT:
+
+File1 = get_file( "", "*.dat", "", "", "dat" );
+
+FOR I = 1 : 120 {
+    IF ( I >= 100 ) {
+		File2 = clone_file( File1, "dat", sprint( "#.dat", I ) );
+	} ELSE IF ( I >= 10 ) {
+		File2 = clone_file( File1, "dat", sprint( "0#.dat", I ) );
+	} ELSE {
+		File2 = clone_file( File1, "dat", sprint( "00#.dat", I ) );
+	}
+}

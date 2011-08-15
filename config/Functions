@@ -45,7 +45,7 @@ get_phase_cycled_area, -1, EXP;
 /* Functions exported by the magnet power supply drivers */
 
 magnet_name, 0, ALL;             // returns the device name
-magnet_setup, 2, ALL;            // set start field and sweep step size
+magnet_setup, 2, PREP;           // set start field and sweep step size
 magnet_fast_init, 0, ALL;        // shortens magnet setup time (X-, S-band)
 magnet_field, -1, EXP;           // set or query the field
 magnet_field_step_size, -1, ALL; // queries field step size
