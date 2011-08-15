@@ -329,7 +329,7 @@ magnet_setup( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    start_field = lrnd( get_double( v, "start field" )
+    start_field = lrnd(   get_double( v, "start field" )
                         / BH15_FC_MIN_FIELD_STEP ) * BH15_FC_MIN_FIELD_STEP;
 
     bh15_fc_field_check( start_field );
@@ -353,7 +353,7 @@ magnet_setup( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    field_step = lrnd( MAX_SWA * field_step / BH15_FC_SW_RESOLUTION )
+    field_step =   lrnd( MAX_SWA * field_step / BH15_FC_SW_RESOLUTION )
                  * BH15_FC_SW_RESOLUTION / MAX_SWA;
 
     too_many_arguments( v );
@@ -364,7 +364,7 @@ magnet_setup( Var_T * v )
        to shift the center field during a longer sweep. Thus we readjust
        the start field in these cases. */
 
-    rem = lrnd( start_field / BH15_FC_MIN_FIELD_STEP )
+    rem =   lrnd( start_field / BH15_FC_MIN_FIELD_STEP )
           % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP );
 
     if (    rem > 0
