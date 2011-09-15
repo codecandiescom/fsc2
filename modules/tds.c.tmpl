@@ -831,6 +831,7 @@ digitizer_coupling( Var_T * v )
     else
     {
         cpl = get_long( v, "coupling type" );
+
         if ( cpl < TDS_TMPL_CPL_AC_1_MOHM || cpl > TDS_TMPL_CPL_AC_50_OHM )
         {
             print( FATAL, "Invalid coupling type (%d).\n", cpl );
@@ -859,9 +860,9 @@ digitizer_bandwidth_limiter( Var_T * v )
     long channel;
     long bwl = TDS_TMPL_BWL_INVALID;
 #if defined TDS_TMPL_BWL_250MHZ
-    const char *cpl_str[ ] = { "OFF", "20MHZ", "100MHZ" };
+    const char *cpl_str[ ] = { "OFF", "20MHZ", "100MHZ", "250MHZ" };
 #else
-    const char *cpl_str[ ] = { "OFF", "20MHz", "100MHz", "250MHz" };
+    const char *cpl_str[ ] = { "OFF", "20MHZ", "100MHZ" };
 #endif
     size_t i;
 

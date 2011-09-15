@@ -2054,7 +2054,7 @@ Waverunner} series three possible settings exist. It can be switched
 off by calling the function with a string argument of @code{"OFF"} (or
 an integer argument of @code{0}) to achieve the highst model-dependent
 bandwidth (see specifications). It can be set to @code{200 MHz} by
-calling the function with the string @code{"200MHz"} (or the value
+calling the function with the string @code{"200MHZ"} (or the value
 @code{2}). Finally by calling it with the string @code{"ON"} (or an
 integer argument of @code{1}) for bandwidth can be restricted to
 @code{25 MHz} for the Waverunner models LT322, LT342(L), LT262(ML) and
@@ -2067,16 +2067,16 @@ MHz} has the same effect.
 
 For the @ref{lecroy_ws, LeCroy WaveSurfer} with the models
 @strong{422} and @strong{424} only @code{"OFF"} and @code{"ON"} can be
-set, while with the other models also @code{"200MHz"} can be set (the
+set, while with the other models also @code{"200MHZ"} can be set (the
 maximum bandwidth of the @strong{422} and @code{424} models is @w{200
 MHz}, so this limit is already reached when the bandwidth limiter is
 set to @code{"OFF"}.
 
 For all Tektronix oscilloscopes there exist at least three possible
 settings, the string @code{"OFF"} or the integer value @code{0} for
-full bandwidth, @code{"20MHz"} or @code{1} and @code{"100MHz"} or
+full bandwidth, @code{"20MHZ"} or @code{1} and @code{"100MHZ"} or
 @code{2}. The models TDS744A and TDS754A support a further setting,
-@code{"250MHz"} or @code{3}.
+@code{"250MHZ"} or @code{3}.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
