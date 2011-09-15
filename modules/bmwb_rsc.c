@@ -60,8 +60,8 @@ create_form_bmwb_rsc( void )
 
 	if ( bmwb.type == X_BAND )
 	{
-		fdui->unlocked_indicator = obj =
-			fl_add_roundbutton( FL_PUSH_BUTTON, 400, 20, 100, 20, "Unlocked" );
+		fdui->unleveled_indicator = obj =
+		   fl_add_roundbutton( FL_PUSH_BUTTON, 400, 20, 100, 20, "Unleveled" );
 		fl_set_object_color( obj, FL_WHITE, FL_FREE_COL1 );
 		fl_set_button( obj, 1 );
 		fl_deactivate_object( obj );
@@ -102,8 +102,11 @@ create_form_bmwb_rsc( void )
     fl_set_counter_bounds( obj, MIN_ATTENUATION, MAX_ATTENUATION );
 	fl_set_counter_value( obj, bmwb.attenuation );
 
-	obj = fl_add_text( FL_NORMAL_TEXT, 350, 120, 320, 20,
-					   "Microwave attenuation [dB]" );
+	obj = fdui->attenuation_label =
+		                       fl_add_text( FL_NORMAL_TEXT, 310, 120, 320, 20,
+										    pretty_print_attenuation( ) );
+    fl_set_object_lalign( obj, FL_ALIGN_LEFT );
+    fl_set_object_lsize( obj, FL_SMALL_SIZE );
 
 
     obj = fl_add_button( FL_TOUCH_BUTTON, 280, 90, 30, 30, "@<<" );
@@ -169,7 +172,7 @@ create_form_bmwb_rsc( void )
 	freq = bmwb.min_freq + bmwb.freq * ( bmwb.max_freq - bmwb.min_freq );
 	sprintf( buf, "(ca. %.3f GHz / %.0f G)", freq, FAC * freq );
 
-	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 285, 199, 320, 20,
+	fdui->freq_text = obj = fl_add_text( FL_NORMAL_TEXT, 285, 197, 320, 20,
 										 buf );
     fl_set_object_lalign( obj, FL_ALIGN_CENTER );
     fl_set_object_lsize( obj, FL_SMALL_SIZE );

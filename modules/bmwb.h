@@ -21,7 +21,9 @@
 #if ! defined BMWB_HEADER_
 #define BMWB_HEADER_
 
-/* #define BMWB_TEST */
+
+#define BMWB_TEST
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,7 +74,8 @@
 
 
 /* Minimum and maximum expected detector current signal for X- and Q-band
-   bridge (measured values times 2/3, taking voltage devider into account) */
+   bridge (measured values in V times 2/3, taking voltage devider into
+   account) */
 
 #define DC_SIGNAL_MIN_X_BAND      0.0
 #define DC_SIGNAL_MAX_X_BAND      0.24
@@ -86,7 +89,7 @@
 
 
 /* Minimum and maximum expected AFC signal for X- and Q-band bridge (measured
-   values times 2/3, taking voltage devider into account) */
+   values in V times 2/3, taking voltage devider into account) */
 
 #define AFC_SIGNAL_MIN_X_BAND  -0.155
 #define AFC_SIGNAL_MAX_X_BAND   0.155
@@ -102,11 +105,11 @@
 #define UNCALIBRATED_MAX  2.5
 
 
-/* Minimum and maximum voltage to be expected for "unlocked" signal
+/* Minimum and maximum voltage to be expected for "unleveled" signal
    (X-band only) */
 
-#define UNLOCKED_MIN  1.0
-#define UNLOCKED_MAX  3.0
+#define UNLEVELED_MIN  1.0
+#define UNLEVELED_MAX  3.0
 
 
 /* Minimum and maximum x- and y-voltages masured in tune mode */
@@ -190,6 +193,7 @@ typedef struct {
 	double            freq;
 	double            min_freq;
 	double            max_freq;
+    double            max_power;
 	int               attenuation;
 	double            signal_phase;
 	double            bias;
@@ -221,7 +225,7 @@ extern BMWB bmwb;
 
 #define DETECTOR_CURRENT_AI     0         /* detector current */
 #define AFC_SIGNAL_AI           1         /* AFC signal */
-#define UNLOCKED_SIGNAL_AI      2         /* unlocked signal */
+#define UNLEVELED_SIGNAL_AI     2         /* unleveled signal */
 #define UNCALIBRATED_SIGNAL_AI  3         /* uncalibrated signal */
 #define TUNE_MODE_X_SIGNAL_AI   4         /* tune mode x signal */
 #define TUNE_MODE_Y_SIGNAL_AI   6         /* tune mode y signal */
@@ -257,7 +261,7 @@ int measure_dc_signal( double * /* val */ );
 int measure_afc_signal( double * /* val */ );
 int measure_tune_mode( double * /* data */,
                        size_t   /* size */ );
-int measure_unlocked_signal( double * /* val */ );
+int measure_unleveled_signal( double * /* val */ );
 int measure_uncalibrated_signal( double * /* val */ );
 int measure_afc_state( int * /* state */ );
 
@@ -307,6 +311,8 @@ int irnd( double /* d */ );
 char * get_string( const char * /* fmt */,
 				   ... );
 const char * slash( const char * /* path */ );
+
+const char * pretty_print_attenuation( void );
 
 
 #endif /* ! defined BMWB_HEADER_*/

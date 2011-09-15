@@ -211,6 +211,33 @@ slash( const char * path )
 }
 
 
+const char *
+pretty_print_attenuation( void )
+{
+    static char buf[ 100 ] = "Microwave attenuation [dB] (ca. ";
+    static char *p = buf + 32;
+    double power = bmwb.max_power * pow( 10.0, - 0.1 * bmwb.attenuation );
+
+
+    int expo = floor( log10( power ) );
+    double fac = pow( 10, - expo + 3 );
+    power  = irnd( power * fac ) / fac;
+
+    if ( expo >= -2 )
+        sprintf( p, "%.0f0 mW)", 1.0e2 * power );
+    else if ( expo == -3 )
+        sprintf( p, "%.1f mW)", 1.0e3 * power );
+    else if ( expo == -4 || expo == -5 )
+        sprintf( p, "%.0f0 uW)", 1.0e5 * power );
+    else if ( expo == -6 )
+        sprintf( p, "%.1f uW)", 1.0e6 * power );
+    else if ( expo == -7 || expo == -8 )
+        sprintf( p, "%.0f0 nW)", 1.0e8 * power );
+    else
+        sprintf( p, "%.0f nW)", 1.0e9 * power );
+
+    return buf;
+}
 
 
 /*

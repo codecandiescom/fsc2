@@ -548,7 +548,7 @@ mw_bridge_lock_phase, -1, EXP;
 mw_bridge_mode, -1, EXP;
 mw_bridge_detector_current, 0, EXP;
 mw_bridge_afc_signal, 0, EXP;
-mw_bridge_unlocked_signal, 0, EXP;
+mw_bridge_unleveled_signal, 0, EXP;
 mw_bridge_uncalibrated_signal, 0, EXP;
 mw_bridge_afc_state, 0, EXP;
 mw_bridge_iris, 2, EXP;

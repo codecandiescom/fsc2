@@ -30,6 +30,10 @@ BMWB bmwb;
 
 
 /*---------------------------------------------------*
+ * Since this is an program, running independently from fsc2,
+ * we need amain() function. The connection to fsc2 (and the
+ * x_bmwb and q_bmwb modules) is via a socket over which both
+ * programs communicate.
  *---------------------------------------------------*/
 
 int
@@ -119,7 +123,7 @@ main( int     argc,
         return EXIT_FAILURE;
 	}
 
-    /* Initialize graphics */
+    /* Initialize XForms library */
 
     if ( ! fl_initialize( &argc, argv, "bmwb", NULL, 0 ) )
 	{
@@ -161,14 +165,17 @@ main( int     argc,
     else
         bmwb.type = type;
 
-    /* Get the last settings of the bridge from  state file */
+    /* Get the last settings of the bridge from the state file */
 
 	load_state( );
+
+    /* Initialize graphics (can only be done after type of bridge has been
+       detected */
 
 	graphics_init( );
 
     /* Open a socket we're listening on and which might be used to send
-       commands for controling the bridge */
+       the program commands for controling the bridge */
 
     if ( bmwb_open_sock( ) )
     {
@@ -237,7 +244,7 @@ get_bridge_type( void )
                            X_BAND_ATT_BITS : Q_BAND_ATT_BITS ) )
         return TYPE_FAIL;
 
-    return bmwb.mode;
+    return bmwb.type;
 #else
     return X_BAND;
 #endif
@@ -245,7 +252,9 @@ get_bridge_type( void )
 
 
 /*------------------------------------------------*
- * Function for setting a new microwave frequency
+ * Function for setting a new microwave frequency (given as a number
+ * in ther interval [0,1] where 0 represents the lowest frequency
+ * possible and 1 the highest). Returns 0 on success and 1 on failure.
  *------------------------------------------------*/
 
 int
@@ -273,7 +282,8 @@ set_mw_freq( double val )
 
 
 /*--------------------------------------------------*
- * Function for setting a new microwave attenuation
+ * Function for setting a new microwave attenuation, given in dB.
+ * Returns 0 on success and 1 on failure.
  *--------------------------------------------------*/
 
 int
@@ -307,7 +317,8 @@ set_mw_attenuation( int val )
 
 
 /*-----------------------------------------*
- * Function for setting a new signal phase
+ * Function for setting a new signal phase, given as number in the interval
+ * [0,1]. Returns 0 on success and 1 on failure.
  *-----------------------------------------*/
 
 int
@@ -335,7 +346,8 @@ set_signal_phase( double val )
 
 
 /*-------------------------------------------------*
- * Function for setting a new microwave bias power 
+ * Function for setting a new microwave bias power, given as a number in the
+ * interval [0,1]. Returns 0 on success and 1 on failure.
  *-------------------------------------------------*/
 
 int
@@ -365,6 +377,7 @@ set_mw_bias( double val )
 /*------------------------------------------------------*
  * Function for controlling the iris motor, argument is
  * 0 to stop the motor, 1 to go up and -1 to go down.
+ * Returns 0 on success and 1 on failure.
  *------------------------------------------------------*/
 
 int
@@ -404,7 +417,9 @@ set_iris( int state )
 
 
 /*--------------------------------------*
- * Function for switching to a new mode 
+ * Function for switching to a new mode, with the mode given by the argument
+ * with values as defined in the header file. Returns 0 on success and 1 on
+ * failure.
  *--------------------------------------*/
 
 int
@@ -475,13 +490,15 @@ load_state( void )
 
 	if ( bmwb.type == X_BAND )
 	{
-		bmwb.min_freq = X_BAND_MIN_FREQ;
-		bmwb.max_freq = X_BAND_MAX_FREQ;
+		bmwb.min_freq  = X_BAND_MIN_FREQ;
+		bmwb.max_freq  = X_BAND_MAX_FREQ;
+        bmwb.max_power = X_BAND_MAX_POWER;
 	}
 	else
 	{
-		bmwb.min_freq = Q_BAND_MIN_FREQ;
-		bmwb.max_freq = Q_BAND_MAX_FREQ;
+		bmwb.min_freq  = Q_BAND_MIN_FREQ;
+		bmwb.max_freq  = Q_BAND_MAX_FREQ;
+        bmwb.max_power = Q_BAND_MAX_POWER;
 	}
 
 	if ( bmwb.type == X_BAND )
@@ -581,7 +598,7 @@ check_unique( void )
     if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
                   sizeof serv_addr ) != -1 )
     {
-        fprintf( stderr, "Another instance of the program seems already to be "
+        fprintf( stderr, "Another instance of the program already seems to be "
                  "running.\n" );
         return 1;
     }

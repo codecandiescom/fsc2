@@ -59,7 +59,7 @@ static int detsig_req( int          fd,
 static int afcsig_req( int          fd,
                        const char * req );
 
-static int unlck_req( int          fd,
+static int unlvl_req( int          fd,
                       const char * req );
 
 static int uncal_req( int          fd,
@@ -103,7 +103,7 @@ bmwb_open_sock( void )
     if ( ( listen_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
     {
         lower_permissions( );
-        sprintf( bmwb.error_msg, "Can't create a socket." );
+        sprintf( bmwb.error_msg, "Can't create required socket." );
         return 1;
     }
 
@@ -132,6 +132,9 @@ bmwb_open_sock( void )
         sprintf( bmwb.error_msg, "Can't listen on socket." );
         return 1;
     }
+
+    /* Create the thread that's responsible for accepting connections to the
+       socket */
 
     pthread_attr_init( &attr );
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
@@ -166,6 +169,11 @@ conn_handler( void * null  UNUSED_ARG )
 
 
     bmwb.a_is_active = 1;
+
+    /* Wait for connections and create a new thread for dealing with the
+       client. Note that there only can be a single client using the
+       bridge, so reject connections from further clients when the
+       client handling thread is running. */
 
     pthread_attr_init( &attr );
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
@@ -231,6 +239,9 @@ client_handler( void * null  UNUSED_ARG )
         pthread_exit( NULL );
     }
 
+    /* At the very start tell the client which bridge this program thinks
+       it's dealing with */
+
     if ( swrite( client_fd, bmwb.type == Q_BAND ? "Q\n" : "X\n", 2 ) == 2 )
     {
         while ( 1 )
@@ -238,7 +249,9 @@ client_handler( void * null  UNUSED_ARG )
             FD_ZERO( &fds );
             FD_SET( client_fd, &fds );
 
-            /* Wait for next request from the client and deal with it */
+            /* Wait for next request from the client and deal with it until
+               either the client closed the socket or a communication error
+               is detected */
 
             if (    select( client_fd + 1, &fds, NULL, NULL, NULL ) != 1
                  || handle_request( client_fd ) )
@@ -290,7 +303,7 @@ handle_request( int fd )
             { "MODE",    4, mode_req   },   /* set/get mode */
             { "SIGPH",   5, sigph_req  },   /* set/get signal phase */
             { "UNCAL?",  6, uncal_req  },   /* get uncalibrated signal */
-            { "UNLCK?",  6, unlck_req  }   /* get unlocked signal */
+            { "UNLVL?",  6, unlvl_req  }    /* get unleveled signal */
           };
 
 
@@ -674,11 +687,11 @@ afcsig_req( int          fd,
 
 
 /*-------------------------------------------------*
- * Handles a request to return the unlocked signal
+ * Handles a request to return the unleveled signal
  *-------------------------------------------------*/
 
 static int
-unlck_req( int          fd,
+unlvl_req( int          fd,
            const char * req )
 {
     double val;
@@ -690,7 +703,7 @@ unlck_req( int          fd,
 
     pthread_mutex_lock( &bmwb.mutex );
 
-    if ( measure_unlocked_signal( &val ) )
+    if ( measure_unleveled_signal( &val ) )
     {
         pthread_mutex_unlock( &bmwb.mutex );
         return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
@@ -722,7 +735,7 @@ uncal_req( int          fd,
 
     pthread_mutex_lock( &bmwb.mutex );
 
-    if ( measure_unlocked_signal( &val ) )
+    if ( measure_unleveled_signal( &val ) )
     {
         pthread_mutex_unlock( &bmwb.mutex );
         return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1

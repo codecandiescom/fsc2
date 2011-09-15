@@ -37,7 +37,7 @@ static struct {
 	int    mode;
 	double dc_signal;
 	double afc_signal;
-	double unlocked_signal;
+	double unleveled_signal;
 	double uncalibrated_signal;
 } x_bmwb;
 
@@ -57,7 +57,7 @@ Var_T * mw_bridge_bias(                Var_T * v );
 Var_T * mw_bridge_mode(                Var_T * v );
 Var_T * mw_bridge_detector_current(    Var_T * v );
 Var_T * mw_bridge_afc_signal(          Var_T * v );
-Var_T * mw_bridge_unlocked_signal(     Var_T * v );
+Var_T * mw_bridge_unleveled_signal(    Var_T * v );
 Var_T * mw_bridge_uncalibrated_signal( Var_T * v );
 Var_T * mw_bridge_iris(                Var_T * v );
 Var_T * mw_bridge_max_frequency(       Var_T * v );
@@ -96,7 +96,7 @@ x_bmwb_init_hook( void )
 	x_bmwb.mode                = 2;
 	x_bmwb.dc_signal           = 0.5;
 	x_bmwb.afc_signal          = 0.0;
-	x_bmwb.unlocked_signal     = 0.0;
+	x_bmwb.unleveled_signal    = 0.0;
 	x_bmwb.uncalibrated_signal = 0.0;
 
 	return 1;
@@ -550,16 +550,16 @@ mw_bridge_afc_signal( Var_T * v  UNUSED_ARG )
  *--------------------------------------------------------*/
 
 Var_T *
-mw_bridge_unlocked_signal( Var_T * v  UNUSED_ARG )
+mw_bridge_unleveled_signal( Var_T * v  UNUSED_ARG )
 {
 	char buf[ 30 ];
 	ssize_t len;
 
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, x_bmwb.unlocked_signal );
+		return vars_push( FLOAT_VAR, x_bmwb.unleveled_signal );
 
-	if ( x_bmwb_write( x_bmwb.fd, "UNLCK?\n", 7 ) != 7 )
+	if ( x_bmwb_write( x_bmwb.fd, "UNLVL?\n", 7 ) != 7 )
 		x_bmwb_comm_failure( );
 
 	if (    ( len = x_bmwb_read( x_bmwb.fd, buf, sizeof( buf ) ) ) <= 0

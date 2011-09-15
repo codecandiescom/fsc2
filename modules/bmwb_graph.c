@@ -28,7 +28,7 @@ Canvas_T tune_canvas,
 static void init_canvas( void );
 static void display_detector_current( void );
 static void display_afc_signal( void );
-static void display_unlocked( void );
+static void display_unleveled( void );
 static void display_uncalibrated( void );
 static void display_afc_state( void );
 static int canvas_expose( FL_OBJECT * obj,
@@ -214,7 +214,7 @@ mode_cb( FL_OBJECT * obj,
 
             if ( bmwb.type == X_BAND )
             {
-                display_unlocked( );
+                display_unleveled( );
                 display_uncalibrated( );
             }
             else
@@ -369,6 +369,9 @@ attenuation_cb( FL_OBJECT * obj  UNUSED_ARG,
     set_mw_attenuation( irnd( val ) );
 
     fl_set_counter_value( bmwb.rsc->attenuation_counter, bmwb.attenuation );
+
+    fl_set_object_label( bmwb.rsc->attenuation_label,
+                         pretty_print_attenuation( ) );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -650,7 +653,7 @@ update_display( XEvent * xev   UNUSED_ARG ,
 
 	if ( bmwb.type == X_BAND )
 	{
-		display_unlocked( );
+		display_unleveled( );
 		display_uncalibrated( );
 	}
 	else
@@ -793,13 +796,13 @@ display_mode_pic( int mode )
 }
 
 
-/*---------------------------------------------------*
- * Determines if the device says it's locked or unlocked
+/*----------------------------------------------*
+ * Determines if the device says it's unleveled
  * and displays the result (X-band bridge only)
- *---------------------------------------------------*/
+ *----------------------------------------------*/
 
 static void
-display_unlocked( void )
+display_unleveled( void )
 {
     double val = 0.0;
     static double old_val = -1.0;
@@ -808,7 +811,7 @@ display_unlocked( void )
     if ( bmwb.type == Q_BAND )
         return;
 
-    if ( bmwb.mode != MODE_STANDBY && measure_unlocked_signal( &val ) )
+    if ( bmwb.mode != MODE_STANDBY && measure_unleveled_signal( &val ) )
     {
         error_handling( );
         return;
@@ -818,7 +821,7 @@ display_unlocked( void )
     {
         fl_mapcolor( FL_FREE_COL1, 173 + irnd( 82.0 * val ),
                      irnd( 173 * ( 1.0 - val ) ), irnd( 173 * ( 1.0 - val ) ) );
-        fl_redraw_object( bmwb.rsc->unlocked_indicator );
+        fl_redraw_object( bmwb.rsc->unleveled_indicator );
         old_val = val;
     }
 }

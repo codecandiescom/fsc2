@@ -391,41 +391,41 @@ find_trigger( double * data,
 
 /*----------------------------------------------------*
  * Returns a value between 0 or 1.0, indicating the
- * "unlocked-ness" of the bridge (X-band bridge only)
+ * "unleveled-ness" of the bridge (X-band bridge only)
  *----------------------------------------------------*/
 
 int
-measure_unlocked_signal( double * val )
+measure_unleveled_signal( double * val )
 {
     if ( bmwb.type != X_BAND )
     {
-        sprintf( bmwb.error_msg, "Cant determine unlocked signal for "
+        sprintf( bmwb.error_msg, "Cant determine unleveled signal for "
                  "Q-band bridge.\n" );
         return 1;
     }
 
 #if ! defined BMWB_TEST
-    if ( meilhaus_ai_single( UNLOCKED_SIGNAL_AI, UNLOCKED_MIN, UNLOCKED_MAX,
-                             val ) )
+    if ( meilhaus_ai_single( UNLEVELED_SIGNAL_AI, UNLEVELED_MIN,
+                             UNLEVELED_MAX, val ) )
         return 1;
 
-    if ( *val < UNLOCKED_MIN )
+    if ( *val < UNLEVELED_MIN )
     {
-        fprintf( stderr, "Unlocked signal is lower than expected minimum "
-                 "(%.3f instead of %.3f V)\n", *val, UNLOCKED_MIN );
-        *val = UNLOCKED_MIN;
+        fprintf( stderr, "Unleveled signal is lower than expected minimum "
+                 "(%.3f instead of %.3f V)\n", *val, UNLEVELED_MIN );
+        *val = UNLEVELED_MIN;
     }
-    else if ( *val > UNLOCKED_MAX )
+    else if ( *val > UNLEVELED_MAX )
     {
-        fprintf( stderr, "Unlocked signal is higher than expected maximum "
-                 "(%.3f instead of %.3f V)\n", *val, UNLOCKED_MAX );
-        *val = UNLOCKED_MAX;
+        fprintf( stderr, "Unlveled signal is higher than expected maximum "
+                 "(%.3f instead of %.3f V)\n", *val, UNLEVELED_MAX );
+        *val = UNLEVELED_MAX;
     }
 #else
 	*val = 0.0;
 #endif
 
-	return ( *val - UNLOCKED_MIN ) / ( UNLOCKED_MAX - UNLOCKED_MIN );
+	return ( *val - UNLEVELED_MIN ) / ( UNLEVELED_MAX - UNLEVELED_MIN );
 
 	return 0;
 }

@@ -798,7 +798,7 @@ bh15_fc_start_field( void )
        it silently to fit this requirement - hopefully, this isn't going to
        lead to any real field precision problems. */
 
-    magnet.sw = BH15_FC_SW_RESOLUTION
+    magnet.sw =   BH15_FC_SW_RESOLUTION
                 * lrnd( magnet.sw / BH15_FC_SW_RESOLUTION );
     magnet.swa_step = magnet.sw / MAX_SWA;
     magnet.field_step = magnet.step_incr * magnet.swa_step;
@@ -810,15 +810,15 @@ bh15_fc_start_field( void )
 
     if ( magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD )
     {
-        shift = irnd( ceil( ( magnet.cf + 0.5 * magnet.sw
+        shift = irnd( ceil( (   magnet.cf + 0.5 * magnet.sw
                               - BH15_FC_MAX_FIELD ) / magnet.swa_step ) );
         magnet.swa += shift;
         magnet.cf -= shift * magnet.swa_step;
     }
     else if ( magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
     {
-        shift = irnd( ceil( ( BH15_FC_MIN_FIELD
-                              - ( magnet.cf - 0.5 * magnet.sw ) )
+        shift = irnd( ceil(   (   BH15_FC_MIN_FIELD
+                                - ( magnet.cf - 0.5 * magnet.sw ) )
                             / magnet.swa_step ) );
         magnet.swa -= shift;
         magnet.cf += shift * magnet.swa_step;

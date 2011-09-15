@@ -78,10 +78,15 @@ static struct {
 int
 meilhaus_init( void )
 {
-#if ! defined BMWB_TEST
+#if defined BMWB_TEST
+
+    return 0;
+
+#else
 
     char buf[ 32 ];
     int dev_count;
+    int is_locked = 0;
 
 
     raise_permissions( );
@@ -97,15 +102,14 @@ meilhaus_init( void )
         return 1;
 	}
   
-    /* Find out many devices are present */
+    /* Find out how many devices are present */
 
     if ( meQueryNumberDevices( &dev_count ) != ME_ERRNO_SUCCESS )
 	{
 		meErrorGetLastMessage( msg, sizeof msg );
 		sprintf( bmwb.error_msg, "Failed to determine number of Meilhaus "
                  "devices: %s", msg );
-		lower_permissions( );
-        return 1;
+        goto failed_itinitalization;
 	}
 
     /* If there's none we've got a problem... */
@@ -113,8 +117,7 @@ meilhaus_init( void )
     if ( dev_count == 0 )
     {
 		sprintf( bmwb.error_msg, "No Meilhaus cards found." );
-		lower_permissions( );
-        return 1;
+        goto failed_itinitalization;
 	}
 
     /* Try to get a lock on the whole device */
@@ -125,21 +128,18 @@ meilhaus_init( void )
 		meErrorGetLastMessage( msg, sizeof msg );
 		sprintf( bmwb.error_msg, "Failed to obtain lock on Meilhaus card: "
                  "%s", msg );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
-        return 1;
+        goto failed_itinitalization;
     }
+
+    is_locked = 1;
 
     /* Check that it's a ME-4680 card */
 
     if ( meQueryNameDevice( DEV_ID, buf, sizeof buf ) != ME_ERRNO_SUCCESS )
     {
 		meErrorGetLastMessage( msg, sizeof msg );
-        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
         sprintf( bmwb.error_msg, "Can't determine device type: %s", msg );
-        return 1;
+        goto failed_itinitalization;
     }
 
     /* Note: the returned string may contain some extra information beside
@@ -147,44 +147,30 @@ meilhaus_init( void )
 
     if ( strncmp( buf, "ME-4680", 7 ) )
     {
-        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
         sprintf( bmwb.error_msg, "Device not a ME-4680 card." );
-        return 1;
+        goto failed_itinitalization;
     }
 
     /* Initialize all sub-devices */
 
-    if ( setup_ai( ) )
-    {
-        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
-        return 1;
-    }
+    if ( setup_ai( ) || setup_aos( ) || setup_dios( ) )
+        goto failed_itinitalization;
 
-    if ( setup_aos( ) )
-    {
-        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
-        return 1;
-    }
-
-    if ( setup_dios( ) )
-    {
-        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
-        meClose( ME_CLOSE_NO_FLAGS );
-		lower_permissions( );
-        return 1;
-    }
+    /* Everything seems to be fine so far */
 
 	lower_permissions( );
+	return 0;
+
+  failed_itinitalization:
+
+    if ( is_locked )
+        meLockDevice( DEV_ID, ME_LOCK_RELEASE, ME_LOCK_DEVICE_NO_FLAGS );
+    meClose( ME_CLOSE_NO_FLAGS );
+
+    lower_permissions( );
+    return 1;
 
 #endif
-
-	return 0;
 }
 
 
@@ -220,7 +206,7 @@ meilhaus_finish( void )
 /*----------------------------------------------------------------------*
  * Checks that the AI of the card can be found and reads out the ranges
  * (initialization can not be done here since the mode it's used with
- * changes)
+ * will change between single and continuous operation)
  *----------------------------------------------------------------------*/
 
 static int
@@ -244,20 +230,20 @@ setup_ai( void )
         return 1;
     }
 
-    /* Determine the number of output ranges of the AI */
+    /* Determine the number of input ranges of the AI */
 
     if ( meQueryNumberRanges( DEV_ID, AI, ME_UNIT_ANY, &n )
                                                          != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
-        sprintf( bmwb.error_msg, "Failed to query number of output ranges "
+        sprintf( bmwb.error_msg, "Failed to query number of input ranges "
                  "for AI subdevice %d: %s", AI, msg );
         return 1;
     }
 
     if ( n != 4 )
     {
-        sprintf( bmwb.error_msg, "Unexpected number of output ranges "
+        sprintf( bmwb.error_msg, "Unexpected number of input ranges "
                  "for AI subdevice %d.", AI );
         return 1;
     }
@@ -310,7 +296,6 @@ setup_aos( void )
                      "%d: %s", i, msg );
             return 1;
         }
-
 
         /* Set up the AO - output is supposed to happen directly on a call
            of meIOSingle() */

@@ -51,7 +51,7 @@ typedef struct {
     FL_OBJECT * afc_canvas;
     FL_OBJECT * tune_canvas;
 	FL_OBJECT * mode_select;
-	FL_OBJECT * unlocked_indicator;
+	FL_OBJECT * unleveled_indicator;
 	FL_OBJECT * uncalibrated_indicator;
 	FL_OBJECT * afc_indicator;
 	FL_OBJECT * main_frame;
@@ -60,6 +60,7 @@ typedef struct {
 	FL_OBJECT * freq_text;
 	FL_OBJECT * attenuation_group;
     FL_OBJECT * attenuation_counter;
+    FL_OBJECT * attenuation_label;
 	FL_OBJECT * signal_phase_group;
     FL_OBJECT * signal_phase_slider;
 	FL_OBJECT * secondary_frame;
