@@ -31,6 +31,21 @@
 #include "tds540.conf"
 
 
+/* Constants for channel input coupling and band width limiter */
+
+#define TDS540_CPL_INVALID       -1   /* Input coupling for data channel */
+#define TDS540_CPL_AC_1_MOHM     0    /* (don't change the sequence!) */
+#define TDS540_CPL_DC_1_MOHM     1
+#define TDS540_CPL_DC_50_OHM     2
+#define TDS540_CPL_GND           3
+#define TDS540_CPL_AC_50_OHM     4
+
+#define TDS540_BWL_INVALID      -1    /* Bandwidth limiter settings */
+#define TDS540_BWL_OFF           0
+#define TDS540_BWL_20MHZ         1
+#define TDS540_BWL_100MHZ        2
+
+
 /* Here values are defined that get returned by the driver in the test run
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
@@ -41,6 +56,8 @@
 #define TDS540_TEST_NUM_AVG      16
 #define TDS540_TEST_TRIG_POS     0.1
 #define TDS540_TEST_TRIG_CHANNEL 0
+#define TDS540_TEST_COUPLING     TDS540_CPL_DC_50_OHM     
+#define TDS540_TEST_BANDWIDTH    TDS540_BWL_OFF
 
 
 
@@ -100,6 +117,12 @@ struct TDS540 {
 
     double sens[ NUM_NORMAL_CHANNELS ];
     double is_sens[ NUM_NORMAL_CHANNELS ];
+
+    int coupling[ NUM_NORMAL_CHANNELS ];
+    bool is_coupling[ NUM_NORMAL_CHANNELS ];
+
+    int bandwidth[ NUM_NORMAL_CHANNELS ];
+    bool is_bandwidth[ NUM_NORMAL_CHANNELS ];
 
     long num_avg;
     bool is_num_avg;
@@ -209,6 +232,8 @@ Var_T * digitizer_display_channel(    Var_T * /* v */ );
 Var_T * digitizer_timebase(           Var_T * /* v */ );
 Var_T * digitizer_time_per_point(     Var_T * /* v */ );
 Var_T * digitizer_sensitivity(        Var_T * /* v */ );
+Var_T * digitizer_coupling(           Var_T * /* v */ );
+Var_T * digitizer_bandwidth_limiter(  Var_T * /* v */ );
 Var_T * digitizer_num_averages(       Var_T * /* v */ );
 Var_T * digitizer_record_length(      Var_T * /* v */ );
 Var_T * digitizer_trigger_position(   Var_T * /* v */ );
@@ -311,6 +336,16 @@ double tds540_get_sens( int /* channel */ );
 
 void tds540_set_sens( int    /* channel */,
                       double /* val     */  );
+
+int tds540_get_coupling( int /* channel */ );
+
+void tds540_set_coupling( int /* channel */,
+                          int /* coup    */ );
+
+int tds540_get_bandwidth( int /* channel */ );
+
+void tds540_set_bandwidth( int /* channel   */,
+                           int /* bandwidth */ );
 
 void tds540_start_acquisition( void );
 

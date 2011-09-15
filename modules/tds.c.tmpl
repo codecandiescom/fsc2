@@ -73,7 +73,11 @@ tds_tmpl_init_hook( void )
     tds_tmpl.lock_state  = SET;
 
     for ( i = TDS_TMPL_CH1; i < NUM_NORMAL_CHANNELS; i++ )
+    {
         tds_tmpl.is_sens[ i ] = UNSET;
+        tds_tmpl.is_coupling[ i ] = UNSET;
+        tds_tmpl.is_bandwidth[ i ] = UNSET;
+    }
 
     for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
         tds_tmpl.channels_in_use[ i ] = UNSET;
@@ -757,6 +761,189 @@ digitizer_sensitivity( Var_T * v )
     tds_tmpl.is_sens[ channel ] = SET;
 
     return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+Var_T *
+digitizer_coupling( Var_T * v )
+{
+    long channel;
+    long cpl = TDS_TMPL_CPL_INVALID;
+    const char *cpl_str[ ] = { "A1M", "D1M", "D50", "GND", "A1M" };
+    size_t i;
+
+
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
+
+    channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
+
+    if ( channel >= NUM_NORMAL_CHANNELS )
+    {
+        print( FATAL, "Can't set or obtain coupling for channel %s.\n",
+               TDS_TMPL_Channel_Names[ channel ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( v = vars_pop( v ) ) == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_coupling[ channel ] )
+                    no_query_possible( );
+                return vars_push( INT_VAR, tds_tmpl.coupling[ channel ] );
+
+            case TEST :
+                return vars_push( INT_VAR, tds_tmpl.is_coupling[ channel ] ?
+                                  tds_tmpl.coupling[ channel ] :
+                                  TDS_TMPL_TEST_COUPLING );
+
+            case EXPERIMENT :
+                tds_tmpl.coupling[ channel ] = tds_tmpl_get_coupling( channel );
+                tds_tmpl.is_coupling[ channel ] = SET;
+                return vars_push( INT_VAR, tds_tmpl.coupling[ channel ] );
+        }
+
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+    if ( v->type == STR_VAR )
+    {
+        for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+            if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+            {
+                cpl = i;
+                break;
+            }
+
+        if ( cpl == TDS_TMPL_CPL_INVALID )
+        {
+            print( FATAL, "Invalid coupling type ('%s').\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        cpl = get_long( v, "coupling type" );
+        if ( cpl < TDS_TMPL_CPL_AC_1_MOHM || cpl > TDS_TMPL_CPL_AC_50_OHM )
+        {
+            print( FATAL, "Invalid coupling type (%d).\n", cpl );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_coupling( channel, cpl );
+
+    tds_tmpl.coupling[ channel ] = cpl;
+    tds_tmpl.is_coupling[ channel ] = SET;
+
+    return vars_push( INT_VAR, tds_tmpl.coupling[ channel ] );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+Var_T *
+digitizer_bandwidth_limiter( Var_T * v )
+{
+    long channel;
+    long bwl = TDS_TMPL_BWL_INVALID;
+#if defined TDS_TMPL_BWL_250MHZ
+    const char *cpl_str[ ] = { "OFF", "20MHZ", "100MHZ" };
+#else
+    const char *cpl_str[ ] = { "OFF", "20MHz", "100MHz", "250MHz" };
+#endif
+    size_t i;
+
+
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
+
+    channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
+
+    if ( channel >= NUM_NORMAL_CHANNELS )
+    {
+        print( FATAL, "Can't set or obtain bandwidth limiter for channel %s.\n",
+               TDS_TMPL_Channel_Names[ channel ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( v = vars_pop( v ) ) == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_bandwidth[ channel ] )
+                    no_query_possible( );
+                return vars_push( INT_VAR, tds_tmpl.bandwidth[ channel ] );
+
+            case TEST :
+                return vars_push( INT_VAR, tds_tmpl.is_bandwidth[ channel ] ?
+                                  tds_tmpl.bandwidth[ channel ] :
+                                  TDS_TMPL_TEST_BANDWIDTH );
+
+            case EXPERIMENT :
+                tds_tmpl.bandwidth[ channel ] =
+                                              tds_tmpl_get_bandwidth( channel );
+                tds_tmpl.is_bandwidth[ channel ] = SET;
+                return vars_push( INT_VAR, tds_tmpl.bandwidth[ channel ] );
+        }
+
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+    if ( v->type == STR_VAR )
+    {
+        for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+            if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+            {
+                bwl = i;
+                break;
+            }
+
+        if ( bwl == TDS_TMPL_BWL_INVALID )
+        {
+            print( FATAL, "Invalid bandwidth limiter type ('%s').\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        bwl = get_long( v, "bandwidth limiter type" );
+
+#if defined TDS_TMPL_BWL_250MHZ
+        if ( bwl < TDS_TMPL_BWL_OFF || bwl > TDS_TMPL_BWL_250MHZ )
+#else
+        if ( bwl < TDS_TMPL_BWL_OFF || bwl > TDS_TMPL_BWL_100MHZ )
+#endif
+        {
+            print( FATAL, "Invalid bandwidth limiter type (%d).\n", bwl );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_bandwidth( channel, bwl );
+
+    tds_tmpl.bandwidth[ channel ] = bwl;
+    tds_tmpl.is_bandwidth[ channel ] = SET;
+
+    return vars_push( INT_VAR, tds_tmpl.bandwidth[ channel ] );
 }
 
 

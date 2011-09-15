@@ -1643,7 +1643,7 @@ The digitizing oscilloscopes currently implemented are:
 @table @samp
 @item by Tektronix:
 @table @samp
-@item TDS520, TDS520A
+@item TDS520, TDS520A, TDS520C
 @item TDS540
 @item TDS744A
 @item TDS754A
@@ -1894,6 +1894,7 @@ oscilloscope:
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemx LeCroy 9400
 @itemx LeCroy 9410
 @itemx LeCroy 9420
@@ -1973,34 +1974,47 @@ argument) only in the @code{EXPERIMENT} section.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the input coupling of one of the channels
 of the oscilloscope. Currently this function only exists for the
-@strong{LeCroy} oscilloscopes @ref{lecroy9400, 9400},
-@ref{lecroy9410, 9410}, @ref{lecroy9420, 9420}, @ref{lecroy9424,
-9424}, @ref{lecroy9424e, 9424E} @ref{lecroy9450, 9450},
-@ref{lecroy_wr, Waverunner} and @ref{lecroy_ws, WaveSurver}.
+Tektronix and @strong{LeCroy} oscilloscopes.
 
 It needs at least one argument, the channel. The channels that can be
 used as arguments depends on the model of the oscilloscope:
 @table @samp
+@item TDS520
+@itemx TDS520A
+@itemx TDS520C
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{AUX1}, @code{AUX2}
+@end itemize
 @itemx LeCroy 9400
 @itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemx LeCroy Wavesurver (422, 432, 452)
+@itemize @bullet
 @code{CH1} or @code{CH2}
+@end itemize
+@itemx TDS540
+@itemx TDS744A
+@itemx TDS754A
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemx LeCroy Wavesurver (424, 434, 454)
+@itemize @bullet
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@end itemize
 @end table
 
 If a second argument is given this is taken to be the new input coupling
 setting, which has to b specified a string or an integer number, where
 @code{"A1M"} or @code{0} stands for AC with @w{1 MOhm}, @code{"D1M"} or
-@code{1} for DC with @w{1 MOhm}, @code{"D50"} for DC with @w{50 Ohm} and,
-finally, @code{"GND"} or @code{3} for Ground. If no second argument is
-given the current setting for the channel is returned as an integer number.
+@code{1} for DC with @w{1 MOhm}, @code{"D50"} for DC with @w{50 Ohm} and
+@code{"GND"} or @code{3} for Ground. For the Tektronix oscilloscopes
+there's a further possibility, @code{"A50"} or @code{4} for AC with
+@w{50 Ohm}. If no second argument is given the current setting for the
+channel is returned as an integer number.
 
 Please note that for some of the oscilloscopes the range of input
 sensitivity settings may depend on the input impedance and requesting
@@ -2014,24 +2028,33 @@ argument) only in the @code{EXPERIMENT} section.
 @anchor{digitizer_bandwidth_limiter()}
 @findex digitizer_bandwidth_limiter()
 @item digitizer_bandwidth_limiter()
-For the LeCroy @ref{lecroy9400, 9400}, @ref{lecroy9410, 9410},
-@ref{lecroy9420, 9420}, @ref{lecroy9424, 9424}, @ref{lecroy9424e,
-9424E}, @ref{lecroy9450, 9450} the function queries (if called with no
-argument) or sets (if called with an arguments) if the bandwidth
-limiter (@w{30 MHz} for the @ref{lecroy9400, 9400}) and @w{80 MHz} for
-all others) is switched on or off. If an argument is given and it is a
-non-zero number or the string @code{"ON"} the bandwidth limiter is
-switched on, if the argument is zero or the string @code{"OFF"} the
-bandwidth limiter is switched off. If called without an argument the
-function returns @code{1} if the bandwidth limiter is on, @code{0} if
-it's off.
+This function allows to set or query the bandwidth limiter(s) of the
+oscilloscopes. For the oscilloscopes of the Lecroy93xx and Lecroy94xx
+series the bandwidth can only be set or queried for all channels at
+once, while for the other supported oscilloscopes the bandwidth
+limit can be set for individual channels. The result us that
+for the Lecroy93xx and Lecroy94xx series oscilloscopes the
+function takes either no (in query mode) or a single argument
+(if the bandwidth is to be set), while for all others (Lecroy
+WaveSurfer and Tektronix) the function expects one or two arguments,
+the first one always being the channel to be set up.
+
+For the oscilloscopes of the Lecroy93xx and Lecroy94xx series
+the function queries (if called with no argument) or sets (if
+called with an arguments) if the bandwidth limiter (@w{30 MHz}
+for the @ref{lecroy9400, 9400}) and @w{80 MHz} for all others)
+is switched on or off. If an argument is given and it is a non-zero
+number or the string @code{"ON"} the bandwidth limiter is switched
+on, if the argument is zero or the string @code{"OFF"} the bandwidth
+limiter is switched off. If called without an argument the function
+returns @code{1} if the bandwidth limiter is on, @code{0} if it's off.
 
 For all but one of the supported models of the @ref{lecroy_wr, LeCroy
-Waverunner} series three possible setings exist. It can be switched
+Waverunner} series three possible settings exist. It can be switched
 off by calling the function with a string argument of @code{"OFF"} (or
 an integer argument of @code{0}) to achieve the highst model-dependent
 bandwidth (see specifications). It can be set to @code{200 MHz} by
-calling the function with the string @code{"200MHZ"} (or the value
+calling the function with the string @code{"200MHz"} (or the value
 @code{2}). Finally by calling it with the string @code{"ON"} (or an
 integer argument of @code{1}) for bandwidth can be restricted to
 @code{25 MHz} for the Waverunner models LT322, LT342(L), LT262(ML) and
@@ -2044,12 +2067,16 @@ MHz} has the same effect.
 
 For the @ref{lecroy_ws, LeCroy WaveSurfer} with the models
 @strong{422} and @strong{424} only @code{"OFF"} and @code{"ON"} can be
-set, while with the other models also @code{"200MHZ"} can be set (the
+set, while with the other models also @code{"200MHz"} can be set (the
 maximum bandwidth of the @strong{422} and @code{424} models is @w{200
 MHz}, so this limit is already reached when the bandwidth limiter is
 set to @code{"OFF"}.
 
-The function does not exist for the @strong{Tektronix} digitizers.
+For all Tektronix oscilloscopes there exist at least three possible
+settings, the string @code{"OFF"} or the integer value @code{0} for
+full bandwidth, @code{"20MHz"} or @code{1} and @code{"100MHz"} or
+@code{2}. The models TDS744A and TDS754A support a further setting,
+@code{"250MHz"} or @code{3}.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -2199,6 +2226,7 @@ numeric!):
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{AUX1}, @code{AUX2} or @code{LINE} (can be abbreviated to
@@ -2624,6 +2652,7 @@ of the digitizer:
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
@@ -2716,6 +2745,7 @@ the digitizer:
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
@@ -2832,6 +2862,7 @@ choices of the data channel depend on the model of the digitizer:
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
@@ -2954,6 +2985,7 @@ of the digitizer)
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
@@ -3003,6 +3035,7 @@ from
 @table @samp
 @item TDS520
 @itemx TDS520A
+@itemx TDS520C
 @itemx TDS540
 @itemx TDS744A
 @itemx TDS754A

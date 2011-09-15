@@ -57,6 +57,22 @@
 #define CHECK_SENS_IMPEDANCE   /* Not all sensitivites are allowed for all
                                   input impedances, needs additonal checks */
 
+/* Constants for channel input coupling and band width limiter */
+
+#define TDS754A_CPL_INVALID       -1   /* Input coupling for data channel */
+#define TDS754A_CPL_AC_1_MOHM     0    /* (don't change the sequence!) */
+#define TDS754A_CPL_DC_1_MOHM     1
+#define TDS754A_CPL_DC_50_OHM     2
+#define TDS754A_CPL_GND           3
+#define TDS754A_CPL_AC_50_OHM     4
+
+#define TDS754A_BWL_INVALID      -1    /* Bandwidth limiter settings */
+#define TDS754A_BWL_OFF           0
+#define TDS754A_BWL_20MHZ         1
+#define TDS754A_BWL_100MHZ        2
+#define TDS754A_BWL_250MHZ        3
+
+
 /* Here values are defined that get returned by the driver in the test run
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
@@ -67,6 +83,8 @@
 #define TDS754A_TEST_NUM_AVG      16
 #define TDS754A_TEST_TRIG_POS     0.1
 #define TDS754A_TEST_TRIG_CHANNEL TDS754A_CH1
+#define TDS754A_TEST_COUPLING     TDS754A_CPL_DC_50_OHM     
+#define TDS754A_TEST_BANDWIDTH    TDS754A_BWL_OFF
 
 
 /* Structure for description of a 'window' on the digitizer, made up from the
@@ -100,6 +118,12 @@ struct TDS754A {
 
     double sens[ NUM_NORMAL_CHANNELS ];
     double is_sens[ NUM_NORMAL_CHANNELS ];
+
+    int coupling[ NUM_NORMAL_CHANNELS ];
+    bool is_coupling[ NUM_NORMAL_CHANNELS ];
+
+    int bandwidth[ NUM_NORMAL_CHANNELS ];
+    bool is_bandwidth[ NUM_NORMAL_CHANNELS ];
 
     long num_avg;
     bool is_num_avg;
@@ -214,6 +238,8 @@ Var_T * digitizer_display_channel(    Var_T * /* v */ );
 Var_T * digitizer_timebase(           Var_T * /* v */ );
 Var_T * digitizer_time_per_point(     Var_T * /* v */ );
 Var_T * digitizer_sensitivity(        Var_T * /* v */ );
+Var_T * digitizer_coupling(           Var_T * /* v */ );
+Var_T * digitizer_bandwidth_limiter(  Var_T * /* v */ );
 Var_T * digitizer_num_averages(       Var_T * /* v */ );
 Var_T * digitizer_record_length(      Var_T * /* v */ );
 Var_T * digitizer_trigger_position(   Var_T * /* v */ );
@@ -316,6 +342,16 @@ double tds754a_get_sens( int /* channel */ );
 
 void tds754a_set_sens( int    /* channel */,
                        double /* val     */  );
+
+int tds754a_get_coupling( int /* channel */ );
+
+void tds754a_set_coupling( int /* channel */,
+                           int /* coup    */ );
+
+int tds754a_get_bandwidth( int /* channel */ );
+
+void tds754a_set_bandwidth( int /* channel   */,
+                            int /* bandwidth */ );
 
 void tds754a_start_acquisition( void );
 

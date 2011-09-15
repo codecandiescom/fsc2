@@ -124,14 +124,26 @@ tds_tmpl_init( const char * name )
 
         tds_tmpl_command( "ACQ:REPE OFF\n" );
 
-        /* If a sensitivity has been set in the PREPARATION section set them
-           now */
+        /* If a sensitivity, coupling or bandwidth has been set in the
+           PREPARATION section set them now, otherwise fetch 'em */
 
         for ( ch = TDS_TMPL_CH1; ch < NUM_NORMAL_CHANNELS; ch++ )
+        {
             if ( tds_tmpl.is_sens[ ch ] )
                 tds_tmpl_set_sens( ch, tds_tmpl.sens[ ch ] );
             else
                 tds_tmpl.sens[ ch ] = tds_tmpl_get_sens( ch );
+
+            if ( tds_tmpl.is_coupling[ ch ] )
+                tds_tmpl_set_coupling( ch, tds_tmpl.coupling[ ch ] );
+            else
+                tds_tmpl.coupling[ ch ] = tds_tmpl_get_coupling( ch );
+
+            if ( tds_tmpl.is_bandwidth[ ch ] )
+                tds_tmpl_set_bandwidth( ch, tds_tmpl.bandwidth[ ch ] );
+            else
+                tds_tmpl.bandwidth[ ch ] = tds_tmpl_get_bandwidth( ch );
+        }
 
         /* If the number of averages has been set in the PREPARATIONS section
            send it to the digitizer now */
@@ -708,6 +720,175 @@ tds_tmpl_set_sens( int    channel,
 #endif
 
     sprintf( cmd, "%s:SCA %8.3E\n", TDS_TMPL_Channel_Names[ channel ], sens );
+    tds_tmpl_command( cmd );
+}
+
+
+/*------------------------------------------------------------*
+ * Returns the coupling of the channel passed as the argument
+ *------------------------------------------------------------*/
+
+int
+tds_tmpl_get_coupling( int channel )
+{
+    char cmd[ 30 ];
+    char reply[ 30 ];
+    long length = sizeof reply;
+    int cpl;
+
+
+    fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+    sprintf( cmd, "%s:COU?\n", TDS_TMPL_Channel_Names[ channel ] );
+    tds_tmpl_talk( cmd, reply, &length );
+    reply[ length - 1 ] = '\0';
+
+    if ( ! strcmp( reply, "AC" ) )
+        cpl = 0;
+    else if ( ! strcmp( reply, "DC" ) )
+        cpl = 1;
+    else if ( ! strcmp( reply, "GND" ) )
+        return tds_tmpl.coupling[ channel ] = TDS_TMPL_CPL_GND;
+    else
+    {
+        print( FATAL, "Unexpected reply from device\n" );
+        THROW( EXCEPTION );
+    }
+
+    length = sizeof reply;
+    sprintf( cmd, "%s:IMP?\n", TDS_TMPL_Channel_Names[ channel ] );
+    tds_tmpl_talk( cmd, reply, &length );
+    reply[ length - 1 ] = '\0';
+
+    if ( ! strcmp( reply, "FIF" ) )
+    {
+        if ( cpl == 0 )
+            tds_tmpl.coupling[ channel ] = TDS_TMPL_CPL_AC_50_OHM;
+        else
+            tds_tmpl.coupling[ channel ] = TDS_TMPL_CPL_DC_50_OHM;
+    }
+    else if ( ! strcmp( reply, "MEG" ) )
+    {
+        if ( cpl == 0 )
+            tds_tmpl.coupling[ channel ] = TDS_TMPL_CPL_AC_1_MOHM;
+        else
+            tds_tmpl.coupling[ channel ] = TDS_TMPL_CPL_DC_1_MOHM;
+    }
+    else
+    {
+        print( FATAL, "Unexpected reply from device\n" );
+        THROW( EXCEPTION );
+    }
+
+    return tds_tmpl.coupling[ channel ];
+}
+
+
+/*-----------------------------------------------------*
+ * Sets the coupling of one of the digitizers channels
+ *-----------------------------------------------------*/
+
+void
+tds_tmpl_set_coupling( int channel,
+                     int coup )
+{
+    char cmd[ 40 ];
+
+
+    fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+    fsc2_assert(    coup >= TDS_TMPL_CPL_AC_1_MOHM
+                 && coup <= TDS_TMPL_CPL_AC_50_OHM );
+
+    if ( coup == TDS_TMPL_CPL_AC_1_MOHM )
+        sprintf( cmd, "%s:COU AC;IMP MEG\n",
+                 TDS_TMPL_Channel_Names[ channel ] );
+    if ( coup == TDS_TMPL_CPL_AC_50_OHM )
+        sprintf( cmd, "%s:COU AC;IMP FIF\n",
+                 TDS_TMPL_Channel_Names[ channel ] );
+    if ( coup == TDS_TMPL_CPL_DC_1_MOHM )
+        sprintf( cmd, "%s:COU DC;IMP MEG\n",
+                 TDS_TMPL_Channel_Names[ channel ] );
+    if ( coup == TDS_TMPL_CPL_DC_50_OHM )
+        sprintf( cmd, "%s:COU DC;IMP FIF\n",
+                 TDS_TMPL_Channel_Names[ channel ] );
+    else
+        sprintf( cmd, "%s:COU GND\n", TDS_TMPL_Channel_Names[ channel ] );
+
+    tds_tmpl_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ * Returns the bandwidth of the channel passed as the argument
+ *-------------------------------------------------------------*/
+
+int
+tds_tmpl_get_bandwidth( int channel )
+{
+    char cmd[ 30 ];
+    char reply[ 30 ];
+    long length = sizeof reply;
+
+
+    fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+    sprintf( cmd, "%s:BAN?\n", TDS_TMPL_Channel_Names[ channel ] );
+    tds_tmpl_talk( cmd, reply, &length );
+    reply[ length - 1 ] = '\0';
+
+    if ( ! strcmp( reply, "FUL" ) )
+        tds_tmpl.bandwidth[ channel ] = TDS_TMPL_BWL_OFF;
+    else if ( ! strcmp( reply, "TWE" ) )
+        tds_tmpl.bandwidth[ channel ] = TDS_TMPL_BWL_20MHZ;
+    else if ( ! strcmp( reply, "HUN" ) )
+        tds_tmpl.bandwidth[ channel ] = TDS_TMPL_BWL_100MHZ;
+#if defined TDS_TMPL_BWL_250MHZ
+    else if ( ! strcmp( reply, "TWO" ) )
+        tds_tmpl.bandwidth[ channel ] = TDS_TMPL_BWL_250MHZ;
+#endif
+    else
+    {
+        print( FATAL, "Unexpected reply from device\n" );
+        THROW( EXCEPTION );
+    }
+
+    return tds_tmpl.bandwidth[ channel ];
+}
+
+
+/*------------------------------------------------------*
+ * Sets the bandwidth of one of the digitizers channels
+ *------------------------------------------------------*/
+
+void
+tds_tmpl_set_bandwidth( int channel,
+                      int bandwidth )
+{
+    char cmd[ 40 ];
+
+
+    fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
+
+#if defined TDS_TMPL_BWL_TDS_TMPL_BWL_250MHZ
+    fsc2_assert(    bandwidth >= TDS_TMPL_BWL_OFF
+                 && bandwidth <= TDS_TMPL_BWL_250MHZ );
+#else
+    fsc2_assert(    bandwidth >= TDS_TMPL_BWL_OFF
+                 && bandwidth <= TDS_TMPL_BWL_100MHZ );
+#endif
+
+    if ( bandwidth == TDS_TMPL_BWL_OFF )
+        sprintf( cmd, "%s:BAN FUL\n", TDS_TMPL_Channel_Names[ channel ] );
+    else if ( bandwidth == TDS_TMPL_BWL_20MHZ )
+        sprintf( cmd, "%s:BAN TWE\n", TDS_TMPL_Channel_Names[ channel ] );
+    else if  ( bandwidth == TDS_TMPL_BWL_100MHZ )
+        sprintf( cmd, "%s:BAN HUN\n", TDS_TMPL_Channel_Names[ channel ] );
+#if defined TDS_TMPL_BWL_TDS_TMPL_BWL_250MHZ
+    else if  ( bandwidth == TDS_TMPL_BWL_250MHZ )
+        sprintf( cmd, "%s:BAN TWO\n", TDS_TMPL_Channel_Names[ channel ] );
+#endif
+
     tds_tmpl_command( cmd );
 }
 
