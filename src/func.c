@@ -170,6 +170,7 @@ static Func_T Def_fncts[ ] =                  /* List of built-in functions */
     { "save_output",         f_save_o,          -2, ACCESS_EXP,  NULL, UNSET },
     { "save_comment",        f_save_c,          -4, ACCESS_EXP,  NULL, UNSET },
     { "is_file",             f_is_file,          1, ACCESS_EXP,  NULL, UNSET },
+    { "file_name",           f_file_name,       -1, ACCESS_EXP,  NULL, UNSET },
     { "layout",              f_layout,           1, ACCESS_EXP,  NULL, UNSET },
     { "button_create",       f_bcreate,         -4, ACCESS_EXP,  NULL, UNSET },
     { "button_delete",       f_bdelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },

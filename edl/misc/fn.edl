@@ -1,0 +1,13 @@
+VARIABLES:
+
+F_1, F_2;
+
+
+EXPERIMENT:
+
+//F_1 = open_file( 1 );
+//F_2 = get_file( );
+save( 3 );
+//print( "is_file:   #\n", is_file( F_1 ) );
+//print( "file_name: #\n", file_name( F_1 ) );
+print( "file_name: #\n", file_name( ) );

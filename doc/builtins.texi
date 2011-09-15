@@ -1084,6 +1084,8 @@ file handles for @i{stdout} and @i{stderr}.
 @item @ref{save_program()}
 @item @ref{save_output()}
 @item @ref{save_comment()}
+@item @ref{is_file()}
+@item @ref{file_name()}
 @end table
 
 
@@ -1568,6 +1570,29 @@ comment:".
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{is_file()}
+@findex is_file()
+@item is_file()
+Function returns if a file handle passed to it as the only argument
+is an opened file, returning @code{1} if it is an open file and
+@code{0} otherwise. @code{stdout} and @code{stderr} are treated
+as open files.
+
+
+@anchor{file_name()}
+@findex file_name()
+@item file_name()
+Function returns the name of an opened file. If @code{@ref{open_file()}}
+or @code{@ref{get_file()}} haven't been called but one of the
+function for writing a file so that a single output file is open
+the function can be called without an argument and the name of
+the unique open output file is returned. Otherwise the function
+requires a valid file handle as it's argument and the function
+returns the name of that file. If the file number corresponds to
+@code{stdout} or @code{stderr} the name returned is the string
+@code{"stdout"} or @code{"stderr"}.
 
 @end table
 

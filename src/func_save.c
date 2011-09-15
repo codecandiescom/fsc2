@@ -69,21 +69,87 @@ f_is_file( Var_T * v )
     long fn;
 
 
+    fn = get_long( v, "file number" );
+
+    if ( STD_Is_Open && ( fn == 1 || fn == 2 ) )
+        return vars_push( INT_VAR, 1L );
+
+    fn -= FILE_NUMBER_OFFSET;
+
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR,
+                          ( fn < 0 || fn >= EDL.File_List_Len ) ?
+                          0L : 1L );
+
+    return vars_push( INT_VAR,
+                      (    fn < 0
+                        || fn >= EDL.File_List_Len
+                        || ! EDL.File_List[ fn ].fp ) ?
+                      0L : 1L );
+}
+
+
+/*----------------------------------------------------------------*
+ * Returns if a file number passed to the function stands for an
+ * open file.
+ *----------------------------------------------------------------*/
+
+Var_T *
+f_file_name( Var_T * v )
+{
+    long fn;
+
+
+    /* The function can be called without an argument when we're in
+       automatical file open mode, i.e. 'No_File_Numbers' is set */
+
     if ( v == NULL )
     {
-        print( FATAL, "Missing argument.\n" );
-        THROW( EXCEPTION );
+        if ( ! No_File_Numbers )
+        {
+            print( FATAL, "Missing argument\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( EDL.File_List_Len < 3 )
+        {
+            print( FATAL, "No file has been opened yet\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( Fsc2_Internals.mode == TEST )
+            return vars_push( STR_VAR, "dummy" );
+
+        return vars_push( STR_VAR,
+                          EDL.File_List[ EDL.File_List_Len - 1 ].name );
     }
+
+    /* Otherwise we need a correct file number */
 
     fn = get_long( v, "file number" );
 
-    too_many_arguments( v );
+    /* Check for standard output and error */
 
-    return vars_push( INT_VAR,
-                      (    fn < FILE_NUMBER_OFFSET
-                        || fn >= EDL.File_List_Len + FILE_NUMBER_OFFSET
-                        || ! EDL.File_List[ fn ].fp ) ?
-                      0L : 1L );
+    if ( STD_Is_Open && ( fn == 1 || fn == 2 ) )
+        return vars_push( STR_VAR, fn == 1 ? "stdout" : "stderr" );
+
+    fn -= FILE_NUMBER_OFFSET;
+
+    if ( fn == 0 || fn == 1 )
+        return vars_push( STR_VAR, fn == 0 ? "stdout" : "stderr" );
+
+    if ( fn < 2 || fn >= EDL.File_List_Len )
+    {
+        print( FATAL, "Invalid file number\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* During the test run we can only return a dummy name */
+
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( STR_VAR, "dummy" );
+
+    return vars_push( STR_VAR, EDL.File_List[ fn ].name );
 }
 
 
@@ -905,8 +971,8 @@ get_save_file( Var_T ** v )
     {
         if ( ! STD_Is_Open )
         {
-            print( FATAL, "The std%s handle must have been opened, either by "
-                   "an explicit call of open_file().\n",
+            print( FATAL, "The std%s handle must have been opened by an "
+                   "explicit call of open_file().\n",
                    ( *v )->val.lval == STDOUT_FILENO ? "out" : "err" );
             THROW( EXCEPTION );
         }

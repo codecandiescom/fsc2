@@ -33,17 +33,18 @@ struct File_List {
 };
 
 
-Var_T * f_openf(   Var_T * /* v */ );
-Var_T * f_getf(    Var_T * /* v */ );
-Var_T * f_clonef(  Var_T * /* v */ );
-Var_T * f_resetf(  Var_T * /* v */ );
-Var_T * f_save(    Var_T * /* v */ );
-Var_T * f_fsave(   Var_T * /* v */ );
-Var_T * f_ffsave(  Var_T * /* v */ );
-Var_T * f_save_p(  Var_T * /* v */ );
-Var_T * f_save_o(  Var_T * /* v */ );
-Var_T * f_save_c(  Var_T * /* v */ );
-Var_T * f_is_file( Var_T * /* v */ );
+Var_T * f_openf(     Var_T * /* v */ );
+Var_T * f_getf(      Var_T * /* v */ );
+Var_T * f_clonef(    Var_T * /* v */ );
+Var_T * f_resetf(    Var_T * /* v */ );
+Var_T * f_save(      Var_T * /* v */ );
+Var_T * f_fsave(     Var_T * /* v */ );
+Var_T * f_ffsave(    Var_T * /* v */ );
+Var_T * f_save_p(    Var_T * /* v */ );
+Var_T * f_save_o(    Var_T * /* v */ );
+Var_T * f_save_c(    Var_T * /* v */ );
+Var_T * f_is_file(   Var_T * /* v */ );
+Var_T * f_file_name( Var_T * /* v */ );
 
 
 #endif  /* ! FUNC_SAVE_HEADER */
