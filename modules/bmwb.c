@@ -305,7 +305,7 @@ set_mw_attenuation( int val )
        one for powers of 10 and one for the remainder of the attenuation
        in dB */
 
-    byte = ( val / 10 ) << 8 | ( val % 10 );
+    byte = ( val / 10 ) << 4 | ( val % 10 );
 
     if ( meilhaus_dio_out( DIO_C, byte ) )
         return 1;
