@@ -356,10 +356,12 @@ start_comm_libs( void )
  serial_fail:
 #endif
 
-#if defined WITH_LIBUSB_1_0
+#if defined WITH_LIBUSB_0_1 || defined WITH_LIBUSB_1_0
     if ( Need_USB )
     {
+#if defined WITH_LIBUSB_1_0
         libusb_exit( NULL );
+#endif
         fsc2_release_uucp_lock( "libusb" );
     }
  libusb_fail:
