@@ -267,8 +267,11 @@ setup_aos( void )
 
     for ( i = AO_0; i <= AO_3; i++ )
     {
-        if ( meQuerySubdeviceByType( DEV_ID, i, sub_dev[ i ].id,
-                                     ME_SUBTYPE_ANY, &n ) != ME_ERRNO_SUCCESS )
+        if ( meQuerySubdeviceByType( DEV_ID,
+                                     i,
+                                     sub_dev[ i ].id,
+                                     ME_SUBTYPE_ANY,
+                                     &n ) != ME_ERRNO_SUCCESS )
         {
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to query subdevice %d: %s",
@@ -286,7 +289,10 @@ setup_aos( void )
         /* Determine the output range of the AO - the cards AOs have only a
            single range (+/-10V), so no need to check the number of ranges */
 
-        if ( meQueryRangeInfo( DEV_ID, i, 0, &sub_dev[ i ].range->unit,
+        if ( meQueryRangeInfo( DEV_ID,
+                               i,
+                               0,
+                               &sub_dev[ i ].range->unit,
                                &sub_dev[ i ].range->min,
                                &sub_dev[ i ].range->max,
                                &sub_dev[ i ].range->cnt ) != ME_ERRNO_SUCCESS )
@@ -300,7 +306,10 @@ setup_aos( void )
         /* Set up the AO - output is supposed to happen directly on a call
            of meIOSingle() */
 
-        if ( meIOSingleConfig( DEV_ID, i, 0, 0,
+        if ( meIOSingleConfig( DEV_ID,
+                               i,
+                               0,
+                               0,
                                ME_REF_AO_GROUND, ME_TRIG_CHAN_DEFAULT,
                                ME_TRIG_TYPE_SW, ME_VALUE_NOT_USED,
                                ME_IO_SINGLE_CONFIG_NO_FLAGS )
@@ -356,11 +365,10 @@ setup_dios( void )
                                i == 0 ? ME_SINGLE_CONFIG_DIO_INPUT :
                                         ME_SINGLE_CONFIG_DIO_OUTPUT,
                                ME_REF_NONE,
-                               ME_TRIG_CHAN_DEFAULT,
-                               ME_TRIG_TYPE_SW,
-                               ME_VALUE_NOT_USED,
-                               ME_IO_SINGLE_CONFIG_DIO_BYTE )
-                                                         != ME_ERRNO_SUCCESS )
+                               ME_TRIG_CHAN_NONE,
+                               ME_TRIG_TYPE_NONE,
+                               ME_TRIG_EDGE_NONE,
+                               ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
         {
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to set up DIO subdevice %d: %s",
@@ -994,6 +1002,8 @@ meilhaus_dio_out( int           dio,
 
     /* Send the value to the card */
 
+    printf( "Send: 0x%02x\n", val );
+
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
@@ -1003,6 +1013,18 @@ meilhaus_dio_out( int           dio,
 
         return 1;;
     }
+
+    list.iDevice    = DEV_ID;
+    list.iSubdevice = dio;
+    list.iChannel   = 0;
+    list.iDir       = ME_DIR_INPUT;
+    list.iValue     = 0;
+    list.iTimeOut   = ME_VALUE_NOT_USED;
+    list.iFlags     = ME_IO_SINGLE_TYPE_NO_FLAGS;
+    list.iErrno     = 0;
+
+    meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS );
+    printf( "Got: 0x%02x\n", list.iValue & 0xFF );
 
     lower_permissions( );
 #endif
