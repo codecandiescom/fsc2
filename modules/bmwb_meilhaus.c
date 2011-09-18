@@ -326,6 +326,7 @@ setup_dios( void )
 {
     int i;
     int n;
+    int piCaps;
 
 
     /* Loop over all 4 DIOs */
@@ -348,14 +349,33 @@ setup_dios( void )
             return 1;
         }
 
-        /* Set up the DIOs - output or input is supposed to happen directly
-           on a call of meIOSingle() */
+        if ( meQuerySubdeviceCaps( DEV_ID, i, &piCaps ) != ME_ERRNO_SUCCESS )
+        {
+            meErrorGetLastMessage( msg, sizeof msg );
+            sprintf( bmwb.error_msg, "Failed to query capabilites of "
+                     "subdevice %d: %s", i, msg );
+            return 1;
+        }
+
+        if ( ! ( piCaps & ME_CAPS_DIO_DIR_BYTE ) )
+        {
+            sprintf( bmwb.error_msg, "Subdevice %d doesn't allow byte-wise "
+                     "access.", i );
+            return 1;
+        }
+
+
+        /* Set up the DIOs (the first DIO for input, all others for output)
+           - output or input is supposed to happen directly on a call of
+           meIOSingle() */
 
         if ( meIOSingleConfig( DEV_ID, i, 0,
                                i == 0 ? ME_SINGLE_CONFIG_DIO_INPUT :
                                         ME_SINGLE_CONFIG_DIO_OUTPUT,
-                               ME_REF_NONE, ME_TRIG_CHAN_DEFAULT,
-                               ME_TRIG_TYPE_SW, ME_VALUE_NOT_USED,
+                               ME_REF_NONE,
+                               ME_TRIG_CHAN_DEFAULT,
+                               ME_TRIG_TYPE_SW,
+                               ME_VALUE_NOT_USED,
                                ME_IO_SINGLE_CONFIG_DIO_BYTE )
                                                          != ME_ERRNO_SUCCESS )
         {
@@ -975,7 +995,7 @@ meilhaus_dio_out( int           dio,
 
 	raise_permissions( );
 
-    /* Fetch a value from the card */
+    /* Send the value to the card */
 
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {

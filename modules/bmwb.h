@@ -22,7 +22,7 @@
 #define BMWB_HEADER_
 
 
-#define BMWB_TEST
+/* #define BMWB_TEST */
 
 
 #include <stdio.h>

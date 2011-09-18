@@ -126,7 +126,6 @@ start_temp = temp_contr_temperature( );
 synthesizer_attenuation( att );
 freq = synthesizer_frequency( start_freq );
 synthesizer_state( "ON" );
-pulser_state( "ON" );
 daq_gain( 4 );
 
 /* Create the toolbox */
@@ -148,13 +147,16 @@ FOREVER {
 		IF I % 10 == 1 {
 		    output_value( B2, temp_contr_temperature( ) );
 		}
+        pulser_state( "ON" );
         wait( 1.1 * repeat_time * N_Avg );
 === if ( START_FREQ <= END_FREQ )
         data[ J, I ] = daq_get_voltage( CH0 );
+        pulser_state( "OFF" );
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ]  + data[ J, I ] ) / J, 2 );
 === else
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
+        pulser_state( "OFF" );
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ N_Points - I + 1 ]
                     + data[ J, N_Points - I + 1 ] ) / J, 2 );
@@ -165,10 +167,8 @@ FOREVER {
 === else
         IF I > 1 {
 === endif
-			pulser_state( "OFF" );
             freq += freq_step;
             synthesizer_frequency( freq );
-			pulser_state( "ON" );
         }
     }
 

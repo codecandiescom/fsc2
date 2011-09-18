@@ -147,7 +147,6 @@ File1 = get_file( "", "*.avg", "", "", "avg" );
 synthesizer_attenuation( att );
 freq = synthesizer_frequency( start_freq );
 synthesizer_state( "ON" );
-pulser_state( "ON" );
 daq_gain( 4 );
 
 /* Create the toolbox */
@@ -162,22 +161,25 @@ FOREVER {
     J += 1;
     output_value( B1, J );
 
-	wait( pre_scan_delay );
+    wait( pre_scan_delay );
 
     FOR I = 1 : N_Points {
+        pulser_state( "ON" );
         wait( 1.1 * repeat_time * N_Avg );
 === if ( ADC_CHANNELS eq "0 and 1" )
 === if ( START_FREQ <= END_FREQ )
         data[ 1, J, I ] = daq_get_voltage( CH0 );
         data[ 2, J, I ] = daq_get_voltage( CH1 );
+        pulser_state( "OFF" );
         display_1d( I, data[ 1, J, I ], 1, I, data[ 2, J, I ], 2,
                     I, ( ( J - 1 ) * avg[ 1, I ]  + data[ 1, J, I ] ) / J, 3,
-					I, ( ( J - 1 ) * avg[ 2, I ]  + data[ 2, J, I ] ) / J, 4 );
+                    I, ( ( J - 1 ) * avg[ 2, I ]  + data[ 2, J, I ] ) / J, 4 );
 === else
         data[ 1, J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
         data[ 2, J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
+        pulser_state( "OFF" );
         display_1d( N_Points - I + 1, data[ 1, J, N_Points - I + 1 ], 1,
-					N_Points - I + 1, data[ 2, J, N_Points - I + 1 ], 2,
+                    N_Points - I + 1, data[ 2, J, N_Points - I + 1 ], 2,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 1, N_Points - I + 1 ]
                     + data[ 1, J, N_Points - I + 1 ] ) / J, 3,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 2, N_Points - I + 1 ]
@@ -190,6 +192,7 @@ FOREVER {
 === else
         data[ J, I ] = daq_get_voltage( CH1 );
 === endif
+        pulser_state( "OFF" );
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ]  + data[ J, I ] ) / J, 2 );
 === else
@@ -198,6 +201,7 @@ FOREVER {
 === else
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
 === endif
+        pulser_state( "OFF" );
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ N_Points - I + 1 ]
                     + data[ J, N_Points - I + 1 ] ) / J, 2 );
@@ -209,10 +213,8 @@ FOREVER {
 === else
         IF I > 1 {
 === endif
-			pulser_state( "OFF" );
             freq += freq_step;
             synthesizer_frequency( freq );
-			pulser_state( "ON" );
         }
     }
 
@@ -284,33 +286,33 @@ IF I != 0 {
                 fsave( File2, "\n" );
             }
 
-	        fsave( File2,
-				   "\n"
-	               "% Date:                   # #\n"
-	               "% Script:                 3_pulse_endor_xtra (W-band, Leiden)\n"
-	               "% Field:                  # G\n"
-	               "% Start frequency:        # MHz\n"
-	               "% End frequency:          # MHz\n"
-	               "% Frequency step:         # MHz\n"
-	               "% Attenuation:            # dB\n"
-	               "% Repetition time:        # ms\n"
-	               "% Length of 1st MW pulse: # ns\n"
-	               "% Length of 2nd MW pulse: # ns\n"
-	               "% Length of 3rd MW pulse: # ns\n"
-	               "% P1-P2 separation:       # ns\n"
-	               "% P2-P3 separation:       # ns\n"
-	               "% RF pulse position:      # ns\n"
-	               "% RF pulse length:        # ns\n"
-		           "% Detection pulse delay:  DET_OFFSET ns\n"
-	               "% Number of averages:     >= #\n"
-	               "% ADC gain:               4\n"
-				   "% ADC channel(s):         ADC_CHANNELS\n",
-	               date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
-	               freq_step / 1 MHz, att, repeat_time / 1 ms,
-	               int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
-	               int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
-	               int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
-	               int( P4.LENGTH / 1 ns ), N_Avg );
+            fsave( File2,
+                   "\n"
+                   "% Date:                   # #\n"
+                   "% Script:                 3_pulse_endor_xtra (W-band, Leiden)\n"
+                   "% Field:                  # G\n"
+                   "% Start frequency:        # MHz\n"
+                   "% End frequency:          # MHz\n"
+                   "% Frequency step:         # MHz\n"
+                   "% Attenuation:            # dB\n"
+                   "% Repetition time:        # ms\n"
+                   "% Length of 1st MW pulse: # ns\n"
+                   "% Length of 2nd MW pulse: # ns\n"
+                   "% Length of 3rd MW pulse: # ns\n"
+                   "% P1-P2 separation:       # ns\n"
+                   "% P2-P3 separation:       # ns\n"
+                   "% RF pulse position:      # ns\n"
+                   "% RF pulse length:        # ns\n"
+                   "% Detection pulse delay:  DET_OFFSET ns\n"
+                   "% Number of averages:     >= #\n"
+                   "% ADC gain:               4\n"
+                   "% ADC channel(s):         ADC_CHANNELS\n",
+                   date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
+                   freq_step / 1 MHz, att, repeat_time / 1 ms,
+                   int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
+                   int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
+                   int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
+                   int( P4.LENGTH / 1 ns ), N_Avg );
         }
 
         FOR I = 1 : N_Points {
@@ -318,7 +320,7 @@ IF I != 0 {
 === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz,
-				   avg[ 1, I ], avg[ 2, I ] );
+                   avg[ 1, I ], avg[ 2, I ] );
 === else
             fsave( File1, "#,#\n",
                    ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
@@ -327,7 +329,7 @@ IF I != 0 {
 === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz,
-				   avg[ 1, I ], avg[ 2, I ] );
+                   avg[ 1, I ], avg[ 2, I ] );
 === else
             fsave( File1, "#,#\n",
                    ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
@@ -337,7 +339,7 @@ IF I != 0 {
     }
 
     fsave( File1,
-		   "\n"
+           "\n"
            "% Date:                   # #\n"
            "% Script:                 3_pulse_endor_xtra (W-band, Leiden)\n"
            "% Field:                  # G\n"
@@ -353,10 +355,10 @@ IF I != 0 {
            "% P2-P3 separation:       # ns\n"
            "% RF pulse position:      # ns\n"
            "% RF pulse length:        # ns\n"
-		   "% Detection pulse delay:  DET_OFFSET ns\n"
+           "% Detection pulse delay:  DET_OFFSET ns\n"
            "% Number of averages:     >= #\n"
            "% ADC gain:               4\n"
-		   "% ADC channel(s):         ADC_CHANNELS\n",
+           "% ADC channel(s):         ADC_CHANNELS\n",
            date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
            freq_step / 1 MHz, att, repeat_time / 1 ms,
            int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
