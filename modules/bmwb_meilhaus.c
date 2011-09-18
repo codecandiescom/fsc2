@@ -353,14 +353,14 @@ setup_dios( void )
         {
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to query capabilites of "
-                     "subdevice %d: %s (0x%08x", i, msg, piCaps );
+                     "subdevice %d: %s", i, msg );
             return 1;
         }
 
         if ( ! ( piCaps & ME_CAPS_DIO_DIR_BYTE ) )
         {
             sprintf( bmwb.error_msg, "Subdevice %d doesn't allow byte-wise "
-                     "access.", i );
+                     "access. (0x%08x", i, piCaps );
             return 1;
         }
 
