@@ -326,7 +326,6 @@ setup_dios( void )
 {
     int i;
     int n;
-    int piCaps;
 
 
     /* Loop over all 4 DIOs */
@@ -348,22 +347,6 @@ setup_dios( void )
                      "type.", i );
             return 1;
         }
-
-        if ( meQuerySubdeviceCaps( DEV_ID, i, &piCaps ) != ME_ERRNO_SUCCESS )
-        {
-            meErrorGetLastMessage( msg, sizeof msg );
-            sprintf( bmwb.error_msg, "Failed to query capabilites of "
-                     "subdevice %d: %s", i, msg );
-            return 1;
-        }
-
-        if ( ! ( piCaps & ME_CAPS_DIO_DIR_BYTE ) )
-        {
-            sprintf( bmwb.error_msg, "Subdevice %d doesn't allow byte-wise "
-                     "access. (0x%08x", i, piCaps );
-            return 1;
-        }
-
 
         /* Set up the DIOs (the first DIO for input, all others for output)
            - output or input is supposed to happen directly on a call of
@@ -894,8 +877,15 @@ int
 meilhaus_dio_in( int             dio,
                  unsigned char * val )
 {
-    meIOSingle_t list = { DEV_ID, dio, 0, ME_DIR_INPUT, 0, 0,
-                          ME_IO_SINGLE_TYPE_DIO_BYTE, 0 };
+    meIOSingle_t list = { DEV_ID,                     /* device index */
+                          dio,                        /* subdevice index */
+                          0,                          /* subdevice channel */
+                          ME_DIR_INPUT,               /* read operation */
+                          0,                          /* contains result */
+                          ME_VALUE_NOT_USED,          /* no time-out */
+                          ME_IO_SINGLE_TYPE_NO_FLAGS, /* use "natural" width */
+                          0                           /* for errno */
+                        };
 
 
     /* Make sure the requested DIO exists and is in output mode (only the
@@ -978,8 +968,15 @@ int
 meilhaus_dio_out( int           dio,
                   unsigned char val )
 {
-    meIOSingle_t list = { DEV_ID, dio, 0, ME_DIR_OUTPUT, val, 0,
-                          ME_IO_SINGLE_TYPE_DIO_BYTE, 0 };
+    meIOSingle_t list = { DEV_ID,                     /* device index */
+                          dio,                        /* subdevice index */
+                          0,                          /* subdevice channel */
+                          ME_DIR_OUTPUT,              /* write operation */
+                          val,                        /* value to output */
+                          ME_VALUE_NOT_USED,          /* no time-out */
+                          ME_IO_SINGLE_TYPE_NO_FLAGS, /* use "natural" width */
+                          0                           /* for errno */
+                        };
 
 
     /* Make sure the requested DIO is in input mode */
