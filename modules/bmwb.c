@@ -229,7 +229,7 @@ get_bridge_type( void )
     /* Get the value from the DIO that receives the bit for determining
        the bridge type */
 
-    if ( meilhaus_dio_in( DIO_A, &v ) )
+    if ( meilhaus_dio_in( BRIDGE_TYPE_DI, &v ) )
         return TYPE_FAIL;
 
     /* If BRIDGE_TYPE_BIT is set this is a Q-band bridge, otherwise a
@@ -240,7 +240,7 @@ get_bridge_type( void )
     /* Set the upper bits of the DIO to the ones needed for setting the
        attenuation, which depend on the bridge type */
 
-    if ( meilhaus_dio_out( DIO_B, bmwb.type == X_BAND ?
+    if ( meilhaus_dio_out( ATT_CONTROL_DO, bmwb.type == X_BAND ?
                            X_BAND_ATT_BITS : Q_BAND_ATT_BITS ) )
         return TYPE_FAIL;
 
@@ -307,7 +307,7 @@ set_mw_attenuation( int val )
 
     byte = ( val / 10 ) << 4 | ( val % 10 );
 
-    if ( meilhaus_dio_out( DIO_C, byte ) )
+    if ( meilhaus_dio_out( ATT_VALUE_DO, byte ) )
         return 1;
 
 	bmwb.attenuation = val;
@@ -386,7 +386,7 @@ set_iris( int state )
     unsigned char v;
 
 
-    if ( meilhaus_dio_out_state( DIO_D, &v ) )
+    if ( meilhaus_dio_out_state( IRIS_CONTROL_DO, &v ) )
         return 1;
 
     v &= ~ ( IRIS_UP_BIT | IRIS_DOWN_BIT );
@@ -409,7 +409,7 @@ set_iris( int state )
             return 1;
     }
 
-    if ( meilhaus_dio_out( DIO_D, v ) )
+    if ( meilhaus_dio_out( IRIS_CONTROL_DO, v ) )
         return 1;
 
     return 0;
@@ -428,7 +428,7 @@ set_mode( int mode )
     unsigned char v;
 
 
-    if ( meilhaus_dio_out_state( DIO_B, &v ) )
+    if ( meilhaus_dio_out_state( MODE_CONTROL_DO, &v ) )
         return 1;
 
     v &= ~ MODE_BITS;
@@ -463,7 +463,7 @@ set_mode( int mode )
             return 1;
     }
 
-    if ( meilhaus_dio_out( DIO_B, v ) )
+    if ( meilhaus_dio_out( MODE_CONTROL_DO, v ) )
         return 1;
 
 	bmwb.mode = mode;

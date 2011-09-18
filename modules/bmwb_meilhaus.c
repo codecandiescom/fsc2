@@ -968,9 +968,9 @@ meilhaus_dio_out_state( int             dio,
 }
 
 
-/*-------------------------------------------*
- * Outputs a bit pattern at a digital output
- *-------------------------------------------*/
+/*-----------------------------------------------------*
+ * Outputs a bit pattern at one of the digital outputs
+ *-----------------------------------------------------*/
 
 int
 meilhaus_dio_out( int           dio,
@@ -1002,8 +1002,6 @@ meilhaus_dio_out( int           dio,
 
     /* Send the value to the card */
 
-    printf( "Send: 0x%02x\n", val );
-
     if ( meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) != ME_ERRNO_SUCCESS )
     {
         meErrorGetLastMessage( msg, sizeof msg );
@@ -1013,18 +1011,6 @@ meilhaus_dio_out( int           dio,
 
         return 1;;
     }
-
-    list.iDevice    = DEV_ID;
-    list.iSubdevice = dio;
-    list.iChannel   = 0;
-    list.iDir       = ME_DIR_INPUT;
-    list.iValue     = 0;
-    list.iTimeOut   = ME_VALUE_NOT_USED;
-    list.iFlags     = ME_IO_SINGLE_TYPE_NO_FLAGS;
-    list.iErrno     = 0;
-
-    meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS );
-    printf( "Got: 0x%02x\n", list.iValue & 0xFF );
 
     lower_permissions( );
 #endif

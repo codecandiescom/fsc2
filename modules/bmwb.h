@@ -207,12 +207,21 @@ extern BMWB bmwb;
 /* Number associated with the different DIs and DOs */
 
 #define DIO_A   0         /* used for AFC state and type of bridge detection */
-#define DIO_B   1         /* mostly used for bridge mode */
+#define DIO_B   1         /* used for bridge mode, iris control */
 #define DIO_C   2         /* used for microwave attenuation */
-#define DIO_D   3         /* used for iris control */
+#define DIO_D   3         /* not used */
 
 
-/* Define subdevice IDs for analog outputs */
+/* Symbolic names for the DIs and DOs according to their functions */
+
+#define BRIDGE_TYPE_DI    DIO_A      /* used to detemine bridge type */
+#define MODE_CONTROL_DO   DIO_B      /* used in control of bridge mode */
+#define IRIS_CONTROL_DO   DIO_B      /* used in controlling the iris motor */
+#define ATT_CONTROL_DO    DIO_B      /* used for attenuation control */
+#define ATT_VALUE_DO      DIO_C      /* outputs attenuation value */
+
+
+/* Symbolic names for subdevice IDs for analog outputs */
 
 #define FREQUENCY_AO            5         /* used for microwave frequency */
 #define BIAS_AO                 6         /* used for microwave bias */
@@ -240,8 +249,8 @@ extern BMWB bmwb;
 #define MODE_TUNE_BITS      0x0D
 #define MODE_OPERATE_BITS   0x01
 
-#define IRIS_UP_BIT         0x01
-#define IRIS_DOWN_BIT       0x02
+#define IRIS_UP_BIT         0x10
+#define IRIS_DOWN_BIT       0x20
 
 #define X_BAND_ATT_BITS     0x40
 #define Q_BAND_ATT_BITS     0xF0
