@@ -353,7 +353,7 @@ setup_dios( void )
         {
             meErrorGetLastMessage( msg, sizeof msg );
             sprintf( bmwb.error_msg, "Failed to query capabilites of "
-                     "subdevice %d: %s", i, msg );
+                     "subdevice %d: %s (0x%08x", i, msg, piCaps );
             return 1;
         }
 
