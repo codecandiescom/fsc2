@@ -1,5 +1,17 @@
-# -*-Makefile-*-
-
-OWNER              := nobody
-GROUP              := dialout
-GPIB_LIBRARY       := JTT
+prefix             := /usr/local
+GPIB_LIBRARY       := SLG
+GPIB_CONF_FILE     := /etc/gpib.conf
+GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
+GPIB_LOG_LEVEL     := HIGH
+SERIAL_LOCK_DIR    := /var/lock
+SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
+SERIAL_LOG_LEVEL   := HIGH
+LAN_LOG_FILE       := /tmp/fsc2_lan.log
+LAN_LOG_LEVEL      := HIGH
+WITH_LIBUSB_0_1    := yes
+# WITH_LIBUSB_1_0  := yes
+EDITOR             := nano
+BROWSER            := firefox
+WITH_HTTP_SERVER   := yes
+DEFAULT_HTTP_PORT  := 8080
+MAIL_ADDRESS       := fsc2@toerring.de
