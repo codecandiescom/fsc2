@@ -129,8 +129,8 @@
 
 /* Frequency (in Hz) of the sawtooth (x-) voltage in tune mode */
 
-#define X_BAND_TUNE_FREQ         1600
-#define Q_BAND_TUNE_FREQ         1600
+#define X_BAND_TUNE_FREQ         1540
+#define Q_BAND_TUNE_FREQ         1540
 
 
 /* Conversion factors for microwave frequency given as a value in the
