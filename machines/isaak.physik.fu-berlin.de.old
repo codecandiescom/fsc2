@@ -1,5 +1,0 @@
-# -*-Makefile-*-
-
-OWNER              := nobody
-GROUP              := dialout
-GPIB_LIBRARY       := JTT
