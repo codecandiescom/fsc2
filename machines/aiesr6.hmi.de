@@ -13,6 +13,7 @@ BROWSER                 := firefox
 WITH_MEDRIVER           := yes
 medriver_incl_path      := /usr/include/medriver
 medriver_lib_path       := /usr/lib
+medriver_version        := NEW
 WITH_HTTP_SERVER        := yes
 DEFAULT_HTTP_PORT       := 8080
 MAIL_ADDRESS            := jens
