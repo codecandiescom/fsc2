@@ -57,6 +57,8 @@ static long T_fprintf( long         fn,
                        const char * fmt,
                        ... );
 
+static const char * get_name( Var_T * v );
+
 
 /*----------------------------------------------------------------*
  * Returns if a file number passed to the function stands for an
@@ -90,12 +92,41 @@ f_is_file( Var_T * v )
 
 
 /*----------------------------------------------------------------*
- * Returns if a file number passed to the function stands for an
- * open file.
+ * Returns for a file number passed to the function the name of
+ * that file (without path)
  *----------------------------------------------------------------*/
 
 Var_T *
 f_file_name( Var_T * v )
+{
+    const char *name = get_name( v );
+    const char *n;
+
+    if ( ( n = strrchr( name, '/' ) ) )
+        return vars_push( STR_VAR, n + 1 );
+    else
+        return vars_push( STR_VAR, name );
+}
+
+
+/*----------------------------------------------------------------*
+ * Returns for a file number passed to the function the name of
+ * that file with the complete path
+ *----------------------------------------------------------------*/
+
+Var_T *
+f_path_name( Var_T * v )
+{
+    return vars_push( STR_VAR, get_name( v ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Utility function for finding the file name for a file number
+ *--------------------------------------------------------------*/
+
+static const char *
+get_name( Var_T * v )
 {
     long fn;
 
@@ -118,10 +149,9 @@ f_file_name( Var_T * v )
         }
 
         if ( Fsc2_Internals.mode == TEST )
-            return vars_push( STR_VAR, "dummy" );
+            return "dummy";
 
-        return vars_push( STR_VAR,
-                          EDL.File_List[ EDL.File_List_Len - 1 ].name );
+        return EDL.File_List[ EDL.File_List_Len - 1 ].name;
     }
 
     /* Otherwise we need a correct file number */
@@ -131,12 +161,12 @@ f_file_name( Var_T * v )
     /* Check for standard output and error */
 
     if ( STD_Is_Open && ( fn == 1 || fn == 2 ) )
-        return vars_push( STR_VAR, fn == 1 ? "stdout" : "stderr" );
+        return fn == 1 ? "stdout" : "stderr";
 
     fn -= FILE_NUMBER_OFFSET;
 
     if ( fn == 0 || fn == 1 )
-        return vars_push( STR_VAR, fn == 0 ? "stdout" : "stderr" );
+        return fn == 0 ? "stdout" : "stderr";
 
     if ( fn < 2 || fn >= EDL.File_List_Len )
     {
@@ -147,9 +177,9 @@ f_file_name( Var_T * v )
     /* During the test run we can only return a dummy name */
 
     if ( Fsc2_Internals.mode == TEST )
-        return vars_push( STR_VAR, "dummy" );
+        return "dummy";
 
-    return vars_push( STR_VAR, EDL.File_List[ fn ].name );
+    return EDL.File_List[ fn ].name;
 }
 
 

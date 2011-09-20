@@ -239,6 +239,16 @@ typedef struct {
 #endif
 
 
+/* The following two macros are removed since kernel 2.6.37, but we use them */
+
+#ifndef init_MUTEX
+# define init_MUTEX( sem ) sema_init( sem, 1 )
+#endif
+#ifndef init_MUTEX_LOCKED
+# define init_MUTEX_LOCKED( sem ) sema_init( sem, 0 )
+#endif
+
+
 #include "autoconf.h"
 
 

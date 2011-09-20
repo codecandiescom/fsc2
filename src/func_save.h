@@ -45,6 +45,7 @@ Var_T * f_save_o(    Var_T * /* v */ );
 Var_T * f_save_c(    Var_T * /* v */ );
 Var_T * f_is_file(   Var_T * /* v */ );
 Var_T * f_file_name( Var_T * /* v */ );
+Var_T * f_path_name( Var_T * /* v */ );
 
 
 #endif  /* ! FUNC_SAVE_HEADER */

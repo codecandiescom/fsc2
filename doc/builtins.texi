@@ -1086,6 +1086,7 @@ file handles for @i{stdout} and @i{stderr}.
 @item @ref{save_comment()}
 @item @ref{is_file()}
 @item @ref{file_name()}
+@item @ref{path_name()}
 @end table
 
 
@@ -1584,15 +1585,22 @@ as open files.
 @anchor{file_name()}
 @findex file_name()
 @item file_name()
-Function returns the name of an opened file. If @code{@ref{open_file()}}
-or @code{@ref{get_file()}} haven't been called but one of the
-function for writing a file so that a single output file is open
-the function can be called without an argument and the name of
-the unique open output file is returned. Otherwise the function
-requires a valid file handle as it's argument and the function
-returns the name of that file. If the file number corresponds to
-@code{stdout} or @code{stderr} the name returned is the string
-@code{"stdout"} or @code{"stderr"}.
+Function returns the name of an opened file (without the path
+information). If @code{@ref{open_file()}} or @code{@ref{get_file()}}
+haven't been called but one of the function for writing a file so that
+a single output file is open the function can be called without an
+argument and the name of the unique open output file is returned.
+Otherwise the function requires a valid file handle as it's argument
+and the function returns the name of that file. If the file number
+corresponds to @code{stdout} or @code{stderr} the name returned is the
+string @code{"stdout"} or @code{"stderr"}.
+
+
+@anchor{path_name()}
+@findex path_name()
+@item path_name()
+Function like @code{@ref{file_name()}}, but returning the
+file name with full path information for an opened.
 
 @end table
 

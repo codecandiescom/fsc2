@@ -126,7 +126,7 @@ get_memcpy( const void * array,
 
 
 /*----------------------------------------------------------------------*
- * Function replaces all occurrences of the character combination "\n"
+ * Function replaces all occurrences of the character combination "\\n"
  * in a string by the line break character '\n'. This is done in place,
  * i.e. the string passed to the function is changed, not a copy. So,
  * never call it with a char array defined as const.
@@ -139,7 +139,7 @@ correct_line_breaks( char * str )
          *p2;
 
 
-    while ( ! ( p1 = strstr( p1, "\\n" ) ) )
+    while ( ( p1 = strstr( p1, "\\n" ) ) )
     {
         p2 = p1++;
         *p2 = '\n';
