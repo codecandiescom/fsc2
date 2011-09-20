@@ -1,5 +1,5 @@
 # -*-sh-*-
 
-sed 's/^[ \t]*#define[ \t]+SERIAL_PORT[ \t]"\/dev\/ttys[1-9].*"/#define SERIAL_PORT     "\/dev\/ttyS0"/'  \
+sed 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttys[1-9].*"/#define SERIAL_PORT     "\/dev\/ttyS0"/'  \
 	$cdir/er035m_sas.conf > $cdir/er035m_sas.conf.new
 mv $cdir/er035m_sas.conf.new $cdir/er035m_sas.conf

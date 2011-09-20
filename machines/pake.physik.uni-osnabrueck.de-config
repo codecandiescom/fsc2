@@ -1,5 +1,5 @@
 # -*-sh-*-
 
-sed 's/^[ \t]*#define[ \t]+SERIAL_PORT[ \t]+\"\/dev\/ttyS[02-9].*"/#define SERIAL_PORT     "\/dev\/ttyS1"/'  \
+sed 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[02-9].*"/#define SERIAL_PORT     "\/dev\/ttyS1"/'  \
 	$cdir/hjs_attenuator.conf > $cdir/hjs_attenuator.conf.new
 mv $cdir/hjs_attenuator.conf.new $cdir/hjs_attenuator.conf
