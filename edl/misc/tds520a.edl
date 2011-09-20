@@ -1,0 +1,14 @@
+DEVICES:
+
+tds520a;
+
+EXPERIMENT:
+
+print( "# #\n", digitizer_coupling( CH1 ),
+                digitizer_bandwidth_limiter( CH1 ) );
+
+digitizer_coupling( CH1, "D1M" );
+digitizer_bandwidth_limiter( CH1, "OFF" );
+
+print( "# #\n", digitizer_coupling( CH1 ),
+                digitizer_bandwidth_limiter( CH1 ) );
