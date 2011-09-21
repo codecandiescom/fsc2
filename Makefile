@@ -177,12 +177,12 @@
 
 # Next set the directory were log files for serial port devices are
 # created. Make sure that fsc2 or its users have write access to the
-# directory. Don't use a partition on which you don't have at least a
-# few megabytes to spare, depending on the type of experiments you do
-# the files can become rather long. But the files will not grow indefinitely,
-# if you start a new experiment their previous contents get overwritten. If
-# no directory is specified logs will be written to the default directory
-# for temporary files
+# directory. Don't use a direction on a partition on which you don't have
+# at least a few megabytes to spare, depending on the type of experiments
+# you do the log files can become rather long. But the files will not grow
+# indefinitely, if you start a new experiment their previous contents get
+# overwritten. If no directory is specified logs will be written to the
+# default directory for temporary files (which typically is '/tmp')
 
 # SERIAL_LOG_DIR    := /tmp
 

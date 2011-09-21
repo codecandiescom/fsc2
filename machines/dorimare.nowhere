@@ -16,7 +16,6 @@ GPIB_LIBRARY         := JTT
 GPIB_LOG_FILE        := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL       := HIGH
 SERIAL_LOCK_DIR      := /var/lock
-SERIAL_LOG_FILE      := /tmp/fsc2_serial.log
 SERIAL_LOG_LEVEL     := HIGH
 LAN_LOG_FILE         := /tmp/fsc2_lan.log
 LAN_LOG_LEVEL        := HIGH
