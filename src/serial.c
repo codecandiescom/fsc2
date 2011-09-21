@@ -62,10 +62,10 @@ static void close_serial_log( int sn );
 
 /*-------------------------------------------------------------------*
  * This function must be called by device modules that need a serial
- * port. Here it is checked if the requested serial port is still
- * available and if the user has access permissions to the serial
- * ports device file. If one of these conditions isn't satisfied the
- * function throws an exception.
+ * port. It checks if the requested serial port is still available
+ * and if the user has access permissions to the serial ports device
+ * file. If one of these conditions isn't satisfied the function
+ * throws an exception.
  * -> 1. Serial port device file
  *    2. Name of the device the serial port is requested for
  * <- Index the serial port is to be accessed by
@@ -76,6 +76,9 @@ fsc2_request_serial_port( const char * dev_file,
                           const char * dev_name )
 {
     int i;
+    struct stat stat_buf;
+    char *real_name = NULL;
+    size_t pathmax = get_pathmax( );
 
 
     /* Check that the device name is reasonable */
@@ -87,34 +90,107 @@ fsc2_request_serial_port( const char * dev_file,
 		THROW( EXCEPTION );
     }
 
-	/* Check that the device file is in the '/dev' directory */
+	/* Check that the device file is a char device file, check the "real"
+       file and not symbolic links */
 
-	if ( strncmp( dev_file, "/dev/", 5 ) )
-	{
-		eprint( FATAL, UNSET, "%s: Invalid device file name '%s', must be "
-                "in '/dev' directory.\n", dev_name, dev_file );
-		THROW( EXCEPTION );
-	}
+    if ( lstat( dev_file, &stat_buf ) == -1 )
+    {
+        if ( errno == EACCES )
+            eprint( FATAL, UNSET, "%s: Missing permissions to access device "
+                    "file '%s'.\n", dev_name, dev_file );
+        else if ( errno == ENOENT || errno == ENOTDIR )
+            eprint( FATAL, UNSET, "%s: Device file '%s' does not exist.\n",
+                    dev_name, dev_file );
+        else if ( errno == ENOMEM )
+            eprint( FATAL, UNSET, "%s: Running out of memory whhile testing "
+                    "device file '%s' does not exist.\n", dev_name, dev_file );
+        else if ( errno == ENAMETOOLONG )
+            eprint( FATAL, UNSET, "%s: Name of device file '%s' is too long.\n",
+                    dev_name, dev_file );
+        else
+            eprint( FATAL, UNSET, "%s: Unexpected error while testing device "
+                    "file '%s'.\n", dev_name, dev_file );
+        THROW( EXCEPTION );
+    }
 
-    /* Check that device file for serial port hasn't already been claimed
+    if ( ! S_ISCHR( stat_buf.st_mode ) )
+    {
+        eprint( FATAL, UNSET, "%s: File '%s' isn't a device file for a serial "
+                "port.\n", dev_name, dev_file );
+        THROW( EXCEPTION );
+    }
+
+    /* If the name given as the device file is a symbolic link obtain the
+       real name */
+
+    if ( stat( dev_file, &stat_buf ) == -1 )
+    {
+        if ( errno == EACCES )
+            eprint( FATAL, UNSET, "%s: Missing permissions to access device "
+                    "file '%s'.\n", dev_name, dev_file );
+        else if ( errno == ENOENT || errno == ENOTDIR )
+            eprint( FATAL, UNSET, "%s: Device file '%s' does not exist.\n",
+                    dev_name, dev_file );
+        else if ( errno == ENOMEM )
+            eprint( FATAL, UNSET, "%s: Running out of memory whhile testing "
+                    "device file '%s' does not exist.\n", dev_name, dev_file );
+        else if ( errno == ENAMETOOLONG )
+            eprint( FATAL, UNSET, "%s: Name of device file '%s' is too long.\n",
+                    dev_name, dev_file );
+        else
+            eprint( FATAL, UNSET, "%s: Unexpected error while testing device "
+                    "file '%s'.\n", dev_name, dev_file );
+        THROW( EXCEPTION );
+    }
+
+    if ( S_ISLNK( stat_buf.st_mode ) )
+    {
+        ssize_t length;
+
+        /* We need memory for the name of the file the link points to */
+
+        real_name = T_malloc( pathmax + 1 );
+        if ( ( length = readlink( dev_file, real_name, pathmax ) ) < 0 )
+        {
+            eprint( FATAL, UNSET, "%s: Can't follow symbolic link that is the "
+                    "file given as the device file '%s'.\n",
+                    dev_name, dev_file );
+            T_free( real_name );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        real_name = T_strdup( dev_file );
+
+    /* Check that device file for the serial port hasn't already been claimed
        by another module */
 
 	for ( i = 0; i < Num_Serial_Ports; i++ )
-		if ( ! strcmp( Serial_Ports[ i ].dev_file, dev_file ) )
+		if ( ! strcmp( Serial_Ports[ i ].dev_file, real_name ) )
 		{
 			eprint( FATAL, UNSET, "%s: Requested serial port '%s' is already "
-					"in use by device '%s'.\n", dev_name, dev_file,
+					"in use by device '%s'.\n", dev_name, real_name,
                     Serial_Ports[ i ].dev_name );
+            T_free( real_name );
 			THROW( EXCEPTION );
 		}
 
-    /* Get memory for one more structure */
+    /* Get memory for one more structure and initialize it */
 
-	Serial_Ports = T_realloc( Serial_Ports,
+    TRY
+    {
+        Serial_Ports = T_realloc( Serial_Ports,
 							  ( Num_Serial_Ports + 1 ) * sizeof *Serial_Ports );
+        Serial_Ports[ Num_Serial_Ports ].dev_name  = T_strdup( dev_name );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( real_name );
+        RETHROW( );
+    }
 
-    Serial_Ports[ Num_Serial_Ports ].dev_file  = T_strdup( dev_file );
-    Serial_Ports[ Num_Serial_Ports ].dev_name  = T_strdup( dev_name );
+    Serial_Ports[ Num_Serial_Ports ].dev_file  = real_name;
     Serial_Ports[ Num_Serial_Ports ].have_lock = UNSET;
     Serial_Ports[ Num_Serial_Ports ].is_open   = UNSET;
 	Serial_Ports[ Num_Serial_Ports ].fd        = -1;

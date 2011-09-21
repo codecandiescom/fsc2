@@ -100,6 +100,9 @@ void get_form_position( FL_FORM * /* form */,
 
 void fsc2_save_conf( void );
 
+size_t get_pathmax( void );
+
+
 #endif  /* ! UTIL_HEADER */
 
 

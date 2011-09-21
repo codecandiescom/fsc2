@@ -20,14 +20,6 @@
 
 #include "fsc2.h"
 
-#if defined PATH_MAX
-static long pathmax = PATH_MAX;
-#else
-static long pathmax = 0;
-#endif
-
-#define PATH_MAX_GUESS 4095      /* guess for maximum file name length... */
-
 
 /*--------------------------------------------------------------------------*
  * This function is called for each device found in the DEVICES section of
@@ -50,6 +42,7 @@ device_add( const char * name )
     char *ld_path;
     char *ld = NULL;
     char *ldc;
+    size_t pathmax = get_pathmax( );
 
 
     CLOBBER_PROTECT( real_name );
@@ -112,25 +105,7 @@ device_add( const char * name )
 
     if ( S_ISLNK( buf.st_mode ) )
     {
-        /* We need memory for the name of the file the link points to, but
-           we may not know the maximum length of a file name... */
-
-        if ( pathmax == 0 )
-        {
-            if ( ( pathmax = pathconf( "/", _PC_PATH_MAX ) ) < 0 )
-            {
-                if ( errno == 0 )
-                    pathmax = PATH_MAX_GUESS;
-                else
-                {
-                    eprint( FATAL, UNSET, "%s:%d: This operating system "
-                            "sucks!\n", __FILE__, __LINE__ );
-                    T_free( lib_name );
-                    T_free( dev_name );
-                    THROW( EXCEPTION );
-                }
-            }
-        }
+        /* We need memory for the name of the file the link points to */
 
         real_name = T_malloc( pathmax + 1 );
         if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )

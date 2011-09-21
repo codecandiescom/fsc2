@@ -1773,6 +1773,41 @@ fsc2_save_conf( void )
 }
 
 
+/*--------------------------------------------------------------*
+ * Function tries to find the maximum path length on the system
+ *--------------------------------------------------------------*/
+
+#define PATH_MAX_GUESS 4095      /* guess for maximum file name length... */
+
+size_t
+get_pathmax( void )
+{
+#if defined PATH_MAX
+    static long pathmax = PATH_MAX;
+#else
+    static long pathmax = 0;
+#endif
+
+
+    if ( pathmax == 0 )
+    {
+        if ( ( pathmax = pathconf( "/", _PC_PATH_MAX ) ) < 0 )
+        {
+            if ( errno == 0 )
+                pathmax = PATH_MAX_GUESS;
+            else
+            {
+                eprint( FATAL, UNSET, "Failure to determine the maximum "
+                        "path length on this system.\n" );
+                THROW( EXCEPTION );
+            }
+        }
+    }
+
+    return pathmax;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
