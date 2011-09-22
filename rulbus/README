@@ -9,7 +9,7 @@ Currently the Rulbus-cards RB8509 (12-bit ADC), RB8510 (12-bit DAC),
 RB8514 (delay card) and RB8515 (clock card) are supported. It was
 mainly written to allow support for Rulbus cards for a program for
 spectrometer control, fsc2, I have written. The driver has been
-tested with both 2.4 and 2.6 kernels.
+tested with both 2.4 and a numbe of 2.6 kernels.
 
 
 II. Preparation for installation
@@ -21,19 +21,20 @@ kernel the modules is supposed to work with. For 2.4 kernels at least
 the directories with the kernels include (header) files are needed while
 for 2.6 kernels the complete kernel sources are required.
 
-In the 'include/linux' subdirectory of the kernel sources a file called
-'autoconf.h' is of special importance. It contains information on how the
-kernel was build. Make sure that it is in sync with the kernel (it could
-be out of sync if you have run 'make menuconfig' or 'make xconfig' etc.,
-changed some settings and saved the results, but didn't built the kernel
-with these new settings). Especially important is that the macro
-CONFIG_MODVERSIONS is defined correctly. If you compile the module but
-get error messages about undefined symbols when you try to run depmode or
-insmode on the new module chances are high that CONFIG_MODVERSIONS was
-defined in autoconf.h but the kernel has not been compiled with this
-option (or the other way round).
+In the 'include/linux' subdirectory of the kernel sources (quite often
+to b found at '/usr/src/linux') a file called 'autoconf.h' is of special
+importance. It contains information on how the kernel was build. Make
+sure that it is in sync with the kernel (it could be out of sync if
+you have run 'make menuconfig' or 'make xconfig' etc., changed some
+settings and saved the results, but didn't built the kernel with these
+new settings). Especially important is that the macro CONFIG_MODVERSIONS
+is defined correctly. If you compile the module but get error messages
+about undefined symbols when you try to run depmode or insmode on the
+new module chances are high that CONFIG_MODVERSIONS was defined in
+autoconf.h but the kernel has not been compiled with this option (or
+the other way round).
 
-Another essential file is 'version.h' in the kernel include directory.
+Another essential file is 'version.h' in the kernel's include directory.
 Without this file the module can not be compiled. The file gets created
 automatically if autoconf.h exists and you have at least run 'make dep'
 in the kernel source directory.
@@ -170,18 +171,19 @@ V. Acknowledgments
 ==================
 
 Martin J. Moene (m.j.moene@eld.physics.leidenuniv.nl) and Arno van
-Amersfoort (arnova@molphys.leidenuniv.nl) from the Physics department
-of the Rijksuniversiteit Leiden, who developed the interface, were
-extremely helpful by supplying all kinds of information, sending me
-very well-documented Windows code, answering all my stupid questions
-and even reading and pointing out errors in my code. Martin also took
-it onto himself to get parts of his Windows version of the library in
-sync with the Linux version, finding several bugs in my code in the
-process, and made lots very helpful suggestions for other improvements.
+Amersfoort (a.c.j.van.amersfoort@eld.physics.leidenuniv.nl) from the
+Physics department of the Rijksuniversiteit Leiden, who developed the
+interface, were extremely helpful by supplying all kinds of information,
+sending me very well-documented Windows code, answering all my stupid
+questions and even reading and pointing out errors in my code. Martin
+also took it onto himself to get parts of his Windows version of the
+library in sync with the Linux version, finding several bugs in my code
+in the process, and made lots very helpful suggestions for other improve-
+ments.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
-the driver and library in order to extend my fsc2 program to make
-it work with their 275 GHz EPR and ENDOR spectrometer.
+the driver and library as part of extending my fsc2 program to make
+it work with their 275 GHz and W-band EPR and ENDOR spectrometers.
 
 
-     12.5.2006     Jens Thoms Törring       <jt@toerring.de>
+     22.9.2011     Jens Thoms Törring       <jt@toerring.de>

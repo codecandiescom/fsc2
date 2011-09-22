@@ -1,6 +1,6 @@
    Library for the Rulbus (Rijksuniversiteit Leiden BUS) with support
-   			for the rb8509_adc12, rb8510_dac12, rb8514_delay,
-   					rb8515_clock and rb_generic cards
+            for the rb8509_adc12, rb8510_dac12, rb8514_delay,
+                    rb8515_clock and rb_generic cards
 
 Contents:
 
@@ -10,7 +10,7 @@ Contents:
     IV   rb8510_dac12 (12-bit DAC) Functions
     V    rb8514_delay (Delay Card) Functions
     VI   rb8515_clock (Clock Card) Functions
-	VII  rb_generic (pseudo-card for debugging) Functions
+    VII  rb_generic (pseudo-card for debugging) Functions
     VIII Example Programs
 
 
@@ -49,7 +49,7 @@ rack "top rack" {
 
     rb8514_delay  "DELAY_0" {
         address         = 0x64;
-		intr_delay      = 60 n;
+        intr_delay      = 60 n;
     }
 
     rb8515_clock "CLOCK" {
@@ -60,8 +60,8 @@ rack "top rack" {
         address         = 0x68;
         num_channels    = 8;
         bipolar         = true;
-		volt_per_bit    = 2.5 m;
-		has_ext_trigger = true;
+        volt_per_bit    = 2.5 m;
+        has_ext_trigger = true;
     }
 
     rb8510_dac12 "DAC12_CH0" {
@@ -70,7 +70,7 @@ rack "top rack" {
         volt_per_bit    = 1.25 m;
     }
 
-	rb_generic   "GENERIC";
+    rb_generic   "GENERIC";
 }
 
 Within the set of configuration informations for the rack you normally
@@ -138,12 +138,12 @@ sensitivities. The sensitivity has to be specified as a voltage per bit.
 The following table (by Martin J. Moene <moene@biophys.LeidenUniv.nl>)
 shows the voltage per bit for different ranges of the card:
 
-      	 Voltage range      |  volt_per_bit   bipolar
+         Voltage range      |  volt_per_bit   bipolar
       ----------------------+--------------------------
-      	 0    ..  5.11875 V |    1.25 mV        0
-      	 0    .. 10.2375  V |    2.5  mV        0
-      	 0    .. 20.475   V |    5    mV        0
-      	-5.12 ..  5.1175  V |    2.5  mV        1
+         0    ..  5.11875 V |    1.25 mV        0
+         0    .. 10.2375  V |    2.5  mV        0
+         0    .. 20.475   V |    5    mV        0
+        -5.12 ..  5.1175  V |    2.5  mV        1
        -10.24 .. 10.235   V |    5    mV        1
 
 To calculate to 'volt_per_bit' property for other types of cards just divide
@@ -200,7 +200,7 @@ written as a number, followed by a suffix, indicating a unit:
      -------+-------------
         f   | femto  1e-15
         p   | pico   1e-12
-		n   | nano   1e-9
+        n   | nano   1e-9
         u   | micro  1e-6
         m   | milli  1e-3
         k   | kilo   1e+3
@@ -236,7 +236,7 @@ of return codes with a short explanation:
   RULBUS_NO_MEMORY                    Running out of memory
   RULBUS_CONF_FILE_ACCESS             No permission to open configuration file
   RULBUS_CONF_FILE_NAME_INVALID       Invalid configuration file name (probably
-									  the file doesn't exist)
+                                      the file doesn't exist)
   RULBUS_CONF_FILE_OPEN_FAIL          Failure to opne the configuration file
   RULBUS_CF_SYNTAX_ERROR              Syntax error in the configration file
   RULBUS_CF_EOF_IN_COMMENT            End of file detected in configuration
@@ -253,48 +253,48 @@ of return codes with a short explanation:
   RULBUS_CF_CARD_NAME_CONFLICT        Two or more cards with the same name
   RULBUS_CF_CARD_ADDR_INVALID         Invalid card address
   RULBUS_CF_CARD_ADDR_CONFLICT        Two or more cards in a rack have been
-									  assigned the same address
+                                      assigned the same address
   RULBUS_CF_CARD_ADDR_DUPLICATE       Two or more different address assigned
-									  to the same card
+                                      to the same card
   RULBUS_CF_CARD_ADDR_DEF_CONFLICT    Two or more cards of the same type in a
-									  rack have no address assigned to them
+                                      rack have no address assigned to them
   RULBUS_CF_CARD_ADDR_OVERLAP         The address ranges of two or more cards
-									  in a rack overlap
+                                      in a rack overlap
   RULBUS_CF_CARD_ADDR_GENERIC         An address has been assigned to a card
-									  of type 'rb_generic'
+                                      of type 'rb_generic'
   RULBUS_CF_CARD_PROPERTY_INVALID     A property has been specifed for a card
-									  that does not have this property
+                                      that does not have this property
   RULBUS_CF_DUPLICATE_NUM_CHANNELS    Two or more different values for the
-									  number of channels have been specified
-									  for a card of type 'rb8509_adc12'
+                                      number of channels have been specified
+                                      for a card of type 'rb8509_adc12'
   RULBUS_CF_INVALID_NUM_CHANNELS      Invalid number of channels specified for
-									   a card of type 'rb8509_adc12'
+                                       a card of type 'rb8509_adc12'
   RULBUS_CF_VPB_DUPLICATE             Two or more different values for the
-									  'volt_per_bit' property have been
-									  specified for a 
+                                      'volt_per_bit' property have been
+                                      specified for a 
   RULBUS_CF_INVALID_VPB               An invalid (negative or zero) value has
-									  been specified for the 'volt_per_bit'
-									  property of a card of type 'rb8509_adc12'
-									  or 'rb8910_dac12'
+                                      been specified for the 'volt_per_bit'
+                                      property of a card of type 'rb8509_adc12'
+                                      or 'rb8910_dac12'
   RULBUS_CF_BIPLOAR_DUPLICATE         Two different values have been specified
-									  for the 'bipolar' property of a card of
-									  type 'rb8509_adc12' or 'rb8910_dac12'
+                                      for the 'bipolar' property of a card of
+                                      type 'rb8509_adc12' or 'rb8910_dac12'
   RULBUS_CF_INTR_DELAY_DUPLICATE      Two or more different values have been
-									  specified for the 'intr_delay' property
-									  of a card of type 'rb8514_delay'
+                                      specified for the 'intr_delay' property
+                                      of a card of type 'rb8514_delay'
   RULBUS_CF_INTR_DELAY_INVALID        An invalid (negative) value has been
-									  specfied  for the 'intr_delay' property
-									  of a card of type 'rb8514_delay'
+                                      specfied  for the 'intr_delay' property
+                                      of a card of type 'rb8514_delay'
   RULBUS_DEV_FILE_ACCESS              No permission to open the device file
-									  for the Rulbus
+                                      for the Rulbus
   RULBUS_DEV_FILE_NAME_INVALID        Invalid device file name (probably the
-									  file doesn't exist)
+                                      file doesn't exist)
   RULBUS_DEV_NO_DEVICE                File does not exist (probably because
-									  driver for the device isn't loaded)
+                                      driver for the device isn't loaded)
   RULBUS_SIGNAL_RECEIVED              During a function call (for opening,
                                       closing, reading or writing) a signal
-									  has been received before the function
-									  could do anything.
+                                      has been received before the function
+                                      could do anything.
   RULBUS_EXCL_ACCESS_DENIED           Failure to open the device with exclusive
                                       access permissions
   RULBUS_EXCL_ACCESS_BY_OTHER         Failure to open the device because some
@@ -309,26 +309,27 @@ of return codes with a short explanation:
   RULBUS_INVALID_CARD_NAME            Specified card name does not exist
   RULBUS_INVALID_CARD_HANDLE          Specified card handle does not exist
   RULBUS_CARD_NOT_OPEN                Missing call of rulbus_card_open()
-									  for card of specified handle
+                                      for card of specified handle
   RULBUS_INVALID_CARD_OFFSET          Address offset for the card is invalid
   RULBUS_WRITE_ERROR                  Write error while trying to write data
-									  to the card
+                                      to the card
   RULBUS_READ_ERROR                   Read error while trying to read data from
-									  the card
+                                      the card
   RULBUS_CARD_IS_BUSY                 Card of type 'rb8614_delay' is producing
-									  delay while rulbus_delay_set_delay() is
-									  called without the 'force' flag being set
+                                      delay while rulbus_delay_set_delay() is
+                                      called without the 'force' flag being set
   RULBUS_INVALID_VOLTAGE              Output voltage of range in call of
-									  rulbus_dac12_set_voltage()
+                                      rulbus_dac12_set_voltage()
   RULBUS_TIME_OUT                     Time-out error while trying to write to
-									  or reading from a card 
+                                      or reading from a card 
   RULBUS_NO_CLOCK_FREQ                No input clock frequency has been set
-									  before rulbus_delay_set_delay() is called
+                                      before rulbus_delay_set_delay() is called
 
 
 ----------------------------------------------------------------------
 
-int rulbus_open( int flags )
+int
+rulbus_open( int flags )
 
 Before anything else the RULBUS must be initialized by calling this
 function. It will try to read in the configuration file, which is
@@ -368,7 +369,8 @@ up. All opened cards are closed automatically.
 
 ----------------------------------------------------------------------
 
-int rulbus_perror( const char *s )
+int
+rulbus_perror( const char * s )
 
 The function prints out a string to stderr, consisting of a string
 pased to it as the argument, a colon, a blank and a short descriptive
@@ -382,7 +384,8 @@ before this function) an appropriate string is printed.
 
 ----------------------------------------------------------------------
 
-const char *rulbus_strerror( void )
+const char *
+rulbus_strerror( void )
 
 The function returns a pointer to a (read-only) string with a short
 descriptive text of the error encountered in the last invocation of
@@ -394,7 +397,8 @@ function) an appropriate string is returned.
 
 ----------------------------------------------------------------------
 
-int rulbus_card_open( const char *name )
+int
+rulbus_card_open( const char * name )
 
 This function must be called for a card on the RULBUS before it can
 be used. It expects the name of the card (as set in the configuration
@@ -408,7 +412,8 @@ returned.
 
 ----------------------------------------------------------------------
 
-void rulbus_card_close( int handle )
+void
+rulbus_card_close( int handle )
 
 This function can be called to "deactivate" the card. Once it has been
 called the card can't be used anymore unless rulbus_card_open() is
@@ -418,7 +423,9 @@ the function rulbus_close() is invoked.
 
 ----------------------------------------------------------------------
 
-int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
+int
+rulbus_get_card_info( const char       * card_name,
+                      RULBUS_CARD_INFO * card_info )
 
 This function can be used to obtain information about the contents
 of an entry in the Rulbus configuration file for a certain card even
@@ -429,12 +436,12 @@ It returns the information about the card in a user-defined structure
 of type RULBUS_CARD_INFO which is typedef'ed to
 
       typedef struct {
-      	  int type;
-      	  int num_channels;
-		  int has_ext_trigger;
-      	  double volt_per_bit;
-      	  int bipolar;
-      	  double intr_delay;
+          int type;
+          int num_channels;
+          int has_ext_trigger;
+          double volt_per_bit;
+          int bipolar;
+          double intr_delay;
       } RULBUS_CARD_INFO;
 
 'type' is the type of the card, one of the (numerical) values RB8509_ADC12,
@@ -473,14 +480,15 @@ configuration file has changed between the invocations.
 III rb8509_adc12 (12-bit ADC) Functions
 ---------------------------------------
 
-On intitialization (when rulbus_card_open() is called) the card is
+On initialization (when rulbus_card_open() is called) the card is
 set up to use channel 0, a gain of 1 and to run in internal trigger
 mode.
 
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_num_channels( int handle )
+int
+rulbus_rb8509_adc12_num_channels( int handle )
 
 This function returns the number of channels of the card. This function
 can fail only due to an invalid 'handle' argument, in which case
@@ -489,7 +497,9 @@ RULBUS_INVALID_HANDLE is returned.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_set_channel( int handle, int channel )
+int
+rulbus_rb8509_adc12_set_channel( int handle,
+                                 int channel )
 
 This function can be called to set the the channel for which conversions
 are to be done. It must be a number between 0 and one less than the
@@ -502,7 +512,9 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_set_gain( int handle, int gain )
+int
+rulbus_rb8509_adc12_set_gain( int handle,
+                              int gain )
 
 This function allows to set the gain of the card. The 'gain' argument
 can be one of the following constants
@@ -520,7 +532,9 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
+int
+rulbus_rb8509_adc12_set_trigger_mode( int handle,
+                                      int mode )
 
 This function allows to switch between the trigger modes, In internal
 mode a conversion is triggered by software, i.e. by asking for a converted
@@ -539,8 +553,11 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_properties( int handle, double *Vmax, double *Vmin,
-									double *dV )
+int
+rulbus_rb8509_adc12_properties( int      handle,
+                                double * Vmax,
+                                double * Vmin,
+                                double * dV )
 
 This function can be used to determine the maximum and minimum
 input voltage as well as the voltage resolution of the ADC for
@@ -552,7 +569,9 @@ RULBUS_INV_HND is returned.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_check_convert( int handle, double *volts )
+int
+rulbus_rb8509_adc12_check_convert( int      handle,
+                                   double * volts )
 
 This function should only be used when the card is in external trigger
 mode. It checks is a conversion has already happened. If this was the
@@ -565,7 +584,9 @@ function returns a negative value indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8509_adc12_convert( int handle, double *volts )
+int
+rulbus_rb8509_adc12_convert( int      handle,
+                             double * volts )
 
 This function can be used both in internal as well as external trigger
 mode. If the card is in internal trigger mode a conversion is triggered.
@@ -584,7 +605,7 @@ indicating the reason for the failure.
 IV rb8510_dac12 (12-bit DAC) Functions
 --------------------------------------
 
-On intitialization (when rulbus_card_open() is called) no changes
+On initialization (when rulbus_card_open() is called) no changes
 of the already set output voltage of the DAC are done and the last
 set voltages remains at the output of the DAC when the connection
 to the DAC is closed.
@@ -592,8 +613,11 @@ to the DAC is closed.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
-									double *dV )
+int
+rulbus_rb8510_dac12_properties( int      handle,
+                                double * Vmax,
+                                double * Vmin,
+                                double * dV )
 
 This function can be used to determine the maximum and minimum
 output voltage as well as the voltage resolution of the DAC. The
@@ -604,7 +628,9 @@ they are NULL). This function can fail only due to an invalid
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8510_dac12_set_voltage( int handle, double volts )
+int
+rulbus_rb8510_dac12_set_voltage( int    handle,
+                                 double volts )
 
 Using this function you can set the output voltage of the connector
 associated with the handle you received when calling rulbus_card_open().
@@ -621,24 +647,28 @@ indicating the reason for the failure.
 V rb8514_delay (Delay Card) Functions
 -------------------------------------
 
-On intitialization (when rulbus_card_open() is called) a delay it may
-be currently creating is stopped, the delay is set to 0 and the creation
-of start or end pulses is switched off and the polarity of start end end
-pulses is set to positive. When the card is closed (either directly by a
-call of rulbus_card_close() or indirectly on a call of rulbus_close())
-the card is left in the state it is at that moment.
+On initialization (when rulbus_card_open() is called) a delay the card
+may be currently in th eprocess of creating is stopped, the delay is set
+to 0 and the creation of start or end pulses is switched off and the
+polarity of start end end pulses is set to positive. When the card is
+closed (either directly by a call of rulbus_card_close() or indirectly
+on a call of rulbus_close()) the card is left in the state it is at that
+moment.
 
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
+int
+rulbus_rb8514_delay_set_clock_frequency( int    handle,
+                                         double freq )
 
 In order to be able to create delays when passed a delay time (instead
 of a number of clock ticks) the library needs to know the frequency of
 the input clock. It is therefore required that before the function
 rulbus_rb8514_delay_set_delay() is called to do a (successful) call
-of rulbus_rb8514_delay_set_clock_frequency() to inform the library
-about the clocks frequency (in Hz).
+of rulbus_rb8514_delay_set_clock_frequency() with the frequency of
+the connected clock (in Hz) to inform the library about the clocks
+frequency.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
@@ -646,7 +676,10 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
+int
+rulbus_rb8514_delay_set_delay( int    handle,
+                               double delay,    
+                               int    force )
 
 This function can be called to set the delay to be produced by the
 card. In order to be able to do so the frequency of the input clock
@@ -673,8 +706,10 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
-									   int force )
+int
+rulbus_rb8514_delay_set_raw_delay( int           handle,
+                                   unsigned long delay,
+                                   int           force )
 
 The function is for setting the number of ticks of an external clock
 during which the card will output a pulse. It must be a number between
@@ -696,7 +731,9 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_trigger( int handle, int edge )
+int
+rulbus_rb8514_delay_set_trigger( int handle,
+                                 int edge )
 
 This function lets you select if the delay is started on the raising
 or the falling edge of an external trigger. To make the card start
@@ -709,7 +746,10 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
+int
+rulbus_rb8514_delay_set_output_pulse( int handle,
+                                      int output,
+                                      int type )
 
 This function allows to set if a start and/or end pulse is to be created
 at output 1 and/or 2. If the 'output' argument is RULBUS_RB8514_DELAY_OUTPUT_1
@@ -732,8 +772,10 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
-												   int pol )
+int
+rulbus_rb8514_delay_set_output_pulse_polarity( int handle,
+                                               int type,
+                                               int pol )
 
 This function lets you select the polarity of the start and/or end pulses.
 The 'type' argument are the same as for the previous function, i.e. it
@@ -755,7 +797,8 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_software_start( int handle )
+int
+rulbus_rb8514_software_start( int handle )
 
 This function allows to start the creation of a delay via software.
 
@@ -765,7 +808,8 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_delay_busy( int handle )
+int
+rulbus_rb8514_delay_busy( int handle )
 
 This function lets you determine if the card is currently creating a
 delay. It returns 1 in this case or 0 if the card isn't just creating
@@ -775,9 +819,10 @@ failure is returned.
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8514_software_start( int handle )
+int
+rulbus_rb8514_software_start( int handle )
 
-Usually, delays get started on receipt of an external trigger. Using with
+Usually, delays get started on receipt of an external trigger. Using
 this function a delay can also be started via software (by toggling the
 trigger edge). On successful return the trigger slope is set back to the
 initial value.
@@ -792,14 +837,16 @@ indicating the reason for the failure.
 VI rb8515_clock (Clock Card) Functions
 --------------------------------------
 
-On intitialization (when rulbus_card_open() is called) no changes
-are done to an already set output frequency of the card and when
-the connection to the card is closed will remain to be output.
+On initialization (when rulbus_card_open() is called) no changes are
+done to the output frequency of the card and when the connection to
+the card is closed it will remain unchanged.
 
 
 ----------------------------------------------------------------------
 
-int rulbus_rb8515_clock_set_frequency( int handle, int freq )
+int
+rulbus_rb8515_clock_set_frequency( int handle,
+                                   int freq )
 
 This function lets you set the frequency of the clock card. Beside the
 handle for the card (as returned by rulbus_card_open()) the function
@@ -839,8 +886,11 @@ been written.
 
 ----------------------------------------------------------------------
 
-int rulbus_generic_write( int handle, unsigned char address,
-						  unsigned char *data, size_t len )
+int
+rulbus_generic_write( int             handle,
+                      unsigned char   address,
+                      unsigned char * data,
+                      size_t len )
 
 Using this function 'len' bytes from buffer 'data' can be written
 to a rack address (must be between 1 and 254).
@@ -851,8 +901,11 @@ indicating the reason for the failure.
 
 ----------------------------------------------------------------------
 
-int rulbus_generic_read( int handle, unsigned char address,
-						 unsigned char *data, size_t len )
+int
+rulbus_generic_read( int             handle,
+                     unsigned char   address,
+                     unsigned char * data,
+                     size_t len )
 
 Using this function 'len' bytes can be read from a rack address (must
 be between 1 and 254), which are returned via the buffer 'data' (which
@@ -876,7 +929,8 @@ from the 12-bit ADC (RB8509).
 #include <stdlib.h>
 #include <rulbus.h>
 
-int main( void )
+int
+main( void )
 {
     int handle;
     double volts;
