@@ -151,13 +151,12 @@ fsc2_request_serial_port( const char * dev_file,
 
         /* We need memory for the name of the file the link points to */
 
-        real_name = T_malloc( pathmax + 2 );
-        if (    ( length = readlink( dev_file, real_name, pathmax + 2 ) ) < 0
+        real_name = T_malloc( pathmax + 1 );
+        if (    ( length = readlink( dev_file, real_name, pathmax + 1 ) ) < 0
              || length > pathmax )
         {
-            eprint( FATAL, UNSET, "%s: Can't follow symbolic link that is the "
-                    "file given as the serial port device file '%s'.\n",
-                    dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Can't follow symbolic link for "
+                    "serial port device file '%s'.\n", dev_name, dev_file );
             T_free( real_name );
             THROW( EXCEPTION );
         }
