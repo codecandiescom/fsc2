@@ -77,8 +77,7 @@ fsc2_request_serial_port( const char * dev_file,
 {
     int i;
     struct stat stat_buf;
-    char *real_name = NULL;
-    size_t pathmax = get_pathmax( );
+    char *real_name;
 
 
     /* Check that the device name is reasonable */
@@ -93,23 +92,23 @@ fsc2_request_serial_port( const char * dev_file,
 	/* Check that the device file is a char device file, check the "real"
        file and not symbolic links */
 
-    if ( lstat( dev_file, &stat_buf ) == -1 )
+    if ( stat( dev_file, &stat_buf ) == -1 )
     {
         if ( errno == EACCES )
-            eprint( FATAL, UNSET, "%s: Missing permissions to access device "
-                    "file '%s'.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Missing permissions to access serial "
+                    "port device file '%s'.\n", dev_name, dev_file );
         else if ( errno == ENOENT || errno == ENOTDIR )
-            eprint( FATAL, UNSET, "%s: Device file '%s' does not exist.\n",
-                    dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Serial port evice file '%s' does not "
+                    "exist.\n", dev_name, dev_file );
         else if ( errno == ENOMEM )
-            eprint( FATAL, UNSET, "%s: Running out of memory whhile testing "
-                    "device file '%s' does not exist.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Running out of memory while testing "
+                    "serial port device file '%s'.\n", dev_name, dev_file );
         else if ( errno == ENAMETOOLONG )
-            eprint( FATAL, UNSET, "%s: Name of device file '%s' is too long.\n",
-                    dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Name of serial port device file '%s' "
+                    "is too long.\n", dev_name, dev_file );
         else
-            eprint( FATAL, UNSET, "%s: Unexpected error while testing device "
-                    "file '%s'.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Unexpected error while testing serial "
+                    "port device file '%s'.\n", dev_name, dev_file );
         THROW( EXCEPTION );
     }
 
@@ -121,42 +120,59 @@ fsc2_request_serial_port( const char * dev_file,
     }
 
     /* If the name given as the device file is a symbolic link obtain the
-       real name */
+       real name - otherwise we might be fooled into accepting the same
+       device file more than once */
 
-    if ( stat( dev_file, &stat_buf ) == -1 )
+    if ( lstat( dev_file, &stat_buf ) == -1 )
     {
         if ( errno == EACCES )
-            eprint( FATAL, UNSET, "%s: Missing permissions to access device "
-                    "file '%s'.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Missing permissions to access serial "
+                    "port device file '%s'.\n", dev_name, dev_file );
         else if ( errno == ENOENT || errno == ENOTDIR )
-            eprint( FATAL, UNSET, "%s: Device file '%s' does not exist.\n",
+            eprint( FATAL, UNSET, "%s: A serial port device file named '%s' "
+                    "does not exist.\n",
                     dev_name, dev_file );
         else if ( errno == ENOMEM )
-            eprint( FATAL, UNSET, "%s: Running out of memory whhile testing "
-                    "device file '%s' does not exist.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Running out of memory while testing "
+                    "serial port device file '%s'.\n", dev_name, dev_file );
         else if ( errno == ENAMETOOLONG )
-            eprint( FATAL, UNSET, "%s: Name of device file '%s' is too long.\n",
-                    dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Name of serial port device file '%s' "
+                    "is too long.\n", dev_name, dev_file );
         else
-            eprint( FATAL, UNSET, "%s: Unexpected error while testing device "
-                    "file '%s'.\n", dev_name, dev_file );
+            eprint( FATAL, UNSET, "%s: Unexpected error while testing serial "
+                    "port device file '%s'.\n", dev_name, dev_file );
         THROW( EXCEPTION );
     }
 
     if ( S_ISLNK( stat_buf.st_mode ) )
     {
+        size_t pathmax = get_pathmax( );
         ssize_t length;
 
         /* We need memory for the name of the file the link points to */
 
-        real_name = T_malloc( pathmax + 1 );
-        if ( ( length = readlink( dev_file, real_name, pathmax ) ) < 0 )
+        real_name = T_malloc( pathmax + 2 );
+        if (    ( length = readlink( dev_file, real_name, pathmax + 2 ) ) < 0
+             || length > pathmax )
         {
             eprint( FATAL, UNSET, "%s: Can't follow symbolic link that is the "
-                    "file given as the device file '%s'.\n",
+                    "file given as the serial port device file '%s'.\n",
                     dev_name, dev_file );
             T_free( real_name );
             THROW( EXCEPTION );
+        }
+
+        real_name[ length ] = '\0';
+
+        TRY
+        {
+            real_name = T_realloc( real_name, strlen( real_name ) + 1 );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( real_name );
+            RETHROW( ) ;
         }
     }
     else

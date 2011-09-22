@@ -107,8 +107,9 @@ device_add( const char * name )
     {
         /* We need memory for the name of the file the link points to */
 
-        real_name = T_malloc( pathmax + 1 );
-        if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
+        real_name = T_malloc( pathmax + 2 );
+        if (    ( length = readlink( lib_name, real_name, pathmax + 2 ) ) < 0
+             || length > pathmax )
         {
             eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
                     lib_name );
