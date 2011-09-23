@@ -375,8 +375,9 @@ magnet_setup( Var_T * v )
 
     if ( field_step < ER032M_MIN_FIELD_STEP )
     {
-        print( FATAL, "Field sweep step size (%f G) too small, minimum is "
-               "%f G.\n", VALUE( v ), ER032M_MIN_FIELD_STEP );
+        print( FATAL, "Field sweep step size (%.0f mG) too small, minimum is "
+               "%.0f mG.\n", 1.0e3 * VALUE( v ),
+               1.0e3 * ER032M_MIN_FIELD_STEP );
         THROW( EXCEPTION );
     }
 

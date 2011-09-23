@@ -297,8 +297,7 @@ er035m_sa_exp_hook( void )
                 break;
 
             case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-                print( FATAL, "NMR gaussmeter has an unidentifiable "
-                       "problem.\n" );
+                print( FATAL, "Gaussmeter can't find the field ("FIELD?").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */

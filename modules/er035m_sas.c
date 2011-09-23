@@ -232,7 +232,7 @@ er035m_sas_exp_hook( void )
     if ( er035m_sas_write( "ED" ) == FAIL )
         er035m_sas_comm_fail( );
 
-    /* Find out the curent resolution, and if necessary, change it to the
+    /* Find out the current resolution, and if necessary, change it to the
        value requested by the user */
 
     cur_res = er035m_sas_get_resolution( );
@@ -318,8 +318,8 @@ er035m_sas_exp_hook( void )
                 nmr.state = ER035M_SAS_LOCKED;
                 break;
 
-            case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-                print( FATAL, "Unidentifiable device problem.\n" );
+            case 'A' :      /* FIELD ? -> error */
+                print( FATAL, "Gaussmeter can't find the field ("FIELD?").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */

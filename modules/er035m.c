@@ -277,7 +277,7 @@ er035m_exp_hook( void )
 
     bp = buffer + 2;     /* skip first two chars of status byte */
 
-    do     /* loop through remaining chars in status byte */
+    do     /* Loop through the remaining chars in status byte */
     {
         switch ( *bp )
         {
@@ -331,8 +331,8 @@ er035m_exp_hook( void )
                 nmr.state = ER035M_LOCKED;
                 break;
 
-            case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-                print( FATAL, "Unidentifiable device problem.\n" );
+            case 'A' :      /* FIELD ? -> error */
+                print( FATAL, "Gaussmeter can't find the field ("FIELD?").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */

@@ -362,8 +362,8 @@ er035m_s_exp_hook( void )
                 nmr.state = ER035M_S_LOCKED;
                 break;
 
-            case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-                print( FATAL, "Unidentifiable device problem.\n" );
+            case 'A' :      /* FIELD ? -> error */
+                print( FATAL, "Gaussmeter can't find the field ("FIELD?").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */
@@ -1285,7 +1285,6 @@ er035m_s_comm( int type,
             *lptr = len;
             for ( len = 0; len < ( ssize_t ) *lptr; len++ )
                 buf[ len ] &= 0x3f;
-
             break;
 
         default :
