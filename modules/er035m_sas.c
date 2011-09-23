@@ -319,7 +319,8 @@ er035m_sas_exp_hook( void )
                 break;
 
             case 'A' :      /* FIELD ? -> error */
-                print( FATAL, "Gaussmeter can't find the field ("FIELD?").\n" );
+                print( FATAL, "Gaussmeter can't find the field "
+					   "(\"FIELD?\").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */
