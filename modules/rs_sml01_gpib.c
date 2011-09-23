@@ -793,6 +793,24 @@ rs_sml01_get_double_pulse_delay( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
+void
+rs_sml01_setup_triggered_frequency_sweep( double step )
+{
+    char cmd[ 100];
+
+
+    if ( step <= 0.0 )
+        sprintf( cmd, "SWE:MODE MAN;SWE:STEP 0\n" );
+    else
+        sprintf( cmd, "SWE:MODE STEP;SWE:SPAC LIN;SWE:STEP %.0f\n", step );
+
+    rs_sml01_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
 static void
 rs_sml01_comm_failure( void )
 {

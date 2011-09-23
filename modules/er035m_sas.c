@@ -805,7 +805,7 @@ er035m_sas_get_field( void )
 
         if ( *state_flag >= '3' )
         {
-            print( FATAL, "NMR gaussmeter can't get lock onto the current "
+            print( FATAL, "NMR gaussmeter can't get lock on the current "
                    "field.\n" );
             THROW( EXCEPTION );
         }

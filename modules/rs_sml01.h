@@ -264,6 +264,8 @@ void rs_sml01_set_double_pulse_mode( bool /* state */ );
 void rs_sml01_set_double_pulse_delay( double /* delay */ );
 #endif /* WITH_PULSE_MODULATION */
 
+void rs_sml01_setup_triggered_frequency_sweep( double /* step */ );
+
 
 /*
  * Local variables:
