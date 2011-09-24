@@ -48,24 +48,16 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then  \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell if [ -e $(KERNELDIR)/include/linux/utsrelease.h ]; then \
-	                      kv = `grep UTS_RELEASE                             \
-                               $(KERNELDIR)/include/linux/utsrelease.h       \
-				               2>/dev/null |                                 \
-				               sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/'           \
-                               2>/dev/null`;                                 \
-                      else                                                   \
-	                      kv = `grep UTS_RELEASE                             \
-                               $(KERNELDIR)/include/linux/version.h          \
-				               2>/dev/null |                                 \
-				               sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/'           \
-                               2>/dev/null`;                                 \
-                      fi;                                                    \
-					  if [ -z "$kv" ]; then                                  \
-						  kv = `make --quiet -C $KERNEL_DIR kernelrelease    \
-		                       2>dev/null`;                                  \
-	                  fi;                                                    \
-	                  echo $kv )
+KERNEL_VER := $(shell    grep UTS_RELEASE                                      \
+                              $(KERNELDIR)/include/linux/utsrelease.h          \
+				              2>/dev/null                                      \
+				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
+                      || grep UTS_RELEASE                                      \
+                              $(KERNELDIR)/include/linux/version.h             \
+				              2>/dev/null                                      \
+				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
+                      || make --quiet -C $(KERNELDIR) kernelrelease            \
+		                      2>/dev/null )
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \

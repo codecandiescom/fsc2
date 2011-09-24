@@ -33,11 +33,11 @@ MODULE  := pci_e_series.o
 ifneq ($(NI_DAQ_KERNEL_SOURCE),)
     KERNELDIR := $(NI_DAQ_KERNEL_SOURCE)
 else
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-					     echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+	KERNELDIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+						     echo "/lib/modules/`uname -r`/build";     \
+						 else                                          \
+							 echo "/usr/src/linux";                    \
+						 fi )
 endif
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
@@ -48,17 +48,22 @@ endif
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell    grep UTS_RELEASE                                      \
-                              $(KERNELDIR)/include/linux/utsrelease.h          \
-				              2>/dev/null                                      \
-				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
-                      || grep UTS_RELEASE                                      \
-                              $(KERNELDIR)/include/linux/version.h             \
-				              2>/dev/null                                      \
-				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
-                      || make --quiet -C $(KERNELDIR) kernelrelease            \
-		                      2>/dev/null )
+KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'         \
+                            $(KERNELDIR)/include/linux/utsrelease.h   \
+				            2>/dev/null |                             \
+	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 
+ifeq ($(KERNEL_VER),)
+KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'         \
+                            $(KERNELDIR)/include/linux/version.h      \
+				            2>/dev/null |                             \
+	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+
+endif
+
+ifeq ($(KERNEL_VER),)
+KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
+endif
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
@@ -86,10 +91,10 @@ EXTRA_CFLAGS := -I$(PWD)/include -I$(PWD)/../include -DPCI_E_SERIES
 export OBJECTS
 
 all:
-	echo "1 I'm at $(KERNELDIR) $(KERNEL_VER)"
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 check:
+	echo "1      $(KERNEL_VER)"
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 install:
@@ -122,7 +127,7 @@ export CC CFLAGS INCLUDES
 
 
 all:
-	echo "2 I'm at $(KERNELDIR) $(KERNEL_VER)"
+	echo "1      $(KERNEL_VER)"
 	$(MAKE) -C pci_e_series all
 	$(MAKE) -C daq_stc all
 	$(MAKE) $(MODULE)

@@ -33,13 +33,13 @@ PWD      := $(shell pwd)
 
 ifneq ($(NI6601_KERNEL_SOURCE),)
     KERNELDIR := $(NI6601_KERNEL_SOURCE)
+else
+	KERNELDIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+						     echo "/lib/modules/`uname -r`/build"; \
+						 else \
+							 echo "/usr/src/linux"; \
+						 fi )
 endif
-
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-					     echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
@@ -49,24 +49,22 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell if [ -e $(KERNELDIR)/include/linux/utsrelease.h ]; then \
-	                      kv = `grep UTS_RELEASE                             \
-                               $(KERNELDIR)/include/linux/utsrelease.h       \
-				               2>/dev/null |                                 \
-				               sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/'           \
-                               2>/dev/null`;                                 \
-                      else                                                   \
-	                      kv = `grep UTS_RELEASE                             \
-                               $(KERNELDIR)/include/linux/version.h          \
-				               2>/dev/null |                                 \
-				               sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/'           \
-                               2>/dev/null`;                                 \
-                      fi;                                                    \
-					  if [ -z "$kv" ]; then                                  \
-						  kv = `make --quiet -C $KERNEL_DIR kernelrelease    \
-		                       2>dev/null`;                                  \
-	                  fi;                                                    \
-	                  echo $kv )
+KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'         \
+                            $(KERNELDIR)/include/linux/utsrelease.h   \
+				            2>/dev/null |                             \
+	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+
+ifeq ($(KERNEL_VER),)
+KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'         \
+                            $(KERNELDIR)/include/linux/version.h      \
+				            2>/dev/null |                             \
+	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+
+endif
+
+ifeq ($(KERNEL_VER),)
+KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
+endif
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
@@ -93,6 +91,7 @@ OBJECTS  := $(SOURCES:.c=.o)
 export OBJECTS
 
 all:
+	echo "1 $(KERNELDIR) $(KERNEL_VER)"
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 check:
@@ -124,6 +123,7 @@ CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 .PHONY: all install cleanup clean pack
 
 all:
+	echo "2 $(KERNELDIR) $(KERNEL_VER)"
 	$(MAKE) $(MODULE)
 
 $(MODULE): $(SOURCES:.c=.o)

@@ -167,7 +167,7 @@ void GPCT_reset_all( Board * board )
 	  /* Switch to full clock speed */
 
 	  board->stc.Clock_and_FOUT &= ~ G_Source_Divide_By_2;
-	  board->GPCT0.timebase1 = board->GPCT0.timebase1 = 50;
+	  board->GPCT0.timebase1 = 50;
 
 	  board->func->stc_writew( board, STC_Clock_and_FOUT,
 				   board->stc.Clock_and_FOUT );
