@@ -74,6 +74,7 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <linux/poll.h>
+#include <linux/sched.h>
 
 #if defined ( CONFIG_PROC_FS )
 #include <linux/proc_fs.h>

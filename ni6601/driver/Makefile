@@ -53,13 +53,13 @@ KERNEL_VER := $(shell if [ -e $(KERNELDIR)/include/linux/utsrelease.h ]; then \
 	                       grep UTS_RELEASE                                   \
                                 $(KERNELDIR)/include/linux/utsrelease.h       \
 				                2>/dev/null |                                 \
-				                sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/  ' \
+				                sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/  '         \
                                 2>/dev/null;                                  \
                       else                                                    \
 	                       grep UTS_RELEASE                                   \
                                 $(KERNELDIR)/include/linux/version.h          \
 				                2>/dev/null |                                 \
-				                sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/'   \
+				                sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/'           \
                                 2>/dev/null;                                  \
                       fi )
 

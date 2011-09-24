@@ -215,6 +215,7 @@ typedef struct {
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <linux/poll.h>
+#include <linux/sched.h>
 
 #ifdef CONFIG_PROC_FS
 #include <linux/proc_fs.h>
@@ -247,7 +248,6 @@ typedef struct {
 #ifndef init_MUTEX_LOCKED
 # define init_MUTEX_LOCKED( sem ) sema_init( sem, 0 )
 #endif
-
 
 #include "autoconf.h"
 

@@ -24,14 +24,14 @@
 
 install:
 ifdef WITH_RULBUS
-	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]+RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RB_PULSER_J_CONFIG_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                \
 	if [      -n "$$rb_pulser_j_cards"                                 \
 		 -a   -e $$rb_pulser_j_cards ]; then                           \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$rb_pulser_j_cards  \
 												  $(libdir);           \
 	fi
 
-	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]+RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RB_PULSER_W_CONFIG_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                \
 	if [      -n "$$rb_pulser_w_cards"                                 \
 		 -a   -e $$rb_pulser_w_cards ]; then                           \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$rb_pulser_w_cards  \
@@ -40,7 +40,7 @@ ifdef WITH_RULBUS
 endif
 
 ifdef WITH_RS_SPEC10
-	rs_spec10_state=`grep '^[ \t]*#define[ \t]\{1,\}RS_SPEC10_STATE_FILE' rs_spec10.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RS_SPEC10_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                        \
+	rs_spec10_state=`grep '^[ \t]*#define[ \t]+RS_SPEC10_STATE_FILE' rs_spec10.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RS_SPEC10_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                        \
 	if [      -n "$$rs_spec10_state"                                 \
 		 -a   -e $$rs_spec10_state                                   \
 		 -a ! -e $(libdir)/$$rs_spec10_state ]; then                 \
@@ -50,7 +50,7 @@ ifdef WITH_RS_SPEC10
 endif
 
 ifdef WITH_WITIO_48
-	hjs_fc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_fc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                          \
+	hjs_fc_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_fc.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                                          \
 	if [      -n "$$hjs_fc_calib"                                            \
 		 -a   -e $$hjs_fc_calib                                              \
 		 -a ! -e $(libdir)/$$hjs_fc_calib ]; then                            \
@@ -58,7 +58,7 @@ ifdef WITH_WITIO_48
 	fi
 endif
 
-	spex_cd2a_state=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_STATE_FILE' spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                        \
+	spex_cd2a_state=`grep '^[ \t]*#define[ \t]+SPEX_CD2A_STATE_FILE' spex_cd2a.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+SPEX_CD2A_STATE_FILE[ 	]\}"\([^"]\+\)"/\1/'`;                                        \
 	if [      -n "$$spex_cd2a_state"                                 \
 		 -a   -e $$spex_cd2a_state                                   \
 		 -a ! -e $(libdir)/$$spex_cd2a_state ]; then                 \
@@ -66,21 +66,21 @@ endif
 												  $(libdir);         \
 	fi
 
-	hp8647a_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8647a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                         \
+	hp8647a_table=`grep '^[ \t]*#define[ \t]+DEFAULT_TABLE_FILE' hp8647a.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_TABLE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                                         \
 	if [      -n "$$hp8647a_table"                                            \
 		 -a   -e $$hp8647a_table                                              \
 		 -a ! -e $(libdir)/$$hp8647a_table ]; then                            \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$hp8647a_table $(libdir);  \
 	fi
 
-	hp8648b_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                         \
+	hp8648b_table=`grep '^[ \t]*#define[ \t]+DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_TABLE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                                         \
 	if [      -n "$$hp8648b_table"                                            \
 		 -a   -e $$hp8648b_table                                              \
 		 -a ! -e $(libdir)/$$hp8648b_table ]; then                            \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$hp8648b_table $(libdir);  \
 	fi
 
-	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                       \
+	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                       \
 	if [      -n "$$hjs_attenuator_calib"                                 \
 		 -a   -e $$hjs_attenuator_calib                                   \
 		 -a ! -e $(libdir)/$$hjs_attenuator_calib ]; then                 \
@@ -88,7 +88,7 @@ endif
                                                   $(libdir);              \
 	fi
 
-	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                      \
+	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                      \
 	if [      -n "$$spectrapro_300i_calib"                                 \
 		 -a   -e $$spectrapro_300i_calib                                   \
 		 -a ! -e $(libdir)/$$spectrapro_300i_calib ]; then                 \
@@ -96,7 +96,7 @@ endif
                                                   $(libdir);               \
 	fi
 
-	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                                 \
+	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                                 \
 	if [      -n "$$hjs_sfc_calib"                                            \
 		 -a   -e $$hjs_sfc_calib                                              \
 		 -a ! -e $(libdir)/$$hjs_sfc_calib ]; then                            \
@@ -104,7 +104,7 @@ endif
 	fi
 
 ifdef WITH_MEDRIVER
-	er218_state=`grep '^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                        \
+	er218_state=`grep '^[ \t]*#define[ \t]+ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+ER218_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                        \
 	if [      -n "$$er218_state"                                 \
 		 -a   -e $$er218_state                                   \
 		 -a ! -e $(libdir)/$$er218_state ]; then                 \
@@ -113,7 +113,7 @@ ifdef WITH_MEDRIVER
 	fi
 endif
 
-	epr_mod_state=`grep '^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                              \
+	epr_mod_state=`grep '^[ \t]*#define[ \t]+EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+EPR_MOD_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                              \
 	if [      -n "$$epr_mod_state"                                 \
 	     -a   -e $$epr_mod_state                                   \
          -a ! -e $(libdir)/$$epr_mod_state ]; then                 \
@@ -124,13 +124,13 @@ endif
 
 uninstall:
 ifdef WITH_RULBUS
-	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                  \
+	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]+RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RB_PULSER_J_CONFIG_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                  \
 	if [    -n "$$rb_pulser_j_cards"                     \
 	     -a -e $(libdir)/$$rb_pulser_j_cards ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$rb_pulser_j_cards;  \
 	fi
 
-	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                  \
+	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]+RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RB_PULSER_W_CONFIG_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                  \
 	if [    -n "$$rb_pulser_w_cards"                     \
 	     -a -e $(libdir)/$$rb_pulser_w_cards ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$rb_pulser_w_cards;  \
@@ -138,7 +138,7 @@ ifdef WITH_RULBUS
 endif
 
 ifdef WITH_RS_SPEC10
-	rs_spec10_state=`grep '^[ \t]*#define[ \t]\{1,\}RS_SPEC10_STATE_FILE' rs_spec10.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RS_SPEC10_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                          \
+	rs_spec10_state=`grep '^[ \t]*#define[ \t]+RS_SPEC10_STATE_FILE' rs_spec10.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+RS_SPEC10_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                          \
 	if [    -n "$$rs_spec10_state"                     \
 	     -a -e $(libdir)/$$rs_spec10_state ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$rs_spec10_state;  \
@@ -146,56 +146,56 @@ ifdef WITH_RS_SPEC10
 endif
 
 ifdef WITH_WITIO_48
-	hjs_fc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_fc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                 \
+	hjs_fc_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_fc.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                 \
 	if [    -n "$$hjs_fc_calib"                     \
 	     -a -e $(libdir)/$$hjs_fc_calib ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$hjs_fc_calib;  \
 	fi
 endif
-	spex_cd2a_state=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_STATE_FILE' spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                          \
+	spex_cd2a_state=`grep '^[ \t]*#define[ \t]+SPEX_CD2A_STATE_FILE' spex_cd2a.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+SPEX_CD2A_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                          \
 	if [    -n "$$spex_cd2a_state"                     \
 		 -a -e $(libdir)/$$spex_cd2a_state ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$spex_cd2a_state;  \
 	fi
 
-	hp8647a_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8647a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	hp8647a_table=`grep '^[ \t]*#define[ \t]+DEFAULT_TABLE_FILE' hp8647a.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_TABLE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                \
 	if [    -n "$$hp8647a_table"                     \
 	     -a -e $(libdir)/$$hp8647a_table ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$hp8647a_table;  \
 	fi
 
-	hp8648b_table=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_TABLE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	hp8648b_table=`grep '^[ \t]*#define[ \t]+DEFAULT_TABLE_FILE' hp8648b.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_TABLE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                \
 	if [    -n "$$hp8648b_table"                     \
 	     -a -e $(libdir)/$$hp8648b_table ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$hp8648b_table;  \
 	fi
 
-	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                   \
+	hjs_attenuator_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_attenuator.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                   \
 	if [ -n "$$hjs_attenuator_calib" ]; then                \
 		$(RM) $(RMFLAGS) $(libdir)/$$hjs_attenuator_calib;  \
 	fi
 
-	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                  \
+	spectrapro_300i_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' spectrapro_300i.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                  \
 	if [ -n "$$spectrapro_300i_calib"                        \
 	     -a -e $(libdir)/$$spectrapro_300i_calib ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$spectrapro_300i_calib;  \
 	fi
 
-	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                          \
+	hjs_sfc_calib=`grep '^[ \t]*#define[ \t]+DEFAULT_CALIB_FILE' hjs_sfc.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+DEFAULT_CALIB_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                          \
 	if [    -n "$$hjs_sfc_calib"                     \
 	     -a -e $(libdir)/$$hjs_sfc_calib ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$hjs_sfc_calib;  \
 	fi
 
 ifdef WITH_MEDRIVER
-	er218_state=`grep '^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                      \
+	er218_state=`grep '^[ \t]*#define[ \t]+ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+ER218_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                      \
 	if [    -n "$$er218_state"                     \
 	     -a -e $(libdir)/$$er218_state ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$er218_state;  \
 	fi
 endif
 
-	epr_mod_state=`grep '^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	epr_mod_state=`grep '^[ \t]*#define[ \t]+EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ 	]*#define[ 	]\+EPR_MOD_STATE_FILE[ 	]\+"\([^"]\+\)"/\1/'`;                                \
 	if [    -n "$$epr_mpd_state"                     \
 	     -a -e $(libdir)/$$epr_mod_state ]; then     \
 		$(RM) $(RMFLAGS) $(libdir)/$$epr_mod_state;  \
