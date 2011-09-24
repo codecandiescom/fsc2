@@ -92,6 +92,16 @@
 #endif
 
 
+// These two macros are removed in kernel 2.6.37 but we're still using them
+
+#ifndef init_MUTEX
+# define init_MUTEX(sem)         sema_init(sem, 1)
+#endif
+#ifndef init_MUTEX_LOCKED
+# define init_MUTEX_LOCKED(sem)  sema_init(sem, 0)
+#endif
+
+
 /* Please note: All of the following must *not* depend on the special
                 hardware, i.e. it must work for both PCI-E-series as
                 well as AT-MIO-series boards! */
