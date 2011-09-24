@@ -180,16 +180,19 @@ function do_compile() {
 # Check that system headers are available
 
 if [    ! -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
-	 -a ! -e /usr/include/linux/autoconf.h ]; then
-	dialog --msgbox \
-"To create the driver for ME6X00 boards the file\n\
-/lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h\n\
-(or /usr/include/linux/autoconf.h, depending on how old\n\
-your kernel is) is required. This file contains vital\n\
+	 -a ! -e /usr/include/linux/autoconf.h \
+	 -a ! -e /lib/modules/$KERNEL_VERSION/build/include/generated/autoconf.h ];
+                                                                           then
+	 dialog --msgbox \
+"To create the driver for NI DAQ boards the file\n\
+/lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h,\n\
+/lib/modules/$KERNEL_VERSION/build/include/generated/autoconf.h\n\
+or /usr/include/linux/autoconf.h, depending on how old\n\
+your kernel is, is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
 Please also see additonal information in the README file.\n\n\
-Unfortunately, the compilation can't proceed.\n" 13 68;
-	exit 1;
+Unfortunately, the installation can't proceed.\n" 13 62;
+	 exit 1;
 fi
 
 # Compile the driver and the library
@@ -503,8 +506,7 @@ Please also see additonal information in the README file.\n\n\
 				       sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
     if [ -z "$KERNEL_VERSION" ]; then
-        KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease | \
-                        sed 's/^\([0-9]\+\.[0-9]\+\.[0-9]\+\).*$/\1/'`;
+        KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease 2>/dev/null`;
 	fi
 
 	if [ -z "$KERNEL_VERSION" ]; then
