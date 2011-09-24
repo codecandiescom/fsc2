@@ -196,14 +196,13 @@ function do_compile() {
 
 # Check that system headers are available
 
-if [    ! -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
+if [    ! -e $KERNEL_DIR/include/linux/autoconf.h \
 	 -a ! -e /usr/include/linux/autoconf.h \
-	 -a ! -e /lib/modules/$KERNEL_VERSION/build/include/generated/autoconf.h ];
-                                                                           then
+	 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]; then
 	 dialog --msgbox \
 "To create the driver for NI DAQ boards the file\n\
-/lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h,\n\
-/lib/modules/$KERNEL_VERSION/build/include/generated/autoconf.h,\n\
+$KERNEL_DIR/include/linux/autoconf.h,\n\
+$KERNEL_DIR/include/generated/autoconf.h,\n\
 or /usr/include/linux/autoconf.h, depending on how old\n\
 your kernel is, is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
