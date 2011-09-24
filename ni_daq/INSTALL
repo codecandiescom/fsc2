@@ -494,7 +494,11 @@ Unfortunately, the installation can't proceed.\n" 13 68;
                        2>/dev/null | \
 				       sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
-	
+    if [ -z "$KERNEL_VERSION" ]; then
+        KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease | \           
+                        sed 's/^\([0-9]\+\.[0-9]\+\.[0-9]\+\).*$/\1/'`;
+	fi
+
 	if [ -z "$KERNEL_VERSION" ]; then
 		dialog --msgbox "\
 Sorry, can't determine kernel version under the assumption\n\

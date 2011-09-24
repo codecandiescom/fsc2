@@ -502,6 +502,10 @@ Please also see additonal information in the README file.\n\n\
                        2>/dev/null | \
 				       sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
+    if [ -z "$KERNEL_VERSION" ]; then
+        KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease | \           
+                        sed 's/^\([0-9]\+\.[0-9]\+\.[0-9]\+\).*$/\1/'`;
+	fi
 
 	if [ -z "$KERNEL_VERSION" ]; then
 		dialog --msgbox "\
