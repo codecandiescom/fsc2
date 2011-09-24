@@ -948,12 +948,11 @@ EOT
     for ( @vars ) {
         if ( $$_{ type } =~ /^int(_empty)?$/o ) {
             print "
-    if (    (     \$$$_{ name }\{ type \} =~ /^int_empty\$/o
-              and \$$$_{ name }\{ value \} eq '' )
-         or (     \$$$_{ name }\{ value \} ne ''
-              and \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o
-              and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
-              and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) ) {
+    if (     defined \$$$_{ name }\{ value \}
+         and \$$$_{ name }\{ value \} ne ''
+         and \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o
+         and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
+         and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
@@ -961,12 +960,11 @@ EOT
 ";
         } elsif ( $$_{ type } =~ /^float(_empty)?$/o ) {
             print "
-    if (    (     \$$$_{ name }\{ type \} =~ /^float_empty\$/o
-              and \$$$_{ name }\{ value \} eq '' )
-         or (     \$$$_{ name }\{ value \} ne ''
-              and \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o
-              and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
-              and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) ) {
+    if (     defined \$$$_{ name }\{ value \}
+         and \$$$_{ name }\{ value \} ne ''
+         and \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o
+         and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
+         and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";

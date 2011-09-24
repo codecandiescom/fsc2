@@ -59,7 +59,7 @@ fsc2.html: $(docs) $(figures)
 	fi
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
+	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
 
 ps: fsc2.ps.gz
 
@@ -99,10 +99,10 @@ fsc2.pdf: $(docs) $(pdf_pics)
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
 %.pdf: %.png
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found"; \

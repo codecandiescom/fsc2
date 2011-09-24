@@ -150,3 +150,11 @@ edl/wband.meetnet.physics.leidenuniv.nl/3_pulse_epr
 edl/wband.meetnet.physics.leidenuniv.nl/m3_pulse_endor
 edl/wband.meetnet.physics.leidenuniv.nl/pulse_monitor
 edl/milli.ptc.tugraz.at/kinetic
+edl/aiesr6.hmi.de/cw_epr_bruker.EDL
+edl/aiesr6.hmi.de/cw_epr_sr.EDL
+edl/aiesr6.hmi.de/monitor_bruker.EDL
+edl/aiesr6.hmi.de/monitor_sr.EDL
+edl/aiesr6.hmi.de/cw_epr_bruker
+edl/aiesr6.hmi.de/cw_epr_sr
+edl/aiesr6.hmi.de/monitor_bruker
+edl/aiesr6.hmi.de/monitor_sr

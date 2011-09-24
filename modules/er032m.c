@@ -283,7 +283,7 @@ er032m_end_of_test_hook( void )
          || (    ! magnet.is_init
               && floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during test run was %.0f mG.\n",
-                magnet.max_field_dev * 1.0e3 );
+               1.0e3 * magnet.max_field_dev );
     magnet.max_field_dev = 0.0;
     return 1;
 }
@@ -315,7 +315,7 @@ er032m_end_of_exp_hook( void )
          || (    ! magnet.is_init
               && floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during experiment was "
-               "%.0f mG.\n", magnet.max_field_dev * 1.0e3 );
+               "%.0f mG.\n", 1.0e3 * magnet.max_field_dev );
     magnet.max_field_dev = 0.0;
 
     if ( magnet.device >= 0 )
@@ -669,8 +669,8 @@ set_field( Var_T * v )
 
 /*----------------------------------------------------------------*
  * Function returns the minimum field step size if called without
- * an argument and the possible field step size nearest to the
- * argument.
+ * an argument and otherwise the field step size nearest to the
+ * argument feasable.
  *----------------------------------------------------------------*/
 
 Var_T *
