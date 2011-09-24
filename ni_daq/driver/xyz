@@ -1,0 +1,10 @@
+make all KERNEL_VER=2.6.32-33-generic
+make[1]: Entering directory `/home/jens/Lab/fsc2-2.4.0/ni_daq/driver'
+echo "1 I'm at /lib/modules/2.6.32-33-generic/build 2.6.32-33-generic"
+1 I'm at /lib/modules/2.6.32-33-generic/build 2.6.32-33-generic
+make -C /lib/modules/2.6.32-33-generic/build M="/home/jens/Lab/fsc2-2.4.0/ni_daq/driver" EXTRA_CFLAGS="-I/home/jens/Lab/fsc2-2.4.0/ni_daq/driver/include -I/home/jens/Lab/fsc2-2.4.0/ni_daq/driver/../include -DPCI_E_SERIES"
+make[2]: Entering directory `/usr/src/linux-headers-2.6.32-33-generic'
+  Building modules, stage 2.
+  MODPOST 1 modules
+make[2]: Leaving directory `/usr/src/linux-headers-2.6.32-33-generic'
+make[1]: Leaving directory `/home/jens/Lab/fsc2-2.4.0/ni_daq/driver'

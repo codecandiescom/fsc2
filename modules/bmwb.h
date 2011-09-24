@@ -232,13 +232,25 @@ extern BMWB bmwb;
 
 #define AI                      4         /* subdevice ID for analog input */
 
-#define DETECTOR_CURRENT_AI     0         /* detector current */
-#define AFC_SIGNAL_AI           1         /* AFC signal */
-#define UNLEVELED_SIGNAL_AI     2         /* unleveled signal */
-#define UNCALIBRATED_SIGNAL_AI  3         /* uncalibrated signal */
-#define TUNE_MODE_X_SIGNAL_AI   4         /* tune mode x signal */
-#define TUNE_MODE_Y_SIGNAL_AI   6         /* tune mode y signal */
-#define OVERHEAT_SIGNAL_AI      8         /* overheat signal */
+
+#define AI_0                    0
+#define AI_1                    1
+#define AI_2                    2
+#define AI_3                    3
+#define AI_4                    4
+#define AI_5                    5
+#define AI_6                    6
+#define AI_7                    7
+#define AI_8                    8
+
+
+#define DETECTOR_CURRENT_AI     AI_0      /* detector current */
+#define AFC_SIGNAL_AI           AI_1      /* AFC signal */
+#define UNLEVELED_SIGNAL_AI     AI_2      /* unleveled signal */
+#define UNCALIBRATED_SIGNAL_AI  AI_3      /* uncalibrated signal */
+#define TUNE_MODE_X_SIGNAL_AI   AI_4      /* tune mode x signal */
+#define TUNE_MODE_Y_SIGNAL_AI   AI_6      /* tune mode y signal */
+#define OVERHEAT_SIGNAL_AI      AI_8      /* overheat signal */
 
 
 #define AFC_STATE_BIT       0x01
