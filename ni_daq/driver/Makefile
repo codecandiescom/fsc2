@@ -50,11 +50,11 @@ ifndef KERNEL_VER
 
 KERNEL_VER := $(shell    grep UTS_RELEASE                                      \
                               $(KERNELDIR)/include/linux/utsrelease.h          \
-				              2>/dev/null |                                    \
+				              2>/dev/null                                      \
 				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
                       || grep UTS_RELEASE                                      \
                               $(KERNELDIR)/include/linux/version.h             \
-				              2>/dev/null |                                    \
+				              2>/dev/null                                      \
 				              sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null  \
                       || make --quiet -C $(KERNELDIR) kernelrelease            \
 		                      2>/dev/null )
