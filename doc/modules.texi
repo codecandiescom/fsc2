@@ -2266,23 +2266,24 @@ the new module and re-install to make it available to @code{fsc2}.
 If you should want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
 paths and that both the flags @code{-shared} and @code{-fpic} are set
-both for compiling as well as linking. If you have a @code{C} source
+(for both compiling and linking). If you have a @code{C} source file
 called @code{abc123.c} in the @file{modules} directory and you want to
-make a shareable library out of it you should compile it with at least
+make a shareable library out of it you should compile and link it with
+at least
 @example
-  gcc -I../src -I../config -shared -fpic -o abc.o abc.c
+  gcc -I../src -I../config -shared -fpic -o abc.fsc2_so abc.c
 @end example
 @noindent
-To create a shareable library from it you need
-@example
-  ld -shared -fpic -o abc.fsc2_so abc.c
-@end example
-@noindent
-(assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
-you will still have to copy the library to the place where
-@code{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2},
-or need to set the environment variable @code{LD_LIBRARY_PATH} to
-point to the place where the library can be found.
+(assuming you're using GNU's @code{gcc}). Note that to distinguish
+modules from "normal" shared libraries (even modules are shared
+libraries) they are expected to have an extension of @code{.fsc2_so}
+instead of @code{.so}.
+
+If this succeeds you will still have to copy the library to the place
+where @code{fsc2} expects it, i.e.@: usually
+@file{/usr/local/lib/fsc2} (or you need to set the environment variable
+@code{LD_LIBRARY_PATH} to point to the place where the library can be
+found before running @code{fsc2}).
 
 
 @node Linker scripts, Making fsc2 aware of the module, How to compile a module, Writing New Modules

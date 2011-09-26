@@ -206,7 +206,7 @@ int
 er035m_sas_exp_hook( void )
 {
     char buffer[ 21 ], *bp;
-    size_t length = sizeof buffer - 1;
+    size_t length = sizeof buffer;
     Var_T *v;
     long retries;
     int cur_res;
@@ -226,6 +226,7 @@ er035m_sas_exp_hook( void )
 
     if ( ! er035m_sas_write( "REM" ) )
         er035m_sas_comm_fail( );
+    fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
     /* Switch the display on */
 
@@ -258,7 +259,7 @@ er035m_sas_exp_hook( void )
         if ( er035m_sas_write( "PS" ) == FAIL )
             er035m_sas_comm_fail( );
 
-        length = sizeof buffer - 1;
+        length = sizeof buffer;
         if ( er035m_sas_read( buffer, &length ) == OK )
             break;
 
@@ -266,9 +267,9 @@ er035m_sas_exp_hook( void )
             er035m_sas_comm_fail( );
     }
 
-    /* Now look if the status byte says that device is OK where OK means that
-       for the X-Band magnet the F0-probe and for the S-band the F1-probe is
-       connected, modulation is on and the gaussmeter is either in locked
+    /* Now look if the status byte says that the device is OK, where OK means
+	   that for the X-Band magnet the F0-probe and for the S-band the F1-probe
+	   is connected, modulation is on and the gaussmeter is either in locked
        state or is actively searching to achieve the lock (if it's just in
        TRANS L-H or H-L state check again) */
 
@@ -456,7 +457,7 @@ measure_field( Var_T * v  UNUSED_ARG )
             if ( er035m_sas_write( "PS" ) == FAIL )
                 er035m_sas_comm_fail( );
 
-            length = sizeof buffer - 1;
+            length = sizeof buffer;
             if ( er035m_sas_read( buffer, &length ) == OK )
                 break;
 
@@ -562,7 +563,7 @@ gaussmeter_resolution( Var_T * v )
 
     if ( res <= 0 )
     {
-        print( FATAL, "Invalid resolution of %f G.\n", res );
+        print( FATAL, "Invalid resolution of %.0f mG.\n", 1.0e3 * res );
         THROW( EXCEPTION );
     }
 
@@ -586,8 +587,8 @@ gaussmeter_resolution( Var_T * v )
     }
 
     if ( fabs( res_list[ res_index ] - res ) > 1.0e-2 * res_list[ res_index ] )
-        print( WARN, "Can't set resolution to %.3f G, using %.3f G instead.\n",
-               res, res_list[ res_index ] );
+        print( WARN, "Can't set resolution to %.0f mG, using %.0f mG "
+			   "instead.\n", 1.0e3 * res, 1.0e3 * res_list[ res_index ] );
 
     fsc2_assert( res_index >= LOW_RES && res_index <= HIGH_RES );
 
@@ -675,7 +676,7 @@ gaussmeter_upper_search_limit( Var_T * v )
                                    PROBE_TYPE_F1 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested upper search limit too high, changing to "
-               "%ld G\n",
+               "%ld G.\n",
                upper_search_limits[ FSC2_MODE == TEST ?
                                     PROBE_TYPE_F1 : nmr.probe_type ] );
         ul = upper_search_limits[ FSC2_MODE == TEST ?
@@ -719,7 +720,7 @@ gaussmeter_lower_search_limit( Var_T * v )
                                    PROBE_TYPE_F0 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested lower search limit too low, changing to "
-               "%ld G\n",
+               "%ld G.\n",
                lower_search_limits[ FSC2_MODE == TEST ?
                                     PROBE_TYPE_F0 : nmr.probe_type ] );
         ll = lower_search_limits[ FSC2_MODE == TEST ?
@@ -769,7 +770,6 @@ er035m_sas_get_field( void )
     size_t length;
     long tries = ER035M_SAS_MAX_RETRIES;
     long retries;
-    const char *res[ ] = { "0.1", "0.01", "0.001" };
 
 
     /* Repeat asking for field value until it's correct up to the LSD -
@@ -790,7 +790,7 @@ er035m_sas_get_field( void )
             if ( er035m_sas_write( "PF" ) == FAIL )
                 er035m_sas_comm_fail( );
 
-            length = sizeof buffer - 1;
+            length = sizeof buffer;
             if ( er035m_sas_read( buffer, &length ) == OK )
                 break;
 
@@ -800,14 +800,19 @@ er035m_sas_get_field( void )
 
         /* Disassemble field value and flag showing the state */
 
-        state_flag = strrchr( buffer, ',' ) + 1;
+        state_flag = strrchr( buffer, ',' );
+
+        if ( ! state_flag )
+        {
+            print( FATAL, "Undocumented data received.\n" );
+            THROW( EXCEPTION );
+        }
 
         /* Report error if gaussmeter isn't in lock state */
 
-        if ( *state_flag >= '3' )
+        if ( *++state_flag >= '3' )
         {
-            print( FATAL, "NMR gaussmeter can't get lock on the current "
-                   "field.\n" );
+            print( FATAL, "NMR gaussmeter can't get lock on the field.\n" );
             THROW( EXCEPTION );
         }
 
@@ -818,7 +823,7 @@ er035m_sas_get_field( void )
     if ( tries < 0 )
     {
         print( FATAL, "Field is too unstable to be measured with the current "
-               "resolution of %s G.\n", res[ nmr.resolution ] );
+               "resolution of %.0f mG.\n", 1.0e3 * res_list[ nmr.resolution ] );
         THROW( EXCEPTION );
     }
 
@@ -1085,6 +1090,7 @@ er035m_sas_read( char *   buf,
     if ( buf == NULL || *len == 0 )
         return OK;
 
+	*len -= 1;
     if ( ! er035m_sas_comm( SERIAL_READ, buf, len ) )
         return FAIL;
 
@@ -1095,8 +1101,7 @@ er035m_sas_read( char *   buf,
     if ( nmr.prompt == '\0' )
         nmr.prompt = buf[ 0 ];
 
-    /* Make buffer end with '\0' (but take into account that the device
-       sometimes may send complete BS) */
+    /* Make buffer end with '\0' */
 
     buf[ *len ] = '\0';         /* make sure there's an end of string marker */
 
@@ -1109,9 +1114,8 @@ er035m_sas_read( char *   buf,
 
     /* Remove leading prompt characters if there are any */
 
-    for ( ptr = buf; *ptr == nmr.prompt; ptr++ )
+    for ( ptr = buf; *ptr == nmr.prompt; ptr++, *len -= 1 )
         /* empty */ ;
-    *len -= ( size_t ) ( ptr - buf );
 
     if ( *len == 0 )          /* if nothing (except the prompt) was received */
         return FAIL;

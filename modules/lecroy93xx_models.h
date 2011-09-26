@@ -31,7 +31,7 @@
  * sections of the manuals (as far as I had access to them) are often
  * far from being clear or complete and, moreover, contradictions exist
  * between the information from the manuals and the diverse web pages.
- * Thus the data below sometimes just represent a guess of which of the
+ * Thus the data below sometimes just represent a guess at which of the
  * data to be found in different sources are correct.
  */
 
@@ -88,8 +88,8 @@
  * of defines for:
  *
  * LECROY93XX_CH_MAX            channel number of the highest existing channel,
- *                              this is LECROY_WR_CH2 for 2-channels scopes
- *                              and LECROY_WR_CH4 for 4-channel scopes
+ *                              this is LECROY93XX_CH2 for 2-channels scopes
+ *                              and LECROY93XX_CH4 for 4-channel scopes
  * LECROY93XX_MAX_MEMORY_SIZE   maximum number of points per channel (single
  *                              channel, not combined channels)
  * LECROY93XX_HAS_200MHz_BW_LIMITER   define this only if the device has a

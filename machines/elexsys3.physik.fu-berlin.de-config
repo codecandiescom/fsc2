@@ -1,8 +1,5 @@
 # -*-sh-*-
 
-sed 's/^[ \t]*#define[ \t]\+MIN_ATTEN[ \t]\+.*$/#define MIN_ATTEN +3.0/'  \
-	$cdir/hp8647a.conf > $cdir/hp8647a.conf.new
-mv $cdir/hp8647a.conf.new $cdir/hp8647a.conf
-sed 's/^[ \t]*#define[ \t]\+MIN_ATTEN[ \t]\+.*?/#define MIN_ATTEN +3.0/'  \
-	$cdir/hp8648b.conf > $cdir/hp8648b.conf.new
-mv $cdir/hp8648b.conf.new $cdir/hp8648b.conf
+sed -i'.old' -e 's/^[ \t]*#define[ \t]\+MIN_ATTEN[ \t]\+.*$/#define MIN_ATTEN +3.0/' $cdir/hp8647a.conf
+
+sed -i'.old' -e 's/^[ \t]*#define[ \t]\+MIN_ATTEN[ \t]\+.*?/#define MIN_ATTEN +3.0/' $cdir/hp8648b.conf
