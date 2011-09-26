@@ -673,14 +673,14 @@ gaussmeter_upper_search_limit( Var_T * v )
     ul = lrnd( ceil( val ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F1 : nmr.probe_type ] )
+								   PROBE_TYPE_F1 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested upper search limit too high, changing to "
                "%ld G.\n",
                upper_search_limits[ FSC2_MODE == TEST ?
                                     PROBE_TYPE_F1 : nmr.probe_type ] );
         ul = upper_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F1 : nmr.probe_type ];
+								  PROBE_TYPE_F1 : nmr.probe_type ];
     }
 
     if ( ul <= nmr.lower_search_limit )
@@ -717,14 +717,14 @@ gaussmeter_lower_search_limit( Var_T * v )
     ll = lrnd( floor( val ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F0 : nmr.probe_type ] )
+								   PROBE_TYPE_F0 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested lower search limit too low, changing to "
                "%ld G.\n",
                lower_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F0 : nmr.probe_type ] );
+									PROBE_TYPE_F0 : nmr.probe_type ] );
         ll = lower_search_limits[ FSC2_MODE == TEST ?
-                                  PROBE_TYPE_F0 :nmr.probe_type ];
+								  PROBE_TYPE_F0 : nmr.probe_type ];
     }
 
     if ( ll >= nmr.upper_search_limit )
@@ -933,9 +933,15 @@ er035m_sas_get_upper_search_limit( void )
             er035m_sas_comm_fail( );
     }
 
+	if ( length < 2 )
+	{
+		print( FATAL, "Undocumented data received.\n" );
+		THROW( EXCEPTION );
+	}
+
     buffer[ length - 2 ] = '\0';
 
-    for ( ptr = buffer; *ptr != '\0'; ptr++ )
+    for ( ptr = buffer; *ptr; ptr++ )
     {
         if ( ! isdigit( ( unsigned char ) *ptr ) )
         {
@@ -974,9 +980,15 @@ er035m_sas_get_lower_search_limit( void )
             er035m_sas_comm_fail( );
     }
 
+	if ( length < 2 )
+	{
+		print( FATAL, "Undocumented data received.\n" );
+		THROW( EXCEPTION );
+	}
+
     buffer[ length - 2 ] = '\0';
 
-    for ( ptr = buffer; *ptr != '\0'; ptr++ )
+    for ( ptr = buffer; *ptr; ptr++ )
     {
         if ( ! isdigit( ( unsigned char ) *ptr ) )
         {

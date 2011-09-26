@@ -997,9 +997,15 @@ er035m_s_get_upper_search_limit( void )
             er035m_s_comm_fail( );
     }
 
+	if ( length < 2 )
+	{
+		print( FATAL, "Undocumented data received.\n" );
+		THROW( EXCEPTION );
+	}
+
     buffer[ length - 2 ] = '\0';
 
-    for ( ptr = buffer; *ptr != '\0'; ptr++ )
+    for ( ptr = buffer; *ptr; ptr++ )
     {
         if ( ! isdigit( ( unsigned char ) *ptr ) )
         {
@@ -1039,9 +1045,15 @@ er035m_s_get_lower_search_limit( void )
             er035m_s_comm_fail( );
     }
 
+	if ( length < 2 )
+	{
+		print( FATAL, "Undocumented data received.\n" );
+		THROW( EXCEPTION );
+	}
+
     buffer[ length - 2 ] = '\0';
 
-    for ( ptr = buffer; *ptr != '\0'; ptr++ )
+    for ( ptr = buffer; *ptr; ptr++ )
     {
         if ( ! isdigit( ( unsigned char ) *ptr ) )
         {
