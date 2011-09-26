@@ -140,8 +140,8 @@ static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 #define PROBE_TYPE_F1 1
 
 
-static long upper_search_limits[ 2 ] = { 2400, 20000 };
-static long lower_search_limits[ 2 ] = { 450, 1450 };
+static long upper_search_limits[ 2 ] = { 20000, 2400 };
+static long lower_search_limits[ 2 ] = { 1450, 450 };
 
 
 enum {
@@ -227,8 +227,8 @@ int
 er035m_s_test_hook( void )
 {
     nmr_stored = nmr;
-    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F1 ];
-    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F0 ];
+    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F0 ];
+    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F1 ];
     return 1;
 }
 
@@ -736,14 +736,14 @@ gaussmeter_upper_search_limit( Var_T * v )
     ul = lrnd( ceil( val ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F1 : nmr.probe_type ] )
+                                   PROBE_TYPE_F0 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested upper search limit too high, changing to "
                "%ld G.\n",
                upper_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F1 : nmr.probe_type ] );
+                                    PROBE_TYPE_F0 : nmr.probe_type ] );
         ul = upper_search_limits[ FSC2_MODE == TEST ?
-                                  PROBE_TYPE_F1 : nmr.probe_type ];
+                                  PROBE_TYPE_F0 : nmr.probe_type ];
     }
 
     if ( ul <= nmr.lower_search_limit )
@@ -780,14 +780,14 @@ gaussmeter_lower_search_limit( Var_T * v )
     ll = lrnd( floor( val ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F0 : nmr.probe_type ] )
+                                   PROBE_TYPE_F1 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested lower search limit too low, changing to "
                "%ld G.\n",
                lower_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F0 : nmr.probe_type ] );
+                                    PROBE_TYPE_F1 : nmr.probe_type ] );
         ll = lower_search_limits[ FSC2_MODE == TEST ?
-                                  PROBE_TYPE_F0 : nmr.probe_type ];
+                                  PROBE_TYPE_F1 : nmr.probe_type ];
     }
 
     if ( ll >= nmr.upper_search_limit )

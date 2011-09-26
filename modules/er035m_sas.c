@@ -92,8 +92,8 @@ static struct {
     int              state;      /* current state of the gaussmeter */
     double           field;      /* last measured field */
     int              resolution; /* set to either RES_VERY_LOW = 0.1 G,
-									RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
-	int              sn;
+                                    RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
+    int              sn;
     struct termios * tio;        /* serial port terminal interface structure */
     char             prompt;     /* prompt character send on each reply */
     int              probe_orientation;
@@ -138,8 +138,8 @@ enum {
 #define PROBE_TYPE_F1 1
 
 
-static long upper_search_limits[ 2 ] = { 2400, 20000 };
-static long lower_search_limits[ 2 ] = { 450, 1450 };
+static long upper_search_limits[ 2 ] = { 20000, 2400 };
+static long lower_search_limits[ 2 ] = { 1450, 450 };
 
 
 enum {
@@ -193,8 +193,8 @@ int
 er035m_sas_test_hook( void )
 {
     nmr_stored = nmr;
-    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F1 ];
-    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F0 ];
+    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F0 ];
+    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F1 ];
     return 1;
 }
 
@@ -218,10 +218,10 @@ er035m_sas_exp_hook( void )
         return 1;
 
     if ( ! er035m_sas_open( ) )
-	{
-		print( FATAL, "Failed to open serial port for the NMR gaussmeter.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Failed to open serial port for the NMR gaussmeter.\n" );
+        THROW( EXCEPTION );
+    }
     fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
     if ( ! er035m_sas_write( "REM" ) )
@@ -268,22 +268,21 @@ er035m_sas_exp_hook( void )
     }
 
     /* Now look if the status byte says that the device is OK, where OK means
-	   that for the X-Band magnet the F0-probe and for the S-band the F1-probe
-	   is connected, modulation is on and the gaussmeter is either in locked
-       state or is actively searching to achieve the lock (if it's just in
-       TRANS L-H or H-L state check again) */
+       that modulation is on and the gaussmeter is either in locked state or
+       is actively searching to achieve the lock (if it's just in TRANS L-H or
+       H-L state check again) */
 
     bp = buffer;
 
-    do     /* loop through remaining chars in status byte */
+    do     /* Loop through remaining chars in status byte */
     {
         switch ( *bp )
         {
-            case '0' :     /* F0 probe is connected */
+            case '0' :     /* F0 (X-band) probe is connected */
                 nmr.probe_type = PROBE_TYPE_F0;
                 break;
 
-            case '1' :     /* F1 probe is connected */
+            case '1' :     /* F1 (X-band) probe is connected */
                 nmr.probe_type = PROBE_TYPE_F1;
                 break;
 
@@ -321,7 +320,7 @@ er035m_sas_exp_hook( void )
 
             case 'A' :      /* FIELD ? -> error */
                 print( FATAL, "Gaussmeter can't find the field "
-					   "(\"FIELD?\").\n" );
+                       "(\"FIELD?\").\n" );
                 THROW( EXCEPTION );
 
             case 'B' :      /* SU active -> OK */
@@ -436,9 +435,9 @@ measure_field( Var_T * v  UNUSED_ARG )
        decision as searching up... */
 
     if (    (    nmr.state == ER035M_SAS_OU_ACTIVE
-			  || nmr.state == ER035M_SAS_OD_ACTIVE
-			  || nmr.state == ER035M_SAS_UNKNOWN )
-		 && er035m_sas_write( "SD" ) == FAIL )
+              || nmr.state == ER035M_SAS_OD_ACTIVE
+              || nmr.state == ER035M_SAS_UNKNOWN )
+         && er035m_sas_write( "SD" ) == FAIL )
         er035m_sas_comm_fail( );
 
     /* Wait for gaussmeter to go into lock state (or FAIL) */
@@ -588,7 +587,7 @@ gaussmeter_resolution( Var_T * v )
 
     if ( fabs( res_list[ res_index ] - res ) > 1.0e-2 * res_list[ res_index ] )
         print( WARN, "Can't set resolution to %.0f mG, using %.0f mG "
-			   "instead.\n", 1.0e3 * res, 1.0e3 * res_list[ res_index ] );
+               "instead.\n", 1.0e3 * res, 1.0e3 * res_list[ res_index ] );
 
     fsc2_assert( res_index >= LOW_RES && res_index <= HIGH_RES );
 
@@ -673,14 +672,14 @@ gaussmeter_upper_search_limit( Var_T * v )
     ul = lrnd( ceil( val ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
-								   PROBE_TYPE_F1 : nmr.probe_type ] )
+                                   PROBE_TYPE_F0 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested upper search limit too high, changing to "
                "%ld G.\n",
                upper_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F1 : nmr.probe_type ] );
+                                    PROBE_TYPE_F0 : nmr.probe_type ] );
         ul = upper_search_limits[ FSC2_MODE == TEST ?
-								  PROBE_TYPE_F1 : nmr.probe_type ];
+                                  PROBE_TYPE_F0 : nmr.probe_type ];
     }
 
     if ( ul <= nmr.lower_search_limit )
@@ -717,14 +716,14 @@ gaussmeter_lower_search_limit( Var_T * v )
     ll = lrnd( floor( val ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
-								   PROBE_TYPE_F0 : nmr.probe_type ] )
+                                   PROBE_TYPE_F1 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested lower search limit too low, changing to "
                "%ld G.\n",
                lower_search_limits[ FSC2_MODE == TEST ?
-									PROBE_TYPE_F0 : nmr.probe_type ] );
+                                    PROBE_TYPE_F1 : nmr.probe_type ] );
         ll = lower_search_limits[ FSC2_MODE == TEST ?
-								  PROBE_TYPE_F0 : nmr.probe_type ];
+                                  PROBE_TYPE_F1 : nmr.probe_type ];
     }
 
     if ( ll >= nmr.upper_search_limit )
@@ -779,9 +778,9 @@ er035m_sas_get_field( void )
     do
     {
         /* Ask gaussmeter to send the current field and read result - sometimes
-		   the fucking thing does not answer (i.e. it just seems to send the
-		   prompt character and nothing else) so in this case we give it
-		   another chance (or even more, see FAIL_RETRIES above) */
+           the fucking thing does not answer (i.e. it just seems to send the
+           prompt character and nothing else) so in this case we give it
+           another chance (or even more, see FAIL_RETRIES above) */
 
         for ( retries = FAIL_RETRIES; ; retries-- )
         {
@@ -867,22 +866,22 @@ er035m_sas_get_resolution( void )
             er035m_sas_comm_fail( );
     }
 
-	/* There should only be a single character in the reply (after superfluous
-	   stuff has been stripped) and that character should tell us about us the
-	   current resolution setting */
+    /* There should only be a single character in the reply (after superfluous
+       stuff has been stripped) and that character should tell us about us the
+       current resolution setting */
 
-	if ( length == 1 )
-		switch ( *buffer )
-		{
-			case '1' :
-				return LOW_RES;
+    if ( length == 1 )
+        switch ( *buffer )
+        {
+            case '1' :
+                return LOW_RES;
 
-			case '2' :
-				return MEDIUM_RES;
+            case '2' :
+                return MEDIUM_RES;
 
-			case '3' :
-				return HIGH_RES;
-		}
+            case '3' :
+                return HIGH_RES;
+        }
 
     print( FATAL, "Undocumented data received.\n" );
     THROW( EXCEPTION );
@@ -933,11 +932,11 @@ er035m_sas_get_upper_search_limit( void )
             er035m_sas_comm_fail( );
     }
 
-	if ( length < 2 )
-	{
-		print( FATAL, "Undocumented data received.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( length < 2 )
+    {
+        print( FATAL, "Undocumented data received.\n" );
+        THROW( EXCEPTION );
+    }
 
     buffer[ length - 2 ] = '\0';
 
@@ -980,11 +979,11 @@ er035m_sas_get_lower_search_limit( void )
             er035m_sas_comm_fail( );
     }
 
-	if ( length < 2 )
-	{
-		print( FATAL, "Undocumented data received.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( length < 2 )
+    {
+        print( FATAL, "Undocumented data received.\n" );
+        THROW( EXCEPTION );
+    }
 
     buffer[ length - 2 ] = '\0';
 
@@ -1094,7 +1093,7 @@ er035m_sas_write( const char * buf )
 
 static bool
 er035m_sas_read( char *   buf,
-				 size_t * len )
+                 size_t * len )
 {
     char *ptr;
 
@@ -1102,7 +1101,7 @@ er035m_sas_read( char *   buf,
     if ( buf == NULL || *len == 0 )
         return OK;
 
-	*len -= 1;
+    *len -= 1;
     if ( ! er035m_sas_comm( SERIAL_READ, buf, len ) )
         return FAIL;
 
@@ -1118,7 +1117,7 @@ er035m_sas_read( char *   buf,
     buf[ *len ] = '\0';         /* make sure there's an end of string marker */
 
     if (    ( ptr = strchr( buf, '\r' ) )
-		 || ( ptr = strchr( buf, '\n' ) ) )
+         || ( ptr = strchr( buf, '\n' ) ) )
     {
         *ptr = '\0';
         *len = ptr - buf;
@@ -1143,7 +1142,7 @@ er035m_sas_read( char *   buf,
 
 static bool
 er035m_sas_comm( int type,
-				 ... )
+                 ... )
 {
     va_list ap;
     char *buf;
@@ -1220,7 +1219,7 @@ er035m_sas_comm( int type,
 
             /* The two most significant bits of each byte the gaussmeter
                sends are irrelevant and reflect the parity setting at the
-			   device, get rid of them... */
+               device, get rid of them... */
 
             *lptr = len;
             for ( len = 0; len < ( ssize_t ) *lptr; len++ )

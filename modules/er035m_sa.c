@@ -136,8 +136,8 @@ enum {
 #define PROBE_TYPE_F1 1
 
 
-long upper_search_limits[ 2 ] = { 2400, 20000 };
-long lower_search_limits[ 2 ] = { 450, 1450 };
+long upper_search_limits[ 2 ] = { 20000, 2400 };
+long lower_search_limits[ 2 ] = { 1450, 450 };
 
 
 enum {
@@ -184,8 +184,8 @@ int
 er035m_sa_test_hook( void )
 {
     nmr_stored = nmr;
-    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F1 ];
-    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F0 ];
+    nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F0 ];
+    nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F1 ];
     return 1;
 }
 
@@ -250,9 +250,9 @@ er035m_sa_exp_hook( void )
     }
 
     /* Now look if the status byte says that the device is OK, where OK means
-       that for the X-Band magnet the F0-probe is connected, modulation is on
-       and the gaussmeter is either in locked state or is actively searching to
-       achieve the lock (if it's just in TRANS L-H or H-L state check again) */
+       that modulation is on and the gaussmeter is either in locked state or
+       is actively searching to achieve the lock (if it's just in TRANS L-H or
+       H-L state check again) */
 
     bp = buffer + 2;     /* skip first two chars of status byte */
 
@@ -260,11 +260,11 @@ er035m_sa_exp_hook( void )
     {
         switch ( *bp )
         {
-            case '0' :      /* Probe F0 is connected -> OK for S-band */
+            case '0' :      /* Probe F0 (S-band) is connected */
                 nmr.probe_type = PROBE_TYPE_F0;
                 break;
 
-            case '1' :      /* Probe F1 is connected -> OK for X-band*/
+            case '1' :      /* Probe F1 (X-band) is connected */
                 nmr.probe_type = PROBE_TYPE_F1;
                 break;
 
@@ -612,14 +612,14 @@ gaussmeter_upper_search_limit( Var_T * v )
     ul = lrnd( ceil( val ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F1 : nmr.probe_type ] )
+                                   PROBE_TYPE_F0 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested upper search limit too high, changing to "
                "%ld G.\n",
                upper_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F1 : nmr.probe_type ] );
+                                    PROBE_TYPE_F0 : nmr.probe_type ] );
         ul = upper_search_limits[ FSC2_MODE == TEST ?
-                                  PROBE_TYPE_F1 : nmr.probe_type ];
+                                  PROBE_TYPE_F0 : nmr.probe_type ];
     }
 
     if ( ul <= nmr.lower_search_limit )
@@ -656,14 +656,14 @@ gaussmeter_lower_search_limit( Var_T * v )
     ll = lrnd( floor( val ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
-                                   PROBE_TYPE_F0 : nmr.probe_type ] )
+                                   PROBE_TYPE_F1 : nmr.probe_type ] )
     {
         print( SEVERE, "Requested lower search limit too low, changing to "
                "%ld G.\n",
                lower_search_limits[ FSC2_MODE == TEST ?
-                                    PROBE_TYPE_F0 : nmr.probe_type ] );
+                                    PROBE_TYPE_F1 : nmr.probe_type ] );
         ll = lower_search_limits[ FSC2_MODE == TEST ?
-                                  PROBE_TYPE_F0 : nmr.probe_type ];
+                                  PROBE_TYPE_F1 : nmr.probe_type ];
     }
 
     if ( ll >= nmr.upper_search_limit )
