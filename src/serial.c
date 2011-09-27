@@ -153,7 +153,7 @@ fsc2_request_serial_port( const char * dev_file,
 
         real_name = T_malloc( pathmax + 1 );
         if (    ( length = readlink( dev_file, real_name, pathmax + 1 ) ) < 0
-             || length > pathmax )
+             || ( size_t ) length > pathmax )
         {
             eprint( FATAL, UNSET, "%s: Can't follow symbolic link for "
                     "serial port device file '%s'.\n", dev_name, dev_file );
@@ -1331,6 +1331,8 @@ static void
 open_serial_log( int sn )
 {
     char *log_file_name = NULL;
+    char *dev_name = NULL;
+    char *cp;
 
 
     if ( ll == LL_NONE )
@@ -1338,19 +1340,29 @@ open_serial_log( int sn )
 
     TRY
     {
+        dev_name = Serial_Ports[ sn ].dev_name;
+        while ( ( cp = strchr( dev_name, '/' ) ) )
+            *cp = '_';
+
 #if defined SERIAL_LOG_DIR
         log_file_name = get_string( "%s%sfsc2_%s.log", SERIAL_LOG_DIR,
-                                    slash( SERIAL_LOG_DIR ),
-                                    Serial_Ports[ sn ].dev_name );
+                                    slash( SERIAL_LOG_DIR ), dev_name );
 #else
-        log_file_name = get_string( P_tmpdir "/fsc2_%s.log",
-                                    Serial_Ports[ sn ].dev_name );
+        log_file_name = get_string( P_tmpdir "/fsc2_%s.log", dev_name );
 #endif
+        T_free( dev_name );
+        
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )     /* extremely unlikely... */
     {
+        if ( dev_name )
+            T_free( dev_name );
         Serial_Ports[ sn ].log_fp = stderr;
+
+        fprintf( stderr, "Running out of memory and can't open serial log "
+                 "file for %s, using stderr instead.\n",
+                 Serial_Ports[ sn ].dev_name );
         return;
     }
 
