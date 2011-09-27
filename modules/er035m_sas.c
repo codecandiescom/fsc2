@@ -278,7 +278,7 @@ er035m_sas_exp_hook( void )
     {
         switch ( *bp )
         {
-            case '0' :     /* F0 (X-band) probe is connected */
+            case '0' :     /* F0 (S-band) probe is connected */
                 nmr.probe_type = PROBE_TYPE_F0;
                 break;
 
@@ -1217,13 +1217,13 @@ er035m_sas_comm( int type,
                 return FAIL;
             }
 
-            /* The two most significant bits of each byte the gaussmeter
-               sends are irrelevant and reflect the parity setting at the
-               device, get rid of them... */
+            /* The most significant bit of each byte the gaussmeter sends is
+               irrelevant and may reflect the parity setting at the device,
+               get rid of it... */
 
             *lptr = len;
             for ( len = 0; len < ( ssize_t ) *lptr; len++ )
-                buf[ len ] &= 0x3f;
+                buf[ len ] &= 0x7f;
             break;
 
         default :
