@@ -13,11 +13,11 @@ sed -i'.old' -e 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[013-9].*"
 # going to be used). Apply the necessary patch to the files for all the
 # four modules that are meant to control the ER035M
 
-sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/ero35m.c
+sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/er035m.c
 
-sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/ero35m_s.c
+sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/er035m_s.c
 
-sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/ero35m_sa.c
+sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/er035m_sa.c
 
-sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/ero35m_sas.c
+sed -i'.old' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1;/' $mdir/er035m_sas.c
 
