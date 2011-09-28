@@ -2,25 +2,25 @@
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_WIDTH[ \t]+1340[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
-	sed -i'.old' -e 's/^\s*\(#define[ \t]\+CCD_PIXEL_WIDTH\).*$/\1  1340/' $cdir/rs_spec10.conf
+	sed -i'' -e 's/^\s*\(#define[ \t]\+CCD_PIXEL_WIDTH\).*$/\1  1340/' $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_HEIGHT[ \t]+400[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
-	sed -i'.old' -e 's/^\s*\(#define[ \t]\+CCD_PIXEL_HEIGHT\).*$/\1 400/' $cdir/rs_spec10.conf
+	sed -i'' -e 's/^\s*\(#define[ \t]\+CCD_PIXEL_HEIGHT\).*$/\1 400/' $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*#define[ \t]+RS_SPEC10_UPSIDE_DOWN[ \t]+0[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
-	sed -i'.old' -e 's/^\s*\(#define[ \t]\+RS_SPEC10_UPSIDE_DOWN\).*$/\1 0/' $cdir/rs_spec10.conf
+	sed -i'' -e 's/^\s*\(#define[ \t]\+RS_SPEC10_UPSIDE_DOWN\).*$/\1 0/' $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*#define[ \t]+RS_SPEC10_MIRROR[ \t]+0[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
-	sed -i'.old' -e 's/^\s*\(#define[ \t]\+RS_SPEC10_MIRROR\).*$/\1 0/' $cdir/rs_spec10.conf
+	sed -i'' -e 's/^\s*\(#define[ \t]\+RS_SPEC10_MIRROR\).*$/\1 0/' $cdir/rs_spec10.conf
 fi
 
 grep -E '^[ \t]*[0-9]+[ \t]+[0-9]+[ \t]+1339+[ \t]+399[[:space:]]*$' $cdir/rs_spec10.state > /dev/null
 if [ $? -ne 0 ]; then
-	sed -i'.old' -e 's/\s*\([0-9]\+[ \t]\+[0-9]\+[ \t]\+\).$/\1 1339 399/' $cdir/rs_spec10.state
+	sed -i'' -e 's/\s*\([0-9]\+[ \t]\+[0-9]\+[ \t]\+\).$/\1 1339 399/' $cdir/rs_spec10.state
 fi

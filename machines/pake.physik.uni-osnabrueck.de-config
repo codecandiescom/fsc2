@@ -1,3 +1,3 @@
 # -*-sh-*-
 
-sed -i'.old' -e 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[02-9].*"/#define SERIAL_PORT     "\/dev\/ttyS1"/' $cdir/hjs_attenuator.conf
+sed -i'' -e 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[02-9].*"/#define SERIAL_PORT     "\/dev\/ttyS1"/' $cdir/hjs_attenuator.conf
