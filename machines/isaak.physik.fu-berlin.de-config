@@ -20,8 +20,7 @@ sed -i'' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type =
 # Add entry for the OPTA OPO device in the device database if it doesn't
 # already exist
 
-grep '^[ \t]*opo[ \t];' $cdir/Devices >/dev/null 2>&1
-if [ ! $? ]; then
+if [ -z "`grep '^[ \t]*opo[ \t]*;' $cdir/Devices`" ]; then
 	echo "
 //OPTA opo (FU Berlin, AG Bittl)
 
@@ -31,8 +30,7 @@ fi
 # Also add entries for all OPO EDL functions into the function database (at
 # least if they don't exist yet)
 
-grep '^[ \t]*opo_' $cdir/Functions >/dev/null 2>&1
-if [ ! $? ]; then
+if [ -z "`grep '^[ \t]*opo_' $cdir/Functions`"]; then
 	echo "
 /* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */
 
