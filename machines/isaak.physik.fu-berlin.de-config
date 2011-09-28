@@ -24,7 +24,7 @@ if [ -z "`grep '^[ \t]*opo[ \t]*;' $cdir/Devices`" ]; then
 	echo "
 //OPTA opo (FU Berlin, AG Bittl)
 
-opo;" >> $cdir/devices;
+opo;" >> $cdir/Devices;
 fi
 
 # Also add entries for all OPO EDL functions into the function database (at
