@@ -24,7 +24,7 @@ if [ grep '^[ \t]*opo[ \t];' $cdir/Devices >/dev/null 2>&1 ]; then
 	echo "//OPTA opo (FU Berlin, AG Bittl)
 
 opo;" >> $cdir/devices;
-done
+fi
 
 # Also add entries for all OPO EDL functions into the function database (at
 # least if they don't exist yet)
@@ -45,5 +45,4 @@ opo_signalFromIdler, 1, ALL;
 opo_calibration, 3, EXP;
 opo_setOffset, 1, EXP;
 opo_goToInteractive, 1, EXP;" >> $cdir/Functions
-done
-
+fi
