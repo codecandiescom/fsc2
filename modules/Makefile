@@ -230,7 +230,7 @@ all:
 	$(MAKE) -C .. modules
 
 bmwb: $(bmwb_src) bmwb.h bmwb_rsc.h
-	$(CC) -ggdb $(CFLAGS) -o $@ $(bmwb_src) $(INCLUDES) $(LIBS) -pthread
+	$(CC) -ggdb $(CFLAGS) -o $@ $(bmwb_src) $(INCLUDES) $(LIBS) -pthreads
 
 list_simp:
 	@echo $(simp_modules)

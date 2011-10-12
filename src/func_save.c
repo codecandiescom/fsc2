@@ -138,14 +138,14 @@ get_name( Var_T * v )
     {
         if ( ! No_File_Numbers )
         {
-            print( FATAL, "Missing argument\n" );
+            print( FATAL, "Missing argument.\n" );
             THROW( EXCEPTION );
         }
 
         if ( EDL.File_List_Len < 3 )
         {
-            print( FATAL, "No file has been opened yet\n" );
-            THROW( EXCEPTION );
+            print( SEVERE, "No file has been opened yet.\n" );
+            return "/dev/null";
         }
 
         if ( Fsc2_Internals.mode == TEST )

@@ -314,9 +314,9 @@ fsc2_serial_final_reset( void )
     while ( i-- > 0 )
     {
         if ( Serial_Ports[ i ].dev_name )
-            Serial_Ports[ i ].dev_name  = T_free( Serial_Ports[ i ].dev_name );
+            Serial_Ports[ i ].dev_name = T_free( Serial_Ports[ i ].dev_name );
         if ( Serial_Ports[ i ].dev_file )
-            Serial_Ports[ i ].dev_file  = T_free( Serial_Ports[ i ].dev_file );
+            Serial_Ports[ i ].dev_file = T_free( Serial_Ports[ i ].dev_file );
     }
 
     if ( Serial_Ports )
@@ -839,8 +839,8 @@ fsc2_serial_read( int          sn,
                         break;
                 }
 
-                fsc2_serial_log_message( sn, "Error: select() call aborted due "
-                                         "to receipt of signal\n" );
+                fsc2_serial_log_message( sn, "Error: select() call aborted "
+                                         "due to receipt of signal\n" );
                 fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
                 return 0;
             }
@@ -870,7 +870,7 @@ fsc2_serial_read( int          sn,
 
         raise_permissions( );
 
-        /* We've finally come to really trying to read from the serial port.
+        /* We've finally arrived at really trying to read from the serial port.
            If there's no termination string be prepared to read as many bytes
            as fit into the buffer. Otherwise we can read only one byte to be
            able to check if, with this byte, we got the the termination string
@@ -1340,7 +1340,7 @@ open_serial_log( int sn )
 
     TRY
     {
-        dev_name = Serial_Ports[ sn ].dev_name;
+        dev_name = T_strdup( Serial_Ports[ sn ].dev_name );
         while ( ( cp = strchr( dev_name, '/' ) ) )
             *cp = '_';
 

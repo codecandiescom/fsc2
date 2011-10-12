@@ -26,12 +26,12 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
                   F_RDLCK F_WRLCK F_UNLCK
                   SEEK_SET SEEK_CUR SEEK_END );
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 
 =pod
 
-=head1 name
+=head1 NAME
 
 File::FcntlLock - File locking with L<fcntl(2)>
 
@@ -353,7 +353,7 @@ over which process this is.
 For C<F_SETLK> the C<lock()> method tries to obtain the lock (when
 C<l_type> is set to either C<F_WRLCK> or C<F_RDLCK>) or releases
 the lock (if C<l_type> is set to C<F_UNLCK>). If a lock is held
-by some other proces the method call returns C<undef> and errno
+by some other process the method call returns C<undef> and errno
 is set to C<EACCESS> or C<EAGAIN> (please see the the man page for
 L<fcntl(2)> for the details).
 

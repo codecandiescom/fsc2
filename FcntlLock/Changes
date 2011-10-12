@@ -1,5 +1,9 @@
 Revision history for Perl extension File::FcntlLock
 
+0.13  Thu Oct 11 20011
+    - Spelling errors in the documentation fixed, thanks to Julián
+      Moreno Patiño (Debian Package Maintainer)
+
 0.12  Thu Oct 8 2009
     - Stupid bug in Makefile removed that assumed a certain
       layout of the flock structure - thanks to Glenn Herteg
