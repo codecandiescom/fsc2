@@ -483,7 +483,9 @@ SEEK_SET SEEK_CUR SEEK_END
 Thanks to Mark Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
 helpful discussions, code examples and encouragement. Glenn Herteg
 pointed out several problems and also helped improve the documentation.
-
+Julian Moreno Patino also helped correcting the documentation and
+pointed out problems arising on GNU Hurd (which seems to have only
+very rudimentary support for locking with fcntl()).
 
 =head1 AUTHOR
 

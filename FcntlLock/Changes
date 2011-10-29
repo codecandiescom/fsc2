@@ -1,13 +1,20 @@
 Revision history for Perl extension File::FcntlLock
 
-0.13  Thu Oct 11 20011
-    - Spelling errors in the documentation fixed, thanks to Julián
-      Moreno Patiño (Debian Package Maintainer)
+0.14  Thu Oct 29 2011
+	- Changed the test script to get it to pass under GNU Hurd,
+      using only the rather limited fcntl() locking capabilities
+      available on that system. Thanks to Julián Moreno Patiño
+      for bringing the problem to my attention and helping me
+      to set up a virtual GNU Hurd system for testing.
+
+0.13  Thu Oct 11 2011
+    - Spelling errors fixed in the documentation, thanks to
+      Julián Moreno Patiño (Debian Package Maintainer).
 
 0.12  Thu Oct 8 2009
     - Stupid bug in Makefile removed that assumed a certain
       layout of the flock structure - thanks to Glenn Herteg
-      for spotting this
+      for spotting this.
 
 0.11  Wed Oct 7 2009
 	- Module did use only 32-bit flock structure, making it
