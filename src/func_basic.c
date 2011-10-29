@@ -3734,7 +3734,7 @@ datanh( double arg )
 
 /*------------------------------------------------------------------------*
  * Function for adding a new value (or array or matrix) to an average so
- * that the new average (always as a float number of array) gets returned
+ * that the new average (always as a float number or array) gets returned
  *------------------------------------------------------------------------*/
 
 Var_T *
@@ -3756,20 +3756,20 @@ f_add2avg( Var_T * v )
 
     avg_data_check( avg, data, count );
 
-    /* The next line looks simple but actually involves some trickery. You
-       may have wondered why all these extra variables of type 'Var_T *' were
-       created above (one might ty to use v->next instead of 'data' and even
-       v->next->next instead of 'cnt'). This is because all the vars_xxx()
-       function return a new variable, destroying the ones passed to them
-       (actually, that's not the full truth, the returned variable might be
-       one of those passed to the function, but you can't tell if this
-       happens and then which of them gets returned). Thus, depending on the
-       way the compiler rearranges the code, v->next->next might be a
+    /* The next line looks simple but actually involves some trickery. You may
+       have wondered why all these extra variables of type 'Var_T *' were
+       created above (one might be tempted to use v->next instead of 'data'
+       and even v->next->next instead of 'cnt'). This is because all the
+       vars_xxx() function return a new variable, destroying the ones passed
+       to them (actually, that's not the full truth, the returned variable
+       might be one of those passed to the function, but you can't tell if
+       this happens and then which of them gets returned). Thus, depending on
+       the way the compiler rearranges the code, v->next->next might be a
        pointer to the counter variable from the arguments or, if what was
        v->next got removed, a pointer to nothing at all, or to 'avg' or to
        'scans_done' - one simply can't tell. But the way the function is
-       written now one can be sure that everything left on the stack at
-       the end of the function is the return value - as it should. */
+       written now one can be sure that everything left on the stack at the
+       end of the function is the return value - just as it should be. */
 
     return vars_div( vars_add( vars_mult( avg, scans_done ), data ), cnt );
 }

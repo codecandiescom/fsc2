@@ -16,6 +16,7 @@ use strict;
 use warnings;
 BEGIN { plan tests => 11 };
 use POSIX;
+use Errno;
 use File::FcntlLock;
 
 
@@ -92,6 +93,9 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
     close $fh;
     if ( defined open $fh, '<', './fcntllock_test' ) {
         $fs->l_type( F_RDLCK );
+        $fs->l_start( 0 );                    # that's all GNU Hurd can handle
+        $fs->l_len( 0 );                      # ditto
+        $fs->l_whence( SEEK_SET );            # ditto
         my $res = $fs->lock( $fh, F_SETLK );
         unlink './fcntllock_test';
         if ( defined $res ) {
@@ -141,7 +145,9 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
 # 11. Now a "real" test: the child process grabs a write lock on a test file
 #     for 2 secs while the parent repeatedly tests if it can get the lock.
 #     After the child finally releases the lock the parent should be able to
-#     obtain and again release it.
+#     obtain and again release it. Note that there are systems that don't
+#     support F_GETLK and in that case we can only try to obtain the lock
+#     directly and check for the reason it failed.
 
 
 if ( defined open $fh, '>', './fcntllock_test' ) {
@@ -149,31 +155,51 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
     $fs = $fs->new( l_type   => F_WRLCK,
                     l_whence => SEEK_SET,
                     l_start  => 0,
-                    l_len    => 0         );
+                    l_len    => 0 );
+
     if ( my $pid = fork ) {
-        sleep 1;
+        sleep 1;             # leave some time for the child to get the lock
         my $failed = 1;
 
         while ( 1 ) {
             last if $pid == waitpid( $pid, WNOHANG ) and $?;
-            last unless defined $fs->lock( $fh, F_GETLK );
-            last if $fs->l_type == F_WRLCK and $fs->l_pid != $pid;
-            if ( $fs->l_type == F_UNLCK ) {
-                $failed = 0;
-                last;
+
+            # F_GETLK is not supported on all systems in which case errno
+            # is set to ENOSYS. In that case we have to resort to trying to
+            # obtain the lock directly and testing the reasons for failure,
+            # not being able to obtain information about the holder of the
+            # lock.
+
+            if ( ! defined $fs->lock( $fh, F_GETLK ) ) {
+                last unless $!{ ENOSYS };
+                $fs->l_type( F_WRLCK );
+                if ( ! defined $fs->lock( $fh, F_SETLK ) ) {
+                    last unless $!{ EACCES } or ! $!{ EAGAIN };
+                } else {
+                    $fs->l_type( F_UNLCK );
+                    last unless defined $fs->lock( $fh, F_SETLK );
+                    $failed = 0;
+                    last;
+                }
+            } else {
+                last if $fs->l_type == F_WRLCK and $fs->l_pid != $pid;
+                if ( $fs->l_type == F_UNLCK ) {
+                    $failed = 0;
+                    last;
+                }
             }
             select undef, undef, undef, 0.25;
         }
 
         if ( ! $failed ) {
-            $fs->l_type( F_WRLCK );
-            ok(     $fs->lock( $fh, F_SETLK )
+            ok(     $fs->l_type( F_WRLCK ), $fs->lock( $fh, F_SETLK )
                 and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
         } else {
             ok( 0 );
         }
+
         close $fh;
-    } elsif ( defined $pid ) {
+    } elsif ( defined $pid ) {                     # child's code
         $fs->lock( $fh, F_SETLKW ) or exit 1;
         sleep 2;
         $fs->l_type( F_UNLCK );

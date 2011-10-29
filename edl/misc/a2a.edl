@@ -1,0 +1,18 @@
+VARIABLES:
+
+data[ * ];
+avg[ * ];
+J;
+
+PREPARATIONS:
+
+init_1d( 2 );
+
+EXPERIMENT:
+
+FOR J = 1 : 100 {
+	data = random( 1000 );;  // get array of 1000 randon numbers
+	avg = add_to_average( avg, data, J );
+	display_1d( 1, avg, 1, 1, data, 2 );
+	wait( 0.05 s );            // otherwise it's too fast to see
+}

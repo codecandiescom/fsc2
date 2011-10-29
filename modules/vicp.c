@@ -18,20 +18,20 @@
  */
 
 
-/* The following is a set of routines that can be used by progams that need
-   to communicate with devices using LeCroy's VICP (Versatile Instrument
-   Control Protocol), running on top of TCP/IP. It uses a TCP connection on
-   port 1861.
+/* The following is a set of routines that can be used by programs that
+   need to communicate with devices using LeCroy's VICP (Versatile
+   Instrument Control Protocol), running on top of TCP/IP. It uses a
+   TCP connection on port 1861.
 
-   Basically Lecroy's VICP protocol just tells that before data are exchanged
-   a header must be sent. The header has the form
+   Basically, Lecroy's VICP protocol just tells that before data are
+   exchanged a header must be sent. The header has the form
 
    struct VICP_Header {
-       unsigned char  operation;
-       unsigned char  header version;
-       unsigned char  sequence_number;    // only set in version 1A and later
-       unsigned char  reserved;
-       uint_32        block_length;       // in big-endian format
+       unsigned char operation;
+       unsigned char header version;
+       unsigned char sequence_number;    // only set in version 1A and later
+       unsigned char reserved;
+       uint_32       block_length;       // in big-endian format
    };
 
    The bits of the 'operation' byte have the following meaning:
@@ -40,7 +40,7 @@
    bit 6    remote mode
    bit 5    local lockout
    bit 4    clear device (if send with data clear is done before data are
-                          interpreted)
+            interpreted)
    bit 3    SRQ (only to be send by the device)
    bit 2    reserved
    bit 1    reserved
@@ -53,16 +53,16 @@
    value (protocol version 1A is treated as a subversion of version 1).
 
    The 'sequence_number' field only has a meaning for devices supporting
-   the version 1A of the protocol. For these it must be a number between
-   1 and 255 (but never 0), where each data block must have a "sequence
+   version 1A of the protocol. For these it must be a number between 1
+   and 255 (but never 0), where each data block must have a "sequence
    number" incremented by 1 relative to the previous block (if 255 is
-   reached the next number is then 1). For all other devices the field
+   reached the next number then is 1). For all other devices the field
    will always be set to 0. Since one can't figure out from the version
    field if the device is using version 1 or 1A of the protocol one only
    can find out from checking if the sequence number is 0 or non-zero.
 
    Finally, the 'block_length' member is the length of the block of data
-   (in bytes) to be send following the header. It is 32-bit number in
+   (in bytes) to be send following the header. It's a 32-bit number in
    big-endian format, i.e. the MSB is at the lowest memory address and
    the LSB at the highest address.
 
@@ -98,53 +98,53 @@
    further function calls. The function expects a symbolic name for the
    device (only to be used for the log file), its IP address, either as
    a hostname or a numerical IP address in dotted-quad format, a positive
-   or zero maximum time (in micro-seconds, a zero value means indefinitely
-   long timeout) the function is allowed to wait for successfully establishing
+   or zero maximum time (in micro-seconds, a zero value means never to
+   time-out) the function is allowed to wait for successfully establishing
    the connection and a flag that tells if the function is supposed to return
    immediately on receipt of a signal. Please note that a timer, raising a
    SIGALRM signal on expiry, is used for controlling the timeout. Thus the
    function temporarily installs its own signal handler for SIGALRM, so the
-   caller should make sure that it doesn't initate anything that would also
+   caller should make sure that it doesn't initiate anything that would also
    raise such a signal. Please also note that the function can't be called
    when an connection has already been created. On failure (either because
    the connection has already been opened, connecting to the device fails or
    not enough memory is available) the function throws an exception.
 
-   vicp_close() is the opposite of vicp_open(), i.e. it closes down the
+   vicp_close() is the opposite of vicp_open(), i.e. it shuts down the
    existing connection. It throws an exception when you try to close an
    already closed connection.
 
    vicp_lock_out() allows you to control if the device is in local lockout
    state (the default when a connection is made) or not. By calling the
    funtion with a true boolean value local lockout gets switched on,
-   switch it off by calling it with a false value.
+   switch it off by calling it with a value evaluating to false.
 
    vicp_set_timeout() allows to set timeouts for read or write operations.
    If the first argument is the symbolic value READ (or 0), a timeout for
    read operations gets set, if it's WRITE (or 1) the timeout for writes
-   gets set. Timeouts must be specified in micro-seconds and must be either
-   positive numbers or zero, in which case an indefinitely long timeout is
-   used. Without calling the function a default timeout of 5 seconds will
+   gets set. Timeouts must be specified in microseconds and must be either
+   positive numbers or zero (in which case an indefinitely long timeout is
+   used). Without calling the function a default timeout of 5 seconds will
    be used. Please note that the function can only be called after the
    connection has been established. Please also note that on some systems
-   (those tht don't support the SO_RCVTIMEO and SO_SNDTIMEO socket options)
+   (those that don't support the SO_RCVTIMEO and SO_SNDTIMEO socket options)
    the timeouts get created via a timer that raises a SIGALRM signal. Thus
    on these systems the caller may not initiate any action that would raise
    such a signal when calling one of the functions that can timeout.
 
    The function vicp_write() is used to send data to the device. It requires
-   four arguments, a buffer with the data to be send, a pointer to a variable
+   four arguments: a buffer with the data to be send, a pointer to a variable
    with the number of bytes to be send, a flag that tells if the data are
-   send with a trailing EOI and a flag that tells if the function is supposed
+   sent with a trailing EOI, and a flag that tells if the function is supposed
    to return immediately when receiving a signal. The function returns either
-   SUCCESS (0) if the date could be send successfully, or FAILURE (-1) if
+   SUCCESS (0) if the date could be sent successfully, or FAILURE (-1) if
    sending the data aborted due to receiving a signal. On errors or timeouts
    the function closes the connection and throws an exception. On return the
    variable pointed to by the secand argument will contain the number of bytes
    that have been sent - this also is the case if the function returns FAILURE
    or did throw an exception.
 
-   vicp_read() is for reading data the device sends. It takes four arguments,
+   vicp_read() is for reading data the device sends. It takes four arguments:
    a buffer for storing the data, a pointer to a variable with the length of
    the buffer, a pointer to a variable that tells on return if EOI was set
    for the data and a flag telling if the function is supposed to return
@@ -179,7 +179,6 @@
    to finish. The function also closes and reopens the connection to the
    device.
 
-
    The availability of source code of implementations written by Steve D.
    Sharples from Nottingham University (steve.sharples@nottingham.ac.uk),
    see
@@ -192,7 +191,7 @@
 
    http://sourceforge.net/projects/lecroyvicp/
 
-   were of great help in writing my own implementation, especially given
+   were of great help in writing this implementation, especially given
    the rather meager amount of information in the Remote Control Manuals
    by LeCroy.
 */
@@ -289,7 +288,7 @@ static inline void vicp_set_version( unsigned char * header );
 static inline void vicp_set_sequence( unsigned char * header );
 
 static inline void vicp_set_length( unsigned char * header,
-                                           unsigned long   lenght );
+                                    unsigned long   lenght );
 
 
 /*--------------------------------------------------------------*
@@ -590,7 +589,7 @@ vicp_write( const char * buffer,
     data[ 1 ].iov_base = ( void * ) buffer;
     data[ 1 ].iov_len  = *length;
 
-    /* Assemble the header, set the EOI flag if the user tells us so */
+    /* Assemble the header, set the EOI flag if the user told us to */
 
     if ( with_eoi )
         op |= VICP_EOI;
@@ -603,7 +602,8 @@ vicp_write( const char * buffer,
     /* Now start pushing the data over to the device. Since there is no
        guarantee that all of them will be written in one go (e.g. because
        there are more than fit into a packet) we must go on trying if less
-       then the requested amount of bytes could be send on the first try. */
+       than the requested amount of bytes were sent on the first try amd
+       keep on trying until we're done. */
 
     gettimeofday( &before, NULL );
 
@@ -639,7 +639,6 @@ vicp_write( const char * buffer,
         }
 
         before = after;
-
         buffer += total_length;
 
         bytes_written = fsc2_lan_write( vicp.handle, buffer,
@@ -685,11 +684,11 @@ vicp_write( const char * buffer,
  *     b) SUCCESS (0)           all data have been received successfully
  *     c) FAILURE (-1)          transmission was aborted due to a
  *                              signal
- * If a timeout happens during the transmission an exception gets
- * thrown.
- * Reading stops when either we got as many data as the user asked
- * for or the end of a message was reached (as determined from the
- * EOI flag in the header) or a read was interrupted by a signal.
+ * If a timeout occurs during the transmission an exception gets thrown.
+ *
+ * Reading stops when we either got as many data as the user asked for
+ * or the end of a message was reached (as determined from the EOI flag
+ * in the header) or a read was interrupted by a signal.
  *---------------------------------------------------------------------*/
 
 int
@@ -726,9 +725,9 @@ vicp_read( char    * buffer,
         THROW( EXCEPTION );
     }
 
-    /* Check if there are still outstanding bytes, i.e. bytes of wich we know
-       from reading the last header that they are in the process of being sent 
-       by the device. Get them first. */
+    /* Check if there are still outstanding bytes, i.e. bytes of which we
+       know from reading the last header that they are in the process of
+       being sent by the device. Get them first. */
 
     gettimeofday( &before, NULL );
 
@@ -838,7 +837,7 @@ vicp_read( char    * buffer,
 
         /* Now read the real data. Make sure we don't try to read more than
            the user asked for. If we could read more we store the number of
-           bytes we could have but didn't fetch. */
+           bytes we could have read but didn't yet fetch. */
 
         if ( ( ssize_t ) bytes_to_expect - total_length > *length )
         {
@@ -894,7 +893,7 @@ vicp_read( char    * buffer,
  * enable registers remain unchanged. The command may
  * take several seconds to finish.
  * The function also closes and then reopens the network
- * connection to device.
+ * connection to the device.
  * +++ is dis- and re-connecting really necessary? +++
  *-------------------------------------------------------*/
 
@@ -960,9 +959,9 @@ vicp_device_clear( void )
 }
 
 
-/*--------------------------------------------------------------*
- * Function for evaluating the operation field of a VICP header
- *--------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for evaluating the "operation" field of a VICP header
+ *----------------------------------------------------------------*/
 
 static inline unsigned char
 vicp_get_operation( unsigned char * header )
@@ -971,9 +970,9 @@ vicp_get_operation( unsigned char * header )
 }
 
 
-/*------------------------------------------------------------*
- * Function for evaluating the version field of a VICP header
- *------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for evaluating the "version" field of a VICP header
+ *--------------------------------------------------------------*/
 
 static inline unsigned char
 vicp_get_version( unsigned char * header )
@@ -982,9 +981,9 @@ vicp_get_version( unsigned char * header )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function for evaluation the sequence number field of a VICP header
- *--------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for evaluation the "sequence number" field of a VICP header
+ *----------------------------------------------------------------------*/
 
 static inline unsigned char
 vicp_get_sequence( unsigned char * header )
@@ -993,10 +992,10 @@ vicp_get_sequence( unsigned char * header )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for evaluating the length field of a VICP header
+/*-------------------------------------------------------------*
+ * Function for evaluating the "length" field of a VICP header
  * Please note: the length field is a big-endian number
- *-----------------------------------------------------------*/
+ *-------------------------------------------------------------*/
 
 static inline ssize_t
 vicp_get_length( unsigned char * header )
@@ -1012,9 +1011,9 @@ vicp_get_length( unsigned char * header )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for setting the operation field of a VICP header
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for setting the "operation" field of a VICP header
+ *-------------------------------------------------------------*/
 
 static inline void
 vicp_set_operation( unsigned char * header,
@@ -1024,9 +1023,9 @@ vicp_set_operation( unsigned char * header,
 }
 
 
-/*---------------------------------------------------------*
- * Function for setting the version field of a VICP header
- *---------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for setting the "version" field of a VICP header
+ *-----------------------------------------------------------*/
 
 static inline void
 vicp_set_version( unsigned char * header )
@@ -1034,13 +1033,15 @@ vicp_set_version( unsigned char * header )
     header[ VICP_HEADER_VERSION_OFFSET ] = VICP_HEADER_VERSION_VALUE;
 }
 
-/*-----------------------------------------------------------------*
- * Function for setting the sequence number field of a VICP header
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting the "sequence number" field of a VICP header
+ *-------------------------------------------------------------------*/
 
 static inline void
 vicp_set_sequence( unsigned char * header )
 {
+    /* The sequence number wraps around but may never be 0 */
+
     if ( ++vicp.seq_number == 0 )
         vicp.seq_number++;
 
@@ -1048,10 +1049,10 @@ vicp_set_sequence( unsigned char * header )
 }
 
 
-/*--------------------------------------------------------*
- * Function for setting the length field of a VICP header
+/*----------------------------------------------------------*
+ * Function for setting the "length" field of a VICP header
  * Please note: the length field is a big-endian number
- *--------------------------------------------------------*/
+ *----------------------------------------------------------*/
 
 static inline void
 vicp_set_length( unsigned char * header,
