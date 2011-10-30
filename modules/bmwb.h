@@ -181,9 +181,9 @@
 
 
 typedef struct {
-    uid_t             EUID;           /* user and group ID the program got */
-    gid_t             EGID;           /* started with */
-    pthread_t         a_thread;       /* threads for dealing with connections */
+    uid_t             EUID;          /* user and group ID the program got */
+    gid_t             EGID;          /* started with */
+    pthread_t         a_thread;      /* threads for dealing with connections */
     int               a_is_active;
     pthread_t         c_thread;
     int               c_is_active;

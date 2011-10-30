@@ -91,7 +91,7 @@ meilhaus_init( void )
 
     raise_permissions( );
 
-    /* Try to initilaize the library, thereby opening the device file */
+    /* Try to initialize the library, thereby opening the device file */
 
 	if ( meOpen( ME_OPEN_NO_FLAGS ) != ME_ERRNO_SUCCESS )
 	{
@@ -112,7 +112,7 @@ meilhaus_init( void )
         goto failed_itinitalization;
 	}
 
-    /* If there's none we've got a problem... */
+    /* If there's none there's nothing further we can do... */
 
     if ( dev_count == 0 )
     {
@@ -133,7 +133,7 @@ meilhaus_init( void )
 
     is_locked = 1;
 
-    /* Check that it's a ME-4680 card */
+    /* Check that it's the required ME-4670 or ME-4680 card */
 
     if ( meQueryNameDevice( DEV_ID, buf, sizeof buf ) != ME_ERRNO_SUCCESS )
     {
@@ -142,12 +142,13 @@ meilhaus_init( void )
         goto failed_itinitalization;
     }
 
-    /* Note: the returned string may contain some extra information beside
-       "ME-4680" at the start, we don't care about it */
-
-    if ( strncmp( buf, "ME-4680", 7 ) )
+    if (    strcmp( buf, "ME-4670S" )
+         && strcmp( buf, "ME-4670IS" )
+         && strcmp( buf, "ME-4680S" )
+         && strcmp( buf, "ME-4680IS" ) )
     {
-        sprintf( bmwb.error_msg, "Device not a ME-4680 card." );
+        sprintf( bmwb.error_msg, "Device not a ME-4670s, ME-4670is, "
+                 "ME-4680s or ME-4680is card." );
         goto failed_itinitalization;
     }
 
@@ -528,8 +529,8 @@ meilhaus_ai_get_curves( int      x_channel,
 
     /* Check all arguments */
 
-    if (    x_channel < 0 || x_channel  > 8
-         || y_channel < 0 || y_channel > 8
+    if (    x_channel < 0 || x_channel >= 8
+         || y_channel < 0 || y_channel >= 8
          || x_channel == y_channel )
     {
         sprintf( bmwb.error_msg, "Invalid x or y channel argument to "
