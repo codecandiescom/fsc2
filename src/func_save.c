@@ -144,12 +144,12 @@ get_name( Var_T * v )
 
         if ( EDL.File_List_Len < 3 )
         {
-            print( SEVERE, "No file has been opened yet.\n" );
-            return "/dev/null";
+            print( FATAL, "No file has been opened yet.\n" );
+            THROW( EXCEPTION );
         }
 
         if ( Fsc2_Internals.mode == TEST )
-            return "dummy";
+            return "dummy for test run";
 
         return EDL.File_List[ EDL.File_List_Len - 1 ].name;
     }
@@ -168,7 +168,7 @@ get_name( Var_T * v )
     if ( fn == 0 || fn == 1 )
         return fn == 0 ? "stdout" : "stderr";
 
-    if ( fn < 2 || fn >= EDL.File_List_Len )
+    if ( fn < 0 || fn >= EDL.File_List_Len )
     {
         print( FATAL, "Invalid file number\n" );
         THROW( EXCEPTION );
@@ -177,7 +177,7 @@ get_name( Var_T * v )
     /* During the test run we can only return a dummy name */
 
     if ( Fsc2_Internals.mode == TEST )
-        return "dummy";
+        return "dummy for test run";
 
     return EDL.File_List[ fn ].name;
 }

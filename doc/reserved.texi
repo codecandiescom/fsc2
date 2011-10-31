@@ -167,7 +167,7 @@ functions and may not be used as variable names.
 @item @code{INVERTED}         @tab @code{INVERTED} keyword
 @item @code{IMP}              @tab @code{IMPEDANCE} keyword
 @item @code{IMPEDANCE}        @tab @code{IMPEDANCE} keyword
-@item @code{is_file}          @tab Deprecated built-in function
+@item @code{is_file}          @tab built-in function
 @item                         @tab
 @item @code{KEEP_ALL_PULSES}  @tab Deprecated keyword
 @item @code{K_to_C}           @tab Built-in function (@ref{K_to_C()})
