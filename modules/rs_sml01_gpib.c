@@ -72,6 +72,8 @@ rs_sml01_init( const char * name )
     rs_sml01_command( "PULM:POL NORM\n" );
 #endif
 
+    rs_sml01_triggered_sweep_off( );
+
     /* Figure out the current frequency if it's not going to be set */
 
     if ( ! rs_sml01.freq_is_set )
@@ -382,6 +384,33 @@ rs_sml01_get_frequency( void )
     rs_sml01_talk( "FREQ:CW?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_sml01_triggered_sweep_off( void )
+{
+    rs_sml01_command( "SWE:FREQ:MODE MAN\n" );
+    rs_sml01.sweep_state = UNSET;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_sml01_triggered_sweep_on( void )
+{
+    char cmd[ 100 ];
+
+
+    sprintf( cmd, "SWE:FREQ:SPAC LIN;SWE:FREQ:STEP:LIN %.0f;"
+             "SWE:FREQ:MODE STEP\n", rs_sml01.step_freq );
+    rs_sml01_command( cmd );
+    rs_sml01.sweep_state = SET;
 }
 
 

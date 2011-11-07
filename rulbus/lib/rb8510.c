@@ -57,7 +57,8 @@ static RULBUS_RB8510_DAC12_CARD *rulbus_rb8510_dac12_card_find( int handle );
  * called by the user directly).
  *------------------------------------------------------------------*/
 
-int rulbus_rb8510_dac12_init( void )
+int
+rulbus_rb8510_dac12_init( void )
 {
     rulbus_rb8510_dac12_card = NULL;
     rulbus_num_dac12_cards = 0;
@@ -73,7 +74,8 @@ int rulbus_rb8510_dac12_init( void )
  * all existing cards.
  *------------------------------------------------------------------*/
 
-void rulbus_rb8510_dac12_exit( void )
+void
+rulbus_rb8510_dac12_exit( void )
 {
     if ( rulbus_rb8510_dac12_card == NULL )
         return;
@@ -90,9 +92,10 @@ void rulbus_rb8510_dac12_exit( void )
  * user directly).
  *---------------------------------------------------------------------*/
 
-int rulbus_rb8510_dac12_card_init( int handle )
+int
+rulbus_rb8510_dac12_card_init( int handle )
 {
-    RULBUS_RB8510_DAC12_CARD *tmp;
+    RULBUS_RB8510_DAC12_CARD * tmp;
 
 
     tmp = realloc( rulbus_rb8510_dac12_card,
@@ -130,9 +133,10 @@ int rulbus_rb8510_dac12_card_init( int handle )
  * by the user directly).
  *---------------------------------------------------------------*/
 
-int rulbus_rb8510_dac12_card_exit( int handle )
+int
+rulbus_rb8510_dac12_card_exit( int handle )
 {
-    RULBUS_RB8510_DAC12_CARD *card;
+    RULBUS_RB8510_DAC12_CARD * card;
 
 
     /* Try to find the card, if it doesn't exist just return */
@@ -173,12 +177,13 @@ int rulbus_rb8510_dac12_card_exit( int handle )
  * Function for enquiring about the DACs properties 
  *--------------------------------------------------*/
 
-int rulbus_rb8510_dac12_properties( int      handle,
-                                    double * Vmax,
-                                    double * Vmin,
-                                    double * dV )
+int
+rulbus_rb8510_dac12_properties( int      handle,
+                                double * Vmax,
+                                double * Vmin,
+                                double * dV )
 {
-    RULBUS_RB8510_DAC12_CARD *card;
+    RULBUS_RB8510_DAC12_CARD * card;
 
 
     if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
@@ -201,10 +206,11 @@ int rulbus_rb8510_dac12_properties( int      handle,
  * Function for setting a new output voltage
  *-------------------------------------------*/
 
-int rulbus_rb8510_dac12_set_voltage( int    handle,
-                                     double volts )
+int
+rulbus_rb8510_dac12_set_voltage( int    handle,
+                                 double volts )
 {
-    RULBUS_RB8510_DAC12_CARD *card;
+    RULBUS_RB8510_DAC12_CARD * card;
     int retval;
     unsigned char byte[ 2 ];
     unsigned short int val;
@@ -239,7 +245,9 @@ int rulbus_rb8510_dac12_set_voltage( int    handle,
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_RB8510_DAC12_CARD *rulbus_rb8510_dac12_card_find( int handle )
+static
+RULBUS_RB8510_DAC12_CARD *
+rulbus_rb8510_dac12_card_find( int handle )
 {
     int i;
 

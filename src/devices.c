@@ -109,7 +109,7 @@ device_add( const char * name )
 
         real_name = T_malloc( pathmax + 1 );
         if (    ( length = readlink( lib_name, real_name, pathmax + 1 ) ) < 0
-             || length > pathmax )
+             || ( size_t ) length > pathmax )
         {
             eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
                     lib_name );

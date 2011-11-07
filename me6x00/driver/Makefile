@@ -48,7 +48,7 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then  \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
+KERNEL_VER := $(shell $(MAKE) -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
 
 ifeq ($(KERNEL_VER),)
 	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \

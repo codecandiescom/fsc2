@@ -31,13 +31,13 @@
 #include <errno.h>
 
 
-RULBUS_CARD_LIST *rulbus_card = NULL;
+RULBUS_CARD_LIST * rulbus_card = NULL;
 int rulbus_num_cards = 0;
 char *rulbus_dev_file = NULL;
 int rulbus_errno = RULBUS_NO_INITIALIZATION;
 
 
-static const char *rulbus_errlist[ ] = {
+static const char * rulbus_errlist[ ] = {
     "Success",                          /* RULBUS_OK */
     "Running out of memory",            /* RULBUS_NO_MEMORY */
     "No permission to open configuration file",
@@ -243,10 +243,11 @@ static const int rulbus_num_card_handlers =
  * out about the cards in the racks.
  *--------------------------------------------------------------------*/
 
-int rulbus_open( int flag )
+int
+rulbus_open( int flag )
 {
-    const char *config_name;
-    extern FILE *rulbus_in;             /* defined in parser.y */
+    const char * config_name;
+    extern FILE * rulbus_in;             /* defined in parser.y */
     int fd_flags;
     int retval;
     int i;
@@ -370,7 +371,8 @@ int rulbus_open( int flag )
  * Function to "close" to the RULBUS
  *-----------------------------------*/
 
-void rulbus_close( void )
+void
+rulbus_close( void )
 {
     int i;
 
@@ -410,7 +412,8 @@ void rulbus_close( void )
  * printed.
  *----------------------------------------------------------------*/
 
-int rulbus_perror( const char * s )
+int
+rulbus_perror( const char * s )
 {
     extern int rulbus_lineno;
     extern int rulbus_column;
@@ -441,7 +444,8 @@ int rulbus_perror( const char * s )
  * functions.
  *---------------------------------------------------------------*/
 
-const char *rulbus_strerror( void )
+const char *
+rulbus_strerror( void )
 {
     extern int rulbus_lineno;
     extern int rulbus_column;
@@ -470,7 +474,8 @@ const char *rulbus_strerror( void )
  * card.
  *-------------------------------------------------------------------*/
 
-int rulbus_card_open( const char * name )
+int
+rulbus_card_open( const char * name )
 {
     int i;
     int retval;
@@ -510,7 +515,8 @@ int rulbus_card_open( const char * name )
  * Function to deactivate a card
  *-------------------------------*/
 
-int rulbus_card_close( int handle )
+int
+rulbus_card_close( int handle )
 {
     if ( handle < 0 || handle >= rulbus_num_cards )
         return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
@@ -537,10 +543,11 @@ int rulbus_card_close( int handle )
  * value indicating an error.
  *---------------------------------------------------------------*/
 
-int rulbus_write( int             handle,
-                  unsigned char   offset,
-                  unsigned char * data,
-                  size_t          len )
+int
+rulbus_write( int             handle,
+              unsigned char   offset,
+              unsigned char * data,
+              size_t          len )
 {
     int retval;
 
@@ -581,10 +588,11 @@ int rulbus_write( int             handle,
  * otherwise a (negative) value indicating an error.
  *--------------------------------------------------------------*/
 
-int rulbus_write_range( int             handle,
-                        unsigned char   offset,
-                        unsigned char * data,
-                        size_t          len )
+int
+rulbus_write_range( int             handle,
+                    unsigned char   offset,
+                    unsigned char * data,
+                    size_t          len )
 {
     int retval;
 
@@ -625,10 +633,11 @@ int rulbus_write_range( int             handle,
  * indicating an error.
  *------------------------------------------------------------------*/
 
-int rulbus_read( int             handle,
-                 unsigned char   offset,
-                 unsigned char * data,
-                 size_t          len )
+int
+rulbus_read( int             handle,
+             unsigned char   offset,
+             unsigned char * data,
+             size_t          len )
 {
     int retval;
 
@@ -669,10 +678,11 @@ int rulbus_read( int             handle,
  * otherwise a (negative) value indicating an error.
  *-------------------------------------------------------------------*/
 
-int rulbus_read_range( int             handle,
-                       unsigned char   offset,
-                       unsigned char * data,
-                       size_t          len )
+int
+rulbus_read_range( int             handle,
+                   unsigned char   offset,
+                   unsigned char * data,
+                   size_t          len )
 {
     int retval;
 
@@ -709,7 +719,9 @@ int rulbus_read_range( int             handle,
  * just read in from the configuration file
  *-------------------------------------------------*/
 
-static int rulbus_check_config( void )
+static
+int
+rulbus_check_config( void )
 {
     int i, j;
 
@@ -746,7 +758,9 @@ static int rulbus_check_config( void )
  * error was detected or the RULBUS is "closed"
  *-------------------------------------------------------*/
 
-static void rulbus_cleanup( void )
+static
+void
+rulbus_cleanup( void )
 {
     int i;
 
@@ -774,10 +788,12 @@ static void rulbus_cleanup( void )
  * a certain address at one of the racks.
  *-------------------------------------------*/
 
-static int rulbus_write_rack( unsigned char   rack,
-                              unsigned char   addr,
-                              unsigned char * data,
-                              size_t          len )
+static
+int
+rulbus_write_rack( unsigned char   rack,
+                   unsigned char   addr,
+                   unsigned char * data,
+                   size_t          len )
 {
     RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
     int retval;
@@ -805,10 +821,12 @@ static int rulbus_write_rack( unsigned char   rack,
  * number of address at one of the racks, starting at addr
  *---------------------------------------------------------*/
 
-static int rulbus_write_rack_range( unsigned char   rack,
-                                    unsigned char   addr,
-                                    unsigned char * data,
-                                    size_t          len )
+static
+int
+rulbus_write_rack_range( unsigned char   rack,
+                         unsigned char   addr,
+                         unsigned char * data,
+                         size_t          len )
 {
     RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
     int retval;
@@ -836,10 +854,12 @@ static int rulbus_write_rack_range( unsigned char   rack,
  * a certain address at one of the racks.
  *---------------------------------------------*/
 
-static int rulbus_read_rack( unsigned char   rack,
-                             unsigned char   addr,
-                             unsigned char * data,
-                             size_t          len )
+static
+int
+rulbus_read_rack( unsigned char   rack,
+                  unsigned char   addr,
+                  unsigned char * data,
+                  size_t          len )
 {
     RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
     int retval;
@@ -867,10 +887,12 @@ static int rulbus_read_rack( unsigned char   rack,
  * number of addresses at one of the racks, starting at addr
  *-----------------------------------------------------------*/
 
-static int rulbus_read_rack_range( unsigned char   rack,
-                                   unsigned char   addr,
-                                   unsigned char * data,
-                                   size_t          len )
+static
+int
+rulbus_read_rack_range( unsigned char   rack,
+                        unsigned char   addr,
+                        unsigned char * data,
+                        size_t          len )
 {
     RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
     int retval;
@@ -898,11 +920,12 @@ static int rulbus_read_rack_range( unsigned char   rack,
  * as far as specified in the configuration file
  *----------------------------------------------------*/
 
-int rulbus_get_card_info( const char *       card_name,
-                          RULBUS_CARD_INFO * card_info )
+int
+rulbus_get_card_info( const char *       card_name,
+                      RULBUS_CARD_INFO * card_info )
 {
-    const char *config_name;
-    extern FILE *rulbus_in;             /* defined in parser.y */
+    const char * config_name;
+    extern FILE * rulbus_in;             /* defined in parser.y */
     int retval;
     int i;
 

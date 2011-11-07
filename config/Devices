@@ -156,6 +156,11 @@ rs_spec10
 oriel_matrix
 
 
+// Trigger devices
+
+rb8514_trigger
+
+
 // Monochromators
 
 spectrapro_300i     // Acton SpectaPro-300i

@@ -84,7 +84,8 @@ static RULBUS_RB8509_ADC12_CARD *rulbus_rb8509_adc12_card_find( int handle );
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_init( void )
+int
+rulbus_rb8509_adc12_init( void )
 {
     rulbus_rb8509_adc12_card = NULL;
     rulbus_num_adc12_cards = 0;
@@ -100,7 +101,8 @@ int rulbus_rb8509_adc12_init( void )
  * all existing cards.
  *------------------------------------------------------------------*/
 
-void rulbus_rb8509_adc12_exit( void )
+void
+rulbus_rb8509_adc12_exit( void )
 {
     if ( rulbus_rb8509_adc12_card == NULL )
         return;
@@ -117,9 +119,10 @@ void rulbus_rb8509_adc12_exit( void )
  * user directly)
  *---------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_card_init( int handle )
+int
+rulbus_rb8509_adc12_card_init( int handle )
 {
-    RULBUS_RB8509_ADC12_CARD *tmp;
+    RULBUS_RB8509_ADC12_CARD * tmp;
     int retval = RULBUS_OK;
     unsigned char dummy;
 
@@ -192,9 +195,10 @@ int rulbus_rb8509_adc12_card_init( int handle )
  * by the user directly)
  *----------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_card_exit( int handle )
+int
+rulbus_rb8509_adc12_card_exit( int handle )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
 
 
     /* Try to find the card, if it doesn't exist just return */
@@ -235,9 +239,10 @@ int rulbus_rb8509_adc12_card_exit( int handle )
  * Function returns the number of channels of the card
  *-----------------------------------------------------*/
 
-int rulbus_rb8509_adc12_num_channels( int handle )
+int
+rulbus_rb8509_adc12_num_channels( int handle )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
 
 
     if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
@@ -253,10 +258,11 @@ int rulbus_rb8509_adc12_num_channels( int handle )
  * is to be used in conversions
  *---------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_channel( int handle,
-                                     int channel )
+int
+rulbus_rb8509_adc12_set_channel( int handle,
+                                 int channel )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
     unsigned char ctrl;
     int retval;
 
@@ -291,10 +297,11 @@ int rulbus_rb8509_adc12_set_channel( int handle,
  * either 1, 2, 4 or 8.
  *----------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_gain( int handle,
-                                  int gain )
+int
+rulbus_rb8509_adc12_set_gain( int handle,
+                              int gain )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
     unsigned char ctrl;
     unsigned char gain_bits = 0;
     int retval;
@@ -341,10 +348,11 @@ int rulbus_rb8509_adc12_set_gain( int handle,
  * RULBUS_RB8509_ADC12_INT_TRIG or RULBUS_RB8509_ADC12_EXT_TRIG
  *-------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_trigger_mode( int handle,
-                                          int mode )
+int
+rulbus_rb8509_adc12_set_trigger_mode( int handle,
+                                      int mode )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
     unsigned char ctrl;
     int retval;
 
@@ -390,13 +398,14 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle,
  * as the voltage resolution of the card.
  *---------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_properties( int      handle,
-                                    double * Vmax,
-                                    double * Vmin,
-                                    double * dV )
+int
+rulbus_rb8509_adc12_properties( int      handle,
+                                double * Vmax,
+                                double * Vmin,
+                                double * dV )
 
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
 
 
     if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
@@ -419,9 +428,10 @@ int rulbus_rb8509_adc12_properties( int      handle,
  * Function returns the number of channels of the card
  *-----------------------------------------------------*/
 
-int rulbus_rb8509_adc12_has_external_trigger( int handle )
+int
+rulbus_rb8509_adc12_has_external_trigger( int handle )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
 
 
     if ( ( card = rulbus_rb8509_adc12_card_find( handle ) ) == NULL )
@@ -440,10 +450,11 @@ int rulbus_rb8509_adc12_has_external_trigger( int handle )
  * 0 is returned.
  *----------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_check_convert( int      handle,
-                                       double * volts )
+int
+rulbus_rb8509_adc12_check_convert( int      handle,
+                                   double * volts )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
     unsigned char hi, low;
     int retval;
 
@@ -493,10 +504,11 @@ int rulbus_rb8509_adc12_check_convert( int      handle,
  * Function for getting a converted voltage from the card.
  *--------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_convert( int      handle,
-                                 double * volts )
+int
+rulbus_rb8509_adc12_convert( int      handle,
+                             double * volts )
 {
-    RULBUS_RB8509_ADC12_CARD *card;
+    RULBUS_RB8509_ADC12_CARD * card;
     int retval;
     unsigned char trig;
     unsigned char hi, low;
@@ -542,7 +554,9 @@ int rulbus_rb8509_adc12_convert( int      handle,
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_RB8509_ADC12_CARD *rulbus_rb8509_adc12_card_find( int handle )
+static
+RULBUS_RB8509_ADC12_CARD *
+rulbus_rb8509_adc12_card_find( int handle )
 {
     int i;
 

@@ -203,7 +203,7 @@ static struct rulbus_device {
 		struct cdev ch_dev;
 		dev_t dev_no;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
-		struct class *rb_class;
+		struct class * rb_class;
 #endif
 #endif
 		int in_use;					  /* set when device is opened */
@@ -292,7 +292,9 @@ module_exit( rulbus_cleanup );
  * Function tests if the last transfer resulted in a timeout
  *-----------------------------------------------------------*/
 
-inline static unsigned char rulbus_epp_timeout_check( void )
+inline static
+unsigned char
+rulbus_epp_timeout_check( void )
 {
 		return inb( STATUS_BYTE ) & EPP_Timeout;
 }
@@ -302,7 +304,9 @@ inline static unsigned char rulbus_epp_timeout_check( void )
  * Function to check for and clear a timeout condition
  *-----------------------------------------------------*/
 
-inline static int rulbus_clear_epp_timeout( void )
+inline static
+int
+rulbus_clear_epp_timeout( void )
 {
 		unsigned char status;
 
@@ -329,7 +333,9 @@ inline static int rulbus_clear_epp_timeout( void )
  * Reverse the port direction by enabling or disabling the bi-direction bit
  *--------------------------------------------------------------------------*/
 
-inline static void rulbus_parport_reverse( void )
+inline static
+void
+rulbus_parport_reverse( void )
 {
 		rulbus.direction ^= 1;
 		outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
@@ -341,7 +347,9 @@ inline static void rulbus_parport_reverse( void )
  * if necessary after switching from write to read mode
  *---------------------------------------------------------*/
 
-inline static unsigned char rulbus_parport_read_data( void )
+inline static
+unsigned char
+rulbus_parport_read_data( void )
 {
 		if ( rulbus.direction != READ_FROM_DEVICE )
 				rulbus_parport_reverse( );
@@ -355,7 +363,9 @@ inline static unsigned char rulbus_parport_read_data( void )
  * if necessary after switching from write to read mode
  *--------------------------------------------------------------*/
 
-inline static unsigned char rulbus_parport_read_addr( void )
+inline static
+unsigned char
+rulbus_parport_read_addr( void )
 {
 		if ( rulbus.direction != READ_FROM_DEVICE )
 				rulbus_parport_reverse( );
@@ -372,7 +382,9 @@ inline static unsigned char rulbus_parport_read_addr( void )
  * fails - even using out_p() doesn't seem to help).
 *--------------------------------------------------------*/
 
-inline static void rulbus_parport_write_data( unsigned char data )
+inline static
+void
+rulbus_parport_write_data( unsigned char data )
 {
 		if ( rulbus.direction != WRITE_TO_DEVICE )
 				rulbus_parport_reverse( );
@@ -388,7 +400,9 @@ inline static void rulbus_parport_write_data( unsigned char data )
  * if necessary after switching from read to write mode
  *------------------------------------------------------------*/
 
-inline static void rulbus_parport_write_addr( unsigned char addr )
+inline static
+void
+rulbus_parport_write_addr( unsigned char addr )
 {
 		if ( rulbus.direction != WRITE_TO_DEVICE )
 				rulbus_parport_reverse( );
@@ -405,7 +419,9 @@ inline static void rulbus_parport_write_addr( unsigned char addr )
  * Function that gets invoked when the module is loaded
  *------------------------------------------------------*/
 
-static int __init rulbus_init( void )
+static
+int
+__init rulbus_init( void )
 {
 		int result;
 
@@ -507,7 +523,9 @@ static int __init rulbus_init( void )
  * Function gets invoked when the module is unloaded
  *---------------------------------------------------*/
 
-static void __exit rulbus_cleanup( void )
+static
+void
+__exit rulbus_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
@@ -549,7 +567,9 @@ static void __exit rulbus_cleanup( void )
  * a driver for it.
  *--------------------------------------------------------------------*/
 
-static void rulbus_epp_attach( struct parport * port )
+static
+void
+rulbus_epp_attach( struct parport * port )
 {
 		/* Check that the port has the base address we're looking for and
 		   that we don't already have a device registered for this port */
@@ -577,7 +597,9 @@ static void rulbus_epp_attach( struct parport * port )
  * unregisters the device we might have registered for the port.
  *---------------------------------------------------------------------*/
 
-static void rulbus_epp_detach( struct parport * port )
+static
+void
+rulbus_epp_detach( struct parport * port )
 {
 		if ( rulbus.dev == NULL || rulbus.port != port )
 				return;
@@ -598,8 +620,10 @@ static void rulbus_epp_detach( struct parport * port )
  * be reasonably sure we got it.
  *-------------------------------------------------------------------------*/
 
-static int rulbus_open( struct inode * inode_p,
-						struct file *  filep )
+static
+int
+rulbus_open( struct inode * inode_p,
+			 struct file  * filep )
 {
 		/* All the following code can be only be accessed from a single thread
 		   at a time. For callers that want to open the device not prepared
@@ -691,8 +715,10 @@ static int rulbus_open( struct inode * inode_p,
  * closed. We must unclaim the port and unregister the device for it.
  *---------------------------------------------------------------------*/
 
-static int rulbus_release( struct inode * inode_p,
-						   struct file *  filep )
+static
+int
+rulbus_release( struct inode * inode_p,
+				struct file  * filep )
 {
 		if ( rulbus.in_use == 0 ) {
 				printk( KERN_NOTICE "Device not open\n" );
@@ -733,14 +759,18 @@ static int rulbus_release( struct inode * inode_p,
  *----------------------------------------------------*/
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *	filep,
-						 unsigned int	cmd,
-						 unsigned long	arg )
+static
+int
+rulbus_ioctl( struct inode * inode_p,
+			  struct file  * filep,
+			  unsigned int	 cmd,
+			  unsigned long	 arg )
 #else
-static long rulbus_ioctl( struct file * filep,
-						  unsigned int	cmd,
-						  unsigned long arg )
+static
+long
+rulbus_ioctl( struct file   * filep,
+			  unsigned int	  cmd,
+			  unsigned long   arg )
 #endif
 {
 		RULBUS_EPP_IOCTL_ARGS rulbus_arg;
@@ -804,11 +834,13 @@ static long rulbus_ioctl( struct file * filep,
  * Function for reading data from a card in one of the racks
  *-----------------------------------------------------------*/
 
-static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
+static
+int
+rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-		unsigned char *data;
+		unsigned char * data;
 		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
-		unsigned char *bp;
+		unsigned char * bp;
 		size_t i;
 
 
@@ -888,7 +920,9 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
  * we can do with a local buffer instead of allocating one.
  *--------------------------------------------------------------------*/
 
-static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
+static
+int
+rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
 		unsigned char data[ 254 ];
 		size_t i;
@@ -959,11 +993,13 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
  * Function for writing data to a card in one of the racks
  *---------------------------------------------------------*/
 
-static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
+static
+int
+rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
 		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
-		unsigned char *data;
-		unsigned char *bp;
+		unsigned char * data;
+		unsigned char * bp;
 		size_t i;
 
 
@@ -1051,7 +1087,9 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
  * one.
  *---------------------------------------------------------------*/
 
-static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
+static
+int
+rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
 		unsigned char data[ 254 ];
 		size_t i;
@@ -1121,7 +1159,9 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
  * Function to initialize the parallel port
  *------------------------------------------*/
 
-static int rulbus_epp_init( void )
+static
+int
+rulbus_epp_init( void )
 {
 		unsigned char ctrl;
 
@@ -1150,7 +1190,9 @@ static int rulbus_epp_init( void )
  * they can be read back.
  *----------------------------------------------------------------*/
 
-static int rulbus_epp_interface_present( void )
+static
+int
+rulbus_epp_interface_present( void )
 {
 		const int p1 = 0xE5;		 // write/read address bit-pattern 1
 		const int p2 = 0x5E;		 // write/read address bit-pattern 2

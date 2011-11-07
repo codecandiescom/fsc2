@@ -179,8 +179,8 @@ typically in the order of 55-65 ns. To tell the library about the exact
 value a line consisting of the the keyword 'intr_delay' and the length
 of this minimum delay can be specified. If not given it defaults to 60 ns.
 This information is not used by the library directly but can be inquired
-by the calling program than in turn can use that information, e.g. by
-raising the trigger earlier by that amount of time to countervail for
+by the calling program that then in turn can use that information, e.g.
+by raising the trigger earlier by that amount of time, thus compensate
 the delay.
 
 The RB8515 clock card does not have any properties that can be set in
@@ -648,12 +648,12 @@ V rb8514_delay (Delay Card) Functions
 -------------------------------------
 
 On initialization (when rulbus_card_open() is called) a delay the card
-may be currently in th eprocess of creating is stopped, the delay is set
+may be currently in the process of creating is stopped, the delay is set
 to 0 and the creation of start or end pulses is switched off and the
 polarity of start end end pulses is set to positive. When the card is
 closed (either directly by a call of rulbus_card_close() or indirectly
-on a call of rulbus_close()) the card is left in the state it is at that
-moment.
+on a call of rulbus_close()) the card is left in the state it is at
+that moment.
 
 
 ----------------------------------------------------------------------
@@ -667,7 +667,7 @@ of a number of clock ticks) the library needs to know the frequency of
 the input clock. It is therefore required that before the function
 rulbus_rb8514_delay_set_delay() is called to do a (successful) call
 of rulbus_rb8514_delay_set_clock_frequency() with the frequency of
-the connected clock (in Hz) to inform the library about the clocks
+the connected clock (in Hz) to inform the library about the clock
 frequency.
 
 On success the function returns RULBUS_OK, otherwise a negative value
@@ -686,7 +686,7 @@ card. In order to be able to do so the frequency of the input clock
 must have been set by a call of rulbus_rb8514_delay_set_delay().
 There is a lower limit to the delay that can be set, which is the
 intrinsic delay of the card (which can be specified in the Rulbus
-configuration file. The upper limit depends on the inout clock
+configuration file. The upper limit depends on the input clock
 frequency and is 16777215 times the inverse of the input clock
 frequency plus the intrisic delay of the card.
 
@@ -694,7 +694,7 @@ If the delay can't be produced exactly (because the value, reduced by
 the intrinsic delay, isn't an integer multiple of the inverse of the
 input clock frequency), the nearest possible delay is used instead.
 
-Usually when the card is just in the process of creating a delay the
+Usually, when the card is just in the process of creating a delay, the
 function will return the error RULBUS_CARD_BUSY and not set a new delay.
 To force the function to set a new delay value even in this case (and
 thereby ending the currently created delay prematurely) the function
@@ -798,17 +798,6 @@ indicating the reason for the failure.
 ----------------------------------------------------------------------
 
 int
-rulbus_rb8514_software_start( int handle )
-
-This function allows to start the creation of a delay via software.
-
-On success the function returns RULBUS_OK, otherwise a negative value
-indicating the reason for the failure.
-
-
-----------------------------------------------------------------------
-
-int
 rulbus_rb8514_delay_busy( int handle )
 
 This function lets you determine if the card is currently creating a
@@ -831,6 +820,19 @@ On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
 
 
+----------------------------------------------------------------------
+
+double
+rulbus_rb8514_delay_get_intrinsic_delay( int handle )
+
+Returns the minimum time a delay (in seconds) for the card can be
+set to (i.e. the intrinsic delay of the card).
+
+On success the function returns a non-negative value, the intrinsic
+delay, otherwise a negative value. The latter can only happen for
+an invalid card handle.
+
+
 ======================================================================
 
 
@@ -838,8 +840,8 @@ VI rb8515_clock (Clock Card) Functions
 --------------------------------------
 
 On initialization (when rulbus_card_open() is called) no changes are
-done to the output frequency of the card and when the connection to
-the card is closed it will remain unchanged.
+made to the output frequency of the card and when the connection to
+the card is closed it also remains unchanged.
 
 
 ----------------------------------------------------------------------
@@ -874,9 +876,8 @@ indicating the reason for the failure.
 VII rb_generic Functions
 ------------------------
 
-
 Cards of type "rb_generic" aren't real cards, they are pseudo-cards,
-existing only in software. They are meant for debugging purposes
+emulated only in software. They are meant for debugging purposes
 only. Using such a card all addresses of a rack (between 1 and 254)
 can be written to or read from, allowing to bypass the functions
 for the real cards, which in some situations might be to restrictive
@@ -947,24 +948,24 @@ main( void )
     if ( ( handle = rulbus_card_open( "ADC12" ) != RULBUS_OK )
         return EXIT_FAILURE;
 
-    /* Set up card to use input channel 1 */
+    /* Set up the card to use input channel 1 */
 
     if ( rulbus_adc12_set_channel( handle, 1 ) != RULBUS_OK )
         return EXIT_FAILURE;
 
-    /* Switch on gain factor of 4 */
+    /* Switch to a gain factor of 4 */
 
     if ( rulbus_adc12_set_gain( handle, RULBUS_RB8509_ADC12_GAIN_4 )
                                                                  != RULBUS_OK )
         return EXIT_FAILURE;
 
-    /* Set internal trigger mode */
+    /* Set its internal trigger mode */
 
     if ( rulbus_adc12_set_trigger_mode( handle, RULBUS_RB8509_ADC12_INT_TRIG )
                                                                  != RULBUS_OK )
         return EXIT_FAILURE;
 
-    /* Start a conversion and print out measured voltage */
+    /* Start a conversion and print out the measured voltage */
 
     if ( rulbus_adc12_convert( handle, &volts ) != RULBUS_OK )
         return EXIT_FAILURE;
@@ -975,7 +976,7 @@ main( void )
 
     rulbus_close_card( handle );
 
-    /* Close connection to the Rulbus */
+    /* Close the connection to the Rulbus */
 
     rulbus_close( );
 

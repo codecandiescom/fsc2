@@ -413,12 +413,6 @@ fsc2_fopen( const char * path,
  * permissions of fsc2
  *---------------------------------------------------------*/
 
-#if ! defined vfscanf
-extern int vfscanf( FILE       * stream,
-                    const char * format,
-                    va_list      arg );
-#endif
-
 int
 fsc2_fscanf( FILE *       stream,
              const char * format,

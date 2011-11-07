@@ -565,6 +565,13 @@ fft_power_spectrum, -1, ALL;
 fft_complex, -1, ALL;
 
 
+/* Function exported by trigger devices */
+
+trigger_name, 0, ALL;
+trigger_duration, -1, EXP;
+trigger_raise, 0, EXP;
+
+
 /*
  * Local variables:
  * tab-width: 4

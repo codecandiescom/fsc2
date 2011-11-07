@@ -171,7 +171,7 @@ endif
 # Support for devices controlled via the RULBUS
 
 ifdef WITH_RULBUS
-simp_modules    += rb8509 rb8510_0 rb8510_1
+simp_modules    += rb8509 rb8510_0 rb8510_1 rb8514_trigger
 comp_modules    += rb_pulser_j rb_pulser_w
 endif
 

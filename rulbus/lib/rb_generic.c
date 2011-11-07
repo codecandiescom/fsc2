@@ -45,7 +45,8 @@ static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle );
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-int rulbus_generic_init( void )
+int
+rulbus_generic_init( void )
 {
     rulbus_generic_card = NULL;
     rulbus_num_generic_cards = 0;
@@ -61,7 +62,8 @@ int rulbus_generic_init( void )
  * existing cards.
  *------------------------------------------------------------------*/
 
-void rulbus_generic_exit( void )
+void
+rulbus_generic_exit( void )
 {
     if ( rulbus_generic_card == NULL )
         return;
@@ -78,9 +80,10 @@ void rulbus_generic_exit( void )
  * user directly)
  *---------------------------------------------------------------------*/
 
-int rulbus_generic_card_init( int handle )
+int
+rulbus_generic_card_init( int handle )
 {
-    RULBUS_GENERIC_CARD *tmp;
+    RULBUS_GENERIC_CARD * tmp;
 
 
     tmp = realloc( rulbus_generic_card,
@@ -104,9 +107,10 @@ int rulbus_generic_card_init( int handle )
  * by the user directly)
  *---------------------------------------------------------------*/
 
-int rulbus_generic_card_exit( int handle )
+int
+rulbus_generic_card_exit( int handle )
 {
-    RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD * card;
 
 
     /* Try to find the card, if it doesn't exist just return */
@@ -147,12 +151,13 @@ int rulbus_generic_card_exit( int handle )
  * Function for writing data to a generic card
  *---------------------------------------------*/
 
-int rulbus_generic_write( int             handle,
-                          unsigned char   address,
-                          unsigned char * data,
-                          size_t          len )
+int
+rulbus_generic_write( int             handle,
+                      unsigned char   address,
+                      unsigned char * data,
+                      size_t          len )
 {
-    RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD * card;
 
 
     if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
@@ -170,12 +175,13 @@ int rulbus_generic_write( int             handle,
  * Function for reading data from a generic card
  *-----------------------------------------------*/
 
-int rulbus_generic_read( int             handle,
-                         unsigned char   address,
-                         unsigned char * data,
-                         size_t          len )
+int
+rulbus_generic_read( int             handle,
+                     unsigned char   address,
+                     unsigned char * data,
+                     size_t          len )
 {
-    RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD * card;
 
 
     if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
@@ -193,7 +199,9 @@ int rulbus_generic_read( int             handle,
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle )
+static
+RULBUS_GENERIC_CARD *
+rulbus_generic_card_find( int handle )
 {
     int i;
 

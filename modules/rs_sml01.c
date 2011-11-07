@@ -73,6 +73,8 @@ rs_sml01_init_hook( void )
     rs_sml01.attenuation_is_set = UNSET;
     rs_sml01.min_attenuation = MIN_ATTEN;
 
+    rs_sml01.sweep_state = UNSET;
+
     rs_sml01.table_file = NULL;
     rs_sml01.use_table = UNSET;
     rs_sml01.att_table = NULL;
@@ -430,6 +432,53 @@ synthesizer_frequency( Var_T * v )
     }
 
     return vars_push( FLOAT_VAR, freq );
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+Var_T *
+synthesizer_triggered_sweep_state( Var_T * v )
+{
+    bool mode;
+
+
+    if ( v == NULL )
+        return vars_push( INT_VAR, rs_sml01.sweep_state );
+
+    mode = get_boolean( v );
+
+    if ( mode == SET )
+    {
+        if ( ! rs_sml01.step_freq_is_set )
+        {
+            print( FATAL, "Can't switch on frequency sweep, sweep step width "
+                   "has not been set.\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( rs_sml01.step_freq < 0.0 )
+        {
+            print( FATAL, "Can't start a triggered sweep with a negative step "
+                   "frequency.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( mode )
+            rs_sml01_triggered_sweep_on( );
+        else
+            rs_sml01_triggered_sweep_off( );
+    }
+    else
+        rs_sml01.sweep_state = mode;
+
+    return vars_push( INT_VAR, rs_sml01.sweep_state );
 }
 
 

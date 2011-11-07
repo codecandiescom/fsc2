@@ -62,7 +62,8 @@ int rulbus_rb8515_clock_init( void )
  * all existing cards.
  *------------------------------------------------------------------*/
 
-void rulbus_rb8515_clock_exit( void )
+void
+rulbus_rb8515_clock_exit( void )
 {
     if ( rulbus_rb8515_clock_card == NULL )
         return;
@@ -79,9 +80,10 @@ void rulbus_rb8515_clock_exit( void )
  * user directly)
  *---------------------------------------------------------------------*/
 
-int rulbus_rb8515_clock_card_init( int handle )
+int
+rulbus_rb8515_clock_card_init( int handle )
 {
-    RULBUS_RB8515_CLOCK_CARD *tmp;
+    RULBUS_RB8515_CLOCK_CARD * tmp;
     int retval;
 
 
@@ -112,9 +114,10 @@ int rulbus_rb8515_clock_card_init( int handle )
  * by the user directly)
  *---------------------------------------------------------------*/
 
-int rulbus_rb8515_clock_card_exit( int handle )
+int
+rulbus_rb8515_clock_card_exit( int handle )
 {
-    RULBUS_RB8515_CLOCK_CARD *card;
+    RULBUS_RB8515_CLOCK_CARD * card;
 
 
     /* Try to find the card, if it doesn't exist just return */
@@ -155,10 +158,11 @@ int rulbus_rb8515_clock_card_exit( int handle )
  * Function for setting the frequency of the clock
  *-------------------------------------------------*/
 
-int rulbus_rb8515_clock_set_frequency( int handle,
-                                       int freq )
+int
+rulbus_rb8515_clock_set_frequency( int handle,
+                                   int freq )
 {
-    RULBUS_RB8515_CLOCK_CARD *card;
+    RULBUS_RB8515_CLOCK_CARD * card;
     int retval;
 
 
@@ -186,7 +190,9 @@ int rulbus_rb8515_clock_set_frequency( int handle,
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle )
+static
+RULBUS_RB8515_CLOCK_CARD *
+rulbus_rb8515_clock_card_find( int handle )
 {
     int i;
 
