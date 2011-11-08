@@ -391,9 +391,26 @@ rs_sml01_get_frequency( void )
  *-------------------------------------------------------------*/
 
 void
+rs_sml01_triggered_sweep_setup( double start_freq,
+                                double end_freq,
+                                double step_freq )
+{
+    char cmd[ 200 ];
+
+
+    sprintf( cmd, "SWE:FREQ:SPAC LIN;SOUR:FREQ:START %.0f;SOUR:FREQ:STOP %.0f;"
+             "SOUR:FREQ:STEP:INCR %.0f\n", start_freq, end_freq, step_freq );
+    rs_sml01_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
 rs_sml01_triggered_sweep_off( void )
 {
-    rs_sml01_command( "SWE:FREQ:MODE MAN\n" );
+    rs_sml01_command( "SOUR:FREQ:MODE CW\n" );
     rs_sml01.sweep_state = UNSET;
 }
 
@@ -404,13 +421,18 @@ rs_sml01_triggered_sweep_off( void )
 void
 rs_sml01_triggered_sweep_on( void )
 {
-    char cmd[ 100 ];
-
-
-    sprintf( cmd, "SWE:FREQ:SPAC LIN;SWE:FREQ:STEP:LIN %.0f;"
-             "SWE:FREQ:MODE STEP\n", rs_sml01.step_freq );
-    rs_sml01_command( cmd );
+    rs_sml01_command( "SOUR:FREQ:MODE SWE;SWE:FREQ:MODE STEP;TRIG:SOUR EXT\n" );
     rs_sml01.sweep_state = SET;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_sml01_do_triggered_sweep_step( void )
+{
+    gpib_trigger( dev_handle );
 }
 
 

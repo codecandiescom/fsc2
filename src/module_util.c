@@ -131,7 +131,7 @@ no_query_possible( void )
  *--------------------------------------------------------------*/
 
 long
-get_long( Var_T *      v,
+get_long( Var_T      * v,
           const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
@@ -151,7 +151,7 @@ get_long( Var_T *      v,
  *--------------------------------------------------------------*/
 
 double
-get_double( Var_T *      v,
+get_double( Var_T      * v,
             const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
@@ -172,7 +172,7 @@ get_double( Var_T *      v,
  *----------------------------------------------------------------------*/
 
 long
-get_strict_long( Var_T *      v,
+get_strict_long( Var_T      * v,
                  const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
@@ -437,10 +437,10 @@ fsc2_fscanf( FILE *       stream,
  *--------------------------------------------------*/
 
 size_t
-fsc2_fread( void * ptr,
-            size_t size,
-            size_t nmemb,
-            FILE * stream )
+fsc2_fread( void   * ptr,
+            size_t   size,
+            size_t   nmemb,
+            FILE   * stream )
 {
     size_t num;
 
@@ -458,7 +458,7 @@ fsc2_fread( void * ptr,
  *-------------------------------------------------------*/
 
 int
-fsc2_fprintf( FILE *       stream,
+fsc2_fprintf( FILE       * stream,
               const char * format,
               ... )
 {
@@ -482,10 +482,10 @@ fsc2_fprintf( FILE *       stream,
  *------------------------------------------------*/
 
 size_t
-fsc2_fwrite( void * ptr,
-             size_t size,
-             size_t nmemb,
-             FILE * stream )
+fsc2_fwrite( void   * ptr,
+             size_t   size,
+             size_t   nmemb,
+             FILE   * stream )
 {
     size_t num;
 
@@ -636,7 +636,7 @@ fsc2_fputc( int    c,
 
 int
 fsc2_fputs( const char * s,
-            FILE *       stream )
+            FILE       * stream )
 {
     int num;
 

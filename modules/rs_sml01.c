@@ -439,6 +439,76 @@ synthesizer_frequency( Var_T * v )
  *-----------------------------------------------------------------------*/
 
 Var_T *
+synthesizer_triggered_sweep_setup( Var_T * v )
+{
+    double start_freq,
+           end_freq,
+           step_freq,
+           new_end_freq;
+    size_t pnts;
+
+
+    start_freq = get_double( v, "sweep start frequency" );
+    end_freq = get_double( v = vars_pop( v ), "sweep end frequency" );
+    step_freq = get_double( v = vars_pop( v ), "sweep step frequency" );
+
+    if ( start_freq < MIN_FREQ || start_freq > MAX_FREQ )
+    {
+        print( FATAL, "Sweep start RF frequency (%f MHz) not within "
+               "synthesizers range (%.3f kHz - %g Mhz).\n",
+               1.0e-6 * start_freq, 1.0e-3 * MIN_FREQ, 1.0e-6 * MAX_FREQ );
+        THROW( EXCEPTION );
+    }
+
+    if ( end_freq < MIN_FREQ || end_freq > MAX_FREQ )
+    {
+        print( FATAL, "Sweep end RF frequency (%f MHz) not within "
+               "synthesizers range (%.3f kHz - %g Mhz).\n",
+               1.0e-6 * end_freq, 1.0e-3 * MIN_FREQ, 1.0e-6 * MAX_FREQ );
+        THROW( EXCEPTION );
+    }
+
+    if ( step_freq <= 0.0 )
+    {
+        print( FATAL, "Invalid negative or zero sweep step frequency.\n" );
+        THROW( EXCEPTION );
+    }
+
+    pnts = ceil( fabs( end_freq - start_freq ) / step_freq ) + 1;
+
+    if ( start_freq / end_freq )
+        new_end_freq = start_freq + ( pnts - 1 ) * step_freq;
+    else
+        new_end_freq = start_freq - ( pnts - 1 ) * step_freq;
+
+    if (    fabs( new_end_freq - end_freq ) / end_freq < 0.99
+         || fabs( new_end_freq - end_freq ) / end_freq < 1.01 )
+    {
+        if ( new_end_freq >= MIN_FREQ && new_end_freq <= MAX_FREQ )
+            print( WARN, "Sweep end frequency had to be adjusted to %f MHz.\n",
+                   1.0e-6 * new_end_freq );
+        else
+        {
+            print( FATAL, "Adjusting sweep end frequency results in "
+                   "end frequency of %f MHz, which isn't withing the "
+                   "allowed range.\n", 1.0e-6 * new_end_freq );
+            THROW( EXCEPTION );
+        }
+    }
+
+    end_freq = new_end_freq;
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_sml01_triggered_sweep_setup( start_freq, end_freq, step_freq );
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+Var_T *
 synthesizer_triggered_sweep_state( Var_T * v )
 {
     bool mode;
@@ -479,6 +549,25 @@ synthesizer_triggered_sweep_state( Var_T * v )
         rs_sml01.sweep_state = mode;
 
     return vars_push( INT_VAR, rs_sml01.sweep_state );
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+Var_T *
+synthesizer_triggered_sweep_step( Var_T * v  UNUSED_ARG )
+{
+    if ( ! rs_sml01.sweep_state )
+    {
+        print( FATAL, "Triggered sweep hasn't been started.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_sml01_do_triggered_sweep_step( );
+
+    return vars_push( INT_VAR, 1L );
 }
 
 
