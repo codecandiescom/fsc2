@@ -74,6 +74,7 @@ rs_sml01_init_hook( void )
     rs_sml01.min_attenuation = MIN_ATTEN;
 
     rs_sml01.sweep_state = UNSET;
+    rs_sml01.triggered_sweep_is_initialized = UNSET;
 
     rs_sml01.table_file = NULL;
     rs_sml01.use_table = UNSET;
@@ -501,6 +502,8 @@ synthesizer_triggered_sweep_setup( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
         rs_sml01_triggered_sweep_setup( start_freq, end_freq, step_freq );
 
+    rs_sml01.triggered_sweep_is_initialized = SET;
+
     return vars_push( INT_VAR, 1L );
 }
 
@@ -521,10 +524,10 @@ synthesizer_triggered_sweep_state( Var_T * v )
 
     if ( mode == SET )
     {
-        if ( ! rs_sml01.step_freq_is_set )
+        if ( ! rs_sml01.triggered_sweep_is_initialized )
         {
-            print( FATAL, "Can't switch on frequency sweep, sweep step width "
-                   "has not been set.\n" );
+            print( FATAL, "Can't switch on triggered frequency sweep, sweep "
+                   "parameters have not beed set.\n" );
             THROW( EXCEPTION );
         }
 

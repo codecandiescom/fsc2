@@ -110,6 +110,7 @@ struct RS_SML01 {
 
     bool state;
 
+    bool triggered_sweep_is_initialized;
     bool sweep_state;
 
     char *table_file;               /* name of attenuation table file */
