@@ -482,8 +482,7 @@ synthesizer_triggered_sweep_setup( Var_T * v )
     else
         new_end_freq = start_freq - ( pnts - 1 ) * step_freq;
 
-    if (    fabs( new_end_freq - end_freq ) / end_freq < 0.99
-         || fabs( new_end_freq - end_freq ) / end_freq > 1.01 )
+    if ( fabs( new_end_freq - end_freq ) / end_freq > 0.01 )
     {
         if ( new_end_freq >= MIN_FREQ && new_end_freq <= MAX_FREQ )
             print( WARN, "Sweep end frequency had to be adjusted to %f MHz.\n",
