@@ -5,8 +5,8 @@ This package is a driver (module) and a library for National Instruments
 6601 GPCT (General Purpose Counter and Timer) cards. It was mainly written
 to allow support for this type of cards for a program for spectrometer
 control, fsc2, I have written and currently only supports using the board
-for event counting, pulse generation and DIO. The module compiles for both
-2.4 and 2.6 kernels but was tested with 2.4 kernels only.
+for event counting, pulse generation and DIO. The module compiles with
+2.4, 2.6 and 3.1 kernels but was tested with 2.4 kernels only.
 
 
 II. Preparation for installation
@@ -119,4 +119,4 @@ In the 'lib' subdirectory a file named 'ni6601_lib.txt' describes the
 functionality supplied by the library.
 
 
-       12.5.2006   Jens Thoms Törring <jt@toerring.de>
+       12.11.2011   Jens Thoms Törring <jt@toerring.de>

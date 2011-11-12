@@ -15,7 +15,7 @@ analog output (AO) only in direct mode, i.e. no time or trigger controlled
 output, just simply setting the output voltages, event counting, pulse
 generation and DIO. Calibration of the cards (except reading the factory
 values stored in the EEPROM) isn't possible yet. While the driver compiles
-with both 2.4 and .6 kernels it was tested with 2.4 kernels only.
+with both 2.4, 2.6 and 3.1 kernels it was tested with 2.4 kernels only.
 
 
 II. Preparation for installation
@@ -162,4 +162,4 @@ to program it an unnecessary PITA. Thanks go to Tim Ously of National
 Instruments by supplying in the comedi mailing list as much of the missing
 informations on the Comedi mailing as he was able to get permission for.
 
-        12.5.2006   Jens Thoms Törring <jt@toerring.de>
+        12.11.2011   Jens Thoms Törring <jt@toerring.de>
