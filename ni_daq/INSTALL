@@ -46,9 +46,9 @@ settings for the driver. If you have problems understanding\n\
 fi
 
 # Ask for the major device number, it must be between 1 and 254 (or 4094
-# for 2.6 kernels) or 0 for a dynamically assigned device nuber
+# for 2.6 or 3.x kernels) or 0 for a dynamically assigned device nuber
 
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[0-4]\)\..*$/XXX/'` == "XXX" ]; then
+if [ ! $IS_NEW_KERNEL ]; then
 
 	REPEAT=1;
 	while [ $REPEAT -ne 0 ]; do
@@ -215,7 +215,7 @@ function do_install() {
 
 PREFIX=`grep NI_DAQ_PREFIX driver/include/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep NI_DAQ_MAJOR driver/include/autoconf.h | awk '{print $3}'`;
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
+if [ $IS_NEW_KERNEL ]; then
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/ni_daq.ko";
 	LOCAL_NAME="driver/ni_daq.ko";
 else
@@ -488,9 +488,16 @@ Unfortunately, the installation can't proceed.\n" 13 68;
 		exit 1;
 	fi
 
-	KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/utsrelease.h \
-                   2>/dev/null | \
-				   sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+	KERNEL_VERSION=`grep UTS_RELEASE                                 \
+		            $KERNEL_DIR/include/generated/utsrelease.h       \
+                    2>/dev/null |                                    \
+				    sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+	if [ -z "$KERNEL_VERSION" ]; then
+		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_                         \
+                        DIR/include/linux/utsrelease.h                    \
+                        2>/dev/null |                                     \
+				        sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+	fi
 	if [ -z "$KERNEL_VERSION" ]; then
 		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
                        2>/dev/null | \
@@ -505,6 +512,15 @@ Unfortunately, the installation can't proceed.\n" 13 68;
 Sorry, can't determine kernel version under the assumption\n\
 that kernel sources are at '$KERNEL_DIR'" 6 64;
 		exit 1
+	fi
+
+	KV_MAJOR=`echo $KERNEL_VERSION | sed 's/^\([0-9]\+\)\..*$/\1/' 2>/dev/null`
+	KV_MINOR=`echo $KERNEL_VERSION | \
+              sed 's/^[0-9]\+\.\([0-9]\+\)\..*$/\1/' 2>/dev/null`
+	if [ $KV_MAJOR -lt 2 -o $KV_MINOR -le 4 ]; then
+		IS_NEW_KERNEL=0;
+	else
+		IS_NEW_KERNEL=1;
 	fi
 }
 
@@ -529,10 +545,12 @@ fi
 
 get_kernel_version;
 
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[46]\)\..*$/XXX/'` != "XXX" ]; then
+if [    $KV_MAJOR -eq 3                                           \
+	 -o \(    $KV_MAJOR -eq 2                                     \
+           -a \( $KV_MINOR -eq 4 -o $KV_MINOR -e 4 \) \) ]; then
     dialog --yesno \
-"This package is only tested with 2.4 and 2.6 kernels.\n\
-There may be lots of problems with other kernels.\n\n\
+"This package is only tested with 2.4, 2.6 and 3.x\n\
+kernels. There could be problems with other kernels.\n\n\
            Do you want to continue?" 8 60
     test $? -eq 0 || exit 0
 fi
@@ -542,11 +560,9 @@ if [ ! -e driver/include/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [    \(      "2.4.${KERNEL_VERSION#2.4.}" == "$KERNEL_VERSION"  \
-               -a ! -e driver/ni_daq.o \)                              \
-         -o \(      "2.6.${KERNEL_VERSION#2.6.}" == "$KERNEL_VERSION"  \
-               -a ! -e driver/ni_daq.ko \)                             \
-		 -o ! -e lib/libni_daq.a                                       \
+    if [    \( ! $IS_NEW_KERNEL -a ! -e driver/rulbus_epp.o  \)  \
+         -o \(   $IS_NEW_KERNEL -a ! -e driver/rulbus_epp.ko \)  \
+		 -o ! -e lib/libni_daq.a                                 \
 		 -o ! -e lib/libni_daq.so ]; then
         pref_comp
         do_compile 0

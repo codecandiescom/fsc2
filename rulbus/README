@@ -9,7 +9,8 @@ Currently the Rulbus-cards RB8509 (12-bit ADC), RB8510 (12-bit DAC),
 RB8514 (delay card) and RB8515 (clock card) are supported. It was
 mainly written to allow support for Rulbus cards for a program for
 spectrometer control, fsc2, I have written. The driver has been
-tested with both 2.4 and a numbe of 2.6 kernels.
+tested with a number of both 2.4 and 2.6 kernels. It compiles also
+with 3.x kernels but hasn't been tested yet.
 
 
 II. Preparation for installation
