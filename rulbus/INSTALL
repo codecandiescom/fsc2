@@ -221,7 +221,7 @@ function do_install() {
 
 PREFIX=`grep RULBUS_EPP_PREFIX include/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep RULBUS_EPP_MAJOR include/autoconf.h | awk '{print $3}'`;
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
+if [ `echo $KERNEL_VERSION | sed 's/^\(3\|\(2\.6\)\.\).*$/XXX/'` == "XXX" ]; then
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/rulbus_epp.ko";
 	LOCAL_NAME="driver/rulbus_epp.ko";
 else
@@ -496,9 +496,14 @@ Unfortunately, the installation can't proceed.\n" 13 68;
 		exit 1;
 fi
 
-	KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/utsrelease.h \
+	KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/generated/utsrelease.h \
                    2>/dev/null | \
 				   sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+	if [ -z "$KERNEL_VERSION" ]; then
+		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/utsrelease.h \
+                   2>/dev/null | \
+				   sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+	fi
 	if [ -z "$KERNEL_VERSION" ]; then
 		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
                        2>/dev/null | \
@@ -533,15 +538,15 @@ if [ $? -eq 1 ]; then
 fi
 
 
-# Check if this is a 2.4 or 2.6 kernel
+# Check if this is a 2.4, 2.6 or 3.x kernel
 
 get_kernel_version;
 
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[46]\)\..*$/XXX/'` != "XXX" ]; then
+if [ `echo $KERNEL_VERSION | sed 's/^\(3\|\(2\.[46]\)\.\).*$/XXX/'` != "XXX" ]; then
     dialog --yesno \
-"This package is only tested with 2.4 and 2.6 kernels.\n\
-There may be lots of problems with other kernels.\n\n\
-           Do you want to continue?" 8 56
+"This package is only tested with 2.4, 2.6 and 3.x\n\
+kernels. There may be problems with other kernels.\n\n\
+           Do you want to continue?" 8 60
     test $? -eq 0 || exit 0
 fi
 
@@ -553,6 +558,8 @@ else
     if [    \(      "2.4.${KERNEL_VERSION#2.4.}" == "$KERNEL_VERSION"  \
                -a ! -e driver/rulbus_epp.o \)                          \
          -o \(      "2.6.${KERNEL_VERSION#2.6.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/rulbus_epp.ko \)                         \
+         -o \(      "2.6.${KERNEL_VERSION#3.}" == "$KERNEL_VERSION"    \
                -a ! -e driver/rulbus_epp.ko \)                         \
 		 -o ! -e lib/librulbus.a                                       \
 		 -o ! -e lib/librulbus.so ]; then

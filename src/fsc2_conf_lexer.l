@@ -79,7 +79,7 @@ int fsc2_conflex_destroy( void );
                                   fsc2_conflval.sval = fsc2_conftext;
                                   return SZ;
                               }
-"\""[^\"]+"\""[ \t]*"\n"              {
+"\""[^\"]+"\""[ \t]*"\n"      {
                                   *strrchr( fsc2_conftext, '"' ) = '\0';
                                   fsc2_conflval.sval = fsc2_conftext + 1;
                                   return TEXT;
