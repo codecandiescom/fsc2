@@ -31,9 +31,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 static struct {
-    int    handle;
-    double length;
-    double intrinsic_delay;
+    int  handle;
+    long length;
 } rb8514_trigger, rb8514_trigger_stored;
 
 
@@ -42,9 +41,9 @@ int rb8514_trigger_test_hook(       void );
 int rb8514_trigger_exp_hook(        void );
 int rb8514_trigger_end_of_exp_hook( void );
 
-Var_T * trigger_name(     Var_T * v );
-Var_T * trigger_duration( Var_T * v );
-Var_T * trigger_raise(    Var_T * v );
+Var_T * trigger_name(   Var_T * v );
+Var_T * trigger_length( Var_T * v );
+Var_T * trigger_raise(  Var_T * v );
 
 
 /*--------------------------------------------------------------*
@@ -67,8 +66,7 @@ rb8514_trigger_init_hook( void )
     }
 
     rb8514_trigger.handle = -1;
-    rb8514_trigger.length = 6.0e-8;
-    rb8514_trigger.intrinsic_delay = 4.0e-8;
+    rb8514_trigger.length = 10;
 
     return 1;
 }
@@ -96,13 +94,7 @@ int rb8514_trigger_exp_hook( void )
     raise_permissions( );
     rb8514_trigger.handle = rulbus_card_open( RULBUS_CARD_NAME );
 
-    if (    rb8514_trigger.handle < 0
-         || rulbus_rb8514_delay_set_clock_frequency( rb8514_trigger.handle,
-                                                     RULBUS_DELAY_INPUT_FREQ )
-                                                                          < 0
-         || ( rb8514_trigger.intrinsic_delay =
-              rulbus_rb8514_delay_get_intrinsic_delay( rb8514_trigger.handle ) )
-                                                                         < 0.0 )
+    if ( rb8514_trigger.handle < 0 )
     {
         lower_permissions( );
         print( FATAL, "Initialization of card failed: %s.\n",
@@ -150,27 +142,26 @@ trigger_name( Var_T * v  UNUSED_ARG )
  *--------------------------------------------------------------*/
 
 Var_T *
-trigger_duration( Var_T * v )
+trigger_length( Var_T * v )
 {
-    double length;
+    long int length;
 
 
     if ( v == 0 )
         return vars_push( FLOAT_VAR, rb8514_trigger.length );
 
-    length = get_double( v, "trigger duration" );
+    length = get_long( v, "trigger length" );
 
-    if (    ( FSC2_MODE == TEST && length < 0.99 / RULBUS_DELAY_INPUT_FREQ )
-         || (    FSC2_MODE == EXPERIMENT
-              && length < 0.99 * rb8514_trigger.intrinsic_delay ) )
+    if ( length < 1 )
     {
-        print( FATAL, "Requested length of trigger is too short.\n" );
+        print( FATAL, "Trigger length must be at least 1.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( length > 16777215.0 /RULBUS_DELAY_INPUT_FREQ )
+    if ( length >= 16777215 )
     {
-        print( FATAL, "Requested length of trigger is too long.\n" );
+        print( FATAL, "Requested trigger length is too large, must not be "
+               "larger than 16777215.\n" );
         THROW( EXCEPTION );
     }
         
@@ -181,7 +172,8 @@ trigger_duration( Var_T * v )
         int ret;
 
         raise_permissions( );
-        ret = rulbus_rb8514_delay_set_delay( rb8514_trigger.handle, length, 1 );
+        ret = rulbus_rb8514_delay_set_raw_delay( rb8514_trigger.handle,
+                                                 length, 1 );
         lower_permissions( );
 
         if ( ret < 0 )

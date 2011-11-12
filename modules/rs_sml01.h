@@ -170,7 +170,6 @@ Var_T * synthesizer_frequency(             Var_T * /* v */ );
 Var_T * synthesizer_step_frequency(        Var_T * /* v */ );
 Var_T * synthesizer_triggered_sweep_setup( Var_T * /* v */ );
 Var_T * synthesizer_triggered_sweep_state( Var_T * /* v */ );
-Var_T * synthesizer_triggered_sweep_step(  Var_T * /* v */ );
 Var_T * synthesizer_attenuation(           Var_T * /* v */ );
 Var_T * synthesizer_minimum_attenuation(   Var_T * /* v */ );
 Var_T * synthesizer_sweep_up(              Var_T * /* v */ );
@@ -239,11 +238,7 @@ void rs_sml01_triggered_sweep_setup( double /* start_freq */,
                                      double /* end_freq   */,
                                      double /* step_freq  */ );
 
-void rs_sml01_triggered_sweep_off( void );
-
-void rs_sml01_triggered_sweep_on( void );
-
-void rs_sml01_do_triggered_sweep_step( void );
+void rs_sml01_triggered_sweep_state( bool /* state */ );
 
 double rs_sml01_set_attenuation( double /* att */ );
 

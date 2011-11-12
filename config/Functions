@@ -287,7 +287,6 @@ synthesizer_double_pulse_delay, -1, ALL;   // R&S SML01 with SML-B3 only
 
 synthesizer_triggered_sweep_setup, 3, EXP;
 synthesizer_triggered_sweep_state, -1, EXP;
-synthesizer_triggered_sweep_step, 0, EXP;
 
 synthesizer_freq_change_delay, -1, ALL;
 
@@ -571,7 +570,7 @@ fft_complex, -1, ALL;
 /* Function exported by trigger devices */
 
 trigger_name, 0, ALL;
-trigger_duration, -1, EXP;
+trigger_length, -1, EXP;
 trigger_raise, 0, EXP;
 
 

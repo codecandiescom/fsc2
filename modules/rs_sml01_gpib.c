@@ -72,8 +72,6 @@ rs_sml01_init( const char * name )
     rs_sml01_command( "PULM:POL NORM\n" );
 #endif
 
-    rs_sml01_triggered_sweep_off( );
-
     /* Figure out the current frequency if it's not going to be set */
 
     if ( ! rs_sml01.freq_is_set )
@@ -398,12 +396,12 @@ rs_sml01_triggered_sweep_setup( double start_freq,
     char cmd[ 200 ];
 
 
-    sprintf( cmd, 
-             ":SOUR:FREQ:START %.0f;"
-             ":SOUR:FREQ:STOP %.0f;"
-             ":SOUR:SWE:FREQ:SPAC LIN;"
-             ":SOUR:FREQ:STEP:INCR %.0f\n",
-             start_freq, end_freq, step_freq );
+    sprintf( cmd,
+             "FREQ:STAR %.0f;"
+             ":FREQ:STOP %.0f;"
+             ":SWE:SPAC LIN;"
+             ":SWE:STEP:LIN %.0f\n",
+             end_freq, start_freq, step_freq );
     rs_sml01_command( cmd );
 }
 
@@ -412,34 +410,16 @@ rs_sml01_triggered_sweep_setup( double start_freq,
  *-------------------------------------------------------------*/
 
 void
-rs_sml01_triggered_sweep_off( void )
+rs_sml01_triggered_sweep_state( bool state )
 {
-    rs_sml01_command( "SOUR:FREQ:MODE CW\n" );
-    rs_sml01.sweep_state = UNSET;
-}
+    if ( state == UNSET )
+        rs_sml01_command( "FREQ:MODE CW\n" );
+    else
+        rs_sml01_command( "FREQ:MODE SWE;"
+                          ":SWE:MODE STEP;"
+                          ":TRIG:SOUR EXT\n" );
 
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
-
-void
-rs_sml01_triggered_sweep_on( void )
-{
-    rs_sml01_command( ":SOUR:FREQ:MODE SWE;"
-                      ":SOUR:SWE:FREQ:MODE STEP;"
-                      ":TRIG:SOUR SING\n" );
-    rs_sml01.sweep_state = SET;
-}
-
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
-
-void
-rs_sml01_do_triggered_sweep_step( void )
-{
-//    gpib_trigger( dev_handle );
-    rs_sml01_command( "*TRG\n" );
+    rs_sml01.sweep_state = state;
 }
 
 
