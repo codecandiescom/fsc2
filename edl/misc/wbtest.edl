@@ -1,0 +1,91 @@
+DEVICES:
+
+rs_sml01;
+rb_pulser_w;
+rb8514_trigger;
+
+
+VARIABLES:
+
+repeat_time    = 1 ms;
+p1_pos         = 200 ns;
+p1_to_p2_dist  = 400 ns;
+p2_to_p3_dist  = 2000 ns;
+p1_len         = 100 ns;
+p2_len         = 200 ns;
+p3_len         = 200 ns;
+p2_rf_delay    = 100 ns;
+rf_p3_delay    = 100 ns;
+det_offset     = 0 ns;
+
+start_freq     = 100 MHz;
+end_freq       = 900 MHz;
+freq_step      = 10 MHz;
+att            = -13;
+
+N_Avg          = 10;
+N_Points       = ceil( ( end_freq - start_freq ) / freq_step ) + 1;
+I;
+K;
+
+
+ASSIGNMENTS:
+
+TIMEBASE: 10 ns;
+TRIGGER_MODE: EXTERNAL;
+
+
+PREPARATIONS:
+
+pulser_minimum_defense_distance( 50 ns );
+
+P1:  FUNCTION = MICROWAVE,
+     START    = p1_pos,
+     LENGTH   = p1_len;
+
+P2:  FUNCTION = MICROWAVE,
+     START    = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
+     LENGTH   = p2_len;
+
+P3:  FUNCTION = MICROWAVE,
+     START    = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
+     LENGTH   = p3_len;
+
+P4:  FUNCTION = RF,
+     START    = P2.START + P2.LENGTH + p2_rf_delay,
+     LENGTH   = p2_to_p3_dist - 0.5 * ( P2.LENGTH + P3.LENGTH )
+                - p2_rf_delay - rf_p3_delay;
+
+P5:  FUNCTION = DETECTION,
+     START    = P3.START + det_offset + p1_to_p2_dist + 0.5 * P3.LENGTH,
+     LENGTH   = 10 ns;
+
+
+init_1d( 2, N_Points, start_freq / 1 MHz, freq_step / 1 MHz,
+         "RF frequency [MHz]", "Echo amplitude [a.u.]" );
+
+EXPERIMENT:
+synthesizer_attenuation( att );
+synthesizer_frequency( start_freq );
+synthesizer_triggered_sweep_setup( start_freq, end_freq, freq_step );
+synthesizer_state( "ON" );
+trigger_length( 100 );
+
+FOR K = 1 : 10 {
+    synthesizer_triggered_sweep_state( "ON" );
+
+    FOR I = 1 : N_Points {
+        pulser_state( "ON" );
+        wait( 1.1 * repeat_time * N_Avg );
+        IF I < N_Points {
+            trigger_raise( );
+        }
+		pulser_state( "OFF" );
+    }
+
+    synthesizer_triggered_sweep_state( "OFF" );
+}
+
+ON_STOP:
+
+synthesizer_state( "OFF" );

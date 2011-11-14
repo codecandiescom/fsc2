@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-int rulbus_column = 0;
+int rulbus_column;
 int rulbus_lex( void );
 static void count( void );
 
@@ -81,14 +81,14 @@ DEC      [+-]*("0"|([1-9][0-9]*))
 <<EOF>>            { return EOFC_TOKEN; }  /* End of file in comment */
 }                  /* End of C style comment handling */
 
-"file"             { count(); return FILE_TOKEN; }
-"rack"             { count(); return RACK_TOKEN; }
-"address"          { count(); return ADDR_TOKEN; }
-"num_channels"     { count(); return NCHAN_TOKEN; }
-"volt_per_bit"     { count(); return VPB_TOKEN; }
-"bipolar"          { count(); return POL_TOKEN; }
-"intr_delay"       { count(); return IDEL_TOKEN; }
-"has_ext_trigger"  { count(); return EXTTRIG_TOKEN; }
+"file"             { count( ); return FILE_TOKEN; }
+"rack"             { count( ); return RACK_TOKEN; }
+"address"          { count( ); return ADDR_TOKEN; }
+"num_channels"     { count( ); return NCHAN_TOKEN; }
+"volt_per_bit"     { count( ); return VPB_TOKEN; }
+"bipolar"          { count( ); return POL_TOKEN; }
+"intr_delay"       { count( ); return IDEL_TOKEN; }
+"has_ext_trigger"  { count( ); return EXTTRIG_TOKEN; }
 
 "rb_generic"       {
 			           count( );
