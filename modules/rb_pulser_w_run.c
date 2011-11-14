@@ -900,7 +900,7 @@ rb_pulser_w_commit( bool test_only )
             if ( ! card->was_active && card->is_active )
                 rb_pulser_w_delay_card_state( card, START );
             else if ( card->old_delay != card->delay )
-                rb_pulser_w_delay_card_delay( card, card->delay );
+                rb_pulser_w_delay_card_delay( card, card->delay, UNSET );
 
             card->old_delay = card->delay;
         }
@@ -936,7 +936,7 @@ rb_pulser_w_set_phases( void )
         if ( card->was_active && ! card->is_active )
         {
             rb_pulser_w_set_phase( card, PHASE_PLUS_X );
-            rb_pulser_w_delay_card_delay( card, 0 );
+            rb_pulser_w_delay_card_delay( card, 0, UNSET );
             card->delay = card->old_delay = 0;
             continue;
         }
@@ -954,7 +954,7 @@ rb_pulser_w_set_phases( void )
 
         if ( card->delay != card->old_delay )
         {
-            rb_pulser_w_delay_card_delay( card, card->delay );
+            rb_pulser_w_delay_card_delay( card, card->delay, UNSET );
             card->old_delay = card->delay;
         }
     }

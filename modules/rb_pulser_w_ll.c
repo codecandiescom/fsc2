@@ -326,7 +326,7 @@ rb_pulser_w_phase_init( void )
     card = rb_pulser_w.delay_card + PHASE_DELAY_0;
     rb_pulser_w_delay_card_delay( card,
                                   Ticks_ceil( MINIMUM_PHASE_PULSE_LENGTH /
-                                              rb_pulser_w.timebase ) );
+                                              rb_pulser_w.timebase ), SET );
     raise_permissions( );
 
     /* Now start this card to make it emit a singe pulse that in turn sets
@@ -351,7 +351,7 @@ rb_pulser_w_phase_init( void )
 
     for ( ; card != NULL; card = card->next )
     {
-        if ( rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 0 )
+        if ( rulbus_rb8514_delay_set_raw_delay( card->handle, 0, SET )
                                                                  != RULBUS_OK )
                 rb_pulser_w_failure( SET, "Failure to initialize pulser" );
 
@@ -364,13 +364,13 @@ rb_pulser_w_phase_init( void )
                  "%s )\n", card->name, ps_str[ PHASE_PLUS_X ][ 0 ],
                  ps_str[ PHASE_PLUS_X ][ 1 ] );
     card = rb_pulser_w.delay_card + PHASE_DELAY_0;
-    rb_pulser_w_delay_card_delay( card,
-                                  Ticks_ceil( MINIMUM_PHASE_PULSE_LENGTH /
-                                              rb_pulser_w.timebase ) );
+    fprintf( stderr, "rb_pulser_w_delay_card_delay( %s, %lu, SET )\n",
+             card->name, Ticks_ceil( MINIMUM_PHASE_PULSE_LENGTH /
+                                     rb_pulser_w.timebase ) );
     fprintf( stderr, "rulbus_rb8514_software_start( %s )\n", card->name );
     for ( ; card != NULL; card = card->next )
     {
-        fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, 0, 0 )\n",
+        fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, 0, SET )\n",
                  card->name );
         card->old_delay = card->old_delay = 0;
     }
@@ -818,7 +818,8 @@ rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
 
 void
 rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
-                              unsigned long         delay )
+                              unsigned long         delay,
+                              bool                  force )
 {
 #if ! defined RB_PULSER_W_TEST
     int ret;
@@ -830,7 +831,7 @@ rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
        a pulse */
 
     while ( ( ret = rulbus_rb8514_delay_set_raw_delay( card->handle,
-                                                       delay, 0 ) )
+                                                       delay, force ) )
                                                        == RULBUS_CARD_IS_BUSY )
         /* empty */ ;
 

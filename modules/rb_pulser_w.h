@@ -441,7 +441,8 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * /* card  */,
                                    bool                  /* state */  );
 
 void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * /* card  */,
-                                   unsigned long         /* delay */  );
+                                   unsigned long         /* delay */,
+                                   bool                  /* force */ );
 
 void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card  */,
                             int                   /* phase */  );

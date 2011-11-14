@@ -229,6 +229,7 @@ rulbus_rb8514_delay_set_delay( int    handle,
     int retval;
     unsigned char i;
     unsigned char bytes[ 3 ];
+    unsigned long d; 
 
 
     if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
@@ -242,7 +243,9 @@ rulbus_rb8514_delay_set_delay( int    handle,
     if ( ldelay < 0 || ldelay > RULBUS_RB8514_DELAY_CARD_MAX )
         return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-    if ( delay == card->delay )
+    d = ldelay;
+
+    if ( d == card->delay )
         return rulbus_errno = RULBUS_OK;
 
     /* Check that the card isn't currently creating a delay - if it is tell
@@ -250,20 +253,23 @@ rulbus_rb8514_delay_set_delay( int    handle,
        user to set a new delay even though a delay is already created, which
        then gets ended prematurely) */
 
-    if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
-         return rulbus_errno = retval;
+    if ( ! force )
+    {
+        if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
+            return rulbus_errno = retval;
 
-    if ( bytes[ 0 ] & DELAY_BUSY && ! force )
-        return rulbus_errno = RULBUS_CARD_IS_BUSY;
+        if ( bytes[ 0 ] & DELAY_BUSY )
+            return rulbus_errno = RULBUS_CARD_IS_BUSY;
+    }
 
-    card->delay = ldelay;
-
-    for ( i = 0; i < 3; ldelay >>= 8, i++ )
-        bytes[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
+    for ( i = 0; i < 3; d >>= 8, i++ )
+        bytes[ 2 - i ] = ( unsigned char ) ( d & 0xFF );
     
     if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
                                         bytes, 3 ) ) != 3 )
         return rulbus_errno = retval;
+
+    card->delay = ldelay;
 
     return rulbus_errno = RULBUS_OK;
 }
@@ -283,6 +289,7 @@ rulbus_rb8514_delay_set_raw_delay( int           handle,
     unsigned char bytes[ 3 ];
     unsigned char i;
     int retval;
+    unsigned long d = delay;
 
 
     if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
@@ -299,20 +306,23 @@ rulbus_rb8514_delay_set_raw_delay( int           handle,
        user to set a new delay even though a delay is already created, which
        then ends prematurely) */
 
-    if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
-         return rulbus_errno = retval;
+    if ( ! force )
+    {
+        if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
+            return rulbus_errno = retval;
 
-    if ( bytes[ 0 ] & DELAY_BUSY && ! force )
-        return rulbus_errno = RULBUS_CARD_IS_BUSY;
+        if ( bytes[ 0 ] & DELAY_BUSY )
+            return rulbus_errno = RULBUS_CARD_IS_BUSY;
+    }
 
-    card->delay = delay;
-
-    for ( i = 0; i < 3; delay >>= 8, i++ )
-        bytes[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
+    for ( i = 0; i < 3; d >>= 8, i++ )
+        bytes[ 2 - i ] = ( unsigned char ) ( d & 0xFF );
 
     if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
                                         bytes, 3 ) ) != 3 )
         return rulbus_errno = retval;
+
+    card->delay = delay;
 
     return rulbus_errno = RULBUS_OK;
 }
