@@ -2131,9 +2131,9 @@ lecroy_wr_serial_open( void )
     if ( ( lecroy_wr.tio = fsc2_serial_open( lecroy_wr.sn, O_RDWR ) ) == NULL )
         return FAIL;
 
-    /* Set up serial port according to settings in the configuration file  */
+    /* Set up serial port according to settings in the configuration file */
 
-    memset( &lecroy_wr.tio, 0, sizeof lecroy_wr.tio );
+    memset( lecroy_wr.tio, 0, sizeof lecroy_wr.tio );
 
     lecroy_wr.tio->c_cflag = CREAD | CLOCAL;
 
