@@ -21,12 +21,6 @@
 #include "bmwb.h"
 
 
-#define AO_0    5
-#define AO_1    5
-#define AO_2    6
-#define AO_3    7
-
-
 #define AI_MIN_VOLTAGE  -10.0
 #define AI_MAX_VOLTAGE   10.0
 

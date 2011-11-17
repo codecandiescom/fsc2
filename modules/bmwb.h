@@ -223,14 +223,20 @@ extern BMWB bmwb;
 
 /* Symbolic names for subdevice IDs for analog outputs */
 
-#define FREQUENCY_AO            5         /* used for microwave frequency */
-#define BIAS_AO                 6         /* used for microwave bias */
-#define SIGNAL_PHASE_AO         7         /* used for signal phase */
+#define AO_0                    5
+#define AO_1                    6
+#define AO_2                    7
+#define AO_3                    8
+
+
+#define FREQUENCY_AO            AO_0      /* used for microwave frequency */
+#define BIAS_AO                 AO_1      /* used for microwave bias */
+#define SIGNAL_PHASE_AO         AO_2      /* used for signal phase */
 
 
 /* Define subdevice ID for analog input and the different channels */
 
-#define AI                      4         /* subdevice ID for analog input */
+#define AI                      4         /* device ID for analog input */
 
 
 #define AI_0                    0
