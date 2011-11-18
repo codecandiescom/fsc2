@@ -52,6 +52,75 @@
 #undef DEVICE_TYPE
 
 
+/* Number associated with the different DIs and DOs */
+
+#define DIO_A   0         /* used for AFC state and type of bridge detection */
+#define DIO_B   1         /* not used */
+#define DIO_C   2         /* used for microwave attenuation */
+#define DIO_D   3         /* used for bridge mode, iris control */
+
+
+/* Symbolic names for the DIs and DOs according to their functions */
+
+#define BRIDGE_TYPE_DI    DIO_A      /* used to detemine bridge type */
+#define MODE_CONTROL_DO   DIO_D      /* used in control of bridge mode */
+#define IRIS_CONTROL_DO   DIO_D      /* used in controlling the iris motor */
+#define ATT_CONTROL_DO    DIO_D      /* used for attenuation control */
+#define ATT_VALUE_DO      DIO_C      /* outputs attenuation value */
+
+
+/* Symbolic names for subdevice IDs for analog outputs */
+
+#define AO_0                    5
+#define AO_1                    6
+#define AO_2                    7
+#define AO_3                    8
+
+
+#define FREQUENCY_AO            AO_0      /* used for microwave frequency */
+#define BIAS_AO                 AO_1      /* used for microwave bias */
+#define SIGNAL_PHASE_AO         AO_2      /* used for signal phase */
+
+
+/* Define subdevice ID for analog input and the different channels */
+
+#define AI                      4         /* device ID for analog input */
+
+#define AI_0                    0
+#define AI_1                    1
+#define AI_2                    2
+#define AI_3                    3
+#define AI_4                    4
+#define AI_5                    5
+#define AI_6                    6
+#define AI_7                    7
+#define AI_8                    8
+
+
+#define DETECTOR_CURRENT_AI     AI_0      /* detector current */
+#define AFC_SIGNAL_AI           AI_1      /* AFC signal */
+#define UNLEVELED_SIGNAL_AI     AI_2      /* unleveled signal */
+#define UNCALIBRATED_SIGNAL_AI  AI_3      /* uncalibrated signal */
+#define TUNE_MODE_X_SIGNAL_AI   AI_4      /* tune mode x signal */
+#define TUNE_MODE_Y_SIGNAL_AI   AI_6      /* tune mode y signal */
+#define OVERHEAT_SIGNAL_AI      AI_8      /* overheat signal */
+
+
+#define AFC_STATE_BIT       0x01
+#define BRIDGE_TYPE_BIT     0x02
+
+#define MODE_BITS           0x0F
+#define MODE_STANDBY_BITS   0x0A
+#define MODE_TUNE_BITS      0x0C
+#define MODE_OPERATE_BITS   0x00
+
+#define IRIS_UP_BIT         0x10
+#define IRIS_DOWN_BIT       0x20
+
+#define X_BAND_ATT_BITS     0x40
+#define Q_BAND_ATT_BITS     0xF0
+
+
 #define BMWB_X_BAND_STATE_FILE    "x_bmwb.state"
 #define BMWB_Q_BAND_STATE_FILE    "q_bmwb.state"
 
@@ -202,77 +271,6 @@ typedef struct {
 } BMWB;
 
 extern BMWB bmwb;
-
-
-/* Number associated with the different DIs and DOs */
-
-#define DIO_A   0         /* used for AFC state and type of bridge detection */
-#define DIO_B   1         /* used for bridge mode, iris control */
-#define DIO_C   2         /* used for microwave attenuation */
-#define DIO_D   3         /* not used */
-
-
-/* Symbolic names for the DIs and DOs according to their functions */
-
-#define BRIDGE_TYPE_DI    DIO_A      /* used to detemine bridge type */
-#define MODE_CONTROL_DO   DIO_B      /* used in control of bridge mode */
-#define IRIS_CONTROL_DO   DIO_B      /* used in controlling the iris motor */
-#define ATT_CONTROL_DO    DIO_B      /* used for attenuation control */
-#define ATT_VALUE_DO      DIO_C      /* outputs attenuation value */
-
-
-/* Symbolic names for subdevice IDs for analog outputs */
-
-#define AO_0                    5
-#define AO_1                    6
-#define AO_2                    7
-#define AO_3                    8
-
-
-#define FREQUENCY_AO            AO_0      /* used for microwave frequency */
-#define BIAS_AO                 AO_1      /* used for microwave bias */
-#define SIGNAL_PHASE_AO         AO_2      /* used for signal phase */
-
-
-/* Define subdevice ID for analog input and the different channels */
-
-#define AI                      4         /* device ID for analog input */
-
-
-#define AI_0                    0
-#define AI_1                    1
-#define AI_2                    2
-#define AI_3                    3
-#define AI_4                    4
-#define AI_5                    5
-#define AI_6                    6
-#define AI_7                    7
-#define AI_8                    8
-
-
-#define DETECTOR_CURRENT_AI     AI_0      /* detector current */
-#define AFC_SIGNAL_AI           AI_1      /* AFC signal */
-#define UNLEVELED_SIGNAL_AI     AI_2      /* unleveled signal */
-#define UNCALIBRATED_SIGNAL_AI  AI_3      /* uncalibrated signal */
-#define TUNE_MODE_X_SIGNAL_AI   AI_4      /* tune mode x signal */
-#define TUNE_MODE_Y_SIGNAL_AI   AI_6      /* tune mode y signal */
-#define OVERHEAT_SIGNAL_AI      AI_8      /* overheat signal */
-
-
-#define AFC_STATE_BIT       0x01
-#define BRIDGE_TYPE_BIT     0x02
-
-#define MODE_BITS           0x0F
-#define MODE_STANDBY_BITS   0x0B
-#define MODE_TUNE_BITS      0x0D
-#define MODE_OPERATE_BITS   0x01
-
-#define IRIS_UP_BIT         0x10
-#define IRIS_DOWN_BIT       0x20
-
-#define X_BAND_ATT_BITS     0x40
-#define Q_BAND_ATT_BITS     0xF0
-
 
 
 void error_handling( void );

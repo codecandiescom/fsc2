@@ -2021,8 +2021,8 @@ lecroy_wr_talk( const char * cmd,
     if (    fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send
          || ( *length = fsc2_serial_read( lecroy_wr.sn, reply, *length, "\r",
-                                        TIMEOUT_FROM_LENGTH( *length ), SET ) )
-                                                                         <= 0 )
+                                          TIMEOUT_FROM_LENGTH( *length ),
+                                          SET ) ) <= 0 )
         lecroy_wr_comm_failure( );
     reply[ *length - 1 ] = '\0';
     return OK;
@@ -2214,8 +2214,8 @@ lecroy_wr_serial_open( void )
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
          || fsc2_serial_write( lecroy_wr.sn,
-                          "CORS EO,\"\n\r\",EI,\"\r\",SRQ,\"\",LS,OFF;*STB?\r",
-                          40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40
+                               "CORS EO,\"\\r\",EI,13,SRQ,\"\",LS,OFF;*STB?\r",
+                               39, TIMEOUT_FROM_LENGTH( 39 ), SET ) != 39
          || fsc2_serial_read( lecroy_wr.sn, buf, 10, NULL,
                               TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
