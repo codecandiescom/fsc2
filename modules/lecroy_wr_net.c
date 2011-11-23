@@ -821,7 +821,8 @@ lecroy_wr_get_trigger_source( void )
     {
         print( SEVERE, "Non-standard mode trigger, switching to standard "
                "edge trigger on to LINe input\n" );
-        return lecroy_wr_set_trigger_source( LECROY_WR_LIN );
+        lecroy_wr_set_trigger_source( LECROY_WR_LIN );
+        return LECROY_WR_LIN;
     }
 
     if ( *ptr == ',' )
@@ -831,10 +832,13 @@ lecroy_wr_get_trigger_source( void )
         sscanf( ++ptr, "%d", &src );
     else if ( *ptr == 'L' )
         src = LECROY_WR_LIN;
-    else if ( *ptr == 'E' && ptr[ 2 ] == '1' )
-        src = LECROY_WR_EXT10;
-    else if ( *ptr == 'E' && ptr[ 2 ] != '1' )
-        src = LECROY_WR_EXT;
+    else if ( *ptr == 'E' )
+    {
+        if ( ptr[ 2 ] == '1' )
+            src = LECROY_WR_EXT10;
+        else
+            src = LECROY_WR_EXT;
+    }
     else
         fsc2_impossible( );
 

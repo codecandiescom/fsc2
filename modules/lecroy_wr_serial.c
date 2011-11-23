@@ -330,7 +330,7 @@ lecroy_wr_get_timebase( void )
     int i;
 
 
-    lecroy_wr_talk( "TDIV?", reply, &length );
+    lecroy_wr_talk( "TDIV?\r", reply, &length );
     timebase = T_atod( reply );
 
     for ( i = 0; i < lecroy_wr.num_tbas; i++ )
@@ -496,7 +496,7 @@ lecroy_wr_get_sens( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV?", channel + 1 );
+    sprintf( cmd, "C%1d:VDIV?\r", channel + 1 );
     lecroy_wr_talk( cmd, reply, &length );
     return lecroy_wr.sens[ channel ] = T_atod( reply );
 }
@@ -540,7 +540,7 @@ lecroy_wr_get_offset( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( buf, "C%1d:OFST?", channel + 1 );
+    sprintf( buf, "C%1d:OFST?\r", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
     return  lecroy_wr.offset[ channel ] = T_atod( buf );
 }
@@ -585,7 +585,7 @@ lecroy_wr_get_coupling( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( buf, "C%1d:CPL?", channel + 1 );
+    sprintf( buf, "C%1d:CPL?\r", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
 
     if ( buf[ 0 ] == 'A' )
@@ -644,7 +644,7 @@ lecroy_wr_set_coupling( int channel,
 int
 lecroy_wr_get_bandwidth_limiter( int channel )
 {
-    char buf[ 30 ] = "BWL?";
+    char buf[ 30 ] = "BWL?\r";
     long length = sizeof buf;
     int mode = -1;
     char *ptr = buf;
@@ -723,7 +723,7 @@ bool
 lecroy_wr_set_bandwidth_limiter( int channel,
                                  int bwl )
 {
-    char buf[ 50 ] = "GBWL?";
+    char buf[ 50 ] = "GBWL?\r";
     long length = sizeof buf;
     ssize_t to_send;
 #if defined LECROY_WR_HAS_GLOBAL_BW
@@ -832,14 +832,15 @@ lecroy_wr_get_trigger_source( void )
     char *ptr = reply + 7;
 
 
-    lecroy_wr_talk( "TRSE?", reply, &length );
+    lecroy_wr_talk( "TRSE?\r", reply, &length );
 
     if (    strncmp( reply, "STD,SR,", 7 )
          && strncmp( reply, "EDGE,SR,", 8 ) )
     {
         print( SEVERE, "Non-standard mode trigger, switching to standard "
                "edge trigger on to LINe input\n" );
-        return lecroy_wr_set_trigger_source( LECROY_WR_LIN );
+        lecroy_wr_set_trigger_source( LECROY_WR_LIN );
+        return LECROY_WR_LIN;
     }
 
     if ( *ptr == ',' )
@@ -849,10 +850,13 @@ lecroy_wr_get_trigger_source( void )
         sscanf( ++ptr, "%d", &src );
     else if ( *ptr == 'L' )
         src = LECROY_WR_LIN;
-    else if ( *ptr == 'E' && ptr[ 2 ] == '1' )
-        src = LECROY_WR_EXT10;
-    else if ( *ptr == 'E' && ptr[ 2 ] != '1' )
-        src = LECROY_WR_EXT;
+    else if ( *ptr == 'E' )
+    {
+        if ( ptr[ 2 ] == '1' )
+            src = LECROY_WR_EXT10;
+        else
+            src = LECROY_WR_EXT;
+    }
     else
         fsc2_impossible( );
 
@@ -976,13 +980,13 @@ lecroy_wr_get_trigger_slope( int channel )
                  || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRSL?", channel + 1 );
+        sprintf( buf, "C%1d:TRSL?\r", channel + 1 );
     else if ( channel == LECROY_WR_LIN )
-        strcpy( buf, "LINE:TRSL?" );
+        strcpy( buf, "LINE:TRSL?\r" );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRSL?" );
+        strcpy( buf, "EX:TRSL?\r" );
     else
-        strcpy( buf, "EX10:TRSL?" );
+        strcpy( buf, "EX10:TRSL?\r" );
 
     lecroy_wr_talk( ( const char *) buf, buf, &length );
 
@@ -2162,7 +2166,7 @@ lecroy_wr_serial_open( void )
         lecroy_wr.tio->c_iflag |= IXON | IXOFF | IXANY;
 
     lecroy_wr.tio->c_cc[ VSTART ] = 0x11;       /* DC1, CRTL-Q */
-    lecroy_wr.tio->c_cc[ VSTOP ]   = 0x13;      /* DC3, CRTL-S */
+    lecroy_wr.tio->c_cc[ VSTOP ]  = 0x13;       /* DC3, CRTL-S */
     lecroy_wr.tio->c_cc[ VMIN ]   = 0;          /* non-blocking read */
     lecroy_wr.tio->c_cc[ VTIME ]  = 0;          /* non-blocking read */
 
@@ -2214,7 +2218,7 @@ lecroy_wr_serial_open( void )
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
          || fsc2_serial_write( lecroy_wr.sn,
-                               "CORS EO,\"\\r\",EI,13,SRQ,\"\",LS,OFF;*STB?\r",
+                               "CORS EO,\'\\r\',EI,13,SRQ,\"\",LS,OFF;*STB?\r",
                                39, TIMEOUT_FROM_LENGTH( 39 ), SET ) != 39
          || fsc2_serial_read( lecroy_wr.sn, buf, 10, NULL,
                               TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
