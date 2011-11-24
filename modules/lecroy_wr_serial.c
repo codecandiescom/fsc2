@@ -2218,8 +2218,8 @@ lecroy_wr_serial_open( void )
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
          || fsc2_serial_write( lecroy_wr.sn, comm_setup, strlen( comm_setup ),
-                               TIMEOUT_FROM_LENGTH( strlen( comm_setup ) ),
-                               SET ) != ( ssize_t ) strlen( comm_setup )
+                               TIMEOUT_FROM_STRING( comm_setup ), SET ) !=
+                                               ( ssize_t ) strlen( comm_setup )
          || fsc2_serial_read( lecroy_wr.sn, buf, sizeof buf, NULL,
                               TIMEOUT_FROM_LENGTH( sizeof buf ), SET ) <= 0 )
     {
