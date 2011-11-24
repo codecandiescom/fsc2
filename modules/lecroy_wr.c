@@ -142,15 +142,14 @@ lecroy_wr_init_hook( void )
 
     for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
     {
-        lecroy_wr.is_trigger_slope[ trg_channels[ i ] ]    = UNSET;
-        lecroy_wr.trigger_slope[ trg_channels[ i ] ]       =
-                                                     LECROY_WR_TEST_TRIG_SLOPE;
-        lecroy_wr.is_trigger_coupling[ trg_channels[ i ] ] = UNSET;
-        lecroy_wr.trigger_coupling[ trg_channels[ i ] ]    =
-                                                      LECROY_WR_TEST_TRIG_COUP;
-        lecroy_wr.is_trigger_level[ trg_channels[ i ] ]    = UNSET;
-        lecroy_wr.trigger_level[ trg_channels[ i ] ]       =
-                                                     LECROY_WR_TEST_TRIG_LEVEL;
+        int tch = trg_channels[ i ];
+
+        lecroy_wr.is_trigger_slope[ tch ]    = UNSET;
+        lecroy_wr.trigger_slope[ tch ]       = LECROY_WR_TEST_TRIG_SLOPE;
+        lecroy_wr.is_trigger_coupling[ tch ] = UNSET;
+        lecroy_wr.trigger_coupling[ tch ]    = LECROY_WR_TEST_TRIG_COUP;
+        lecroy_wr.is_trigger_level[ tch ]    = UNSET;
+        lecroy_wr.trigger_level[ tch ]       = LECROY_WR_TEST_TRIG_LEVEL;
     }
 
     lecroy_wr_stored.w = NULL;
@@ -1295,7 +1294,8 @@ digitizer_trigger_slope( Var_T * v )
     }
 
     if (    ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
-         && channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
+         && channel != LECROY_WR_EXT
+         && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel %s.\n",
                LECROY_WR_Channel_Names[ channel ] );

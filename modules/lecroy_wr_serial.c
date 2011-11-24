@@ -65,7 +65,7 @@ static double Serial_Delay_Factor;
         ( lrnd( ( length ) * Serial_Delay_Factor ) + DEFAULT_TIMEOUT )
 
 
-/* Different short command strings */
+/* Several short command strings */
 
 #define ECHO_ON               "\033]"
 #define ECHO_OFF              "\033["
@@ -262,29 +262,31 @@ lecroy_wr_init( void )
 
         for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
         {
-            if ( trg_channels[ i ] == LECROY_WR_LIN )
+            int tch = trg_channels[ i ];
+
+            if ( tch > LECROY_WR_CH_MAX && tch < LECROY_WR_EXT )
                 continue;
 
-            if ( lecroy_wr.is_trigger_level[ trg_channels[ i ] ] )
-                lecroy_wr_set_trigger_level( trg_channels[ i ],
-                                lecroy_wr.trigger_level[ trg_channels[ i ] ] );
+            if ( lecroy_wr.is_trigger_level[ tch ] )
+                lecroy_wr_set_trigger_level( tch,
+                                             lecroy_wr.trigger_level[ tch ] );
             else
-                lecroy_wr.trigger_level[ trg_channels[ i ] ] =
-                              lecroy_wr_get_trigger_level( trg_channels[ i ] );
+                lecroy_wr.trigger_level[ tch ] =
+                                           lecroy_wr_get_trigger_level( tch );
 
-            if ( lecroy_wr.is_trigger_slope[ trg_channels[ i ] ] )
-                lecroy_wr_set_trigger_slope( trg_channels[ i ],
-                                lecroy_wr.trigger_slope[ trg_channels[ i ] ] );
+            if ( lecroy_wr.is_trigger_slope[ tch ] )
+                lecroy_wr_set_trigger_slope( tch,
+                                             lecroy_wr.trigger_slope[ tch ] );
             else
-                lecroy_wr.trigger_slope[ trg_channels[ i ] ] =
-                              lecroy_wr_get_trigger_slope( trg_channels[ i ] );
+                lecroy_wr.trigger_slope[ tch ] =
+                                           lecroy_wr_get_trigger_slope( tch );
 
-            if ( lecroy_wr.is_trigger_coupling[ trg_channels[ i ] ] )
-                lecroy_wr_set_trigger_coupling( trg_channels[ i ],
-                             lecroy_wr.trigger_coupling[ trg_channels[ i ] ] );
+            if ( lecroy_wr.is_trigger_coupling[ tch ] )
+                lecroy_wr_set_trigger_coupling( tch,
+                                          lecroy_wr.trigger_coupling[ tch ] );
             else
-                lecroy_wr.trigger_coupling[ trg_channels[ i ] ] =
-                           lecroy_wr_get_trigger_coupling( trg_channels[ i ] );
+                lecroy_wr.trigger_coupling[ tch ] =
+                                        lecroy_wr_get_trigger_coupling( tch );
         }
 
         /* Set (if required) the trigger delay */
@@ -2218,7 +2220,7 @@ lecroy_wr_serial_open( void )
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
          || fsc2_serial_write( lecroy_wr.sn,
-                               "CORS EO,\'\\r\',EI,13,SRQ,\"\",LS,OFF;*STB?\r",
+                               "CORS EO,'\\r',EI,13,SRQ,\"\",LS,OFF;*STB?\r",
                                39, TIMEOUT_FROM_LENGTH( 39 ), SET ) != 39
          || fsc2_serial_read( lecroy_wr.sn, buf, 10, NULL,
                               TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
