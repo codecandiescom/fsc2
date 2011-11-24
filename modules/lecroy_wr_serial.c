@@ -2053,7 +2053,8 @@ static bool
 lecroy_wr_serial_open( void )
 {
     char buf[ 10 ];
-    int bits = 1;           /* one for the start bit */
+    int bits = 1;                           /* one for the start bit */
+    const char * comm_setup = "CORS EO,'\\r',EI,13,SRQ,\"\",LS,OFF;*STB?\r";
 
 
     /* Check the settings from the configuration file */
@@ -2208,9 +2209,6 @@ lecroy_wr_serial_open( void )
     if (    fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( ECHO_OFF ),
                                TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
                                                           != strlen( ECHO_OFF )
-         || fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( XON_XOFF_OFF ),
-                               TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
-                                                      != strlen( XON_XOFF_OFF )
          || fsc2_serial_write( lecroy_wr.sn, REMOTE_ENABLE,
                                strlen( REMOTE_ENABLE ),
                                TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
@@ -2219,11 +2217,11 @@ lecroy_wr_serial_open( void )
                                strlen( LOCAL_LOCKOUT ),
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
-         || fsc2_serial_write( lecroy_wr.sn,
-                               "CORS EO,'\\r',EI,13,SRQ,\"\",LS,OFF;*STB?\r",
-                               39, TIMEOUT_FROM_LENGTH( 39 ), SET ) != 39
-         || fsc2_serial_read( lecroy_wr.sn, buf, 10, NULL,
-                              TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
+         || fsc2_serial_write( lecroy_wr.sn, comm_setup, strlen( comm_setup ),
+                               TIMEOUT_FROM_LENGTH( strlen( comm_setup ) ),
+                               SET ) != ( ssize_t ) strlen( comm_setup )
+         || fsc2_serial_read( lecroy_wr.sn, buf, sizeof buf, NULL,
+                              TIMEOUT_FROM_LENGTH( sizeof buf ), SET ) <= 0 )
     {
         lecroy_wr_finished( );
         return FAIL;
