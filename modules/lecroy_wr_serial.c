@@ -56,7 +56,7 @@ static bool is_running = UNSET;
 
 static double Serial_Delay_Factor;
 
-#define DEFAULT_TIMEOUT  30000000L      /* 3 s */
+#define DEFAULT_TIMEOUT  3000000L      /* 3 s */
 
 #define TIMEOUT_FROM_STRING( cmd ) \
         ( lrnd( strlen( cmd ) * Serial_Delay_Factor ) + DEFAULT_TIMEOUT )
@@ -2083,14 +2083,6 @@ lecroy_wr_serial_open( void )
     }
     bits += SERIAL_STOP_BITS;
 
-    if (    SERIAL_HARDWARE_FLOW_CONTROL != 0
-         && SERIAL_HARDWARE_FLOW_CONTROL != 1 )
-    {
-        print( FATAL, "Invalid setting for flow control in configuration file "
-               "for device.\n" );
-        return FAIL;
-    }
-
     /* Calculate a rough estimate of how many micro-seconds transmitting
        a single byte will take */
 
@@ -2142,7 +2134,7 @@ lecroy_wr_serial_open( void )
 
     memset( lecroy_wr.tio, 0, sizeof lecroy_wr.tio );
 
-    lecroy_wr.tio->c_cflag = CREAD | CLOCAL;
+    lecroy_wr.tio->c_cflag = CREAD | CLOCAL | CRTSCTS;
 
     if ( SERIAL_DATA_BITS == 8 )
         lecroy_wr.tio->c_cflag |= CS8;
@@ -2157,16 +2149,14 @@ lecroy_wr_serial_open( void )
     if ( SERIAL_PARITY == -1 )
         lecroy_wr.tio->c_cflag |= PARODD;
 
-    if ( SERIAL_HARDWARE_FLOW_CONTROL )
-        lecroy_wr.tio->c_cflag |= CRTSCTS;
-
     cfsetispeed( lecroy_wr.tio, SERIAL_BAUDRATE );
     cfsetospeed( lecroy_wr.tio, SERIAL_BAUDRATE );
 
-    lecroy_wr.tio->c_iflag = IGNBRK | IGNPAR;
+    lecroy_wr.tio->c_iflag |= IGNBRK;
 
-    if ( ! SERIAL_HARDWARE_FLOW_CONTROL )
-        lecroy_wr.tio->c_iflag |= IXON | IXOFF | IXANY;
+    lecroy_wr.tio->c_oflag |= ONLCR | NL0 | CR0 | TAB0 | BS0 | VT0 | FF0;
+
+    lecroy_wr.tio->c_lflag |= NOFLSH;
 
     lecroy_wr.tio->c_cc[ VSTART ] = 0x11;       /* DC1, CRTL-Q */
     lecroy_wr.tio->c_cc[ VSTOP ]  = 0x13;       /* DC3, CRTL-S */
@@ -2176,37 +2166,16 @@ lecroy_wr_serial_open( void )
     fsc2_tcflush( lecroy_wr.sn, TCIFLUSH );
     fsc2_tcsetattr( lecroy_wr.sn, TCSANOW, lecroy_wr.tio );
 
-    /* Send command to enable either hardware or software flow control */
-
-    if ( SERIAL_HARDWARE_FLOW_CONTROL )
-    {
-        if ( fsc2_serial_write( lecroy_wr.sn, XON_XOFF_OFF,
-                                strlen( XON_XOFF_OFF ),
-                                TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
-                                                    != strlen( XON_XOFF_OFF ) )
-        {
-            lecroy_wr_finished( );
-            return FAIL;
-        }
-    }
-    else
-    {
-        if ( fsc2_serial_write( lecroy_wr.sn, XON_XOFF_ON,
-                                strlen( XON_XOFF_ON ),
-                                TIMEOUT_FROM_STRING( XON_XOFF_ON ), SET )
-                                                     != strlen( XON_XOFF_ON ) )
-        {
-            lecroy_wr_finished( );
-            return FAIL;
-        }
-    }
-
     /* Switch off echoing of device (which is on by default), place device in
        remote mode, lock the keyboard, set message terminators and switch off
        sending of SRQ messages and splitting of lines. Check that communication
        works by asking for the status byte. */
 
-    if (    fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( ECHO_OFF ),
+    if (    fsc2_serial_write( lecroy_wr.sn, XON_XOFF_OFF,
+                                strlen( XON_XOFF_OFF ),
+                                TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
+                                                    != strlen( XON_XOFF_OFF )
+         || fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( ECHO_OFF ),
                                TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
                                                           != strlen( ECHO_OFF )
          || fsc2_serial_write( lecroy_wr.sn, REMOTE_ENABLE,
