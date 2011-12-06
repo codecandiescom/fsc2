@@ -61,15 +61,19 @@ fi
 
 case "$1" in
     start)
-		modprobe ni_daq > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		modprobe pci_e_series > /dev/null 2>&1
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Loading NI_DAQ module failed."
 			exit 1
 		fi
+
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			major=`grep ni_daq /proc/devices | awk '{print $1}'`
-			if [ -z $major ]; then
+			if [ -z $major ]
+			then
 				log_failure_msg "Can't determine major device number for NI_DAQ cards."
 				exit 1
 			fi
@@ -85,13 +89,17 @@ case "$1" in
 			nboards=$(($nboards+`lspci -n | grep -i '1093:18b0' | wc -l`))
 			nboards=$(($nboards+`lspci -n | grep -i '1093:1350' | wc -l`))
 			i=0;
-			while [ $i -lt $nboards -a $i -lt 4 ]; do
-				mknod /dev/pci_e_series_$i c $major $i
-				if [ $? != 0 ]; then
-					log_failure_msg "Creating device files for NI_DAQ cards failed."
-					exit 1
+			while [ $i -lt $nboards -a $i -lt 4 ]
+			do
+				if [ ! -e /dev/pci_e_series_$i ]
+				then
+					mknod /dev/pci_e_series_$i c $major $i
+					if [ $? != 0 ]; then
+						log_failure_msg "Creating device files for NI_DAQ cards failed."
+						exit 1
+					fi
+					chmod 666 /dev/pci_e_series_$i
 				fi
-				chmod 666 /dev/pci_e_series_$i
 				i=$(($i+1))
 			done
 		fi
@@ -99,21 +107,29 @@ case "$1" in
 		;;
 
 	 stop)
-		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
-			for f in /dev/pci_e_series_*; do
-				rm -f $f
-				if [ $? != 0 ]; then
-					log_failure_msg "Deleting device files for NI_DAQ cards failed."
-					exit 1
-				fi
-			done
-		fi
 		rmmod ni_daq > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Unloading NI_DAQ module failed."
 			exit 1
 		fi
+
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]
+		then
+			for f in /dev/pci_e_series_*
+			do
+				if [ -e $f ]
+				then
+					rm -f $f
+					if [ $? != 0 ]; then
+						log_failure_msg "Deleting device files for NI_DAQ cards failed."
+						exit 1
+					fi
+				fi
+			done
+		fi
+
 		test "$2" = "restart" || log_success_msg "Stopping NI_DAQ support."
 		;;
 
@@ -124,7 +140,8 @@ case "$1" in
 
 	 status)
 		grep ni_daq /proc/devices
-		if [ $? = 0 ]; then
+		if [ $? = 0 ]
+		then
 			log_success_msg "NI_DAQ support is up and running."
 			exit 0
 		else
@@ -132,6 +149,7 @@ case "$1" in
 			exit 3
 		fi
 		;;
+
     *)
 		echo "Usage: $0 {start|stop|restart|force-reload|reload|status}"
 		exit 1

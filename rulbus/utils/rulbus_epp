@@ -69,13 +69,15 @@ case "$1" in
 				exit 1
 			fi
 		fi
+
 		modprobe rulbus_epp > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Loading Rulbus EPP module failed."
 			exit 1
 		fi
+
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 -a ! -e /dev/rulbus_epp ]; then
 			major=`grep rulbus_epp /proc/devices | awk '{print $1}'`
 			if [ -z $major ]; then
 				log_failure_msg "Can't determine major device number for Rulbus EPP interface."
@@ -88,24 +90,25 @@ case "$1" in
 			fi
 			chmod 666 /dev/rulbus_epp
 		fi
-		test "$2" = "restart" || log_success_msg "Rulbus EPP support."
+		test "$2" = "restart" || log_success_msg "Rulbus EPP support started."
 		;;
 
 	 stop)
-		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		rmmod rulbus_epp > /dev/null 2>&1
 		if [ $? != 0 ]; then
+			log_failure_msg "Unloading Rulbus EPP module failed."
+			exit 1
+		fi
+
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 -a -e /dev/rulbus_epp ]; then
 			rm -f /dev/rulbus_epp
 			if [ $? != 0 ]; then
 				log_failure_msg "Deleting device files for Rulbus EPP interface failed."
 				exit 1
 			fi
 		fi
-		rmmod rulbus_epp > /dev/null 2>&1
-		if [ $? != 0 ]; then
-			log_failure_msg "Unloading Rulbus EPP module failed."
-			exit 1
-		fi
-		test "$2" = "restart" || log_success_msg "Stopping Rulbus EPP support."
+		test "$2" = "restart" || log_success_msg "Rulbus EPP support stopped."
 		;;
 
 	 restart|reload|force-reload)        # no reason here to differentiate...
@@ -114,7 +117,7 @@ case "$1" in
 		;;
 
 	 status)
-		grep ni_daq /proc/devices
+		grep rulbus_epp /proc/devices
 		if [ $? = 0 ]; then
 			log_success_msg "Rulbus EPP support is up and running."
 			exit 0

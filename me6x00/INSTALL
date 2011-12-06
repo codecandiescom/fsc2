@@ -34,7 +34,8 @@ function get_reply() {
 
 function do_setup() {
 
-if [ $1 -ne 1 ]; then
+if [ $1 -ne 1 ]
+then
 	dialog --yesno \
 "     Installation of ME6X00 driver and library\n\n\
 You will now be asked a few questions concerning the\n\
@@ -49,10 +50,12 @@ fi
 # Ask for the major device number, it must be between 1 and 254 (or 4094
 # for 2.6 and 3.x kernels) or 0 for a dynamically assigned device nuber
 
-if [ ! $IS_NEW_KERNEL ]; then
+if [ ! $IS_NEW_KERNEL ]
+then
 
 	REPEAT=1;
-	while [ $REPEAT -ne 0 ]; do
+	while [ $REPEAT -ne 0 ]
+	do
 		MAJOR=0;
 		REPEAT=0;
 		dialog --inputbox "\
@@ -64,13 +67,15 @@ device number." 12 70 "$MAJOR" 2> /tmp/ME6X00_reply
 		get_reply MAJOR
 		test -n "$MAJOR" || REPEAT=1
 		test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
-		if [ $REPEAT -eq 0 ]; then
+		if [ $REPEAT -eq 0 ]
+		then
 			test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
 		fi
 	done
 else
 	REPEAT=1;
-	while [ $REPEAT -ne 0 ]; do
+	while [ $REPEAT -ne 0 ]
+	do
 		MAJOR=0;
 		REPEAT=0;
 		dialog --inputbox "\
@@ -82,7 +87,8 @@ device number." 12 70 "$MAJOR" 2> /tmp/ME6X00_reply
 		get_reply MAJOR
 		test -n "$MAJOR" || REPEAT=1
 		test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
-		if [ $REPEAT -eq 0 ]; then
+		if [ $REPEAT -eq 0 ]
+		then
 			test \( $MAJOR -ge 0 -a $MAJOR -le 4094 \) || REPEAT=1
 		fi
 	done
@@ -94,7 +100,8 @@ fi
 dialog --yesno "Build driver with debugging code?" 6 50
 DEBUG=$?
 
-if [ $DEBUG -eq 0 ]; then
+if [ $DEBUG -eq 0 ]
+then
     dbg="Yes";
 else
     dbg="No"
@@ -132,7 +139,8 @@ function make_auto() {
 echo "/* Automatically created - change carefully */" > driver/autoconf.h
 echo "" >> driver/autoconf.h
 echo "#define ME6X00_MAJOR    $MAJOR" >> driver/autoconf.h
-if [ $DEBUG -eq 0 ]; then
+if [ $DEBUG -eq 0 ]
+then
 	echo "#define ME6X00_CALL_DEBUG" >> driver/autoconf.h
 	echo "#define ME6X00_ISR_DEBUG" >> driver/autoconf.h
 	echo "#define ME6X00_PORT_DEBUG" >> driver/autoconf.h
@@ -154,7 +162,8 @@ echo "#define ME6X00_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
 function setup_loop() {
 
     do_setup $1
-    while [ $? -ne  0 ]; do
+    while [ $? -ne  0 ]
+	do
         do_setup 1
     done
 
@@ -181,7 +190,8 @@ function do_compile() {
 
 if [    ! -e $KERNEL_DIR/include/linux/autoconf.h \
 	 -a ! -e /usr/include/linux/autoconf.h \
-	 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]; then
+	 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]
+then
 	 dialog --msgbox \
 "To create the driver for NI DAQ boards the file\n\
 $KERNEL_DIR/include/linux/autoconf.h,\n\
@@ -199,7 +209,8 @@ fi
 echo "Compiling the driver, please wait..."
 make driver > makelog 2>&1
 
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 ]
+then
     dialog --msgbox \
 "Sorry, compiling the driver failed.\nSee \"makelog\" for the reasons.\n" 7 42;
     exit 1;
@@ -208,7 +219,8 @@ fi
 echo "Compiling the library, please wait..."
 make lib >> makelog 2>&1
 
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 ]
+then
     dialog --msgbox \
 "Sorry, compiling the library failed.\n\
 See \"makelog\" for the reasons.\n" 7 45;
@@ -219,23 +231,102 @@ fi
 
 
 ################################################################
+
+function install_lsb() {
+
+	dialog --yesno "\
+Do you want me to copy the init script 'utils/me6x00'\n\
+to the init directory '/etc/init.d' and create the\n\
+necessary runlevel links so that the ME6X00 module gets\n\
+loaded at boot time and the device files are created\n\
+                 automatically?" 9 60
+
+	if [ $? -eq 0 ]
+	then
+		if [ -e /etc/init.d/me6x00 ]
+		then
+			if [ -e /lib/lsb/remove_initd ]
+			then
+				/lib/lsb/remove_initd /etc/init.d/me6x00 > /dev/null 2>&1
+			else
+				/usr/lib/lsb/remove_initd /etc/init.d/me6x00 > /dev/null 2>&1
+			fi
+			rm -f /etc/init.d/me6x00
+		fi
+		install -m 744 util/me6x00 /etc/init.d/me6x00
+		if [ -e /lib/lsb/install_initd ]
+		then
+			/lib/lsb/install_initd /etc/init.d/me6x00
+		else
+			/usr/lib/lsb/install_initd /etc/init.d/me6x00
+		fi
+		dialog --msgbox "\
+Unless you reboot the system (which is *not* required)\n\
+please run the command\n\
+\n\
+         /etc/init.d/me6x00 start\n\
+\n\
+    to load the module and create device files.\n\
+    If the module is already loaded please use\n\
+\n\
+         /etc/init.d/me6x00 restart\n\
+\n\
+      to replace it by the new version." 16 60
+	fi
+}
+
+
+################################################################
+
+function install_update_rc() {
+
+	dialog --yesno "\
+Do you want me to copy the init script 'utils/me6x00'\n\
+to the init directory '/etc/init.d' and create the\n\
+necessary runlevel links so that the ME6X00 module gets\n\
+loaded at boot time and the device files are created\n\
+                 automatically?" 9 60
+
+	if [ $? -eq 0 ]
+	then
+		install -m 744 utils/me6x00 /etc/init.d/me6x00
+		update-rc.d me6x00 defaults
+
+		dialog --msgbox "\
+Unless you reboot the system (which is *not* required)\n\
+please run the command\n\
+\n\
+         /etc/init.d/me6x00 start\n\
+\n\
+    to load the module and create device files.\n\
+    If the module is already loaded please use\n\
+\n\
+         /etc/init.d/me6x00 restart\n\
+\n\
+      to replace it by the new version." 16 60
+	fi
+}
+
+
+################################################################
 # Does everything needed for the installation
 
 function do_install() {
 
-# Ask user if he wants to install the library, driver and include files etc.
+	# Ask user if he wants to install the library, driver and include files etc.
 
-PREFIX=`grep ME6X00_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
-MAJOR=`grep ME6X00_MAJOR driver/autoconf.h | awk '{print $3}'`;
-if [ $IS_NEW_KERNEL ]; then
-	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/me6x00.ko";
-	LOCAL_NAME="driver/me6x00.ko";
-else
-	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/me6x00.o";
-	LOCAL_NAME="driver/me6x00.o ";
-fi
+	PREFIX=`grep ME6X00_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
+	MAJOR=`grep ME6X00_MAJOR driver/autoconf.h | awk '{print $3}'`;
+	if [ $IS_NEW_KERNEL ]
+	then
+		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/me6x00.ko";
+		LOCAL_NAME="driver/me6x00.ko";
+	else
+		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/me6x00.o";
+		LOCAL_NAME="driver/me6x00.o ";
+	fi
 
-dialog --yesno \
+	dialog --yesno \
 "Now we're ready to install everything. This starts with\n\
 copying the following files, if necessary creating\n\
 directories that don't exist:\n\n\
@@ -246,32 +337,35 @@ directories that don't exist:\n\n\
  lib/me6x00.h         => $PREFIX/include/me6x00.h\n\n\
 		Do you want to continue ?" 15 74
 
-test $? -eq 0 || exit 0
+	test $? -eq 0 || exit 0
 
-# Check that user has root privileges
+	# Check that user has root privileges
 
-if [ `id -u` != "0" ]; then
-	dialog --msgbox \
+	if [ `id -u` != "0" ]
+	then
+		dialog --msgbox \
 "Sorry, you need root privileges to install\n\
  the driver and the library etc. Please\n\
     become root and then try again.\n" 7 48
-	exit 1;
-fi
+		exit 1;
+	fi
 
-# Do the basic installation (covered by the makefile)
+	# Do the basic installation (covered by the makefile)
 
-make install >> makelog 2>&1
-if [ $? -ne 0 ]; then
-	dialog --msgbox \
+	make install >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+		dialog --msgbox \
 "  Sorry, installation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
-	exit 1
-fi
+		exit 1
+	fi
 
-# Find out if user wants to create the device file for the board, but only if
-# the major device number isn't set to 0.
+	# Find out if user wants to create the device file for the board, but
+	# only if the major device number isn't set to 0.
 
-if [ $MAJOR -ne 0 ]; then
-	dialog --yesno \
+	if [ $MAJOR -ne 0 ]
+	then
+		dialog --yesno \
 "Do you want to create the device files\n\
       /dev/me6x00_0\n\
       /dev/me6x00_1\n\
@@ -279,94 +373,76 @@ if [ $MAJOR -ne 0 ]; then
       /dev/me6x00_3\n\n\
      for the board now?"  12 46
 
-	if [ $? -eq 0 ]; then
-		for i in 0 1 2 3; do
-			if [ -e /dev/me6x00_$i ]; then 
+	    if [ $? -eq 0 ]
+		then
+			for i in 0 1 2 3
+			do
+				if [ -e /dev/me6x00_$i ]
+				then 
 					dialog --yesno \
 "A device file /dev/me6x00_$i already exists.\n\
 Delete existing file and replace with a new one?" 7 54;
-				if [ $? -eq 0 ]; then
-					rm -f /dev/me6x00_$i
+					if [ $? -eq 0 ]
+					then
+						rm -f /dev/me6x00_$i
+						mknod /dev/me6x00_$i c $MAJOR $i
+						chmod 666 /dev/me6x00_$i
+					fi
+				else
 					mknod /dev/me6x00_$i c $MAJOR $i
 					chmod 666 /dev/me6x00_$i
 				fi
-			else
-				mknod /dev/me6x00_$i c $MAJOR $i
-				chmod 666 /dev/me6x00_$i
-			fi
-		done
-	fi
+			done
+		fi
 
-	# Ask user if the module should be included in /etc/modules.conf (or, on
-	# older installations, in /etc/conf.modules, o, on newer installations, in
-	# /etc/modules.conf.local) and find out if the user wants to update the
-	# modules dependency file
+		# Ask user if the module should be included in /etc/modules.conf (or,
+		# on older installations, in /etc/conf.modules, o, on newer
+		# installations, in /etc/modules.conf.local) and find out if the user
+		# wants to update the modules dependency file
 
-	MODULECONF="/etc/modules.conf";
-	if [ ! -e $MODULECONF -a -e /etc/conf.modules ]; then
-		MODULECONF="/etc/conf.modules"
-	fi
-	if [ -e $MODULECONF -a -e /etc/modules.conf.local ]; then
-		MODULECONF="/etc/modules.conf.local"
-	fi
+		MODULECONF="/etc/modules.conf";
+		if [ ! -e $MODULECONF -a -e /etc/conf.modules ]
+		then
+			MODULECONF="/etc/conf.modules"
+		fi
+		if [ -e $MODULECONF -a -e /etc/modules.conf.local ]
+		then
+			MODULECONF="/etc/modules.conf.local"
+		fi
 
-	dialog --yesno \
+		dialog --yesno \
 "  Update $MODULECONF to include the new driver?\n\
  (Old version will be copied to $MODULECONF.bak.)" 7 62
-	test $? -ne 0 || mod_update
+		test $? -ne 0 || mod_update
 
-else              # dynamically assigned major device number
+	else              # dynamically assigned major device number
 
-	# Test if the system is LSB 1.1.0 compliant
+		# Try to install the init.d script
 
-	if [ ! \(    -d /etc/init.d                   	              \
-		      -a -e /lib/lsb/init-functions       	              \
-              -a \(    -e /lib/lsb/install_initd                  \
-					-o -e /usr/lib/lsb/install_initd \)           \
-              -a \(    -e /lib/lsb/remove_initd                   \
-					-o -e /usr/lib/lsb/remove_initd \) \) ]; then
-	dialog --msgbox "\
-Sorry, your system does not seem to be LSB 1.1.0 compliant.\n\
-To have the ME6X00 module loaded at boot time and device files\n\
-created automatically please change the script 'me6x00' in\n\
-the 'utils' subdirectory to fit your needs and install it\n\
-in the directory for init scripts yourself." 12 70
-
-	else   # System is LSB compliant
-
-		dialog --yesno "\
-Do you want me to copy the init script 'utils/me6x00'\n\
-to the init directory '/etc/init.d' and create the\n\
-necessary runlevel links so that the ME6X00 module gets\n\
-loaded at boot time and the device files are created\n\
-                 automatically?" 9 60
-
-		if [ $? -eq 0 ]; then
-			if [ -e /etc/init.d/me6x00 ]; then
-				if [ -e /lib/lsb/remove_initd ]; then
-					/lib/lsb/remove_initd /etc/init.d/me6x00 >/dev/null 2>&1
-				else
-					/usr/lib/lsb/remove_initd /etc/init.d/me6x00 >/dev/null 2>&1
-				fi
-				rm -f /etc/init.d/me6x00
-			fi
-			install -m 744 utils/me6x00 /etc/init.d/me6x00
-			if [ -e /lib/lsb/install_initd ]; then
-				/lib/lsb/install_initd /etc/init.d/me6x00
+		if [    -d /etc/init.d           \
+		 -a -e /lib/lsb/init-functions ]
+		then
+			if [     \(    -e /lib/lsb/install_initd         \
+				        -o -e /usr/lib/lsb/install_initd \)  \
+				 -a \(    -e /lib/lsb/remove_initd          \
+				       -o -e /usr/lib/lsb/remove_initd \) ]
+			then
+				install_lsb
+			elif [ -e /usr/sbin/update-rc.d ]
+			then
+				install_update_rc
 			else
-				/usr/lib/lsb/install_initd /etc/init.d/me6x00
+				dialog --msgbox "\
+Sorry, don't know how to install a script that automatically\n\
+loads the ME6x99 module loaded at boot time and creates the\n\
+device file. Please change the script 'me6x00' in the\n\
+'util' subdirectory to fit your needs and install it\n\
+in the directory for init scripts yourself." 12 70
 			fi
-
-			dialog --msgbox "\
-Unless you reboot the system (which is *not* required)\n\
-please run the command\n\
-\n\
-         /etc/init.d/me6x00 start\n\
-\n\
-    to load the module and create device files." 11 56
 		fi
 	fi
-fi
+
+	update_dep
 
 } # end of do_install()
 
@@ -385,12 +461,14 @@ MAJOR=`grep ME6X00_MAJOR driver/autoconf.h | awk '{print $3}'`
 PATTERN="^[[:space:]]*alias[[:space:]+]char-major-$MAJOR[[:space:]+]"
 LINE=`grep $PATTERN $MODULECONF`
 
-if [ $? -eq 0 ]; then
+if [ $? -eq 0 ]
+then
 	 grep -v $PATTERN $MODULECONF > /tmp/`basename $MODULECONF`
 	 echo "#$LINE" >> /tmp/`basename $MODULECONF`
 
 	 LINE=`grep "^[[:space:]]*options[[:space:]+]me6x00" /tmp/\`basename $MODULECONF\``;
-	 if [ $? -eq 0 ]; then
+	 if [ $? -eq 0 ]
+	 then
 		mv /tmp/`basename $MODULECONF` /tmp/`basename $MODULECONF`2
 		grep -v "$LINE" /tmp/`basename $MODULECONF`2 > /tmp/`basename $MODULECONF`
 		rm -f /tmp/`basename $MODULECONF`2
@@ -401,12 +479,18 @@ if [ $? -eq 0 ]; then
 fi
 
 echo "alias char-major-$MAJOR me6x00" >> $MODULECONF
+}
 
-dialog --yesno \
+
+################################################################
+
+function update_dep() {
+
+	dialog --yesno \
 "Do you want to update the modules dependency\n\
 file /lib/modules/$KERNEL_VERSION/modules.dep using\n\
-        the command 'depmod -a'?" 8 55
-test $? || depmod -v $KERNEL_VERSION -a >/dev/null
+the command 'depmod -a'?" 8 55
+   test $? -ne 0 || depmod $KERNEL_VERSION -a >/dev/null
 }
 
 
@@ -475,16 +559,19 @@ esac
 
 function get_kernel_version() {
 
-	if [ -n "$ME6X00_KERNEL_SOURCE" ]; then
+	if [ -n "$ME6X00_KERNEL_SOURCE" ]
+	then
 		KERNEL_DIR=$ME6X00_KERNEL_SOURCE;
 	else
 		KERNEL_DIR="/lib/modules/`uname -r`/build";
-		if [ -z "$KERNEL_DIR" ]; then
+		if [ -z "$KERNEL_DIR" ]
+		then
 			KERNEL_DIR="/usr/src/linux";
 		fi
 	fi
 
-	if [ ! -e $KERNEL_DIR/include/linux/version.h ]; then
+	if [ ! -e $KERNEL_DIR/include/linux/version.h ]
+	then
 		dialog --msgbox \
 "To create the driver for ME6X00 boards the file\n\
 $KERNEL_DIR/include/linux/version.h\n\
@@ -500,23 +587,27 @@ Please also see additonal information in the README file.\n\n\
 		           $KERNEL_DIR/include/generated/utsrelease.h        \
                    2>/dev/null |                                     \
 				   sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
-	if [ -z "$KERNEL_VERSION" ]; then
+	if [ -z "$KERNEL_VERSION" ]
+	then
 		KERNEL_VERSION=`grep UTS_RELEASE                        \
 			            $KERNEL_DIR/include/linux/utsrelease.h  \
                         2>/dev/null |                           \
 				        sed 's/^[^"]\+"\([^"]\+\)".*$/\1/'      \
 			            2>/dev/null`;
 	fi
-	if [ -z "$KERNEL_VERSION" ]; then
+	if [ -z "$KERNEL_VERSION" ]
+	then
 		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
                         2>/dev/null | \
 				        sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
-    if [ -z "$KERNEL_VERSION" ]; then
+    if [ -z "$KERNEL_VERSION" ]
+	then
         KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease 2>/dev/null`;
 	fi
 
-	if [ -z "$KERNEL_VERSION" ]; then
+	if [ -z "$KERNEL_VERSION" ]
+	then
 		dialog --msgbox "\
 Sorry, can't determine kernel version under the assumption\n\
 that kernel sources are at '$KERNEL_DIR'" 6 64;
@@ -526,7 +617,8 @@ that kernel sources are at '$KERNEL_DIR'" 6 64;
 	KV_MAJOR=`echo $KERNEL_VERSION | sed 's/^\([0-9]\+\)\..*$/\1/' 2>/dev/null`
 	KV_MINOR=`echo $KERNEL_VERSION | \
               sed 's/^[0-9]\+\.\([0-9]\+\)\..*$/\1/' 2>/dev/null`
-	if [ $KV_MAJOR -lt 2 -o $KV_MINOR -le 4 ]; then
+	if [ $KV_MAJOR -lt 2 -o $KV_MINOR -le 4 ]
+	then
 		IS_NEW_KERNEL=0;
 	else
 		IS_NEW_KERNEL=1;
@@ -544,7 +636,8 @@ export DIALOGRC=./.INSTALLrc
 # We need dialog so check if it's available
 
 DIALOG=`which dialog`
-if [ $? -eq 1 ]; then
+if [ $? -eq 1 ]
+then
     echo "Sorry, you need the 'dialog' utility to run this script!";
     exit 1;
 fi
@@ -558,7 +651,8 @@ if [    $KV_MAJOR -eq 3                             \
 	 -o \(    $KV_MAJOR -eq 2                       \
            -a \(    $KV_MINOR -eq 2                 \
 				 -o $KV_MINOR -eq 4                 \
-				 -o $KV_MINOR -e 4 \) \) ]; then
+				 -o $KV_MINOR -e 4 \) \) ]
+then
 
     dialog --yesno \
 "This package is only tested with 2.2, 2.4, 2.6 and 3.x\n\
@@ -567,7 +661,8 @@ kernels. There could be problems with other kernels.\n\n\
     test $? -eq 0 || exit 0
 fi
 
-if [ ! -e driver/autoconf.h ]; then
+if [ ! -e driver/autoconf.h ]
+then
    setup_loop 0
    do_compile 0
    do_install
@@ -575,7 +670,8 @@ else
     if [     \( ! $IS_NEW_KERNEL -a ! -e driver/me6x00.o  \)  \
          -o \(    $IS_NEW_KERNEL -a ! -e driver/me6x00.ko \)  \
 		 -o ! -e lib/libme6x00.a                                       \
-		 -o ! -e lib/libme6x00.so ]; then
+		 -o ! -e lib/libme6x00.so ]
+	then
         pref_comp
         do_compile 0
         do_install

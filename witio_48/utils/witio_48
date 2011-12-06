@@ -54,44 +54,52 @@
 # test "$START_WITIO_48" = yes || exit 0
 
 
-if [ -z $1 ]; then
+if [ -z $1 ]
+then
 	log_failure_msg "Missing argument."
-	exit 2;
+	exit 2
 fi
 
 case "$1" in
     start)
 		modprobe witio_48 > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Loading WITIO-48 module failed."
 			exit 1
 		fi
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 -a ! -e /dev/witio_48 ]
+		then
 			major=`grep witio_48 /proc/devices | awk '{print $1}'`
-			if [ -z $major ]; then
+			if [ -z $major ]
+			then
 				log_failure_msg "Can't determine major device number for WITIO-48 cards."
 				exit 1
 			fi
 			mknod -m 666 /dev/witio_48 c $major 0
-			if [ $? != 0 ]; then
+			if [ $? != 0 ]
+			then
 				log_failure_msg "Creating device file for WITIO-48 cards failed."
 				exit 1
 			fi
 		fi
-		test "$2" = "restart" || log_success_msg "Starting WITIO-48 support."
+		test "$2" = "restart" || log_success_msg "WITIO-48 support started."
 		;;
 
 	 stop)
 		rmmod witio_48 > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Unloading WITIO-48 module failed."
 			exit 1
 		fi
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 -a -e /dev/witio_48 ]
+		then
 			rm -f /dev/witio
-				if [ $? != 0 ]; then
+				if [ $? != 0 ]
+				then
 					log_failure_msg "Deleting device files for WITIO-48 cards failed."
 				exit 1
 			fi
@@ -106,7 +114,8 @@ case "$1" in
 
 	 status)
 		grep witio_48 /proc/devices
-		if [ $? = 0 ]; then
+		if [ $? = 0 ]
+		then
 			log_success_msg "WITIO-48 support is up and running."
 			exit 0
 		else

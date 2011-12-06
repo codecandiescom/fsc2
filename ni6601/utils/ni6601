@@ -62,49 +62,67 @@ fi
 case "$1" in
     start)
 		modprobe ni6601 > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Loading NI6601 module failed."
 			exit 1
 		fi
+
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 -]
+		then
 			major=`grep ni6601 /proc/devices | awk '{print $1}'`
-			if [ -z $major ]; then
+			if [ -z $major ]
+			then
 				log_failure_msg "Can't determine major device number for NI6601 cards."
 				exit 1
 			fi
 			nboards=`lspci -n | grep -i '1093:2c60' | wc -l`
 			i=0;
-			while [ $i -lt $nboards ]; do
-				mknod /dev/ni6601_$i c $major $i
-				if [ $? != 0 ]; then
-					log_failure_msg "Creating device files for NI6601 cards failed."
-					exit 1
+			while [ $i -lt $nboards ]
+			do
+				if [ ! -e /dev/ni6601_$i ]
+				then
+					mknod /dev/ni6601_$i c $major $i
+					if [ $? != 0 ]
+					then
+						log_failure_msg "Creating device files for NI6601 cards failed."
+						exit 1
+					fi
+					chmod 666 /dev/ni6601_$i
 				fi
-				chmod 666 /dev/ni6601_$i
 				i=$(($i+1))
 			done
 		fi
-		test "$2" = "restart" || log_success_msg "Starting NI6601 support."
+
+		test "$2" = "restart" || log_success_msg "NI6601 support started."
 		;;
 
 	 stop)
-		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
-		if [ $? != 0 ]; then
-			for f in /dev/ni6601_*; do
-				rm -f $f
-				if [ $? != 0 ]; then
-					log_failure_msg "Deleting device files for NI6601 cards failed."
-					exit 1
-				fi
-			done
-		fi
 		rmmod ni6601 > /dev/null 2>&1
-		if [ $? != 0 ]; then
+		if [ $? != 0 ]
+		then
 			log_failure_msg "Unloading NI6601 module failed."
 			exit 1
 		fi
-		test "$2" = "restart" || log_success_msg "Stopping NI6601 support."
+
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]
+		then
+			for f in /dev/ni6601_*; do
+				if [ -e $f ]
+				then
+					rm -f $f
+					if [ $? != 0 ]
+					then
+						log_failure_msg "Deleting device files for NI6601 cards failed."
+						exit 1
+					fi
+				fi
+			done
+		fi
+
+		test "$2" = "restart" || log_success_msg "NI6601 support support."
 		;;
 
 	 restart|reload|force-reload)        # no reason here to differentiate...
@@ -114,7 +132,8 @@ case "$1" in
 
 	 status)
 		grep ni6601 /proc/devices
-		if [ $? = 0 ]; then
+		if [ $? = 0 ]
+		then
 			log_success_msg "NI6601 support is up and running."
 			exit 0
 		else
