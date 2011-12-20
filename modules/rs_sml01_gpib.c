@@ -401,7 +401,7 @@ rs_sml01_triggered_sweep_setup( double start_freq,
              ":FREQ:STOP %.0f;"
              ":SWE:SPAC LIN;"
              ":SWE:STEP:LIN %.0f\n",
-             end_freq, start_freq, step_freq );
+             start_freq, end_freq, step_freq );
     rs_sml01_command( cmd );
 }
 
