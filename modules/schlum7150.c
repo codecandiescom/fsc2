@@ -477,7 +477,7 @@ multimeter_lock_keyboard( Var_T * v )
     cmd[ 1 ] = lock ? '1' : '0';
 
     if (    FSC2_MODE == EXPERIMENT
-         && gpib_write( schlum7150.device, "K1\n", 3 ) == FAILURE )
+         && gpib_write( schlum7150.device, cmd, 3 ) == FAILURE )
         schlum7150_failure( );
 
     return vars_push( INT_VAR, lock ? 1L : 0L );

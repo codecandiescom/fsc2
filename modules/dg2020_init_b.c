@@ -780,7 +780,11 @@ static void
 dg2020_create_shape_pulses( void )
 {
     Function_T *f;
-    Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+    Pulse_T *np = NULL,
+            *cp, *rp,
+            *p1,
+            *p2,
+            *old_end;
 
 
     /* Nothing to be done if no automatic setting of shape pulses is
@@ -949,7 +953,9 @@ static void
 dg2020_create_twt_pulses( void )
 {
     Function_T *f;
-    Pulse_T *np, *cp, *rp, *old_end;
+    Pulse_T *np,
+            *cp,
+            *rp;
 
 
     /* Nothing to be done if no automatic setting of TWT pulses is
@@ -963,7 +969,6 @@ dg2020_create_twt_pulses( void )
 
     for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
         /* empty */ ;
-    old_end = cp;
 
     /* Loop over all pulses */
 

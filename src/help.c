@@ -42,7 +42,7 @@ run_help( FL_OBJECT * a,
     if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
     {
         eprint( NO_ERROR, UNSET,
-                ( GUI.G_Funcs.size == LOW ) ?
+                ( GUI.G_Funcs.size == ( bool ) LOW ) ?
                 "@n-------------------------------------------\n" :
                 "@n-----------------------------------------------\n" );
         eprint( NO_ERROR, UNSET,
@@ -54,7 +54,7 @@ run_help( FL_OBJECT * a,
                 "@n<Shift> LMB: Show cross section (2D only)\n"
                 "@nLMB + MMB + <Space>: Switch between x/y cross section\n" );
         eprint( NO_ERROR, UNSET,
-                ( GUI.G_Funcs.size == LOW ) ?
+                ( GUI.G_Funcs.size == ( bool ) LOW ) ?
                 "@n-------------------------------------------\n" :
                 "@n-----------------------------------------------\n" );
         return;

@@ -601,7 +601,6 @@ get_print_comm( long data )
 {
     FL_OBJECT *obj;
     const char *res;
-    static bool locked = UNSET;
 
 
     if ( ! print_with_comment )
@@ -634,10 +633,6 @@ get_print_comm( long data )
             fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
                           FL_TRANSIENT, "fsc2: Print text (cross section)" );
             break;
-
-        default :
-            locked = UNSET;
-            return;
     }
 
     while ( ( obj = fl_do_forms( ) ) != GUI.print_comment->pc_done )
@@ -653,8 +648,6 @@ get_print_comm( long data )
 
     if ( fl_form_is_visible( GUI.print_comment->print_comment ) )
         fl_hide_form( GUI.print_comment->print_comment );
-
-    locked = UNSET;
 }
 
 

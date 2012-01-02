@@ -1502,7 +1502,6 @@ monochromator_calibrate( Var_T * v )
     long gn;
     double *x = NULL, *dx;
     double epsilon;
-    double val;
     ssize_t i;
 
 
@@ -1749,7 +1748,7 @@ monochromator_calibrate( Var_T * v )
         {
             dx[ 2 ] = get_double( v, "deviation for detector angle" );
             if ( dx[ 2 ] == 0.0 )
-                dx[ 2 ] = dx[ 2 ] = atan( 1.0 ) / 900.0;
+                dx[ 2 ] = atan( 1.0 ) / 900.0;
         }
 
         too_many_arguments( v );
@@ -1759,23 +1758,23 @@ monochromator_calibrate( Var_T * v )
             c.opt = 0;
             c.focal_length   = x[ 1 ];
             c.detector_angle = x[ 2 ];
-            val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
-                                epsilon );
+            fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+                          epsilon );
 
             c.inclusion_angle = x[ 0 ];
 
             c.opt = 1;
             x[ 0 ] = c.focal_length;
             dx[ 0 ] = dx[ 1 ];
-            val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
-                                epsilon );
+            fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+                          epsilon );
             c.focal_length = x[ 0 ];
 
             c.opt = 2;
             x[ 0 ] = x[ 2 ];
             dx[ 0 ] = dx[ 2 ];
-            val = fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
-                                epsilon );
+            fsc2_simplex( 1, x, dx, ( void * ) &c, spectrapro_300i_min,
+                          epsilon );
             x[ 2 ] = x[ 0 ];
             x[ 0 ] = c.inclusion_angle;
             x[ 1 ] = c.focal_length;

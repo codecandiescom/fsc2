@@ -80,9 +80,6 @@ void
 vars_assign( Var_T * src,
              Var_T * dest )
 {
-    long count = 0;
-
-
 #ifndef NDEBUG
     /* Check that both variables exist and src has a reasonable type */
 
@@ -103,13 +100,13 @@ vars_assign( Var_T * src,
         case UNDEF_VAR :
         case INT_VAR : case FLOAT_VAR :
         case INT_PTR : case FLOAT_PTR :
-            count = vars_assign_to_1d( src, dest );
+            vars_assign_to_1d( src, dest );
             break;
 
         case INT_ARR :    case FLOAT_ARR :
         case INT_REF :    case FLOAT_REF :
         case SUB_REF_PTR: case REF_PTR :
-            count = vars_assign_to_nd( src, dest );
+            vars_assign_to_nd( src, dest );
             break;
 
         default :

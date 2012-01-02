@@ -201,10 +201,9 @@ bool
 lecroy9400_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TD,";
-    char *dummy;
 
 
-    dummy = gcvt( timebase, 6, cmd + strlen( cmd ) );
+    gcvt( timebase, 6, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -386,10 +385,9 @@ bool
 lecroy9400_set_trigger_level( double level )
 {
     char cmd[ 40 ] = "TRL,";
-    char * dummy;
 
 
-    dummy = gcvt( level, 6, cmd + strlen( cmd ) );
+    gcvt( level, 6, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -469,13 +467,12 @@ lecroy9400_set_sens( int    channel,
                      double sens )
 {
     char cmd[ 40 ];
-    char * dummy;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
     sprintf( cmd, "C%1dVD,", channel + 1 );
-    dummy = gcvt( sens, 8, cmd + strlen( cmd ) );
+    gcvt( sens, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -515,13 +512,12 @@ lecroy9400_set_offset( int    channel,
                        double offset )
 {
     char cmd[ 40 ];
-    char *dummy;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
     sprintf( cmd, "C%1dOF,", channel + 1 );
-    dummy = gcvt( offset, 8, cmd + strlen( cmd ) );
+    gcvt( offset, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -778,7 +774,6 @@ void
 lecroy9400_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRD,";
-    char *dummy;
 
 
     /* For positive delay (i.e. pre-trigger) the delay must be set as a
@@ -788,7 +783,7 @@ lecroy9400_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy9400.timebase;
 
-    dummy = gcvt( delay, 8, cmd + strlen( cmd ) );
+    gcvt( delay, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 }

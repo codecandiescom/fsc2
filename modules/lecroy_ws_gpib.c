@@ -315,10 +315,9 @@ bool
 lecroy_ws_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
-	char *dummy;
 
 
-    dummy = gcvt( timebase, 8, cmd + strlen( cmd ) );
+    gcvt( timebase, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_ws.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_ws_comm_failure( );
 
@@ -445,13 +444,12 @@ lecroy_ws_set_sens( int    channel,
                     double sens )
 {
     char cmd[ 40 ];
-	char *dummy;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel - LECROY_WS_CH1 + 1 );
-    dummy = gcvt( sens, 8, cmd + strlen( cmd ) );
+    gcvt( sens, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_ws.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_ws_comm_failure( );
 
@@ -489,13 +487,12 @@ lecroy_ws_set_offset( int    channel,
                       double offset )
 {
     char cmd[ 40 ];
-	char *dummy;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel - LECROY_WS_CH1 + 1 );
-    dummy = gcvt( offset, 8, cmd + strlen( cmd ) );
+    gcvt( offset, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_ws.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_ws_comm_failure( );
 
@@ -767,7 +764,6 @@ lecroy_ws_set_trigger_level( int    channel,
                              double level )
 {
     char cmd[ 40 ];
-	char *dummy;
 
 
     fsc2_assert(    (    channel >= LECROY_WS_CH1
@@ -782,7 +778,7 @@ lecroy_ws_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    dummy = gcvt( level, 6, cmd + strlen( cmd ) );
+    gcvt( level, 6, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_ws.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_ws_comm_failure( );
 
@@ -1034,7 +1030,6 @@ bool
 lecroy_ws_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
-    char *dummy;
 
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
@@ -1043,7 +1038,7 @@ lecroy_ws_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_ws.timebase;
 
-    dummy = gcvt( delay, 8, cmd + strlen( cmd ) );
+    gcvt( delay, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_ws.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_ws_comm_failure( );
 

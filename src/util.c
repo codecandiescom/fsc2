@@ -699,7 +699,6 @@ filter_edl( const char * name,
     fd_set rfds;
     int rs;
     char c = '\0';
-    ssize_t w;
 
 
     /* The first set of pipes is needed to read the output of 'fsc2_clean' */
@@ -786,11 +785,11 @@ filter_edl( const char * name,
              || dup2( ed[ 1 ], STDERR_FILENO ) == -1 )
         {
             if ( errno == EMFILE )
-                w = write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-                           "running out of system resources.\n", 71 );
+                write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+                       "running out of system resources.\n", 71 );
             else
-                w = write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-                           "internal error detected.\n", 63 );
+                write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+                       "internal error detected.\n", 63 );
 
             fclose( fp );
             close( pd[ 1 ] );
@@ -828,7 +827,7 @@ filter_edl( const char * name,
        single byte to the child so it knows we have its PID. */
 
     close( pdt[ 0 ] );
-    w = write( pdt[ 1 ], &c, 1 );
+    write( pdt[ 1 ], &c, 1 );
     close( pdt[ 1 ] );
 
     /* Close write side of the pipes, we're only going to read */

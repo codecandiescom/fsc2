@@ -99,7 +99,7 @@ rs690_store_timebase( double timebase )
     /* Remind the user if with the choosen time base an external clock
        is needed */
 
-    if ( rs690.timebase_mode == EXTERNAL && ! rs690.is_timebase_level )
+    if ( rs690.timebase_mode == ( bool ) EXTERNAL && ! rs690.is_timebase_level )
         print( NO_ERROR, "Time base of %s requires external clock.\n",
                rs690_ptime( timebase ) );
 
@@ -125,7 +125,7 @@ rs690_store_timebase_level( int level_type )
     rs690.timebase_level = level_type;
     rs690.is_timebase_level = SET;
 
-    if ( rs690.is_timebase && rs690.timebase_mode == INTERNAL )
+    if ( rs690.is_timebase && rs690.timebase_mode == ( bool ) INTERNAL )
     {
         rs690.timebase_mode = EXTERNAL;
         rs690.timebase_type = TIMEBASE_4_NS;
@@ -187,7 +187,7 @@ rs690_assign_channel_to_function( int  function,
             if ( channel % 16 >= 4 )
             {
                 print( FATAL, "For %s only channels [A-%c][0-3] can be used\n",
-                       rs690.timebase_mode == INTERNAL ?
+                       rs690.timebase_mode == ( bool ) INTERNAL ?
                        "time bases below 8 ns" : "external time bases",
                        'A' + 4 * NUM_HSM_CARDS - 1 );
                 THROW( EXCEPTION );

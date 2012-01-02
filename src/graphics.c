@@ -473,7 +473,7 @@ set_default_sizes( void )
 static void
 set_defaults( void )
 {
-    if ( GUI.G_Funcs.size == LOW )
+    if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         GI.win_min_1d_width    = 300;
         GI.win_min_2d_width    = 350;

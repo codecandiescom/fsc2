@@ -106,7 +106,7 @@ static bool is_mapped = UNSET;           /* set while form is mapped */
 void
 cut_init( void )
 {
-    if ( GUI.G_Funcs.size == LOW )
+    if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         GC_sizes.WIN_MIN_WIDTH  = 350;
         GC_sizes.WIN_MIN_HEIGHT = 220;

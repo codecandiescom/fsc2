@@ -675,7 +675,6 @@ lockin_ref_level( Var_T * v )
 {
     double ma;
     int ma_index = UNDEF_MA_INDEX;
-    int old_ma_index;
     int i;
 
 
@@ -693,8 +692,6 @@ lockin_ref_level( Var_T * v )
             case EXPERIMENT :
                 return vars_push( FLOAT_VAR, ma_list[ er023m_get_ma( ) ] );
         }
-
-    old_ma_index = er023m.ma_index;
 
     ma = get_double( v, "modulation amplitude" );
 

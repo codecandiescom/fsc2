@@ -379,7 +379,6 @@ rb_pulser_mw_min_specs( Pulse_T * p )
     Function_T *f = p->function;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + MW_DELAY_0;
     Rulbus_Delay_Card_T *cur_card;
-    double start;
     double t;
     int i;
     double min =
@@ -393,7 +392,6 @@ rb_pulser_mw_min_specs( Pulse_T * p )
     fsc2_assert( f == rb_pulser_w.function + PULSER_CHANNEL_MW );
 
     cur_card = card;
-    start = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + f->delay;
 
     for ( i = 0; i < MAX_MW_PULSES; i++ )
     {

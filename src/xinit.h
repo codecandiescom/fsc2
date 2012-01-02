@@ -25,7 +25,7 @@
 typedef struct G_Funcs G_Funcs_T;
 
 struct G_Funcs {
-    bool size;
+    bool               size;
     FD_fsc2 *          ( * create_form_fsc2       ) ( void );
     FD_run_1d *        ( * create_form_run_1d     ) ( void );
     FD_run_2d *        ( * create_form_run_2d     ) ( void );

@@ -936,8 +936,7 @@ vars_pop( Var_T * v )
     Var_T *ret = NULL;
     ssize_t i;
 #ifndef NDEBUG
-    Var_T *stack,
-          *prev = NULL;
+    Var_T *stack;
 #endif
 
 
@@ -951,7 +950,7 @@ vars_pop( Var_T * v )
        a new bug */
 
     for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
-        prev = stack;
+        /* empty */ ;
 
     if ( stack == NULL )
         fsc2_impossible( );

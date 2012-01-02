@@ -955,7 +955,6 @@ spex_cd2a_pos_mess_check( const char * bp )
 {
     char *ep;
     const char *eu = bp;
-    double val;
 
 
     /* When the device is wavenumber driven it sends either a 'W' (when
@@ -980,7 +979,7 @@ spex_cd2a_pos_mess_check( const char * bp )
         bp++;
 
     errno = 0;
-    val = strtod( bp, &ep );
+    strtod( bp, &ep );
     if ( errno || ep != eu + 9 )
         spex_cd2a_wrong_data( );
 }

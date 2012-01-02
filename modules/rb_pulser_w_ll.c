@@ -355,7 +355,7 @@ rb_pulser_w_phase_init( void )
                                                                  != RULBUS_OK )
                 rb_pulser_w_failure( SET, "Failure to initialize pulser" );
 
-        card->old_delay = card->old_delay = 0;
+        card->delay = card->old_delay = 0;
     }
 
 #else /* in test mode */
@@ -372,7 +372,7 @@ rb_pulser_w_phase_init( void )
     {
         fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, 0, SET )\n",
                  card->name );
-        card->old_delay = card->old_delay = 0;
+        card->delay = card->old_delay = 0;
     }
 #endif
 }

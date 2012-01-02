@@ -31,8 +31,7 @@ Var_T *
 daq_reserve_dac( Var_T * v )
 {
     bool lock_state = SET;
-    long channel;
-    int dac;
+    long dac;
 
 
     if ( v == NULL )
@@ -41,15 +40,11 @@ daq_reserve_dac( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = get_strict_long( v, "channel number" );
-
     dac = pci_mio_16e_1_channel_number( get_strict_long( v,
                                                          "AO channel number" ),
                                         "AO channel" );
 
-    v = vars_pop( v );
-
-    if ( v == NULL )
+    if ( ( v = vars_pop( v ) ) == NULL )
         return vars_push( INT_VAR,
                          pci_mio_16e_1.ao_state.reserved_by[ dac ] ? 1L : 0L );
 

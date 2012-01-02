@@ -346,11 +346,7 @@ get_field( Var_T * v  UNUSED_ARG )
         if (    ips120_10.sweep_state != STOPPED
              && ips120_10.activity == TO_SET_POINT )
         {
-            double cur_time, dtime;
-
-            cur_time = experiment_time( );
-            dtime = cur_time - ips120_10.time_estimate;
-            ips120_10.time_estimate = cur_time;
+            ips120_10.time_estimate = experiment_time( );
 
             ips120_10.act_current = 1.0e-4 *
                 ( double ) lrnd( 1.0e4 * ( ips120_10.act_current

@@ -93,7 +93,7 @@ rs690_init( const char * name )
     /* Set the clock source mode - currently we only support either internal
        or external ECL and TTL oscillator (defaulting to TTL) */
 
-    sprintf( cmd, "LCK,%c!", rs690.timebase_mode == INTERNAL ? '0' :
+    sprintf( cmd, "LCK,%c!", rs690.timebase_mode == ( bool ) INTERNAL ? '0' :
              ( rs690.timebase_level == ECL_LEVEL ? '1' : '2' ) );
     if ( rs690_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
         rs690_gpib_failure( );

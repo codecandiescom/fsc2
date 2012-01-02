@@ -110,7 +110,7 @@ toolbox_create( long layout )
     Toolbox->objs           = NULL;                 /* and also no objects */
     Toolbox->next_ID        = ID_OFFSET;
 
-    if ( GUI.G_Funcs.size == LOW )
+    if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) )
             fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
@@ -930,8 +930,7 @@ tools_clear( void )
 void
 recreate_Toolbox( void )
 {
-    Iobject_T *io,
-              *last_io = NULL;
+    Iobject_T *io;
     int flags;
     int unsigned dummy;
     int tool_x,
@@ -990,10 +989,7 @@ recreate_Toolbox( void )
     Toolbox->h = 2 * FI_sizes.HORI_OFFSET;
 
     for ( io = Toolbox->objs; io != NULL; io = io->next )
-    {
         append_object_to_form( io, &Toolbox->w, &Toolbox->h );
-        last_io = io;
-    }
 
     fl_end_form( );
 

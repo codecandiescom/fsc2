@@ -930,9 +930,7 @@ vxi11_read( char   * buffer,
 
         if ( fsc2_lan_log_level( ) == LL_ALL )
         {
-            size_t c;
-
-            c = fwrite( buffer, *length, 1, log_fp );
+            fwrite( buffer, *length, 1, log_fp );
             fputc( ( int ) '\n', log_fp );
         }
     }

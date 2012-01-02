@@ -218,7 +218,12 @@ static void
 ep385_create_shape_pulses( void )
 {
     Function_T *f;
-    Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+    Pulse_T *np = NULL,
+            *cp,
+            *rp,
+            *p1,
+            *p2,
+            *old_end;
 
 
     if ( ! ep385.auto_shape_pulses || ep385.pulses == NULL )
@@ -383,7 +388,9 @@ static void
 ep385_create_twt_pulses( void )
 {
     Function_T *f;
-    Pulse_T *np = NULL, *cp, *rp, *old_end;
+    Pulse_T *np = NULL,
+            *cp,
+            *rp;
 
 
     if ( ! ep385.auto_twt_pulses || ep385.pulses == NULL )
@@ -394,7 +401,6 @@ ep385_create_twt_pulses( void )
 
     for ( cp = ep385.pulses; cp->next != NULL; cp = cp->next )
         /* empty */ ;
-    old_end = cp;
 
     /* Loop over all pulses */
 
@@ -824,7 +830,7 @@ ep385_pulse_start_setup( void )
                 opp = ch->old_pulse_params + ch->num_active_pulses++;
 
                 pp->pos = opp->pos = p->pos + f->delay;
-                pp->len = pp->len = p->len;
+                pp->len = opp->len = p->len;
                 pp->pulse = opp->pulse = p;
 
                 /* Extend pulses for which a shape pulse has been created

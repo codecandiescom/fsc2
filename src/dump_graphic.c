@@ -307,7 +307,6 @@ dump_as_ppm( FILE   * fp,
     char *lineptr;
     G_Hash_Entry_T *hash;
     unsigned int hash_size;
-    size_t c;
 
 
     hash = G.color_hash;
@@ -384,7 +383,7 @@ dump_as_ppm( FILE   * fp,
             key = pixel % hash_size;
             while ( hash[ key ].pixel != pixel )
                 key = ( key + 1 ) % hash_size;
-            c = fwrite( hash[ key ].rgb, 1, 3, fp );
+            fwrite( hash[ key ].rgb, 1, 3, fp );
         }
     }
 }
