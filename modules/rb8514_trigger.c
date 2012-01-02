@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2011 Jens Thoms Toerring
+ *  Copyright (C) 2012 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *

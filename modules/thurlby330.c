@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2011 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2012 Anton Savitsky / Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *

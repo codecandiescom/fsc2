@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2011 Jens Thoms Toerring/Ivo Alxneit
+ *  Copyright (C) 1999-2012 Jens Thoms Toerring/Ivo Alxneit
  *
  *  This file is part of fsc2.
  *
