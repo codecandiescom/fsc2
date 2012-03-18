@@ -11,9 +11,9 @@
 
 #########################
 
-use Test;
 use strict;
 use warnings;
+use Test;
 BEGIN { plan tests => 11 };
 use POSIX;
 use Errno;
@@ -88,57 +88,13 @@ ok( $fs->l_len, 3 );
 ##############################################
 # 9. Test if we can get a read lock on a file and release it again
 
-my $fh;
-if ( defined open $fh, '>', './fcntllock_test' ) {
-    close $fh;
-    if ( defined open $fh, '<', './fcntllock_test' ) {
-        $fs->l_type( F_RDLCK );
-        $fs->l_start( 0 );                    # that's all GNU Hurd can handle
-        $fs->l_len( 0 );                      # ditto
-        $fs->l_whence( SEEK_SET );            # ditto
-        my $res = $fs->lock( $fh, F_SETLK );
-        unlink './fcntllock_test';
-        if ( defined $res ) {
-            $fs->l_type( F_UNLCK );
-            $res = $fs->lock( $fh, F_SETLK );
-            print "# Dropping read lock failed: $! (" . $fs->lock_errno . ")\n"
-                unless defined $res;
-        } else {
-            print "# Read lock failed: $! (" . $fs->lock_errno . ")\n";
-        }
-        close $fh;
-        ok( defined $res );
-    } else {
-        print "# Can't open a file for reading: $!\n";
-        ok( 0 );
-    }
-} else {
-    print "# Can't create a test file: $!\n";
-    ok( 0 );
-}
+ok( \&test_read_lock );
 
 
 ##############################################
 # 10. Test if we can get an write lock on a test file and release it again
 
-if ( defined open $fh, '>', './fcntllock_test' ) {
-    unlink './fcntllock_test';
-    $fs->l_type( F_WRLCK );
-    my $res = $fs->lock( $fh, F_SETLK );
-    if ( defined $res ) {
-        $fs->l_type( F_UNLCK );
-        $res = $fs->lock( $fh, F_SETLK );
-        print "# Dropping write lock failed: $! (" . $fs->lock_errno . ")\n"
-            unless defined $res;
-        close( $fh );
-    } else {
-        print "# Write lock failed: $! (" . $fs->lock_errno . ")\n";
-    }
-    ok( defined $res );
-} else {
-    print "# Can't open a file for writing: $!\n";
-    ok( 0 );
-}
+ok( \&test_write_lock );
 
 
 ##############################################
@@ -149,19 +105,110 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
 #     support F_GETLK and in that case we can only try to obtain the lock
 #     directly and check for the reason it failed.
 
+ok( \&test_concurrent_locking );
 
-if ( defined open $fh, '>', './fcntllock_test' ) {
+
+##############################################
+# Function run for test 9, tests if we can get a read lock
+# on a file and release it again
+
+sub test_read_lock {
+    my $fh;
+
+    unless ( defined open $fh, '>', './fcntllock_test' ) {
+        print "# Can't create a test file: $!\n";
+        return 0;
+    }
+    close $fh;
+
+    unless ( defined open $fh, '<', './fcntllock_test' ) {
+        print "# Can't open a file for reading: $!\n";
+        unlink './fcntllock_test';
+        return 0;
+    }
     unlink './fcntllock_test';
-    $fs = $fs->new( l_type   => F_WRLCK,
-                    l_whence => SEEK_SET,
-                    l_start  => 0,
-                    l_len    => 0 );
+
+    $fs->l_type( F_RDLCK );
+    $fs->l_start( 0 );                    # that's all GNU Hurd can handle
+    $fs->l_len( 0 );                      # ditto
+    $fs->l_whence( SEEK_SET );            # ditto
+    my $res = $fs->lock( $fh, F_SETLK );
+
+    if ( defined $res ) {
+        $fs->l_type( F_UNLCK );
+        $res = $fs->lock( $fh, F_SETLK );
+        print "# Dropping read lock failed: $! (" . $fs->lock_errno . ")\n"
+            unless defined $res;
+    } else {
+        print "# Read lock failed: $! (" . $fs->lock_errno . ")\n";
+    }
+
+    close $fh;
+    return defined $res;
+}
+
+
+##############################################
+# Function run fot test 10, tests if we can get an write lock
+# on a test file and release it again
+
+sub test_write_lock {
+    my $fh;
+
+    unless ( defined open $fh, '>', './fcntllock_test' ) {
+        print "# Can't open a file for writing: $!\n";
+        return 0;
+    }
+    unlink './fcntllock_test';
+
+    $fs->l_type( F_WRLCK );
+    my $res = $fs->lock( $fh, F_SETLK );
+
+    if ( defined $res ) {
+        $fs->l_type( F_UNLCK );
+        $res = $fs->lock( $fh, F_SETLK );
+        print   "# Dropping write lock failed: $! (" . $fs->lock_errno . ")\n"
+            unless defined $res;
+    } else {
+        print "# Write lock failed: $! (" . $fs->lock_errno . ")\n";
+    }
+
+    close $fh;
+    return defined $res;
+}
+
+
+##############################################
+# Function run for test11: the child process grabs a write lock on a test
+# file for 2 secs while the parent repeatedly tests if it can get the lock.
+# After the child finally releases the lock the parent should be able to
+# obtain and again release it. Note that there are systems that don't
+# support F_GETLK and in that case we can only try to obtain the lock
+# directly and check for the reason it failed.
+
+sub test_concurrent_locking {
+    my $fh;
+
+    unless ( defined open $fh, '>', './fcntllock_test' ) {
+        print "# Can't open a file for writing: $!\n";
+        return 0;
+    }
+    unlink './fcntllock_test';
+
+    my $fs = $fs->new( l_type   => F_WRLCK,
+                       l_whence => SEEK_SET,
+                       l_start  => 0,
+                       l_len    => 0 );
+
+    my $res = 0;
 
     if ( my $pid = fork ) {
         sleep 1;             # leave some time for the child to get the lock
         my $failed = 1;
 
         while ( 1 ) {
+            # Check for abnormal exit of the child process
+
             last if $pid == waitpid( $pid, WNOHANG ) and $?;
 
             # F_GETLK is not supported on all systems in which case errno
@@ -192,26 +239,21 @@ if ( defined open $fh, '>', './fcntllock_test' ) {
         }
 
         if ( ! $failed ) {
-            ok(     $fs->l_type( F_WRLCK ), $fs->lock( $fh, F_SETLK )
-                and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
-        } else {
-            ok( 0 );
+            $res =     $fs->l_type( F_WRLCK ), $fs->lock( $fh, F_SETLK )
+                   and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK );
         }
-
-        close $fh;
     } elsif ( defined $pid ) {                     # child's code
         $fs->lock( $fh, F_SETLKW ) or exit 1;
         sleep 2;
-        $fs->l_type( F_UNLCK );
+        $fs->l_type( F_UNLCK ) or exit 1;
         $fs->lock( $fh, F_SETLK ) or exit 1;
         exit 0;
     } else {
         print "# Can't fork: $!\n";
-        ok( 0 );
     }
-} else {
-    print "# Can't open a file for writing: $!\n";
-    ok( 0 );
+
+    close $fh;
+    return $res;
 }
 
 

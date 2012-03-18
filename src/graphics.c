@@ -168,7 +168,7 @@ start_graphics( void )
     {
         w = fl_show_form( GUI.run_form_1d->run_1d,
                           GUI.display_1d_has_pos ?
-                              FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
                           FL_FULLBORDER,
                           G.mode == NORMAL_DISPLAY ?
                           "fsc2: 1D-Display" :
@@ -183,7 +183,7 @@ start_graphics( void )
     {
         w = fl_show_form( GUI.run_form_2d->run_2d,
                           GUI.display_2d_has_pos ?
-                              FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
                           FL_FULLBORDER, "fsc2: 2D-Display" );
         G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
         fl_addto_selected_xevent( w, FocusIn | FocusOut );

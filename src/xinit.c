@@ -288,22 +288,14 @@ xforms_init( int  * argc,
         XI_Sizes.SLIDER_SIZE      = 0.15;
     }
 
-    /* Set some properties of goodies */
-
-    fl_set_goodies_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
-    fl_set_oneliner_font( FL_NORMAL_STYLE, XI_Sizes.NORMAL_FONT_SIZE );
-
     if ( * ( ( int * ) Xresources[ HELPFONTSIZE ].var ) != 0 )
         fl_set_tooltip_font( FL_NORMAL_STYLE,
                              * ( ( int * ) Xresources[ HELPFONTSIZE ].var ) );
-    else
-        fl_set_tooltip_font( FL_NORMAL_STYLE, XI_Sizes.SMALL_FONT_SIZE );
 
     if ( * ( ( int * ) Xresources[ FILESELFONTSIZE ].var ) != 0 )
         fl_set_fselector_fontsize( * ( ( int * )
                                        Xresources[ FILESELFONTSIZE ].var )  );
-    else
-        fl_set_fselector_fontsize( XI_Sizes.NORMAL_FONT_SIZE );
+
     fl_set_tooltip_color( FL_BLACK, FL_YELLOW );
 
     fl_disable_fselector_cache( 1 );
