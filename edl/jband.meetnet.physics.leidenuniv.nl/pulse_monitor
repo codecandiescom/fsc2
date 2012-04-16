@@ -126,7 +126,7 @@ PL[ 5 ] = input_create( "INT_INPUT", PLV[ 5 ] * 10, "Length of DET pulse" );
 Freq    = input_create( "FLOAT_INPUT", freq / 1 MHz, "RF frequency (MHz)" );
 Current_Field = output_create( "FLOAT_OUTPUT", current_field,
                                "Current field [G]" );
-Att = input_create( "FLOAT_INPUT", att, "RF attenuation (dBm)" );
+Att = input_create( "FLOAT_INPUT", att, "RF power (dBm)" );
 RF_ON_OFF = button_create( "PUSH_BUTTON", "RF On/Off" );
 button_state( RF_ON_OFF, synthesizer_state( ) );
 New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
