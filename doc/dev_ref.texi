@@ -981,7 +981,7 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 @strong{Description}: @uref{http://www.bruker-biospin.com/, Bruker}
 BVT3000 Variable Temperature Unit (using a
 @uref{http://www.eurotherm.com/, Eurotherm} 902S temperature
-controller). Worksa also with BVT3500 booster. Please note: some
+controller). Works also with BVT3500 booster. Please note: some
 device functions can only be used if the device is fitted with an LN2
 evaporator.
 

@@ -4398,8 +4398,8 @@ time without an argument. If no sample channel has been set before
 (either by a call of this function or
 @code{@ref{temp_contr_sample_channel()}}) the default sample channel
 is used. This is channel @code{1} for the @ref{itc503, Oxford
-Instruments ITC503} and the channel before the program start at the
-front panel for the @ref{lakeshore330, Lake Shore 330}.
+Instruments ITC503} and the channel set before the program was started
+at the front panel for the @ref{lakeshore330, Lake Shore 330}.
 
 The function returned is always in Kelvin.
 
