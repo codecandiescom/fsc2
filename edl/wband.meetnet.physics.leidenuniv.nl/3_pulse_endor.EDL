@@ -167,11 +167,11 @@ FOREVER {
     pulser_state( "ON" );
     FOR I = 1 : N_Points {
         wait( 1.1 * repeat_time * N_Avg );
+		pulser_state( "OFF" );
 === if ( ADC_CHANNELS eq "0 and 1" )
 === if ( START_FREQ <= END_FREQ )
         data[ 1, J, I ] = daq_get_voltage( CH0 );
         data[ 2, J, I ] = daq_get_voltage( CH1 );
-		pulser_state( "OFF" );
         display_1d( I, data[ 1, J, I ], 1, I, data[ 2, J, I ], 2,
                     I, ( ( J - 1 ) * avg[ 1, I ]  + data[ 1, J, I ] ) / J, 3,
 					I, ( ( J - 1 ) * avg[ 2, I ]  + data[ 2, J, I ] ) / J, 4 );
@@ -193,7 +193,6 @@ FOREVER {
 === else
         data[ J, I ] = daq_get_voltage( CH1 );
 === endif
-		pulser_state( "OFF" );
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ]  + data[ J, I ] ) / J, 2 );
 === else
@@ -202,7 +201,6 @@ FOREVER {
 === else
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
 === endif
-        pulser_state( "OFF" );
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ N_Points - I + 1 ]
                     + data[ J, N_Points - I + 1 ] ) / J, 2 );
@@ -214,9 +212,10 @@ FOREVER {
 === else
         IF I > 1 {
 === endif
-	        pulser_state( "ON" );
 			trigger_raise( );
 			freq += freq_step;
+		    wait( 5 ms );
+	        pulser_state( "ON" );
         }
     }
 
