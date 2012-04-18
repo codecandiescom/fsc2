@@ -18,6 +18,7 @@
 === END_FREQ float [ 0.009 : 1100 ] [ 160 ] "End frequency" "MHz"
 === FREQ_STEP float [ 0.001 : 1000 ] [ 0.25 ] "Step frequency" "MHz"
 === RF_ATT float [ -140 : 13 ] [ -13 ] "RF Gain" "dBm"
+=== FREQ_STEP_DELAY int [ 0 : 100 ] [ 5 ] "Frequency step delay" "ms"
 === ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 === WAIT_TIME float [ 0.0 : ] [ 5 ] "Delay between scans" "s"
@@ -214,7 +215,7 @@ FOREVER {
 === endif
 			trigger_raise( );
 			freq += freq_step;
-		    wait( 5 ms );
+		    wait( FREQ_STEP_DELAY );
 	        pulser_state( "ON" );
         }
     }
