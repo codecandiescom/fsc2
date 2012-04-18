@@ -215,7 +215,7 @@ FOREVER {
 === endif
 			trigger_raise( );
 			freq += freq_step;
-		    wait( FREQ_STEP_DELAY );
+		    wait( FREQ_STEP_DELAY ms );
 	        pulser_state( "ON" );
         }
     }
