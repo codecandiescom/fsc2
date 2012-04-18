@@ -117,21 +117,21 @@ pulser_show_pulses( );
 === endif
 
 === if ( ADC_CHANNELS eq "0 and 1" )
-=== if ( START_FREQ <= END_FREQ )
+  === if ( START_FREQ <= END_FREQ )
 init_1d( 4, N_Points, start_freq / 1 MHz, freq_step / 1 MHz,
          "RF frequency [MHz]", "Echo amplitude [a.u.]" );
-=== else
+  === else
 init_1d( 4, N_Points, end_freq / 1 MHz, - freq_step / 1 MHz,
          "RF frequency [MHz]", "Echo amplitude [a.u.]" );
-=== endif
+  === endif
 === else
-=== if ( START_FREQ <= END_FREQ )
+  === if ( START_FREQ <= END_FREQ )
 init_1d( 2, N_Points, start_freq / 1 MHz, freq_step / 1 MHz,
          "RF frequency [MHz]", "Echo amplitude [a.u.]" );
-=== else
+  === else
 init_1d( 2, N_Points, end_freq / 1 MHz, - freq_step / 1 MHz,
          "RF frequency [MHz]", "Echo amplitude [a.u.]" );
-=== endif
+  === endif
 === endif
 
 EXPERIMENT:
@@ -139,16 +139,23 @@ EXPERIMENT:
 print( "Please make sure the repetition time is set correctly!\n" );
 === endif
 
+// Set the filed (do that first to give it more time to settle)
+
 field = magnet_field( field );
 
+// Ask for the file name to store data
+
 File1 = get_file( "", "*.avg", "", "", "avg" );
+
+// Set up the synthesizer
 
 synthesizer_attenuation( att );
 synthesizer_frequency( start_freq );
 synthesizer_triggered_sweep_setup( start_freq, end_freq, abs( freq_step ) );
 synthesizer_state( "ON" );
-daq_gain( 4 );
 trigger_length( 10 );
+
+daq_gain( 4 );
 
 /* Create the toolbox */
 
@@ -160,52 +167,53 @@ hide_toolbox( "OFF" );
 FOREVER {
 	freq = start_freq;
 	synthesizer_triggered_sweep_state( "ON" );
+	wait( FREQ_STEP_DELAY ms );
+
     J += 1;
     output_value( B1, J );
 
 	wait( pre_scan_delay );
 
-    pulser_state( "ON" );
     FOR I = 1 : N_Points {
+		pulser_state( "ON" );
         wait( 1.1 * repeat_time * N_Avg );
 		pulser_state( "OFF" );
 === if ( ADC_CHANNELS eq "0 and 1" )
-=== if ( START_FREQ <= END_FREQ )
+  === if ( START_FREQ <= END_FREQ )
         data[ 1, J, I ] = daq_get_voltage( CH0 );
         data[ 2, J, I ] = daq_get_voltage( CH1 );
         display_1d( I, data[ 1, J, I ], 1, I, data[ 2, J, I ], 2,
                     I, ( ( J - 1 ) * avg[ 1, I ]  + data[ 1, J, I ] ) / J, 3,
 					I, ( ( J - 1 ) * avg[ 2, I ]  + data[ 2, J, I ] ) / J, 4 );
-=== else
+  === else
         data[ 1, J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
         data[ 2, J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
-		pulser_state( "OFF" );
         display_1d( N_Points - I + 1, data[ 1, J, N_Points - I + 1 ], 1,
 					N_Points - I + 1, data[ 2, J, N_Points - I + 1 ], 2,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 1, N_Points - I + 1 ]
                     + data[ 1, J, N_Points - I + 1 ] ) / J, 3,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 2, N_Points - I + 1 ]
                     + data[ 2, J, N_Points - I + 1 ] ) / J, 4 );
-=== endif
+  === endif
 === else
-=== if ( START_FREQ <= END_FREQ )
-=== if ( ADC_CHANNELS eq "0" )
+  === if ( START_FREQ <= END_FREQ )
+    === if ( ADC_CHANNELS eq "0" )
         data[ J, I ] = daq_get_voltage( CH0 );
-=== else
+    === else
         data[ J, I ] = daq_get_voltage( CH1 );
-=== endif
+    === endif
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ]  + data[ J, I ] ) / J, 2 );
-=== else
-=== if ( ADC_CHANNELS eq "0" )
+  === else
+    === if ( ADC_CHANNELS eq "0" )
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
-=== else
+    === else
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
-=== endif
+    === endif
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ N_Points - I + 1 ]
                     + data[ J, N_Points - I + 1 ] ) / J, 2 );
-=== endif
+  === endif
 === endif
 
 === if ( START_FREQ <= END_FREQ )
@@ -216,9 +224,12 @@ FOREVER {
 			trigger_raise( );
 			freq += freq_step;
 		    wait( FREQ_STEP_DELAY ms );
-	        pulser_state( "ON" );
         }
     }
+
+	// This also resets the synthesizer to the start frequency...
+
+    synthesizer_triggered_sweep_state( "OFF" );
 
 === if ( ADC_CHANNELS eq "0 and 1" )
     avg[ 1 ] = add_to_average( avg[ 1 ], data[ 1, J ], J );
@@ -227,8 +238,6 @@ FOREVER {
     avg = add_to_average( avg, data[ J ], J );
 === endif
 
-    synthesizer_triggered_sweep_state( "OFF" );
-
     IF button_state( B2 ) {
         BREAK;
     }
@@ -236,33 +245,34 @@ FOREVER {
 
 ON_STOP:
 
+pulser_state( "OFF" );
 synthesizer_state( "OFF" );
 
 IF I != 0 {
     IF J == 1 {
 === if ( START_FREQ <= END_FREQ )
         FOR K = 1 : I - 1 {
-=== if ( ADC_CHANNELS eq "0 and 1" )
+  === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( start_freq + ( K - 1 ) * freq_step ) / 1 MHz,
                    data[ 1, 1, K ], data[ 2, 1, K ] );
-=== else
+  === else
             fsave( File1, "#,#\n",
                    ( start_freq + ( K - 1 ) * freq_step ) / 1 MHz,
                    data[ 1, K ] );
-=== endif
+  === endif
         }
 === else
         FOR K = N_Points - I + 2 : N_Points {
-=== if ( ADC_CHANNELS eq "0 and 1" )
+  === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( end_freq - ( K - 1 ) * freq_step ) / 1 MHz,
                    data[ 1, 1, K ], data[ 2, 1, K ] );
-=== else
+  === else
             fsave( File1, "#,#\n",
                    ( end_freq - ( K - 1 ) * freq_step ) / 1 MHz,
                    data[ 1, K ] );
-=== endif
+  === endif
         }
 === endif
     } ELSE {
@@ -321,23 +331,23 @@ IF I != 0 {
 
         FOR I = 1 : N_Points {
 === if ( START_FREQ <= END_FREQ )
-=== if ( ADC_CHANNELS eq "0 and 1" )
+  === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz,
 				   avg[ 1, I ], avg[ 2, I ] );
-=== else
+  === else
             fsave( File1, "#,#\n",
                    ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
-=== endif
+  === endif
 === else
-=== if ( ADC_CHANNELS eq "0 and 1" )
+  === if ( ADC_CHANNELS eq "0 and 1" )
             fsave( File1, "#,#,#\n",
                    ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz,
 				   avg[ 1, I ], avg[ 2, I ] );
-=== else
+  === else
             fsave( File1, "#,#\n",
                    ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
-=== endif
+  === endif
 === endif
         }
     }
