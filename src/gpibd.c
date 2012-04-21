@@ -43,14 +43,14 @@
   requests by this instance of fsc2 locks a mutex that gives it exclusive
   access to the GPIB bus, thereby avoiding intermixing data on the bus
   from different requests. Only when the request is satisfied the mutex
-  is unlocked again and another instance of fsc2 and the corresponding
+  is again unlocked and another instance of fsc2 and the corresponding
   thread can get access to the GPIB.
 
-  At the same time there's a list of all device claimed by the different
-  instances of fsc2. Once a device is successfully claimed by one instance
-  of fsc2 requests for that device by another instance of fsc2 are denied,
-  thus avoiding that different instances send unrelated requests to the
-  same device.
+  There's also a list of all device claimed by the different instances
+  of fsc2. Once a device is successfully claimed by one instance of fsc2
+  requests for that device by another instance of fsc2 are denied, thus
+  avoiding that different instances send unrelated requests to the same
+  device.
 
   Since fsc2 supports different libraries for GPIB cards the daemons gets
   built with an interface suitable for the GPIB library being used. These
@@ -84,8 +84,8 @@
 
 
 /* Since there can't be more than 15 GPIB devices on the bus, including the
-   controller which is handled by the main thread, there never can be more
-   than 14 threads */
+   controller which is handled by the main thread, it makes no sense to have
+   more than 14 threads */
 
 #define MAX_THREADS MAX_DEVICES
 
@@ -114,7 +114,7 @@ static thread_data_T thread_data[ MAX_THREADS ];
 static device_T devices[ MAX_DEVICES ];
 
 
-/* Mutex for protecting accssesto the GPIB bus */
+/* Mutex for protecting accsses to the GPIB bus */
 
 static pthread_mutex_t gpib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -196,8 +196,9 @@ main( void )
 
 	set_gpibd_signals( );
 
-    /* Check that the socket file does not exist, otherwise assume that
-       another instance of gpibd is already running */
+    /* Check that the socket file does not exist, if it does test if another
+       instance is acceptng connections. If that's the case give up, otherwise
+       delete it, must be a stale file. */
 
     if ( stat( GPIBD_SOCK_FILE, &sbuf ) != -1 )
     {
@@ -286,7 +287,8 @@ main( void )
  * a new thread for dealing with the client.
  *---------------------------------------------------*/
 
-static void
+static
+void
 new_client( int fd )
 {
     struct sockaddr_un cli_addr;
@@ -296,7 +298,7 @@ new_client( int fd )
     char c;
 
 
-    /* Accept connection by new client */
+    /* Accept connection by the new client */
 
     if ( ( cli_fd = accept( fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
@@ -304,8 +306,7 @@ new_client( int fd )
 
     /* Check if client sends an ACK character */
 
-    if ( sread( cli_fd, &c, 1 ) != 1
-            || c != ACK )
+    if ( sread( cli_fd, &c, 1 ) != 1 || c != ACK )
     {
         shutdown( cli_fd, SHUT_RDWR );
         close( cli_fd );
@@ -352,12 +353,11 @@ new_client( int fd )
     {
         shutdown( cli_fd, SHUT_RDWR );
         close( cli_fd );
-        pthread_attr_destroy( &attr );
-        return;
     }
+    else
+        thread_count++;
 
     pthread_attr_destroy( &attr );
-    thread_count++;
 }
 
 
@@ -369,7 +369,8 @@ new_client( int fd )
  * otherwise -1.
  *--------------------------------------------------------*/
 
-static int
+static
+int
 test_connect( void )
 {
     int sock_fd;
@@ -408,10 +409,11 @@ test_connect( void )
 
 /*----------------------------------------------------*
  * Function checks if clients still exist and removes
- * the threads handling those that have vanished
+ * the threads handling the clients that have vanished.
  *----------------------------------------------------*/
 
-static size_t
+static
+size_t
 check_connections( void )
 {
     size_t i;
@@ -441,7 +443,8 @@ check_connections( void )
  * Main function of each thread for dealing with a client
  *--------------------------------------------------------*/
 
-static void *
+static
+void *
 gpib_handler( void * null  UNUSED_ARG )
 {
     int fd = -1;
@@ -452,19 +455,19 @@ gpib_handler( void * null  UNUSED_ARG )
     long cmd;
     char *eptr;
     int ret;
-    int ( * gpib_func[ ] )( int, char * ) = { gpibd_init,
-                                              gpibd_shutdown,
-                                              gpibd_init_device,
-                                              gpibd_timeout,
-                                              gpibd_clear_device,
-                                              gpibd_local,
-                                              gpibd_local_lockout,
-                                              gpibd_trigger,
-                                              gpibd_wait,
-                                              gpibd_write,
-                                              gpibd_read,
-                                              gpibd_serial_poll,
-                                              gpibd_last_error };
+    int ( * gpibd_func[ ] )( int, char * ) = { gpibd_init,
+                                               gpibd_shutdown,
+                                               gpibd_init_device,
+                                               gpibd_timeout,
+                                               gpibd_clear_device,
+                                               gpibd_local,
+                                               gpibd_local_lockout,
+                                               gpibd_trigger,
+                                               gpibd_wait,
+                                               gpibd_write,
+                                               gpibd_read,
+                                               gpibd_serial_poll,
+                                               gpibd_last_error };
 
 
     /* Wait for our thread ID to become available in the list of threads
@@ -479,7 +482,6 @@ gpib_handler( void * null  UNUSED_ARG )
             if ( pthread_equal( thread_data[ slot ].tid, pthread_self( ) ) )
             {
                 fd = thread_data[ slot ].fd;
-                pthread_mutex_unlock( &gpib_mutex );
                 break;
             }
 
@@ -487,7 +489,7 @@ gpib_handler( void * null  UNUSED_ARG )
     }
 
     /* Now keep on waiting for requests from the client until the client
-       either tells us it's finished or a severe error happens */
+       either tells us it's finished or a severe error is detected */
 
     while ( 1 )
     {
@@ -500,7 +502,7 @@ gpib_handler( void * null  UNUSED_ARG )
         buf[ len ] = '\0';
         cmd = strtol( buf, &eptr, 10 );
 
-        /* Check for obviously wrong data sent by the client, where "wrong data"
+        /* Check for obviously wrong data sent by the client, where "wrong"
            means not a number (or an out of range number) or the number not
            followed by a space (or a line-feed for the last error request),
            or a request other than GPIB_INIT while it hasn't called before. */
@@ -520,7 +522,7 @@ gpib_handler( void * null  UNUSED_ARG )
 
         pthread_mutex_lock( &gpib_mutex );
         gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
-        ret = gpib_func[ cmd ]( fd, eptr + 1 );
+        ret = gpibd_func[ cmd ]( fd, eptr + 1 );
         pthread_mutex_unlock( &gpib_mutex );
 
         /* Quit on failed gpib_init() and always on gpib_shutdown() command */
@@ -555,7 +557,8 @@ gpib_handler( void * null  UNUSED_ARG )
  * from the list of devices
  *-----------------------------------------*/
 
-static void
+static
+void
 cleanup_devices( pthread_t tid )
 {
 	size_t i;
@@ -578,7 +581,8 @@ cleanup_devices( pthread_t tid )
  * Function called for a gpib_init() client request
  *--------------------------------------------------*/
 
-static int
+static
+int
 gpibd_init( int    fd,
             char * line )
 {
@@ -606,7 +610,8 @@ gpibd_init( int    fd,
  * its devices and end the connection.
  *---------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_shutdown( int    fd    UNUSED_ARG,
                 char * line  UNUSED_ARG )
 {
@@ -621,7 +626,8 @@ gpibd_shutdown( int    fd    UNUSED_ARG,
  * Function called for a gpib_init_device() client request
  *---------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_init_device( int    fd,
                    char * line )
 {
@@ -684,7 +690,8 @@ gpibd_init_device( int    fd,
  * Function called for a gpib_timeout() client request
  *-----------------------------------------------------*/
 
-static int
+static
+int
 gpibd_timeout( int    fd,
                char * line )
 {
@@ -724,7 +731,8 @@ gpibd_timeout( int    fd,
  * Function called for a gpib_clear_device() client request
  *----------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_clear_device( int    fd,
                     char * line )
 {
@@ -754,7 +762,8 @@ gpibd_clear_device( int    fd,
  * Function called for a gpib_local() client request
  *---------------------------------------------------*/
 
-static int
+static
+int
 gpibd_local( int    fd,
              char * line )
 {
@@ -784,7 +793,8 @@ gpibd_local( int    fd,
  * Function called for a gpib_local_lockout() client request
  *-----------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_local_lockout( int    fd,
                      char * line )
 {
@@ -813,7 +823,8 @@ gpibd_local_lockout( int    fd,
 /*--------------------------------------------*
  *--------------------------------------------*/
 
-static int
+static
+int
 gpibd_trigger( int    fd,
                char * line )
 {
@@ -843,7 +854,8 @@ gpibd_trigger( int    fd,
  * Function called for a gpib_wait() client request
  *--------------------------------------------------*/
 
-static int
+static
+int
 gpibd_wait( int    fd,
             char * line )
 {
@@ -886,7 +898,8 @@ gpibd_wait( int    fd,
  * Function called for a gpib_write() client request
  *---------------------------------------------------*/
 
-static int
+static
+int
 gpibd_write( int    fd,
              char * line )
 {
@@ -924,7 +937,7 @@ gpibd_write( int    fd,
         return send_nak( fd );
     }
 
-    /* Send an ACK as acknowledgement to client to make it send the data... */
+    /* Send an ACK as acknowledgement to the client to make it send the data */
 
     if ( send_ack( fd ) == -1 )
     {
@@ -932,7 +945,7 @@ gpibd_write( int    fd,
         return -1;
     }
 
-    /* ...read the complete data from the client... */
+    /* Read the complete data from the client */
 
     if ( len != sread( fd, buf, len ) )
     {
@@ -940,7 +953,7 @@ gpibd_write( int    fd,
         return -1;
     }
 
-    /* ...and pass them on to the device */
+    /* Pass then to the device */
 
     if ( gpib_write( dev_id, buf, len ) != SUCCESS )
     {
@@ -960,7 +973,8 @@ gpibd_write( int    fd,
  * Function called for a gpib_read() client request
  *--------------------------------------------------*/
 
-static int
+static
+int
 gpibd_read( int    fd,
             char * line )
 {
@@ -1029,7 +1043,8 @@ gpibd_read( int    fd,
  * Function called for a gpib_serial_poll() client request
  *---------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_serial_poll( int    fd,
                    char * line )
 {
@@ -1062,7 +1077,8 @@ gpibd_serial_poll( int    fd,
  * Function called for a gpib_last_error() client request
  *--------------------------------------------------------*/
 
-static int
+static
+int
 gpibd_last_error( int    fd,
                   char * line )
 {
@@ -1090,7 +1106,8 @@ gpibd_last_error( int    fd,
  * returns the number of bytes on success and -1 otherwise.
  *-----------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 swrite( int          d,
         const char * buf,
         ssize_t      len )
@@ -1121,7 +1138,8 @@ swrite( int          d,
  * returns the number of bytes on success and -1 otherwise.
  *----------------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 sread( int       d,
        char    * buf,
        ssize_t   len )
@@ -1139,6 +1157,7 @@ sread( int       d,
         {
             if ( ret == 0 || errno != EINTR )
                 return -1;
+            ret = 0;
             continue;
         }
         buf += ret;
@@ -1154,7 +1173,8 @@ sread( int       d,
  * number of bytes read on success and -1 on failure
  *------------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 readline( int       d,
           char    * buf,
           ssize_t   max_len )
@@ -1177,7 +1197,8 @@ readline( int       d,
 /*--------------------------------------------*
  *--------------------------------------------*/
 
-static thread_data_T *
+static
+thread_data_T *
 find_thread_data( pthread_t tid )
 {
     size_t i;
@@ -1197,7 +1218,8 @@ find_thread_data( pthread_t tid )
  * result is stored in 'val'.
  *--------------------------------------------*/
 
-static int
+static
+int
 extract_long( char ** line,
               char    ec,
               long  * val )
@@ -1225,7 +1247,8 @@ extract_long( char ** line,
  * result is stored in 'val'.
  *--------------------------------------------*/
 
-static int
+static
+int
 extract_int( char ** line,
              char    ec,
              int   * val )
@@ -1249,12 +1272,13 @@ extract_int( char ** line,
 
 
 /*------------------------------------------------------*
- * Creates a UNIX domain socket the daemon is listening
- * on for clients trying to connect. Returns the file
- * descriptor on success or -1 on failure.
+ * Creates a UNIX domain socket the daemon listens on for
+ * clients trying to connect. Returns the file descriptor
+ * on success or -1 on failure.
  *------------------------------------------------------*/
 
-static int
+static
+int
 create_socket( void )
 {
     int listen_fd;
@@ -1308,7 +1332,8 @@ create_socket( void )
  * returns 0 on success and -1 in failure
  *-----------------------------------------*/
 
-static int
+static
+int
 send_nak( int fd )
 {
     if ( swrite( fd, STR_NAK, 1 ) != 1 )
@@ -1322,7 +1347,8 @@ send_nak( int fd )
  * returns 0 on success and -1 in failure
  *-----------------------------------------*/
 
-static int
+static
+int
 send_ack( int fd )
 {
     if ( swrite( fd, STR_ACK, 1 ) != 1 )
@@ -1335,23 +1361,24 @@ send_ack( int fd )
  * Signal handler: all signals are ignored
  *-----------------------------------------*/
 
-static void
+static
+void
 set_gpibd_signals( void )
 {
     struct sigaction sact;
-    int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
-                        SIGSEGV, SIGPIPE, SIGALRM, SIGTERM, SIGUSR1, SIGUSR2,
-                        SIGCHLD, SIGCONT, SIGTTIN, SIGTTOU, SIGBUS,
-                        SIGVTALRM, 0 };
-    int i;
+    int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT,
+                        SIGFPE, SIGSEGV, SIGPIPE, SIGALRM, SIGTERM,
+                        SIGUSR1, SIGUSR2, SIGCHLD, SIGCONT, SIGTTIN,
+                        SIGTTOU, SIGBUS, SIGVTALRM, 0 };
+    int *s = sig_list;
 
 
-    for ( i = 0; sig_list[ i ] != 0; i++ )
+    while ( *s )
     {
         sact.sa_handler = SIG_IGN;
         sigemptyset( &sact.sa_mask );
         sact.sa_flags = 0;
-        if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
+        if ( sigaction( *s++, &sact, NULL ) < 0 )
             _exit( -1 );
     }
 }

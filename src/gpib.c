@@ -54,6 +54,8 @@ static int extract_int( char * line,
 static void gpib_sig_handler( int signo );
 #endif
 
+static void block_signals( sigset_t * old_mask );
+
 
 /*--------------------------------------------------*
  * If not yet running start the "GPIB daemon", then
@@ -69,8 +71,7 @@ gpib_init( void )
 #else
 	char line[ 20 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Make sure only the parent can initialize the GPIB */
@@ -98,16 +99,14 @@ gpib_init( void )
 		return FAILURE;
 	}
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
 	/* Send the magic number for gpib_init() and our PID. The expected
        reply is either a NAK or ACK character */
 
 	len = sprintf( line, "%d %ld\n", GPIB_INIT, ( long ) getpid( ) );
 	if (    swrite( GPIB_fd, line, len ) != len
-		 || sread( GPIB_fd, line, 1 ) < 1
+		 || sread( GPIB_fd, line, 1 ) != 1
 		 || *line != ACK )
 	{
 		shutdown( GPIB_fd, SHUT_RDWR );
@@ -139,8 +138,7 @@ gpib_shutdown( void )
 {
 	char line[ 10 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Make sure only the parent can shutdown the GPIB */
@@ -153,9 +151,7 @@ gpib_shutdown( void )
     if ( GPIB_fd < 0 )
         return SUCCESS;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
 	len = sprintf( line, "%d\n", GPIB_SHUTDOWN );
 	swrite( GPIB_fd, line, len );
@@ -185,8 +181,7 @@ gpib_init_device( const char * name,
 	char *line;
 	ssize_t len;
 	char reply[ 20 ];
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -207,12 +202,10 @@ gpib_init_device( const char * name,
 	line = get_string( "%d %s\n", GPIB_INIT_DEVICE, name );
 	len = strlen( line );
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
 	if (    swrite( GPIB_fd, line, len ) != len
-         || sread( GPIB_fd, reply, 1 ) < 1 
+         || sread( GPIB_fd, reply, 1 ) != 1 
          || *reply == NAK
          || ( len = readline( GPIB_fd, reply + 1, sizeof reply - 2 ) ) < 1 )
     {
@@ -244,8 +237,7 @@ gpib_timeout( int dev,
 {
 	char line[ 20 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -259,17 +251,15 @@ gpib_timeout( int dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
-    /* Send line with 'magic value' for gpib_timeout(), followed by the
-       device number and the timeout value. The expected reply is either
-       a ACK or NAK character */
+    /* Send line with the 'magic value' for gpib_timeout(), followed by the
+       device number and the timeout value. The expected reply is either a
+       ACK or NAK character */
 
 	len = sprintf( line, "%d %d %d\n", GPIB_TIMEOUT, dev, timeout );
 	if (    swrite( GPIB_fd, line, len ) != len
-		 || sread( GPIB_fd, line, 1 ) < 1
+		 || sread( GPIB_fd, line, 1 ) != 1
          || *line != ACK )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
@@ -344,8 +334,7 @@ gpib_wait( int   dev,
 {
 	char line[ 30 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 		
 
     /* Keep the module writers from calling the function anywhere else
@@ -359,9 +348,7 @@ gpib_wait( int   dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
     /* Send the 'magic value' for gpib_wait(), the device ID and the mask.
        The other side should either reply by sending the status of the
@@ -399,8 +386,7 @@ gpib_write( int          dev,
 {
 	char line[ 30 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -414,9 +400,7 @@ gpib_write( int          dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
     /* Send a line with the 'magic number' for gpib_write(), the device ID
        and the number of bytes to be written. The expected answer is a ACK
@@ -464,8 +448,7 @@ gpib_read( int    dev,
 	char line[ 30 ];
 	ssize_t len;
 	long val;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -479,9 +462,7 @@ gpib_read( int    dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
     /* Send the 'magic value' for gpib_read(), the device ID and the
        maximum number of bytes to be read */
@@ -499,7 +480,7 @@ gpib_read( int    dev,
        allocation for a large enough buffer or the call of gpib_read()
        failed) */
 
-    if (    sread( GPIB_fd, line, 1 ) < 1
+    if (    sread( GPIB_fd, line, 1 ) != 1
          || *line == NAK
          || ( len = readline( GPIB_fd, line + 1, sizeof line - 2 ) ) < 1 )
     {
@@ -544,8 +525,7 @@ gpib_serial_poll( int             dev,
 	char line[ 20 ];
 	ssize_t len;
     int val;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -559,13 +539,11 @@ gpib_serial_poll( int             dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
+    block_signals( &old_mask );
+
     /* Send a line with the 'magic value' for gpib_serial_poll() and the
        device number. Expect either either the status byte as a number
        (must be positive an not larger the 255) or a single NAK character */
-
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 	len = sprintf( line, "%d %d\n", GPIB_SERIAL_POLL, dev );
 	if (    swrite( GPIB_fd, line, len ) != len
@@ -602,8 +580,7 @@ gpib_last_error( void )
 	char line[ 20 ];
 	ssize_t len;
 	long val;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -619,9 +596,7 @@ gpib_last_error( void )
 
     *err_msg = '\0';
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
 	len = sprintf( line, "%d\n", GPIB_LAST_ERROR );
 	if (    swrite( GPIB_fd, line, len ) != len
@@ -664,14 +639,14 @@ gpib_last_error( void )
  * either a ACK or NAK character.
  *----------------------------------------------------------*/
 
-static int
+static
+int
 simple_gpib_call( int dev,
                   int func_id )
 {
 	char line[ 20 ];
 	ssize_t len;
-    sigset_t new_mask,
-             old_mask;
+    sigset_t old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -685,16 +660,14 @@ simple_gpib_call( int dev,
     if ( GPIB_fd < 0 )
         return FAILURE;
 
-    sigemptyset( &new_mask );
-    sigaddset( &new_mask, DO_QUIT );
-    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    block_signals( &old_mask );
 
     /* Send line with 'magic value' for requested function and the device
        number. The expected reply is either a ACK or NAK character. */
 
 	len = sprintf( line, "%d %d\n", func_id, dev );
 	if (    swrite( GPIB_fd, line, len ) != len
-		 || sread( GPIB_fd, line, 1 ) < 1
+		 || sread( GPIB_fd, line, 1 ) != 1
          || *line != ACK )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
@@ -714,7 +687,8 @@ simple_gpib_call( int dev,
  *--------------------------------------------------------*/
 
 #ifndef GPIB_LIBRARY_NONE
-static int
+static
+int
 connect_to_gpibd( void )
 {
     int sock_fd;
@@ -782,7 +756,8 @@ connect_to_gpibd( void )
  *-----------------------------------------------------------*/
 
 #ifndef GPIB_LIBRARY_NONE
-static int
+static
+int
 start_gpibd( void )
 {
 	const char *a[ 2 ] = { NULL, NULL };
@@ -832,7 +807,7 @@ start_gpibd( void )
 
 	lower_permissions( );
 
-	/* Wait for the daemon to send a signal that tells us that it's prepared
+	/* Wait for the daemon to send the signal that tells us that it's prepared
 	   to accept connections, also check for the case that it exited again */
 
     while ( ! Gpibd_replied && waitpid( pid, NULL, WNOHANG ) == 0 )
@@ -845,7 +820,7 @@ start_gpibd( void )
 	if ( ! Gpibd_replied )
 		return -2;
 
-    /* Otherwise return the result of attempt to connect to it */
+    /* Otherwise return the result of an attempt to connect to it */
 
 	return connect_to_gpibd( );
 }
@@ -857,7 +832,8 @@ start_gpibd( void )
  * returns the number of bytes on success and -1 otherwise.
  *----------------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 swrite( int          fd,
         const char * buf,
         ssize_t      len )
@@ -875,6 +851,7 @@ swrite( int          fd,
         {
             if  ( ret == -1 && errno != EINTR )
                 return -1;
+            ret = 0;
             continue;
         }
         buf += ret;
@@ -889,10 +866,11 @@ swrite( int          fd,
  * returns the number of bytes on success and -1 otherwise.
  *------------------------------------------------------------*/
 
-static ssize_t
-    sread( int       fd,
-           char    * buf,
-           ssize_t   len )
+static
+ssize_t
+sread( int       fd,
+       char    * buf,
+       ssize_t   len )
 {
     ssize_t n = len,
             ret;
@@ -907,6 +885,7 @@ static ssize_t
         {
             if ( ret == 0 || errno != EINTR )
                 return -1;
+            ret = 0;
             continue;
         }
         buf += ret;
@@ -922,7 +901,8 @@ static ssize_t
  * read on success and -1 on failure
  *------------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 readline( int       fd,
           char    * buf,
           ssize_t   max_len )
@@ -948,7 +928,8 @@ readline( int       fd,
  * result is stored in 'val'.
  *--------------------------------------------*/
 
-static int
+static
+int
 extract_long( char * line,
              char   ec,
              long * val )
@@ -975,7 +956,8 @@ extract_long( char * line,
  * result is stored in 'val'.
  *--------------------------------------------*/
 
-static int
+static
+int
 extract_int( char * line,
             char   ec,
             int  * val )
@@ -1003,13 +985,33 @@ extract_int( char * line,
  *---------------------------------------------------*/
 
 #ifndef GPIB_LIBRARY_NONE
-static void
+static
+void
 gpib_sig_handler( int signo )
 {
     if ( signo == SIGUSR1 )
         Gpibd_replied = 1;
 }
 #endif
+
+
+/*---------------------------------------------------*
+ * Blocks "DO_QUIT" and SIGALRM to make sure we're not getting
+ * interrupted while we're talking with the GPIB daemon.
+ *---------------------------------------------------*/
+
+static
+void
+block_signals( sigset_t * old_mask )
+{
+    sigset_t new_mask;
+
+
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigaddset( &new_mask, SIGALRM );
+    sigprocmask( SIG_BLOCK, &new_mask, old_mask );
+}
 
 
 /*

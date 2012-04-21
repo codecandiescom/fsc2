@@ -54,7 +54,8 @@ freq_step      = - FREQ_STEP MHz;
 freq;
 att            = RF_ATT;
 
-pre_scan_delay = WAIT_TIME s;
+pre_scan_delay  = WAIT_TIME s;
+freq_step_delay = FREQ_STEP_DELAY ms;
 
 field          = FIELD G;
 N_Avg          = N_AVG;
@@ -167,7 +168,7 @@ hide_toolbox( "OFF" );
 FOREVER {
 	freq = start_freq;
 	synthesizer_triggered_sweep_state( "ON" );
-	wait( FREQ_STEP_DELAY ms );
+	wait( freq_step_delay );
 
     J += 1;
     output_value( B1, J );
@@ -223,7 +224,7 @@ FOREVER {
 === endif
 			trigger_raise( );
 			freq += freq_step;
-		    wait( FREQ_STEP_DELAY ms );
+		    wait( freq_step_delay );
         }
     }
 

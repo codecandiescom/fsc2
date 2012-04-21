@@ -868,9 +868,9 @@ check_for_further_errors( Compilation_T * c_old,
 
 
 /*---------------------------------------------------------------------*
- * quitting_handler() is the parents handler for the QUITTING signal
- * sent by the child when it exits normally: the handler sets a global
- * variable and reacts by sending the child a DO_QUIT signal.
+ * This is the parents handler for the QUITTING signal sent by the child
+ * when it exits normally: the handler sets a global variable and reacts
+ * by sending the child a DO_QUIT signal.
  *---------------------------------------------------------------------*/
 
 static void
@@ -895,20 +895,20 @@ quitting_handler( int signo )
  *-------------------------------------------------------------------*/
 
 void
-run_stop_button_callback( FL_OBJECT * a,
+run_stop_button_callback( FL_OBJECT * obj,
                           long        b  UNUSED_ARG )
 {
     int bn;
 
 
-    /* Activating the Stop button when the child is already dead should
-       not be possible, but to make real sure (in case of some real
-       subtle timing problems) we better check */
+    /* Using the "Stop" button when the child is already dead (or has been
+       asked to quit) shouldn't be possible, but to make real sure (in case
+       of some real subtle timing problems) we better check */
 
     if (    Fsc2_Internals.child_pid == 0
          || kill( Fsc2_Internals.child_pid, 0 ) == -1 )
     {
-        fl_set_object_callback( a, NULL, 0 );
+        fl_set_object_callback( obj, NULL, 0 );
         return;
     }
 
@@ -916,25 +916,25 @@ run_stop_button_callback( FL_OBJECT * a,
 
     if ( GUI.stop_button_mask != 0 )
     {
-        bn = fl_get_button_numb( a );
+        bn = fl_get_button_numb( obj );
         if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
             return;
     }
 
     kill( Fsc2_Internals.child_pid, DO_QUIT );
 
-    /* Disable the stop button for the time until the child has died */
-
-    fl_set_object_callback( a, NULL, 0 );
+    /* Disable the stop button(s) until the child has died */
 
     if ( G.dim & 1 || ! G.is_init )
     {
+        fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
         fl_deactivate_object( GUI.run_form_1d->stop_1d );
         fl_set_object_lcol( GUI.run_form_1d->stop_1d, FL_INACTIVE_COL );
     }
 
     if ( G.dim & 2 )
     {
+        fl_set_object_callback( GUI.run_form_2d->stop_2d, NULL, 0 );
         fl_deactivate_object( GUI.run_form_2d->stop_2d );
         fl_set_object_lcol( GUI.run_form_2d->stop_2d, FL_INACTIVE_COL );
     }
@@ -1417,10 +1417,10 @@ setup_child_signals( void )
 /*----------------------------------------------------------------*
  * This is the signal handler for the signals the child receives.
  * There are two signals that have a real meaning, SIGUSR2 (aka
- * DO_QUIT) and SIGALRM. The others are either ignored or kill
- * the child (but in a, hopefully, controlled way to allow
- * deletion of shared memory if the parent didn't do it itself).
- * There's a twist: The SIGALRM signal can only come from the
+ * DO_QUIT) and SIGALRM. The others are either ignored or kill the
+ * child (but in a hopefully controlled way to allow to delete
+ * shared memory if the parent didn't do it itself).
+ * There's a twist: the SIGALRM signal can only come from the
  * f_wait() function (see func_util.c). Here we wait in a pause()
  * for SIGALRM to get a reliable timer. On the other hand, the
  * pause() also has to be interruptible by the DO_QUIT signal, so
@@ -1437,7 +1437,7 @@ child_sig_handler( int signo )
 {
     switch ( signo )
     {
-        case DO_QUIT :                             /* aka SIGUSR2 */
+        case DO_QUIT :                          /* aka SIGUSR2 */
             if ( ! EDL.react_to_do_quit )
                 return;
             EDL.do_quit = SET;
@@ -1451,9 +1451,7 @@ child_sig_handler( int signo )
             }
             return;
 
-        /* Ignored signals : */
-
-        case SIGHUP :
+        case SIGHUP :                           /* Ignored signals : */
         case SIGINT :
         case SIGUSR1 :
         case SIGCHLD :
