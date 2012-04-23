@@ -610,14 +610,21 @@ f_wait( Var_T * v )
             pause( );
     }
 
-    /* Return 1 if end of sleeping time was reached, 0 if 'EDL.do_quit' was
-       set. In case the wait ended due to a DO_QUIT signal we have to switch
-       off the timer because after the receipt of a DO_QUIT signal the timer
-       would still be running and the finally arriving SIGALARM signal could
-       kill the child prematurely. */
+    /* We'll get here only from the handler for the DO_QUIT and the SIG_ALRM
+       signal calling siglongjmp(). Return 1 if end of sleeping time has been
+       reached (i.e. on SIG_ALRM) and 0 if 'EDL.do_quit' was set (as it is
+       in case on a DO_QUIT signal). In case the wait ended due to a DO_QUIT
+       signal we have to switch off the timer because after the receipt of a
+       DO_QUIT signal the timer would still be running and the finally arriving
+       SIGALARM signal might kill the child process (or result in other kinds
+       of unexpected things happening). */
 
     if ( EDL.do_quit )
+    {
+        sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec =
         sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
+        setitimer( ITIMER_REAL, &sleepy, NULL );
+    }
 
     return vars_push( INT_VAR, EDL.do_quit ? 0L : 1L );
 }
