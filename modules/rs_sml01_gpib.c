@@ -907,8 +907,8 @@ static
 void
 rs_sml01_get_ucor_list( void )
 {
-    char buf[   2 * RS_SML01_MAX_TABLE_ENTRIES
-              * ( RS_SML01_MAX_TABLE_NAME_LENGTH + 3 ) ];
+    char buf[   1.1 * RS_SML01_MAX_TABLE_ENTRIES
+              * ( RS_SML01_MAX_TABLE_NAME_LENGTH + 1 ) ];
     long length = sizeof buf - 1;
     char *res = buf;
 
@@ -932,30 +932,14 @@ rs_sml01_get_ucor_list( void )
         char *ep;
 
         fsc2_assert( rs_sml01.corrs_avail.cnt <= RS_SML01_MAX_TABLE_ENTRIES );
-
-        while ( *res && *res++ != '"' )
-            /* empty */ ;
-
-        if ( ! *res )
-        {
-            print( FATAL, "Unexpected data received from device.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( ! ( ep = strrchr( res, '"' ) ) || ep == res )
-        {
-            print( FATAL, "Unexpected data received from device.\n" );
-            THROW( EXCEPTION );
-        }
-
         fsc2_assert( strlen( res ) < RS_SML01_MAX_TABLE_NAME_LENGTH );
 
         rs_sml01.corrs_avail.names =
                     T_realloc( rs_sml01.corrs_avail.names,
                                  ++rs_sml01.corrs_avail.cnt
                                * sizeof *rs_sml01.corrs_avail.names );
-        rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] =
-                                                                          NULL;
+        rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] = NULL;
+
         rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] =
                                                  T_malloc( strlen( res ) + 1 );
         strcpy( rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ],
