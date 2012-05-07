@@ -907,7 +907,7 @@ static
 void
 rs_sml01_get_ucor_list( void )
 {
-    char buf[   1.1 * RS_SML01_MAX_TABLE_ENTRIES
+    char buf[   2 * RS_SML01_MAX_TABLE_ENTRIES
               * ( RS_SML01_MAX_TABLE_NAME_LENGTH + 1 ) ];
     long length = sizeof buf - 1;
     char *res = buf;
