@@ -3807,6 +3807,8 @@ in the @code{DEVICES} section.
 @item @ref{synthesizer_frequency()}
 @item @ref{synthesizer_set_freq_delay()}
 @item @ref{synthesizer_attenuation()}
+@item @ref{synthesizer_automatic_level_control()}
+@item @ref{synthesizer_user_level_correction()}
 @item @ref{synthesizer_minimum_attenuation()}
 @item @ref{synthesizer_step_frequency()}
 @item @ref{synthesizer_sweep_up()}
@@ -3944,6 +3946,41 @@ disables setting the attenuation by further calls of
 function.
 
 
+@anchor{synthesizer_automatic_level_control()}
+@findex synthesizer_automatic_level_control()
+@item synthesizer_automatic_level_control()
+The function is currently only implemented for the @ref{rs_sml01,
+Rohde&Schwarz SML01}. It allows to query or set if automatic control
+of the RF power level is used. If called without an argument @code{1}
+is returned when automatic level control is switched on, otherwise
+@code{0}. If called with a boolean argument, either the string
+@code{"OFF"} or the integer @code{0} automatic level control is
+switched off, if called with @code{"ON"} or @code{1} it's switched on.
+
+Before the the function has been called with an argument the query
+form of the function (i.e.@: calling it without an argument) can't be
+used in the PREPARATIONS section.
+
+
+@anchor{synthesizer_user_level_correction()}
+@findex synthesizer_user_level_correction()
+@item synthesizer_user_level_correction()
+The function is currently only implemented for the @ref{rs_sml01,
+Rohde&Schwarz SML01}. It allows to query or set if RF level
+corrections are done using a user created table stored in the
+synthesizer. If called with no argument @code{1} is returned when a
+user created table is used, otherwise @code{0}. If called with an
+empty string (@code{""}) as the argument use of a user table is
+switched off. Wehn called with a non-empty string (which may contain
+no more than 7 characters and must be the name of a table stored in
+the synthesizer) user level correction is switched on, using hat
+table.
+
+Before the step frequency has been set by calling the function with an
+argument the query form of the function (i.e.@: calling it without an
+argument) can't be used in the PREPARATIONS section.
+
+
 @anchor{synthesizer_step_frequency()}
 @findex synthesizer_step_frequency()
 @item synthesizer_step_frequency()
@@ -3956,7 +3993,7 @@ it can be changed later in the @code{EXPERIMENT} section.
 
 Before the step frequency has been set by calling the function with an
 argument the query form of the function (i.e.@: calling it without an
-argument can't be used).
+argument) can't be used in the PREPARATIONS section.
 
 
 @anchor{synthesizer_sweep_up()}

@@ -52,6 +52,10 @@
 #define RS_SML01_TEST_MOD_FREQ            1.0e5            /* 100 kHz */
 #define RS_SML01_TEST_MOD_AMPL            2.5e4            /* 25 kHz */
 
+#define RS_SML01_MAX_TABLE_ENTRIES           10
+#define RS_SML01_MAX_TABLE_NAME_LENGTH        7
+
+#define RS_SML01_LEAVE_UCOR_UNCHANGED        -2
 
 #if defined WITH_PULSE_MODULATION
 
@@ -70,6 +74,7 @@
 #define RS_SML01_TEST_PULSE_TRIG_SLOPE    SLOPE_RAISE
 #define RS_SML01_TEST_PULSE_WIDTH         1.0e-6           /* 1 us */
 #define RS_SML01_TEST_PULSE_DELAY         2.0e-8           /* 20 ns */
+#define RS_SML01_TEST_ALC_STATE           SET
 
 #define RS_SML01_TEST_DOUBLE_PULSE_MODE   UNSET
 #define RS_SML01_TEST_DOUBLE_PULSE_DELAY  1.0e-5           /* 10 us */
@@ -96,6 +101,12 @@ struct Att_Table_Entry {
     double freq;
     double att;
 };
+
+
+typedef struct {
+    char   ** names;
+    size_t    cnt;
+} User_Corrs;
 
 
 struct RS_SML01 {
@@ -135,6 +146,14 @@ struct RS_SML01 {
 
     double freq_change_delay;
 
+    bool alc_state;
+    bool alc_state_is_set;
+
+    User_Corrs corrs_req;
+    User_Corrs corrs_avail;
+    bool corrs_is_set;
+    ssize_t corrs_active;
+
 #if defined WITH_PULSE_MODULATION
     bool pulse_mode_state;            /* pulse mode on/off */
     bool pulse_mode_state_is_set;
@@ -164,28 +183,30 @@ int rs_sml01_end_of_exp_hook( void );
 void rs_sml01_exit_hook(      void );
 
 
-Var_T * synthesizer_name(                  Var_T * /* v */ );
-Var_T * synthesizer_state(                 Var_T * /* v */ );
-Var_T * synthesizer_frequency(             Var_T * /* v */ );
-Var_T * synthesizer_step_frequency(        Var_T * /* v */ );
-Var_T * synthesizer_triggered_sweep_setup( Var_T * /* v */ );
-Var_T * synthesizer_triggered_sweep_state( Var_T * /* v */ );
-Var_T * synthesizer_attenuation(           Var_T * /* v */ );
-Var_T * synthesizer_minimum_attenuation(   Var_T * /* v */ );
-Var_T * synthesizer_sweep_up(              Var_T * /* v */ );
-Var_T * synthesizer_sweep_down(            Var_T * /* v */ );
-Var_T * synthesizer_reset_frequency(       Var_T * /* v */ );
-Var_T * synthesizer_use_table(             Var_T * /* v */ );
-Var_T * synthesizer_att_ref_freq(          Var_T * /* v */ );
-Var_T * synthesizer_modulation(            Var_T * /* v */ );
-Var_T * synthesizer_mod_freq(              Var_T * /* v */ );
-Var_T * synthesizer_mod_ampl(              Var_T * /* v */ );
-Var_T * synthesizer_mod_type(              Var_T * /* v */ );
-Var_T * synthesizer_mod_source(            Var_T * /* v */ );
-Var_T * synthesizer_freq_change_delay(     Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_mode(     Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_delay(    Var_T * /* v */ );
-Var_T * synthesizer_command(               Var_T * /* v */ );
+Var_T * synthesizer_name(                    Var_T * /* v */ );
+Var_T * synthesizer_state(                   Var_T * /* v */ );
+Var_T * synthesizer_frequency(               Var_T * /* v */ );
+Var_T * synthesizer_step_frequency(          Var_T * /* v */ );
+Var_T * synthesizer_triggered_sweep_setup(   Var_T * /* v */ );
+Var_T * synthesizer_triggered_sweep_state(   Var_T * /* v */ );
+Var_T * synthesizer_attenuation(             Var_T * /* v */ );
+Var_T * synthesizer_minimum_attenuation(     Var_T * /* v */ );
+Var_T * synthesizer_automatic_level_control( Var_T * /* v */ );
+Var_T * synthesizer_user_level_correction(   Var_T * /* v */ );
+Var_T * synthesizer_sweep_up(                Var_T * /* v */ );
+Var_T * synthesizer_sweep_down(              Var_T * /* v */ );
+Var_T * synthesizer_reset_frequency(         Var_T * /* v */ );
+Var_T * synthesizer_use_table(               Var_T * /* v */ );
+Var_T * synthesizer_att_ref_freq(            Var_T * /* v */ );
+Var_T * synthesizer_modulation(              Var_T * /* v */ );
+Var_T * synthesizer_mod_freq(                Var_T * /* v */ );
+Var_T * synthesizer_mod_ampl(                Var_T * /* v */ );
+Var_T * synthesizer_mod_type(                Var_T * /* v */ );
+Var_T * synthesizer_mod_source(              Var_T * /* v */ );
+Var_T * synthesizer_freq_change_delay(       Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_mode(       Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_delay(      Var_T * /* v */ );
+Var_T * synthesizer_command(                 Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
 Var_T * synthesizer_pulse_state(           Var_T * /* v */ );
@@ -243,6 +264,18 @@ void rs_sml01_triggered_sweep_state( bool /* state */ );
 double rs_sml01_set_attenuation( double /* att */ );
 
 double rs_sml01_get_attenuation( void );
+
+bool rs_sml01_set_automatic_level_control( bool /* state */ );
+
+bool rs_sml01_get_automatic_level_control( void );
+
+size_t rs_sml01_check_ucor_avail_name( const char * /* name */ );
+
+ssize_t rs_sml01_check_ucor_req_name( const char * /* name */ );
+
+bool rs_sml01_get_ucor( void );
+
+void rs_sml01_set_ucor( ssize_t /* index */ );
 
 int rs_sml01_set_mod_type( int /* type */ );
 

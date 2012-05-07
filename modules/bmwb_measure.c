@@ -61,6 +61,7 @@ measure_dc_signal( double * val )
 #else
     static double tval = 0;
 
+
     tval += 0.02 * ( rand( ) / ( 1.0 * RAND_MAX ) - 0.5 );
     if ( tval < 0.0 )
         tval = 0.0;
@@ -108,6 +109,7 @@ measure_afc_signal( double * val )
 #else
 	static double tval = 0.0;
 
+
     tval += 0.02 * ( ( rand( ) / ( 1.0 * RAND_MAX ) ) - 0.5 );
     if ( tval < -1.0 )
         tval = -1.0;
@@ -125,7 +127,8 @@ measure_afc_signal( double * val )
  *---------------------------------------------------------*/
 
 #if defined BMWB_TEST
-static void
+static
+void
 generate_dummy_data( double * x,
                      double * y,
                      size_t   len,
@@ -178,7 +181,7 @@ measure_tune_mode( double * data,
     size_t i;
     double *x, *y;
     size_t data_len;
-    double x_min = HUGE_VAL,
+    double x_min =  HUGE_VAL,
            x_max = -HUGE_VAL;
     double min_x_exp = bmwb.type == X_BAND ?
                        X_BAND_MIN_TUNE_X_VOLTS : Q_BAND_MIN_TUNE_X_VOLTS,
@@ -207,7 +210,7 @@ measure_tune_mode( double * data,
         return 1;
     y = x + data_len;
 
-    /* Get the two curves from the Meilhaus card - we need a bit higher
+    /* Get the two curves from the Meilhaus card - we need a bit higher a
        frequency since we're really only interested in the part were the
        sawtooth wave is going up and in that range we need about 'size'
        samples */
@@ -243,16 +246,17 @@ measure_tune_mode( double * data,
     }
 
     /* Start and end trigger are 5% above the minimum and 5% below the
-       maximum value, if we go nearer to the extrema we may loose too
-       many triggers, if we go further way we drop too many good data */
+       maximum value, if we go nearer to the extrema we may loose too many
+       triggers, if we go further away we may throw out too many good data
+       points. */
 
     start_trigger_level = x_min + 0.05 * ( x_max - x_min );
     end_trigger_level   = x_max - 0.05 * ( x_max - x_min );
 
     /* Find the positions of the start and end trigger level in the
        data set, bail out if not enough can be found. Don't try to find
-       as many triggers as there in theory could be, some may be missed
-       due to noise, */
+       as many triggers as there could be theoreticallt, some may have
+       been missed due to noise. */
 
     for ( i = 0; i < AVERAGES + MAX_BAD / 2; i++ )
     {
@@ -276,7 +280,7 @@ measure_tune_mode( double * data,
     }
 
     /* Some intervals may be too long due to a missing end trigger, remove
-       them, bail out if we end up with not enough data ranges */
+       them, bail out if we end up with not enough sweeps */
 
     i = 0;
     while ( i < AVERAGES )
@@ -301,7 +305,7 @@ measure_tune_mode( double * data,
         i++;
     }
 
-    /* If we manage to get here we've got at least AVERAGE valid ranges,
+    /* If we manage to get here we've got at least AVERAGE valid sweeps,
        clear the array of data to be returned */
 
     for ( i = 0; i < size; i++ )

@@ -33,6 +33,8 @@ static int setup_aos( void );
 static int setup_dios( void );
 
 
+/* Last bit patterns output via the DOs and DIOs */
+
 static unsigned char dio_states[ 4 ] = { 0, 0, 0, 0 };
 
 
@@ -357,8 +359,8 @@ setup_dios( void )
            meIOSingle() */
 
         if ( meIOSingleConfig( DEV_ID, i, 0,
-                               i == 0 ? ME_SINGLE_CONFIG_DIO_INPUT :
-                                        ME_SINGLE_CONFIG_DIO_OUTPUT,
+                               i == DIO_A ? ME_SINGLE_CONFIG_DIO_INPUT :
+                                            ME_SINGLE_CONFIG_DIO_OUTPUT,
                                ME_REF_NONE,
                                ME_TRIG_CHAN_NONE,
                                ME_TRIG_TYPE_NONE,
@@ -872,6 +874,7 @@ meilhaus_ao( int    ao,
     return 0;
 }
 
+
 /*-------------------------------------------------------*
  * Returns the bit pattern measured at the digital input
  *-------------------------------------------------------*/
@@ -880,19 +883,19 @@ int
 meilhaus_dio_in( int             dio,
                  unsigned char * val )
 {
-    meIOSingle_t list = { DEV_ID,                     /* device index */
-                          dio,                        /* subdevice index */
-                          0,                          /* subdevice channel */
-                          ME_DIR_INPUT,               /* read operation */
-                          0,                          /* contains result */
-                          ME_VALUE_NOT_USED,          /* no time-out */
+    meIOSingle_t list = { DEV_ID,                     /* device index        */
+                          dio,                        /* subdevice index     */
+                          0,                          /* subdevice channel   */
+                          ME_DIR_INPUT,               /* read operation      */
+                          0,                          /* contains result     */
+                          ME_VALUE_NOT_USED,          /* no time-out         */
                           ME_IO_SINGLE_TYPE_NO_FLAGS, /* use "natural" width */
-                          0                           /* for errno */
+                          0                           /* for errno           */
                         };
 
 
-    /* Make sure the requested DIO exists and is in output mode (only the
-       first one is) and that the second argument is reasonable */
+    /* Make sure the requested DIO is in input mode (only the DIO_A is) and
+       that the second argument is reasonable */
 
     if ( dio != DIO_A )
     {
@@ -941,8 +944,8 @@ int
 meilhaus_dio_out_state( int             dio,
                         unsigned char * val )
 {
-    /* Make sure the requested DIO is in input mode and the second argument
-       is reasonable */
+    /* Make sure the requested DIO is in output mode (all but DIO_A are) and
+       that the second argument is reasonable */
 
     if ( dio < DIO_B || dio > DIO_D )
     {
@@ -971,18 +974,18 @@ int
 meilhaus_dio_out( int           dio,
                   unsigned char val )
 {
-    meIOSingle_t list = { DEV_ID,                     /* device index */
-                          dio,                        /* subdevice index */
-                          0,                          /* subdevice channel */
-                          ME_DIR_OUTPUT,              /* write operation */
-                          val,                        /* value to output */
-                          ME_VALUE_NOT_USED,          /* no time-out */
+    meIOSingle_t list = { DEV_ID,                     /* device index        */
+                          dio,                        /* subdevice index     */
+                          0,                          /* subdevice channel   */
+                          ME_DIR_OUTPUT,              /* write operation     */
+                          val,                        /* value to output     */
+                          ME_VALUE_NOT_USED,          /* no time-out         */
                           ME_IO_SINGLE_TYPE_NO_FLAGS, /* use "natural" width */
-                          0                           /* for errno */
+                          0                           /* for errno           */
                         };
 
 
-    /* Make sure the requested DIO is in input mode */
+    /* Make sure the requested DIO is in output mode (all but DIO_A are) */
 
     if ( dio < DIO_B || dio > DIO_D )
     {

@@ -30,8 +30,8 @@ BMWB bmwb;
 
 
 /*---------------------------------------------------*
- * Since this is an program, running independently from fsc2,
- * we need amain() function. The connection to fsc2 (and the
+ * Since this is a programthat may run independently from fsc2
+ * we need a amain() function. The connection to fsc2 (and the
  * x_bmwb and q_bmwb modules) is via a socket over which both
  * programs communicate.
  *---------------------------------------------------*/
@@ -60,7 +60,7 @@ main( int     argc,
 
     /* Check the application name to see if the user explicitely wants
        to use the X-band or Q-band bridge, overruling the built-in
-       automatic determination of its type. */
+       automatic detection of its type. */
 
     if ( ( app_name = strrchr( argv[ 0 ], '/' ) ) == NULL )
         app_name = argv[ 0 ];
@@ -73,7 +73,7 @@ main( int     argc,
         bmwb.type = Q_BAND;
 
     /* Check command line arguments. '-X' or '-Q' allow to select the
-       bridge type and by '-S' the invoking process may tell that it
+       bridge type and with '-S' the invoking process may tell that it
        wants to get a signal on success (SIGUSR1) or failure (SIGUSR2) */
 
     for ( i = 1; i < argc; i++ )
@@ -105,10 +105,12 @@ main( int     argc,
             fprintf( stderr, "Usage: %s [ OPTION... ]\n\n"
                      "  -X Connect to X-band bridge\n"
                      "  -Q Connect to Q-band bridge\n"
-                     "  -S Send signal after initialization\n", app_name );
+                     "  -S Send SIGUSR1 signal after initialization\n",
+                     app_name );
         else
             fprintf( stderr, "Usage: %s [ OPTION ]\n\n"
-                     "  -S Send signal after initialization\n", app_name );
+                     "  -S Send SIGUSR1 signal after initialization\n",
+                     app_name );
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
         return EXIT_FAILURE;
@@ -120,6 +122,7 @@ main( int     argc,
     {
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
+
         return EXIT_FAILURE;
 	}
 
@@ -128,8 +131,10 @@ main( int     argc,
     if ( ! fl_initialize( &argc, argv, "bmwb", NULL, 0 ) )
 	{
 		fprintf( stderr, "Failed to intialize graphics.\n" );
+
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
+
         return EXIT_FAILURE;
 	}
 
@@ -139,8 +144,10 @@ main( int     argc,
 	{
         fprintf( stderr, "%s\n", bmwb.error_msg );
 		fl_finish( );
+
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
+
 		return EXIT_FAILURE;
 	}
 
@@ -150,18 +157,21 @@ main( int     argc,
     {
         fprintf( stderr, "Can't determine bridge type: %s\n", bmwb.error_msg );
         meilhaus_finish( );
+
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
+
         return EXIT_FAILURE;
     }
 
     /* Check for inconsistencies */
 
     if ( bmwb.type != TYPE_FAIL && bmwb.type != type )
-        fprintf( stderr, "Warning: Requested bridge type differs from "
-                 "detected type (requested was %s, detected is %s).\n",
-                 bmwb.type == X_BAND ? "X-band" : "Q-band",
-                 type == X_BAND ? "X-band" : "Q-band" );
+        fprintf( stderr, "Warning: Requested bridge type differs from the "
+                 "detected type (requested was %c-band, detected is "
+                 "%c-band).\n",
+                 bmwb.type == X_BAND ? 'X' : 'Q',
+                 type == X_BAND ? 'X' : 'Q' );
     else
         bmwb.type = type;
 
@@ -181,8 +191,10 @@ main( int     argc,
     {
         fprintf( stderr, "%s\n", bmwb.error_msg );
         meilhaus_finish( );
+
         if ( do_signal )
             kill( getppid( ), SIGUSR2 );
+
         return EXIT_FAILURE;
     }
 
@@ -192,7 +204,7 @@ main( int     argc,
     if ( do_signal )
         kill( getppid( ), SIGUSR1 );
 
-    /* All intialization done go into the graphics loop */
+    /* All initialization is done, go into the graphics loop */
 
 	fl_do_forms( );
 
@@ -253,7 +265,7 @@ get_bridge_type( void )
 
 /*------------------------------------------------*
  * Function for setting a new microwave frequency (given as a number
- * in ther interval [0,1] where 0 represents the lowest frequency
+ * in the interval [0,1] where 0 represents the lowest frequency
  * possible and 1 the highest). Returns 0 on success and 1 on failure.
  *------------------------------------------------*/
 
@@ -570,7 +582,7 @@ save_state( void )
 
 /*---------------------------------------------------------------------*
  * Tests if there's another instance of the program already running by
- * trying to connect to the socket it's then supposed to listen on.
+ * trying to connect to the socket it's supposed to listen on.
  *---------------------------------------------------------------------*/
 
 static int

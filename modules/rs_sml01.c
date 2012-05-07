@@ -95,6 +95,18 @@ rs_sml01_init_hook( void )
 
     rs_sml01.freq_change_delay = 0.0;
 
+    rs_sml01.alc_state = RS_SML01_TEST_ALC_STATE;
+    rs_sml01.alc_state_is_set = UNSET;
+
+    rs_sml01.corrs_req.names = NULL;
+    rs_sml01.corrs_req.cnt   = 0;
+
+    rs_sml01.corrs_avail.names = NULL;
+    rs_sml01.corrs_avail.cnt   = 0;
+
+    rs_sml01.corrs_is_set = UNSET;
+    rs_sml01.corrs_active = RS_SML01_LEAVE_UCOR_UNCHANGED;
+
 #if defined WITH_PULSE_MODULATION
     rs_sml01.pulse_mode_state_is_set = UNSET;
     rs_sml01.pulse_mode_state = UNSET;
@@ -247,6 +259,19 @@ rs_sml01_end_of_exp_hook( void )
 {
     rs_sml01_finished( );
 
+    rs_sml01.corrs_active = -1;
+
+    if ( rs_sml01.corrs_avail.cnt && rs_sml01.corrs_avail.names )
+    {
+        size_t i = 0;
+
+        while ( i < rs_sml01.corrs_avail.cnt )
+            T_free( rs_sml01.corrs_avail.names[ i++ ] );
+
+        rs_sml01.corrs_avail.names = T_free( rs_sml01.corrs_avail.names );
+        rs_sml01.corrs_avail.cnt = 0;
+    }
+
     rs_sml01 = rs_sml01_backup;
 
     return 1;
@@ -265,6 +290,18 @@ rs_sml01_exit_hook( void )
 
     if ( rs_sml01.use_table && rs_sml01.att_table != NULL )
         rs_sml01.att_table = T_free( rs_sml01.att_table );
+
+    if ( rs_sml01.corrs_req.cnt && rs_sml01.corrs_req.names )
+    {
+        size_t i = 0;
+
+        while ( i < rs_sml01.corrs_req.cnt )
+            T_free( rs_sml01.corrs_req.names[ i++ ] );
+
+        rs_sml01.corrs_req.names = T_free( rs_sml01.corrs_req.names );
+        rs_sml01.corrs_req.cnt = 0;
+    }
+
 }
 
 
@@ -645,6 +682,149 @@ synthesizer_minimum_attenuation( Var_T * v )
 
     return vars_push( FLOAT_VAR, rs_sml01.min_attenuation );
 }
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+Var_T *
+synthesizer_automatic_level_control( Var_T * v )
+{
+    bool state;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( INT_VAR, rs_sml01.alc_state );
+        else
+            return vars_push( rs_sml01.alc_state =
+                                     rs_sml01_get_automatic_level_control( ) );
+    }
+
+    state = get_boolean( v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_sml01_set_automatic_level_control( state );
+
+    rs_sml01.alc_state = state;
+    rs_sml01.alc_state_is_set = SET;
+
+    return vars_push( INT_VAR, state );
+}
+
+
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
+
+Var_T *
+synthesizer_user_level_correction( Var_T * v )
+{
+    const char * table;
+    ssize_t idx;
+
+
+    if ( v == NULL )
+    {
+        if (    FSC2_MODE == PREPARATION
+             && rs_sml01.corrs_active == RS_SML01_LEAVE_UCOR_UNCHANGED )
+            no_query_possible( );
+
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( INT_VAR, rs_sml01_get_ucor( ) );
+
+        return vars_push( INT_VAR, rs_sml01.corrs_active >= 0 );
+    }
+
+    /* During the PREPAATIONS section a user level correction can be set
+       only once. */
+
+    if (    FSC2_MODE == PREPARATION
+         && rs_sml01.corrs_active != RS_SML01_LEAVE_UCOR_UNCHANGED )
+    {
+        print( SEVERE, "User level correction can only be set once in the "
+               "preparation section, leaving it unchanged.\n" );
+        return vars_push( INT_VAR, rs_sml01.corrs_active >= 0 );
+    }
+
+    /* No argument (or an empty string) will be treated to mean that user
+       level corrections are to be switched off, otherwise get the name of
+       the table (which can be the empty string) */
+
+    vars_check( v, STR_VAR );
+    table = v->val.sptr;
+
+    too_many_arguments( v );
+
+    /* Empty string means switching off */
+
+    if ( ! *table )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            rs_sml01_set_ucor( -1 );
+
+        rs_sml01.corrs_active = -1;
+
+        return vars_push( INT_VAR, 0L );
+    }
+
+    /* Make sure the table name isn't too long */
+
+    if ( strlen( table ) > RS_SML01_MAX_TABLE_NAME_LENGTH )
+    {
+        print( FATAL, "Invalid table name for user level correction, may "
+               "not have more than 7 %d characters.\n",
+               RS_SML01_MAX_TABLE_NAME_LENGTH );
+        THROW( EXCEPTION );
+    }
+
+    /* During the experiment just switch to the requested table (and switch
+       user level correction on). Otherwise put the name into the list of
+       requested tables, so we can check at the start of the experiment
+       if such a table exists at all. */
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        idx = rs_sml01_check_ucor_avail_name( table );
+        rs_sml01_set_ucor( idx );
+    }
+    else if ( ( idx = rs_sml01_check_ucor_req_name( table ) ) < 0 )
+    {
+        TRY
+        {
+            rs_sml01.corrs_req.names =
+                        T_realloc( rs_sml01.corrs_req.names,
+                                     ++rs_sml01.corrs_req.cnt
+                                   * sizeof *rs_sml01.corrs_req.names );
+
+            rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ] = NULL;
+            rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ] =
+                                              T_malloc( strlen( table ) + 1 );
+
+            idx = rs_sml01.corrs_req.cnt - 1;
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            size_t i = 0;
+
+            while (    i < rs_sml01.corrs_req.cnt
+                    && rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ] )
+                T_free( rs_sml01.corrs_req.names[ i++ ] );
+
+            rs_sml01.corrs_req.cnt   = 0;
+            rs_sml01.corrs_req.names = T_free( rs_sml01.corrs_req.names );
+                        
+            RETHROW( );
+        }
+    }
+
+    rs_sml01.corrs_active = idx;
+
+    return vars_push( INT_VAR, 1L );
+}
+
 
 /*-----------------------------------------------------------*
  * Function sets or returns (if called with no argument) the

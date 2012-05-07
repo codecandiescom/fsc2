@@ -3170,6 +3170,8 @@ In the GPIB configuration file use @code{"RS_SML01"} as the device name,
 @item @ref{synthesizer_reset_frequency()}
 @item @ref{synthesizer_use_table()}
 @item @ref{synthesizer_attenuation()}
+@item @ref{synthesizer_automatic_level_control()}
+@item @ref{synthesizer_user_level_correction()}
 @item @ref{synthesizer_att_ref_freq()}
 @item @ref{synthesizer_modulation()}
 @item @ref{synthesizer_mod_ampl()}

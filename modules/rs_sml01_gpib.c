@@ -35,6 +35,8 @@ static double rs_sml01_get_pulse_delay( void );
 static double rs_sml01_get_double_pulse_delay( void );
 #endif
 
+static void rs_sml01_get_ucor_list( void );
+
 static void rs_sml01_comm_failure( void );
 
 static bool rs_sml01_talk( const char * cmd,
@@ -59,13 +61,11 @@ rs_sml01_init( const char * name )
 
     /* Set up default settings */
 
-    rs_sml01_command( "CORR:STAT OFF\n" );
     rs_sml01_command( "FREQ:MODE CW\n" );
     rs_sml01_command( "FREQ:ERAN OFF\n" );
     rs_sml01_command( "FREQ:OFFS 0\n" );
     rs_sml01_command( "POW:MODE CW\n" );
     rs_sml01_command( "POW:OFFS 0\n" );
-    rs_sml01_command( "POW:ALC ON\n" );
     rs_sml01_command( "OUTP:AMOD AUTO\n" );
 #if defined WITH_PULSE_MODULATION
     rs_sml01_command( "PULM:SOUR INT\n" );
@@ -109,6 +109,28 @@ rs_sml01_init( const char * name )
     }
     else
         rs_sml01.attenuation = rs_sml01_get_attenuation( );
+
+    /* Set or test for automatic level control setting */
+
+    if ( rs_sml01.alc_state_is_set )
+        rs_sml01_set_automatic_level_control( rs_sml01.alc_state );
+    else
+        rs_sml01.alc_state = rs_sml01_get_automatic_level_control( );
+
+    /* Check for samity of user level corrections and set it if requested */
+
+    rs_sml01_get_ucor_list( );
+
+    if ( rs_sml01.corrs_req.cnt && rs_sml01.corrs_req.names )
+    {
+        size_t j;
+
+        for ( j = 0; j < rs_sml01.corrs_req.cnt; ++j )
+            rs_sml01_check_ucor_avail_name( rs_sml01.corrs_req.names[ j ] );
+    }
+
+    if ( rs_sml01.corrs_active > RS_SML01_LEAVE_UCOR_UNCHANGED )
+        rs_sml01_set_ucor( rs_sml01.corrs_active );
 
     /* Now we set the modulation type if it has been set, otherwise ask the
        synthesizer for its currents setting */
@@ -450,9 +472,41 @@ rs_sml01_get_attenuation( void )
     char buffer[ 100 ];
     long length = sizeof buffer;
 
+
     rs_sml01_talk( "POW?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+bool
+rs_sml01_set_automatic_level_control( bool state )
+{
+    char cmd[ 11 ];
+
+
+    sprintf( cmd, "POW:ALC %s\n", state ? "ON" : "OFF" );
+    rs_sml01_command( cmd );
+
+    return state;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+bool
+rs_sml01_get_automatic_level_control( void )
+{
+    char buffer[ 10 ];
+    long length = sizeof buffer;
+
+
+    rs_sml01_talk( "POW:ALC?\n", buffer, &length );
+    return buffer[ 0 ] == '1';
 }
 
 
@@ -834,7 +888,7 @@ rs_sml01_get_double_pulse_delay( void )
 void
 rs_sml01_setup_triggered_frequency_sweep( double step )
 {
-    char cmd[ 100];
+    char cmd[ 100 ];
 
 
     if ( step <= 0.0 )
@@ -843,6 +897,152 @@ rs_sml01_setup_triggered_frequency_sweep( double step )
         sprintf( cmd, "SWE:MODE STEP;SWE:SPAC LIN;SWE:STEP %.0f\n", step );
 
     rs_sml01_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+static
+void
+rs_sml01_get_ucor_list( void )
+{
+    char buf[   2 * RS_SML01_MAX_TABLE_ENTRIES
+              * ( RS_SML01_MAX_TABLE_NAME_LENGTH + 3 ) ];
+    long length = sizeof buf - 1;
+    char *res = buf;
+
+
+    if ( rs_sml01.corrs_avail.cnt )
+    {
+        size_t i;
+
+        for ( i = 0; i < rs_sml01.corrs_avail.cnt; ++i )
+            T_free( rs_sml01.corrs_avail.names[ i ] );
+
+        rs_sml01.corrs_avail.names = T_free( rs_sml01.corrs_avail.names );
+        rs_sml01.corrs_avail.cnt = 0;
+    }
+
+    rs_sml01_talk( "CORR:CSET:CAT?\n", buf, &length );
+    buf[ length ] = '\0';
+
+    while ( ( res = strtok( res, "," ) ) )
+    {
+        char *ep;
+
+        fsc2_assert( rs_sml01.corrs_avail.cnt <= RS_SML01_MAX_TABLE_ENTRIES );
+
+        while ( *res && *res++ != '"' )
+            /* empty */ ;
+
+        if ( ! *res )
+        {
+            print( FATAL, "Unexpected data received from device.\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( ! ( ep = strrchr( res, '"' ) ) || ep == res )
+        {
+            print( FATAL, "Unexpected data received from device.\n" );
+            THROW( EXCEPTION );
+        }
+
+        fsc2_assert( strlen( res ) < RS_SML01_MAX_TABLE_NAME_LENGTH );
+
+        rs_sml01.corrs_avail.names =
+                    T_realloc( rs_sml01.corrs_avail.names,
+                                 ++rs_sml01.corrs_avail.cnt
+                               * sizeof *rs_sml01.corrs_avail.names );
+        rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] =
+                                                                          NULL;
+        rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] =
+                                                 T_malloc( strlen( res ) + 1 );
+        strcpy( rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ],
+                res );
+        res = NULL;
+    }
+}            
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+size_t
+rs_sml01_check_ucor_avail_name( const char * name )
+{
+    size_t i;
+
+
+    for ( i = 0; i < rs_sml01.corrs_avail.cnt; ++i )
+        if ( ! strcmp( name, rs_sml01.corrs_avail.names[ i ] ) )
+            break;
+
+    if ( i == rs_sml01.corrs_avail.cnt )
+    {
+        print( FATAL, "Table named '%s' requested for user level correction "
+               "doesn't exist.\n", name );
+        THROW( EXCEPTION );
+    }
+
+    return i;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+ssize_t
+rs_sml01_check_ucor_req_name( const char * name )
+{
+    size_t i;
+
+
+    for ( i = 0; i < rs_sml01.corrs_req.cnt; ++i )
+        if ( ! strcmp( name, rs_sml01.corrs_req.names[ i ] ) )
+            break;
+
+    return i >= rs_sml01.corrs_req.cnt ? -1 : ( ssize_t ) i;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+bool
+rs_sml01_get_ucor( void )
+{
+    char buf[ 100 ];
+    long length = sizeof buf;
+
+
+    rs_sml01_talk( "CORR:STAT?\n", buf, &length );
+    return buf[ 0 ] == 1;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+void
+rs_sml01_set_ucor( ssize_t idx )
+{
+    char cmd[ 100 ];
+
+
+    rs_sml01_command( "CORR:STAT OFF" );
+    rs_sml01.corrs_active = -1;
+
+    if ( idx < 0 )
+        return;
+
+    fsc2_assert( idx < ( ssize_t ) rs_sml01.corrs_avail.cnt );
+
+    sprintf( cmd, "CORR:CSET:SEL %s", rs_sml01.corrs_avail.names[ idx ] );
+    rs_sml01_command( cmd );
+    rs_sml01_command( "CORR:STAT ON" );
+
+    rs_sml01.corrs_active = idx;
 }
 
 

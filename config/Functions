@@ -264,6 +264,8 @@ synthesizer_frequency, -1, ALL;       // set/get frequency
 synthesizer_set_freq_delay, -1, ALL;  // set delay after freq. change
 synthesizer_attenuation, -1, ALL;     // set/get attenuation
 synthesizer_minimum_attenuation, -1, ALL;     // set/get minimum attenuation
+synthesizer_automatic_level_control, -1, ALL;
+synthesizer_user_level_correction, -1, ALL;
 synthesizer_step_frequency, -1, ALL;  // set/get sweep step frequency
 synthesizer_sweep_up, 0, EXP;         // sweep up
 synthesizer_sweep_down, 0, EXP;       // sweep down

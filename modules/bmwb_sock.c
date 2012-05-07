@@ -83,6 +83,8 @@ static ssize_t sread( int       fd,
 
 static int finish_with_update( int fd );
 
+static int finish_with_failed_update( int fd );
+
 
 /*-------------------------------------------------------*
  * Opens the socket we're going to listen on and creates
@@ -159,7 +161,8 @@ bmwb_open_sock( void )
  * Thread function that deals with incoming connections
  *------------------------------------------------------*/
 
-static void *
+static
+void *
 conn_handler( void * null  UNUSED_ARG )
 {
     int fd;
@@ -171,7 +174,7 @@ conn_handler( void * null  UNUSED_ARG )
     bmwb.a_is_active = 1;
 
     /* Wait for connections and create a new thread for dealing with the
-       client. Note that there only can be a single client using the
+       client. Note that there can only be a single client using the
        bridge, so reject connections from further clients when the
        client handling thread is running. */
 
@@ -219,7 +222,8 @@ conn_handler( void * null  UNUSED_ARG )
  * Handles requests by the client as long as it exists
  *-----------------------------------------------------*/
 
-static void *
+static
+void *
 client_handler( void * null  UNUSED_ARG )
 {
     fd_set fds;
@@ -242,7 +246,7 @@ client_handler( void * null  UNUSED_ARG )
     /* At the very start tell the client which bridge this program thinks
        it's dealing with */
 
-    if ( swrite( client_fd, bmwb.type == Q_BAND ? "Q\n" : "X\n", 2 ) == 2 )
+    if ( swrite( client_fd, bmwb.type == X_BAND ? "X\n" : "Q\n", 2 ) == 2 )
     {
         while ( 1 )
         {
@@ -250,7 +254,7 @@ client_handler( void * null  UNUSED_ARG )
             FD_SET( client_fd, &fds );
 
             /* Wait for next request from the client and deal with it until
-               either the client closed the socket or a communication error
+               either the client closes the socket or a communication error
                is detected */
 
             if (    select( client_fd + 1, &fds, NULL, NULL, NULL ) != 1
@@ -285,7 +289,8 @@ typedef struct {
 } req_type;
 
 
-static int
+static
+int
 handle_request( int fd )
 {
     char buf[ 64 ];
@@ -324,7 +329,8 @@ handle_request( int fd )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static int
+static
+int
 req_compare( const void * what,
              const void * req )
 {
@@ -338,7 +344,8 @@ req_compare( const void * what,
  * Handles a request to return the microwave frequency or set a new one
  *----------------------------------------------------------------------*/
 
-static int
+static
+int
 freq_req( int          fd,
           const char * req )
 {
@@ -364,11 +371,7 @@ freq_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_mw_freq( val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg,strlen(  bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     fl_set_slider_value( bmwb.rsc->freq_slider, val );
     val = bmwb.min_freq + val * ( bmwb.max_freq - bmwb.min_freq );
@@ -383,7 +386,8 @@ freq_req( int          fd,
  * Handles a request to return the microwave attenuation or set a new one
  *------------------------------------------------------------------------*/
 
-static int
+static
+int
 att_req( int          fd,
          const char * req )
 {
@@ -412,11 +416,7 @@ att_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_mw_attenuation( val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     fl_set_counter_value( bmwb.rsc->attenuation_counter, val );
 
@@ -428,7 +428,8 @@ att_req( int          fd,
  * Handles a request to return the signal phase or set a new one
  *---------------------------------------------------------------*/
 
-static int
+static
+int
 sigph_req( int          fd,
            const char * req )
 {
@@ -453,11 +454,7 @@ sigph_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_signal_phase( val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     fl_set_slider_value( bmwb.rsc->signal_phase_slider, val );
     sprintf( buf, "Signal phase (%d%%)", irnd( 100.0 * val ) );
@@ -471,7 +468,8 @@ sigph_req( int          fd,
  * Handles a request to return the microwave bias or set a new one
  *-----------------------------------------------------------------*/
 
-static int
+static
+int
 bias_req( int          fd,
           const char * req )
 {
@@ -496,11 +494,7 @@ bias_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_mw_bias( val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     fl_set_slider_value( bmwb.rsc->bias_slider, val );
     sprintf( buf, "Microwave bias (%d%%)", irnd( 100.0 * val ) );
@@ -514,7 +508,8 @@ bias_req( int          fd,
  * Handles a request to return the mode or switch to a different one
  *-------------------------------------------------------------------*/
 
-static int
+static
+int
 mode_req( int          fd,
           const char * req )
 {
@@ -543,11 +538,7 @@ mode_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_mode( mode ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     e = fl_get_select_item_by_value( bmwb.rsc->mode_select, mode );
     fl_set_select_item( bmwb.rsc->mode_select, e );
@@ -562,7 +553,8 @@ mode_req( int          fd,
  * Handles a request to move the iris for a certain time
  *-------------------------------------------------------*/
 
-static int
+static
+int
 iris_req( int          fd,
           const char * req )
 {
@@ -599,11 +591,7 @@ iris_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_iris( dir ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -612,11 +600,7 @@ iris_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( set_iris( 0 ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     return finish_with_update( fd );
 }
@@ -626,7 +610,8 @@ iris_req( int          fd,
  * Handles a request to return the detector current signal
  *---------------------------------------------------------*/
 
-static int
+static
+int
 detsig_req( int          fd,
             const char * req )
 {
@@ -640,11 +625,7 @@ detsig_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( measure_dc_signal( &val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -658,7 +639,8 @@ detsig_req( int          fd,
  * Handles a request to return the AFC signal
  *--------------------------------------------*/
 
-static int
+static
+int
 afcsig_req( int          fd,
             const char * req )
 {
@@ -672,11 +654,7 @@ afcsig_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( measure_afc_signal( &val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) )== -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -690,7 +668,8 @@ afcsig_req( int          fd,
  * Handles a request to return the unleveled signal
  *-------------------------------------------------*/
 
-static int
+static
+int
 unlvl_req( int          fd,
            const char * req )
 {
@@ -704,11 +683,7 @@ unlvl_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( measure_unleveled_signal( &val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
-               1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -722,7 +697,8 @@ unlvl_req( int          fd,
  * Handles a request to return the uncalibrated signal
  *-----------------------------------------------------*/
 
-static int
+static
+int
 uncal_req( int          fd,
            const char * req )
 {
@@ -736,11 +712,7 @@ uncal_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( measure_unleveled_signal( &val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
-               ? 1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -754,7 +726,8 @@ uncal_req( int          fd,
  * Handles a request to return the AFC state
  *-------------------------------------------*/
 
-static int
+static
+int
 afcst_req( int          fd,
            const char * req )
 {
@@ -768,11 +741,7 @@ afcst_req( int          fd,
     pthread_mutex_lock( &bmwb.mutex );
 
     if ( measure_afc_state( &val ) )
-    {
-        pthread_mutex_unlock( &bmwb.mutex );
-        return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1
-               ? 1 : 0;
-    }
+        return finish_with_failed_update( fd );
 
     pthread_mutex_unlock( &bmwb.mutex );
 
@@ -786,7 +755,8 @@ afcst_req( int          fd,
  * Handles a request to lock or unlock the graphical user interface
  *------------------------------------------------------------------*/
 
-static int
+static
+int
 lck_req( int          fd,
          const char * req )
 {
@@ -813,7 +783,8 @@ lck_req( int          fd,
  * trying to write to the client
  *------------------------------------------------------*/
 
-static void
+static
+void
 write_sig_handler( int sig_no )
 {
     if ( sig_no == SIGPIPE )
@@ -826,7 +797,8 @@ write_sig_handler( int sig_no )
  * returns the number of bytes on success and -1 otherwise.
  *-----------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 swrite( int          fd,
         const char * buf,
         ssize_t      len )
@@ -860,7 +832,8 @@ swrite( int          fd,
  * returns the number of bytes on success and -1 otherwise.
  *------------------------------------------------------------*/
 
-static ssize_t
+static
+ssize_t
 sread( int       fd,
        char    * buf,
        ssize_t   len )
@@ -893,7 +866,8 @@ sread( int       fd,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static int
+static
+int
 finish_with_update( int fd )
 {
     pthread_mutex_unlock( &bmwb.mutex );
@@ -911,6 +885,19 @@ finish_with_update( int fd )
     return swrite( fd, "OK\n", 3 ) == 3 ? 0 : 1;
 }
     
+
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
+
+static
+int
+finish_with_failed_update( int fd )
+{
+    pthread_mutex_unlock( &bmwb.mutex );
+    return swrite( fd, bmwb.error_msg, strlen( bmwb.error_msg ) ) == -1 ?
+           1 : 0;
+}
+
 
 /*
  * Local variables:
