@@ -721,7 +721,7 @@ synthesizer_automatic_level_control( Var_T * v )
 Var_T *
 synthesizer_user_level_correction( Var_T * v )
 {
-    const char * table;
+    char table[ RS_SML01_MAX_TABLE_NAME_LENGTH + 1 ] ;
     ssize_t idx;
 
 
@@ -748,16 +748,24 @@ synthesizer_user_level_correction( Var_T * v )
         return vars_push( INT_VAR, rs_sml01.corrs_active >= 0 );
     }
 
-    /* No argument (or an empty string) will be treated to mean that user
-       level corrections are to be switched off, otherwise get the name of
-       the table (which can be the empty string) */
+    /* Check the argument */
 
     vars_check( v, STR_VAR );
-    table = v->val.sptr;
+
+    if ( strlen( table ) > RS_SML01_MAX_TABLE_NAME_LENGTH )
+    {
+        print( FATAL, "Invalid table name for user level correction, may "
+               "not have more than 7 %d characters.\n",
+               RS_SML01_MAX_TABLE_NAME_LENGTH );
+        THROW( EXCEPTION );
+    }
+
+    strcpy( table, v->val.sptr );
 
     too_many_arguments( v );
 
-    /* Empty string means switching off */
+    /* An empty string is taken to mean that user level corrections are to
+       be switched off, otherwise get the name of the table */
 
     if ( ! *table )
     {
@@ -767,16 +775,6 @@ synthesizer_user_level_correction( Var_T * v )
         rs_sml01.corrs_active = -1;
 
         return vars_push( INT_VAR, 0L );
-    }
-
-    /* Make sure the table name isn't too long */
-
-    if ( strlen( table ) > RS_SML01_MAX_TABLE_NAME_LENGTH )
-    {
-        print( FATAL, "Invalid table name for user level correction, may "
-               "not have more than 7 %d characters.\n",
-               RS_SML01_MAX_TABLE_NAME_LENGTH );
-        THROW( EXCEPTION );
     }
 
     /* During the experiment just switch to the requested table (and switch
