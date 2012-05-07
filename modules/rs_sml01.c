@@ -235,9 +235,12 @@ rs_sml01_test_hook( void )
 int
 rs_sml01_exp_hook( void )
 {
+    User_Corrs ulc_req_list  = rs_sml01.corrs_req;
+
     /* Restore device structure to the state at the start of the test run */
 
     rs_sml01 = rs_sml01_backup;
+    rs_sml01.corrs_req = ulc_req_list;
 
     if ( ! rs_sml01_init( DEVICE_NAME ) )
     {
@@ -799,6 +802,9 @@ synthesizer_user_level_correction( Var_T * v )
             rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ] = NULL;
             rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ] =
                                               T_malloc( strlen( table ) + 1 );
+
+            strcpy( rs_sml01.corrs_req.names[ rs_sml01.corrs_req.cnt - 1 ],
+                    table );
 
             idx = rs_sml01.corrs_req.cnt - 1;
             TRY_SUCCESS;

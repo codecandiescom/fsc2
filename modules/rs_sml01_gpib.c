@@ -925,19 +925,17 @@ rs_sml01_get_ucor_list( void )
     }
 
     rs_sml01_talk( "CORR:CSET:CAT?\n", buf, &length );
-    buf[ length ] = '\0';
+    buf[ length - 1 ] = '\0';
 
     while ( ( res = strtok( res, "," ) ) )
     {
-        char *ep;
-
         fsc2_assert( rs_sml01.corrs_avail.cnt <= RS_SML01_MAX_TABLE_ENTRIES );
         fsc2_assert( strlen( res ) < RS_SML01_MAX_TABLE_NAME_LENGTH );
 
         rs_sml01.corrs_avail.names =
-                    T_realloc( rs_sml01.corrs_avail.names,
-                                 ++rs_sml01.corrs_avail.cnt
-                               * sizeof *rs_sml01.corrs_avail.names );
+                            T_realloc( rs_sml01.corrs_avail.names,
+                                         ++rs_sml01.corrs_avail.cnt
+                                       * sizeof *rs_sml01.corrs_avail.names );
         rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] = NULL;
 
         rs_sml01.corrs_avail.names[ rs_sml01.corrs_avail.cnt - 1 ] =
@@ -1000,8 +998,8 @@ rs_sml01_get_ucor( void )
     long length = sizeof buf;
 
 
-    rs_sml01_talk( "CORR:STAT?\n", buf, &length );
-    return buf[ 0 ] == 1;
+    rs_sml01_talk( "CORR:STAT?", buf, &length );
+    return buf[ 0 ] == '1';
 }
 
 
@@ -1022,7 +1020,7 @@ rs_sml01_set_ucor( ssize_t idx )
 
     fsc2_assert( idx < ( ssize_t ) rs_sml01.corrs_avail.cnt );
 
-    sprintf( cmd, "CORR:CSET:SEL %s", rs_sml01.corrs_avail.names[ idx ] );
+    sprintf( cmd, "CORR:CSET:SEL \"%s\"", rs_sml01.corrs_avail.names[ idx ] );
     rs_sml01_command( cmd );
     rs_sml01_command( "CORR:STAT ON" );
 
