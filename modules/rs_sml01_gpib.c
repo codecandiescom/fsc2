@@ -132,7 +132,8 @@ rs_sml01_init( const char * name )
     if ( rs_sml01.corrs_active > RS_SML01_LEAVE_UCOR_UNCHANGED )
     {
         if ( rs_sml01.corrs_active >= 0 )
-            rs_sml01.corrs_active = rs_sml01_check_ucor_avail_name( 0 );
+            rs_sml01.corrs_active = 
+                rs_sml01_check_ucor_avail_name( rs_sml01.corrs_req.names[ 0 ] );
         rs_sml01_set_ucor( rs_sml01.corrs_active );
     }
 
