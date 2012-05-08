@@ -154,7 +154,7 @@ File1 = get_file( "", "*.avg", "", "", "avg" );
 synthesizer_attenuation( att );
 synthesizer_frequency( start_freq );
 synthesizer_triggered_sweep_setup( start_freq, end_freq, abs( freq_step ) );
-sythesizer_user_level_correction( TABLE_NAME );
+synthesizer_user_level_correction( TABLE_NAME );
 synthesizer_state( "ON" );
 trigger_length( 10 );
 
