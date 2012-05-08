@@ -170,18 +170,19 @@ first of the new lines in the "enhanced" @code{EDL} script:
 === START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
 @end example
 @noindent
-The special lines needed by the @code{fsc2_guify} conversion tool start
+All the special lines needed by the @code{fsc2_guify} conversion tool start
 with three equal signs, at least one space character and followed by a
 list of items, separated by spaces. The first item on such a line is the
 name of a variable, which may consist of all normal characters, digits
 and the underscore character. But you must make sure that its name does
-not coincide with the name of a variable already used in the
+not coincide with one of the name of a variable already used in the
 @code{EDL} script. The next required item is the type of the
 variable, which can be either @code{int}, @code{int_empty},
-@code{float}, @code{float_empty}, @code{menu}, @code{button} or
-@code{file} (all in lower case characters).
+@code{float}, @code{float_empty}, @code{string}, @code{string_empty},
+@code{menu}, @code{button} or @code{file} (all in lower case characters).
 
-For variables of type @code{int} and @code{float} all the following
+For variables of type @code{int} and @code{float} (and
+@code{int_empty} and @code{float_empty}) all the following
 items are optional. The first thing you can tell the conversion program
 is an allowed range for the value of a variable. Ranges have to be given
 in square braces and the start and end value of the range must be
@@ -228,7 +229,26 @@ check for that in the template for the @code{EDL} script by checking
 if the corresponding variable is @code{defined} (if it is it will
 contain a valid value) and branch accordingly.
 
-But there's also another type of variables, @code{menu}. These are for
+Another type of variable is @code{string} and @code{tring_empty}.
+They also can be followed by a range, indicating the minimum and
+maximum number of characters that will be accepted (for
+@code{string_empty} it is also acceptable if the input field
+is empty, even though a non-zero minumum is specified in the
+range field). This is followed, again in square brackets, by
+a default string (to be given in double quotes) and then the
+usual sting for the lable of the input field. Thus a line for
+a string will typically look like this:
+@example
+=== TABLE_NAME string_empty [ 1 : 7 ] [ "UCOR1" ] "Table name"
+@end example
+@noindent
+This allows the user to either leave the input field empty or to enter
+a string with between 1 and 7 characters. Note that the variable (in
+this case @code{TABLE_NAME}) will be replaced in the followeing by
+whatever the user inputs into the input field, enclosed in double
+quotes.
+
+But there's another type of variables, @code{menu}. These are for
 cases where you want to have one value selected from a list of
 values. To demonstrate this let's improve the @code{EDL} script a
 bit. For examples sake we assume that you have to switch between

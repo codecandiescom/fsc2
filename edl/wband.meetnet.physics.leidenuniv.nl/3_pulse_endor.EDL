@@ -18,6 +18,7 @@
 === END_FREQ float [ 0.009 : 1100 ] [ 160 ] "End frequency" "MHz"
 === FREQ_STEP float [ 0.001 : 1000 ] [ 0.25 ] "Step frequency" "MHz"
 === RF_ATT float [ -140 : 13 ] [ -13 ] "RF Gain" "dBm"
+=== TABLE_NAME string_empty [ 1 : 7 ] [ "" ] "Table name for user\nlevel corrections"
 === FREQ_STEP_DELAY int [ 0 : 100 ] [ 5 ] "Frequency step delay" "ms"
 === ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
@@ -153,6 +154,7 @@ File1 = get_file( "", "*.avg", "", "", "avg" );
 synthesizer_attenuation( att );
 synthesizer_frequency( start_freq );
 synthesizer_triggered_sweep_setup( start_freq, end_freq, abs( freq_step ) );
+sythesizer_user_level_correction( TABLE_NAME );
 synthesizer_state( "ON" );
 trigger_length( 10 );
 

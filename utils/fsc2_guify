@@ -41,7 +41,7 @@ my @lines;
 my @vars;
 my $guify_marker = '^\s*===\s*';
 my $var_entry = $guify_marker .
-    '([A-Za-z0-9_]+)\s+(int(_empty)?|float(_empty)?|menu|file|button)(\s*(.*))?';
+    '([A-Za-z0-9_]+)\s+(int(_empty)?|float(_empty)?|string(_empty)?|menu|file|button)(\s*(.*))?';
 my $if_entry = $guify_marker . 'if\s*';
 my $elsif_entry = $guify_marker . 'elsif\s*';
 my $else_entry = $guify_marker . 'else\s*$';
@@ -141,8 +141,8 @@ while ( <$if> ) {
                             type     => $2,
                             value    => undef,
                             line     => $cur_line };
-        if ( defined $6 ) {
-            my $option = $6;
+        if ( defined $7 ) {
+            my $option = $7;
             $option = "''" if     $var_options->{ type } =~ /^file$/o
                               and $option =~ /^\s*$/;
             die "Syntax error at line $lino, garbage after variable type\n"
@@ -250,6 +250,8 @@ sub analyze_var_options {
         $str = get_float_limits( $hr, $str );
     } elsif ( $hr->{ type } =~ /^int(_empty)?$/o ) {
         $str = get_int_limits( $hr, $str );
+    } elsif ( $hr->{ type } =~ /^string(_empty)?$/o ) {
+        $str = get_string_limits( $hr, $str );
     } elsif ( $hr->{ type } =~ /^menu$/o ) {
         $str = get_menu_entries( $hr, $str );
     }
@@ -355,6 +357,49 @@ sub get_int_limits {
 
 
 ################################################################
+# Function for determining the limits for string variables
+
+sub get_string_limits {
+    my ( $hr, $str ) = @_;
+    my ( $min, $max );
+    my $int_rep = '[+]?\d+';
+
+    if ($str !~ /^\s*\[/o ) {
+        $hr->{ max } = undef;
+        $hr->{ min } = 0;
+        return $str;
+    }
+
+    if ( $str =~ /^(\[\s*([^:\t ]+)?\s*:\s*([^:\t ]+)?\s*\])(\s*(.*))?$/o ) {
+        $str = $5;
+
+        $min = defined $2 ? $2 : 0;
+        $max = $3 if defined $3;
+
+        die "Not a non-negative integer number ($min) at line $lino\n"
+            if defined $min and $min !~ /^$int_rep$/o;
+
+        die "Not an non-negative integer number ($max) at line $lino\n"
+            if defined $max and $max !~ /^$int_rep$/o;
+
+        if ( defined $min and defined $max and $min > $max ) {
+            my $temp = $min;
+            $min = $max;
+            $max = $temp;
+        }
+
+        $hr->{ max } = $max;
+        $hr->{ min } = $min;
+    } else {
+        $hr->{ max } = undef;
+        $hr->{ min } = 0;
+    }
+
+    return $str;
+}
+
+
+################################################################
 # Function for parsing the menu entries passed for menu variables
 
 sub get_menu_entries {
@@ -381,23 +426,29 @@ sub get_menu_entries {
 
 
 ################################################################
-# Function for parsing the default values that can be specified
-# for integer and float variables
+# Function for parsing the default value
 
 sub get_default_value {
     my ( $str, $hr ) = @_;
     my $val;
 
     return ( undef, undef ) unless defined $str;
-    return ( undef, $str ) unless
-        $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s*(.*)?)?$/o;
 
-    $val = $1;
-    $str = $3;
+    if ( $hr->{ type } =~ /^string(_empty)?$/ ) {
+        return ( undef, $str ) unless
+            $str =~ /^\s*\[\s*\"([^"]*)\"\s*\](\s*(.*)?)?$/o;
+        $val = $1;
+        $str = $3;
+    } else {
+        return ( undef, $str ) unless
+            $str =~ /^\s*\[\s*([^\]\t ]+)\s*\](\s*(.*)?)?$/o;
+        $val = $1;
+        $str = $3;
+    }
 
     if ( $hr->{ type } =~ /^int(_empty)?$/ ) {
         if ( $val =~ /^[+-]?\d+$/ ) {
-            die "Default value for $hr->{ name } does not fit into range at " .
+            die "Default value for $hr->{ name } doesn't fit into range at " .
                 "line $lino\n"
                     if ( defined $hr->{ max } and $hr->{ max } < $val ) or
                        ( defined $hr->{ min } and $hr->{ min } > $val );
@@ -407,7 +458,7 @@ sub get_default_value {
         }
     } elsif ( $hr->{ type } =~ /^float(_empty)?$/ ) {
         if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
-            die "Default value for $hr->{ name } does not fit into range at " .
+            die "Default value for $hr->{ name } doesn't fit into range at " .
                 "line $lino\n"
                     if ( defined $hr->{ max } and $hr->{ max } < $val ) or
                        ( defined $hr->{ min } and $hr->{ min } > $val );
@@ -416,6 +467,19 @@ sub get_default_value {
             die "Default value ($val) isn't a floating point number at " .
                 "line $lino\n";
         }
+    } elsif ( $hr->{ type } =~ /^string(_empty)?$/ ) {
+        return ( $val, $str )
+            if     ( defined $1 and length( $val ) == 0 )
+               or (     length( $val ) >= $hr->{ min }
+                    and (    ! defined $hr->{ max }
+                          or length( $val ) <= $hr->{ max } ) );
+            die "Default value (\"$val\") doesn't fit the requested minimum " .
+                "and/or maximum string length at line $lino\n";
+    } elsif ( $hr->{ type } =~ /^button$/ ) {
+        return ( $val =~ /^on|1$/io ? 1 : 0, $str )
+            if $val =~ /^on|off|1|0$/io;
+        die "Default value ($val) isn't a valid initializer for a button at " .
+            "line $lino\n";
     } elsif ( $hr->{ type } =~ /^button$/ ) {
         return ( $val =~ /^on|1$/io ? 1 : 0, $str )
             if $val =~ /^on|off|1|0$/io;
@@ -576,9 +640,13 @@ push \@VARS, \\\%$$_{ name };
 -anchor => 'w' );
 EOT
 
-        if ( $$_{ type } =~ /^(int|float)(_empty)?$/o ) {
-            print "\$$$_{ name }\{ value \} = " . ( $$_{ value } ne '' ? $$_{ value } : "''" ) . ";\n
-\$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : 'undef' ) . ";
+        if ( $$_{ type } =~ /^(int|float|string)(_empty)?$/o ) {
+            if ( $$_{ type } =~ /^(int|floats)(_empty)?$/o ) {
+                print "\$$$_{ name }\{ value \} = " . ( $$_{ value } ne '' ? $$_{ value } : "''" ) . ";\n";
+                } else {
+                    print "\$$$_{ name }\{ value \} = '$$_{ value }';\n";
+                }
+            print "\$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : 'undef' ) . ";
 \$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : 'undef' ) . ";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name }\{ value \},
 -width => $entry_width,
@@ -614,7 +682,7 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 ";
         }
 
-        if ( $$_{ type } =~ /^int|float|menu|button$/o ) {
+        if ( $$_{ type } =~ /^int|float|string|menu$|button$/o ) {
             print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
 -width => $unit_width );
@@ -762,6 +830,24 @@ sub float_check {
 
 ################################################################
 
+sub string_check {
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
+
+    \$\$is_valid = 0;
+
+    if (    length( \$new ) < \$min
+         or ( defined \$max and length( \$new ) > \$max ) ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+     } else {
+         \$\$is_valid = 1;
+         check_all_vars( );
+     }
+     return 1;
+}
+
+
+################################################################
+
 sub float_empty_check {
     my ( \$new, \$is_valid, \$min, \$max ) = \@_;
     my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
@@ -795,6 +881,24 @@ sub float_empty_check {
     }
 
     return 0;
+}
+
+
+################################################################
+
+sub string_empty_check {
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
+
+    \$\$is_valid = 0;
+
+    if (    ( length( \$new ) < \$min and length( \$new ) != 0 )
+         or ( defined \$max and length( \$new ) > \$max ) ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+     } else {
+         \$\$is_valid = 1;
+         check_all_vars( );
+     }
+     return 1;
 }
 
 
@@ -889,8 +993,10 @@ EOT
         $line =~ s{\$}{\\\$}g;
 
         for ( @vars ) {
-            if ( $$_{ type } =~ /^int|float|menu|button$/o ) {
+            if ( $$_{ type } =~ /^int|float|menu$|button$/o ) {
                 $line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
+            } elsif ( $$_{ type } =~ /^string/o ) {
+                $line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
             } elsif ( $$_{ type } =~ /^file$/o ) {
                 $line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
             }
@@ -968,6 +1074,31 @@ EOT
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
+    }
+";
+        } elsif ( $$_{ type } =~ /^string$/o ) {
+            print "
+    if (     defined \$$$_{ name }\{ value \}
+         and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= length( \$$$_{ name }\{ value \} ) : 1 )
+         and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= length( \$$$_{ name }\{ value \} ) : 1 ) ) {
+        print \$fh \"\\\"\$$$_{ name }\{ value \}\\\"\\n\";
+    } else {
+        print \$fh \"\\\"$$_{ def_value }\\\"\\n\";
+    }
+";
+        } elsif ( $$_{ type } =~ /^button$/o ) {
+            print "
+    print \$fh \"\$$$_{ name }\{ value \}\\n\";
+";
+        } elsif ( $$_{ type } =~ /^string_empty$/o ) {
+            print "
+    if (     defined \$$$_{ name }\{ value \}
+         and ( \$$$_{ name }\{ value \} eq ''
+               or (     defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= length( \$$$_{ name }\{ value \} ) : 1 )
+                    and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= length( \$$$_{ name }\{ value \} ) : 1 ) ) ) {
+        print \$fh \"\\\"\$$$_{ name }\{ value \}\\\"\\n\";
+    } else {
+        print \$fh \"\\\"$$_{ def_value }\\\"\\n\";
     }
 ";
         } elsif ( $$_{ type } =~ /^button$/o ) {
@@ -1054,6 +1185,25 @@ EOT
     goto done_reading if     \$ne ne ''
                          and (    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
                                or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} ) );
+    \$$$_{ name }\{ value \} = \$ne;
+";
+        } elsif ( $$_{ type } =~ /^string$/o ) {
+            print "
+    goto done_reading unless     defined( \$ne = <\$fh> )
+                             and \$ne =~ /^\\\"([^\"]*)\\\"\$/o;
+    \$ne = \$1;
+    goto done_reading if    ( defined \$$$_{ name }\{ max \} and length( \$ne ) > \$$$_{ name }\{ max \} )
+                         or ( defined \$$$_{ name }\{ min \} and length( \$ne ) < \$$$_{ name }\{ min \} );
+    \$$$_{ name }\{ value \} = \$ne;
+";
+        } elsif ( $$_{ type } =~ /^string_empty$/o ) {
+            print "
+    goto done_reading unless     defined( \$ne = <\$fh> )
+                             and \$ne =~ /^\\\"([^\"]*)\\\"\$/o;
+    \$ne = \$1;
+    goto done_reading if     \$ne ne ''
+                         and (    ( defined \$$$_{ name }\{ max \} and length( \$ne ) > \$$$_{ name }\{ max \} )
+                               or ( defined \$$$_{ name }\{ min \} and length( \$ne ) < \$$$_{ name }\{ min \} ) );
     \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
