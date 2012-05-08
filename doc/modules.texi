@@ -769,13 +769,14 @@ correct sequence, so it's not completely foolproof.
 @node EDL Functions, Files to be included, , Writing New Modules
 @subsection EDL Functions
 
-Each module has its own unique name, usually you will pick name of the
-device. Beside, a device usually belongs to a certain group, i.e.@:
-lock-in-amplifiers, digitizers, gaussmeters etc. As you will already
-have understood, the names of the @code{EDL} functions should be chosen
-to start with the type of the device, followed by an underscore and a
-name, describing what the function is supposed to do. Typical examples
-are @code{lockin_get_data()} or @code{digitzer_time_constant()}.
+Each module has its own unique name, it's often most convenient to
+pick the name of the device. Beside, a device usually belongs to a
+certain group, i.e.@: lock-in-amplifiers, digitizers, gaussmeters etc.
+As you will already have understood, the names of the @code{EDL}
+functions should be chosen to start with the type of the device,
+followed by an underscore and a name, describing what the function is
+supposed to do. Typical examples are @code{lockin_get_data()} or
+@code{digitzer_time_constant()}.
 
 Please note that there aren't two separate function, one for setting the
 digitizers time constant and one for asking the digitizer for the
@@ -786,13 +787,14 @@ currently set time constant, otherwise it sets the time constant to the
 value passed to the function (at least if the value is reasonable). You
 should try to follow this convention if possible.
 
-Another convention I am following when inventing function names is that
-if one can only either set a certain value for a device or get some data
-from a device I always use either @code{set} or @code{get} in the
-function name. E.g.@: its not possible to send data values to a
-lockin-amplifier, thus I use the name @code{lockin_get_data()} (and not
-e.g.@: @code{lockin_data()}). In names for functions that can be used
-for setting as well as getting data I try to avoid these words.
+Another convention I am following when inventing function names is
+that if one can either only set a certain value for a device or get
+some data from it with that function I always use either @code{set} or
+@code{get} in the function name. E.g.@: it's not possible to send data
+values to a lockin-amplifier, thus I use the name
+@code{lockin_get_data()} (and not e.g.@: @code{lockin_data()}). In
+names for functions that can be used for setting as well as receiving
+data I try to avoid these words.
 
 All functions to be invoked via an @code{EDL} script take their arguments
 in the form of the variables as described above and return a pointer to
