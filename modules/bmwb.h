@@ -97,13 +97,13 @@
 #define AI_8                    8
 
 
-#define DETECTOR_CURRENT_AI     AI_0      /* detector current */
-#define AFC_SIGNAL_AI           AI_1      /* AFC signal */
-#define UNLEVELED_SIGNAL_AI     AI_2      /* unleveled signal */
+#define DETECTOR_CURRENT_AI     AI_0      /* detector current    */
+#define AFC_SIGNAL_AI           AI_1      /* AFC signal          */
+#define UNLEVELED_SIGNAL_AI     AI_2      /* unleveled signal    */
 #define UNCALIBRATED_SIGNAL_AI  AI_3      /* uncalibrated signal */
-#define TUNE_MODE_X_SIGNAL_AI   AI_4      /* tune mode x signal */
-#define TUNE_MODE_Y_SIGNAL_AI   AI_6      /* tune mode y signal */
-#define OVERHEAT_SIGNAL_AI      AI_8      /* overheat signal */
+#define TUNE_MODE_X_SIGNAL_AI   AI_4      /* tune mode x signal  */
+#define TUNE_MODE_Y_SIGNAL_AI   AI_6      /* tune mode y signal  */
+#define OVERHEAT_SIGNAL_AI      AI_8      /* overheat signal     */
 
 
 #define AFC_STATE_BIT       0x01
@@ -118,7 +118,7 @@
 #define IRIS_DOWN_BIT       0x20
 
 #define X_BAND_ATT_BITS     0x40
-#define Q_BAND_ATT_BITS     0xF0
+#define Q_BAND_ATT_BITS     0xC0
 
 
 #define BMWB_X_BAND_STATE_FILE    "x_bmwb.state"

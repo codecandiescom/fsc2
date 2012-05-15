@@ -175,7 +175,7 @@ main( int     argc,
     else
         bmwb.type = type;
 
-    /* Get the last settings of the bridge from the state file */
+    /* Get the last settings for the bridge from the state file */
 
 	load_state( );
 

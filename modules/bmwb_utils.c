@@ -37,10 +37,10 @@ raise_permissions( void )
 }
 
 
-/*---------------------------------------------------------------------*
- * This function sets the EUID and EGID to the one of the user running
- * the program.
- *---------------------------------------------------------------------*/
+/*---------------------------------------------*
+ * This function sets the EUID and EGID to the
+ * one of the user running the program.
+ *---------------------------------------------*/
 
 void
 lower_permissions( void )
@@ -210,6 +210,9 @@ slash( const char * path )
     return path[ strlen( path ) - 1 ] != '/' ? "/" : "";
 }
 
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
 const char *
 pretty_print_attenuation( void )

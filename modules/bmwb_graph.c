@@ -198,8 +198,8 @@ mode_cb( FL_OBJECT * obj,
 	if ( r->val != bmwb.mode )
     {
 		if ( set_mode( r->val ) )
-            fl_set_select_item( obj, fl_get_select_item_by_value( obj,
-                                                                  bmwb.mode ) );
+            fl_set_select_item( obj,
+                                fl_get_select_item_by_value( obj, bmwb.mode ) );
         else
         {
             /* Clear canvas if old mode was tune mode */
