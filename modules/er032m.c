@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
- *  Programming this field controller became a bit of a mess because of the
+ *  Programming this field controller becomes a bit of a mess because of the
  *  number of conditions to be taken into consideration:
  *
  *  1. Field range is -50 G to 23000 G
@@ -47,40 +47,43 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 #define ER032M_TEST_FIELD  3480.0   /* returned as current field in test run */
 
-#define MIN_SWA            0
-#define CENTER_SWA         2048
-#define MAX_SWA            4095
+#define MIN_SWA               0
+#define CENTER_SWA            2048
+#define MAX_SWA               4095
 
 
 /* The maximum field resolution: this is, according to the manual the best
-   result that can be achieved when repeatedly setting the center field and
-   it doesn't seem to make too much sense to set a new field when the
-   difference from the current field is below this resolution. */
+   result that can be achieved when repeatedly setting the center field. */
 
-#define ER032M_RESOLUTION   5.0e-3
+#define ER032M_RESOLUTION     5.0e-3
 
 
-/* Maximum resolution that can be used for sweep ranges */
+/* Resolution with which sweep ranges can be set (in G) */
 
-#define ER032M_SW_RESOLUTION 0.1
+#define ER032M_SW_RESOLUTION  0.1
+
+
+/* Best resolution possible for field step */
+
+#define MAX_STEP_RESOLUTION   ( ER032M_SW_RESOLUTION / ( double ) MAX_SWA )
 
 
 /* As Mr. Antoine Wolff from Bruker pointed out to me the center field
    can only be set with a resolution of 50 mG. */
 
-#define ER032M_CF_RESOLUTION 5.0e-2
+#define ER032M_CF_RESOLUTION  5.0e-2
 
 
 /* Defines the time before we test again if it is found that the overload
    LED is still on. */
 
-#define ER032M_WAIT_TIME   100000     /* in us */
+#define ER032M_WAIT_TIME      100000     /* in us */
 
 
 /* Define the maximum number of retries before giving up if the
    overload LED is on. */
 
-#define ER032M_MAX_RETRIES   300
+#define ER032M_MAX_RETRIES    300
 
 
 /* When setting a new center field or sweep width the value send to the
@@ -213,10 +216,12 @@ er032m_init_hook( void )
 
     /* Initialize some variables in the magnets structure. */
 
-    magnet.device = -1;
-    magnet.is_init = UNSET;
-    magnet.is_sw = UNSET;
+    magnet.device        = -1;
+    magnet.is_init       = UNSET;
+    magnet.is_sw         = UNSET;
     magnet.max_field_dev = 0.0;
+    magnet.field_step    =   lrnd( MIN_FIELD_STEP / MAX_STEP_RESOLUTION )
+                           * MAX_STEP_RESOLUTION;
 
     /* Make sure the maximum sweep width isn't larger than the difference
        between the maximum and minimum field. */
@@ -244,11 +249,11 @@ er032m_test_hook( void )
     {
         magnet.act_field = ER032M_TEST_FIELD;
 
-        rem = ( lrnd( magnet.act_field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP )
-              ) * ER032M_MIN_FIELD_STEP;
+        rem =   (   lrnd( magnet.act_field / MIN_FIELD_STEP )
+                  % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) )
+              * MIN_FIELD_STEP;
 
-        if ( rem <= 2 * ER032M_MIN_FIELD_STEP )
+        if ( rem <= 2 * MIN_FIELD_STEP )
         {
             magnet.swa = er032m_set_swa( CENTER_SWA );
             magnet.sw = er032m_set_sw( 0.0 );
@@ -306,9 +311,9 @@ er032m_exp_hook( void )
 int
 er032m_end_of_exp_hook( void )
 {
-    /* Tell user if field maximum field deviation was more than 1% of the
-       field step width (if one was set) or was larger than the resolution
-       reasonably to be expected */
+    /* Tell user if maximum field deviation was more than 1% of the field step
+       width (if one was set) or was larger than the resolution reasonably to
+       be expected */
 
     if (    (    magnet.is_init
               && magnet.max_field_dev / magnet.field_step >= 0.01 )
@@ -342,8 +347,10 @@ magnet_name( Var_T * v  UNUSED_ARG )
 Var_T *
 magnet_setup( Var_T * v )
 {
-    double start_field;
-    double field_step;
+    double start_field,
+           real_start_field;
+    double field_step,
+           real_field_step;
     long rem;
 
 
@@ -356,33 +363,33 @@ magnet_setup( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    start_field = lrnd( get_double( v, "start field" )
-                        / ER032M_MIN_FIELD_STEP ) * ER032M_MIN_FIELD_STEP;
+    start_field = get_double( v, "start field" );
+    real_start_field =   lrnd( start_field / MIN_FIELD_STEP ) * MIN_FIELD_STEP;
 
     er032m_field_check( start_field );
 
     /* Get the field step size and round it to the next allowed value
        (resulting in a sweep step resolution of about 25 uG with the
-       given setting for the sweep width resolution of 0.1 G) */
+       given setting for the smallest reasonable sweep width resolution
+       of 0.1 G) */
 
     if ( ( v = vars_pop( v ) ) == NULL )
     {
-        print( FATAL, "Missing field step size.\n" );
+        print( FATAL, "Missing field step size argument.\n" );
         THROW( EXCEPTION );
     }
 
     field_step = get_double( v, "field step width" );
 
-    if ( field_step < ER032M_MIN_FIELD_STEP )
+    if ( field_step < MIN_FIELD_STEP )
     {
         print( FATAL, "Field sweep step size (%.0f mG) too small, minimum is "
-               "%.0f mG.\n", 1.0e3 * VALUE( v ),
-               1.0e3 * ER032M_MIN_FIELD_STEP );
+               "%.0f mG.\n", 1.0e3 * VALUE( v ), 1.0e3 * MIN_FIELD_STEP );
         THROW( EXCEPTION );
     }
 
-    field_step = lrnd( MAX_SWA * field_step / ER032M_SW_RESOLUTION )
-                 * ER032M_SW_RESOLUTION / MAX_SWA;
+    real_field_step =   lrnd( field_step / MAX_STEP_RESOLUTION )
+                      * MAX_STEP_RESOLUTION;
 
     too_many_arguments( v );
 
@@ -392,23 +399,26 @@ magnet_setup( Var_T * v )
        to shift the center field during a longer sweep. Thus we readjust
        the start field in these cases. */
 
-    rem = lrnd( start_field / ER032M_MIN_FIELD_STEP )
-          % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+    rem =   lrnd( real_start_field / MIN_FIELD_STEP )
+          % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP );
 
     if (    rem > 0
-         && lrnd( field_step / ER032M_MIN_FIELD_STEP ) %
-                    lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
-    {
-        start_field = lrnd( start_field / ER032M_CF_RESOLUTION )
-                      * ER032M_CF_RESOLUTION;
-        print( SEVERE, "Readjusting start field to %.3f G.\n",
-               start_field );
-        THROW( EXCEPTION );
-    }
+         &&   lrnd( field_step / MIN_FIELD_STEP )
+            % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) == 0 )
+        real_start_field =   lrnd( real_start_field / ER032M_CF_RESOLUTION )
+                           * ER032M_CF_RESOLUTION;
 
-    magnet.start_field = start_field;
-    magnet.field_step = field_step;
-    magnet.is_init = SET;
+    if ( fabs( start_field - real_start_field ) > 0.01 * start_field )
+        print( WARN, "Readjusting start field from %.3f to %.3f G.\n",
+               start_field, real_start_field );
+
+    if ( fabs( real_field_step - field_step ) > 0.01 * field_step )
+        print( WARN, "Readjusting field step size from %.3f to %.3f mG.\n",
+               1.0e3 * field_step, 1.0e3 * real_field_step );
+
+    magnet.start_field = real_start_field;
+    magnet.field_step  = real_field_step;
+    magnet.is_init     = SET;
 
     return vars_push( INT_VAR, 1L );
 }
@@ -439,7 +449,7 @@ sweep_up( Var_T * v  UNUSED_ARG )
     if ( ! magnet.is_init )
     {
         print( FATAL, "No sweep step size has been set - you must call "
-               "the function magnet_setup() to be able to do sweeps.\n" );
+               "magnet_setup() to be able to do sweeps.\n" );
         THROW( EXCEPTION );
     }
 
@@ -460,7 +470,7 @@ sweep_up( Var_T * v  UNUSED_ARG )
         if ( magnet.cf + 0.75 * magnet.sw < ER032M_MAX_FIELD )
             steps = MAX_SWA / 4;
         else
-            steps = irnd( floor( ( ER032M_MAX_FIELD - magnet.cf )
+            steps = irnd( floor(   ( ER032M_MAX_FIELD - magnet.cf )
                                  / magnet.swa_step ) ) - CENTER_SWA;
 
         /* We also need the center field to be a multiple of the center field
@@ -471,7 +481,8 @@ sweep_up( Var_T * v  UNUSED_ARG )
            expecting. */
 
         new_swa = magnet.swa - steps + magnet.step_incr;
-        diff = magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step
+        diff =   magnet.cf
+               + ( magnet.swa - CENTER_SWA ) * magnet.swa_step
                - magnet.act_field;
         new_cf = magnet.cf - diff + steps * magnet.swa_step;
 
@@ -494,6 +505,12 @@ sweep_up( Var_T * v  UNUSED_ARG )
 
         er032m_set_swa( magnet.swa = new_swa );
         magnet.cf = er032m_set_cf( new_cf );
+
+        if ( magnet.field_step < 2 * ER032M_RESOLUTION )
+            print( WARN, "Sweeping from %.3f to %.3f G required change of "
+                   "center field, might result in jump of up to %.0f mG.\n",
+                   magnet.act_field, magnet.act_field + magnet.field_step,
+                   1.0e3 * ER032M_RESOLUTION );
     }
 
     er032m_test_leds( );
@@ -580,6 +597,12 @@ sweep_down( Var_T * v  UNUSED_ARG )
 
         er032m_set_swa( magnet.swa = new_swa );
         magnet.cf = er032m_set_cf( new_cf );
+
+        if ( magnet.field_step < 2 * ER032M_RESOLUTION )
+            print( WARN, "Sweeping from %.3f to %.3f G required change of "
+                   "center field, might result in jump of up to %.0f mG.\n",
+                   magnet.act_field, magnet.act_field - magnet.field_step,
+                   1.0e3 * ER032M_RESOLUTION );
     }
 
     er032m_test_leds( );
@@ -677,26 +700,19 @@ Var_T *
 magnet_field_step_size( Var_T * v )
 {
     double field_step;
-    long steps;
 
 
     if ( v == NULL )
-        return vars_push( FLOAT_VAR, ER032M_RESOLUTION );
+        return vars_push( FLOAT_VAR, magnet.field_step );
 
     field_step = get_double( v, "field step size" );
 
-    too_many_arguments( v );
+    if ( field_step < MIN_FIELD_STEP )
+        field_step = MIN_FIELD_STEP;
 
-    if ( field_step < 0.0 )
-    {
-        print( FATAL, "Invalid negative field step size.\n" );
-        THROW( EXCEPTION );
-    }
+    field_step = lrnd( field_step / MAX_STEP_RESOLUTION ) * MAX_STEP_RESOLUTION;
 
-    if ( ( steps = lrnd( field_step / ER032M_RESOLUTION ) ) == 0 )
-        steps++;
-
-    return vars_push( FLOAT_VAR, steps * ER032M_RESOLUTION );
+    return vars_push( FLOAT_VAR, field_step );
 }
 
 
@@ -786,11 +802,11 @@ er032m_init( void )
     {
         magnet.act_field = er032m_get_field( );
 
-        rem = ( lrnd( magnet.act_field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP )
-              ) * ER032M_MIN_FIELD_STEP;
+        rem =   (   lrnd( magnet.act_field / MIN_FIELD_STEP )
+                  % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) )
+              * MIN_FIELD_STEP;
 
-        if ( rem <= 2 * ER032M_MIN_FIELD_STEP )
+        if ( rem <= 2 * MIN_FIELD_STEP )
         {
             magnet.swa = er032m_set_swa( CENTER_SWA );
             magnet.sw = er032m_set_sw( 0.0 );
@@ -828,10 +844,10 @@ er032m_start_field( void )
     double cur_sw;
 
 
-    magnet.cf = magnet.start_field;
-    magnet.sw = MAX_SWA * magnet.field_step;
-    magnet.swa = CENTER_SWA;
-    magnet.swa_step = magnet.field_step;
+    magnet.cf        = magnet.start_field;
+    magnet.sw        = MAX_SWA * magnet.field_step;
+    magnet.swa       = CENTER_SWA;
+    magnet.swa_step  = magnet.field_step;
     magnet.step_incr = 1;
 
     /* Make sure that the sweep width isn't larger than the maximum sweep
@@ -851,9 +867,9 @@ er032m_start_field( void )
        it silently to fit this requirement - hopefully, this isn't going to
        lead to any real field precision problems. */
 
-    magnet.sw = ER032M_SW_RESOLUTION
-                * lrnd( magnet.sw / ER032M_SW_RESOLUTION );
-    magnet.swa_step = magnet.sw / MAX_SWA;
+    magnet.sw         =   ER032M_SW_RESOLUTION
+                        * lrnd( magnet.sw / ER032M_SW_RESOLUTION );
+    magnet.swa_step   = magnet.sw / MAX_SWA;
     magnet.field_step = magnet.step_incr * magnet.swa_step;
 
     /* Make sure the sweep range is still within the allowed field range,
@@ -889,7 +905,7 @@ er032m_start_field( void )
     /* Now readjust the SWA count a bit to make sure that the center field is
        a multiple of the maximum CF resolution (at least with in accuracy of
        2 mG). This should always work out correctly because we made sure that
-       either CF is alrady a multiple of the required resolution or the step
+       either CF is already a multiple of the required resolution or the step
        size is below this resolution. So we can set the correct start field
        with a combination of a slightly shifted CF plus not too large number
        of SWA steps (typically not more than 100). */
@@ -957,7 +973,7 @@ er032m_start_field( void )
  *    Because our guess about the typical field changes didn't work
  *    out we also have to adapt the sweep width.
  * 3. If magnet_setup() has been called changing the sweep width can't
- *    be done. If possible field change is done via changing the SWA,
+ *    be done. If possible a field change is done by changing the SWA,
  *    otherwise a combination of changing the SWA and shifting the
  *    center field is used.
  *---------------------------------------------------------------------*/
@@ -1008,10 +1024,11 @@ er032m_change_field_and_set_sw( double field )
 
     if ( ! magnet.is_sw )
     {
-        rem = ( lrnd( field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) )
-              * ER032M_MIN_FIELD_STEP;
-        if ( rem > ER032M_MIN_FIELD_STEP )
+        rem =   (   lrnd( field / MIN_FIELD_STEP )
+                  % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) )
+              * MIN_FIELD_STEP;
+
+        if ( rem > MIN_FIELD_STEP )
         {
             magnet.cf = er032m_set_cf( field - rem );
             er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
@@ -1037,9 +1054,9 @@ er032m_change_field_and_set_sw( double field )
              || field - ( magnet.cf + ( magnet.swa - CENTER_SWA )
                           * magnet.swa_step ) > ER032M_RESOLUTION )
         {
-            rem = ( lrnd( field / ER032M_MIN_FIELD_STEP )
-                    % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) )
-                  * ER032M_MIN_FIELD_STEP;
+            rem =   (   lrnd( field / MIN_FIELD_STEP )
+                      % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) )
+                  * MIN_FIELD_STEP;
             er032m_set_sw( 0.0 );
             magnet.cf = er032m_set_cf( field - rem );
             er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
@@ -1107,7 +1124,7 @@ er032m_change_field_and_keep_sw( double field )
     steps = irnd( ( field - magnet.act_field ) / magnet.swa_step );
 
     if (    fabs( fabs( field - magnet.act_field )
-                  - magnet.swa_step * abs( steps ) ) < 1e-2 * magnet.swa_step
+                  - magnet.swa_step * abs( steps ) ) < 0.01 * magnet.swa_step
          && magnet.swa + steps <= MAX_SWA
          && magnet.swa + steps >= MIN_SWA )
     {
@@ -1148,16 +1165,16 @@ er032m_change_field_and_keep_sw( double field )
          || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
          || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
     {
-        print( FATAL, "Can't set field of %.3f G, to near to minimum or "
+        print( FATAL, "Can't set field of %.3f G, too near to minimum or "
                "maximum field.\n", field );
         THROW( EXCEPTION );
     }
 
     /* Now we again got to deal with cases where the resulting center field
-       isn't a multiple of the CF resoultion... */
+       isn't a multiple of the CF resolution... */
 
-    rem = lrnd( magnet.cf / ER032M_MIN_FIELD_STEP )
-          % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+    rem =   lrnd( magnet.cf / MIN_FIELD_STEP )
+          % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP );
 
     if ( rem > 0 )
     {
@@ -1165,8 +1182,8 @@ er032m_change_field_and_keep_sw( double field )
            step size is we can't adjust the field to the required value and
            must use the nearest possible field instead. */
 
-        if ( lrnd( magnet.swa_step / ER032M_MIN_FIELD_STEP ) %
-             lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
+        if ( lrnd( magnet.swa_step / MIN_FIELD_STEP ) %
+             lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP ) == 0 )
             magnet.cf = lrnd( magnet.cf / ER032M_CF_RESOLUTION )
                         * ER032M_CF_RESOLUTION;
         else
@@ -1597,7 +1614,7 @@ er032m_failure( void )
 
 static int
 er032m_best_fit_search( double * cf,
-                        int *    swa,
+                        int    * swa,
                         bool     dir,
                         int      fac )
 {
@@ -1621,8 +1638,9 @@ er032m_best_fit_search( double * cf,
         while (    new_swa < MAX_SWA
                 && new_cf - 0.5 * magnet.swa_step > ER032M_MIN_FIELD )
         {
-            rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
-                  % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+            rem =   lrnd( fabs( new_cf ) / MIN_FIELD_STEP )
+                  % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP );
+
             if ( rem <= fac || ++add_steps >= MAX_ADD_STEPS )
                 break;
             new_swa++;
@@ -1637,8 +1655,9 @@ er032m_best_fit_search( double * cf,
         while (    new_swa > MIN_SWA
                 && new_cf + 0.5 * magnet.swa_step < ER032M_MAX_FIELD )
         {
-            rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
-                  % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+            rem =   lrnd( fabs( new_cf ) / MIN_FIELD_STEP )
+                  % lrnd( ER032M_CF_RESOLUTION / MIN_FIELD_STEP );
+
             if ( rem <= fac || ++add_steps >= MAX_ADD_STEPS )
                 break;
             new_swa--;
