@@ -486,6 +486,10 @@ lecroy_wr_get_sens( int channel )
 
     sprintf( cmd, "C%1d:VDIV?\n", channel + 1 );
     lecroy_wr_talk( cmd, reply, &length );
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     reply[ length - 1 ] = '\0';
     return lecroy_wr.sens[ channel ] = T_atod( reply );
 }
@@ -530,6 +534,10 @@ lecroy_wr_get_offset( int channel )
 
     sprintf( buf, "C%1d:OFST?\n", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     buf[ length - 1 ] = '\0';
     return  lecroy_wr.offset[ channel ] = T_atod( buf );
 }
@@ -575,6 +583,10 @@ lecroy_wr_get_coupling( int channel )
 
     sprintf( buf, "C%1d:CPL?\n", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     buf[ length - 1 ] = '\0';
 
     if ( buf[ 0 ] == 'A' )
@@ -643,6 +655,10 @@ lecroy_wr_get_bandwidth_limiter( int channel )
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     lecroy_wr_talk( buf, buf, &length );
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     buf[ length - 1 ] = '\0';
 
     /* We have to distinguish two cases: if the global bandwidth limiter is
@@ -724,6 +740,10 @@ lecroy_wr_set_bandwidth_limiter( int channel,
     /* We first need to check if the global bandwidth limiter is on or off. */
 
     lecroy_wr_talk( buf, buf, &length );
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     buf[ length - 1 ] = '\0';
 
     fsc2_assert( buf[ 1 ] == 'N' || buf[ 1 ] == 'F' );
@@ -908,6 +928,10 @@ lecroy_wr_get_trigger_level( int channel )
 
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
+
+    if ( length <= 1 )
+        lecroy_wr_invalid_data( );
+
     return lecroy_wr.trigger_level[ channel ] = T_atod( buf );
 }
 
@@ -1581,6 +1605,10 @@ lecroy_wr_get_avg_count( int ch )
         lecroy_wr_lan_failure( );
 
     buf[ length ] = '\0';
+
+    if ( length == 0 )
+        lecroy_wr_invalid_data( );
+
     length = T_atol( ( char * ) buf );
 
     fsc2_assert( length == LECROY_WR_DESC_LENGTH );
