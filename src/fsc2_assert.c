@@ -36,9 +36,18 @@ fsc2_assert_print( const char * expression,
     Assert_Struct.line = line;
     Assert_Struct.filename = filename;
 
-    Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
-    memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
-    abort( );
+    if ( Fsc2_Internals.in_hook && get_mode( ) == EXPERIMENT )
+    {
+        print( FATAL, "%s:%d: failed assertion: %s\n", filename, line,
+               expression );
+        THROW( EXCEPTION );
+    }
+    else
+    {
+        Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
+        memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
+        abort( );
+    }
 
     return 0;
 }
@@ -53,9 +62,19 @@ fsc2_impossible_print( const char * filename,
     Assert_Struct.expression = "Impossible situation encountered.";
     Assert_Struct.line = line;
     Assert_Struct.filename = filename;
-    Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
-    memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
-    abort( );
+
+    if ( Fsc2_Internals.in_hook && get_mode( ) == EXPERIMENT )
+    {
+        print( FATAL, "%s:%d: failed assertion: impossible situation "
+               "encountered.\n", filename, line );
+        THROW( EXCEPTION );
+    }
+    else
+    {
+        Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
+        memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
+        abort( );
+    }
 
     return 0;
 }

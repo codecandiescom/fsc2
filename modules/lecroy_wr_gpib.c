@@ -40,6 +40,7 @@ static bool lecroy_wr_talk( const char * cmd,
                             char       * reply,
                             long       * length );
 static void lecroy_wr_comm_failure( void );
+static void lecroy_wr_invalid_data( void );
 
 
 static bool is_running = UNSET;
@@ -570,7 +571,7 @@ lecroy_wr_get_coupling( int channel )
                LECROY_WR_Channel_Names[ channel ] );
     }
     else
-        fsc2_impossible( );
+        lecroy_wr_invalid_data( );
 
     return lecroy_wr.coupling[ channel ] = type;
 }
@@ -634,7 +635,7 @@ lecroy_wr_get_bandwidth_limiter( int channel )
         else if ( buf[ 0 ] == '2' )      /* 200MHZ */
             mode = LECROY_WR_BWL_200MHZ;
         else
-            fsc2_impossible( );
+            lecroy_wr_invalid_data( );
 
         for ( i = 0; i <= LECROY_WR_CH_MAX; i++ )
             lecroy_wr.bandwidth_limiter[ i ] = mode;
@@ -647,10 +648,7 @@ lecroy_wr_get_bandwidth_limiter( int channel )
         if (    sscanf( ptr + 1, "%d", &ch ) != 1
              || --ch < LECROY_WR_CH1
              ||ch > LECROY_WR_CH_MAX )
-        {
-            print( FATAL, "Can't determine bandwidth limiter settings.\n" );
-            THROW( EXCEPTION );
-        }
+            lecroy_wr_invalid_data( );
 
         ptr += 3;
 
@@ -670,7 +668,7 @@ lecroy_wr_get_bandwidth_limiter( int channel )
             ptr += 7;
         }
         else
-            fsc2_impossible( );
+            lecroy_wr_invalid_data( );
 
         lecroy_wr.bandwidth_limiter[ ch ] = mode;
     }
@@ -816,7 +814,7 @@ lecroy_wr_get_trigger_source( void )
             src = LECROY_WR_EXT;
     }
     else
-        fsc2_impossible( );
+        lecroy_wr_invalid_data( );
 
     return lecroy_wr.trigger_source = src;
 }
@@ -1028,7 +1026,7 @@ lecroy_wr_get_trigger_coupling( int channel )
             break;
 
         default :
-            fsc2_impossible( );
+            lecroy_wr_invalid_data( );
     }
 
     lecroy_wr.trigger_coupling[ channel ] = cpl;
@@ -1094,7 +1092,7 @@ lecroy_wr_get_trigger_mode( void )
     else if ( buf[ 1 ] == 'T' )
         mode = LECROY_WR_TRG_MODE_STOP;
     else
-        fsc2_impossible( );
+        lecroy_wr_invalid_data( );
 
     return lecroy_wr.trigger_mode = mode;
 }
@@ -1875,6 +1873,17 @@ lecroy_wr_talk( const char * cmd,
          || gpib_read( lecroy_wr.device, reply, length ) == FAILURE )
         lecroy_wr_comm_failure( );
     return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+lecroy_wr_invalid_data( void )
+{
+    print( FATAL, "Invalid data received from device.\n" );
+    THROW( EXCEPTION );
 }
 
 

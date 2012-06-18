@@ -542,12 +542,12 @@ fsc2_lan_write( int          handle,
 }
 
 
-/*----------------------------------------------------------------*
- * Function for writing from a set from buffers to the socket. If
+/*---------------------------------------------------------------*
+ * Function for writing from a set of buffers to the socket. If
  * 'us_timeout' is set to a positive (non-zero) value it doesn't
  * wait longer than that many microseconds. If 'quit_on_signal'
  * is set it returns immediately when a signal is caught.
- *----------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 ssize_t
 fsc2_lan_writev( int                  handle,

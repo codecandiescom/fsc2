@@ -29,12 +29,12 @@ static int check_unique( void );
 BMWB bmwb;
 
 
-/*---------------------------------------------------*
- * Since this is a programthat may run independently from fsc2
+/*--------------------------------------------------------------*
+ * Since this is a program that may run independently from fsc2
  * we need a amain() function. The connection to fsc2 (and the
  * x_bmwb and q_bmwb modules) is via a socket over which both
  * programs communicate.
- *---------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 int
 main( int     argc,
@@ -263,11 +263,11 @@ get_bridge_type( void )
 }
 
 
-/*------------------------------------------------*
+/*---------------------------------------------------------------------*
  * Function for setting a new microwave frequency (given as a number
  * in the interval [0,1] where 0 represents the lowest frequency
  * possible and 1 the highest). Returns 0 on success and 1 on failure.
- *------------------------------------------------*/
+ *---------------------------------------------------------------------*/
 
 int
 set_mw_freq( double val )
@@ -293,10 +293,10 @@ set_mw_freq( double val )
 }
 
 
-/*--------------------------------------------------*
- * Function for setting a new microwave attenuation, given in dB.
- * Returns 0 on success and 1 on failure.
- *--------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for setting a new microwave attenuation, given
+ * in dB. Returns 0 on success and 1 on failure.
+ *---------------------------------------------------------*/
 
 int
 set_mw_attenuation( int val )
@@ -328,10 +328,10 @@ set_mw_attenuation( int val )
 }
 
 
-/*-----------------------------------------*
- * Function for setting a new signal phase, given as number in the interval
- * [0,1]. Returns 0 on success and 1 on failure.
- *-----------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for setting a new signal phase, given as number in
+ * the interval [0,1]. Returns 0 on success and 1 on failure.
+ *-------------------------------------------------------------*/
 
 int
 set_signal_phase( double val )
@@ -357,10 +357,10 @@ set_signal_phase( double val )
 }
 
 
-/*-------------------------------------------------*
- * Function for setting a new microwave bias power, given as a number in the
- * interval [0,1]. Returns 0 on success and 1 on failure.
- *-------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting a new microwave bias power, given as a number
+ * in the interval [0,1]. Returns 0 on success and 1 on failure.
+ *--------------------------------------------------------------------*/
 
 int
 set_mw_bias( double val )
@@ -428,11 +428,11 @@ set_iris( int state )
 }
 
 
-/*--------------------------------------*
- * Function for switching to a new mode, with the mode given by the argument
- * with values as defined in the header file. Returns 0 on success and 1 on
- * failure.
- *--------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for switching to a new mode, with the mode given by
+ * the argument with values as defined in the header file. Returns
+ * 0 on success and 1 on failure.
+ *-----------------------------------------------------------------*/
 
 int
 set_mode( int mode )
@@ -580,10 +580,10 @@ save_state( void )
 }
 
 
-/*---------------------------------------------------------------------*
- * Tests if there's another instance of the program already running by
- * trying to connect to the socket it's supposed to listen on.
- *---------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Tests if there's another instance of the program already running
+ * by trying to connect to the socket it's supposed to listen on.
+ *------------------------------------------------------------------*/
 
 static int
 check_unique( void )
