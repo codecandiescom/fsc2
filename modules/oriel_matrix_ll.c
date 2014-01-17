@@ -592,10 +592,9 @@ oriel_matrix_close_CCD_shutter( void )
  *
  * Input: None
  *
- * Return value: a unsigned short integer array which contains
- *               the following inormation:
- *                 index = 0: pixel width
- *                 index = 1; pixel height
+ * Return value: a unsigned short integer array which contains:
+ *                 at index = 0: pixel width
+ *                 at index = 1: pixel height
  *               Throws an exception on failure
  *----------------------------------------------------------------*/
 

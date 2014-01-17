@@ -1242,12 +1242,12 @@ lecroy93xx_get_prep( int              ch,
         fsc2_impossible( );
 
 #if 0
-    /* We probably have to check if two or mor channels are combined - I found
-       no way this can be checked via the program and we can only look for
-       the number of points and compare that with what we expect. To make
-       things a bit more interesting, the device always seems to send us 2 more
-       points than it should and I don't know if that become 4 when to curves
-       are combined ... */
+    /* We probably have to check if two or more channels are combined - I
+       found no way this can be checked via the program and we can only look
+       for the number of points and compare that with what we expect. To make
+       things a bit more interesting, the device always seems to send us 2
+       more points than it should and I don't know if that becomes 4 when two
+       curves are combined ... */
 
     /* Get the number of byztes of the curve */
 
@@ -1473,7 +1473,9 @@ lecroy93xx_get_data( long * len )
 {
     unsigned char *data;
     char len_str[ 10 ];
+#if defined EXTRA_BYTE_AFTER_WAVEFORM
     long one = 1;
+#endif
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
@@ -1503,9 +1505,17 @@ lecroy93xx_get_data( long * len )
 
     data = T_malloc( *len );
 
-    if (    gpib_read( lecroy93xx.device, ( char * ) data, len ) == FAILURE
-         || gpib_read( lecroy93xx.device, len_str, &one ) == FAILURE )
+    if ( gpib_read( lecroy93xx.device, ( char * ) data, len ) == FAILURE )
         lecroy93xx_gpib_failure( );
+
+    /* Note: some models of this series send an extra byte after the
+       waveform and we need to read this also - set the corresponding
+       macro in the configuration file for the device! */
+
+#if defined EXTRA_BYTE_AFTER_WAVEFORM
+    if ( gpib_read( lecroy93xx.device, len_str, &one ) == FAILURE )
+        lecroy93xx_gpib_failure( );
+#endif
 
     return data;
 }

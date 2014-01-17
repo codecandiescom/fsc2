@@ -953,7 +953,7 @@ gpibd_write( int    fd,
         return -1;
     }
 
-    /* Pass then to the device */
+    /* Pass them on to the device */
 
     if ( gpib_write( dev_id, buf, len ) != SUCCESS )
     {

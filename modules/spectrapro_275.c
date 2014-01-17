@@ -650,7 +650,7 @@ spectrapro_275_talk( const char * buf,
 
         while ( ! spectrapro_275_read( lbuf + already_read, &len ) )
         {
-            lbuf = realloc( lbuf, 2 * len + 5 );
+            lbuf = T_realloc( lbuf, 2 * len + 5 );
             already_read += len;
         }
         already_read += len;

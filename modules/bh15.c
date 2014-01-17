@@ -47,7 +47,7 @@ Var_T * gaussmeter_command(    Var_T * v );
 
 static double bh15_get_field( void );
 
-static bool bh15_command( const char * cmd );
+static void bh15_command( const char * cmd );
 
 
 static struct {
@@ -124,11 +124,11 @@ bh15_exp_hook( void )
 
     /* Set Mode 5 */
 
-    bh15_command( "MO 5\r" );
+    bh15_command( "MO 5" );
 
     /* Set it into run mode */
 
-    bh15_command( "RU\r" );
+    bh15_command( "RU" );
 
     sleep( 5 );                /* unfortunately, it seems to need this... */
 
@@ -138,7 +138,7 @@ bh15_exp_hook( void )
 
         fsc2_usleep( 100000, UNSET );
 
-        bh15_command( "LE\r" );
+        bh15_command( "LE" );
 
         len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
@@ -295,7 +295,7 @@ bh15_get_field( void )
 
         fsc2_usleep( 100000, UNSET );
 
-        bh15_command( "LE\r" );
+        bh15_command( "LE" );
 
         len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
@@ -315,7 +315,7 @@ bh15_get_field( void )
 
         fsc2_usleep( 100000, UNSET );
 
-        bh15_command( "FV\r" );
+        bh15_command( "FV" );
 
         len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
@@ -407,16 +407,23 @@ bh15_get_field( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool
+static void
 bh15_command( const char * cmd )
 {
-    if ( gpib_write( bh15.device, cmd, strlen( cmd ) ) == FAILURE )
+    size_t cnt = strlen( cmd ) + 1;
+    char * mess = T_malloc( cnt ); 
+
+    memcpy( mess, cmd, cnt - 1 );
+    mess[ cnt ] = EOS;
+
+    if ( gpib_write( bh15.device, mess, cnt ) == FAILURE )
     {
+        T_free( mess );
         print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
         THROW( EXCEPTION );
     }
 
-    return OK;
+    T_free( mess );
 }
 
 

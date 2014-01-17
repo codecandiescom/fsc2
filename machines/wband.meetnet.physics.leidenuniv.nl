@@ -18,3 +18,4 @@ FLEX_NEEDS_DECLARATIONS := yes
 BROWSER                 := firefox
 MAIL_ADDRESS            := fsc2@toerring.de
 DESCRIPTION             := "W-band"
+FLEX_NEEDS_BISON_DECLARATIONS := yes

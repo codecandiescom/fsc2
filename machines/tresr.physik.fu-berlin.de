@@ -5,3 +5,4 @@ GROUP              := dialout
 GPIB_LIBRARY       := JTT
 SERIAL_LOCK_DIR    := /var/lock
 BROWSER            := firefox
+FLEX_NEEDS_BISON_DECLARATIONS := yes

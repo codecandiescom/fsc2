@@ -14,3 +14,4 @@ rs_spec10_libs          := libpvcam.so
 #rs_spec10_extra_libs   := yes
 FLEX_NEEDS_DECLARATIONS := yes
 MAIL_ADDRESS            := jens
+FLEX_NEEDS_BISON_DECLARATIONS := yes

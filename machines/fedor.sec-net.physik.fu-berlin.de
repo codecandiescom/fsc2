@@ -32,3 +32,4 @@ me4000_libs          := libmedriver.so
 # we're in sec-net, mails won't be send anyway...
 NO_MAIL              := yes
 
+FLEX_NEEDS_BISON_DECLARATIONS := yes

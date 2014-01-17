@@ -13,3 +13,4 @@ LAN_LOG_LEVEL      := HIGH
 EDITOR             := emacs
 BROWSER            := firefox
 MAIL_ADDRESS       := fsc2@toerring.de
+FLEX_NEEDS_BISON_DECLARATIONS := yes

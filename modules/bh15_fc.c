@@ -31,7 +31,7 @@
  *     is equal to CF for SWA = 2048
  *  7. Repeatability of CF setting: 5 mG
  *  8. The current field can't be measured since when switching to measurement
- *     mode th currently set field isn't kept but is set back to zero.
+ *     mode the currently set field isn't kept but is set back to zero.
  */
 
 
@@ -149,9 +149,9 @@ static void bh15_fc_deviation( double field );
 
 static void bh15_fc_test_leds( void );
 
-static bool bh15_fc_command( const char *cmd );
+static void bh15_fc_command( const char *cmd );
 
-static bool bh15_fc_talk( const char * cmd,
+static void bh15_fc_talk( const char * cmd,
                           char *       reply,
                           long *       length );
 
@@ -733,17 +733,17 @@ bh15_fc_init( void )
 
     /* Switch off service requests. */
 
-    bh15_fc_command( "SR0\r" );
+    bh15_fc_command( "SR0" );
 
     /* Switch to mode 0, i.e. field-controller mode via internal sweep-
        address-generator. */
 
-    bh15_fc_command( "MO0\r" );
+    bh15_fc_command( "MO0" );
 
     /* Set IM0 sweep mode (we don't use it, just to make sure we don't
        trigger a sweep start inadvertently). */
 
-    bh15_fc_command( "IM0\r" );
+    bh15_fc_command( "IM0" );
 
     /* The device seems to need a bit of time after being switched to
        remote mode */
@@ -841,7 +841,8 @@ bh15_fc_start_field( void )
        of SWA steps (typically not more than 100). */
 
     bh15_fc_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
-                          0.5 * ( BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD ), 2 );
+                               0.5 * ( BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD ),
+                             2 );
 
     fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA
                  && magnet.cf - 0.5 * magnet.sw >= BH15_FC_MIN_FIELD
@@ -1280,10 +1281,10 @@ bh15_fc_test_leds( void )
         is_overload = is_remote = UNSET;
 
         length = sizeof buf;
-        bh15_fc_talk( "LE\r", buf, &length );
+        bh15_fc_talk( "LE", buf, &length );
 
         bp = buf;
-        while ( *bp && *bp != '\r' )
+        while ( *bp && *bp != EOS )
         {
             switch ( *bp )
             {
@@ -1352,7 +1353,7 @@ bh15_fc_set_cf( double center_field )
     if ( FSC2_MODE != EXPERIMENT )
         return center_field;
 
-    sprintf( buf, "CF%.3f\r", center_field );
+    sprintf( buf, "CF%.3f", center_field );
 
     for ( i = BH15_FC_MAX_SET_RETRIES; i > 0; i-- )
         bh15_fc_command( buf );
@@ -1390,7 +1391,7 @@ bh15_fc_set_sw( double sweep_width )
     if ( FSC2_MODE != EXPERIMENT )
         return sweep_width;
 
-    sprintf( buf, "SW%.3f\r", sweep_width );
+    sprintf( buf, "SW%.3f", sweep_width );
 
     for ( i = BH15_FC_MAX_SET_RETRIES; i > 0; i-- )
         bh15_fc_command( buf );
@@ -1413,7 +1414,7 @@ bh15_fc_set_swa( int sweep_address )
     if ( FSC2_MODE != EXPERIMENT )
         return sweep_address;
 
-    sprintf( buf, "SS%d\r", sweep_address );
+    sprintf( buf, "SS%d", sweep_address );
     bh15_fc_command( buf );
     return sweep_address;
 }
@@ -1438,27 +1439,37 @@ bh15_fc_deviation( double field )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool
+static void
 bh15_fc_command( const char * cmd )
 {
-    if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE )
+    size_t cnt = strlen( cmd ) + 1;
+    char * mess = T_malloc( cnt ); 
+
+    memcpy( mess, cmd, cnt - 1 );
+    mess[ cnt ] = EOS;
+
+    if ( gpib_write( magnet.device, mess, cnt ) == FAILURE )
+    {
+        T_free( mess );
         bh15_fc_failure( );
-    return OK;
+    }
+
+    T_free( mess );
 }
 
 
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool
+static void
 bh15_fc_talk( const char * cmd,
-                          char *       reply,
-                          long *       length )
+              char *       reply,
+              long *       length )
 {
-    if (    gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE
-         || gpib_read( magnet.device, reply, length ) == FAILURE )
+    bh15_fc_command( cmd );
+
+    if ( gpib_read( magnet.device, reply, length ) == FAILURE )
         bh15_fc_failure( );
-    return OK;
 }
 
 

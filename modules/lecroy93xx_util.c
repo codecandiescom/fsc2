@@ -718,7 +718,7 @@ lecroy93xx_hori_res_prep( void )
 
             lecroy93xx.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
             lecroy93xx.hres[ i ][ j ].cl_ris =
-                                    lrnd( 10 * lecroy93xx.tbas[ j ] * ris_res );
+                                   lrnd( 10 * lecroy93xx.tbas[ j ] * ris_res );
         }
 
         for ( ; j < LECROY93XX_NUM_TBAS; j++ )
@@ -802,15 +802,15 @@ lecroy93xx_curve_length( void )
 }
 
 
-/*-----------------------------------------------------------------*
- * Returns the time distance between to points of a curve for the
+/*------------------------------------------------------------------*
+ * Returns the time distance between two points of a curve for the
  * current setting of the timebase and interleaved mode
- *-----------------------------------------------------------------*/
+ *------------------------------------------------------------------*/
 
 double
 lecroy93xx_time_per_point( void )
 {
-    return ( lecroy93xx.cur_hres->cl_ris > 0 && lecroy93xx.interleaved ) ?
+    return ( lecroy93xx.cur_hres->tpp_ris > 0 && lecroy93xx.interleaved ) ?
            lecroy93xx.cur_hres->tpp_ris : lecroy93xx.cur_hres->tpp;
 }
 

@@ -35,3 +35,4 @@ WITH_HTTP_SERVER     := yes
 MAIL_ADDRESS         := jt@toerring.de
 BROWSER              := /usr/bin/firefox 
 DESCRIPTION          := "Test machine"
+FLEX_NEEDS_BISON_DECLARATIONS := yes

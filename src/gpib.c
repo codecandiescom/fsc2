@@ -78,8 +78,8 @@ gpib_init( void )
 
     fsc2_assert( Fsc2_Internals.I_am == PARENT );
 
-    /* If the file descriptor already has a non-negative value the GPIB must
-       already up */
+    /* If the file descriptor already has a non-negative value the GPIB
+       is already up */
 
 	if ( GPIB_fd >= 0 )
 		return SUCCESS;

@@ -50,7 +50,9 @@
 #include "devices_parser.h"
 
 
+#if defined FLEX_NEEDS_BISON_DECLARATIONS
 extern void devicesparse( void );
+#endif
 
 
 /* The following declarations are to avoid unnecessary warnings from

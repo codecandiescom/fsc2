@@ -11,3 +11,4 @@ SERIAL_LOCK_DIR    := /var/lock
 BROWSER            := iceweasel
 NO_MAIL            := yes
 DESCRIPTION        := "CIDEP"
+FLEX_NEEDS_BISON_DECLARATIONS := yes

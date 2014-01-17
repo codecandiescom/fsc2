@@ -6,3 +6,4 @@ GPIB_LIBRARY       := NONE
 SERIAL_LOCK_DIR    := /var/lock
 WITH_WITIO_48      := yes
 witio_48_libs      := libwitio_48.so
+FLEX_NEEDS_BISON_DECLARATIONS := yes

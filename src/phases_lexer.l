@@ -50,7 +50,9 @@
 #include "fsc2.h"
 #include "phases_parser.h"
 
+#if defined FLEX_NEEDS_BISON_DECLARATIONS
 extern void phasesparse( void );
+#endif
 
 
 /* The following declarations are to avoid unnecessary warnings from

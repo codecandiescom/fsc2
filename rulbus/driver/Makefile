@@ -22,7 +22,7 @@
 MODULE   := rulbus_epp.o
 SOURCES  := rulbus_epp.c
 PWD      := $(shell pwd)
-HEADERS  := $(PWD)/../include/rulbus_epp.h $(PWD)/../include/autoconf.h
+HEADERS  := rulbus_epp.h autoconf.h
 
 
 # Unless the user set the environment variable RULBUS_EPP_KERNEL_SOURCE
@@ -32,15 +32,21 @@ HEADERS  := $(PWD)/../include/rulbus_epp.h $(PWD)/../include/autoconf.h
 # use '/usr/src/linux/' as a last resort - but it's not unlikely to point
 # to the wrong kernel code or may even not exist...
 
+ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
+    KERNELDIR := $(kernel_source_dir)
+endif
+
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)
     KERNELDIR := $(RULBUS_EPP_KERNEL_SOURCE)
 endif
 
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-					     echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+ifeq ($(KERNELDIR),)
+	KERNELDIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+						     echo "/lib/modules/`uname -r`/build"; \
+						 else \
+							 echo "/usr/src/linux"; \
+						 fi )
+endif
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
@@ -50,7 +56,11 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
+KERNEL_VER=$(KERNELRELEASE)
+
+ifeq ($(KERNEL_VER),)
+	KERNEL_VER := $(shella make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
+endif
 
 ifeq ($(KERNEL_VER),)
 	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
@@ -92,13 +102,11 @@ ifneq ($(KERNELRELEASE),)    # if we can use the kernel build system
 
 else                         # otherwise make kernel build system available
 
-EXTRA_CFLAGS := -I$(PWD)/../include
-
 all:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA"
 
 check:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1"
 
 install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
@@ -115,7 +123,7 @@ else
 # (the -fno-strict-aliasing in CFLAGS is set because of some problems with
 # the 2.4 kernel header files withh gcc 3.3.3 on Debian)
 
-INCLUDES := -I$(KERNELDIR)/include -I$(PWD)/../include
+INCLUDES := -I$(KERNELDIR)/include
 
 CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes  \
             -fno-strict-aliasing

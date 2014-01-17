@@ -53,7 +53,10 @@
 
 
 extern void assignparser_init( void );
+
+#if defined FLEX_NEEDS_BISON_DECLARATIONS
 extern void assignparse( void );
+#endif
 
 
 /* The following declarations are to avoid unnecessary warnings from
