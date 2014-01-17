@@ -1943,14 +1943,14 @@ of the oscilloscope. Currently this function only exists for the
 needs at least one argument, the channel. The channels that can be
 used as arguments depends on the model of the oscilloscope:
 @table @samp
-@itemx LeCroy 9400
+@item LeCroy 9400
 @itemx LeCroy 9420
 @itemx LeCroy 9410
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemx LeCroy WaveSurfer (422, 432, 452)
 @code{CH1} or @code{CH2}
-@itemx LeCroy 9424
+@item LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemx LeCroy WaveSurfer (424, 434, 454)
@@ -1993,7 +1993,7 @@ used as arguments depends on the model of the oscilloscope:
 @itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemx LeCroy Wavesurver (422, 432, 452)
 @itemize @bullet
-@code{CH1} or @code{CH2}
+@item @code{CH1} or @code{CH2}
 @end itemize
 @itemx TDS540
 @itemx TDS744A
@@ -2003,7 +2003,7 @@ used as arguments depends on the model of the oscilloscope:
 @itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemx LeCroy Wavesurver (424, 434, 454)
 @itemize @bullet
-@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end itemize
 @end table
 
@@ -2128,28 +2128,28 @@ This function only exists for the @strong{LeCroy} oscilloscopes and
 must be used to set up averaging. It expects at least three arguments.
 The first argument is the channel to be used to do the averaging, i.e.@:
 @table @samp
-@itemx LeCroy 9400
+@item LeCroy 9400
 @itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy 9450
 @code{FUNC_E} or @code{FUNC_F}
-@itemx LeCroy Waverunner
+@item LeCroy Waverunner
 @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
-@itemx LeCroy WaveSurfer
+@item LeCroy WaveSurfer
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}, @code{MATH}
 @end table
 The second is the source channel to be averaged, i.e.
 @table @samp
-@itemx LeCroy 9400
+@item LeCroy 9400
 @itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemx LeCroy WaveSurfer (422, 432, 452)
 @code{CH1} or @code{CH2}
-@itemx LeCroy 9424
+@item LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemx LeCroy WaveSurfer (424, 434, 454)
@@ -2373,7 +2373,7 @@ called without an argument the function returns the currently set
 trigger mode as an integer, if called to set the mode it can either be
 a string or an integer. The following values are allowed:
 @table @samp
-@itemx LeCroy 9400
+@item LeCroy 9400
 @itemize @bullet
 @item @code{AUTO} or @code{0}
 @item @code{NORM} or @code{1}
