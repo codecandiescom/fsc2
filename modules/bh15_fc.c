@@ -1437,16 +1437,19 @@ bh15_fc_deviation( double field )
 
 
 /*--------------------------------------------------------------*
+ * Sends a message to the device after appending the end of
+ * string character expected by the device.
  *--------------------------------------------------------------*/
 
 static void
 bh15_fc_command( const char * cmd )
 {
-    size_t cnt = strlen( cmd ) + 1;
-    char * mess = T_malloc( cnt ); 
+    size_t cnt = strlen( cmd );
+    char * mess = T_malloc( cnt + 2 ); 
 
-    memcpy( mess, cmd, cnt - 1 );
-    mess[ cnt ] = EOS;
+    memcpy( mess, cmd, cnt );
+    mess[ cnt++ ] = EOS;
+    mess[ cnt ]   = '\0';
 
     if ( gpib_write( magnet.device, mess, cnt ) == FAILURE )
     {
@@ -1459,6 +1462,8 @@ bh15_fc_command( const char * cmd )
 
 
 /*--------------------------------------------------------------*
+ * Sends a message to the device after appending and return its
+ * answer.
  *--------------------------------------------------------------*/
 
 static void

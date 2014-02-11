@@ -405,16 +405,19 @@ bh15_get_field( void )
 
 
 /*--------------------------------------------------------------*
+ * Sends a message to the device after appending the end of
+ * string character expected by the device.
  *--------------------------------------------------------------*/
 
 static void
 bh15_command( const char * cmd )
 {
-    size_t cnt = strlen( cmd ) + 1;
-    char * mess = T_malloc( cnt ); 
+    size_t cnt = strlen( cmd ) ;
+    char * mess = T_malloc( cnt + 2 ); 
 
-    memcpy( mess, cmd, cnt - 1 );
-    mess[ cnt ] = EOS;
+    memcpy( mess, cmd, cnt );
+    mess[ cnt++ ] = EOS;
+    mess[ cnt ]   = '\0';
 
     if ( gpib_write( bh15.device, mess, cnt ) == FAILURE )
     {
