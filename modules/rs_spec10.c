@@ -346,7 +346,7 @@ ccd_camera_binning( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        vbin[ 0 ] = vbin[ 2 ] = 1;
+        vbin[ 0 ] = vbin[ 1 ] = 1;
     }
     else
     {

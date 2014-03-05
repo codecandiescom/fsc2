@@ -349,12 +349,15 @@ xforms_init( int  * argc,
 
     Fsc2_Internals.http_port = 8080;
 
-#if defined DEFAULT_HTTP_PORT
+#if defined WITH_HTTP_SERVER
     if (    * ( ( int * ) Xresources[ HTTPPORT ].var ) >= 1024
          && * ( ( int * ) Xresources[ HTTPPORT ].var ) <= 65535 )
         Fsc2_Internals.http_port = * ( ( int * ) Xresources[ HTTPPORT ].var );
     else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
         Fsc2_Internals.http_port = DEFAULT_HTTP_PORT;
+    else
+        Fsc2_Internals.http_port = 8080;
+
 #endif
 
     /* Load the library dealing for creating the graphics resources and

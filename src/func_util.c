@@ -3742,7 +3742,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
 
     /* Now try to get a shared memory segment */
 
-    len = sizeof len + sizeof type + MAX_CURVES * sizeof *curves;
+    len = sizeof len + sizeof type + sizeof curves;
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
@@ -3761,7 +3761,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
     memcpy( ptr, &type, sizeof type );             /* type indicator  */
     ptr += sizeof type;
 
-    memcpy( ptr, curves, MAX_CURVES * sizeof curves );
+    memcpy( ptr, curves, sizeof curves );
 
     /* Detach from the segment with the data */
 

@@ -72,11 +72,19 @@ main( void )
         /* Read the output of addr2line and pass it on to the parent */
 
 		if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
+        {
+            pclose( fp );
 			return EXIT_FAILURE;
+        }
+
 		fprintf( stdout, "%s", buf );
 
         if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
+        {
+            pclose( fp );
             return EXIT_FAILURE;
+        }
+
         fprintf( stdout, "%s", buf );
         fflush( stdout );
 
