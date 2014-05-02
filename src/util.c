@@ -777,8 +777,14 @@ filter_edl( const char * name,
         rewind( fp );
         lseek( fileno( fp ), 0, SEEK_SET );      /* paranoia... */
 
+        /* Close read end of pipes output and errors messags are going to
+           be written to */
+
         close( pd[ 0 ] );
         close( ed[ 0 ] );
+
+        /* Redirct so that input is read from th file and writes to
+           STOUT and STDERR go to the appropriate pipes */
 
         if (    dup2( fileno( fp ), STDIN_FILENO ) == -1
              || dup2( pd[ 1 ], STDOUT_FILENO ) == -1
@@ -797,6 +803,8 @@ filter_edl( const char * name,
 
             goto filter_failure;
         }
+
+        /* Finally. the redirected file descriptors must be closed */
 
         fclose( fp );
         close( pd[ 1 ] );
@@ -823,7 +831,7 @@ filter_edl( const char * name,
         _exit( EXIT_SUCCESS );
     }
 
-    /* And finally the code for the parent: first thing to do is to send a
+    /* And, finally, the code for the parent: first thing to do is to send a
        single byte to the child so it knows we have its PID. */
 
     close( pdt[ 0 ] );

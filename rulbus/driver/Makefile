@@ -1,6 +1,6 @@
 # Makefile for the RULBUS EPP kernel driver
 #
-# Copyright (C) 2003-2012  Jens Thoms Toerring
+# Copyright (C) 2003-2011  Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 MODULE   := rulbus_epp.o
 SOURCES  := rulbus_epp.c
 PWD      := $(shell pwd)
-HEADERS  := rulbus_epp.h autoconf.h
+HEADERS  := $(PWD)/../include/rulbus_epp.h $(PWD)/../include/autoconf.h
 
 
 # Unless the user set the environment variable RULBUS_EPP_KERNEL_SOURCE
@@ -32,21 +32,15 @@ HEADERS  := rulbus_epp.h autoconf.h
 # use '/usr/src/linux/' as a last resort - but it's not unlikely to point
 # to the wrong kernel code or may even not exist...
 
-ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
-    KERNELDIR := $(kernel_source_dir)
-endif
-
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)
     KERNELDIR := $(RULBUS_EPP_KERNEL_SOURCE)
 endif
 
-ifeq ($(KERNELDIR),)
-	KERNELDIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-						     echo "/lib/modules/`uname -r`/build"; \
-						 else \
-							 echo "/usr/src/linux"; \
-						 fi )
-endif
+KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+					     echo "/lib/modules/`uname -r`/build"; \
+					 else \
+						 echo "/usr/src/linux"; \
+					 fi )
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
@@ -56,18 +50,7 @@ endif
 
 ifndef KERNEL_VER
 
-KERNEL_VER=$(KERNELRELEASE)
-
-ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shella make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
-endif
-
-ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
-	                            $(KERNELDIR)/include/generated/utsrelease.h \
-					            2>/dev/null |                               \
-		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
-endif
+KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
 
 ifeq ($(KERNEL_VER),)
 	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
@@ -83,7 +66,6 @@ ifeq ($(KERNEL_VER),)
 	        	    	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
-
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
 		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
@@ -93,7 +75,7 @@ all $(MODULE) install check clean:
 
 else      # if KERNEL_VER is set
 
-# First handle the case that we're building for a 2.6 or 3.x kernel
+# First handle the case that we're building for a 2.6 kernel
 
 ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.' 2>/dev/null),)
 
@@ -102,11 +84,18 @@ ifneq ($(KERNELRELEASE),)    # if we can use the kernel build system
 
 else                         # otherwise make kernel build system available
 
+
+PWD          := $(shell pwd)
+SOURCES      := $(shell ls *.c)
+OBJECTS      := $(SOURCES:.c=.o)
+EXTRA_CFLAGS := -I$(PWD)/../include
+export OBJECTS
+
 all:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 check:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
@@ -123,7 +112,7 @@ else
 # (the -fno-strict-aliasing in CFLAGS is set because of some problems with
 # the 2.4 kernel header files withh gcc 3.3.3 on Debian)
 
-INCLUDES := -I$(KERNELDIR)/include
+INCLUDES := -I$(KERNELDIR)/include -I$(PWD)/../include
 
 CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes  \
             -fno-strict-aliasing

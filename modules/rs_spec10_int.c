@@ -20,12 +20,6 @@
 
 #include "rs_spec10.h"
 
-#ifdef __cplusplus
-#define UNS32_P              ( uns32 * )
-#else
-#define UNS32_P
-#endif
-
 
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
 #include <sys/mman.h>
@@ -40,7 +34,7 @@ static void rs_spec10_temperature_init( void );
 /*----------------------------------------------------------------------*
  * Function for initializing everything related to the camera. It first
  * tries to find the camera, then opens the device file and finally
- * initializes it and temperature control system.
+ * initializes it and the temperature control system.
  *----------------------------------------------------------------------*/
 
 void
@@ -172,9 +166,9 @@ rs_spec10_ccd_init( void )
         THROW( EXCEPTION );
     }
 
-    /* If the clear mode can be set use CLEAR_PRE_EXPOSURE mode if, this looks
-       like the most reasonable mode for both cameras with and without a
-       shutter */
+    /* If the clear mode can be set use CLEAR_PRE_EXPOSURE mode if, this
+       looks like the most reasonable mode for both cameras with and without
+       a shutter. */
 
     if (    rs_spec10_param_access( PARAM_CLEAR_MODE, &acc )
          && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
@@ -186,7 +180,7 @@ rs_spec10_ccd_init( void )
     }
 
     /* If the camera has a shutter set open mode to OPEN_PRE_EXPOSURE, i.e.
-       the normal default mode */
+       the normal default mode. */
 
     if (    rs_spec10_param_access( PARAM_SHTR_OPEN_MODE, &acc )
          && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
@@ -198,7 +192,7 @@ rs_spec10_ccd_init( void )
     }
 
     /* Try to get figure out if the exposure time resolution can be set and
-       how many settings there are */
+       how many settings there are. */
 
     if (    ! rs_spec10_param_access( PARAM_EXP_RES_INDEX, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
@@ -214,9 +208,9 @@ rs_spec10_ccd_init( void )
 
     fsc2_assert( exp_res_count > 0 );
 
-    /* If we can set the exposure time resolution determine which values are
-       available and set the resolution to the highest possible one. Otherwise
-       just determine the only available setting. */
+    /* If we can set the exposure time resolution determine which values
+       are available and set the resolution to the highest possible one.
+       Otherwise just determine the only available setting. */
 
     if ( acc == ACC_READ_WRITE )
     {
@@ -296,7 +290,7 @@ rs_spec10_ccd_init( void )
     rs_spec10->ccd.exp_time = lrnd( CCD_EXPOSURE_TIME
                                     / rs_spec10->ccd.exp_res ) ;
 
-    /* Now also figure out (if possible) the minimum exposure time */
+    /* Now also figure out (if possible) the minimum exposure time. */
 
     if (    ! rs_spec10_param_access( PARAM_EXP_MIN_TIME, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
@@ -306,7 +300,7 @@ rs_spec10_ccd_init( void )
                               ( void_ptr ) &rs_spec10->ccd.exp_min_time ) )
         rs_spec10_error_handling( );
 
-    /* Check that exposure times requested during test can really be set */
+    /* Check that exposure times requested during test can really be set. */
 
     if ( rs_spec10_test.ccd.test_min_exp_time < rs_spec10->ccd.exp_min_time )
     {
@@ -317,7 +311,7 @@ rs_spec10_ccd_init( void )
         THROW( EXCEPTION );
     }
 
-    /* Find out if we can read and write the number of clear cycles */
+    /* Find out if we can read and write the number of clear cycles. */
 
     if (    ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc )
          || acc != ACC_READ_WRITE )
@@ -328,7 +322,7 @@ rs_spec10_ccd_init( void )
     }
 
     /* Check that the range for the number of clear cycles is identical to
-       what is specified in the configuration file */
+       what is specified in the configuration file. */
 
     if ( ! pl_get_param( rs_spec10->handle, PARAM_CLEAR_CYCLES,
                          ATTR_MAX, ( void_ptr ) &clear_cycles ) )
@@ -377,7 +371,7 @@ rs_spec10_temperature_init( void )
 
     raise_permissions( );
 
-    /* Determine if reading and setting a setpoint is possible */
+    /* Determine if reading and setting a setpoint is possible. */
 
     if ( ! rs_spec10_param_access( PARAM_TEMP_SETPOINT, &acc ) )
     {
@@ -387,9 +381,9 @@ rs_spec10_temperature_init( void )
 
     rs_spec10->temp.acc_setpoint = acc;
 
-    /* Get maximum and minimum temperature that can be set and check that the
-       values in the configuration file are correct, we did rely on them in
-       the PREAPARATIONS section and during the test run */
+    /* Get maximum and minimum temperature that can be set and check that
+       the values in the configuration file are correct, we did rely on
+       them in the PREAPARATIONS section and during the test run. */
 
     if (    rs_spec10->temp.acc_setpoint == ACC_READ_ONLY
          || rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
@@ -646,10 +640,8 @@ rs_spec10_get_pic( uns32 * size )
                    "careful!\n" );
 
 #if ! defined RS_SPEC10_TEST
-
         pl_exp_abort( rs_spec10->handle, CCS_HALT );
         pl_exp_uninit_seq( );
-
 #endif /* ! defined RS_SPEC10_TEST */
 
         lower_permissions( );
@@ -708,10 +700,12 @@ rs_spec10_get_pic( uns32 * size )
     }
 
     /* According to the manual calling pl_exp_finish_seq( ) isn't necessary
-       since were doing a single region, single exposure. */
-#if 0
+       since we're doing a single region, single exposure, so it's commented
+       out. */
+
+    /*
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
-#endif
+    */
 
     pl_exp_uninit_seq( );
 
@@ -721,11 +715,6 @@ rs_spec10_get_pic( uns32 * size )
         uns32 j;
 
         unsigned long max_val = ~ ( uns16 ) 0;
-
-#if 0
-        for ( i = 0; i < *size / sizeof *frame; i++ )
-            frame[ i ] = random( ) & max_val;
-#endif
 
         for ( i = 0; i < abs( region.s2 - region.s1 + 1 ) / region.sbin; i++ )
         {
@@ -805,11 +794,9 @@ rs_spec10_set_temperature( double temp )
                  && itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
 
 #if ! defined RS_SPEC10_TEST
-
     if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT,
                          &itemp ) )
         rs_spec10_error_handling( );
-
 #endif /* ! defined RS_SPEC10_TEST */
 
     /* Return the new setpoint */
