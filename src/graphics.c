@@ -1005,7 +1005,7 @@ G_init_curves_1d( void )
 
         /* Create a GC for drawing the curve and set its color */
 
-        cv->gc = XCreateGC( G.d, G_1d.canvas.pm, 0, 0 );
+        cv->gc = XCreateGC( G.d, G_1d.canvas.pm, 0, NULL );
         XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
 
         /* Create pixmaps for the out-of-display arrows */
@@ -1047,7 +1047,7 @@ G_init_curves_1d( void )
 
         /* Create a GC for the font and set the appropriate color */
 
-        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_1d.canvas.obj ), 0, 0 );
+        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_1d.canvas.obj ), 0, NULL );
         if ( G.font != NULL )
             XSetFont( G.d, cv->font_gc, G.font->fid );
         XSetForeground( G.d, cv->font_gc, fl_get_pixel( G.colors[ i ] ) );
@@ -1096,7 +1096,7 @@ G_init_curves_2d( void )
 
     for ( i = 0; i < NUM_COLORS + 2; i++ )
     {
-        G_2d.gcs[ i ] = XCreateGC( G.d, G_2d.canvas.pm, 0, 0 );
+        G_2d.gcs[ i ] = XCreateGC( G.d, G_2d.canvas.pm, 0, NULL );
         XSetForeground( G.d, G_2d.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
         XSetLineAttributes( G.d, G_2d.gcs[ i ], 0, LineSolid, CapButt,
                             JoinBevel );
@@ -1124,7 +1124,7 @@ G_init_curves_2d( void )
 
         /* Create a GC for drawing the curve and set its color */
 
-        cv->gc = XCreateGC( G.d, G_2d.canvas.pm, 0, 0 );
+        cv->gc = XCreateGC( G.d, G_2d.canvas.pm, 0, NULL );
         XSetForeground( G.d, cv->gc, fl_get_pixel( G.colors[ i ] ) );
 
         /* Create pixmaps for the out-of-display arrows */
@@ -1166,7 +1166,7 @@ G_init_curves_2d( void )
 
         /* Create a GC for the font and set the appropriate color */
 
-        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.canvas.obj ), 0, 0 );
+        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.canvas.obj ), 0, NULL );
         if ( G.font != NULL )
             XSetFont( G.d, cv->font_gc, G.font->fid );
         XSetForeground( G.d, cv->font_gc, fl_get_pixel( FL_WHITE ) );
@@ -1617,7 +1617,7 @@ setup_canvas( Canvas_T  * c,
         fl_addto_selected_xevent( FL_ObjWin( obj ),
                                   Button1MotionMask | Button2MotionMask );
 
-        c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
+        c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, NULL );
         XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
         XSetFont( G.d, c->font_gc, G.font->fid );
     }
@@ -1634,7 +1634,7 @@ create_pixmap( Canvas_T * c )
     char dashes[ ] = { 2, 2 };
 
 
-    c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
+    c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, NULL );
     c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
                            fl_get_canvas_depth( c->obj ) );
 
@@ -1650,7 +1650,7 @@ create_pixmap( Canvas_T * c )
 
     if ( G.is_init )
     {
-        c->box_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, 0 );
+        c->box_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, NULL );
 
         if ( c == &G_1d.canvas || c == &G_1d.x_axis || c == &G_1d.y_axis )
             XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );

@@ -159,3 +159,4 @@ edl/aiesr6.hmi.de/cw_epr_sr
 edl/aiesr6.hmi.de/monitor_bruker
 edl/aiesr6.hmi.de/monitor_sr
 .tmp_mc_*
+FcntlLock/MYMETA.yml

@@ -957,8 +957,8 @@ is_in( const char *  supplied_in,
  *------------------------------------------------------------------------*/
 
 void
-i2rgb( double h,
-       int *  rgb )
+i2rgb( double    h,
+       int    * rgb )
 {
     int i, j;
     double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };

@@ -1,5 +1,17 @@
 Revision history for Perl extension File::FcntlLock
 
+0.15  Thu May 20 2014
+    - Module rewritten as three modules, one working
+      exactly as before, and two new ones that instead of
+      being XS-based use Perl code. For the first one the
+      Perl code for packing/unpacking the C flock struct is
+      generated when 'perl Makefile.PL' is run. For the other
+      a C program is created, compiled and run each time the
+      module gets loaded. This is in response to some concerns
+      the Debian dpkg package managers (who use the module) had
+      for certain circumstances when new Perl versions need to
+      be installed (as far as I understand;-)
+
 0.14  Thu Oct 29 2011
 	- Changed the test script to get it to pass under GNU Hurd,
       using only the rather limited fcntl() locking capabilities

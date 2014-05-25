@@ -3,7 +3,7 @@
 #  This program is free software; you can redistribute it and/or modify it
 #  under the same terms as Perl itself.
 #
-#  Copyright (C) 2002-2012 Jens Thoms Toerring <jt@toerring.de>
+#  Copyright (C) 2002-2014 Jens Thoms Toerring <jt@toerring.de>
 #
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl FcntlLock.t'
@@ -14,29 +14,49 @@
 use strict;
 use warnings;
 use Test;
-BEGIN { plan tests => 11 };
 use POSIX;
-use Errno;
-use File::FcntlLock;
+use File::FcntlLock::Core;
+
+my @modules;
+
+BEGIN {
+    my $num_tests = 8;
+
+    # Check which packages are usable and only test those
+
+    for ( qw/ File::FcntlLock::XS
+              File::FcntlLock::Pure
+              File::FcntlLock::Inline / ) {
+        eval "use $_";
+        unless ( $@ ) {
+            push @modules, $_;
+            $num_tests += 3;
+        }
+    }
+
+    die "Can't use any of the packages\n" unless $num_tests > 8;
+
+    plan tests => $num_tests;
+}
 
 
 ##############################################
 # 1. Most basic test: create an object
 
-my $fs = new File::FcntlLock;
-ok( defined $fs and $fs->isa( 'File::FcntlLock' ) );
+my $fs = new File::FcntlLock::Core;
+ok( defined $fs and $fs->isa( 'File::FcntlLock::Core' ) );
 
 
 ##############################################
 # 2. Also basic: create an object with initalization and check thet the
 #    properties of the created object are what they are supposed to be
 
-$fs = new File::FcntlLock l_type   => F_RDLCK,
-                          l_whence => SEEK_CUR,
-                          l_start  => 123,
-                          l_len    => 234;
+$fs = new File::FcntlLock::Core l_type   => F_RDLCK,
+                                l_whence => SEEK_CUR,
+                                l_start  => 123,
+                                l_len    => 234;
 ok(     defined $fs
-    and $fs->isa( 'File::FcntlLock' )
+    and $fs->isa( 'File::FcntlLock::Core' )
     and $fs->l_type   == F_RDLCK 
     and $fs->l_whence == SEEK_CUR
     and $fs->l_start  == 123
@@ -86,35 +106,44 @@ ok( $fs->l_len, 3 );
 
 
 ##############################################
-# 9. Test if we can get a read lock on a file and release it again
+# 9.-17. Test for obtaining a read and write lock and then concurrent
+#        locking of all three packages (or as far as the packages could
+#        be loaded)
 
-ok( \&test_read_lock );
+for my $module ( @modules ) {
+
+    ##############################################
+    # Test if we can get a read lock on a file and release it again
+
+    ok( test_read_lock( $module ) );
+
+
+    ##############################################
+    # Test if we can get an write lock on a test file and release it again
+
+    ok( test_write_lock( $module ) );
+
+
+    ##############################################
+    # Now a "real" test: the child process grabs a write lock on a test
+    # file for 2 secs while the parent repeatedly tests if it can get the
+    # lock. After the child finally releases the lock the parent should be
+    # able to obtain and again release it. Note that there are systems
+    # that don't support F_GETLK and in that case we can only try to
+    # obtain the lock directly and check for the reason it failed.
+
+    ok( test_concurrent_locking( $module ) );
+}
 
 
 ##############################################
-# 10. Test if we can get an write lock on a test file and release it again
-
-ok( \&test_write_lock );
-
-
-##############################################
-# 11. Now a "real" test: the child process grabs a write lock on a test file
-#     for 2 secs while the parent repeatedly tests if it can get the lock.
-#     After the child finally releases the lock the parent should be able to
-#     obtain and again release it. Note that there are systems that don't
-#     support F_GETLK and in that case we can only try to obtain the lock
-#     directly and check for the reason it failed.
-
-ok( \&test_concurrent_locking );
-
-
-##############################################
-# Function run for test 9, tests if we can get a read lock
+# Function run for tests 9, 12 and 15: tests if we can get a read lock
 # on a file and release it again
 
 sub test_read_lock {
-    my $fh;
+    my $module = shift;
 
+    my $fh;
     unless ( defined open $fh, '>', './fcntllock_test' ) {
         print "# Can't create a test file: $!\n";
         return 0;
@@ -127,6 +156,8 @@ sub test_read_lock {
         return 0;
     }
     unlink './fcntllock_test';
+
+    my $fs = $module->new( );
 
     $fs->l_type( F_RDLCK );
     $fs->l_start( 0 );                    # that's all GNU Hurd can handle
@@ -149,17 +180,20 @@ sub test_read_lock {
 
 
 ##############################################
-# Function run fot test 10, tests if we can get an write lock
+# Function run fot test 10, 13 and 16: tests if we can get an write lock
 # on a test file and release it again
 
 sub test_write_lock {
-    my $fh;
+    my $module = shift;
 
+    my $fh;
     unless ( defined open $fh, '>', './fcntllock_test' ) {
         print "# Can't open a file for writing: $!\n";
         return 0;
     }
     unlink './fcntllock_test';
+
+    my $fs = $module->new( );
 
     $fs->l_type( F_WRLCK );
     my $res = $fs->lock( $fh, F_SETLK );
@@ -179,26 +213,27 @@ sub test_write_lock {
 
 
 ##############################################
-# Function run for test11: the child process grabs a write lock on a test
-# file for 2 secs while the parent repeatedly tests if it can get the lock.
-# After the child finally releases the lock the parent should be able to
-# obtain and again release it. Note that there are systems that don't
-# support F_GETLK and in that case we can only try to obtain the lock
+# Function run for test 11, 14 and 17: the child process grabs a write lock
+# on a test file for 2 secs while the parent repeatedly tests if it can get
+# the lock. After the child finally releases the lock the parent should be
+# able to obtain and again release it. Note that there are systems that do
+# not support F_GETLK and in that case we can only try to obtain the lock
 # directly and check for the reason it failed.
 
 sub test_concurrent_locking {
-    my $fh;
+    my $module = shift;
 
+    my $fh;
     unless ( defined open $fh, '>', './fcntllock_test' ) {
         print "# Can't open a file for writing: $!\n";
         return 0;
     }
     unlink './fcntllock_test';
 
-    my $fs = $fs->new( l_type   => F_WRLCK,
-                       l_whence => SEEK_SET,
-                       l_start  => 0,
-                       l_len    => 0 );
+    my $fs = $module->new( l_type   => F_WRLCK,
+                           l_whence => SEEK_SET,
+                           l_start  => 0,
+                           l_len    => 0 );
 
     my $res = 0;
 

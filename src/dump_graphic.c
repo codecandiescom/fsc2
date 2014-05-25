@@ -127,7 +127,7 @@ get_1d_window( unsigned int * width,
     pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form_1d->canvas_1d ),
                         *width, *height,
                         fl_get_canvas_depth( GUI.run_form_1d->canvas_1d ) );
-    gc = XCreateGC( G.d, pm, 0, 0 );
+    gc = XCreateGC( G.d, pm, 0, NULL );
 
     /* Draw the background */
 
@@ -178,7 +178,7 @@ get_2d_window( unsigned int * width,
     pm = XCreatePixmap( G.d, FL_ObjWin( GUI.run_form_2d->canvas_2d ),
                         *width, *height,
                         fl_get_canvas_depth( GUI.run_form_2d->canvas_2d ) );
-    gc = XCreateGC( G.d, pm, 0, 0 );
+    gc = XCreateGC( G.d, pm, 0, NULL );
 
     /* Draw the background */
 
@@ -236,7 +236,7 @@ get_cut_window( unsigned int * width,
     pm = XCreatePixmap( G.d, FL_ObjWin( GUI.cut_form->cut_canvas ),
                         *width, *height,
                         fl_get_canvas_depth( GUI.cut_form->cut_canvas ) );
-    gc = XCreateGC( G.d, pm, 0, 0 );
+    gc = XCreateGC( G.d, pm, 0, NULL );
 
     /* Draw the background */
 

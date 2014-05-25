@@ -1,6 +1,16 @@
 Changes
-lib/File/FcntlLock.pm
 FcntlLock.xs
+lib/File/FcntlLock.pm
+lib/File/FcntlLock.pod
+lib/File/FcntlLock/Core.pm
+lib/File/FcntlLock/XS.pm
+lib/File/FcntlLock/XS.pod
+lib/File/FcntlLock/Pure.pod
+lib/File/FcntlLock/Inline.pm
+lib/File/FcntlLock/Inline.pod
+lib/File/FcntlLock/Errors.pm
+Pure_build/Pure.tmpl
+Pure_build/builder.c
 Makefile.PL
 MANIFEST
 README

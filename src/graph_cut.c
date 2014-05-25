@@ -352,7 +352,7 @@ cut_setup_canvas( Canvas_T  * c,
         fl_addto_selected_xevent( FL_ObjWin( obj ),
                                   Button1MotionMask | Button2MotionMask );
 
-        c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
+        c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, NULL );
         XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
         XSetFont( G.d, c->font_gc, G.font->fid );
 
@@ -450,7 +450,7 @@ G_init_cut_curve( void )
 
     /* Create a GC for drawing the curve and set its colour */
 
-    cv->gc = XCreateGC( G.d, G_2d.cut_canvas.pm, 0, 0 );
+    cv->gc = XCreateGC( G.d, G_2d.cut_canvas.pm, 0, NULL );
     XSetForeground( G.d, cv->gc,
                     fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
 
@@ -512,7 +512,7 @@ G_init_cut_curve( void )
 
     /* Create a GC for the font and set the appropriate colour */
 
-    cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.cut_canvas.obj ), 0, 0 );
+    cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.cut_canvas.obj ), 0, NULL );
     if ( G.font != NULL )
         XSetFont( G.d, cv->font_gc, G.font->fid );
     XSetForeground( G.d, cv->font_gc,
