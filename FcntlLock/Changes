@@ -1,5 +1,8 @@
 Revision history for Perl extension File::FcntlLock
 
+0.16  Sun May 25 2014
+	- Missing file in 0.15, Pure.pm, in MANIFEST added.
+
 0.15  Thu May 20 2014
     - Module rewritten as three modules, one working
       exactly as before, and two new ones that instead of
