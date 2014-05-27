@@ -18,6 +18,9 @@ use warnings;
 use base qw( File::FcntlLock::Core );
 
 
+our $VERSION = File::FcntlLock::Core->VERSION;
+
+
 ###########################################################
 # Function for doing the actual fcntl() call: assembles the binary
 # structure that must be passed to fcntl() from the File::FcntlLock
@@ -25,16 +28,15 @@ use base qw( File::FcntlLock::Core );
 # with the data from the flock structure
 
 sub lock {
-    my ( $flock_struct, $fh, $action ) = @_;
-    my $buf = pack_flock( $flock_struct );
+    my ( $self, $fh, $action ) = @_;
+    my $buf = $self->pack_flock( );
     my $ret = fcntl( $fh, $action, $buf );
 
     if ( $ret  ) {
-		unpack_flock( $flock_struct, $buf );
-        $flock_struct->{ errno } = $flock_struct->{ error } = undef;
+		$self->unpack_flock( $buf );
+        $self->{ errno } = $self->{ error } = undef;
     } else {
-        $flock_struct->{ errno } = $! + 0;
-        $flock_struct->{ error } = get_error( $! + 0 );
+        $self->get_error( $self->{ errno } = $! + 0 );
     }
 
     return $ret;

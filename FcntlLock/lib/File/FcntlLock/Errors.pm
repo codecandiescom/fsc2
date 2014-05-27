@@ -22,8 +22,8 @@ my %fcntl_error_texts;
 
 BEGIN {
     # Set up a hash with the error messages, but only for errno's that Errno
-    # knows about. The texts represent what's written in SUSv3 and in the man
-    # pages for Linux, TRUE64, OpenBSD3 and Solaris8.
+    # knows about. The texts represent what is written in SUSv3 and in the
+    # man pages for Linux, TRUE64, OpenBSD3 and Solaris8.
 
     my $err;
 
@@ -85,10 +85,46 @@ BEGIN {
 }
 
 
+###########################################################
+# Function for converting an errno to a useful, human readable
+# message.
+
 sub get_error {
-    my $err = shift;
-    return defined $fcntl_error_texts{ $err } ? $fcntl_error_texts{ $err }
-                                              : "Unexpected error: $!";
+    my ( $self, $err ) = @_;
+    return $self->{ error } =
+             defined $fcntl_error_texts{ $err } ? $fcntl_error_texts{ $err }
+                                                : "Unexpected error: $!";
+}
+
+
+###########################################################
+# Method returns the error number from the latest call of the
+# derived classes lock() function. If the last call did not
+# result in an error the method returns undef.
+
+sub lock_errno {
+    return shift->{ errno };
+}
+
+
+###########################################################
+# Method returns a short description of the error that happenend
+# on the latest call of derived classes lock() method with the
+# object. If there was no error the method returns undef.
+
+sub error {
+    return shift->{ error };
+}
+
+
+###########################################################
+# Method returns the "normal" system error message associated
+# with errno. The method returns undef if there was no error.
+
+sub system_error {
+    local $!;
+    my $self = shift;
+    return $self->{ errno } ? $! = $self->{ errno } : undef;
 }
 
 

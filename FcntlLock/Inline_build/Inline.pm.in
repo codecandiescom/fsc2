@@ -22,6 +22,9 @@ use File::Spec;
 use base qw( File::FcntlLock::Core );
 
 
+our $VERSION = File::FcntlLock::Core->VERSION;
+
+
 my ( $packstr, @member_list );
 
 
@@ -150,6 +153,9 @@ main( void )
                 break;
 
             case 8 :
+#if defined NO_Q_FORMAT
+                exit( EXIT_FAILURE );
+#endif
 				strcat( packstr, "q" );
                 break;
 
@@ -180,8 +186,11 @@ EOF
 									 DIR      => File::Spec->tmpdir( ) );
 	close $exec_file;
 
+    my $qflag = eval { pack 'q', 1 };
+    $qflag = $@ ? '-DNO_Q_FORMAT' : '';
+
 	die "Failed to run the C compiler '$Config{cc}'\n"
-		if system "$Config{cc} -o $exec_file $c_file";
+		if system "$Config{cc} $Config{ccflags} $qflag -o $exec_file $c_file";
 
 	# Run the program and read it's output, it writes out the template string
 	# we need for packing and unpacking the binary C struct flock required for
@@ -199,6 +208,9 @@ EOF
 
 	# Make sure we got all information needed
 
+    die   "Your Perl version does not support the 'q' format for pack() "
+        . "and unpack()\n" unless defined $packstr;
+
 	die "Failed to obtain all needed data about the C struct flock\n"
 		unless @member_list == 5;
 }
@@ -211,17 +223,16 @@ EOF
 # with the data from the flock structure
 
 sub lock {
-    my ( $flock_struct, $fh, $action ) = @_;
+    my ( $self, $fh, $action ) = @_;
 
-    my $buf = pack_flock( $flock_struct );
+    my $buf = $self->pack_flock( );
     my $ret = fcntl( $fh, $action, $buf );
 
     if ( $ret  ) {
-		unpack_flock( $flock_struct, $buf );
-        $flock_struct->{ errno } = $flock_struct->{ error } = undef;
+		$self->unpack_flock( $buf );
+        $self->{ errno } = $self->{ error } = undef;
     } else {
-        $flock_struct->{ errno } = $! + 0;
-        $flock_struct->{ error } = get_error( $! + 0 );
+        $self->get_error( $self->{ errno } = $! + 0 );
     }
 
     return $ret;
@@ -233,9 +244,9 @@ sub lock {
 # binary blob to be passed to fcntl().
 
 sub pack_flock {
-    my $fs = shift;
+    my $self = shift;
 	my @args;
-	push @args, $fs->{ $_ } for @member_list;
+	push @args, $self->{ $_ } for @member_list;
     return pack $packstr, @args;
 }
 
@@ -245,9 +256,9 @@ sub pack_flock {
 # fcntl() into the 'flock_struct'.
 
 sub unpack_flock {
-	my ( $fs, $data ) = @_;
+	my ( $self, $data ) = @_;
 	my @res = unpack $packstr, $data;
-	$fs->{ $_ } = shift @res for @member_list;
+	$self->{ $_ } = shift @res for @member_list;
 }
 
 

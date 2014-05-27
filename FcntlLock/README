@@ -20,9 +20,18 @@ happens each time the package is loaded (e.g. wih the 'use' function).
 Of course, for this to work a C compiler must be installed on the
 system!
 
+Unfortunately, there seem to be a few 32-bit systems where the off_t
+type, used in the flock struct, is a 64-bit integer but which use a
+Perl version that hasn't 64-bit support enabled. On these systems the
+'q' format for Perl's pack() and unpack() function isn't available and
+thus a "pure Perl" approach is thus not possible. On such systems the
+File::FcntlLock::Pure and File::FcntlLock::Inline modules won't get
+installed.
+
+
 PORTABILITY
 
-To use the module the system must supports the fcntl() system call
+To use the module the system must support the fcntl() system call
 which probably will restrict its use to POSIX compliant systems.
 
 
@@ -44,8 +53,11 @@ The module requires the following other modules:
 
 To install the module(s) a C compiler must be available and the
 system must support the use of shared libraries (or DLLs). For
-File::FcntlFlock::Inline the C compiler must also be available
-when the module is used.
+File::FcntlFlock::Inline the C compiler must also be available when
+the module is used. The installation of the File::FcntlLock::Pure
+and File::FcntlLock::Inline modules require that the Perl pack()
+and unpack() function support the 'q' format if the off_t type on
+the system is 64-bit wide.
 
 
 ACKNOWLEDGMENTS

@@ -8,13 +8,18 @@
 
 use strict;
 use warnings;
-use ExtUtils::MakeMaker;
 use Config;
+use ExtUtils::MakeMaker;
 
+
+# We need a compiler and, of course, a system that has a fcntl(2) system
+# call. Check for both. Then set up things to also create the Pure and
+# Inline sub-modules if possible.
 
 check_for_compiler( );
 check_for_fcntl( );
-assemble_pure( );
+link 'lib/File/FcntlLock.pod', 'lib/File/FcntlLock/XS.pod';
+assemble_inline( ) if assemble_pure( );
 
 
 # Finally create the Makefile
@@ -32,8 +37,12 @@ WriteMakefile(
                        DynaLoader => 0,
                        Config     => 0 },
     test          => { TESTS => 't/*.t' },
-    clean         => { FILES => 'lib/File/FcntlLock/Pure.pm' }
-);
+	clean         => { FILES => join ' ', qw{ lib/File/FcntlLock/XS.pod
+											  lib/File/FcntlLock/Pure.pm
+											  lib/File/FcntlLock/Inline.pm
+											  lib/File/FcntlLock/Pure.pod
+											  lib/File/FcntlLock/Inline.pod } }
+			 );
 
 
 ###########################################################
@@ -42,12 +51,14 @@ WriteMakefile(
 # the module
 
 sub check_for_compiler {
+	print "Checking if there's a C compiler\n";
+
     open my $fh, '>', 'cc_test.c'
         or die "Failed to open a file for writing: $!\n";
     print $fh "int main(void)\n{\nreturn 0;\n}\n";
     close $fh;
 
-    if ( system "$Config{cc} -o cc_test cc_test.c" ) {
+    if ( system "$Config{cc} $Config{ccflags} -o cc_test cc_test.c" ) {
         unlink 'cc_test.c';
         die "Can't run C compiler '$Config{cc}'\n";
     }
@@ -61,6 +72,8 @@ sub check_for_compiler {
 # without it this module makes no sense at all.
 
 sub check_for_fcntl {
+	print "Checking if there's a fcntl(2) system call\n";
+
     open my $fh, '>', 'fcntl_test.c'
         or die "Failed to open a file for writing: $!\n";
     print $fh <<EOF;
@@ -79,10 +92,9 @@ int main( void ) {
 EOF
     close $fh;
 
-    if ( system "$Config{cc} -o fcntl_test fcntl_test.c" ) {
+    if ( system "$Config{cc} $Config{ccflags} -o fcntl_test fcntl_test.c" ) {
         unlink 'fcntl_test.c';
-        die "Failed to compile a program that uses fcntl(). Does your system " .
-            "have a fcntl(2) system call?\n";
+        die "OS unsupported\n";
     }
     unlink 'fcntl_test';
     unlink 'fcntl_test.c';
@@ -99,27 +111,75 @@ EOF
 # there are two other ways of attempting to use fcntl(2), one via
 # an XS based module and one that attempts to obtain the same kind
 # of information in its BEGIN block.)
+# Note: there seem to be some 32-bit systems, where the flock struct
+#       contails 64-bit off_t members, but there's no 'q' format for
+#       Perl's pack() and unpack() function. For these systems I do
+#       not know of any proper way of setting up the flock structure
+#       using pure Perl...
 
 sub assemble_pure {
     use File::Copy;
 
-    return unless chdir 'Pure_build';
+	my $success = 0;
 
-    goto FAIL if system "$Config{cc} -o builder builder.c";
+    return 0 unless chdir 'Pure_build';
+
+	# Compile with the 'NO_Q_FORMAT' macro defined unless Perl supports
+	# the 'q' format for pack() and unpack(). If the system uses a 64-bit
+	# off_t type in its flock struct this will make the program for con-
+    # structing the code for assembling and disassembling the flock struct
+	# output nothing and we abandon trying to  build the "pure Perl" modules.
+
+	my $qflag = eval { pack 'q', 1; };
+	$qflag = $@ ? '-DNO_Q_FORMAT' : '';
+
+    goto FAIL
+        if system "$Config{cc} $Config{ccflags} $qflag -o builder builder.c";
     goto FAIL unless copy 'Pure.tmpl', 'Pure.pm';
     goto FAIL unless open my $out, '>>', 'Pure.pm';
     goto FAIL unless open my $in, "-|", './builder';
+	unless ( my $line = <$in> ) {
+		close $in;
+		close $out;
+		goto FAIL;
+	} else {
+		print $out $line;
+	}
+
     print $out $_ for <$in>;
     close $in;
 
     print $out "\n\n1;\n";
     close $out;
 
-    move 'Pure.pm', '../lib/File/FcntlLock';
+    goto FAIL unless move 'Pure.pm', '../lib/File/FcntlLock';
+
+	link '../lib/File/FcntlLock.pod', '../lib/File/FcntlLock/Pure.pod';
+
+	$success = 1;
 
   FAIL:
+	print   "Warning: Support for modules `File::FcntlLock::Pure' and "
+		  . "`File::FcntlLock::Inline' had to be disabled\n"
+		unless $success;
     unlink 'builder';
     chdir '..';
+
+	return $success;
+}
+
+
+###########################################################
+# Function for setting up the Inline package - this only happens
+# when we can use pure Perl to setup the flock struct (i.e., if
+# the assemble_pure() function was successful).
+
+sub assemble_inline {
+    use File::Copy;
+
+	return unless copy 'Inline_build/Inline.pm.in',
+		               'lib/File/FcntlLock/Inline.pm';
+	link 'lib/File/FcntlLock.pod', 'lib/File/FcntlLock/Inline.pod';
 }
 
 

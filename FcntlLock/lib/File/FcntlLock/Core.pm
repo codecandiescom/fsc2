@@ -18,6 +18,9 @@ use Carp;
 use base qw( File::FcntlLock::Errors Exporter );
 
 
+our $VERSION = '0.20';
+
+
 # Items to export into callers namespace by default.
 
 our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
@@ -26,7 +29,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 
 
 ###########################################################
-# Method for creating an object
+# Method for creating the object
 
 sub new {
     my $inv = shift;
@@ -66,7 +69,7 @@ sub new {
 # Method for setting or querying the 'l_type' property
 
 sub l_type {
-    my $flock_struct = shift;
+    my $self = shift;
 
     if ( @_ ) {
         my $l_type = shift;
@@ -76,18 +79,17 @@ sub l_type {
             carp "Invalid argument in call of l_type method";
             return;
         }
-        $flock_struct->{ l_type } = $l_type;
+        $self->{ l_type } = $l_type;
     }
-    return $flock_struct->{ l_type };
+    return $self->{ l_type };
 }
 
 
 ###########################################################
 # Method for setting or querying the 'l_whence' property
 
-
 sub l_whence {
-    my $flock_struct = shift;
+    my $self = shift;
 
     if ( @_ ) {
         my $l_whence = shift;
@@ -97,72 +99,39 @@ sub l_whence {
             carp "Invalid argument in call of l_whence method";
             return;
         }
-        $flock_struct->{ l_whence } = $l_whence;
+        $self->{ l_whence } = $l_whence;
     }
-    return $flock_struct->{ l_whence };
+    return $self->{ l_whence };
 }
 
 
 ###########################################################
-# Method for setting or querying the 'l_start' property
+# Method to set or query of the 'l_start' property
 
 sub l_start {
-    my $flock_struct = shift;
+    my $self = shift;
 
-    $flock_struct->{ l_start } = shift if @_;
-    return $flock_struct->{ l_start };
+    $self->{ l_start } = shift if @_;
+    return $self->{ l_start };
 }
 
 
 ###########################################################
-# Method for setting or querying the 'l_len' property
+# Method to set or query the 'l_len' property
 
 sub l_len {
-    my $flock_struct = shift;
+    my $self = shift;
 
-    $flock_struct->{ l_len } = shift if @_;
-    return $flock_struct->{ l_len };
+    $self->{ l_len } = shift if @_;
+    return $self->{ l_len };
 }
 
 
 ###########################################################
-# Method for querying the 'l_pid' property
+# Method to query the 'l_pid' property
 
 sub l_pid {
     return shift->{ l_pid };
-}
-
-
-###########################################################
-# Method returns the error number from the latest call of the
-# derived classes lock() function. If the last call did not
-# result in an error the method returns undef.
-
-=cut
-
-sub lock_errno {
-    return shift->{ errno };
-}
-
-
-###########################################################
-# Method returns a short description of the error that happenend
-# on the latest call of derived classes lock() method with the
-# object. If there was no error the method returns undef.
-
-sub error {
-    return shift->{ error };
-}
-
-
-###########################################################
-# Method returns the "normal" system error message associated
-# with errno. The method returns undef if there was no error.
-
-sub system_error {
-    local $!;
-    my $flock_struct = shift;
-    return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : undef;
 }
 
 

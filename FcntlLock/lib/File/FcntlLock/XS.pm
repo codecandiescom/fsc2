@@ -15,6 +15,8 @@ use strict;
 use warnings;
 use base qw( File::FcntlLock );
 
+our $VERSION = File::FcntlLock->VERSION;
+
 
 1;
 

@@ -17,7 +17,7 @@ use Carp;
 use base qw( File::FcntlLock::Core DynaLoader );
 
 
-our $VERSION = '0.16';
+our $VERSION = '0.20';
 
 
 bootstrap File::FcntlLock $VERSION;
@@ -29,7 +29,7 @@ bootstrap File::FcntlLock $VERSION;
 # process holds a lock.
 
 sub lock {
-    my ( $flock_struct, $fh, $action ) = @_;
+    my ( $self, $fh, $action ) = @_;
     my ( $ret, $err );
 
     # Figure out the file descriptor - we might get a file handle, a
@@ -45,13 +45,12 @@ sub lock {
 
     $action = -1 unless defined $action;
 
-    if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
-        $flock_struct->{ errno } = $flock_struct->{ error } = undef;
+    if ( $ret = C_fcntl_lock( $fd, $action, $self, $err ) ) {
+        $self->{ errno } = $self->{ error } = undef;
     } elsif ( $err ) {
         die "Internal error in File::FcntlLock module detected";
     } else {
-        $flock_struct->{ errno } = $! + 0;
-        $flock_struct->{ error } = get_error( $! + 0 );
+        $self->get_error( $self->{ errno } = $! + 0 );
     }
 
     return $ret;

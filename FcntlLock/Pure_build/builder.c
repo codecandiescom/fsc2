@@ -122,6 +122,15 @@ main( void )
                 break;
 
             case 8 :
+#if defined NO_Q_FORMAT
+                /* There seem to be some 32-bit systems out there where off_t
+                   is a 64-bit integer but Perl has no 'q' format for its
+                   pack() and unpack() functions. For these  systemsthere
+                   doesn't seem to be a good way for setting up the flock
+                   structure properly using pure Perl. */
+
+                exit( EXIT_FAILURE );
+#endif
 				strcat( packstr, "q" );
                 break;
 
@@ -142,10 +151,10 @@ main( void )
             "# the data from the 'flock_struct' into a binary blob to be\n"
             "# passed to fcntl().\n\n"
             "sub pack_flock {\n"
-            "    my $fs = shift;\n"
+            "    my $self = shift;\n"
             "    return pack( '%s',\n", packstr );
     for ( i = 0; i < NUM_ELEMS( params ); ++i )
-		printf( "                 $fs->{ %s }%s", params[ i ].name,
+		printf( "                 $self->{ %s }%s", params[ i ].name,
 				i == NUM_ELEMS( params ) - 1 ? " " : ",\n" );
 
     printf( ");\n}\n\n\n"
@@ -155,11 +164,11 @@ main( void )
             "# the binary blob received from a call of fcntl() into the\n"
             "# 'flock_struct'.\n\n"
             "sub unpack_flock {\n"
-            "     my ( $fs, $data ) = @_;\n"
+            "     my ( $self, $data ) = @_;\n"
 			"     ( " );
 
     for ( i = 0; i < NUM_ELEMS( params ); ++i )
-        printf( "$fs->{ %-8s }%s", params[ i ].name,
+        printf( "$self->{ %-8s }%s", params[ i ].name,
 				i == NUM_ELEMS( params ) - 1 ? " " : ",\n       " );
 	printf( ") = unpack( '%s', $data );\n}\n", packstr );
 
