@@ -241,7 +241,7 @@ fsc2_serial_exp_init( int log_level )
     if ( ll > LL_ALL )
         ll = LL_ALL;
 
-    /* Lock and create log files for all devices */
+    /* Lock (via lock files) and create log files for all devices */
 
     for ( i = 0; i < Num_Serial_Ports; i++ )
     {
@@ -322,6 +322,41 @@ fsc2_serial_final_reset( void )
     if ( Serial_Ports )
         Serial_Ports = T_free( Serial_Ports );
     Num_Serial_Ports = 0;
+}
+
+
+/*-----------------------------------------------------------------------*
+ * Helper function for doing everything necessary when either opening
+ * a serial port fails or one of the operations immediately following
+ * open().
+ *-----------------------------------------------------------------------*/
+
+static struct termios *
+fail_on_open( int          sn,
+              int          fd,
+              const char * mess )
+{
+    /* We want to pass errno settings from failed calls back to the caller,
+       so store it before we attempt any other operation */
+
+    int stored_errno = errno;
+
+
+    /* Close the port if it's already open and then get rid of permissions */
+
+    if ( fd != -1 )
+        close( fd );
+
+    lower_permissions( );
+
+    fsc2_serial_log_message( sn, "Error: %s serial port '%s' for device "
+                             "%s in function fsc2_serial_open()\n", mess,
+                             Serial_Ports[ sn ].dev_file,
+                             Serial_Ports[ sn ].dev_name );
+    fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+
+    errno = stored_errno;
+    return NULL;
 }
 
 
@@ -413,18 +448,18 @@ fsc2_serial_open( int sn,
             lower_permissions( );
             Serial_Ports[ sn ].is_open = UNSET;
             Serial_Ports[ sn ].fd = -1;
-            fsc2_serial_log_message( sn, "Closed alteady open serial port "
+            fsc2_serial_log_message( sn, "Closed already open serial port "
                                      "for device '%s', to be re-opened in the "
                                      "following with different flags\n",
                                      Serial_Ports[ sn ].dev_name );
         }
     }
 
-    /* We need exclussive access to the serial port and we also need
+    /* We need exclusive access to the serial port and we also need
        non-blocking mode (already to avoid hanging indefinitely if the
        other side does not react). O_NOCTTY is set because the serial
        port should not become the controlling terminal, otherwise line
-       noise read as a CTRL-C might kill the program. */
+       noise read as a CTRL-C might kill us! */
 
     Serial_Ports[ sn ].flags = flags;
 
@@ -443,39 +478,26 @@ fsc2_serial_open( int sn,
 
     raise_permissions( );
 
-    if ( ( fd = open( Serial_Ports[ sn ].dev_file, flags ) ) < 0 )
-    {
-        int stored_errno = errno;
-
-        lower_permissions( );
-
-        fsc2_serial_log_message( sn, "Error: Failed to open serial port '%s' "
-                                 "for device %s in function "
-                                 "fsc2_serial_open()\n",
-                                 Serial_Ports[ sn ].dev_file,
-                                 Serial_Ports[ sn ].dev_name );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
-
-        errno = stored_errno;
-        return NULL;
-    }
+    if ( ( fd = open( Serial_Ports[ sn ].dev_file, flags ) ) == -1 )
+        return fail_on_open( sn, fd, "Failed to open" );
 
     /* Set the close-on-exec flag for the file descriptor */
 
-    if ( ( fd_flags = fcntl( fd, F_GETFD ) ) < 0 )
-        fd_flags = 0;
-    fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
+    if (    ( fd_flags = fcntl( fd, F_GETFD ) ) == -1
+         || fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC ) == -1 )
+        return fail_on_open( sn, fd, "Failed to set CLOSE_ON_EXEC flag on" );
 
     /* Get the the current terminal settings and copy them to a structure
        that gets passed back to the caller. */
 
-    tcgetattr( fd, &Serial_Ports[ sn ].old_tio );
-    memcpy( &Serial_Ports[ sn ].new_tio, &Serial_Ports[ sn ].old_tio,
-            sizeof Serial_Ports[ sn ].new_tio );
+    if ( tcgetattr( fd, &Serial_Ports[ sn ].old_tio ) == -1 )
+        return fail_on_open( sn, fd, "Failed to obtain settings for" );
+
     lower_permissions( );
 
-    Serial_Ports[ sn ].fd = fd;
+    Serial_Ports[ sn ].fd      = fd;
     Serial_Ports[ sn ].is_open = SET;
+    Serial_Ports[ sn ].new_tio = Serial_Ports[ sn ].old_tio;
 
     fsc2_serial_log_message( sn, "Successfully opened serial port '%s' for "
                              "device %s\n", Serial_Ports[ sn ].dev_file,
@@ -542,18 +564,21 @@ fsc2_serial_close( int sn )
 
 /*-------------------------------------------------------------------*
  * Function for sending data via one of the serial ports. It expects
- * 5 arguments, first the number of the serial port, then a buffer
- * with the data and its length, a timeout in us we are supposed to
- * wait for data to become writeable to the serial port and finally
- * a flag that tells if the function is to return immediately if a
- * signal is received before any data could be send.
+ * 5 arguments
+ *   sn             :  number of the serial port
+ *   buf            :  buffer with the data to be send
+ *   count          :  length of the buffer
+ *   us_wait        :  timeout in us we are supposed to wait for data
+ *                     to become writeable to the serial port
+ *   quit_on_signal :  flag that tells if the function is to return
+ *                     immediately if a signal is received before any
+ *                     data could be send.
  * If the timeout value in 'us_wait' is zero the function won't wait
  * for the serial port to become ready for writing, if it's negative
- * the the function potentially will wait indefinitely long.
- * The function returns the number of written bytes or -1 when an
- * error happened. A value of 0 is returned when no data could be
- * written, possibly because a signal was received before writing
- * started.
+ * the the function may wait indefinitely long.
+ * The function returns the number of written bytes or -1 on errors.
+ * A value of 0 is returned when no data could be written, possibly
+ * because a signal was received before writing started.
  *-------------------------------------------------------------------*/
 
 ssize_t
@@ -702,16 +727,20 @@ fsc2_serial_write( int          sn,
 
 /*---------------------------------------------------------------------*
  * Function for reading data from one of the serial ports. It expects
- * 6 arguments, first the number of the serial port, then a buffer and
- * its maximum length for returning the read in data, an (optional
- * string with the character(s) that act as termination for the data
- * send by the device, a timeout in micro-seconds we are supposed to
- * wait for data to be read from the serial port and finally a flag
- * that tells if the function is to return immediately if a signal
- * is received.
+ * 6 arguments:
+ *   sn             :  number of the serial port
+ *   buf            :  buffer for storing the data read
+ *   count          :  length of the buffer
+ *   term           :  (optional) string with the character(s) that act as
+ *                     termination for the data send by the device (can be
+ *                     empty string or a NULL pointer)
+ *   us_wait        :  timeout in us we're supposed to wait for data to
+ *                     be read from the serial port
+ *   quit_on_signal :  flag that tells if the function is to return
+ *                     immediately if a signal is received
  * If the timeout value in 'us_wait' is zero the function won't wait
  * for data to appear on the serial port, when it is negative the
- * function waits indefinitely long for data.
+ * function may wait indefinitely long for data.
  * The function returns the number of read in data or -1 when an error
  * happened. A value of 0 is returned when no data could be read in,
  * possibly because a signal was received before reading started.
@@ -830,8 +859,8 @@ fsc2_serial_read( int          sn,
 
                     gettimeofday( &after, NULL );
                     still_to_wait -=
-                                   ( after.tv_sec  * 1000000 + after.tv_usec  )
-                                 - ( before.tv_sec * 1000000 + before.tv_usec );
+                                  ( after.tv_sec  * 1000000 + after.tv_usec  )
+                                - ( before.tv_sec * 1000000 + before.tv_usec );
 
                     if ( still_to_wait > 0 )
                         goto read_retry;
