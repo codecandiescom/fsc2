@@ -49,7 +49,7 @@ static int ll;                       /* log level                            */
 static void fsc2_serial_log_date( int sn );
 static void fsc2_serial_log_message( int          sn,
                                      const char * fmt,
-                                     ...               );
+                                     ... );
 static void fsc2_serial_log_function_start( int          sn,
                                             const char * function );
 static void fsc2_serial_log_function_end( int          sn,
@@ -1383,7 +1383,7 @@ open_serial_log( int sn )
         
         TRY_SUCCESS;
     }
-    CATCH( OUT_OF_MEMORY_EXCEPTION )     /* extremely unlikely... */
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
         if ( dev_name )
             T_free( dev_name );
@@ -1408,7 +1408,7 @@ open_serial_log( int sn )
         int fd_flags = fcntl( fileno( Serial_Ports[ sn ].log_fp ),
                               F_GETFD );
 
-        if ( fd_flags < 0 )
+        if ( fd_flags == -1 )
             fd_flags = 0;
         fcntl( fileno( Serial_Ports[ sn ].log_fp ), F_SETFD,
                fd_flags | FD_CLOEXEC );
@@ -1451,14 +1451,14 @@ close_serial_log( int sn )
 
 /* Here come some dummy functions for the case that fsc2 was compiled without
    support for serial ports. They are needed for the case that from a previous
-   install meodules using the serial port still exist - an attempt to load
-   these outdated modules would result in a failure with an error message
-   telling that fsc2 is missing some serial port functions without an
-   explanation that they aren't compiled in anymore. By supplying dummy
-   functions loading these modules still works but once the modules try to
-   call a function needing a serial port they fail with a error message the
-   user can understand, i.e. one that tells him/her that fsc2 was compiled
-   without support for serial ports... */
+   install modules using the serial port still exist - without these dummy
+   functions an attempt to load these outdated modules would result in a
+   failure with an error message telling that fsc2 is missing some serial
+   port functionality without an explanation that they aren't compiled in
+   anymore. By supplying these functions loading such a module still works
+   but once the module tries to call a function needing a serial port it
+   will fail with an error message the user can understand, i.e. one that
+   tells him/her that fsc2 was compiled without support for serial ports. */
 
 
 int
@@ -1472,6 +1472,7 @@ fsc2_request_serial_port( const char * dev_file  UNUSED_ARG,
 
     return -1;
 }
+
 
 struct termios *
 fsc2_serial_open( int sn     UNUSED_ARG,
@@ -1564,6 +1565,7 @@ fsc2_tcflow( int sn      UNUSED_ARG,
     errno = EBADF;
     return -1;
 }
+
 
 #endif
 

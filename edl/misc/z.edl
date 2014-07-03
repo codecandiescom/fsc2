@@ -14,7 +14,7 @@ xN[ N ];
 
 PREP:
 
-init_2d( 4, N, M, -0.1 s, 5 ms, 3325 G, 2.0 G, "Time after laser flash [µs]",
+init_2d( 4, N, M, -0.1 s, 5 ms, 3325 G, 2.0 G, "Time after laser flash [Âµs]",
 		 "Magnetic field [G]", "Signal intensity [mV]" );
 
 EXP:
@@ -63,7 +63,7 @@ print( "\Ttime = # s\n", delta_time( ) - t );
 
 ON_STOP:
 
-save_comment( "% ", "Na, was denkst\ndu über das?\n", 
-			  "Ihre Meinung zählt:" );
+save_comment( "% ", "Na, was denkst\ndu Ã¼ber dies?\n", 
+			  "Ihre Meinung zÃ¤hlt:" );
 save_program( "# ");
 save_output( "% " );

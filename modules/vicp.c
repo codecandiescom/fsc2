@@ -39,17 +39,17 @@
    bit 7    data will be send (if with or without EOI is determined by bit 0)
    bit 6    remote mode
    bit 5    local lockout
-   bit 4    clear device (if send with data clear is done before data are
+   bit 4    clear device (if sent with data a clear is done before data are
             interpreted)
    bit 3    SRQ (only to be send by the device)
    bit 2    reserved
    bit 1    reserved
-   bit 0    if set data block terminates in EOI character
+   bit 0    if set data block is terminater by EOI character
 
    The EOI bit simply tells if the data block send to the device or received
    from it ends in an EOI character ('\n' or 0x0A).
 
-   The 'header_version' field is a number - currently only 1 is an acceptable
+   The 'header_version' field is a number - currently only 1 is an allowed
    value (protocol version 1A is treated as a subversion of version 1).
 
    The 'sequence_number' field only has a meaning for devices supporting
@@ -62,7 +62,7 @@
    can find out from checking if the sequence number is 0 or non-zero.
 
    Finally, the 'block_length' member is the length of the block of data
-   (in bytes) to be send following the header. It's a 32-bit number in
+   (in bytes) to be sent following the header. It's a 32-bit number in
    big-endian format, i.e. the MSB is at the lowest memory address and
    the LSB at the highest address.
 
@@ -105,10 +105,10 @@
    SIGALRM signal on expiry, is used for controlling the timeout. Thus the
    function temporarily installs its own signal handler for SIGALRM, so the
    caller should make sure that it doesn't initiate anything that would also
-   raise such a signal. Please also note that the function can't be called
-   when an connection has already been created. On failure (either because
-   the connection has already been opened, connecting to the device fails or
-   not enough memory is available) the function throws an exception.
+   raise such a SIGALRM signal. Please also note that the function can't be
+   called when an connection has already been created. On failure (either
+   because the connection has already been opened, connecting to the device
+   fails or not enough memory is available) the function throws an exception.
 
    vicp_close() is the opposite of vicp_open(), i.e. it shuts down the
    existing connection. It throws an exception when you try to close an
@@ -183,13 +183,13 @@
    Sharples from Nottingham University (steve.sharples@nottingham.ac.uk),
    see
 
-   http://osam.eee.nottingham.ac.uk/lecroy_tcp/
+     http://osam.eee.nottingham.ac.uk/lecroy_tcp/
 
    and for the (Windows) LeCroyVICP Client Library written by Anthony Cake
    (anthonyrc@users.sourceforge.net) and Larry Salant
    (larryss@users.sourceforge.net), available at
 
-   http://sourceforge.net/projects/lecroyvicp/
+     http://sourceforge.net/projects/lecroyvicp/
 
    were of great help in writing this implementation, especially given
    the rather meager amount of information in the Remote Control Manuals

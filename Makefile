@@ -501,19 +501,20 @@ mchdir           := $(fdir)/machines
 
 SHELL            := /bin/sh
 CC               := gcc
-CFLAGS           := -W                      \
-					-Wall                   \
-					-Wextra                 \
-					-Wwrite-strings         \
-					-Wstrict-prototypes     \
-					-Wmissing-prototypes    \
-					-Wmissing-declarations  \
-					-Wredundant-decls       \
-					-Wshadow                \
-					-Wpointer-arith         \
-					-Waggregate-return      \
-					-Wnested-externs        \
-					-Wcast-align
+CFLAGS           := -W                                  \
+					-Wall                               \
+					-Wextra                             \
+					-Wwrite-strings                     \
+					-Wstrict-prototypes                 \
+					-Wmissing-prototypes                \
+					-Wmissing-declarations              \
+					-Wredundant-decls                   \
+					-Wshadow                            \
+					-Wpointer-arith                     \
+					-Waggregate-return                  \
+					-Wnested-externs                    \
+					-Wcast-align                        \
+	                $$$$(pkg-config --cflags freetype2)
 
 
 BISON         := bison
@@ -582,7 +583,7 @@ LFLAGS	 := -shared -fpic
 
 
 LIBS := -L/usr/local/lib \
-		-L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
+		-L/usr/X11R6/lib -lforms -lX11 -lXft -lXpm -lm -ldl
 
 ifeq ($(MPATROL),YES)
 	CONFFLAGS := -DMPATROL
