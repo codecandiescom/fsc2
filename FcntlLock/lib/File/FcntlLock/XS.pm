@@ -17,6 +17,8 @@ use base qw( File::FcntlLock );
 
 our $VERSION = File::FcntlLock->VERSION;
 
+our @EXPORT = @File::FcntlLock::EXPORT;
+
 
 1;
 

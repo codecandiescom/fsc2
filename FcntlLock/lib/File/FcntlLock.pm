@@ -17,12 +17,22 @@ use Carp;
 use base qw( File::FcntlLock::Core DynaLoader );
 
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 
 bootstrap File::FcntlLock $VERSION;
 
 our @EXPORT = @File::FcntlLock::Core::EXPORT;
+
+
+###########################################################
+#
+# Make our exports exportable by child classes
+
+sub import
+{
+    File::FcntlLock->export_to_level( 1, @_ );
+}
 
 
 ###########################################################

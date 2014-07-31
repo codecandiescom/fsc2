@@ -20,6 +20,8 @@ use base qw( File::FcntlLock::Core );
 
 our $VERSION = File::FcntlLock::Core->VERSION;
 
+our @EXPORT = @File::FcntlLock::Core::EXPORT;
+
 
 ###########################################################
 # Function for doing the actual fcntl() call: assembles the binary

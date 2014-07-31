@@ -1,6 +1,10 @@
 Revision history for Perl extension File::FcntlLock
 
-0.21  Tue July 31 2014
+0.22  Thu July 31 2014
+	- Exports still didn't work from the XS, Pure and Inline modules,
+	  hopefully fixed.
+
+0.21  Thu July 31 2014
 	- Missing @EXPORT of constants fixed with patch supplied by
 	  Raphaël Hertzog <hertzog@debian.org> (thank you;-)
 
