@@ -20,13 +20,13 @@
 
 
 use strict;
-use Net::Domain qw ( hostfqdn );
 use warnings;
+use Net::Domain qw ( hostfqdn );
 use IO::Socket::INET;
 use POSIX;
 use File::FcntlLock;
 
-# Reduce PATH to the necessary minmum and delete some other environment
+# Reduce PATH to the absolute minmum and delete some other environment
 # variable that might lead to trouble - we're running in taint mode
 
 $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
@@ -117,8 +117,8 @@ $SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
 
 while ( 1 ) {
     $client = $server->accept( );
-    next if $! == 10;
-    exit 1 unless $client;
+    next unless $client;
+
   FORK:
     if ( my $pid = fork ) {         # parent on success
         close $client;
