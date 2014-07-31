@@ -17,10 +17,12 @@ use Carp;
 use base qw( File::FcntlLock::Core DynaLoader );
 
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 
 bootstrap File::FcntlLock $VERSION;
+
+our @EXPORT = @File::FcntlLock::Core::EXPORT;
 
 
 ###########################################################

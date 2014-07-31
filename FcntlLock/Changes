@@ -1,5 +1,9 @@
 Revision history for Perl extension File::FcntlLock
 
+0.21  Tue July 31 2014
+	- Missing @EXPORT of constants fixed with patch supplied by
+	  Raphaël Hertzog <hertzog@debian.org> (thank you;-)
+
 0.20  Tue May 27 2014
     - Problem on GNU Hurd hopefully fixed and some cosmetic changes.
 
