@@ -18,7 +18,7 @@
 === BSLOPE  float  [ : ] [ 4.0 ] "Field/current ratio" "mT/A"
 DEVICES:
 
-fsps25;              /* sweep power supply */
+fsps25;               /* sweep power supply */
 LOCKIN;               /* lock-in amplifier  */
 
 
@@ -102,9 +102,10 @@ delay = FACTOR * lockin_time_constant( );
 lockin_sensitivity( SENS );
 === endif
 
-magnet_max_sweep_rate( SPEED / 6.0e4 );
-data[ 1, SP, 1 ] = magnet_field( start_current );
 magnet_max_sweep_rate( 2000.0 / 6.0e4 );
+magnet_sweep_rate( 2000.0 / 6.0e4 );
+data[ 1, SP, 1 ] = magnet_field( start_current );
+magnet_sweep_rate( SPEED / 6.0e4 );
 sc = data[ 1, SP, 1 ];
 
 /* Create the toolbos that shows the current scan number and allows to
@@ -223,11 +224,11 @@ FOREVER {
 		BREAK;
 	}
 
-	/* Otherwise go back to the start field */
+	/* Otherwise go back to the start field (with maximum possible speed) */
 
-	magnet_max_sweep_rate( SPEED / 6.0e4 );
+    magnet_sweep_rate( 2000.0 / 6.0e4 );
 	data[ I + 1, SP, 1 ] = magnet_field( start_current );
-	magnet_max_sweep_rate( 2000.0 / 6.0e4 );
+    magnet_sweep_rate( SPEED / 6.0e4 );
 }
 
 

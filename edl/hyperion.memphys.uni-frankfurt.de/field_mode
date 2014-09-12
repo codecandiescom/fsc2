@@ -36,6 +36,8 @@ EXPERIMENT:
 
 current = magnet_field( );
 max_current = magnet_max_current( );
+magnet_max_sweep_speed( 2000.0 / 6.0e4 );
+magnet_sweep_speed( 2000.0 / 6.0e4 );
 
 hide_toolbox( "ON" );
 Current = input_create( "FLOAT_INPUT", current, "Magnet current [A]" );

@@ -98,7 +98,7 @@ fsc2_request_serial_port( const char * dev_file,
             eprint( FATAL, UNSET, "%s: Missing permissions to access serial "
                     "port device file '%s'.\n", dev_name, dev_file );
         else if ( errno == ENOENT || errno == ENOTDIR )
-            eprint( FATAL, UNSET, "%s: Serial port evice file '%s' does not "
+            eprint( FATAL, UNSET, "%s: Serial port device file '%s' does not "
                     "exist.\n", dev_name, dev_file );
         else if ( errno == ENOMEM )
             eprint( FATAL, UNSET, "%s: Running out of memory while testing "
