@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2012 Jens Thoms Toerring
+ *  Copyright (C) 1999-2014 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1147,7 +1147,7 @@ reconfigure_window_1d( Canvas_T * c,
        factors are set. Thus we need in the call for the canvas window to
        redraw also axis windows which got reconfigured before. */
 
-    XftDrawChange( c->xftdraw, NULL );
+    XftDrawChange( c->xftdraw, None );
     delete_pixmap( c );
     create_pixmap( c );
     XftDrawChange( c->xftdraw, c->pm );
@@ -1460,7 +1460,7 @@ repaint_canvas_1d( Canvas_T * c )
                 XftDrawStringUtf8( c->xftdraw, G.xftcolor + i, G.font,
                                    5,   ( G.font_asc + 2 ) * ( i + 1 )
                                       + G.font_desc * i + 2,
-                                   buf, strlen( buf ) );
+                                   ( XftChar8 const * ) buf, strlen( buf ) );
                 XftDrawChange( c->xftdraw, c->pm );
             }
         }
@@ -1485,7 +1485,7 @@ repaint_canvas_1d( Canvas_T * c )
                 XftDrawStringUtf8( c->xftdraw, G.xftcolor + i, G.font,
                                    5,   ( G.font_asc + 2 ) * ( i + 1 )
                                       + G.font_desc * i + 2,
-                                   buf, strlen( buf ) );
+                                   ( XftChar8 const * ) buf, strlen( buf ) );
                 XftDrawChange( c->xftdraw, c->pm );
             }
 

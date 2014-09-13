@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2012 Jens Thoms Toerring
+ *  Copyright (C) 1999-2014 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -323,16 +323,16 @@ fonts_init( void )
         xrcolor.green = ( ( unsigned short ) green ) << 8;
         xrcolor.blue  = ( ( unsigned short ) blue )  << 8;
 
-        XftColorAllocValue( G.d, fl_visual, fl_colormap,
+        XftColorAllocValue( G.d, fl_get_visual(), fl_get_colormap( ),
                             &xrcolor, G.xftcolor + i );
     }
 
     xrcolor.red = xrcolor.green = xrcolor.blue = 0;
-    XftColorAllocValue( G.d, fl_visual, fl_colormap,
+    XftColorAllocValue( G.d, fl_get_visual(), fl_get_colormap( ),
                         &xrcolor, G.xftcolor + MAX_CURVES );
 
     xrcolor.red = xrcolor.green = xrcolor.blue = 0xffff;
-    XftColorAllocValue( G.d, fl_visual, fl_colormap,
+    XftColorAllocValue( G.d, fl_get_visual(), fl_get_colormap( ),
                         &xrcolor, G.xftcolor + MAX_CURVES + 1 );
 }
 
@@ -1328,7 +1328,7 @@ stop_graphics( void )
         XftFontClose( G.d, G.font );
 
         for ( i = 0; i < MAX_CURVES + 2; i++ )
-            XftColorFree( G.d, fl_visual, fl_colormap,
+            XftColorFree( G.d, fl_get_visual(), fl_get_colormap( ),
                           G.xftcolor + i );
 
         if ( GUI.run_form_1d )
@@ -1592,7 +1592,8 @@ setup_canvas( Canvas_T  * c,
 
     create_pixmap( c );
 
-    c->xftdraw = XftDrawCreate( G.d, c->pm, fl_visual, fl_colormap );
+    c->xftdraw = XftDrawCreate( G.d, c->pm, fl_get_visual(),
+                                fl_get_colormap( ) );
 
     fl_add_canvas_handler( c->obj, Expose, ch, c );
 

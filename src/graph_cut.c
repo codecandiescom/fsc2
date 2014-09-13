@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2012 Jens Thoms Toerring
+ *  Copyright (C) 1999-2014 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -327,7 +327,8 @@ cut_setup_canvas( Canvas_T  * c,
 
     create_pixmap( c );
 
-    c->xftdraw = XftDrawCreate( G.d, c->pm, fl_visual, fl_colormap );
+    c->xftdraw = XftDrawCreate( G.d, c->pm, fl_get_visual(),
+                                fl_get_colormap( ) );
 
     fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
 
@@ -548,7 +549,6 @@ void
 cut_form_close( void )
 {
     int i;
-    Curve_1d_T *cv = &G_2d.cut_curve;
 
 
     if ( ! G_cut.is_shown )
@@ -1299,7 +1299,7 @@ cut_reconfigure_window( Canvas_T * c,
     /* Delete the old pixmap for the canvas and get a new one with the proper
        sizes. Also do some other small modifications necessary. */
 
-    XftDrawChange( c->xftdraw, NULL );
+    XftDrawChange( c->xftdraw, None );
     delete_pixmap( c );
     create_pixmap( c );
     XftDrawChange( c->xftdraw, c->pm );

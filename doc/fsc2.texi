@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 
-@c  Copyright (C) 1999-2012 Jens Thoms Toerring
+@c  Copyright (C) 1999-2014 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c

@@ -1,7 +1,7 @@
 /*
  *  Kernel module for Wasco WITIO-48 DIO ISA cards
  * 
- *  Copyright (C) 2003-2012  Jens Thoms Toerring
+ *  Copyright (C) 2003-2014  Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

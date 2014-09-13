@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2012 Jens Thoms Toerring
+ *  Copyright (C) 1999-2014 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1282,7 +1282,7 @@ reconfigure_window_2d( Canvas_T * c,
        canvas window we also need to redraw the axis windows which may have
        gotten reconfigured before. */
 
-    XftDrawChange( c->xftdraw, NULL );
+    XftDrawChange( c->xftdraw, None );
     delete_pixmap( c );
     create_pixmap( c );
     XftDrawChange( c->xftdraw, c->pm );
@@ -1814,7 +1814,8 @@ repaint_canvas_2d( Canvas_T * c )
                             G.font_asc + G.font_desc + 4 );
             XftDrawChange( c->xftdraw, pm );
             XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES + 1, G.font,
-                               5, G.font_asc + 7, buf, strlen( buf ) );
+                               5, G.font_asc + 7,
+                               ( XftChar8 const * ) buf, strlen( buf ) );
             XftDrawChange( c->xftdraw, c->pm );
         }
 
@@ -1884,7 +1885,7 @@ repaint_canvas_2d( Canvas_T * c )
                 XftDrawChange( c->xftdraw, pm );
                 XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES + 1,
                                    G.font, 5, G.font_asc + 7,
-                                   buf, strlen( buf ) );
+                                   ( XftChar8 const * ) buf, strlen( buf ) );
                 XftDrawChange( c->xftdraw, c->pm );
             }
 
