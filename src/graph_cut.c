@@ -1297,10 +1297,13 @@ cut_reconfigure_window( Canvas_T * c,
     }
 
     /* Delete the old pixmap for the canvas and get a new one with the proper
-       sizes. Also do some small changes necessary. */
+       sizes. Also do some other small modifications necessary. */
 
+    XftDrawChange( c->xftdraw, NULL );
     delete_pixmap( c );
     create_pixmap( c );
+    XftDrawChange( c->xftdraw, c->pm );
+
     if ( c == &G_2d.cut_canvas )
         XSetForeground( G.d, c->gc, fl_get_pixel( FL_BLACK ) );
     XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
@@ -2134,7 +2137,7 @@ repaint_cut_canvas( Canvas_T * c )
                             G.font_asc + G.font_desc + 4 );
             XftDrawChange( c->xftdraw, pm );
             XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES + 1, G.font,
-                               5, G.font_asc + 2,
+                               10, G.font_asc + 7,
                                ( XftChar8 const * ) buf, strlen( buf ) );
             XftDrawChange( c->xftdraw, c->pm );
         }
@@ -2154,7 +2157,7 @@ repaint_cut_canvas( Canvas_T * c )
                             G.font_asc + G.font_desc + 4 );
             XftDrawChange( c->xftdraw, pm );
             XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES + 1, G.font,
-                               5, G.font_asc + 7,
+                               10, G.font_asc + 7,
                                ( XftChar8 const * ) buf, strlen( buf ) );
             XftDrawChange( c->xftdraw, c->pm );
 

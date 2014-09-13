@@ -1282,8 +1282,10 @@ reconfigure_window_2d( Canvas_T * c,
        canvas window we also need to redraw the axis windows which may have
        gotten reconfigured before. */
 
+    XftDrawChange( c->xftdraw, NULL );
     delete_pixmap( c );
     create_pixmap( c );
+    XftDrawChange( c->xftdraw, c->pm );
 
     if ( c == &G_2d.z_axis )
     {

@@ -507,7 +507,7 @@ set_defaults( void )
         GI.win_min_height      = 360;
         GI.curve_button_height = 35;
         GI.small_font_size     = FL_TINY_SIZE;
-        GI.default_axisfont    = "DejaVu Sans Condensed-7";
+        GI.default_axisfont    = "DejaVu Sans Condensed-8";
 
         G.scale_tick_dist      =  4;
         G.short_tick_len       =  3;

@@ -1147,8 +1147,10 @@ reconfigure_window_1d( Canvas_T * c,
        factors are set. Thus we need in the call for the canvas window to
        redraw also axis windows which got reconfigured before. */
 
+    XftDrawChange( c->xftdraw, NULL );
     delete_pixmap( c );
     create_pixmap( c );
+    XftDrawChange( c->xftdraw, c->pm );
 
     if ( c == &G_1d.canvas )
     {
