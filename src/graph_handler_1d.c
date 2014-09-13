@@ -1429,6 +1429,7 @@ repaint_canvas_1d( Canvas_T * c )
     if ( c == &G_1d.canvas )
     {
         if ( G.coord_display == 1 )
+        {
             for ( i = 0; i < G_1d.nc; i++ )
             {
                 cv = G_1d.curve[ i ];
@@ -1449,12 +1450,18 @@ repaint_canvas_1d( Canvas_T * c )
                                                 / cv->s2d[ Y ] ) ) - 2 ) );
                 strcat( buf, " " );
 
-                if ( G.font != NULL )
-                    XDrawImageString( G.d, pm, cv->font_gc, 5,
-                                      ( G.font_asc + 3 ) * ( i + 1 )
+                XFillRectangle( G.d, pm, c->axis_gc,
+                                5, 5 + i * ( G.font_asc + G.font_desc + 4 ) - 2,
+                                text_width( buf ),
+                                G.font_asc + G.font_desc + 4 );
+                XftDrawChange( c->xftdraw, pm );
+                XftDrawStringUtf8( c->xftdraw, G.xftcolor + i, G.font,
+                                   5,   ( G.font_asc + 2 ) * ( i + 1 )
                                       + G.font_desc * i + 2,
-                                      buf, strlen( buf ) );
+                                   buf, strlen( buf ) );
+                XftDrawChange( c->xftdraw, c->pm );
             }
+        }
 
         if ( G.dist_display == 1 )
         {
@@ -1467,11 +1474,17 @@ repaint_canvas_1d( Canvas_T * c )
                 y_pos = G_1d.rwc_delta[ Y ] * ( G.start[ Y ] - c->ppos[ Y ] )
                         / cv->s2d[ Y ];
                 sprintf( buf, " dx = %#g   dy = %#g ", x_pos, y_pos );
-                if ( G.font != NULL )
-                    XDrawImageString( G.d, pm, cv->font_gc, 5,
-                                      ( G.font_asc + 3 ) * ( i + 1 )
+
+                XFillRectangle( G.d, pm, c->axis_gc,
+                                5, 5 + i * ( G.font_asc + G.font_desc + 4 ) - 2,
+                                text_width( buf ),
+                                G.font_asc + G.font_desc + 4 );
+                XftDrawChange( c->xftdraw, pm );
+                XftDrawStringUtf8( c->xftdraw, G.xftcolor + i, G.font,
+                                   5,   ( G.font_asc + 2 ) * ( i + 1 )
                                       + G.font_desc * i + 2,
-                                      buf, strlen( buf ) );
+                                   buf, strlen( buf ) );
+                XftDrawChange( c->xftdraw, c->pm );
             }
 
             XDrawArc( G.d, pm, G_1d.curve[ 0 ]->gc,
@@ -1751,8 +1764,8 @@ make_scale_1d( Curve_1d_T * cv,
 
         y = i2s15( G.x_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, 0, y - 1, c->w, 2 );
-        XDrawLine( G.d, c->pm, c->font_gc, 0, y - 2, c->w, y - 2 );
-        XDrawLine( G.d, c->pm, c->font_gc, 0, y + 1, c->w, y + 1 );
+        XDrawLine( G.d, c->pm, c->axis_gc, 0, y - 2, c->w, y - 2 );
+        XDrawLine( G.d, c->pm, c->axis_gc, 0, y + 1, c->w, y + 1 );
 
         /* Draw all the ticks and numbers */
 
@@ -1763,28 +1776,28 @@ make_scale_1d( Curve_1d_T * cv,
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
-                XDrawLine( G.d, c->pm, c->font_gc, x, y + 3,
+                XDrawLine( G.d, c->pm, c->axis_gc, x, y + 3,
                            x, y - G.long_tick_len );
                 rwc_coarse += coarse_factor * rwc_delta;
-                if ( G.font == NULL )
-                    continue;
 
                 make_label_string( lstr, rwc_coarse, ( int ) mag );
-                width = XTextWidth( G.font, lstr, strlen( lstr ) );
+                width = text_width( lstr );
 
                 if ( x - width / 2 - 10 > last )
                 {
-                    XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
-                                 y + G.label_dist + G.font_asc, lstr,
-                                 strlen( lstr ) );
+                    XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES,
+                                       G.font, x - width / 2,
+                                       y + G.label_dist + G.font_asc,
+                                        ( XftChar8 const * ) lstr,
+                                       strlen( lstr ) );
                     last = i2s15( x + width / 2 );
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
-                XDrawLine( G.d, c->pm, c->font_gc, x, y,
+                XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.medium_tick_len );
             else                                       /* short line */
-                XDrawLine( G.d, c->pm, c->font_gc, x, y,
+                XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.short_tick_len );
         }
     }
@@ -1794,8 +1807,8 @@ make_scale_1d( Curve_1d_T * cv,
 
         x = i2s15( c->w - G.y_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, x, 0, 2, c->h );
-        XDrawLine( G.d, c->pm, c->font_gc, x - 1, 0, x - 1, c->h );
-        XDrawLine( G.d, c->pm, c->font_gc, x + 2, 0, x + 2, c->h );
+        XDrawLine( G.d, c->pm, c->axis_gc, x - 1, 0, x - 1, c->h );
+        XDrawLine( G.d, c->pm, c->axis_gc, x + 2, 0, x + 2, c->h );
 
         /* Draw all the ticks and numbers */
 
@@ -1806,23 +1819,22 @@ make_scale_1d( Curve_1d_T * cv,
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
-                XDrawLine( G.d, c->pm, c->font_gc, x - 3, y,
+                XDrawLine( G.d, c->pm, c->axis_gc, x - 3, y,
                            x + G.long_tick_len, y );
                 rwc_coarse += coarse_factor * rwc_delta;
 
-                if ( G.font == NULL )
-                    continue;
-
                 make_label_string( lstr, rwc_coarse, ( int ) mag );
-                width = XTextWidth( G.font, lstr, strlen( lstr ) );
-                XDrawString( G.d, c->pm, c->font_gc, x - G.label_dist - width,
-                             y + G.font_asc / 2 , lstr, strlen( lstr ) );
+                width = text_width( lstr );
+                XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
+                                   x - G.label_dist - width,
+                                   y + G.font_asc / 2 ,
+                                   ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
-                XDrawLine( G.d, c->pm, c->font_gc, x, y,
+                XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.medium_tick_len, y );
             else                                      /* short line */
-                XDrawLine( G.d, c->pm, c->font_gc, x, y,
+                XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.short_tick_len, y );
         }
     }

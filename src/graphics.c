@@ -68,9 +68,7 @@ static struct {
 
     int            small_font_size;
 
-    const char   * default_axisfont_1;
-    const char   * default_axisfont_2;
-    const char   * default_axisfont_3;
+    const char   * default_axisfont;
 
     int            display_x,
                    display_y;
@@ -221,6 +219,14 @@ start_graphics( void )
     if ( G.dim & 2 )
         fl_set_button( GUI.run_form_2d->full_scale_button_2d, 1 );
 
+    /* Define colors for the curves (this could be made user-configurable)
+       - it must happen before font initialization */
+
+    G.colors[ 0 ] = FL_TOMATO;
+    G.colors[ 1 ] = FL_GREEN;
+    G.colors[ 2 ] = FL_YELLOW;
+    G.colors[ 3 ] = FL_CYAN;
+
     /* Load fonts */
 
     fonts_init( );
@@ -273,40 +279,61 @@ start_graphics( void )
 
 /*-----------------------------------------------------------------------*
  * Loads user defined font for the axis and label. If this font can't be
- * loaded some default fonts hopefully available on all machines are
- * tried instead.
+ * loaded a default font is used instead.
  *-----------------------------------------------------------------------*/
 
 static void
 fonts_init( void )
 {
-    XCharStruct font_prop;
-    int dummy;
+    XRenderColor xrcolor;
+    int i;
 
 
     if ( ! G.is_init )
         return;
 
-    /* Load the (possibly user requested) font */
+    /* Load either a user requested font (first try as an "old" Xlfd font)
+       or, if none is specified, use the defautl font */
 
     if ( * ( ( char * ) Xresources[ AXISFONT ].var ) != '\0' )
-        G.font = XLoadQueryFont( G.d, ( char * ) Xresources[ AXISFONT ].var );
+    {
+        G.font =  XftFontOpenXlfd( G.d, DefaultScreen( G.d ),
+                                   ( char * ) Xresources[ AXISFONT ].var );
+        if ( ! G.font )
+            G.font = XftFontOpenName( G.d, DefaultScreen( G.d ),
+                                      ( char * ) Xresources[ AXISFONT ].var );
+    }
+    else
+        G.font = XftFontOpenName( G.d, DefaultScreen( G.d ),
+                                  GI.default_axisfont );
 
-    /* If that didn't work out try to use one of the default fonts */
+    G.font_asc  = G.font->ascent;
+    G.font_desc = G.font->descent;
 
-    if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.default_axisfont_1 );
-    if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.default_axisfont_2 );
-    if ( ! G.font )
-        G.font = XLoadQueryFont( G.d, GI.default_axisfont_3 );
+    xrcolor.alpha = 0xffff;
 
-    /* Try to figure out how much the font extends above and below the
-       baseline (if it was possible to load a font) */
+    for ( i = 0; i < MAX_CURVES; i++ )
+    {
+        int red,
+            green,
+            blue;
 
-    if ( G.font )
-        XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
-                      &font_prop );
+        fl_getmcolor( G.colors[ i ], &red, &green, &blue );
+        xrcolor.red   = ( ( unsigned short ) red )   << 8;
+        xrcolor.green = ( ( unsigned short ) green ) << 8;
+        xrcolor.blue  = ( ( unsigned short ) blue )  << 8;
+
+        XftColorAllocValue( G.d, fl_visual, fl_colormap,
+                            &xrcolor, G.xftcolor + i );
+    }
+
+    xrcolor.red = xrcolor.green = xrcolor.blue = 0;
+    XftColorAllocValue( G.d, fl_visual, fl_colormap,
+                        &xrcolor, G.xftcolor + MAX_CURVES );
+
+    xrcolor.red = xrcolor.green = xrcolor.blue = 0xffff;
+    XftColorAllocValue( G.d, fl_visual, fl_colormap,
+                        &xrcolor, G.xftcolor + MAX_CURVES + 1 );
 }
 
 
@@ -480,9 +507,7 @@ set_defaults( void )
         GI.win_min_height      = 360;
         GI.curve_button_height = 35;
         GI.small_font_size     = FL_TINY_SIZE;
-        GI.default_axisfont_1  = "*-lucida-bold-r-normal-sans-10-*";
-        GI.default_axisfont_2  = "lucidasanstypewriter-10";
-        GI.default_axisfont_3  = "fixed";
+        GI.default_axisfont    = "DejaVu Sans Condensed-7";
 
         G.scale_tick_dist      =  4;
         G.short_tick_len       =  3;
@@ -503,9 +528,7 @@ set_defaults( void )
         GI.win_min_height      = 460;
         GI.curve_button_height = 40;
         GI.small_font_size     = FL_SMALL_SIZE;
-        GI.default_axisfont_1  = "*-lucida-bold-r-normal-sans-14-*";
-        GI.default_axisfont_2  = "lucidasanstypewriter-14";
-        GI.default_axisfont_3  = "fixed";
+        GI.default_axisfont    = "DejaVu Sans Condensed-10";
 
         G.scale_tick_dist      =   6;
         G.short_tick_len       =   5;
@@ -852,14 +875,6 @@ G_struct_init( void )
     if ( keymask & Button3Mask )
         G.raw_button_state |= 4;
 
-    /* Define colors for the curves (this could be made user-configurable)
-       - it must happen before color creation */
-
-    G.colors[ 0 ] = FL_TOMATO;
-    G.colors[ 1 ] = FL_GREEN;
-    G.colors[ 2 ] = FL_YELLOW;
-    G.colors[ 3 ] = FL_CYAN;
-
     /* Create the different cursors and the colors needed for 2D displays */
 
     if ( first_time )
@@ -953,13 +968,13 @@ G_struct_init( void )
 
     /* Create pixmaps for labels that need to be rotated by 90 degrees */
 
-    if ( G.dim & 1 && G_1d.label[ Y ] != NULL && G.font != NULL )
+    if ( G.dim & 1 && G_1d.label[ Y ] != NULL )
         create_label_pixmap( &G_1d.y_axis, Y, G_1d.label[ Y ] );
 
-    if ( G.dim & 2 && G_2d.label[ Y ] != NULL && G.font != NULL )
+    if ( G.dim & 2 && G_2d.label[ Y ] != NULL )
         create_label_pixmap( &G_2d.y_axis, Y, G_2d.label[ Y ] );
 
-    if ( G.dim & 2 && G_2d.label[ Z ] != NULL && G.font != NULL )
+    if ( G.dim & 2 && G_2d.label[ Z ] != NULL )
         create_label_pixmap( &G_2d.z_axis, Z, G_2d.label[ Z ] );
 
     /* Initialize lots of stuff for the curves */
@@ -1044,14 +1059,6 @@ G_init_curves_1d( void )
 
         G.right_arrow_w = right_arrow_width;
         G.right_arrow_h = right_arrow_width;
-
-        /* Create a GC for the font and set the appropriate color */
-
-        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_1d.canvas.obj ), 0, NULL );
-        if ( G.font != NULL )
-            XSetFont( G.d, cv->font_gc, G.font->fid );
-        XSetForeground( G.d, cv->font_gc, fl_get_pixel( G.colors[ i ] ) );
-        XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
 
         /* Set the scaling factors for the curve */
 
@@ -1164,14 +1171,6 @@ G_init_curves_2d( void )
         G.right_arrow_w = right_arrow_width;
         G.right_arrow_h = right_arrow_width;
 
-        /* Create a GC for the font and set the appropriate color */
-
-        cv->font_gc = XCreateGC( G.d, FL_ObjWin( G_2d.canvas.obj ), 0, NULL );
-        if ( G.font != NULL )
-            XSetFont( G.d, cv->font_gc, G.font->fid );
-        XSetForeground( G.d, cv->font_gc, fl_get_pixel( FL_WHITE ) );
-        XSetBackground( G.d, cv->font_gc, fl_get_pixel( FL_BLACK ) );
-
         /* Set the scaling factors for the curve */
 
         cv->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 ) / ( G_2d.nx - 1 );
@@ -1242,7 +1241,7 @@ create_label_pixmap( Canvas_T * c,
 
     /* Get size for a temporary pixmap */
 
-    width = XTextWidth( G.font, label, strlen( label ) ) + 10;
+    width = text_width( label ) + 10;
     height = G.font_asc + G.font_desc + 5;
 
     if ( width > USHRT_MAX )
@@ -1257,8 +1256,11 @@ create_label_pixmap( Canvas_T * c,
                         fl_get_canvas_depth( c->obj ) );
 
     XFillRectangle( G.d, pm, c->gc, 0, 0, width, height );
-    XDrawString( G.d, pm, c->font_gc, 5, height - 1 - G.font_desc,
-                 label, strlen( label ) );
+    XftDrawChange( c->xftdraw, pm );
+    XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
+                       5, height - 1 - G.font_desc,
+                       ( XftChar8 const * ) label, strlen( label ) );
+    XftDrawChange( c->xftdraw, c->pm );
 
     /* Create the real pixmap for the label and copy the contents of the
        temporary pixmap to the final pixmap, rotated by 90 degree ccw */
@@ -1323,8 +1325,11 @@ stop_graphics( void )
                 if ( G_2d.label[ i ] )
                     G_2d.label[ i ] = T_free( G_2d.label[ i ] );
 
-        if ( G.font )
-            XFreeFont( G.d, G.font );
+        XftFontClose( G.d, G.font );
+
+        for ( i = 0; i < MAX_CURVES + 2; i++ )
+            XftColorFree( G.d, fl_visual, fl_colormap,
+                          G.xftcolor + i );
 
         if ( GUI.run_form_1d )
         {
@@ -1473,7 +1478,6 @@ graphics_free( void )
             XFreePixmap( G.d, cv->down_arrow );
             XFreePixmap( G.d, cv->left_arrow );
             XFreePixmap( G.d, cv->right_arrow );
-            XFreeGC( G.d, cv->font_gc );
 
             T_free( cv->points );
             T_free( cv->xpoints );
@@ -1495,7 +1499,6 @@ graphics_free( void )
             XFreePixmap( G.d, cv2->down_arrow );
             XFreePixmap( G.d, cv2->left_arrow );
             XFreePixmap( G.d, cv2->right_arrow );
-            XFreeGC( G.d, cv2->font_gc );
 
             for ( m2 = cv2->marker_2d; m2 != NULL; m2 = mn2 )
             {
@@ -1510,17 +1513,14 @@ graphics_free( void )
         }
     }
 
-    if ( G.font )
-    {
-        if ( G.dim & 1 )
-            if ( G_1d.label[ Y ] )
-                XFreePixmap( G.d, G_1d.label_pm );
+    if ( G.dim & 1 )
+        if ( G_1d.label[ Y ] )
+            XFreePixmap( G.d, G_1d.label_pm );
 
-        if ( G.dim & 2 )
-            for ( coord = Y; coord <= Z; coord++ )
-                if ( G_2d.label[ coord ] )
-                    XFreePixmap( G.d, G_2d.label_pm[ coord ] );
-    }
+    if ( G.dim & 2 )
+        for ( coord = Y; coord <= Z; coord++ )
+            if ( G_2d.label[ coord ] )
+                XFreePixmap( G.d, G_2d.label_pm[ coord ] );
 }
 
 
@@ -1550,9 +1550,10 @@ canvas_off( Canvas_T  * c,
             fl_remove_canvas_handler( obj, ButtonRelease, ch );
             fl_remove_canvas_handler( obj, MotionNotify, ch );
         }
-
-        XFreeGC( G.d, c->font_gc );
     }
+
+    XFreeGC( G.d, c->axis_gc );
+    XftDrawDestroy( c->xftdraw );
 
     delete_pixmap( c );
 }
@@ -1591,6 +1592,8 @@ setup_canvas( Canvas_T  * c,
 
     create_pixmap( c );
 
+    c->xftdraw = XftDrawCreate( G.d, c->pm, fl_visual, fl_colormap );
+
     fl_add_canvas_handler( c->obj, Expose, ch, c );
 
     attributes.backing_store = NotUseful;
@@ -1616,11 +1619,10 @@ setup_canvas( Canvas_T  * c,
                                    ButtonMotionMask );
         fl_addto_selected_xevent( FL_ObjWin( obj ),
                                   Button1MotionMask | Button2MotionMask );
-
-        c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, NULL );
-        XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
-        XSetFont( G.d, c->font_gc, G.font->fid );
     }
+
+    c->axis_gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, NULL );
+    XSetForeground( G.d, c->axis_gc, fl_get_pixel( FL_BLACK ) );
 }
 
 
@@ -1702,20 +1704,20 @@ redraw_axis_1d( int coord )
     {
         c = &G_1d.x_axis;
 
-        if ( G_1d.label[ X ] != NULL && G.font != NULL )
+        if ( G_1d.label[ X ] != NULL )
         {
-            width = XTextWidth( G.font, G_1d.label[ X ],
-                                strlen( G_1d.label[ X ] ) );
-            XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-                         c->h - 5 - G.font_desc,
-                         G_1d.label[ X ], strlen( G_1d.label[ X ] ) );
+            width = text_width( G_1d.label[ X ] );
+            XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
+                               c->w - width - 5, c->h - 2 - G.font_desc,
+                                ( XftChar8 const * ) G_1d.label[ X ],
+                               strlen( G_1d.label[ X ] ) );
         }
     }
     else
     {
         c = &G_1d.y_axis;
 
-        if ( G_1d.label[ coord ] != NULL && G.font != NULL )
+        if ( G_1d.label[ coord ] != NULL )
             XCopyArea( G.d, G_1d.label_pm, c->pm, c->gc, 0, 0,
                        G_1d.label_w, G_1d.label_h, 0, 0 );
     }
@@ -1760,26 +1762,26 @@ redraw_axis_2d( int coord )
     if ( coord == X )
     {
         c = &G_2d.x_axis;
-        if ( G_2d.label[ X ] != NULL && G.font != NULL )
+        if ( G_2d.label[ X ] != NULL )
         {
-            width = XTextWidth( G.font, G_2d.label[ X ],
-                                strlen( G_2d.label[ X ] ) );
-            XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-                         c->h - 5 - G.font_desc,
-                         G_2d.label[ X ], strlen( G_2d.label[ X ] ) );
+            width = text_width( G_2d.label[ X ] );
+            XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
+                               c->w - width - 5, c->h - 2 - G.font_desc,
+                                ( XftChar8 const * ) G_2d.label[ X ],
+                               strlen( G_2d.label[ X ] ) );
         }
     }
     else if ( coord == Y )
     {
         c = &G_2d.y_axis;
-        if ( G_2d.label[ coord ] != NULL && G.font != NULL )
+        if ( G_2d.label[ coord ] != NULL )
             XCopyArea( G.d, G_2d.label_pm[ coord ], c->pm, c->gc, 0, 0,
                        G_2d.label_w[ coord ], G_2d.label_h[ coord ], 0, 0 );
     }
     else
     {
         c = &G_2d.z_axis;
-        if ( G_2d.label[ coord ] != NULL && G.font != NULL )
+        if ( G_2d.label[ coord ] != NULL )
             XCopyArea( G.d, G_2d.label_pm[ coord ], c->pm, c->gc, 0, 0,
                        G_2d.label_w[ coord ], G_2d.label_h[ coord ],
                        c->w - 5 - G_2d.label_w[ coord ], 0 );
@@ -2390,6 +2392,23 @@ form_event_handler( FL_FORM * form,
     }
 
     return 0;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+int
+text_width( const char * txt )
+{
+
+    XGlyphInfo extents;
+
+
+    XftTextExtentsUtf8( G.d, G.font, ( XftChar8 * ) txt, strlen( txt ),
+                        &extents );
+
+    return extents.xOff;
 }
 
 
