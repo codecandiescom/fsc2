@@ -1964,47 +1964,86 @@ split_into_lines( int * num_lines )
  * the PostScript interpreter might otherwise choke on). At the
  * same time all characters that aren't Clean8Bit (i.e. all charac-
  * ters below 0x1B (except TAB, LF and CR) and 0x7F) are replaced
- * by a space character.
+ * by a space character. It also converts, as far as possible, UTF8
+ * characters to their Latin1 equivalent. UTF8 characters not in
+ * that range (or characters that are not valid UTF8) are replaced
+ * by spaces.
  *------------------------------------------------------------------*/
 
 static char *
 paren_replace( const char * str )
 {
-    char *sp;
-    char *cp;
-    long p_count, len, i;
+    const char *sp;
+    char *cp, *rp;
+    long p_count;
+    bool needs_work = false;
 
 
     if ( str == NULL )
         return NULL;
 
-    for ( p_count = 0, len = 1, sp = ( char * ) str; *sp != '\0'; sp++, len++ )
+    for ( p_count = 0, sp = str; *sp != '\0'; sp++ )
     {
         if ( *sp < 0x1B || *sp == 0x7F )
         {
             if (    *sp == 0x7F
                  || ( *sp != 0x09 && *sp != 0x0A && *sp != 0x0D ) )
-                *sp = ' ';
+                needs_work = true;
         }
 
         if ( *sp == '(' || *sp == ')' )
             p_count++;
+
+        if ( ( unsigned char ) *sp >= 0x80 )
+            needs_work = true;
     }
 
-    if ( p_count == 0 )
+    if ( p_count == 0 && ! needs_work )
         return T_strdup( str );
 
-    cp = sp = T_malloc( len + p_count );
-    strcpy( sp, str );
+    rp = cp = T_malloc( strlen( str ) + p_count + 1 );
 
-    for ( i = len; *cp != '\0'; i--, cp++ )
-        if ( *cp == '(' || *cp == ')' )
+    for ( sp = str; *sp; cp++, sp++ )
+    {
+        unsigned char c = *sp;
+
+        if ( c < 0x1B || c == 0x7F )
         {
-            memmove( cp + 1, cp, i );
-            *cp++ = '\\';
+            if (    c == 0x7F
+                 || ( c != 0x09 && c != 0x0A && c != 0x0D ) )
+                *cp = ' ';
+            else
+                *cp = c;
         }
+        else if ( c == '(' || c == ')' )
+        {
+            *cp++ = '\\';
+            *cp = c;
+        }
+        else if ( c >= 0x80 )
+        {
+            fprintf( stderr, "found 0x%x\n", c );
 
-    return sp;
+            if ( c < 0xc2 )
+                *cp = ' ';
+            else if ( c < 0xc4 )
+            {
+                c =   ( ( c & 3 ) << 6 )
+                    | ( ( ( unsigned char ) *++sp ) & 0x3f );
+                *cp = c;
+            }
+            else
+            {
+                while ( ( ( unsigned char ) *++sp ) & 0x80 )
+                    /* empty */ ;
+                sp--;
+            }
+        }
+        else
+            *cp = *sp;
+    }
+
+    return rp;
 }
 
 
