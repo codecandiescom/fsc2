@@ -51,6 +51,7 @@
 #include <sys/utsname.h>
 #include <fcntl.h>
 #include <forms.h>
+#include <X11/Xft/Xft.h>
 
 #if defined WITH_RULBUS
 #include <rulbus.h>
