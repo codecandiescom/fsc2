@@ -16,6 +16,9 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+ifeq ($(adir),)
+	adir := ../aux
+endif
 docs     := $(wildcard *.texi)
 pngs     := $(wildcard fsc2fig*.png) $(wildcard simplecw*.png)
 xbms     := $(wildcard $(adir)/cursor*.xbm)
@@ -24,6 +27,18 @@ eps_pics := $(patsubst %.png,%.eps,$(figures))
 pdf_pics := $(patsubst %.png,%.pdf,$(figures))
 
 
+# Variable with shell script that tests if the programs passed to it
+# exist - bails out on the first missing
+
+TFA = test_for_apps( ) {                    \
+	for var in "$$@"; do                    \
+		if [ -z `command -v $$var` ]; then  \
+			echo "$$var";                   \
+			return;                         \
+		fi                                  \
+	done                                    \
+}
+
 .PHONY:  all docs man html ps pdf info
 
 all:
@@ -31,11 +46,13 @@ all:
 
 docs:
 	$(MAKE) man
+	$(MAKE) info
 	$(MAKE) html
 	$(MAKE) ps
 	$(MAKE) pdf
-	$(MAKE) info
 
+
+# Rules for making the man page
 
 man: fsc2.1.gz
 
@@ -43,72 +60,101 @@ fsc2.1.gz: fsc2.1
 	sed 's/DOCDIR/$(subst /,\/,$(docdir))/' fsc2.1 | gzip -9 -c > fsc2.1.gz
 
 
+# Rules for making the documentation in info format
+
 info: fsc2.info
 
 fsc2.info: $(docs)
-	makeinfo fsc2.texi
+	@$(TFA);                          \
+	res="`test_for_apps makeinfo`";   \
+	if [ -z "$$res" ]; then           \
+		echo "makeinfo fsc2.texi";    \
+		LC_ALL=C makeinfo fsc2.texi;  \
+	else                              \
+		echo "\nERROR: Can't create info documentation, program '$$res' not found\n"; \
+	fi
 
+
+# Rules for making the HTML documentation with PNG images
 
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	@if [ "`eval texi2html --help 2>/dev/null`" ]; then                       \
-		LC_ALL=C texi2html --init-file=fsc2.init fsc2.texi;                   \
-	else                                                                      \
-		echo "Can't make HTML documentation, program 'texi2html' not found";  \
+	@$(TFA);                                                 \
+	res="`test_for_apps texi2html convert identify`";        \
+	if [ -z "$$res" ]; then                                  \
+		echo "texi2html --init-file=fsc2.init fsc2.texi";    \
+		LC_ALL=C texi2html --init-file=fsc2.init fsc2.texi;  \
+	else                                                     \
+		echo "\nERROR: Can't create HTML documentation, program '$$res' not found\n"; \
 	fi
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
+	@$(TFA); \
+	res="`test_for_apps convert identify`"; \
+	if [ -z $$res ]; then  \
+		convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null; \
+	fi
+
+
+# Rules for making the PostScript documentation with EPS images
 
 ps: fsc2.ps.gz
 
 fsc2.ps.gz: $(docs) $(eps_pics)
-	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
-		  -a "`eval dvips --help 2>/dev/null`"    ]; then  \
-		LC_ALL=C texi2dvi --ps -c fsc2.texi &&             \
-		gzip -f -9 fsc2.ps;                                \
-	else                                                   \
-		echo "Can't make PostScript documentation, program 'texi2dvi' or 'dvips' not found";  \
+	@$(TFA);                                                        \
+	res="`test_for_apps texi2dvi dvips convert identify`";          \
+	if [ -z $$res ]; then                                           \
+		echo "texi2dvi --ps -c fsc2.texi && gzip -f -9 fsc2.ps";    \
+		LC_ALL=C texi2dvi --ps -c fsc2.texi && gzip -f -9 fsc2.ps;  \
+	else                                                            \
+		echo "\nERROR: Can't create PostScript documentation, program '$$res' not found\n"; \
+	fi
+
+%.eps: $(adir)/%.xbm
+	@$(TFA); \
+	res="`test_for_apps convert`"; \
+	if [ -z $$res ]; then \
+		convert $< $@; \
+	fi
+
+%.eps: %.png
+	@$(TFA); \
+	res="`test_for_apps convert`"; \
+	if [ -z $$res ]; then \
+		convert $< $@; \
 	fi
 
 
-ifneq ($(word 1,$(shell which convert)),which:)
-%.eps: $(adir)/%.xbm
-	convert $< $@
-%.eps: %.png
-	convert $< $@
-else
-%.pdf: $(figures)
-	@echo "Can't make PostScript documentation, program 'convert' not found"; \
-	exit 1;
-endif
-
+# Rules for making the PDF documentation with PDF images
 
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(pdf_pics)
-	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
-	      -a "`eval pdftex --help 2>/dev/null`"   ]; then  \
-		LC_All=C texi2dvi --pdf -c fsc2.texi;              \
-	else                                                   \
-		echo "Can't make PDF documentation, program 'texi2dvi' or 'pdftex' not found";  \
+	@$(TFA);                                          \
+	res="`test_for_apps texi2dvi convert identify`";  \
+	if [ -z $$res ]; then                             \
+		echo "texi2dvi --pdf -c fsc2.texi";           \
+		LC_All=C texi2dvi --pdf -c fsc2.texi;         \
+	else                                              \
+		echo "\nERROR: Can't create PDF documentation, program '$$res' not found\n";  \
 	fi
 
-
-ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
-	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
-%.pdf: %.png
-	convert -compress Zip \
-		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
-else
-%.pdf: $(figures)
-	@echo "Can't make PDF documentation, program 'convert' not found"; \
-	exit 1;
-endif
+	@$(TFA);                                \
+	res="`test_for_apps convert identify`"; \
+	if [ -z $$res ]; then                   \
+		convert -compress Zip \
+				-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null; \
+	fi
 
+%.pdf: %.png
+	@$(TFA); \
+	res="`test_for_apps convert identify`"; \
+	if [ -z $$res ]; then \
+		convert -compress Zip \
+				-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\+x[0-9]\+\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null; \
+	fi
 
 
 # How to install the documentation

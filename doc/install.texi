@@ -204,9 +204,9 @@ is also the default), while unsetting it will keep the driver from
 doing so.
 
 Beside the entries for the devices another one for the GPIB board itself
-is required:
+is required as an @code{interface} entry:
 @example
-device @{
+interface @{
         name        = "gpib"        /* symbolic name */
         pad         = 0             /* primary address */
         sad         = 0             /* secondary address */
