@@ -40,7 +40,7 @@
  *     ...                                                         *
  * }                                                               *
  * OTHERWISE                                                       *
- *     RETHROW( );                                                 *
+ *     RETHROW;                                                    *
  *                                                                 *
  * Don't use this exception mechanism from within signal handlers  *
  * or other code invoked asynchronously, it easily could trigger a *
@@ -85,11 +85,17 @@ Exception_Types_T get_exception_type( const char * /* file */,
 
 #define TRY  if ( setjmp( *push_exception_frame( __FILE__, __LINE__ ) ) == 0 )
 
-#define TRY_SUCCESS  pop_exception_frame( __FILE__, __LINE__ )
+#define TRY_SUCCESS  do                                                   \
+                     {                                                    \
+                         pop_exception_frame( __FILE__, __LINE__ );       \
+                     } while ( 0 )
 
 #define THROW( e )  longjmp( *throw_exception( e ), 1 )
 
-#define RETHROW( )  THROW( get_exception_type( __FILE__, __LINE__ ) )
+#define RETHROW  do                                                       \
+                 {                                                        \
+                     THROW( get_exception_type( __FILE__, __LINE__ ) );   \
+                 } while ( 0 )
 
 #define CATCH( e )  \
                   else if ( get_exception_type( __FILE__, __LINE__ ) == ( e ) )

@@ -132,7 +132,7 @@ dg2020_reorganize_pulses( bool flag )
             return FAIL;
         }
         OTHERWISE
-            RETHROW( );
+            RETHROW;
 
         /* Send all the changes to the pulser */
 

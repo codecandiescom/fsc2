@@ -154,7 +154,7 @@ witio_48_exp_hook( void )
 
         fsc2_release_uucp_lock( device_name );
 
-        RETHROW( );
+        RETHROW;
     }
 
     return 1;

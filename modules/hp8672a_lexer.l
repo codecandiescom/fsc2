@@ -212,7 +212,7 @@ hp8672a_read_table( FILE * fp )
         THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 }
 
 

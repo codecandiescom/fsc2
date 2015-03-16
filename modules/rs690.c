@@ -232,7 +232,7 @@ rs690_test_hook( void )
             rs690.show_file = NULL;
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
     /* We need some somewhat different functions (or disable some) for
@@ -1423,7 +1423,7 @@ pulser_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

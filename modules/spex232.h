@@ -247,23 +247,32 @@ double spex232_wl2Uwn( double /* wl */ );
 double spex232_Uwn2wl( double /* wn */ );
 
 
-#define SPEX232_THROW( x )  do { spex232.fatal_error = SET;       \
-                                   THROW( x );                    \
-                              } while ( 0 )
+#define SPEX232_THROW( x )  do                                    \
+                            {                                     \
+                                spex232.fatal_error = SET;        \
+                                THROW( x );                       \
+                            } while ( 0 )
 
-#define SPEX232_RETHROW( )  do { spex232.fatal_error = SET;        \
-                                   RETHROW( );                     \
-                              } while ( 0 )
+#define SPEX232_RETHROW     do                                    \
+                            {                                     \
+                                spex232.fatal_error = SET;        \
+                                RETHROW;                          \
+                            } while ( 0 )
 
 
-#define SPEX232_ASSERT( x ) do { if ( ! ( x ) )                    \
-                                       spex232.fatal_error = SET;  \
-                                   fsc2_assert( x );               \
-                               } while( 0 )
+#define SPEX232_ASSERT( x ) do                                    \
+                            {                                     \
+                                if ( ! ( x ) )                    \
+                                    spex232.fatal_error = SET;    \
+                                fsc2_assert( x );                 \
+                            } while( 0 )
 
-#define SPEX232_IMPOSSIBLE( ) do { spex232.fatal_error = SET;      \
-                                     fsc2_impossible( );           \
-                                } while( 0 )
+#define SPEX232_IMPOSSIBLE( ) do                                  \
+                              {                                   \
+                                  spex232.fatal_error = SET;      \
+                                  fsc2_impossible( );             \
+                              } while( 0 )
+
 #endif /* ! SPEX232_HEADER */
 
 

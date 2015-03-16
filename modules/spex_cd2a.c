@@ -489,7 +489,7 @@ monochromator_scan_setup( Var_T * v )
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX_CD2A_RETHROW( );
+        SPEX_CD2A_RETHROW;
 
     if ( start < spex_cd2a.lower_limit )
     {
@@ -661,7 +661,7 @@ monochromator_wavelength( Var_T * v )
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX_CD2A_RETHROW( );
+        SPEX_CD2A_RETHROW;
 
     if ( wl < spex_cd2a.lower_limit )
     {
@@ -732,7 +732,7 @@ monochromator_wavenumber( Var_T * v )
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX_CD2A_RETHROW( );
+        SPEX_CD2A_RETHROW;
 
     if ( wl < spex_cd2a.lower_limit )
     {
@@ -1011,7 +1011,7 @@ monochromator_shutter_limits( Var_T * v )
             SPEX_CD2A_THROW( EXCEPTION );
         }
         OTHERWISE
-            SPEX_CD2A_RETHROW( );
+            SPEX_CD2A_RETHROW;
 
         if ( tl[ 0 ] < spex_cd2a.lower_limit )
         {
@@ -1341,7 +1341,7 @@ monochromator_wavenumber_axis( Var_T * v )
             SPEX_CD2A_THROW( EXCEPTION );
         }
         OTHERWISE
-            SPEX_CD2A_RETHROW( );
+            SPEX_CD2A_RETHROW;
     }
     else
     {

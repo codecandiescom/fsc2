@@ -479,7 +479,7 @@ dg2020_change_pulse_position( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( p->is_pos && new_pos == p->pos )
     {
@@ -543,7 +543,7 @@ dg2020_change_pulse_length( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( p->is_len && p->len == new_len )
     {
@@ -597,7 +597,7 @@ dg2020_change_pulse_position_change( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( new_dpos == 0 && FSC2_MODE == TEST )
     {
@@ -638,7 +638,7 @@ dg2020_change_pulse_length_change( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( new_dlen == 0 && FSC2_MODE == TEST )
     {

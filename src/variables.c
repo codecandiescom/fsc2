@@ -453,7 +453,7 @@ vars_push_matrix( Var_Type_T type,
     OTHERWISE
     {
         T_free( sizes );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < sizes[ 0 ]; i++ )
@@ -471,7 +471,7 @@ vars_push_matrix( Var_Type_T type,
         for ( i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
             vars_free( nv->val.vptr[ i ], SET );
         T_free( sizes );
-        RETHROW( );
+        RETHROW;
     }
 
     nv->len = sizes[ 0 ];
@@ -899,7 +899,7 @@ vars_ref_copy_create( Var_T * nsv,
     OTHERWISE
     {
         nsv->len = 0;
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < nsv->len; i++ )

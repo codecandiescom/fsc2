@@ -95,7 +95,7 @@ rs690_init_setup( void )
             rs690.channel[ i ].pulse_params =
                                      T_free( rs690.channel[ i ].pulse_params );
 
-        RETHROW( );
+        RETHROW;
     }
 
     rs690_calc_max_length( rs690.function + PULSER_CHANNEL_TWT );

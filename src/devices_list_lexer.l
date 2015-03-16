@@ -244,7 +244,7 @@ device_list_parse( void )
     OTHERWISE
     {
         fclose( devices_listin );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( devices_listin );

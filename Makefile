@@ -407,7 +407,7 @@
 
 # Uncomment the following if there are lots of warnings in flex files
 # (those with an extension of '.l' about undeclared functions from
-# bison generated file (as it happens with some versions of bison
+# bison generated files (as it happens with some versions of bison
 # before about version 2.7)
 
 # FLEX_NEEDS_BISON_DECLARATIONS := yes
@@ -910,6 +910,11 @@ endif
 
 ifdef FLEX_NEEDS_DECLARATIONS
 	CONFFLAGS += -DFLEX_NEEDS_DECLARATIONS
+endif
+
+
+ifdef FLEX_NEEDS_BISON_DECLARATIONS
+	CONFFLAGS += -DFLEX_NEEDS_BISON_DECLARATIONS
 endif
 
 

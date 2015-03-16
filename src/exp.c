@@ -898,7 +898,7 @@ exp_syntax_check( void )
     OTHERWISE
     {
         EDL.Fname = NULL;
-        RETHROW( );
+        RETHROW;
     }
 
     EDL.Fname = NULL;
@@ -1026,7 +1026,7 @@ exp_test_run( void )
         close_all_files( );
 
         Fsc2_Internals.mode = PREPARATION;
-        RETHROW( );
+        RETHROW;
     }
 
     Fsc2_Internals.mode = PREPARATION;

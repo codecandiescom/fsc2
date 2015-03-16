@@ -192,15 +192,15 @@ fsc2_lan_open( const char * dev_name,
     dev_addr.sin_port = htons( port );
 
     /* If required make sure we don't wait longer for the connect() call to
-       succeed than the user specified time (take care of the case that
-       setting up the handler for the SIGALRM signal or starting the timer
-       failed, in which case we silently drop the request for a timeout) */
+       succeed than the user specified (take care of the case that setting
+       up the handler for the SIGALRM signal or starting the timer failed,
+       in which case we silently drop the request for a timeout) */
 
     if ( us_timeout > 0 )
     {
         wait_for_connect.it_value.tv_sec     = us_timeout / 1000000;
         wait_for_connect.it_value.tv_usec    = us_timeout % 1000000;
-        wait_for_connect.it_interval.tv_sec  =
+        wait_for_connect.it_interval.tv_sec  = 0;
         wait_for_connect.it_interval.tv_usec = 0;
 
         sact.sa_handler = wait_alarm_handler;
@@ -223,12 +223,13 @@ fsc2_lan_open( const char * dev_name,
        other than SIGALRM and we are not supposed to return on such signals
        retry the connect() call */
     do
+    {
         conn_ret = connect( sock_fd, ( const struct sockaddr * ) &dev_addr,
                             sizeof dev_addr );
-    while (    conn_ret == -1
-            && errno == EINTR
-            && ! quit_on_signal
-            && ! got_sigalrm );
+    } while (      conn_ret == -1
+              &&   errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm );
 
     /* Stop the timer for the timeout and reset the signal handler */
 
@@ -272,8 +273,7 @@ fsc2_lan_open( const char * dev_name,
     /* Since everything worked out satisfactory we now add the new connection
        to the list of connections, beginning by adding an entry to the end.
        If this fails due to runnning out of memory there's nothing left we can
-       do and all we can do is close all already open connections and throwing
-       an exception. */
+       do except closing all open connections and throwing an exception. */
 
     TRY
     {
@@ -310,7 +310,8 @@ fsc2_lan_open( const char * dev_name,
             fsc2_lan_close_log( log_fp );
             fsc2_release_uucp_lock( dev_name );
         }
-        RETHROW( );
+
+        RETHROW;
     }
 
     ll->next = NULL;

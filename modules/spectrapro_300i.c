@@ -651,7 +651,7 @@ monochromator_load_calibration( Var_T * v )
         OTHERWISE
         {
             T_free( calib_file );
-            RETHROW( );
+            RETHROW;
         }
     }
     else
@@ -670,7 +670,7 @@ monochromator_load_calibration( Var_T * v )
         OTHERWISE
         {
             T_free( calib_file );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -683,7 +683,7 @@ monochromator_load_calibration( Var_T * v )
     {
         fclose( cfp );
         T_free( calib_file );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( cfp );
@@ -1794,7 +1794,7 @@ monochromator_calibrate( Var_T * v )
             T_free( c.n_exp );
         if ( x != NULL )
             T_free( x );
-        RETHROW( );
+        RETHROW;
     }
 
     x[ 0 ] *= 45.0 / atan( 1.0 );

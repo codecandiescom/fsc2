@@ -337,7 +337,7 @@ rb_pulser_w_read_configuration( void )
     {
         fclose( rb_pulser_w_in );
         rb_pulser_w_cleanup( );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( rb_pulser_w_in );

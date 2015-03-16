@@ -608,7 +608,7 @@ dg2020_set_constant( int   channel,
     OTHERWISE
     {
         T_free( cmd );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( cmd );

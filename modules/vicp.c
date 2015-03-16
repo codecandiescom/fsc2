@@ -360,7 +360,7 @@ vicp_open( const char * dev_name,
     OTHERWISE
     {
         vicp_close_without_header( );
-        RETHROW( );
+        RETHROW;
     }
 
     /* Finally bring the device into remote state by sending a header

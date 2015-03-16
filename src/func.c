@@ -416,7 +416,7 @@ func_get( const char * name,
             OTHERWISE
             {
                 T_free( sec_name );
-                RETHROW( );
+                RETHROW;
             }
             T_free( sec_name );
             return func_ptr;
@@ -622,7 +622,7 @@ func_call( Var_T * f )
                        EDL.Call_Stack->f->name,
                        EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
             call_pop( );
-            RETHROW( );
+            RETHROW;
         }
 #endif
         call_pop( );
@@ -630,7 +630,7 @@ func_call( Var_T * f )
         for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
             /* empty */ ;
 
-        RETHROW( );
+        RETHROW;
     }
 
 #ifndef NDEBUG

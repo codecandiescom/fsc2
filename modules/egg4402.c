@@ -371,12 +371,12 @@ boxcar_get_curve( Var_T * v )
     CATCH( USER_BREAK_EXCEPTION )
     {
         T_free( buffer );
-        RETHROW( );
+        RETHROW;
     }
     OTHERWISE
     {
         T_free( buffer );
-        RETHROW( );
+        RETHROW;
     }
 
     /* Get a buffer for the data in binary form and convert the ASCII data */
@@ -579,7 +579,7 @@ boxcar_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

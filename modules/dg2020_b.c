@@ -244,7 +244,7 @@ dg2020_b_test_hook( void )
             dg2020.show_file = NULL;
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
     /* We need some somewhat different functions (or disable some of them) for
@@ -1551,7 +1551,7 @@ pulser_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

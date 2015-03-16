@@ -253,7 +253,7 @@ p_assign_pod( long    func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -314,7 +314,7 @@ p_assign_channel( long    func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -365,7 +365,7 @@ p_set_delay( long    func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -401,7 +401,7 @@ p_inv( long func )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -449,7 +449,7 @@ p_set_v_high( long    func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -497,7 +497,7 @@ p_set_v_low( long    func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -544,7 +544,7 @@ p_set_timebase( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -584,7 +584,7 @@ p_set_timebase_level( int level_type )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -634,7 +634,7 @@ p_set_trigger_mode( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -683,7 +683,7 @@ p_set_trigger_slope( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -727,7 +727,7 @@ p_set_trigger_level( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -771,7 +771,7 @@ p_set_trigger_impedance( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -825,7 +825,7 @@ p_set_rep_time( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -886,7 +886,7 @@ p_set_rep_freq( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -970,7 +970,7 @@ p_phase_ref( int func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1024,7 +1024,7 @@ p_new( long pnum )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1151,7 +1151,7 @@ p_set( long    pnum,
     {
         call_pop( );
         Cur_Pulser = stored_Cur_Pulser;
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1279,7 +1279,7 @@ p_get_by_num( long pnum,
     {
         call_pop( );
         Cur_Pulser = stored_Cur_Pulser;
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1358,7 +1358,7 @@ p_phs_setup( int  func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1389,7 +1389,7 @@ p_phs_end( int func )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1465,7 +1465,7 @@ p_set_psd( int     func,
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1509,7 +1509,7 @@ p_set_gp( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1564,7 +1564,7 @@ p_set_max_seq_len( Var_T * v )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1603,7 +1603,7 @@ keep_all_pulses( void )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );
@@ -1642,7 +1642,7 @@ p_ch2num( long channel )
     OTHERWISE
     {
         call_pop( );
-        RETHROW( );
+        RETHROW;
     }
 
     call_pop( );

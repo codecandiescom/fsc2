@@ -747,7 +747,7 @@ synthesizer_use_table( Var_T * v )
         OTHERWISE
         {
             T_free( tfname );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -762,7 +762,7 @@ synthesizer_use_table( Var_T * v )
     {
         fclose( tfp );
         rs_smb100a.table_file = T_free( rs_smb100a.table_file );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( tfp );
@@ -1731,7 +1731,7 @@ synthesizer_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

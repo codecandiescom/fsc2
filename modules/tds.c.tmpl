@@ -174,7 +174,7 @@ tds_tmpl_exp_hook( void )
     OTHERWISE
     {
         tds_tmpl_finished( );
-        RETHROW( );
+        RETHROW;
     }
 
     return 1;
@@ -1966,7 +1966,7 @@ digitizer_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

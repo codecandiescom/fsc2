@@ -685,7 +685,7 @@ lecroy93xx_hori_res_prep( void )
     OTHERWISE
     {
         T_free( lecroy93xx.hres );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < lecroy93xx.num_mem_sizes; i++ )

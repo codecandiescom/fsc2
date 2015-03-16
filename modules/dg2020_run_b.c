@@ -137,7 +137,7 @@ dg2020_reorganize_pulses( bool flag )
             return FAIL;
         }
         OTHERWISE
-            RETHROW( );
+            RETHROW;
     }
 
     /* Now we still need a final check that the distance between the last

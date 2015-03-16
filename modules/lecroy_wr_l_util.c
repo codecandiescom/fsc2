@@ -664,7 +664,7 @@ lecroy_wr_hori_res_prep( void )
     OTHERWISE
     {
         T_free( lecroy_wr.hres );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < lecroy_wr.num_mem_sizes; i++ )

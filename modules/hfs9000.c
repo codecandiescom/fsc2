@@ -193,7 +193,7 @@ hfs9000_test_hook( void )
         }
 
         hfs9000.in_setup = UNSET;
-        RETHROW( );
+        RETHROW;
     }
 
 
@@ -910,7 +910,7 @@ pulser_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

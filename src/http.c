@@ -154,7 +154,7 @@ spawn_server( void )
         close( Comm.http_pd[ HTTP_CHILD_READ ] );
         close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-        RETHROW( );
+        RETHROW;
     }
 
     /* Start the HTTP server with its standard input and output redirected */

@@ -111,7 +111,7 @@ ep385_init_setup( void )
             ep385.channel[ i ].pulse_params =
                                      T_free( ep385.channel[ i ].pulse_params );
 
-        RETHROW( );
+        RETHROW;
     }
 
     if ( ep385.dump_file != NULL )

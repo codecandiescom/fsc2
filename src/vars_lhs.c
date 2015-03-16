@@ -516,7 +516,7 @@ vars_init_list( Var_T * v,
     OTHERWISE
     {
         nv->len = 0;
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < nv->len; i++ )

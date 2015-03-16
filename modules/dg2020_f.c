@@ -207,7 +207,7 @@ dg2020_f_test_hook( void )
             dg2020.show_file = NULL;
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
 
@@ -1076,7 +1076,7 @@ pulser_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

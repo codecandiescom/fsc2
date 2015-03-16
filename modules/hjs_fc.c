@@ -218,7 +218,7 @@ hjs_fc_init_hook( void )
             hjs_fc.gm_res_func = T_free( hjs_fc.gm_res_func );
         if ( hjs_fc.dac_func )
             hjs_fc.dac_func = T_free( hjs_fc.dac_func );
-        RETHROW( );
+        RETHROW;
     }
 
     return 1;
@@ -274,7 +274,7 @@ hjs_fc_exp_hook( void )
     OTHERWISE
     {
         hjs_fc_child_exit_hook( );
-        RETHROW( );
+        RETHROW;
     }
 
     /* If we found in the test run that the requested field is going to
@@ -471,7 +471,7 @@ magnet_calibration_file( Var_T * v )
         OTHERWISE
         {
             T_free( buf );
-            RETHROW( );
+            RETHROW;
         }
 
         T_free( buf );

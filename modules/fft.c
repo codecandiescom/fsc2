@@ -196,7 +196,7 @@ fft_real( Var_T * v )
             fftw_free( out );
             if ( r->type == INT_ARR )
                 fftw_free( in );
-            RETHROW( );
+            RETHROW;
         }
 
         /* Copy data over from result array into new variable */
@@ -441,7 +441,7 @@ fft_power_spectrum( Var_T * v )
     {
         fftw_free( out );
         fftw_destroy_plan( plan );
-        RETHROW( );
+        RETHROW;
     }
 
     dp = ( double * ) out;
@@ -758,7 +758,7 @@ fft_complex( Var_T * v )
 	{
 		fftw_destroy_plan( plan );
 		fftw_free( data );
-		RETHROW( );
+		RETHROW;
 	}
 
     /* For a forward transformation we wantthe array start with the most

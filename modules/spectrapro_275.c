@@ -358,7 +358,7 @@ spectrapro_275_set_wavelength( double wavelength )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -407,7 +407,7 @@ spectrapro_275_set_grating( long gn )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -588,7 +588,7 @@ spectrapro_275_read( char   * buf,
         OTHERWISE
         {
             T_free( lbuf );
-            RETHROW( );
+            RETHROW;
         }
     } while ( to_fetch > 0 );
 
@@ -636,7 +636,7 @@ spectrapro_275_talk( const char * buf,
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     /* Now we read the reply by the device, if necessary extending the
@@ -659,7 +659,7 @@ spectrapro_275_talk( const char * buf,
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_realloc( lbuf, already_read + 1 );
@@ -701,7 +701,7 @@ spectrapro_275_send( const char * buf )
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( lbuf );

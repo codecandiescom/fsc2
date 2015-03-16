@@ -1572,7 +1572,7 @@ lecroy_wr_get_prep( int              ch,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -1641,7 +1641,7 @@ lecroy_wr_get_curve( int         ch,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( data );
@@ -1682,7 +1682,7 @@ lecroy_wr_get_area( int        ch,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( data );
@@ -1735,7 +1735,7 @@ lecroy_wr_get_amplitude( int        ch,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( data );
@@ -2143,7 +2143,7 @@ lecroy_wr_serial_open( void )
 
     /* Set up serial port according to settings in the configuration file */
 
-    memset( lecroy_wr.tio, 0, sizeof lecroy_wr.tio );
+    memset( lecroy_wr.tio, 0, sizeof *lecroy_wr.tio );
 
     lecroy_wr.tio->c_cflag = CREAD | CLOCAL | CRTSCTS;
 

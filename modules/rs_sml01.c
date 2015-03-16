@@ -820,7 +820,7 @@ synthesizer_user_level_correction( Var_T * v )
             rs_sml01.corrs_req.cnt   = 0;
             rs_sml01.corrs_req.names = T_free( rs_sml01.corrs_req.names );
                         
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -1023,7 +1023,7 @@ synthesizer_use_table( Var_T * v )
         OTHERWISE
         {
             T_free( tfname );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -1038,7 +1038,7 @@ synthesizer_use_table( Var_T * v )
     {
         fclose( tfp );
         rs_sml01.table_file = T_free( rs_sml01.table_file );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( tfp );
@@ -2005,7 +2005,7 @@ synthesizer_command( Var_T * v )
         OTHERWISE
         {
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

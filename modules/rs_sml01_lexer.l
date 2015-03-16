@@ -213,7 +213,7 @@ rs_sml01_read_table( FILE * fp )
         THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 }
 
 

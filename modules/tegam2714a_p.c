@@ -146,7 +146,7 @@ tegam2714a_p_test_hook( void )
             tegam2714a_p.show_file = NULL;
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
     /* After the initial setup is done we need some different functions for

@@ -1936,7 +1936,7 @@ split_into_lines( int * num_lines )
             OTHERWISE
             {
                 T_free( lines[ i ] );
-                RETHROW( );
+                RETHROW;
             }
 
             T_free( lines[ i ] );

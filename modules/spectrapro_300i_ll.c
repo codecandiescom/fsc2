@@ -106,7 +106,7 @@ spectrapro_300i_find_calib( char * name )
     OTHERWISE
     {
         T_free( new_name );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( new_name != NULL )
@@ -135,7 +135,7 @@ spectrapro_300i_find_calib( char * name )
     OTHERWISE
     {
         T_free( new_name );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( cfp == NULL )
@@ -413,7 +413,7 @@ spectrapro_300i_set_wavelength( double wavelength )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -462,7 +462,7 @@ spectrapro_300i_set_turret( long tn )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -514,7 +514,7 @@ spectrapro_300i_set_grating( long gn )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -781,7 +781,7 @@ spectrapro_300i_set_offset( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( buf );
@@ -796,7 +796,7 @@ spectrapro_300i_set_offset( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( buf );
@@ -810,7 +810,7 @@ spectrapro_300i_set_offset( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( buf );
@@ -894,7 +894,7 @@ spectrapro_300i_set_adjust( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     buf = get_string( "%.3f INIT-WAVELENGTH",
@@ -909,7 +909,7 @@ spectrapro_300i_set_adjust( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, gn );
@@ -923,7 +923,7 @@ spectrapro_300i_set_adjust( long gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
@@ -993,7 +993,7 @@ spectrapro_300i_install_grating( long         gn,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     /* If this was for one of the gratings from the manual were done */
@@ -1078,7 +1078,7 @@ spectrapro_300i_uninstall_grating( long gn )
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 }
 
@@ -1117,7 +1117,7 @@ spectrapro_300i_send( const char * buf )
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( lbuf );
@@ -1251,7 +1251,7 @@ bool spectrapro_300i_read( char *   buf,
         OTHERWISE
         {
             T_free( lbuf );
-            RETHROW( );
+            RETHROW;
         }
     } while ( to_fetch > 0 );
 
@@ -1299,7 +1299,7 @@ spectrapro_300i_talk( const char * buf,
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     /* Now we read the reply by the device, if necessary extending the
@@ -1322,7 +1322,7 @@ spectrapro_300i_talk( const char * buf,
     OTHERWISE
     {
         T_free( lbuf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_realloc( lbuf, already_read + 1 );

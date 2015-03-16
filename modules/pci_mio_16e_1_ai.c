@@ -199,7 +199,7 @@ daq_ai_channel_setup( Var_T * v )
             if ( dither_enables )
                 T_free( dither_enables );
 
-            RETHROW( );
+            RETHROW;
         }
 
         /* Now look for the optional arguments - they're all strings and
@@ -683,7 +683,7 @@ daq_ai_get_curve( Var_T * v  UNUSED_ARG )
     {
         if ( volts )
             T_free( volts );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( FSC2_MODE == EXPERIMENT )

@@ -319,7 +319,7 @@ rb_pulser_j_read_configuration( void )
     {
         fclose( rb_pulser_j_in );
         rb_pulser_j_cleanup( );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( rb_pulser_j_in );

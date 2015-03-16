@@ -206,7 +206,7 @@ hjs_attenuator_read_calibration( FILE * fp )
         THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 }
 
 

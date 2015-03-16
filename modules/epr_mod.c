@@ -346,7 +346,7 @@ epr_modulation_add_calibration( Var_T * v )
                 T_free( res->name );
 			T_free( res );
         }
-		RETHROW( );
+		RETHROW;
 	}
 
 	return vars_push( INT_VAR, 1L );

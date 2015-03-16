@@ -61,7 +61,7 @@ ep385_store_timebase( double timebase )
         {
             if ( min )
                 T_free( min );
-            RETHROW( );
+            RETHROW;
         }
     }
 

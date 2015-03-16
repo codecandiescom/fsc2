@@ -149,7 +149,7 @@ load_all_drivers( void )
                         call_pop( );
                         vars_del_stack( );
                         dlclose( cd->driver.handle );
-                        RETHROW( );
+                        RETHROW;
                     }
 
                     call_pop( );
@@ -210,7 +210,7 @@ load_all_drivers( void )
     {
         Fsc2_Internals.in_hook = UNSET;
         delete_devices( );
-        RETHROW( );
+        RETHROW;
     }
 
     Fsc2_Internals.in_hook = UNSET;
@@ -655,7 +655,7 @@ run_test_hooks( void )
         call_pop( );
         vars_del_stack( );
         Fsc2_Internals.in_hook = UNSET;
-        RETHROW( );
+        RETHROW;
     }
 
     Fsc2_Internals.in_hook = UNSET;
@@ -704,7 +704,7 @@ run_end_of_test_hooks( void )
         call_pop( );
         vars_del_stack( );
         Fsc2_Internals.in_hook = UNSET;
-        RETHROW( );
+        RETHROW;
     }
 
     Fsc2_Internals.in_hook = UNSET;
@@ -767,7 +767,7 @@ run_exp_hooks( void )
         call_pop( );
         vars_del_stack( );
         Fsc2_Internals.in_hook = UNSET;
-        RETHROW( );
+        RETHROW;
     }
 
     Fsc2_Internals.in_hook = UNSET;

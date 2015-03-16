@@ -817,7 +817,7 @@ counter_get_buffered_counts( Var_T * v )
         OTHERWISE
         {
             T_free( buf );
-            RETHROW( );
+            RETHROW;
         }
 
         T_free( buf );
@@ -942,7 +942,7 @@ ni6601_get_data( long   to_fetch,
                 OTHERWISE
                 {
                     T_free( buf );
-                    RETHROW( );
+                    RETHROW;
                 }
             }
         }
@@ -970,7 +970,7 @@ ni6601_get_data( long   to_fetch,
     OTHERWISE
     {
         T_free( buf );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < received; i++ )
@@ -994,7 +994,7 @@ ni6601_get_data( long   to_fetch,
     OTHERWISE
     {
         T_free( final_buf );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( final_buf );
@@ -1396,7 +1396,7 @@ ni6601_time_check( double       duration,
                 mint = T_free( mint );
             if ( maxt )
                 maxt = T_free( maxt );
-            RETHROW( );
+            RETHROW;
         }
 
         print( FATAL, "Invalid %s of %s, valid values are in the range "
@@ -1422,7 +1422,7 @@ ni6601_time_check( double       duration,
         {
             if ( oldv )
                 oldv = T_free( oldv );
-            RETHROW( );
+            RETHROW;
         }
 
         print( WARN, "Adjusting %s from %s to %s.\n", text, oldv,

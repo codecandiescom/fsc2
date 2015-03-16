@@ -249,7 +249,7 @@ mw_attenuator_load_calibration( Var_T * v )
         CATCH( EXCEPTION )
         {
             T_free( tfname );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -264,7 +264,7 @@ mw_attenuator_load_calibration( Var_T * v )
     {
         fclose( tfp );
         hjs_attenuator.calib_file = T_free( hjs_attenuator.calib_file );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( tfp );

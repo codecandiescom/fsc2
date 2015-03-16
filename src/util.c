@@ -1138,7 +1138,7 @@ fsc2_simplex( size_t   n,
         OTHERWISE
         {
             T_free( p );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -1517,7 +1517,7 @@ fsc2_fline( FILE * fp )
         OTHERWISE
         {
             T_free( line );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -1535,7 +1535,7 @@ fsc2_fline( FILE * fp )
     OTHERWISE
     {
         T_free( line );
-        RETHROW( );
+        RETHROW;
     }
 
     return line;

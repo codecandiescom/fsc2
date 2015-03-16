@@ -2839,14 +2839,14 @@ CATCH( EXCEPTION )
     ...                  /* the error handling code goes here */
 @}
 OTHERWISE
-    RETHROW( );
+    RETHROW;
 @end example
 
 @findex TRY
 @findex TRY_SUCCESS
 @findex CATCH()
 @findex OTHERWISE
-@findex RETHROW()
+@findex RETHROW
 With @code{TRY} the program is told that the following code might throw
 an exception. If everything works out well and no exception is thrown
 the @code{CATCH()} and @code{OTHERWISE} blocks are never executed and in
@@ -2867,7 +2867,7 @@ the one specified as the arguments of the @code{CATCH()} calls, a
 catching could happen). The block following @code{OTHERWISE} will deal
 with all other exceptions not dealt by @code{CATCH()}.  Normally, you
 just will rethrow the exception you're not interested in or which you
-are unable to handle yourself by calling @code{RETHROW()}.
+are unable to handle yourself by calling @code{RETHROW}.
 
 In cases where you aren't interested in a special type of exception but
 want to catch every exception, e.g.@: to just do some cleaning up before
@@ -2883,7 +2883,7 @@ TRY
 OTHERWISE
 @{
     do_local_cleanup();       /* e.g. deallocate memory */
-    RETHROW();
+    RETHROW;
 @}
 @end example
 
@@ -3000,7 +3000,7 @@ long ** foo( size_t count,
     @{
         for ( i -= 1; i >= 0; i-- )
             T_free( i )
-        RETHROW( );
+        RETHROW;
     @}
 
     return buffer;

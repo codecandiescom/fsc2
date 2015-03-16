@@ -1616,7 +1616,7 @@ do_measurement( void )
                 THROW( EXCEPTION );
         }
         OTHERWISE
-            RETHROW( );
+            RETHROW;
     }
 }
 

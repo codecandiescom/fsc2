@@ -185,7 +185,7 @@ device_add( const char * name )
     {
         T_free( real_name );
         T_free( dev_name );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( real_name );

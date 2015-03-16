@@ -104,7 +104,7 @@ spex_cd2a_init( void )
             SPEX_CD2A_THROW( EXCEPTION );
         }
         OTHERWISE
-            SPEX_CD2A_RETHROW( );
+            SPEX_CD2A_RETHROW;
 
         break;
     }

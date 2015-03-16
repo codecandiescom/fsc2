@@ -2711,7 +2711,7 @@ eval_display_args( Var_T * v,
         OTHERWISE
         {
             T_free( dp );
-            RETHROW( );
+            RETHROW;
         }
 
         dp[ *nsets ].type = v->type;
@@ -5164,7 +5164,7 @@ f_spike_rem( Var_T * v )
                 OTHERWISE
                 {
                     T_free( diffs );
-                    RETHROW( );
+                    RETHROW;
                 }
             }
 
@@ -5184,7 +5184,7 @@ f_spike_rem( Var_T * v )
         T_free( diffs );
         if ( ol_indices != NULL )
             T_free( ol_indices );
-        RETHROW( );
+        RETHROW;
     }
 
     /* If there are no outliers we return the unchanged array */

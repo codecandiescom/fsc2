@@ -129,7 +129,7 @@ hfs9000_update_pulses( bool flag )
             return FAIL;
         }
         OTHERWISE
-            RETHROW( );
+            RETHROW;
 
         needed_update |= hfs9000_commit( f, flag );
     }

@@ -297,7 +297,7 @@ oriel_matrix_init( void )
     OTHERWISE
     {
         oriel_matrix_close( );
-        RETHROW( );
+        RETHROW;
     }
 }
 #endif

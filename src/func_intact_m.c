@@ -154,7 +154,7 @@ f_mcreate( Var_T * var )
             T_free( new_io );
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
     /* Draw the new menu */

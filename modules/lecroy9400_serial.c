@@ -714,7 +714,7 @@ lecroy9400_get_curve( int        ch,
     {
         is_acquiring = UNSET;
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 
     gain_fac = sset[ ( int ) lecroy9400.wv_desc[ ch ][ 4 ] - 22 ];

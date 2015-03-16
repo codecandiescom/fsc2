@@ -217,7 +217,7 @@ spectrapro_300i_read_calib( FILE *       fp,
         THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     for ( i = 0; i < MAX_GRATINGS; i++ )
     {

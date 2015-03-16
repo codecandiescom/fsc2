@@ -1410,7 +1410,7 @@ lecroy_ws_get_prep( int              ch,
     {
         if ( *data != NULL )
             T_free( *data );
-        RETHROW( );
+        RETHROW;
     }
 }
 

@@ -1954,7 +1954,7 @@ do_printf( long    file_num,
     OTHERWISE
     {
         T_free( fmt_start );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( fmt_start );
@@ -2261,7 +2261,7 @@ print_include( int          fid,
         level--;
         fclose( finc );
         T_free( file_name );
-        RETHROW( );
+        RETHROW;
     }
 
     level--;

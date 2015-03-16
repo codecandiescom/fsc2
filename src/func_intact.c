@@ -645,7 +645,7 @@ f_obj_clabel( Var_T * v )
     OTHERWISE
     {
         T_free( label );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( io->label );

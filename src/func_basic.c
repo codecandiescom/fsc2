@@ -2659,7 +2659,7 @@ f_slice( Var_T * v )
             {
                 v->val.vptr = old_vptr;
                 v->len      = old_len;
-                RETHROW( );
+                RETHROW;
             }
 
             v->val.vptr = old_vptr;

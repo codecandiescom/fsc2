@@ -122,7 +122,7 @@ rs_spec10_exp_hook( void )
     {
         fsc2_release_uucp_lock( device_name );
         rs_spec10->has_lock = UNSET;
-        RETHROW( );
+        RETHROW;
     }
 
     return 1;
@@ -727,7 +727,7 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
         rs_spec10->ccd.bin[ Y ] = bin[ Y ];
         rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
         rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( frame );
@@ -889,7 +889,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
         rs_spec10->ccd.bin[ Y ] = bin[ Y ];
         rs_spec10->ccd.roi[ X + 2 ] = urc[ X ];
         rs_spec10->ccd.roi[ Y + 2 ] = urc[ Y ];
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( frame );

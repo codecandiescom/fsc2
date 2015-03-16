@@ -339,7 +339,7 @@ ag54830b_get_curve( int       channel,
 			T_free( buffer );
 		if ( *data )
 			T_free( *data );
-		RETHROW( );
+		RETHROW;
 	}
 
 	/* Get scaling */

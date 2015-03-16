@@ -142,7 +142,7 @@ accept_new_data( bool empty_queue )
         OTHERWISE
         {
             detach_shm( buf, &Comm.MQ->slot[ Comm.MQ->low ].shm_id );
-            RETHROW( );
+            RETHROW;
         }
 
         /* Detach from the shared memory segment and remove it */

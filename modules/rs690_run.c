@@ -248,7 +248,7 @@ rs690_update_pulses( bool flag )
                 return FAIL;
             }
             OTHERWISE
-                RETHROW( );
+                RETHROW;
         }
     }
 
@@ -1126,7 +1126,7 @@ rs690_channel_setup( bool flag )
     OTHERWISE
     {
         rs690_cleanup_fs( );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( ! flag )

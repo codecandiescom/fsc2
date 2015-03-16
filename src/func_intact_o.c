@@ -173,7 +173,7 @@ f_ocreate( Var_T * var )
         {
             if ( type == STRING_OUTPUT )
                 T_free( sptr );
-            RETHROW( );
+            RETHROW;
         }
 
         if ( type == STRING_OUTPUT )
@@ -198,7 +198,7 @@ f_ocreate( Var_T * var )
         {
             T_free( label );
             T_free( sptr );
-            RETHROW( );
+            RETHROW;
         }
 
         v = vars_pop( v );
@@ -220,7 +220,7 @@ f_ocreate( Var_T * var )
             T_free( help_text );
             T_free( label );
             T_free( sptr );
-            RETHROW( );
+            RETHROW;
         }
 
         v = vars_pop( v );
@@ -256,7 +256,7 @@ f_ocreate( Var_T * var )
             T_free( help_text );
             T_free( label );
             T_free( sptr );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -301,7 +301,7 @@ f_ocreate( Var_T * var )
         T_free( help_text );
         T_free( label );
         T_free( sptr );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( Toolbox->objs == NULL )

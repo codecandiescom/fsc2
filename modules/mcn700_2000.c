@@ -270,7 +270,7 @@ powersupply_command( Var_T * v )
         {
 
             T_free( cmd );
-            RETHROW( );
+            RETHROW;
         }
     }
 

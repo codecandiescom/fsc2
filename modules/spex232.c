@@ -622,7 +622,7 @@ monochromator_wavelength( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX232_RETHROW( );
+        SPEX232_RETHROW;
 
     if (    wl < spex232.lower_limit
          && ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
@@ -700,7 +700,7 @@ monochromator_wavenumber( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX232_RETHROW( );
+        SPEX232_RETHROW;
 
     if (    wl < spex232.lower_limit
          && ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
@@ -821,7 +821,7 @@ monochromator_scan_setup( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
-        SPEX232_RETHROW( );
+        SPEX232_RETHROW;
 
     if (    start < spex232.lower_limit
          && ( spex232.lower_limit - start ) / spex232.lower_limit < 1.0e-5 )
@@ -1365,7 +1365,7 @@ monochromator_wavenumber_axis( Var_T * v )
             SPEX232_THROW( EXCEPTION );
         }
         OTHERWISE
-            SPEX232_RETHROW( );
+            SPEX232_RETHROW;
     }
     else
     {

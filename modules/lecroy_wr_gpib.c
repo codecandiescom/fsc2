@@ -1489,7 +1489,7 @@ lecroy_wr_get_prep( int              ch,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 }
 

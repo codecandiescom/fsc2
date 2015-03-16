@@ -158,7 +158,7 @@ f_bcreate( Var_T * var )
         OTHERWISE
         {
             T_free( label );
-            RETHROW( );
+            RETHROW;
         }
 
         v = vars_pop( v );
@@ -179,7 +179,7 @@ f_bcreate( Var_T * var )
         {
             T_free( help_text );
             T_free( label );
-            RETHROW( );
+            RETHROW;
         }
 
         v = vars_pop( v );
@@ -206,7 +206,7 @@ f_bcreate( Var_T * var )
         T_free( new_io );
         T_free( help_text );
         T_free( label );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( Toolbox->objs == NULL )

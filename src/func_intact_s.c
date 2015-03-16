@@ -173,7 +173,7 @@ f_screate( Var_T * var )
             OTHERWISE
             {
                 T_free( label );
-                RETHROW( );
+                RETHROW;
             }
         }
     }
@@ -191,7 +191,7 @@ f_screate( Var_T * var )
         {
             T_free( help_text );
             T_free( label );
-            RETHROW( );
+            RETHROW;
         }
     }
 
@@ -213,7 +213,7 @@ f_screate( Var_T * var )
         T_free( new_io );
         T_free( help_text );
         T_free( label );
-        RETHROW( );
+        RETHROW;
     }
 
     if ( Toolbox->objs == NULL )

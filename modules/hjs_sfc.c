@@ -573,7 +573,7 @@ magnet_calibration_file( Var_T * v )
         OTHERWISE
         {
             T_free( buf );
-            RETHROW( );
+            RETHROW;
         }
 
         T_free( buf );

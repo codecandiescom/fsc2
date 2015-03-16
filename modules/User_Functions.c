@@ -197,7 +197,7 @@ get_phase_cycled_area_1( Var_T * v )
     OTHERWISE
     {
         T_free( win_list );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < num_windows; i++ )
@@ -268,7 +268,7 @@ get_phase_cycled_area_1( Var_T * v )
     {
         T_free( data );
         T_free( win_list );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( data );
@@ -421,7 +421,7 @@ get_phase_cycled_area_2( Var_T * v )
     OTHERWISE
     {
         T_free( win_list );
-        RETHROW( );
+        RETHROW;
     }
 
     for ( i = 0; i < 2 * num_windows; i++ )
@@ -551,7 +551,7 @@ get_phase_cycled_area_2( Var_T * v )
     {
         T_free( data );
         T_free( win_list );
-        RETHROW( );
+        RETHROW;
     }
 
     T_free( data );

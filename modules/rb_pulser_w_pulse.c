@@ -617,7 +617,7 @@ rb_pulser_w_change_pulse_length( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( p->is_len && p->len == new_len )
     {
@@ -702,7 +702,7 @@ rb_pulser_w_change_pulse_length_change( long   pnum,
             THROW( EXCEPTION );
     }
     OTHERWISE
-        RETHROW( );
+        RETHROW;
 
     if ( new_dlen == 0 && FSC2_MODE == TEST )
     {

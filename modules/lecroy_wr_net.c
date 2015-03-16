@@ -1909,7 +1909,7 @@ lecroy_wr_get_data( long   * len,
     OTHERWISE
     {
         T_free( data );
-        RETHROW( );
+        RETHROW;
     }
 
     return data;

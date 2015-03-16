@@ -171,7 +171,7 @@ fsc2_request_serial_port( const char * dev_file,
         OTHERWISE
         {
             T_free( real_name );
-            RETHROW( ) ;
+            RETHROW;
         }
     }
     else
@@ -202,7 +202,7 @@ fsc2_request_serial_port( const char * dev_file,
     OTHERWISE
     {
         T_free( real_name );
-        RETHROW( );
+        RETHROW;
     }
 
     Serial_Ports[ Num_Serial_Ports ].dev_file  = real_name;

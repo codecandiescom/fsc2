@@ -235,7 +235,7 @@ rs_spec10_ccd_init( void )
         {
             lower_permissions( );
             T_free( exp_res_array );
-            RETHROW( );
+            RETHROW;
         }
 
         for ( i = 0; i < exp_res_count; i++ )
@@ -645,8 +645,7 @@ rs_spec10_get_pic( uns32 * size )
 #endif /* ! defined RS_SPEC10_TEST */
 
         lower_permissions( );
-
-        RETHROW( );
+        RETHROW;
     }
 
 #if ! defined RS_SPEC10_TEST
@@ -696,7 +695,7 @@ rs_spec10_get_pic( uns32 * size )
         if ( chdir( cur_dir ) )
             print( SEVERE, "Can't go to previous working directory, be very "
                    "careful!\n" );
-        RETHROW( );
+        RETHROW;
     }
 
     /* According to the manual calling pl_exp_finish_seq( ) isn't necessary

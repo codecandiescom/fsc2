@@ -262,7 +262,7 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
-        RETHROW( );
+        RETHROW;
     }
 
     /* If no functions were found return immediately */
@@ -302,7 +302,7 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
-        RETHROW( );
+        RETHROW;
     }
 
     fclose( func_listin );

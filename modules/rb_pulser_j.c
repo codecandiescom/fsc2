@@ -240,7 +240,7 @@ rb_pulser_j_test_hook( void )
             rb_pulser_j.show_file = NULL;
         }
 
-        RETHROW( );
+        RETHROW;
     }
 
 #ifndef FIXED_TIMEBASE
