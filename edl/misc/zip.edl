@@ -1,0 +1,16 @@
+VARIABLES:
+
+I;
+arr[ 10 ];
+FILE;
+
+EXPERIMENT:
+
+FILE = get_gzip_file( );
+FOR I = 1 : 10 {
+	arr[ I ] = I;
+}
+
+save( FILE, arr );
+
+//delete_file( FILE );

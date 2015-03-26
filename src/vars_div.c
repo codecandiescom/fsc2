@@ -43,7 +43,7 @@ static void vars_div_check( double val );
 
 
 /*-----------------------------------------------------------*
- * Function for dividing of two variables of arbitrary types
+ * Function for dividing two variables of arbitrary types
  *-----------------------------------------------------------*/
 
 Var_T *

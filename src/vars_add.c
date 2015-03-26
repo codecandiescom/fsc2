@@ -36,7 +36,7 @@ static Var_T *vars_ref_add( Var_T * v1,
 
 
 /*---------------------------------------------------------*
- * Function for adding of two variables of arbitrary types
+ * Function for adding two variables of arbitrary types
  *---------------------------------------------------------*/
 
 Var_T *

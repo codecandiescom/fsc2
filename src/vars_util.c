@@ -26,10 +26,10 @@ static Var_T * vars_str_comp( int     comp_type,
                               Var_T * v2 );
 
 
-/*---------------------------------------------------------------*
- * vars_negate() negates the value of a variable, an 1D array or
- * a complete matrix.
- *---------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * vars_negate() negates the value of a variable, an 1D array or a
+ * complete matrix.
+ *-----------------------------------------------------------------*/
 
 Var_T * vars_negate( Var_T * v )
 {

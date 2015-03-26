@@ -63,6 +63,7 @@ functions and may not be used as variable names.
 @item @code{clear_curve_1d}   @tab Built-in function (@ref{clear_curve_1d()})
 @item @code{clear_curve_2d}   @tab Built-in function (@ref{clear_curve_2d()})
 @item @code{clone_file}       @tab Built-in function (@ref{clone_file()})
+@item @code{clone_gzip_file}  @tab Built-in function (@ref{clone_gzip_file()})
 @item @code{clear_marker}     @tab Built-in function (@ref{clear_marker()})
 @item @code{cos}              @tab Built-in function (@ref{cos()})
 @item @code{cosh}             @tab Built-in function (@ref{cosh()})
@@ -73,6 +74,7 @@ functions and may not be used as variable names.
 @item @code{DEFAULT_SOURCE}   @tab DAQ channel name
 @item @code{DEL}              @tab @code{DELAY} keyword
 @item @code{DELAY}            @tab @code{DELAY} keyword
+@item @code{delete_file}      @tab Built-in function (@ref{delete_file()})
 @item @code{DELL}             @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DEL_L}            @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DELLEN}           @tab Pulse @code{DELTA_LENGTH} keyword
@@ -141,6 +143,7 @@ functions and may not be used as variable names.
 @item @code{F0} to @code{F15} @tab Pulser channel names
 @item                         @tab
 @item @code{get_file}         @tab Built-in function (@ref{get_file()})
+@item @code{get_gzip_file}    @tab Built-in function (@ref{get_gzip_file()})
 @item @code{GRACE_PERIOD}     @tab Deprecated keyword
 @item @code{G_to_T}           @tab Built-in function (@ref{G_to_T()})
 @item @code{G0} to @code{G15} @tab Pulser channel names
@@ -210,6 +213,7 @@ functions and may not be used as variable names.
 @item @code{object_delete}    @tab Built-in function (@ref{object_delete()})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
 @item @code{open_file}        @tab Built-in function (@ref{open_file()})
+@item @code{open_gzip_file}   @tab Built-in function (@ref{open_gzip_file()})
 @item @code{OR}               @tab logical OR operator
 @item @code{output_create}    @tab Built-in function (@ref{output_create()})
 @item @code{output_delete}    @tab Built-in function (@ref{output_delete()})

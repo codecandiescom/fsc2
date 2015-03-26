@@ -203,4 +203,4 @@ endif
 
 
 clean:
-	$(RM) $(RMFLAGS) *~ svn-*
+	$(RM) $(RMFLAGS) *~

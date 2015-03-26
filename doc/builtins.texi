@@ -1075,9 +1075,13 @@ file handles for @i{stdout} and @i{stderr}.
 @strong{List of all file handling functions}:
 @table @samp
 @item @ref{get_file()}
+@item @ref{get_gzip_file()}
 @item @ref{open_file()}
+@item @ref{open_gzip_file()}
 @item @ref{clone_file()}
+@item @ref{clone_gzip_file()}
 @item @ref{reset_file()}
+@item @ref{delete_file()}
 @item @ref{save()}
 @item @ref{fsave()}
 @item @ref{ffsave()}
@@ -1148,6 +1152,15 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
+@anchor{get_gzip_file()}
+@findex get_gzip_file()
+@item get_gzip_file()
+This function accepts the exact same arguments as
+@code{@ref{get_file()}}. The only difference is that the output is
+automatically compressed as with @code{gzip}. Please note: on case of
+a crash of the program the contents of the file will be unusable.
+
+
 @anchor{open_file()}
 @findex open_file()
 @item open_file()
@@ -1178,6 +1191,15 @@ does not exist yet. The resulting file is used as the output file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{open_gzip_file()}
+@findex open_gzip_file()
+@item open_gzip_file()
+This function accepts the exact same arguments as
+@code{@ref{open_file()}}. The only difference is that the output is
+automatically compressed as with @code{gzip}. Please note: on case of
+a crash of the program the contents of the file will be unusable.
 
 
 @anchor{clone_file()}
@@ -1237,6 +1259,15 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
+@anchor{clone_gzip_file()}
+@findex clone_gzip_file()
+@item clone_gzip_file()
+This function accepts the exact same arguments as
+@code{@ref{clone_file()}}. The only difference is that the output is
+automatically compressed as with @code{gzip}. Please note: on case of
+a crash of the program the contents of the file will be unusable.
+
+
 @anchor{reset_file()}
 @findex reset_file()
 @item reset_file()
@@ -1248,6 +1279,20 @@ calling @code{@ref{open_file()}} before) then the function takes no
 argument. If a file got opened by a call of @code{@ref{open_file()}}
 or similar then the function must be called with a single argument,
 the file handle for the file to be reset.
+
+
+@anchor{delete_file()}
+@findex delete_file()
+@item delete_file()
+This function allows to delete an already opened file (e.g. if it has
+become obvious that the data written to it are useless). If there's
+only a single file that got opened automatically (by callling a
+function that writes to a file withoyut calling
+@code{@ref{open_file()}} before) then the function takes no argument.
+If a file got opened by a call of @code{@ref{open_file()}} or similar
+then the function must be called with a single argument, the file
+handle for the file to be deleted. Attempts to write further data to a
+deleted file will be silently disregarded.
 
 
 @anchor{save()}

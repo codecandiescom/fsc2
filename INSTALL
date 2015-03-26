@@ -3,10 +3,11 @@ install and run fsc2.
 
 fsc2 supports too many devices and configurations to use a one-
 fits-all compilation process. Thus some manual configuration has
-to be done before compilation and installaion can be started. On
-the one hand, some changes to the main Makefile may be required,
-on the other hand some parameters for the devices to be used may
-need to be adjusted.
+to be done before compilation and installaion can be started. You
+may have to set up a number of general options and also parameters
+for the devices you want to use may need to be adjusted. But let's
+start with what you will definitely need to be able to compile the
+whole beast;-)
 
 
 A) Requirements
@@ -21,14 +22,17 @@ run fsc2:
  4) bison
  5) install
  6) sed
- 7) XFORMS library (version 0.89 or higher) and development package
-    (a properly installed header file for XForms as well the shared
-	library are required). You can download it from
+ 7) The XFORMS (shared) library and the properly installed header
+    file. You can download all of it from
 
        http://savannah.nongnu.org/projects/xforms/.
 
-	I strongly recommend to use the newest available version, which
-    currently is xforms-1.0.91
+	Then compile and install it. I strongly recommend to use the
+    newest available version, which currently is xforms-1.2.4.
+    Many Linux distributions also come with ready-made packages
+    - often named something like 'libforms-dev' or similar (pick
+    the development version, otherwise the required header will be
+    missing!)
 
  8) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
@@ -71,37 +75,30 @@ A1) GPIB support
 ----------------
 
 GPIB support requires a library and a driver to interface GPIB cards to
-be installed. You can either use the one I've written and which works, as
-far as I know, for some ISA cards with 2.0, 2.2 and 2.4 kernels and can be
-downloaded from
-
-  http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz
-
-the older LLP (Linux Lab Project) library to be found at
-
-  http://www.llp.fu-berlin.de
-
-(which, at least the last time I checked, didn't work with 2.2 and 2.4
-kernels), the successor of this library, that I will call SLG in the
-following (for SourceForge Linux GPIB) and which is now hosted on
+be installed. I'd strongly recommend to use what I will call SLG in
+the following (for SourceForge Linux GPIB) and which is now hosted on
 SourceForge at
 
 http://linux-gpib.sourceforge.net/
 
-working also for 2.6 kernels, or the one from National Instruments, to
-be downloaded from
+It seems to be rather mature and upports a lot of different
+GPIB cards.
+
+You may also be able to stuff to work with my own version (but
+which works, as far as I know, only for some ISA cards with 2.0,
+2.2 and 2.4 kernels and can be downloaded from
+
+  http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz
+
+There's also something from National Instruments, to be downloaded
+from
 
   http://www.natinst.com
 
-Only the beta-drivers (with 2.4 kernels) have been used. The newer driver
-and library (supposed to work also with 2.6) hasn't been tested, I didn't
-even get the driver to compile and linking against the library led to the
-program aborting immediately. I haven't any idea yet how to resolve that
-problem. If you want the older beta-driver but can't find it on the NI web
-site anymore send me an email, I still have a copy of it around somewhere.
+(but which I nver managed to get to work properly).
 
-From the documentations of the LLP and SLG libraries and the one I have
-written it should already be clear that a GPIB configuration file (that
+From the documentations of the SLG libraries and the one I have writ-
+ten it should already be clear that a GPIB configuration file (that
 is typically '/etc/gpib.conf') is required for the accompanying libraries
 to work correctly, in which all devices to be used with are listed with
 their respective properties.

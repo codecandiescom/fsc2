@@ -99,7 +99,7 @@ endif
 
 
 cleanup:
-	-$(RM) $(RMFLAGS) svn-* *~
+	-$(RM) $(RMFLAGS) *~
 
 
 clean:

@@ -437,8 +437,8 @@ mcn700_2000_talk( const char * cmd,
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-static
-void mcn700_2000_failure( void )
+static void
+mcn700_2000_failure( void )
 {
     print( FATAL, "Communication with power supply failed.\n" );
     THROW( EXCEPTION );

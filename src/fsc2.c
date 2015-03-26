@@ -1180,6 +1180,7 @@ final_exit_handler( void )
 
     /* Do everything required to end the program */
 
+    close_all_files( );
     T_free( EDL.File_List );
 
     if ( In_file_fp )

@@ -29,9 +29,16 @@ extern bool Dont_Save;                 /* defined in func.c */
 static bool STD_Is_Open = UNSET;
 
 
+static Var_T * f_openf_int( Var_T * /* v */,
+                            bool    /* do_compress */ );
+
+static Var_T * f_getf_int( Var_T * /* v */,
+                           bool    /* do_compress */ );
+
 static int get_save_file( Var_T ** /* v */ );
 
-static Var_T * batch_mode_file_open( char * /* name */ );
+static Var_T * batch_mode_file_open( char * /* name */,
+                                     bool   /* do_compress */ );
 
 static long arr_save( const char * sep,
                       long         file_num,
@@ -69,6 +76,7 @@ Var_T *
 f_is_file( Var_T * v )
 {
     long fn;
+    File_List_T *fl;
 
 
     fn = get_long( v, "file number" );
@@ -78,16 +86,15 @@ f_is_file( Var_T * v )
 
     fn -= FILE_NUMBER_OFFSET;
 
-    if ( Fsc2_Internals.mode == TEST )
-        return vars_push( INT_VAR,
-                          ( fn < 0 || fn >= EDL.File_List_Len ) ?
-                          0L : 1L );
+    if ( fn < 0 || fn >= EDL.File_List_Len )
+        return vars_push( INT_VAR, 0L );
 
-    return vars_push( INT_VAR,
-                      (    fn < 0
-                        || fn >= EDL.File_List_Len
-                        || ! EDL.File_List[ fn ].fp ) ?
-                      0L : 1L );
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, 1L );
+
+    fl = EDL.File_List + fn;
+    return vars_push( INT_VAR, (    (   fl->gzip && fl->gp )
+                                 || ( ! fl->gzip && fl->fp ) ) ? 1L : 0L );
 }
 
 
@@ -134,7 +141,7 @@ get_name( Var_T * v )
     /* The function can be called without an argument when we're in
        automatical file open mode, i.e. 'No_File_Numbers' is set */
 
-    if ( v == NULL )
+    if ( ! v )
     {
         if ( ! No_File_Numbers )
         {
@@ -200,12 +207,29 @@ get_name( Var_T * v )
 Var_T *
 f_openf( Var_T * v )
 {
+    return f_openf_int( v, UNSET );
+}
+
+
+Var_T *
+f_opengzf( Var_T * v )
+{
+    return f_openf_int( v, SET );
+}
+
+
+static
+Var_T *
+f_openf_int( Var_T * v,
+             bool    do_compress )
+{
     Var_T *cur;
     long i;
     char *fn;
     char *m;
     struct stat stat_buf;
     FILE *fp = NULL;
+    gzFile gp = NULL;
     File_List_T *old_File_List = NULL;
 
 
@@ -214,7 +238,7 @@ f_openf( Var_T * v )
     CLOBBER_PROTECT( old_File_List );
 
     /* If there was a call of 'f_save()' etc. without a previous call to
-       'f_getf()' or 'f_openf()' then 'f_save()' (or one of its bethren)
+       'f_getf()' or 'f_openf()' then 'f_save()' (or one of its brethrens)
        already called 'f_getf()' by itself and from now on does not expect
        file identifiers anymore - in this case the variable 'No_File_Numbers'
        is set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
@@ -226,11 +250,11 @@ f_openf( Var_T * v )
     {
         print( FATAL, "Function can't be called if one of the functions for "
                "writing data to a file already has been invoked without "
-               "opening a file explicitely.\n" );
+               "opening a file explicitely before.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( v == NULL )
+    if ( ! v )
     {
         print( FATAL, "Missing argument(s).\n" );
         THROW( EXCEPTION );
@@ -240,7 +264,7 @@ f_openf( Var_T * v )
        we're asked to "open" stdout or stderr */
 
     if (    v->type == INT_VAR
-         && v->next == NULL
+         && ! v->next
          && (    v->val.lval == STDOUT_FILENO
               || v->val.lval == STDERR_FILENO ) )
     {
@@ -253,27 +277,31 @@ f_openf( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
     {
-        for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
+        for ( i = 0, cur = v; i < 6 && cur; i++, cur = cur->next )
             vars_check( cur, STR_VAR );
+
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
     }
 
     /* Check the arguments and supply default values if necessary */
 
-    for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
+    for ( i = 0, cur = v; i < 6 && cur; i++, cur = cur->next )
         vars_check( cur, STR_VAR );
 
     fn = v->val.sptr;
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+    {
+        do_compress = UNSET;
         goto got_file;
+    }
 
     if (    Fsc2_Internals.cmdline_flags & BATCH_MODE
          || Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-        return batch_mode_file_open( *fn == '\0' ? NULL : fn );
+        return batch_mode_file_open( ! *fn ? NULL : fn, do_compress );
 
-    if ( *fn == '\0' )
-        return f_getf( v->next );
+    if ( ! *fn )
+        return f_getf_int( v->next, do_compress );
 
     /* Check if the file is already open */
 
@@ -310,12 +338,13 @@ f_openf( Var_T * v )
         T_free( m );
     }
 
-    if ( ( fp = fopen( fn, "w+" ) ) == NULL )
+    if (    ( ! do_compress && ! ( fp = fopen( fn, "w"    ) ) )
+         || (   do_compress && ! ( gp = gzopen( fn, "wb9" ) ) ) )
     {
         switch( errno )
         {
             case EMFILE :
-                show_message( "   You have too many open files!\n"
+                show_message( "You have too many open files!\n"
                               "Please close at least one and retry." );
                 break;
 
@@ -329,12 +358,23 @@ f_openf( Var_T * v )
                               "  Please delete some files and retry." );
                 break;
 
+            case 0 :
+                if ( do_compress )
+                {
+                    show_message( "Not enough memory for compressing the "
+                                  "file. Opening it failed." );
+                    print( FATAL, "Opening file for compressed writing failed "
+                           "due to insufficient memory.\n" );
+                    THROW( EXCEPTION );
+                }
+                /* fall through */
+
             default :
                 show_message( "Can't open selected file for writing!\n"
                               "    Please select a different file." );
         }
 
-        return f_getf( v->next );
+        return f_getf_int( v->next, do_compress );
     }
 
  got_file:
@@ -358,7 +398,13 @@ f_openf( Var_T * v )
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
-        fclose( fp );
+        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        {
+            if ( ! do_compress && fp )
+                fclose( fp );
+            else if ( do_compress && gp )
+                gzclose( gp );
+        }
         THROW( EXCEPTION );
     }
 
@@ -367,21 +413,31 @@ f_openf( Var_T * v )
         EDL.File_List = T_realloc( EDL.File_List,
                                      ( EDL.File_List_Len + 1 )
                                    * sizeof *EDL.File_List );
-        if ( old_File_List != NULL )
+        if ( old_File_List )
             T_free( old_File_List );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
-        fclose( fp );
         EDL.File_List = old_File_List;
+        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        {
+            if ( ! do_compress && fp )
+                fclose( fp );
+            else if ( do_compress && gp )
+                gzclose( gp );
+        }
         THROW( EXCEPTION );
     }
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
         EDL.File_List[ EDL.File_List_Len ].fp = stdout;
     else
+    {
         EDL.File_List[ EDL.File_List_Len ].fp = fp;
+        EDL.File_List[ EDL.File_List_Len ].gp = gp;
+        EDL.File_List[ EDL.File_List_Len ].gzip = do_compress;
+    }
 
     EDL.File_List[ EDL.File_List_Len ].name = NULL;
     EDL.File_List[ EDL.File_List_Len ].name = T_strdup( fn );
@@ -389,7 +445,8 @@ f_openf( Var_T * v )
     /* Switch off buffering for the newly opened file so we're sure
        everything gets written to disk without delay */
 
-    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    if ( ! do_compress )
+        setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
     STD_Is_Open = SET;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -416,10 +473,27 @@ f_openf( Var_T * v )
 Var_T *
 f_getf( Var_T * v )
 {
+    return f_getf_int( v, UNSET );
+}
+
+
+Var_T *
+f_getgzf( Var_T * v )
+{
+    return f_getf_int( v, SET );
+}
+
+
+static
+Var_T *
+f_getf_int( Var_T * v,
+            bool    do_compress )
+{
     Var_T *cur;
     long i;
     char *s[ ] = { NULL, NULL, NULL, NULL, NULL };
-    FILE *fp;
+    FILE *fp = NULL;
+    gzFile gp = NULL;
     struct stat stat_buf;
     char *r = NULL;
     char *new_r, *m;
@@ -427,6 +501,7 @@ f_getf( Var_T * v )
 
 
     CLOBBER_PROTECT( fp );
+    CLOBBER_PROTECT( gp );
     CLOBBER_PROTECT( r );
     CLOBBER_PROTECT( old_File_List );
 
@@ -449,59 +524,59 @@ f_getf( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
     {
-        for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
+        for ( i = 0, cur = v; i < 5 && cur; i++, cur = cur->next )
             vars_check( cur, STR_VAR );
-        if ( i > 0 && *v->val.sptr == '\\' )
-            print( WARN, "Use of hard-coded file names is deprecated, please "
-                   "use open_file() instead.\n" );
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
     }
 
     /* Check the arguments and supply default values if necessary */
 
-    for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
+    for ( i = 0, cur = v; i < 5 && cur;  i++, cur = cur->next )
     {
         vars_check( cur, STR_VAR );
         s[ i ] = cur->val.sptr;
     }
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+    {
+        do_compress = UNSET;
         goto got_file;
+    }
 
     if (    Fsc2_Internals.cmdline_flags & BATCH_MODE
          || Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-        return batch_mode_file_open( NULL );
+        return batch_mode_file_open( NULL, do_compress );
 
     /* First string is the message */
 
-    if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
+    if ( ! s[ 0 ] || ! s[ 0 ][ 0 ] || s[ 0 ][ 0 ] == '\\' )
         s[ 0 ] = T_strdup( "Please select a file name:" );
     else
         s[ 0 ] = T_strdup( s[ 0 ] );
 
     /* Second string is the file name pattern */
 
-    if ( s[ 1 ] == NULL || s[ 1 ][ 0 ] == '\0' )
-        s[ 1 ] = T_strdup( "*.dat" );
+    if ( ! s[ 1 ] || ! s[ 1 ][ 0 ] )
+        s[ 1 ] = T_strdup( do_compress ? "*.dat.gz" : "*.dat" );
     else
         s[ 1 ] = T_strdup( s[ 1 ] );
 
     /* Third string is the default directory */
 
-    if ( s[ 2 ] != NULL )
+    if ( s[ 2 ] )
     {
-        if ( s[ 2 ][ 0 ] == '\0' )
+        if ( ! s[ 2 ][ 0 ] )
             s[ 2 ] = NULL;
         else
             s[ 2 ] = T_strdup( s[ 2 ] );
     }
 
-    if ( s[ 3 ] == NULL )
+    if ( ! s[ 3 ] )
         s[ 3 ] = T_strdup( "" );
     else
         s[ 3 ] = T_strdup( s[ 3 ] );
 
-    if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
+    if ( ! s[ 4 ] || ! s[ 4 ][ 0 ] )
         s[ 4 ] = NULL;
     else
         s[ 4 ] = T_strdup( s[ 4 ] );
@@ -511,10 +586,10 @@ f_getf( Var_T * v )
     /* Try to get a filename - on 'Cancel' request confirmation (unless a
        file name was passed to the routine and this is not a repeat call) */
 
-    if ( r == NULL )
+    if ( ! r )
         r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] ) );
 
-    if (    ( r == NULL || *r == '\0' )
+    if (    ( ! r || ! *r )
          && show_choices( "Do you really want to cancel saving data?\n"
                           "        Those data will be lost!",
                           2, "Yes", "No", NULL, 2, SET ) != 1 )
@@ -523,7 +598,7 @@ f_getf( Var_T * v )
         goto getfile_retry;
     }
 
-    if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
+    if ( ! r || ! *r )                    /* on 'Cancel' with confirmation */
     {
         T_free( r );
         for ( i = 0; i < 5; i++ )
@@ -535,8 +610,8 @@ f_getf( Var_T * v )
     /* If given append default extension to the file name (but only if the
        user didn't entered one when telling us about the file name) */
 
-    if (    s[ 4 ] != NULL
-         && (    strrchr( r, '.' ) == NULL
+    if (    s[ 4 ]
+         && (    ! strrchr( r, '.' )
               || strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
     {
         new_r = get_string( "%s.%s", r, s[ 4 ] );
@@ -585,28 +660,41 @@ f_getf( Var_T * v )
         T_free( m );
     }
 
-    if ( ( fp = fopen( r, "w+" ) ) == NULL )
+    if (    ( ! do_compress && ! ( fp = fopen( r, "w+"   ) ) )
+         || (   do_compress && ! ( gp = gzopen( r, "wb9" ) ) ) )
     {
         switch( errno )
         {
             case EMFILE :
-                show_message( "Sorry, you have too many open files!\n"
+                show_message( "You have too many open files!\n"
                               "Please close at least one and retry." );
                 break;
 
             case ENFILE :
-                show_message( "Sorry, system limit for open files exceeded!\n"
-                              " Please try to close some files and retry." );
+                show_message( "System limit for open files exceeded!\n"
+                              "Please try to close some files and retry." );
                 break;
 
             case ENOSPC :
-                show_message( "Sorry, no space left on device for more file!\n"
-                              "    Please delete some files and retry." );
+                show_message( "No space left on device for more file!\n"
+                              "Please delete some files and retry." );
                 break;
 
+            case 0 :
+                if ( do_compress )
+                {
+                    r = T_free( r );
+                    show_message( "Not enough memory for compressing the "
+                                  "file. Opening it failed." );
+                    print( FATAL, "Opening file for compressed writing failed "
+                           "due to insufficient memory.\n" );
+                    THROW( EXCEPTION );
+                }
+                /* fall through */
+
             default :
-                show_message( "Sorry, can't open selected file for writing!\n"
-                              "       Please select a different file." );
+                show_message( "Can't open selected file for writing!\n"
+                              "Please select a different file." );
         }
 
         r = T_free( r );
@@ -634,27 +722,41 @@ f_getf( Var_T * v )
         EDL.File_List = T_realloc( EDL.File_List,
                                      ( EDL.File_List_Len + 1 )
                                    * sizeof *EDL.File_List );
-        if ( old_File_List != NULL )
+        if ( old_File_List )
             T_free( old_File_List );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
         EDL.File_List = old_File_List;
+
+        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        {
+            if ( ! do_compress && fp )
+                fclose( fp );
+            else if ( do_compress && gp )
+                gzclose( gp );
+        }
+
         THROW( EXCEPTION );
     }
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
         EDL.File_List[ EDL.File_List_Len ].fp = stdout;
     else
+    {
         EDL.File_List[ EDL.File_List_Len ].fp = fp;
+        EDL.File_List[ EDL.File_List_Len ].gp = gp;
+        EDL.File_List[ EDL.File_List_Len ].gzip = do_compress;
+    }
 
     EDL.File_List[ EDL.File_List_Len ].name = r;
 
-    /* Switch off buffering so we're sure everything gets written to disk
-       immediately */
+    /* Switch off buffering for normal files so we're sure everything gets
+       written to disk immediately */
 
-    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    if ( ! do_compress )
+        setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
     STD_Is_Open = SET;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -667,8 +769,10 @@ f_getf( Var_T * v )
  * after applying some changes according to the input arguments.
  *-------------------------------------------------------------------*/
 
+static
 Var_T *
-f_clonef( Var_T * v )
+f_clonef_int( Var_T * v,
+              bool    do_compress )
 {
     char *fn;
     char *n;
@@ -716,7 +820,7 @@ f_clonef( Var_T * v )
     }
 
     if (    v->next->next->type != STR_VAR
-         || *v->next->next->val.sptr == '\0' )
+         || ! *v->next->next->val.sptr )
     {
         print( FATAL, "Invalid third argument.\n" );
         THROW( EXCEPTION );
@@ -751,12 +855,26 @@ f_clonef( Var_T * v )
     arg[ 4 ] = vars_push( STR_VAR, "" );
     arg[ 5 ] = vars_push( STR_VAR, v->next->next->val.sptr );
 
-    new_v = f_openf( arg[ 0 ] );
+    new_v = f_openf_int( arg[ 0 ], do_compress );
 
     for ( i = 5; i >= 0; i-- )
         vars_pop( arg[ i ] );
 
     return new_v;
+}
+
+
+Var_T *
+f_clonef( Var_T * v )
+{
+    return f_clonef_int( v, UNSET );
+}
+
+
+Var_T *
+f_clonegzf( Var_T * v )
+{
+    return f_clonef_int( v, SET );
 }
 
 
@@ -769,11 +887,12 @@ Var_T *
 f_resetf( Var_T * v )
 {
     long file_num;
+    File_List_T * fl;
 
 
     /* Neither stdout nor stderr an be "cloned" */
 
-    if (    v != NULL
+    if (    v
          && v->type == INT_VAR
          && ! No_File_Numbers
          && (    v->val.lval == FILE_NUMBER_STDOUT
@@ -787,7 +906,7 @@ f_resetf( Var_T * v )
     /* Check that a possibly available parameter is ok. Also consider the
        case that the user didn't open the file that's now being reset. */
 
-    if ( v != NULL )
+    if ( v )
     {
         if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
             return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
@@ -801,7 +920,7 @@ f_resetf( Var_T * v )
         }
     }
 
-    if ( v != NULL )
+    if ( v )
         file_num = v->val.lval - FILE_NUMBER_OFFSET;
     else if ( ! No_File_Numbers && EDL.File_List_Len > 2 )
     {
@@ -821,20 +940,34 @@ f_resetf( Var_T * v )
     /* Truncate the file - do it both for the standard C API (which allows
        just setting the position) and the UNIX API */
 
-    fflush( EDL.File_List[ file_num ].fp );
-    if (    fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET ) != 0
-         || lseek( fileno( EDL.File_List[ file_num ].fp ), 0, SEEK_SET ) != 0 )
-    {
-        print( FATAL, "Failed to reset file.\n" );
-        THROW( EXCEPTION );
-    }
+    fl = EDL.File_List + file_num;
 
-    while ( ftruncate( fileno( EDL.File_List[ file_num ].fp ), 0 ) != 0 )
+    if ( ! fl->gzip )
     {
-        if ( errno == EINTR )
-            continue;
-        print( FATAL, "Failed to reset file.\n" );
-        THROW( EXCEPTION );
+        fflush( fl->fp );
+        if (    fseek( fl->fp, 0, SEEK_SET ) != 0
+             || lseek( fileno( fl->fp ), 0, SEEK_SET ) != 0 )
+        {
+            print( FATAL, "Failed to reset file.\n" );
+            THROW( EXCEPTION );
+        }
+
+        while ( ftruncate( fileno( fl->fp ), 0 ) != 0 )
+        {
+            if ( errno == EINTR )
+                continue;
+            print( FATAL, "Failed to reset file.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        gzclose( fl->gp );
+        if ( ! ( fl->gp = gzopen( fl->name, "wb9" ) ) )
+        {
+            print( FATAL, "Failed to reset file.\n" );
+            THROW( EXCEPTION );
+        }
     }
 
     return vars_push( INT_VAR, file_num + FILE_NUMBER_OFFSET );
@@ -846,17 +979,21 @@ f_resetf( Var_T * v )
  *--------------------------------------------------------*/
 
 static Var_T *
-batch_mode_file_open( char * name )
+batch_mode_file_open( char * name,
+                      bool   do_compress )
 {
     unsigned long cn = 0;
     char *new_name = NULL;
     struct stat stat_buf;
-    FILE *fp;
+    FILE *fp = NULL;
+    gzFile *gp = NULL;
     File_List_T *old_File_List = NULL;
 
 
     CLOBBER_PROTECT( new_name );
     CLOBBER_PROTECT( old_File_List );
+    CLOBBER_PROTECT( fp );
+    CLOBBER_PROTECT( gp );
 
     /* If no prefered file name is given (e.g. if we came here from f_getf())
        we make one up from the name of the currently executed EDL script
@@ -866,13 +1003,13 @@ batch_mode_file_open( char * name )
        Otherwise, when a prefered name was given we try to use it, but if it
        already exists we also append an additional extension the same way. */
 
-    if ( name == NULL )
+    if ( ! name )
     {
         do
         {
             if ( cn % 10 == 0 )
             {
-                if ( new_name != NULL )
+                if ( new_name )
                     new_name = T_free( new_name );
                 new_name = get_string( "%s.batch_output.%lu",
                                        strrchr( EDL.files->name, '/' ) + 1,
@@ -890,7 +1027,7 @@ batch_mode_file_open( char * name )
             {
                 if ( cn % 10 == 0 )
                 {
-                    if ( new_name != NULL )
+                    if ( new_name )
                         new_name = T_free( new_name );
                     new_name = get_string( "%s.batch_output.%lu", name, cn++ );
                 }
@@ -908,7 +1045,8 @@ batch_mode_file_open( char * name )
         fprintf( stderr, "Opening file '%s' instead of requested file '%s'!\n",
                  new_name, name );
 
-    if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
+    if (    ( ! do_compress && ! ( fp = fopen( new_name, "w+"   ) ) )
+         || (   do_compress && ! ( fp = gzopen( new_name, "wb9" ) ) ) )
     {
         switch( errno )
         {
@@ -925,6 +1063,15 @@ batch_mode_file_open( char * name )
                 fprintf( stderr, "Sorry, no space left on device for more "
                          "file.\n" );
                 break;
+
+            case 0 :
+                if ( do_compress )
+                {
+                    print( FATAL, "Opening file for compressed writing failed "
+                           "due to insufficient memory.\n" );
+                    break;
+                }
+                /* fall through */
 
             default :
                 fprintf( stderr, "Sorry, can't open file for writing.\n" );
@@ -949,26 +1096,111 @@ batch_mode_file_open( char * name )
         EDL.File_List = T_realloc( EDL.File_List,
                                      ( EDL.File_List_Len + 1 )
                                    * sizeof *EDL.File_List );
-        if ( old_File_List != NULL )
+        if ( old_File_List )
             T_free( old_File_List );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
+        if ( ! do_compress && fp )
+            fclose( fp );
+        else if ( do_compress && gp )
+            gzclose( fp );
+
         T_free( new_name );
         EDL.File_List = old_File_List;
         THROW( EXCEPTION );
     }
 
     EDL.File_List[ EDL.File_List_Len ].fp = fp;
+    EDL.File_List[ EDL.File_List_Len ].gp = gp;
+    EDL.File_List[ EDL.File_List_Len ].gzip = do_compress;
     EDL.File_List[ EDL.File_List_Len ].name = new_name;
 
     /* Switch buffering off so we're sure everything gets written to disk
        immediately */
 
-    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    if ( ! do_compress )
+        setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+}
+
+
+/*-------------------------------------------------------------------*
+ * Closes and deletes an open file
+ *-------------------------------------------------------------------*/
+
+Var_T *
+f_delf( Var_T * v )
+{
+    long file_num;
+    File_List_T * fl;
+
+
+    /* Neither stdout nor stderr an be deleted */
+
+    if (    v
+         && v->type == INT_VAR
+         && ! No_File_Numbers
+         && (    v->val.lval == FILE_NUMBER_STDOUT
+              || v->val.lval == FILE_NUMBER_STDERR ) )
+    {
+        print( WARN, "std%s can't be deleted.\n",
+               v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
+        return vars_push( INT_VAR, 0L );
+    }
+
+    /* Check that a possibly available parameter is ok. Also consider the
+       case that the user didn't open the file that's now being deleted. */
+
+    if ( v )
+    {
+        if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
+            return vars_push( INT_VAR, 1L );
+
+        if (    v->type != INT_VAR
+             || v->val.lval < FILE_NUMBER_OFFSET
+             || v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+        {
+            print( FATAL, "Argument isn't a valid file handle.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+
+    if ( v )
+        file_num = v->val.lval - FILE_NUMBER_OFFSET;
+    else if ( ! No_File_Numbers && EDL.File_List_Len > 2 )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
+    else if ( EDL.File_List_Len == 2 )
+        return vars_push( INT_VAR, 0L );
+    else
+        file_num = 2;
+
+    /* Nothing further to be done in test mode */
+
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, 1L );
+
+    fl = EDL.File_List + file_num;
+
+    if ( ! fl->gzip && fl->fp )
+    {
+        fclose( fl->fp );
+        fl->fp = NULL;
+    }
+    else if ( fl->gzip && fl->gp )
+    {
+        gzclose( fl->fp );
+        fl->gp = NULL;
+    }
+
+    unlink( fl->name );
+
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -993,7 +1225,7 @@ get_save_file( Var_T ** v )
        been "opened" either via an explicit call of f_openf() with 1 or 2
        as the single argument. */
 
-    if (    *v != NULL
+    if (    *v
          && ( *v )->type == INT_VAR
          && ( STD_Is_Open || EDL.File_List_Len > 2 )
          && (    ( *v )->val.lval == STDOUT_FILENO
@@ -1043,7 +1275,7 @@ get_save_file( Var_T ** v )
     }
     else if ( ! No_File_Numbers )                    /* file number is given */
     {
-        if ( *v != NULL )
+        if ( *v )
         {
             /* Check that the first variable is an integer, i.e. can be a
                file identifier */
@@ -1103,8 +1335,11 @@ close_all_files( void )
 
     for ( i = 2; i < EDL.File_List_Len; i++ )
     {
-        if ( EDL.File_List[ i ].fp )
+        if ( ! EDL.File_List[ i ].gzip && EDL.File_List[ i ].fp )
             fclose( EDL.File_List[ i ].fp );
+        else if ( EDL.File_List[ i ].gzip && EDL.File_List[ i ].gp )
+            gzclose( EDL.File_List[ i ].gp );
+
         if ( EDL.File_List[ i ].name )
             T_free( EDL.File_List[ i ].name );
     }
@@ -1147,7 +1382,7 @@ f_save( Var_T * v )
     if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
-    if ( v == NULL )
+    if ( ! v )
     {
         print( WARN, "Missing arguments.\n" );
         return vars_push( INT_VAR, 0L );
@@ -1185,7 +1420,7 @@ f_save( Var_T * v )
             default :
                 fsc2_impossible( );
         }
-    } while ( ( v = vars_pop( v ) ) != NULL );
+    } while ( ( v = vars_pop( v ) ) );
 
     if ( sep )
         T_free( sep );
@@ -1241,7 +1476,7 @@ arr_save( const char * sep,
         case INT_REF : case FLOAT_REF :
             for ( i = 0; i < v->len; i++ )
             {
-                if ( v->val.vptr[ i ] != NULL )
+                if ( v->val.vptr[ i ] )
                     count += arr_save( sep, file_num, v->val.vptr[ i ] );
                 if ( i != v->len - 1 && ! sep )
                     count += T_fprintf( file_num, "\n" );
@@ -1276,7 +1511,7 @@ f_fsave( Var_T * v )
     if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
-    if ( v == NULL )
+    if ( ! v )
     {
         print( WARN, "Missing arguments.\n" );
         return vars_push( INT_VAR, 0L );
@@ -1341,7 +1576,7 @@ f_format_check( Var_T * v )
         if ( *cp != '#' )                 /* keep "normal" characters */
             continue;
 
-        if ( cv == NULL )                  /* '#' without variable to print */
+        if ( ! cv )                       /* '#' without variable to print */
         {
             print( FATAL, "Less data than format descriptors in format "
                    "string.\n" );
@@ -1390,11 +1625,11 @@ f_format_check( Var_T * v )
         cv = cv->next;
     }
 
-    if ( cv != NULL )
+    if ( cv )
     {
         print( SEVERE, "More data than format descriptors in format "
                "string.\n" );
-        while ( ( cv = vars_pop( cv ) ) != NULL )
+        while ( ( cv = vars_pop( cv ) ) )
             /* empty */ ;
     }
 
@@ -1427,7 +1662,7 @@ f_ffsave( Var_T * v )
     if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
-    if ( v == NULL )
+    if ( ! v )
     {
         print( WARN, "Missing arguments.\n" );
         return vars_push( INT_VAR, 0L );
@@ -1476,10 +1711,10 @@ ff_format_check( Var_T * v )
         for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
             /* empty */ ;
 
-        if ( *sptr++ == '\0' )
+        if ( ! *sptr++ )
             break;
 
-        if ( *sptr == '\0' )
+        if ( ! *sptr )
         {
             print( FATAL, "'%%' found at end of format string.\n" );
             THROW( EXCEPTION );
@@ -1497,7 +1732,7 @@ ff_format_check( Var_T * v )
                 || *sptr == '#' )
         {
             sptr++;
-            if ( *sptr == '\0' )
+            if ( ! *sptr )
             {
                 print( FATAL, "End of format string within conversion "
                        "specifier.\n" );
@@ -1525,7 +1760,7 @@ ff_format_check( Var_T * v )
             while ( isdigit( ( unsigned char ) *++sptr ) )
                 /* empty */ ;
 
-        if ( *sptr == '\0' )
+        if ( ! *sptr )
         {
             print( FATAL, "End of format string within conversion "
                    "specifier.\n" );
@@ -1538,7 +1773,7 @@ ff_format_check( Var_T * v )
 
             if ( *sptr == '*' )
             {
-                if ( vptr == NULL )
+                if ( ! vptr )
                 {
                     print( FATAL, "Not enough arguments for format "
                            "string.\n" );
@@ -1559,7 +1794,7 @@ ff_format_check( Var_T * v )
                 while ( isdigit( ( unsigned char ) *++sptr ) )
                     /* empty */ ;
 
-            if ( *sptr == '\0' )
+            if ( ! *sptr )
             {
                 print( FATAL, "End of format string within conversion "
                        "specifier.\n" );
@@ -1574,7 +1809,7 @@ ff_format_check( Var_T * v )
 
         if ( *sptr == 's' )
         {
-            if ( vptr == NULL )
+            if ( ! vptr )
             {
                 print( FATAL, "Not enough arguments for format string.\n" );
                 THROW( EXCEPTION );
@@ -1595,7 +1830,7 @@ ff_format_check( Var_T * v )
 
         if ( *sptr == 'd' || *sptr == 'i' )
         {
-            if ( vptr == NULL )
+            if ( ! vptr )
             {
                 print( FATAL, "Not enough arguments for format string.\n" );
                 THROW( EXCEPTION );
@@ -1616,7 +1851,7 @@ ff_format_check( Var_T * v )
         if (    *sptr == 'f' || *sptr == 'e' || *sptr == 'g'
              || *sptr == 'F' || *sptr == 'E' || *sptr == 'G' )
         {
-            if ( vptr == NULL )
+            if ( ! vptr )
             {
                 print( FATAL, "Not enough arguments for format string.\n" );
                 THROW( EXCEPTION );
@@ -1642,11 +1877,11 @@ ff_format_check( Var_T * v )
     /* Check for superfluous arguments, print a warning if there are any and
        discard them */
 
-    if ( vptr != NULL )
+    if ( vptr )
     {
         print( SEVERE, "More arguments than conversion specifiers found in "
                "format.\n" );
-        while ( ( vptr = vars_pop( vptr ) ) != NULL )
+        while ( ( vptr = vars_pop( vptr ) ) )
             /* empty */ ;
     }
 }
@@ -1710,7 +1945,7 @@ do_printf( long    file_num,
         if ( fmt_start != fmt_end )
             count += T_fprintf( file_num, fmt_start );
 
-        if ( store == '\0' )                         /* already at the end ? */
+        if ( ! store )                               /* already at the end ? */
         {
             TRY_SUCCESS;
             T_free( fmt_start );
@@ -1941,7 +2176,7 @@ do_printf( long    file_num,
                     fsc2_impossible( );
             }
 
-            if ( store == '\0' )             /* end reached ? */
+            if ( ! store )                                 /* end reached ? */
                 break;
 
             sptr += fmt_end - fmt_start - ( need_type == 1 ? 1 : 0 );
@@ -1983,13 +2218,13 @@ f_save_p( Var_T * v )
     if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
-    if ( v != NULL )
+    if ( v )
         vars_check( v, STR_VAR );
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
 
-    if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
+    if ( ! print_browser( 0, file_num, v ? v->val.sptr : "" ) )
         THROW( EXCEPTION );
 
     return vars_push( INT_VAR, 1L );
@@ -2016,13 +2251,13 @@ f_save_o( Var_T * v )
     if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
-    if ( v != NULL )
+    if ( v )
         vars_check( v, STR_VAR );
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
 
-    if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
+    if ( ! print_browser( 1, file_num, v ? v->val.sptr : "" ) )
         THROW( EXCEPTION );
 
     return vars_push( INT_VAR, 1L );
@@ -2048,7 +2283,7 @@ print_browser( int          browser,
 
 
     writer( browser ==  0 ? C_PROG : C_OUTPUT );
-    if ( comment == NULL )
+    if ( ! comment )
         comment = "";
     count = T_fprintf( fid, "%s\n", comment );
 
@@ -2056,7 +2291,7 @@ print_browser( int          browser,
     {
         reader( &line );
         lp = line;
-        if ( line != NULL )
+        if ( line )
         {
             if ( browser == 0 )
             {
@@ -2158,7 +2393,7 @@ print_include( int          fid,
 
     /* Give up when no file name could be extracted */
 
-    if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
+    if ( ! *ep || ( delim != '"' && delim != '>' ) )
     {
         level--;
         return count;
@@ -2223,7 +2458,7 @@ print_include( int          fid,
 
     /* Try to open the include file, give up on failure */
 
-    if ( ( finc = fopen( file_name, "r" ) ) == NULL )
+    if ( ! ( finc = fopen( file_name, "r" ) ) )
     {
         level--;
         T_free( file_name );
@@ -2238,7 +2473,7 @@ print_include( int          fid,
         count = T_fprintf( fid, "%s// --- %c%s%c starts here --------------\n",
                            comment, delim == '"' ? '"' : '<', cp, delim );
 
-        while ( fgets( buf, PRINT_BUF_SIZE, finc ) != NULL )
+        while ( fgets( buf, PRINT_BUF_SIZE, finc ) )
         {
             count += T_fprintf( fid, "%s%s", comment, buf );
 
@@ -2300,7 +2535,7 @@ f_save_c( Var_T * v )
 
     /* Try to get the comment chars to prepend to each line */
 
-    if ( v != NULL )
+    if ( v )
     {
         vars_check( v, STR_VAR );
         cc = v->val.sptr;
@@ -2309,7 +2544,7 @@ f_save_c( Var_T * v )
 
     /* Try to get the predefined content of the editor */
 
-    if ( v != NULL )
+    if ( v )
     {
         vars_check( v, STR_VAR );
         c = v->val.sptr;
@@ -2319,7 +2554,7 @@ f_save_c( Var_T * v )
 
     /* Try to get a label string for the editor */
 
-    if ( v != NULL )
+    if ( v )
     {
         vars_check( v, STR_VAR );
         l = v->val.sptr;
@@ -2332,30 +2567,30 @@ f_save_c( Var_T * v )
          && ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
          r = T_strdup( show_input( c, l ) );
 
-    if ( r == NULL )
+    if ( ! r )
         return vars_push( INT_VAR, 1L );
 
-    if ( *r == '\0' )
+    if ( ! *r )
     {
         T_free( r );
         return vars_push( INT_VAR, 1L );
     }
 
     cl = r;
-    if ( cc == NULL )
+    if ( ! cc )
         cc = "";
     T_fprintf( file_num, "%s\n", cc );
 
-    while ( cl != NULL )
+    while ( cl )
     {
         nl = strchr( cl, '\n' );
-        if ( nl != NULL )
+        if ( nl )
             *nl++ = '\0';
         T_fprintf( file_num, "%s%s\n", cc, cl );
         cl = nl;
     }
 
-    if ( cc != NULL )
+    if ( cc )
         T_fprintf( file_num, "%s\n", cc );
 
     T_free( r );
@@ -2376,7 +2611,6 @@ f_save_c( Var_T * v )
  *--------------------------------------------------------------------*/
 
 #define BUFFER_SIZE_GUESS 128       /* guess for number of characters needed */
-#define COPY_BUFFER_SIZE 1024       /* size of buffer used when copying */
 
 static long
 T_fprintf( long         fn,
@@ -2389,18 +2623,15 @@ T_fprintf( long         fn,
     char *p = initial_buffer;
     long file_num = fn;
     va_list ap;
-    char *new_name;
-    FILE *new_fp;
-    struct stat old_stat,
-                new_stat;
-    size_t rw;
+    struct stat stat_buf;
     char *mess;
     long count;
     long written = 0;
+    File_List_T *fl = EDL.File_List  + file_num - FILE_NUMBER_OFFSET;
 
 
-    /* If the file has been closed because of insufficient space and no
-       replacement file has been given just don't print */
+    /* If the file has been closed because of insufficient space just don't
+       print */
 
     if ( Fsc2_Internals.mode != TEST )
     {
@@ -2414,7 +2645,8 @@ T_fprintf( long         fn,
             THROW( EXCEPTION );
         }
 
-        if ( EDL.File_List[ file_num - FILE_NUMBER_OFFSET ].fp == NULL )
+        if (    ( ! fl->gzip && ! fl->fp )
+             || (   fl->gzip && ! fl->gp ) )
             return 0;
     }
 
@@ -2472,16 +2704,29 @@ T_fprintf( long         fn,
 
     /* Now we try to write the string to the file */
 
-    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
-                                                                  == to_write )
+ get_repeat_write:
+
+    count = fl->gzip ? gzwrite( fl->gp, p + written, to_write - written)
+                     : ( ssize_t ) fwrite( p + written, to_write - written, 1,
+                                           fl->fp );
+
+    fprintf( stderr, "Wrote %ld\n", count );
+
+    if ( count == to_write - written )
     {
         if ( p != initial_buffer )
             T_free( p );
-        return count;
+        return count + written;
     }
 
+    /* If less characters than required where written we reduce 'to_write' to
+       the number of characters that still need to be written out. */
+
+    if ( count > 0 )
+        written  += count;
+
     /* We can't do anything to save the day when writing failed for stdout or
-       stderr, all we can do is printing out a warning and return... */
+       stderr, all we can do is print out a warning and return... */
 
     if ( file_num == 0 || file_num == 1 )
     {
@@ -2490,191 +2735,34 @@ T_fprintf( long         fn,
                file_num == 0 ? "out" : "err" );
         if ( p != initial_buffer )
             T_free( p );
-        return count;
+        return written;
     }
 
-    /* If less characters than required where written we reduce 'to_write' to
-       the number of characters that still need to be written out and get rid
-       of the part of the buffer that already has been written to the file. */
-
-    if ( count > 0 )
-    {
-        written  += count;
-        to_write -= count;
-        memmove( p, p + count, to_write + 1 );
-    }
-
-    /* Couldn't write as many bytes as needed - disk seems to be full */
+    /* Couldn't write as many bytes as needed, disk is probably full.
+       Ask the user to elete some files and try again. */
 
     mess = get_string( "Disk full while writing to file\n%s\n"
-                       "Please choose a new file.",
-                       EDL.File_List[ file_num ].name );
+                       "Please delete some files.", fl->name );
     show_message( mess );
     T_free( mess );
 
-    /* Get a new file name, make user confirm it if he either selected no file
-       at all or a file that already exists (exception: if the file was
-       selected to which we were already writing, we assume that the user
-       deleted some stuff on the disk in between) */
+    /* If the user deleted the file we're currently writing to delete it */
 
-get_repl_retry:
-
-    new_name = T_strdup( show_fselector( "Replacement file:", NULL,
-                                         NULL, NULL ) );
-
-    if (    ( new_name == NULL || *new_name == '\0' )
-         && 1 != show_choices( "Do you really want to stop saving data?\n"
-                               "     All further data will be lost!",
-                               2, "Yes", "No", NULL, 2, SET ) )
-    {
-        if ( new_name != NULL )
-            new_name = T_free( new_name );
-        goto get_repl_retry;
-    }
-
-    if ( new_name == NULL || *new_name == '\0' )       /* confirmed 'Cancel' */
+    if ( stat( fl->name, &stat_buf ) == -1 )
     {
         if ( p != initial_buffer )
             T_free( p );
-        if ( new_name != NULL )
-            T_free( new_name );
-        T_free( EDL.File_List[ file_num ].name );
-        EDL.File_List[ file_num ].name = NULL;
-        fclose( EDL.File_List[ file_num ].fp );
-        EDL.File_List[ file_num ].fp = NULL;
-        return count;
+        T_free( fl->name );
+        fl->name = NULL;
+        if ( ! fl->gzip && fl->fp )
+            fclose( fl->fp );
+        else if ( fl->gzip && fl->gp )
+            gzclose( fl->gp );
+        fl->fp = fl->gp = NULL;
+        return written;
     }
 
-    stat( EDL.File_List[ file_num ].name, &old_stat );
-    if (    0 == stat( new_name, &new_stat )
-         && (    old_stat.st_dev != new_stat.st_dev
-              || old_stat.st_ino != new_stat.st_ino )
-         && 1 != show_choices( "The selected file does already exist!\n"
-                               " Do you really want to overwrite it?",
-                               2, "Yes", "No", NULL, 2, SET ) )
-    {
-        new_name = T_free( new_name );
-        goto get_repl_retry;
-    }
-
-    /* Try to open the new file */
-
-    new_fp = NULL;
-    if (    (    old_stat.st_dev != new_stat.st_dev
-              || old_stat.st_ino != new_stat.st_ino )
-         && ( new_fp = fopen( new_name, "w+" ) ) == NULL )
-    {
-        switch( errno )
-        {
-            case EMFILE :
-                show_message( "Sorry, you have too many open files!\n"
-                              "Please close at least one and retry." );
-                break;
-
-            case ENFILE :
-                show_message( "Sorry, system limit for open files exceeded!\n"
-                              " Please try to close some files and retry." );
-                break;
-
-            case ENOSPC :
-                show_message( "Sorry, no space left on device for more file!\n"
-                              "    Please delete some files and retry." );
-                break;
-
-            default :
-                show_message( "Sorry, can't open selected file for writing!\n"
-                              "       Please select a different file." );
-        }
-
-        new_name = T_free( new_name );
-        goto get_repl_retry;
-    }
-
-    /* Check if the new and old file are identical. If yes continue to write
-       to the old file, otherwise copy everything from the old to the new file
-       and then get rid of the old one. */
-
-    if (    old_stat.st_dev == new_stat.st_dev
-         && old_stat.st_ino == new_stat.st_ino )
-        T_free( new_name );
-    else
-    {
-        char buffer[ COPY_BUFFER_SIZE ];
-
-        fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET );
-        while( 1 )
-        {
-            clearerr( EDL.File_List[ file_num ].fp );
-
-            if ( ( rw = fread( buffer, 1, COPY_BUFFER_SIZE,
-                               EDL.File_List[ file_num ].fp ) ) == 0 )
-            {
-                if ( ferror( EDL.File_List[ file_num ].fp ) )
-                {
-                    mess = get_string( "Failed to read from file\n%s",
-                                       EDL.File_List[ file_num ].name );
-                    show_message( mess );
-                    T_free( mess );
-                    fclose( new_fp );
-                    unlink( new_name );
-                    new_name = T_free( new_name );
-                    THROW( EXCEPTION );
-                }
-
-                break;
-            }
-
-            if( fwrite( buffer, 1, rw, new_fp ) != rw )
-            {
-                mess = get_string( "Failed to write to replacement file\n%s\n"
-                                   "Please choose another replacement file.",
-                                   new_name );
-                show_message( mess );
-                T_free( mess );
-                fclose( new_fp );
-                unlink( new_name );
-                new_name = T_free( new_name );
-                goto get_repl_retry;
-            }
-        }
-
-        fclose( EDL.File_List[ file_num ].fp );
-        unlink( EDL.File_List[ file_num ].name );
-        T_free( EDL.File_List[ file_num ].name );
-        EDL.File_List[ file_num ].name = new_name;
-        EDL.File_List[ file_num ].fp = new_fp;
-
-        /* After we're done with copying switch off buffering for the file */
-
-        setbuf( new_fp, NULL );
-    }
-
-    /* Finally write out the remaining part of the string */
-
-    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
-                                                                  == to_write )
-    {
-        if ( p != initial_buffer )
-            T_free( p );
-        return written + count;
-    }
-
-    /* Again, on failure get rid of all what already has been written to the
-       file and then ask for another replacement file */
-
-    if ( count > 0 )
-    {
-        written  += count;
-        to_write -= count;
-        memmove( p, p + count, to_write + 1 );
-    }
-
-    mess = get_string( "Can't write to (replacement) file\n%s\n"
-                       "Please choose another replacement file.",
-                       EDL.File_List[ file_num ].name );
-    show_message( mess );
-    T_free( mess );
-    goto get_repl_retry;
+    goto get_repeat_write;
 }
 
 

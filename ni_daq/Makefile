@@ -73,11 +73,11 @@ install:
 cleanup:
 	$(MAKE) -C driver cleanup
 	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ include/*~ misc_doc/*~ svn-*
+	$(RM) $(RMFLAGS) *~ include/*~ misc_doc/*~
 
 
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
 	$(RM) $(RMFLAGS) makelog *~ driver/include/autoconf.h  \
-					 include/*~ misc_doc/*~ svn-*
+					 include/*~ misc_doc/*~

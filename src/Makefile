@@ -247,7 +247,7 @@ endif
 cleanup:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c       \
 		             gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out  \
-	                 svn-* *~
+	                 *~
 
 clean:
 	$(MAKE) cleanup

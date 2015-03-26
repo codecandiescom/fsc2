@@ -54,7 +54,7 @@ install:
 	$(INSTALL) -m 644 libni_daq.a  $(lib_dir)
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *~ svn-*
+	$(RM) $(RMFLAGS) *.o *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o *.so *.a *~ svn-*
+	$(RM) $(RMFLAGS) *.o *.so *.a *~

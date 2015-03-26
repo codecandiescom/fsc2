@@ -34,4 +34,4 @@ all: $(SOURCES:.c=.o)
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o svn-* *~
+	$(RM) $(RMFLAGS) *.o *~

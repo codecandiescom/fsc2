@@ -235,7 +235,7 @@ html_pack:
 
 cleanup:
 	-$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf  \
-					  fsc2_html.tar.gz svn-* *~
+					  fsc2_html.tar.gz *~
 
 clean:
 	$(MAKE) cleanup

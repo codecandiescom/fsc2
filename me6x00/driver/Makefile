@@ -104,7 +104,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
 
 endif
 
@@ -143,10 +143,10 @@ endif
 	$(INSTALL) -m 644 me6x00_drv.h $(prefix)/include
 
 cleanup:
-	$(RM) $(RMFLAGS) svn-* *~
+	$(RM) $(RMFLAGS) *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o svn-* Module.symvers *~
+	$(RM) $(RMFLAGS) *.o Module.symvers *~
 
 endif
 endif

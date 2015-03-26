@@ -56,7 +56,7 @@ install:
 	$(INSTALL) -m 644 witio_48.h $(incl_dir)
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *~ svn-*
+	$(RM) $(RMFLAGS) *.o
 
 clean:
 	$(RM) $(RMFLAGS) *.o *.so *.a *~ svn-*

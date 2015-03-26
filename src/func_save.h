@@ -23,19 +23,25 @@
 
 
 #include "fsc2.h"
+#include <zlib.h>
 
 
 typedef struct File_List File_List_T;
 
 struct File_List {
-    FILE * fp;
-    char * name;
+    FILE   * fp;
+    gzFile   gp;
+    char   * name;
+    bool     gzip;
 };
 
 
 Var_T * f_openf(     Var_T * /* v */ );
+Var_T * f_opengzf(   Var_T * /* v */ );
 Var_T * f_getf(      Var_T * /* v */ );
+Var_T * f_getgzf(    Var_T * /* v */ );
 Var_T * f_clonef(    Var_T * /* v */ );
+Var_T * f_clonegzf(  Var_T * /* v */ );
 Var_T * f_resetf(    Var_T * /* v */ );
 Var_T * f_save(      Var_T * /* v */ );
 Var_T * f_fsave(     Var_T * /* v */ );
@@ -46,6 +52,7 @@ Var_T * f_save_c(    Var_T * /* v */ );
 Var_T * f_is_file(   Var_T * /* v */ );
 Var_T * f_file_name( Var_T * /* v */ );
 Var_T * f_path_name( Var_T * /* v */ );
+Var_T * f_delf(      Var_T * /* v */ );
 
 
 #endif  /* ! FUNC_SAVE_HEADER */

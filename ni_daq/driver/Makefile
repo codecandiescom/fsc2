@@ -109,7 +109,7 @@ clean:
 	$(MAKE) -C pci_e_series cleanup
 	$(MAKE) -C daq_stc cleanup
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
 
 endif
 
@@ -160,7 +160,7 @@ endif
 cleanup:
 	$(MAKE) -C pci_e_series cleanup
 	$(MAKE) -C daq_stc cleanup
-	$(RM) $(RMFLAGS) svn-* *~ include/*~
+	$(RM) $(RMFLAGS) *~ include/*~
 
 clean:
 	$(MAKE) cleanup

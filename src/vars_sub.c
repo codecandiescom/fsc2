@@ -42,7 +42,7 @@ static Var_T * vars_ref_sub( Var_T * v1,
 
 
 /*--------------------------------------------------------------*
- * Function for subtracting of two variables of arbitrary types
+ * Function for subtracting two variables of arbitrary types
  *--------------------------------------------------------------*/
 
 Var_T *

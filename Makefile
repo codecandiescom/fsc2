@@ -583,7 +583,7 @@ LFLAGS	 := -shared -fpic
 
 
 LIBS := -L/usr/local/lib \
-		-L/usr/X11R6/lib -lforms -lX11 -lXft -lXpm -lm -ldl
+		-L/usr/X11R6/lib -lforms -lX11 -lXft -lXpm -lm -ldl -lz
 
 ifeq ($(MPATROL),YES)
 	CONFFLAGS := -DMPATROL

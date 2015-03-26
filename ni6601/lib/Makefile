@@ -59,7 +59,7 @@ install:
 
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o ni_test svn-* *~
+	$(RM) $(RMFLAGS) *.o ni_test *~
 
 clean:
 	$(MAKE) cleanup

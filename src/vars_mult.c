@@ -34,7 +34,7 @@ static Var_T * vars_ref_mult( Var_T * v1,
 
 
 /*-------------------------------------------------------------*
- * Function for multipying of two variables of arbitrary types
+ * Function for multipying two variables of arbitrary types
  *-------------------------------------------------------------*/
 
 Var_T *

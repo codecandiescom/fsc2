@@ -7079,16 +7079,17 @@ the number of pixels in the (vertical) @i{y}-direction.
 Currently the @ref{spectrapro_300i, SpectraPro-300i} series of
 monochromator (actually, the module has only been tested with the
 @ref{spectrapro_300i, 308i}) and the @ref{spectrapro_275,
-SpectraPro-275}, both by @strong{Acton Research Corporation}, and
+SpectraPro-275}, both by @strong{Acton Research Corporation},
 monochromators by @strong{SPEX} controlled either via the
 @ref{spex_cd2a, CD2A Compudrive} or the @ref{spex232, SPEX232}
-interface are supported. The modules for the monochromators get loaded
-by specifying
+interface are supported, and the (Newport) Oriel Cornerstone 130. The
+modules for the monochromators get loaded by specifying one of
 @example
 spectrapro_275
 spectrapro_300i
 spex_cd2a
 spex232
+oriel_cs_130
 @end example
 in the @code{DEVICES} section. 
 
@@ -7148,6 +7149,8 @@ conjunction with the supported monochromatore).
 @item @ref{monochromator_calc_wavelength()}
 @item @ref{monochromator_load_calibration()}
 @item @ref{monochromator_set_calibration()}
+@item @ref{monochromator_calibration_offset()}
+@item @ref{monochromator_calibration_factor()}
 @item @ref{monochromator_install_grating()}
 @item @ref{monochromator_zero_offset()}
 @item @ref{monochromator_grating_adjust()}
@@ -7176,9 +7179,10 @@ Returns a string with the name of the monochromator being used.
 @findex monochromator_wavelength()
 @item monochromator_wavelength()
 If called with no argument the function returns the current center
-wavelength (in m) of the grating. If called with an argument the
-grating is moved to the specified center wavelength (which must be in
-the range covered by the monochromator and the current grating).
+wavelength (in m) of the currently used grating. If called with an
+argument the grating is moved to the specified center wavelength
+(which must be in the range covered by the monochromator and the
+current grating).
 
 Please note: for @strong{SPEX} monochromators doing a scan calling
 this function automatically aborts the currently running scan.
@@ -7188,13 +7192,15 @@ this function automatically aborts the currently running scan.
 @findex monochromator_wavenumber()
 @item monochromator_wavenumber()
 If called with no argument this function returns the current center
-wavenumber in @code{cm^-1} of the grating, either in absolute units or,
-if a laser line position has been set, in relative units, i.e.@: as the
-difference between the laser line position and the gratings center
-wavenumber. If called with an argument the grating is moved to the
-specified center wavenumber, which must be given in absolute units if no
-laser line position has been set, otherwise in relative units. The
-possible range depends on the grating being used.
+wavenumber in @code{cm^-1} of the current grating, either in absolute
+units or, if setting a laser line position is supported by the device
+and has been set, in relative units, i.e.@: as the difference between
+the laser line position and the gratings center wavenumber. If called
+with an argument the grating is moved to the specified center
+wavenumber, which must be given in absolute units if setting a
+laser line position is not supported or it has not been set,
+otherwise in relative units. The possible range depends on the
+grating being used.
 
 Please note: for @strong{SPEX} monochromators doing a scan calling
 this function automatically aborts the currently running scan. This
@@ -7346,6 +7352,12 @@ argument it returns the number of grooves per m of the grating indexed
 by the number (an integer between 1 and the maximum number of installed
 gratings) passed to the function.
 
+For the @strong{Oriel Cornerstone 130} the function may also be called
+with the a second argument, the umber of lines per meter of the
+grating. This number is sent to the device and then used by it to
+calculate the wavelengths and wavenumbers. This two-argument version
+of the function is only useful when a new grating has been installed.
+
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script. It isn't available for the @ref{spectrapro_275,
 SpectraPro-275}.
@@ -7355,13 +7367,21 @@ SpectraPro-275}.
 @findex monochromator_grating()
 @item monochromator_grating()
 The function is only supported for @ref{spectrapro_300i,
-SpectraPro-300i} monochromators. It queries or sets a new grating. If
-called with no argument the function returns the number of the
-currently used grating (an integer between 1 and the maximum number of
-installed gratings). If called with an integer argument the
-monochromator switches to the grating indexed by the number if it is
-available. The center wavelength the new grating is set to remains the
-same as for the previous grating.
+SpectraPro-300i} and @ref{oriel_cs_130, Oriel Cornerstone 130}
+monochromators. It queries or sets a new grating. If called with no
+argument the function returns the number of the currently used grating
+(an integer between 1 and the maximum number of installed gratings).
+If called with an integer argument the monochromator switches to the
+grating indexed by the number if it is available.
+
+When switching to a new grating for the @ref{spectrapro_300i,
+SpectraPro-300i} the center wavelength the new grating is set to
+remains the same as for the previous grating. For the
+@ref{oriel_cs_130, Oriel Cornerstone 130} before switching gratings
+the built-in shutter is closed and has to explicitely opened and,
+when switching to grating #2 the system stops at the zero order
+position while, when switching to grating #1 it goes to the maximum
+possible wavelength.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script. It isn't available for the @ref{spectrapro_275,
@@ -7586,6 +7606,22 @@ string @code{"DELETE"}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{monochromator_calibration_offset()}
+@findex monochromator_calibration_offset()
+@item monochromator_calibration_offset()
+The function is only supported for @ref{oriel_cs_130, Oriel
+Cornerstone 130} monochromators. It can be used to query or set a
+wavelength offset to be added
+
+
+@anchor{monochromator_calibration_factor()}
+@findex monochromator_calibration_factor()
+@item monochromator_calibration_factor()
+The function is only supported for @ref{oriel_cs_130, Oriel
+Cornerstone 130} monochromators.
+
 
 
 @anchor{monochromator_install_grating()}

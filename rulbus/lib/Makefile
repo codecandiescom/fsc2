@@ -66,7 +66,7 @@ install:
 
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o lexer.c parser.c parser.h  parser.output *~ svn-*
+	$(RM) $(RMFLAGS) *.o lexer.c parser.c parser.h  parser.output *~
 
 
 clean:

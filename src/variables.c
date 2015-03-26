@@ -1095,7 +1095,8 @@ vars_check( Var_T * v,
  * on what type of variable it is).
  *---------------------------------------------------------------*/
 
-bool vars_exist( Var_T * v )
+bool
+vars_exist( Var_T * v )
 {
     Var_T *lp;
 

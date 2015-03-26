@@ -72,10 +72,10 @@ install:
 cleanup:
 	$(MAKE) -C driver cleanup
 	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ include/*~ util/*~ svn-*
+	$(RM) $(RMFLAGS) *~ include/*~ util/*~
 
 
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) makelog include/autoconf.h include/*~ *~ svn-*
+	$(RM) $(RMFLAGS) makelog include/autoconf.h include/*~ *~

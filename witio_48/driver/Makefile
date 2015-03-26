@@ -107,7 +107,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
 
 endif
 
@@ -149,7 +149,7 @@ endif
 	$(INSTALL) -m 644 witio_48_drv.h $(prefix)/include
 
 cleanup:
-	$(RM) $(RMFLAGS) svn-* *~
+	$(RM) $(RMFLAGS) *~
 
 clean:
 	$(RM) $(RMFLAGS) *.o svn-* Module.symvers *~

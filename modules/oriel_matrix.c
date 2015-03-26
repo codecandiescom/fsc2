@@ -307,15 +307,16 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 }
 
 
-/*-----------------------------------------------------------------------*
+/*---------------------------------------------------------------------*
  * EDL function which returns the exposure time if v is NULL. 
- * If v is a float this function will set that as the CCD exposure time.
+ * If v is a float this function will set that value as the CCD
+ * exposure time.
  *
  * Input: Var_T * v - a fsc2 variable which is either NULL or contains
  *        a float
  *
  * Return value: Returns a fsc2 float which is the exposure time.
- *-----------------------------------------------------------------------*/
+ *---------------------------------------------------------------------*/
 
 Var_T *
 ccd_camera_exposure_time( Var_T * v )
@@ -354,7 +355,7 @@ ccd_camera_exposure_time( Var_T * v )
     }
 
     /* If this isn't a real experiment just store that setting a
-       exposure time was attempted. */
+       new exposure time was attempted. */
 
     if ( FSC2_MODE != EXPERIMENT )
     {

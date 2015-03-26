@@ -784,9 +784,9 @@ fsc2_lan_read( int    handle,
 
     timeout_init( READ, ll, &us_timeout, &old_sact, &before );
 
-    /* Start reading - if it's interrupted by a signal other than SIGALRM
-       and we're supposed to continue on such signals and the timeout time
-       hasn't already been reached retry the read() */
+    /* Start reading - if interrupted by a signal other than SIGALRM
+       and we're supposed to continue on such signals and the timeout
+       time hasn't already been reached retry the read() */
 
     do
     {

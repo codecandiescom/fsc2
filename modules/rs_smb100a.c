@@ -209,7 +209,6 @@ rs_smb100a_test_hook( void )
         rs_smb100a.pulse_delay = RS_SMB100A_TEST_PULSE_DELAY;
         rs_smb100a.pulse_delay_is_set = SET;
     }
-
 #endif /* WITH_PULSE_MODULATION */
 
     return 1;

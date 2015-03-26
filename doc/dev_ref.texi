@@ -73,6 +73,7 @@
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * me_dio_X::        Meilhaus Electronic GmbH DAQ card DIO subsystem
 * ni6601::          National Instruments 6601 GPCT card
+* oriel_cs_130::    Newport Oriel Cornerstone 130 monohromator
 * oriel_matrix::    Newport Oriel MMS Spectrometer
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
@@ -2906,7 +2907,7 @@ library can be downloaded from
 
 @c #############################################################
 
-@node ni6601, oriel_matrix, me_dio_X, Device Reference
+@node ni6601, oriel_cs_130, me_dio_X, Device Reference
 @iftex
 @subheading National Instruments 6601 GPCT card
 @end iftex
@@ -2948,7 +2949,45 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node oriel_matrix, pci_mio_16e_1, ni6601, Device Reference
+@node oriel_cs_130, oriel_matrix, ni6601, Device Reference
+@iftex
+@subheading Newport Oriel Corne4rstone Monochromator
+@end iftex
+@ifnottex
+@section Newport Oriel Corne4rstone Monochromator
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{oriel_matrix}
+
+@paragraphindent 0
+@strong{Description}: Monochromator with two gratings, shutter and
+optional filter wheel (with 6 filters). If a filter wheel is installed
+has to be specified in the device's onfiguration file.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"ORIEL_CS_130"} as the
+device name, @code{'\n'} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{monochromator_name()}
+@item @ref{monochromator_wavelength()}
+@item @ref{monochromator_wavenumber()}
+@item @ref{monochromator_groove_density()}
+@item @ref{monochromator_grating()}
+@end table
+
+
+@c #############################################################
+
+@node oriel_matrix, pci_mio_16e_1, oriel_cs_130, Device Reference
 @iftex
 @subheading Newport Oriel MMS Spectrometer
 @end iftex

@@ -111,7 +111,7 @@ install:
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
 	$(RM) $(RMFLAGS) autoconf.h Module.symvers Module.markers \
-					 modules.order svn-* *~
+					 modules.order *~
 
 endif
 
@@ -156,10 +156,10 @@ endif
 	$(INSTALL) -m 644 ni6601_drv.h $(prefix)/include
 
 cleanup:
-	$(RM) $(RMFLAGS) ni6601_drv.o util.o svn-* *~
+	$(RM) $(RMFLAGS) ni6601_drv.o util.o *~
 
 clean:
-	$(RM) $(RMFLAGS) autoconf.h *.o svn-*  Module.symvers *~
+	$(RM) $(RMFLAGS) autoconf.h *.o Module.symvers *~
 
 endif
 endif
