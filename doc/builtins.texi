@@ -1156,24 +1156,27 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex get_gzip_file()
 @item get_gzip_file()
 This function accepts the exact same arguments as
-@code{@ref{get_file()}}. The only difference is that the output is
-automatically compressed as with @code{gzip}. Please note: on case of
-a crash of the program the contents of the file will be unusable.
+@code{@ref{get_file()}}. The only differences are that the output is
+automatically compressed as with @code{gzip}, that the default file
+extension (for the optional second argument) is `@i{*.dat.gz}' instead
+of just `@i{*.dat}' and that in batch mode the output file will have
+an extra `@i{.gz}' appended. Please note: on case of a crash of the
+program the contents of the file will be unusable.
 
 
 @anchor{open_file()}
 @findex open_file()
 @item open_file()
-This function is similar to the previous one with the main difference
-that one may specify an hard-coded file name in the script. The
-function will use its first argument as a file name and try to open
-this file. If the file already exists (or can't be opened) a warning
-will be shown and, on user request will show up a file selector to
-allow selecting a different file, just as the @code{@ref{get_file()}}
-function. Thus the arguments that the function accepts are identical
-to the ones of @code{@ref{get_file()}} with the only exception that
-the first argument is an additional argument with a string for the
-file name.
+This function is similar to @code{@ref{get_file()}} with the main
+difference that one may specify an hard-coded file name in the script.
+The function will use its first argument as the file name and try to
+open this file. If the file already exists or can't be opened a
+warning will be shown and, on the user request, will show up a file
+selector to allow selecting a different file, just as the
+@code{@ref{get_file()}} function does. Thus the arguments that the
+function accepts are identical to the ones of @code{@ref{get_file()}}
+with the only exception that the first argument is an additional
+argument with a string for the file name.
 
 This function can also be used to explicitely open @i{stdout} and
 @i{stderr}. To do so call the function with a single integer argument
@@ -1197,9 +1200,13 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex open_gzip_file()
 @item open_gzip_file()
 This function accepts the exact same arguments as
-@code{@ref{open_file()}}. The only difference is that the output is
-automatically compressed as with @code{gzip}. Please note: on case of
-a crash of the program the contents of the file will be unusable.
+@code{@ref{open_file()}}. The only differences are that the output is
+automatically compressed as with @code{gzip}, that
+@code{@ref{get_gzip_file()}} is used in case the file specified va the
+first argument already exists or can't be opened, and that in batch
+mode the output file will have an extra `@i{.gz}' appended Please
+note: on case of a crash of the program the contents of the file will
+be unusable.
 
 
 @anchor{clone_file()}
@@ -1209,32 +1216,32 @@ Sometimes two output files are needed that should only differ in their
 extension but not in the filename. In this case the function
 @code{@ref{clone_file()}} can be useful. It expects exactly three
 arguments. The first one is an identifier for an already existing file
-as returned by the function @code{@ref{get_file()}}. If in the call of
-@code{@ref{get_file()}} the user did @b{not} to choose a file, i.e.@:
-pressed the @code{Cancel}-button, it is silently assumed that also the
-new file to be created by @code{@ref{clone_file()}} is @b{not} to be
-used. If either the numer @code{1} (for writing to @i{stdout}) or
-@code{2} (for writing to @i{stderr}) was given as the argument a
-warning is printed out and the output gets written to either
-@i{stdout} or @i{stderr} as if the function wouldn't have been called.
+as returned by the functions @code{@ref{get_file()}} or
+@code{@ref{open_file()}}. If in the call of @code{@ref{get_file()}}
+the user did @b{not} choose a file, i.e.@: pressed the
+@code{Cancel} button, it is silently assumed that also the new file to
+be created by @code{@ref{clone_file()}} is @b{not} to be used. If
+either the number @code{1} (for writing to @i{stdout}) or @code{2} (for
+writing to @i{stderr}) was given as the argument a warning is printed
+out and the output gets written to either @i{stdout} or @i{stderr}.
 
 The second and third arguments both have to be strings. The second
-argument is the expected extension of the file that was selected via
-the previous call of @code{@ref{get_file()}}. And the third argument
-is the replacement for the extension of the previously selected file.
-Both are to be specified without the starting dot. If the second
-argument does not fit with the extension of the file the user had
-chosen, the new extension from the third argument is simply appended
-to the file name (instead of replacing the extension). If the
-replacement extension (i.e.@: the third argument) is identical to the
-extension of the already open file (i.e.@: the second argument) it is
-also appended instead of being used for replacement.
+argument is the extension of the file that was opened byq the
+preceeding call of @code{@ref{get_file()}} or
+@code{@ref{open_file()}}. The third argument is the replacement for
+the extension of that file. Both are to be specified without the
+starting dot. If the second argument does not fit with the extension
+of the file the user had chosen, the new extension from the third
+argument is simply appended to the file name (instead of replacing the
+old extension). If the replacement extension (i.e.@: the third
+argument) is identical to the second it is also appended instead of
+being used as a replacement.
 
 A typical piece of code to open two files, the first with the extension
 @code{dat} and the second with the same name but the extension
 @code{list} would be:
 @example
-FILE1 = get_file( "", "*.dat", "", "", "dat" );
+FILE1 = open_file( "experiment.dat", "", "*.dat", "", "", "dat" );
 FILE2 = clone_file( FILE1, "dat", "list" );
 @end example
 @noindent

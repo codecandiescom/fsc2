@@ -35,6 +35,9 @@ static Var_T * f_openf_int( Var_T * /* v */,
 static Var_T * f_getf_int( Var_T * /* v */,
                            bool    /* do_compress */ );
 
+static Var_T * f_clonef_int( Var_T * /* v */,
+                             bool    /* do_compress */ );
+
 static int get_save_file( Var_T ** /* v */ );
 
 static Var_T * batch_mode_file_open( char * /* name */,
@@ -608,7 +611,7 @@ f_getf_int( Var_T * v,
     }
 
     /* If given append default extension to the file name (but only if the
-       user didn't entered one when telling us about the file name) */
+       user didn't enter one when telling us about the file name) */
 
     if (    s[ 4 ]
          && (    ! strrchr( r, '.' )
@@ -769,6 +772,20 @@ f_getf_int( Var_T * v,
  * after applying some changes according to the input arguments.
  *-------------------------------------------------------------------*/
 
+Var_T *
+f_clonef( Var_T * v )
+{
+    return f_clonef_int( v, UNSET );
+}
+
+
+Var_T *
+f_clonegzf( Var_T * v )
+{
+    return f_clonef_int( v, SET );
+}
+
+
 static
 Var_T *
 f_clonef_int( Var_T * v,
@@ -861,20 +878,6 @@ f_clonef_int( Var_T * v,
         vars_pop( arg[ i ] );
 
     return new_v;
-}
-
-
-Var_T *
-f_clonef( Var_T * v )
-{
-    return f_clonef_int( v, UNSET );
-}
-
-
-Var_T *
-f_clonegzf( Var_T * v )
-{
-    return f_clonef_int( v, SET );
 }
 
 
@@ -1011,9 +1014,9 @@ batch_mode_file_open( char * name,
             {
                 if ( new_name )
                     new_name = T_free( new_name );
-                new_name = get_string( "%s.batch_output.%lu",
+                new_name = get_string( "%s.batch_output.%lu%s",
                                        strrchr( EDL.files->name, '/' ) + 1,
-                                       cn++ );
+                                       cn++, do_compress ? ".gz" : "" );
             }
             else
                 new_name[ strlen( new_name ) - 1 ] += 1;
@@ -1029,7 +1032,8 @@ batch_mode_file_open( char * name,
                 {
                     if ( new_name )
                         new_name = T_free( new_name );
-                    new_name = get_string( "%s.batch_output.%lu", name, cn++ );
+                    new_name = get_string( "%s.batch_output.%lu%s", name, cn++,
+                                           do_compress ? ".gz" : "" );
                 }
                 else
                     new_name[ strlen( new_name ) - 1 ] += 1;
@@ -2709,8 +2713,6 @@ T_fprintf( long         fn,
     count = fl->gzip ? gzwrite( fl->gp, p + written, to_write - written)
                      : ( ssize_t ) fwrite( p + written, to_write - written, 1,
                                            fl->fp );
-
-    fprintf( stderr, "Wrote %ld\n", count );
 
     if ( count == to_write - written )
     {
