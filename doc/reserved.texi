@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -355,10 +355,12 @@ characters in between).
 @item @code{Gdbm}             @tab Giga-Dezibel (relative to 1 mV)
 @item @code{GG}               @tab Giga-Gauss
 @item @code{GHz}              @tab Giga-Hertz
+@item @code{GJ}               @tab Giga-Joule
 @item @code{GK}               @tab Giga-Kelvin
 @item @code{Gm}               @tab Giga-Meter
 @item @code{Gs}               @tab Giga-Seconds
 @item @code{GV}               @tab Giga-Volt
+@item @code{GW}               @tab Giga-Watt
 @item @code{Hz}               @tab Hertz
 @item @code{K}                @tab Kelvin
 @item @code{kA}               @tab Kilo-Ampere
@@ -368,10 +370,13 @@ characters in between).
 @item @code{kdbm}             @tab Kilo-Dezibel (relative to 1 mV)
 @item @code{kG}               @tab Kilo-Gauss
 @item @code{kHz}              @tab Kilo-Hertz
+@item @code{kJ}               @tab Kilo-Jouble
 @item @code{kK}               @tab Kilo-Kelvin
 @item @code{km}               @tab Kilo-Meter
 @item @code{ks}               @tab Kilo-Seconds
 @item @code{kV}               @tab Kilo-Volt
+@item @code{kW}               @tab Kilo-Watt
+@item @code{J}                @tab Jouble
 @item @code{m}                @tab Meter
 @item @code{MA}               @tab Mega-Ampere
 @item @code{MdB}              @tab Mega-Dezibel
@@ -380,10 +385,12 @@ characters in between).
 @item @code{Mdbm}             @tab Mega-Dezibel (relative to 1 mV)
 @item @code{MG}               @tab Mega-Gauss
 @item @code{MHz}              @tab Mega-Hertz
+@item @code{MJ}               @tab Mega-Joule
 @item @code{MK}               @tab Mega-Kelvin
 @item @code{Mm}               @tab Mega-Meter
 @item @code{Ms}               @tab Mega-Seconds
 @item @code{MV}               @tab Mega-Volt
+@item @code{MW}               @tab Mega-Watt
 @item @code{mA}               @tab Milli-Ampere
 @item @code{mdB}              @tab Milli-Dezibel
 @item @code{mdBm}             @tab Milli-Dezibel (relative to 1 mV)
@@ -391,11 +398,13 @@ characters in between).
 @item @code{mdbm}             @tab Milli-Dezibel (relative to 1 mV)
 @item @code{mG}               @tab Milli-Gauss
 @item @code{mHz}              @tab Milli-Hertz
+@item @code{mJ}               @tab Milli-Joule
 @item @code{mk}               @tab Milli-Kelvin
 @item @code{mm}               @tab Milli-Meter
 @item @code{ms}               @tab Milli-Seconds
 @item @code{mT}               @tab Milli-Tesla
 @item @code{mV}               @tab Milli-Volt
+@item @code{mW}               @tab Milli-Watt
 @item @code{nA}               @tab Nano-Ampere
 @item @code{ndB}              @tab Nano-Dezibel
 @item @code{ndBm}             @tab Nano-Dezibel (relative to 1 mV)
@@ -403,11 +412,27 @@ characters in between).
 @item @code{ndbm}             @tab Nano-Dezibel (relative to 1 mV)
 @item @code{nG}               @tab Nano-Gauss
 @item @code{nHz}              @tab Nano-Hertz
+@item @code{nJ}               @tab Nano-Joule
 @item @code{nK}               @tab Nano-Kelvin
 @item @code{nm}               @tab Nano-Meter
 @item @code{ns}               @tab Nano-Seconds
 @item @code{nT}               @tab Nano-Tesla
 @item @code{nV}               @tab Nano-Volt
+@item @code{nW}               @tab Nano-Watt
+@item @code{pA}               @tab Pico-Ampere
+@item @code{pdB}              @tab Pico-Dezibel
+@item @code{pdBm}             @tab Pico-Dezibel (relative to 1 mV)
+@item @code{pdb}              @tab Pico-Dezibel
+@item @code{pdbm}             @tab Pico-Dezibel (relative to 1 mV)
+@item @code{pG}               @tab Pico-Gauss
+@item @code{pHz}              @tab Pico-Hertz
+@item @code{pJ}               @tab Pico-Joule
+@item @code{pK}               @tab Pico-Kelvin
+@item @code{pm}               @tab Pico-Meter
+@item @code{ps}               @tab Pico-Seconds
+@item @code{pT}               @tab Pico-Tesla
+@item @code{pV}               @tab Pico-Volt
+@item @code{pW}               @tab Pico-Watt
 @item @code{s}                @tab Seconds
 @item @code{T}                @tab Tesla
 @item @code{uA}               @tab Micro-Ampere
@@ -418,10 +443,13 @@ characters in between).
 @item @code{udbm}             @tab Micro-Dezibel (relative to 1 mV)
 @item @code{uG}               @tab Micro-Gauss
 @item @code{uHz}              @tab Micro-Hertz
+@item @code{uJ}               @tab Micro-Joule
 @item @code{uK}               @tab Micro-Kelvin
 @item @code{um}               @tab Micro-Meter
 @item @code{us}               @tab Micro-Seconds
 @item @code{uT}               @tab Micro-Tesla
 @item @code{uV}               @tab Micro-Volt
+@item @code{uW}               @tab Micro-Watt
 @item @code{V}                @tab Volt
+@item @code{W}                @tab Watt
 @end multitable

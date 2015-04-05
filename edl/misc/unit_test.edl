@@ -1,0 +1,13 @@
+VARIABLES:
+
+A;
+a;
+mA;
+
+
+EXPERIMENT:
+
+A = 19;
+a = 17 A;
+mA = 2 mA;
+print( "# # #\n", A, a, mA );

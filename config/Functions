@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -574,11 +574,3 @@ fft_complex, -1, ALL;
 trigger_name, 0, ALL;
 trigger_length, -1, EXP;
 trigger_raise, 0, EXP;
-
-
-/*
- * Local variables:
- * tab-width: 4
- * indent-tabs-mode: nil
- * End:
- */

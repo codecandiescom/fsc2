@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -675,7 +675,7 @@ Var_T * my_function( Var_T * var )
 
 
 An alternative (e.g.@: if the type of the variables you need to return
-differs) is two write two functions where the first one does the
+differs) is to write two functions where the first one does the
 calculations needed and stores the second value in a global
 variable. All the second function has to do is just to return the value
 of the global variable. This way, the @code{EDL} file might look like
@@ -1405,7 +1405,7 @@ a handle for the device in all the following function calls, and
 descriptor for the socket connected to the device. You are free to use
 this file descriptor for whatever you want, but please call the
 function @code{@code{fsc2_lan_close()}} to close it. The only two
-option set for the socket are @code{SO_KEEPALIVE} and
+options set for the socket are @code{SO_KEEPALIVE} and
 @code{TCP_NODELAY} (but you can unset them if you want). Later on the
 options @code{SO_SNDTIMEO} and @code{SO_RCVTIMEO} may be set for
 timeouts for read and write operations (if the system supports setting
@@ -2148,11 +2148,11 @@ Finally, the sixth and final function, @code{sr510_exit_hook()}, is run
 just before the module is unloaded except for the case that an exception
 had been thrown while the @code{init_hook()} was run. Please take care:
 you can't talk to the device anymore when this hook is called. It should
-only be used to e.g.@: get rid of memory allocated withing the module
-before the it becomes unloaded (and thus any memory not deallocated
+only be used to e.g.@: get rid of memory allocated within the module
+before it becomes unloaded (and thus any memory not deallocated
 properly would result in a memory leak). The exit hook can be run
-immediately after the init hook, so write your module in a way that it
-can handle this case!
+immediately after the init hook, so write your module in a way that
+it also can handle this case!
 
 Please note that the first three functions, i.e.@:
 @code{sr510_init_hook}, @code{sr510_test_hook} and

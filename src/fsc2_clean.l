@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -128,8 +128,9 @@ INT      [0-9]+
 EXPO     [Ee][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dBm"|"dB"|"dbm"|"db"|"K")
+UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dBm"|"dB"|"dbm"|"db"|"K"|"W"|"J")
 
+IPICO    {INT}[\t \r]*"p"{UNIT}
 INANO    {INT}[\t \r]*"n"{UNIT}
 IMICRO   {INT}[\t \r]*"u"{UNIT}
 IMILLI   {INT}[\t \r]*"m"{UNIT}
@@ -138,6 +139,7 @@ IKILO    {INT}[\t \r]*"k"{UNIT}
 IMEGA    {INT}[\t \r]*"M"{UNIT}
 IGIGA    {INT}[\t \r]*"G"{UNIT}
 
+FPICO    {FLOAT}[\t \r]*"p"{UNIT}
 FNANO    {FLOAT}[\t \r]*"n"{UNIT}
 FMICRO   {FLOAT}[\t \r]*"u"{UNIT}
 FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
@@ -366,6 +368,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* Here's handling of numbers with units - they are converted
                to double automatically */
 
+{IPICO}/[^a-zA-z0-9_]   unit_spec( yytext, -12 );
 {INANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
 {IMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
 {IMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3 );
@@ -374,6 +377,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6 );
 {IGIGA}/[^a-zA-z0-9_]   unit_spec( yytext,  9 );
 
+{FPICO}/[^a-zA-z0-9_]   unit_spec( yytext, -12 );
 {FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
 {FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
 {FMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3 );

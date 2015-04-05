@@ -98,7 +98,7 @@ fsc2_lan_open( const char * dev_name,
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
 
-    fsc2_assert( dev_name != NULL );
+    fsc2_assert( dev_name != NULL && * dev_name );
 
     /* Try to get a lock on the device */
 
@@ -786,7 +786,7 @@ fsc2_lan_read( int    handle,
 
     /* Start reading - if interrupted by a signal other than SIGALRM
        and we're supposed to continue on such signals and the timeout
-       time hasn't already been reached retry the read() */
+       time hasn't already been reached retry the read(2) */
 
     do
     {
@@ -843,10 +843,10 @@ fsc2_lan_read( int    handle,
  * 'us_timeout' is set to a positive (non-zero) value it doesn't
  * wait longer than that many microseconds. If 'quit_on_signal' is
  * set it returns immediately when a signal is caught.
- * Take care: differing from the behaviour of readv() the length
+ * Take care: differing from the behaviour of readv(2) the length
  * fields in the iovec structures get set to the number of bytes
- * read into them (that's why the 'buffer' argument isn't declared
- * as const as it is for the readv() fucntion).
+ * read into them (that's why the 'buffer' argument isn't const
+ * qualified as it is for the readv(2) fucntion).
  *-----------------------------------------------------------------*/
 
 ssize_t
@@ -1081,7 +1081,8 @@ fsc2_lan_cleanup( void )
  * the function was called at.
  *--------------------------------------------------------------------*/
 
-static void
+static
+void
 timeout_init( int                dir,
               LAN_List_T       * ll,
               long             * us_timeout,
@@ -1176,7 +1177,8 @@ timeout_init( int                dir,
  * be resumed. Returns true if resuming is ok, otherwise false.
  *--------------------------------------------------------------------*/
 
-static bool
+static
+bool
 timeout_reset( int                dir,
                LAN_List_T       * ll,
                long             * us_timeout,
@@ -1223,7 +1225,8 @@ timeout_reset( int                dir,
  * stops the timer and resets the SIGALRM signal handler.
  *------------------------------------------------------------------*/
 
-static void
+static
+void
 timeout_exit( LAN_List_T       * ll,
               struct sigaction * old_sact )
 {
@@ -1247,7 +1250,8 @@ timeout_exit( LAN_List_T       * ll,
  * Handler for SIGALRM signals during connect(), write() and read()
  *------------------------------------------------------------------*/
 
-static void
+static
+void
 wait_alarm_handler( int sig_no )
 {
     if ( sig_no == SIGALRM )
@@ -1260,7 +1264,8 @@ wait_alarm_handler( int sig_no )
  * of devices from its file descriptor
  *-------------------------------------------*/
 
-static LAN_List_T *
+static
+LAN_List_T *
 find_lan_entry( int handle )
 {
     LAN_List_T *ll = lan_list;
@@ -1283,7 +1288,8 @@ find_lan_entry( int handle )
  * value that then can be used in a socket() call.
  *------------------------------------------------------*/
 
-static void
+static
+void
 get_ip_address( const char     * address,
                 struct in_addr * ip_addr )
 {
@@ -1391,7 +1397,8 @@ fsc2_lan_close_log( FILE * fp )
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-static void
+static
+void
 fsc2_lan_log_date( FILE * fp )
 {
     char tc[ 26 ];

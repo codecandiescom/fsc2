@@ -1241,7 +1241,8 @@ oriel_cs_130_command( const char * cmd )
  * the trailing '\r' and '\n') and its length
  *-------------------------------------*/
 
-static void
+static
+void
 oriel_cs_130_talk( const char * cmd,
                    char       * reply,
                    long       * length )

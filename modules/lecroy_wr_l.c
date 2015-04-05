@@ -82,7 +82,7 @@ lecroy_wr_l_init_hook( void )
     size_t i;
 
 
-    /* Set global variable to indicate that teh device is controlled via LAN */
+    /* Set global variable to indicate that the device is controlled via LAN */
 
     Need_LAN = SET;
 
