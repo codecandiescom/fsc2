@@ -32,22 +32,26 @@ int gentec_maestro_end_of_test_hook( void );
 int gentec_maestro_exp_hook( void );
 int gentec_maestro_end_of_exp_hook( void );
 
+
 /* EDL functions */
 
 Var_T * powermeter_name( Var_T * v  UNUSED_ARG );
+Var_T * powermeter_detector_name( Var_T * v  UNUSED_ARG );
 Var_T * powermeter_scale( Var_T * v );
 Var_T * powermeter_get_scale_limits( Var_T * v );
 Var_T * powermeter_autocale( Var_T * v );
 Var_T * powermeter_trigger_level( Var_T * v );
 Var_T * powermeter_wavelength( Var_T * v );
-Var_T * powermeter_attenuator( Var_T * v );
-Var_T * powermeter_wavelength_range( Var_T * v );
+Var_T * powermeter_get_wavelength_limits( Var_T * v );
 Var_T * powermeter_get_reading( Var_T * v );
 Var_T * powermeter_anticipation( Var_T * v );
-Var_T * powermeter_attenuation( Var_T * v );
+Var_T * powermeter_attenuator( Var_T * v );
 Var_T * powermeter_zero_offset( Var_T * v );
 Var_T * powermeter_multiplier( Var_T * v );
 Var_T * powermeter_offset( Var_T * v );
+Var_T * powermeter_get_laser_repetition_frequency( Var_T * v );
+Var_T * powermeter_analog_output( Var_T * v );
+
 
 /* Internal functions */
 
@@ -155,6 +159,9 @@ typedef struct
     double user_offset;
     bool user_offset_has_been_set;
 
+    bool analog_output_is_on;
+    bool analog_output_has_been_set;
+
     bool continuous_transmission_is_on;
     bool energy_mode_is_on;
 } Gentec_Maestro;
@@ -208,6 +215,8 @@ gentec_maestro_init_hook( void )
 
     /* Initialize the structure for the device as good as possible */
 
+    gm->handle = -1;
+
     gm->mode = TEST_MODE;
     gm->mode_has_been_set = UNSET;
 
@@ -257,6 +266,9 @@ gentec_maestro_init_hook( void )
     gm->user_offset = TEST_USER_OFFSET;
     gm->user_offset_has_been_set = UNSET;
 
+    gm->analog_output_is_on = UNSET;
+    gm->analog_output_has_been_set = UNSET;
+
     return 1;
 }
 
@@ -268,6 +280,8 @@ int
 gentec_maestro_test_hook( void )
 {
     gentec_maestro_test = gentec_maestro;
+    strcpy( gentec_maestro_test.head_name, gentec_maestro.head_name );
+
     gm = &gentec_maestro;
 
     gm->mode_has_been_set = UNSET;
@@ -279,6 +293,7 @@ gentec_maestro_test_hook( void )
     gm->zero_offset_has_been_set = UNSET;
     gm->user_multiplier_has_been_set = UNSET;
     gm->user_offset_has_been_set = UNSET;
+    gm->analog_output_has_been_set = UNSET;
 
     return 1;
 }
@@ -311,10 +326,10 @@ gentec_maestro_exp_hook( void )
         is_ok = gentec_maestro_init( DEVICE_NAME );
         TRY_SUCCESS;
     }
-    CATCH( EXCEPTION )
+    OTHERWISE
         is_ok = UNSET;
 
-    if ( ! is_ok && gentec_maestro.handle >= 0 )
+    if ( ! is_ok && gentec_maestro.handle != -1 )
     {
         fsc2_lan_close( gentec_maestro.handle );
         gentec_maestro.handle = -1;
@@ -330,7 +345,7 @@ gentec_maestro_exp_hook( void )
 int
 gentec_maestro_end_of_exp_hook( void )
 {
-    if ( gentec_maestro.handle >= 0 )
+    if ( gentec_maestro.handle != -1 )
     {
         fsc2_lan_close( gentec_maestro.handle );
         gentec_maestro.handle = -1;
@@ -348,6 +363,18 @@ Var_T *
 powermeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+
+/*-------------------------------------------------------*
+ * Function returns a string with the name of the device
+ *-------------------------------------------------------*/
+
+Var_T *
+powermeter_detector_name( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( STR_VAR, gm->head_name );
 }
 
 
@@ -630,76 +657,6 @@ powermeter_wavelength( Var_T * v )
 
 
 /*---------------------------------------------------*
- * Queries or sets the attenuator (if one is available).
- * If not available a query for the attenuator state
- * returns -1.
- *---------------------------------------------------*/
-
-Var_T *
-powermeter_attenuator( Var_T * v )
-{
-    bool state;
-
-
-    if ( ! v )
-    {
-        if ( FSC2_MODE == PREPARATION && ! gm->att_has_been_set )
-            no_query_possible( );
-
-        if ( FSC2_MODE == EXPERIMENT )
-        {
-            if ( ! gm->att_is_available )
-                return vars_push( INT_VAR, -1L );
-            gentec_maestro_get_attenuator( );
-        }
-
-        return vars_push( INT_VAR, gm->att_is_on ? 1L : 0L );
-    }
-
-    if ( FSC2_MODE == EXPERIMENT && ! gm->att_is_available )
-    {
-        print( FATAL, "No attenuator available.\n" );
-        THROW( EXCEPTION );
-    }
-
-    state = get_boolean( v );
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        if ( ! gm->att_is_available )
-        {
-            print( FATAL, "No attenuator available.\n" );
-            THROW( EXCEPTION );
-        }
-
-        gentec_maestro_get_wavelength( );
-
-        if (    (    state
-                  && (    gm->wavelength < gm->min_wavelength_with_att
-                       || gm->wavelength > gm->max_wavelength_with_att ) )
-             || (    ! state
-                  && (    gm->wavelength < gm->min_wavelength
-                       || gm->wavelength > gm->max_wavelength ) ) )
-        {
-            print( FATAL, "Wavelength is ut of range when switching "
-                   "attenuator %s.\n", state ? "on" : "off" );
-            THROW( EXCEPTION );
-        }
-
-        gentec_maestro_set_attenuator( state );
-    }
-    else
-    {
-        gm->att_is_on = state;
-        gm->att_has_been_set = SET;
-    }
-
-    return vars_push( INT_VAR, gm->att_is_on ? 1L : 0L );
-}
-
-
-/*---------------------------------------------------*
  * Returns an array with the minimum and maximum wavelength
  * for the head. If a true argument is passed to the function
  * and an attenuator is avaialble the wavelength limits with
@@ -707,7 +664,7 @@ powermeter_attenuator( Var_T * v )
  *---------------------------------------------------*/
 
 Var_T *
-powermeter_wavelength_range( Var_T * v )
+powermeter_get_wavelength_limits( Var_T * v )
 {
     bool with_att = UNSET;
     double wls[ 2 ];
@@ -829,7 +786,7 @@ powermeter_anticipation( Var_T * v )
  *-------------------------------------------------------*/
 
 Var_T *
-powermeter_attenuation( Var_T * v )
+powermeter_attenuator( Var_T * v )
 {
     bool att;
     long int wl;
@@ -841,7 +798,12 @@ powermeter_attenuation( Var_T * v )
             no_query_possible( );
 
         if ( FSC2_MODE == EXPERIMENT )
+        {
+            if ( ! gm->att_is_available )
+                return vars_pus( INT_VAR, -1L );
+
             gentec_maestro_get_attenuator( );
+        }
 
         return vars_push( INT_VAR, gm->att_is_on ? 1L : 0L );
     }
@@ -1037,7 +999,48 @@ powermeter_offset( Var_T * v )
 }
 
 
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
 
+Var_T *
+powermeter_get_laser_repetition_frequency( Var_T * v )
+{
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        return vars_push( FLOAT_VAR, henttec_meastro_get_laser_frequency( ) );
+
+    return vars_push( FLOAT_VAR, TEST_LASER_FREQUENCY );
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+Var_T *
+powermeter_analog_output( Var_T * v )
+{
+    bool on_off;
+
+    if ( ! v )
+    {
+        print( FATAL, "State of analog output can't be queried.\n" );
+        THROW( EXCEPTION );
+    }
+
+    on_off = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        gentec_maestro_set_analog_output( on_off );
+    else
+    {
+        gm->analog_output_is_on = on_off;
+        gm->analog_output_has_been_set = SET;
+    }
+
+    return vars_push( INT_VAR, on_off ? 1L : 0L );
+}
 
 
 /*---------------------------------------------------*
@@ -1068,16 +1071,17 @@ gentec_maestro_init( const char * dev_name )
     /* Store all properties that might have been set during the preparation
        phase in the structure used for tests */
 
-    gmt->mode               = gm->mode;
-    gmt->scale_index        = gm->scale_index;
-    gmt->att_is_on          = gm->att_is_on;
-    gmt->wavelength         = gm->wavelength;
-    gmt->trigger_level      = gm->trigger_level;
-    gmt->autoscale_is_on    = gm->autoscale_is_on;
-    gmt->anticipation_is_on = gm->anticipation_is_on;
-    gmt->zero_offset_is_on  = gm->zero_offset_is_on;
-    gmt->user_multiplier    = gm->user_multiplier;
-    gmt->user_offset        = gm->user_offset;
+    gmt->mode                = gm->mode;
+    gmt->scale_index         = gm->scale_index;
+    gmt->att_is_on           = gm->att_is_on;
+    gmt->wavelength          = gm->wavelength;
+    gmt->trigger_level       = gm->trigger_level;
+    gmt->autoscale_is_on     = gm->autoscale_is_on;
+    gmt->anticipation_is_on  = gm->anticipation_is_on;
+    gmt->zero_offset_is_on   = gm->zero_offset_is_on;
+    gmt->user_multiplier     = gm->user_multiplier;
+    gmt->user_offset         = gm->user_offset;
+    gmt->analog_output_is_on = gm->analog_output_is_on;
 
     /* Disable continupus transmission of data, binary transfers and get the
        currect settings of the device */
@@ -1302,6 +1306,9 @@ gentec_maestro_init( const char * dev_name )
     if (    gm->user_offset_has_been_set
          && gm->user_offset != gmt->user_offset )
         gentec_maestro_set_user_offset( gmt->user_offset );
+
+    if ( gm->analog_output_has_been_set )
+        gentec_maestro_set_analog_output( gmt->analog_output_is_on );
 
     return SET;
 }

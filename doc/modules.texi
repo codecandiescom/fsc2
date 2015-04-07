@@ -756,7 +756,7 @@ correct sequence, so it's not completely foolproof.
 * Handling devices connected via USB::
 * Handling devices connected via LAN::
 * Hook functions::
-* Caveats for the test run::
+* Caveat for the test run::
 * How to compile a module::
 * Linker scripts::
 * Making fsc2 aware of the module::
@@ -1260,13 +1260,13 @@ becoming ready for writing or reading the data. Specifying a negative
 value is interpreted to mean that you want to wait indefinitely for
 data, while a value of @code{0} for @code{us_timeout} means not to
 wait at all. Finally, @code{quit_on_signal} determines if the function
-returns immediately when a signal has been received. This might for
-example happen when the user pressed the @code{Stop} button while the
-function was waiting for data. For @code{fsc2_serial_read()} the
-@code{term} argument is a (optional) string that contains a
-termination sequence on which reading stops. If the device does not
-send a termination sequence at the end of the data simple pass a
-@code{NULL} pointer or an empty string to the function.
+returns immediately when a signal has been received. This could for
+example happen when the user presses the @code{Stop} button while the
+function is waiting for data. For @code{fsc2_serial_read()} the
+@code{term} argument is an optional string with a termination sequence
+on which reading stops. If the device does not send a termination
+sequence at the end of the data simply pass a @code{NULL} pointer or
+an empty string to the function.
 
 The functions return on success the number of bytes written or read,
 @code{0} if no data could be written or read (e.g.@: because the
@@ -1314,11 +1314,11 @@ libusb_do_something( );
 sigprocmask( SIG_SETMASK, &old_mask, NULL );
 lower_permissions( );
 @end example
-Otherwise it might happen that this signal (that is raised when the
+Otherwise it could happen that this signal (that is raised when the
 user clicks onto the @code{Stop} button) gets received. And in this
-case communication with the device may be interruted and the device
-left in an unknown and potentially unresponsive state. By blocking
-the signal this can be avoided.
+case communication with the device might be interrupted and the device
+left in an unknown and potentially unresponsive state. By blocking the
+signal this can be avoided.
 
 
 @node Handling devices connected via LAN, Hook functions, Handling devices connected via USB, Writing New Modules
@@ -2062,7 +2062,7 @@ All of this may take several seconds to finish. The function also
 closes and reopens the connection to the device.
 
 
-@node Hook functions, Caveats for the test run, Handling devices connected via LAN, Writing New Modules
+@node Hook functions, Caveat for the test run, Handling devices connected via LAN, Writing New Modules
 @subsection Hook functions
 @cindex hook functions
 @findex init_hook()
@@ -2129,10 +2129,10 @@ the init hook function (i.e.@: always return a non-zero value on success).
 
 The third function, @code{sr510_end_of_test_hook()} is called when the
 test hook functions of the modules have been run. This hook function
-might be used to reset internal variables of the module that got changed
-during the test run. The return code of the function is the same as for
-the init hook and test hook function (i.e.@: always return a non-zero
-value on success).
+can be used to reset internal variables of the module that got changed
+during the test run. The return code of the function is the same as
+for the init hook and test hook functions (i.e.@: always return a
+non-zero value on success).
 
 The fourth function, @code{sr510_exp_hook()}, is run when the actual
 experiment is started. Initialization of devices should be done
@@ -2163,8 +2163,8 @@ remaining functions, @code{sr510_exp_hook()} and
 started.
 
 
-@node Caveats for the test run, How to compile a module, Hook functions, Writing New Modules
-@subsection Caveats for the test run
+@node Caveat for the test run, How to compile a module, Hook functions, Writing New Modules
+@subsection Caveat for the test run
 
 There is one rather nasty problem with the test run. In the test run the
 @code{EDL} script is checked extensively and, as far as possible,
@@ -2185,7 +2185,7 @@ within the @code{EDL} file they must be prepared to write the @code{EDL}
 script to accept some unexpected values.
 
 
-@node How to compile a module, Linker scripts, Caveats for the test run, Writing New Modules
+@node How to compile a module, Linker scripts, Caveat for the test run, Writing New Modules
 @subsection How to compile a module
 
 A module is a shareable library (with an extension of @file{.fsc2_so})
@@ -2298,22 +2298,20 @@ exported by the shared library representing the module to the smallest
 possible subset.
 
 The reason for the existence of these linker scripts is to avoid name
-space polution, unfortunately not too uncommon a problem with @code{C}.
-For the modules made from single source files this isn't much of a
-problem. As you will notice in these files each and every function and
-global variable that does not need to be visible outside of the scope of
-the file is declared static, thus already reducing the number of visible
-symbols of the library to the bare minimum. It's different for libraries
-that get made from several files, here usually at least some of the
-functions and global variables need a scope that isn't restricted to
-just the file where they are defined in. To restrict the visibility of
-these symbols to the library (so that they are not "picked up" by the
-@code{fsc2} program when the module gets loaded) the linker scripts are
-used. Within a linker script it's possible to declare which of the
-functions and global variables of the library are to be exported and
-which ones not.
+space polution, unfortunately not too uncommon a problem with
+@code{C}. For the modules made from a single source file this isn't a
+problem - one should just declare all functions (and global variables)
+that are to be restriced to the scope of the module as @code{static}.
+It's different for libraries that get made from several files, here
+usually at least some of the functions and global variables need a
+scope that isn't restricted to just the file they are defined in. To
+restrict the visibility of these symbols to the library (so that they
+are not "picked up" by the @code{fsc2} program when the module gets
+loaded) the linker scripts are used. Within a linker script it's
+possible to declare which of the functions and global variables of the
+library are to be exported and which ones not.
 
-Of course, using linker scripts isn't required, modules might work
+Of course, using linker scripts isn't required, modules may work
 perfectly well without one. They are only meant to help keep things
 cleanly separated, thereby reducing the probability of making some
 difficult to trace errors. But if you feel you don't need them you can
@@ -2398,18 +2396,19 @@ driver has to be included into the device name data base called
 @file{Devices}
 @cindex @code{Devices} file
 , which is a simple ASCII file consisting of the names of all the
-supported devices. It can be found in the @file{config} subdirectory of
-the source tree and usually gets installed in the directory
+supported devices. It can be found in the @file{config} subdirectory
+of the source tree and usually gets installed in the directory
 @file{/usr/local/lib/fsc2}. The entries in this file are
-case-insensitive, so you might add `SR510', `sr510' or `Sr510'
-etc. Within the file C and C++ style comments can be used. By adding the
-device name to this file you tell @code{fsc2} that there is now a module
-called `sr510' (take care - all modules are spelled with @strong{lower}
-case characters!). Actually, the file compiled from the C file defining
-the functions has to be @file{sr510.fsc2_so} - that means it is a shared
-library that can be used as a plugin for @code{fsc2} (how to create one
-from the C file is described later). Here is a short snippet from the
-@file{Devices} file with the entries for the lock-in amplifiers:
+case-insensitive, so you could add `SR510', `sr510' or `Sr510' etc.
+Within the file C and C++ style comments can be used. By adding the
+device name to this file you tell @code{fsc2} that there is now a
+module called `sr510' (take care - all modules are spelled with
+@strong{lower} case characters!). Actually, the file compiled from the
+C file defining the functions has to be @file{sr510.fsc2_so} - that
+means it is a shared library that can be used as a plugin for
+@code{fsc2} (how to create one from the C file is described later).
+Here is a short snippet from the @file{Devices} file with the entries
+for the lock-in amplifiers:
 @example
 sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
@@ -2576,7 +2575,7 @@ care about appending a @code{#} and a device number to the function name
 @node Programming Utils, Pulser Modules, Writing New Modules, Writing Modules
 @section Additional utilities provided by fsc2
 
-When writing a module some of the following information might be useful:
+When writing a module some of the following information may be useful:
 first a special function for printing out messages to the user is
 discussed, second a function that simulates @code{usleep()} but does not
 share some of its shortcomings.
@@ -2590,7 +2589,7 @@ When writing the program I had to deal with my share of memory leaks,
 segmentation faults etc.@: and hacked together a few routines for
 allocation and deallocation of memory that have some build in code to
 help me with debugging (and which throw exceptions when an allocation
-fails). You might find it useful to also use these routines for your
+fails). You may find it useful to also use these routines for your
 modules.
 
 A boolean type is something that was missing until the new C99
@@ -2688,14 +2687,14 @@ double experiment_time( void );
 
 When writing code that deals with real devices one often needs to wait
 for times with a resolution of less than a second. The usual way to do
-this is to call either @code{usleep()} or @code{nanosleep()}. The second
-function, @code{nanosleep()}, may look like a bit of overkill since both
-functions real time resolution is usually in the @w{10 ms} range, at
-least on Intel machines. On the other hand, @code{usleep()} is marked as
-obsolete in the IEEE Standard 1003.1-2001 (Single UNIX Specification,
-Version 3) for several reasons (mainly for it's undefined interaction
-with the @code{SIGALRM} signal and other similar functions) and thus
-should not be used anymore.
+this is to call either @code{usleep()} or @code{nanosleep()}. The
+second function, @code{nanosleep()}, may look like a bit of overkill
+since both functions effective time resolution is usually in the ms
+range, at least on Intel machines. On the other hand, @code{usleep()}
+is marked as obsolete in the IEEE Standard 1003.1-2001 (Single UNIX
+Specification, Version 3) for several reasons (mainly for its
+undefined interaction with the @code{SIGALRM} signal and other similar
+functions) and thus should not be used anymore.
 
 As a replacement for @code{usleep()} (which you shouldn't use in a
 module) there is a function
@@ -2704,12 +2703,13 @@ int fsc2_usleep( unsigned long us_duration,
                  bool          quit_on_signal );
 @end example
 @noindent
-It takes two parameters, an @code{unsigned long}, which is the duration
-(in milliseconds) to wait (just like @code{usleep()}), and a boolean
-value that indicates if the function is supposed to return immediately
-if a signal gets caught or if it should wait for the specified time even
-on signals.  The function is actually nothing else than a wrapper around
-@code{nanosleep()}, so you can use @code{nanosleep()} yourself if you prefer.
+It takes two parameters, an @code{unsigned long}, which is the
+duration (in milliseconds) to wait (just like @code{usleep()}), and a
+boolean value that indicates if the function is supposed to return
+immediately if a signal gets caught or if it should wait for the
+specified time even on signals. The function is, except its dealing
+with signals, nothing more than a wrapper around @code{nanosleep()},
+so you can use @code{nanosleep()} yourself if you prefer.
 
 
 @node Assertions, Error handling with exceptions, Waiting for short times, Programming Utils
@@ -2822,7 +2822,7 @@ exceptions for nearly all cases that have to be dealt within modules.
 Of course, when an exception is 'thrown', there must be a place where it
 gets 'caught', otherwise the exception will simply kill the program. You
 don't have to care about catching exceptions, @code{fsc2} will do this
-for you. But in some situations you might prefer to do it yourself. So
+for you. But in some situations you may prefer to do it yourself. So
 lets assume that you have a function @code{foo()} that might run into a
 non-recoverable error that can't be handled within the module itself.
 However you may still need to do some cleaning-up before you pass it up to
@@ -2847,27 +2847,28 @@ OTHERWISE
 @findex CATCH()
 @findex OTHERWISE
 @findex RETHROW
-With @code{TRY} the program is told that the following code might throw
+With @code{TRY} the program is told that the following code may throw
 an exception. If everything works out well and no exception is thrown
-the @code{CATCH()} and @code{OTHERWISE} blocks are never executed and in
-this case @code{TRY_SUCCESS} must be called to do some cleaning up (this
-is different from e.g.@: @code{C++} where the programmer does not have
-to care about this case). But if an error happens and an exception (of
-whatever type, there are more than the simply named @code{EXCEPTION}
-exception) gets thrown the flow of control is changed immediately from
-the function the exception is thrown in to the @code{CATCH()} line.
+the @code{CATCH()} and @code{OTHERWISE} blocks are never executed and
+in this case @code{TRY_SUCCESS} must be called to do some cleaning up
+(this is different from e.g.@: @code{C++} where the programmer does
+not have to care about this since it's done automatically). But if an
+error happens and an exception (of whatever type - there are more than
+the simply named @code{EXCEPTION} exception) gets thrown the flow of
+control is changed immediately from the function the exception is
+thrown in to the @code{CATCH()} line.
 
 The @code{CATCH} section can be used to catch a specific exception and
-you can have several of them for different types of exceptions listed
-one after the other. But because flow of control will be transferred to
-the @code{CATCH()} line on every possible type of exception, not only
-the one specified as the arguments of the @code{CATCH()} calls, a
-@code{CATCH()} should always followed finally by an @code{OTHERWISE}
-(unless you are absolutely sure no other exceptions than the one you're
-catching could happen). The block following @code{OTHERWISE} will deal
-with all other exceptions not dealt by @code{CATCH()}.  Normally, you
-just will rethrow the exception you're not interested in or which you
-are unable to handle yourself by calling @code{RETHROW}.
+you can have several @code{CATCH} blocks, one for wach different type
+of exceptions you want to treat in a specific way. This should always
+followed by a @code{OTHERWISE} section that deals with exceptions of
+types not having been dealt with already (unless you're completely
+sure you've already handled every possible type). Of course, it's
+perfectly ok to just have a @code{OTHERWISE} block if you don't want
+to handle different types of exceptions differently. Within the
+@code{OTHERWISE} block you can just rethrow the exception by calling
+@code{RETHROW} if you're not interested in it or are unable to handle
+it yourself .
 
 In cases where you aren't interested in a special type of exception but
 want to catch every exception, e.g.@: to just do some cleaning up before
@@ -2959,21 +2960,21 @@ while ( 1 )                   /* loop forever */
 @node Problems with exceptions, , More on programming with exceptions, Error handling with exceptions
 @subsubsection Problems with exceptions
 
-There is a caveat when using exceptions. The exception mechanism is
+There is a catch when using exceptions. The exception mechanism is
 using the standard C functions @code{setjmp()} and @code{longjmp()} to
-realize @code{TRY} and @code{CATCH}. These functions have some problems:
+realize @code{TRY} and @code{CATCH}. These functions have one problem:
 when an exception is thrown the data stored in CPU registers are not
-necessarily saved, but an optimizing compiler usually stores the values
-of often used variables in CPU registers, i.e.@: the value of a variable
-in memory is not necessarily identical to its 'real' value (or variables
-might even not exist in memory, they may have gotten optimized out.).
-When the program now reaches the @code{CATCH()} part the values of these
-variables can be completely bogus and if you would try to use their values
-extremely hard to find errors might result.
+necessarily saved. But an optimizing compiler usually stores values of
+often used variables in CPU registers, i.e.@: the value of a variable
+in memory is not necessarily identical to its 'real' value (or
+variables might even not exist in memory, they may have gotten
+optimized out.). When the program now reaches the @code{CATCH()} part
+the values of these variables can be completely bogus and, if you
+would try to use their values, hard to find errors may result.
 
 Fortunately, when the compiler gets invoked with its warning level set
-to a suitable level it will recognize such potential problems and utter
-a warning message message like the following (this example is taken from
+to a suitable level it will recognize such potential problems and emit
+a warning message like the following (this example is taken from
 @code{gcc}):
 @example
 module.c:123: warning: variable `i' might be clobbered by
@@ -3007,13 +3008,13 @@ long ** foo( size_t count,
 @}
 @end example
 @noindent
-Chances are high that the compiler will use a register for the variable
-@code{i} to speed up execution. But when an exception happens the value
-@code{i} had in the loop of the @code{TRY} block might hav gotten discarded
-in the process, even though it is still needed.
+Chances are high that the compiler will use a register for the
+variable @code{i} to speed up execution. But when an exception is
+thrown the value @code{i} had in the loop of the @code{TRY} block may
+get discarded in the process, even though it is still needed.
 
-But there's a way to get rid of this problem. All you need is to add an
-additional statement before @code{TRY} is invoked:
+Fortunatley, there's a way to take care of this problem: all you need
+is to add an additional statement before @code{TRY} is invoked:
 @example
 CLOBBER_PROTECT( i );
 @end example

@@ -41,6 +41,7 @@
 * er035m_sa::       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 * bvt3000::         Bruker BVT3000 Variable Temperature Unit
 * fsps25::          Frankfurt Sweep Power Supply
+* gentec_maestro::  Gentec Maestro Power/Energy Meter
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
@@ -77,7 +78,7 @@
 * oriel_matrix::    Newport Oriel MMS Spectrometer
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
-* q_bmwb::          Bruker ER 051 QG Q-Band Bridge
+@ * q_bmwb::          Bruker ER 051 QG Q-Band Bridge
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rb8509::          Rulbus 12-bit ADC Card
@@ -104,7 +105,7 @@
 * tds754a::         Tektronix Digitizing Oscilloscope TDS754A
 * tegam2714a_p::    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
-* x_bmwb::          Bruker ER 046 X-Band Bridge
+@c * x_bmwb::          Bruker ER 046 X-Band Bridge
 * witio_48::        Wasco WITIO-48 DIO card
 @end menu
 
@@ -1021,7 +1022,7 @@ evaporator.
 
 @c #############################################################
 
-@node fsps25, gg_chopper, bvt3000, Device Reference
+@node fsps25, gentec_maestro, bvt3000, Device Reference
 @iftex
 @subheading Frankfurt Sweep Power Supply (Prisner group, Frankfurt)
 @end iftex
@@ -1063,7 +1064,52 @@ based on a device by B. Kinzer.
 
 @c #############################################################
 
-@node gg_chopper, hfs9000, fsps25, Device Reference
+@node gentec_maestro, gg_chopper, fsps25, Device Reference
+@iftex
+@subheading Gentec Maestro Power/Energy Meter
+@end iftex
+@ifnottex
+@section Gentec Maestro Power/Energy Meter
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{gentec_maestro}
+
+@paragraphindent 0
+@strong{Description}: This module controls The Gentec Maestro
+power- and energy meter.
+
+@paragraphindent 0
+@strong{Controlled via} LAN (raw TCP)
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{powermeter_name()}
+@item @ref{powermeter_detector_name()}
+@item @ref{powermeter_scale()}
+@item @ref{powermeter_get_scale_limits()}
+@item @ref{powermeter_autoscale()}
+@item @ref{powermeter_trigger_level()}
+@item @ref{powermeter_wavelength()}
+@item @ref{powermeter_attenuator()}
+@item @ref{powermeter_get_wavelength_limits()}
+@item @ref{powermeter_get_reading()}
+@item @ref{powermeter_anticipation()}
+@item @ref{powermeter_zero_offset()}
+@item @ref{powermeter_multiplier()}
+@item @ref{powermeter_offset()}
+@item @ref{powermeter_get_laser_repetition_frequency()}
+@item @ref{powermeter_analog_output()}
+@end table
+
+
+@c #############################################################
+
+@node gg_chopper, hfs9000, gentec_maestro, Device Reference
 @iftex
 @subheading Light chopper (Gescheidt group, Graz)
 @end iftex
@@ -3083,7 +3129,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, q_bmwb, pci_mio_16e_1, Device Reference
+@node pt2025, rs_sml01, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -3123,51 +3169,51 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 @c #############################################################
 
-@node q_bmwb, rs_sml01, pt2025, Device Reference
-@iftex
-@subheading Bruker ER 051 QG Q-Band Bridge
-@end iftex
-@ifnottex
-@section Bruker ER 051 QG Q-Band Bridge
-@end ifnottex
-
-@paragraphindent 0
-@strong{Module name}: @code{x_bmwb}
-
-@paragraphindent 0
-@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
-Q-band microwave bridge
-
-@paragraphindent 0
-@strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
-Electronic GmbH} ME-4680 card and additional, home-built electronics
-
-@paragraphindent 0
-@strong{Status}: Untested
-
-@paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{mw_bridge_name()}
-@item @ref{mw_bridge_run()}
-@item @ref{mw_bridge_frequency()}
-@item @ref{mw_bridge_attenuation()}
-@item @ref{mw_bridge_signal_phase()}
-@item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_mode()}
-@item @ref{mw_bridge_detector_current()}
-@item @ref{mw_bridge_afc_signal()}
-@item @ref{mw_bridge_afc_state()}
-@item @ref{mw_bridge_iris()}
-@item @ref{mw_bridge_max_frequency()}
-@item @ref{mw_bridge_min_frequency()}
-@item @ref{mw_bridge_lock()}
-@end table
+@c @node q_bmwb, rs_sml01, pt2025, Device Reference
+@c @iftex
+@c @subheading Bruker ER 051 QG Q-Band Bridge
+@c @end iftex
+@c @ifnottex
+@c @section Bruker ER 051 QG Q-Band Bridge
+@c @end ifnottex
+@c 
+@c @paragraphindent 0
+@c @strong{Module name}: @code{x_bmwb}
+@c 
+@c @paragraphindent 0
+@c @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+@c Q-band microwave bridge
+@c 
+@c @paragraphindent 0
+@c @strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
+@c Electronic GmbH} ME-4680 card and additional, home-built electronics
+@c 
+@c @paragraphindent 0
+@c @strong{Status}: Untested
+@c 
+@c @paragraphindent 0
+@c @strong{Supported functions}:
+@c @table @samp
+@c @item @ref{mw_bridge_name()}
+@c @item @ref{mw_bridge_run()}
+@c @item @ref{mw_bridge_frequency()}
+@c @item @ref{mw_bridge_attenuation()}
+@c @item @ref{mw_bridge_signal_phase()}
+@c @item @ref{mw_bridge_bias()}
+@c @item @ref{mw_bridge_mode()}
+@c @item @ref{mw_bridge_detector_current()}
+@c @item @ref{mw_bridge_afc_signal()}
+@c @item @ref{mw_bridge_afc_state()}
+@c @item @ref{mw_bridge_iris()}
+@c @item @ref{mw_bridge_max_frequency()}
+@c @item @ref{mw_bridge_min_frequency()}
+@c @item @ref{mw_bridge_lock()}
+@c @end table
 
 
 @c #############################################################
 
-@node rs_sml01, rs_spec10, q_bmwb, Device Reference
+@node rs_sml01, rs_spec10, pt2025, Device Reference
 @iftex
 @subheading Rohde & Schwarz SML01 Signal Generator 
 @end iftex
@@ -4470,7 +4516,7 @@ In the GPIB configuration file use @code{"TEGAM2714A"} as the device name,
 
 @c #############################################################
 
-@node thurlby330, x_bmwb, tegam2714a_p, Device Reference
+@node thurlby330, witio_48, tegam2714a_p, Device Reference
 @iftex
 @subheading Thurlby & Thandar Power Supply PL330DP
 @end iftex
@@ -4511,52 +4557,52 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 
 @c #############################################################
 
-@node x_bmwb, witio_48, thurlby330, Device Reference
-@iftex
-@subheading Bruker ER 046 X-Band Bridge
-@end iftex
-@ifnottex
-@section Bruker ER 046 X-Band Bridge
-@end ifnottex
-
-@paragraphindent 0
-@strong{Module name}: @code{x_bmwb}
-
-@paragraphindent 0
-@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
-X-band microwave bridge
-
-@paragraphindent 0
-@strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
-Electronic GmbH} ME-4680 card and additional, home-built electronics
-
-@paragraphindent 0
-@strong{Status}: Untested
-
-@paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{mw_bridge_name()}
-@item @ref{mw_bridge_run()}
-@item @ref{mw_bridge_frequency()}
-@item @ref{mw_bridge_attenuation()}
-@item @ref{mw_bridge_signal_phase()}
-@item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_mode()}
-@item @ref{mw_bridge_detector_current()}
-@item @ref{mw_bridge_afc_signal()}
-@item @ref{mw_bridge_unlocked_signal()}
-@item @ref{mw_bridge_uncalibrated_signal()}
-@item @ref{mw_bridge_iris()}
-@item @ref{mw_bridge_max_frequency()}
-@item @ref{mw_bridge_min_frequency()}
-@item @ref{mw_bridge_lock()}
-@end table
+@c @node x_bmwb, witio_48, thurlby330, Device Reference
+@c @iftex
+@c @subheading Bruker ER 046 X-Band Bridge
+@c @end iftex
+@c @ifnottex
+@c @section Bruker ER 046 X-Band Bridge
+@c @end ifnottex
+@c 
+@c @paragraphindent 0
+@c @strong{Module name}: @code{x_bmwb}
+@c 
+@c @paragraphindent 0
+@c @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+@c X-band microwave bridge
+@c 
+@c @paragraphindent 0
+@c @strong{Controlled via}: @uref{http://www.meilhaus.de/,Meilhaus
+@c Electronic GmbH} ME-4680 card and additional, home-built electronics
+@c 
+@c @paragraphindent 0
+@c @strong{Status}: Untested
+@c 
+@c @paragraphindent 0
+@c @strong{Supported functions}:
+@c @table @samp
+@c @item @ref{mw_bridge_name()}
+@c @item @ref{mw_bridge_run()}
+@c @item @ref{mw_bridge_frequency()}
+@c @item @ref{mw_bridge_attenuation()}
+@c @item @ref{mw_bridge_signal_phase()}
+@c @item @ref{mw_bridge_bias()}
+@c @item @ref{mw_bridge_mode()}
+@c @item @ref{mw_bridge_detector_current()}
+@c @item @ref{mw_bridge_afc_signal()}
+@c @item @ref{mw_bridge_unlocked_signal()}
+@c @item @ref{mw_bridge_uncalibrated_signal()}
+@c @item @ref{mw_bridge_iris()}
+@c @item @ref{mw_bridge_max_frequency()}
+@c @item @ref{mw_bridge_min_frequency()}
+@c @item @ref{mw_bridge_lock()}
+@c @end table
 
 
 @c #############################################################
 
-@node witio_48, , x_bmwb, Device Reference
+@node witio_48, , thurlby330, Device Reference
 @iftex
 @subheading Wasco WITIO-48 DIO card
 @end iftex

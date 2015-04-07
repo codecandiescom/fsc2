@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -44,7 +44,8 @@
 * Microwave Attenuator Functions::
 * Light Chopper Functions::
 * Goniometer Functions::
-* Microwave Bridge Functions::
+* Powermeter Functions::
+@c * Microwave Bridge Functions::
 * Multi-Device Functions::
 @end menu
 
@@ -3954,7 +3955,7 @@ Rohde&Schwarz SML01}. It allows to query or set if automatic control
 of the RF power level is used. If called without an argument @code{1}
 is returned when automatic level control is switched on, otherwise
 @code{0}. If called with a boolean argument, either the string
-@code{"OFF"} or the integer @code{0} automatic level control is
+@code{"OFF"} or the integer @code{0}, automatic level control is
 switched off, if called with @code{"ON"} or @code{1} it's switched on.
 
 Before the the function has been called with an argument the query
@@ -8231,7 +8232,7 @@ e.g.@: to trigger an acquisition.
 @end table
 
 
-@node Goniometer Functions, Microwave Bridge Functions, Light Chopper Functions, Device Functions
+@node Goniometer Functions, Powermeter Functions, Light Chopper Functions, Device Functions
 @section Goniometer Functions
 @cindex Goniometer Functions
 
@@ -8358,242 +8359,469 @@ This function can only be used in the @code{EXPERIMENT} section.
 @end table
 
 
-@node Microwave Bridge Functions, Multi-Device Functions, Goniometer Functions, Device Functions
-@section Microwave Bridge Functions
-@cindex Microwave Bridge Functions
+@node Powermeter Functions, Multi-Device Functions, Goniometer Functions, Device Functions
+@section Powermeter Functions
+@cindex Powermeter Functions
 
-Currently the @code{ER 046} X-band and the @code{ER 051 QG} Q-band
-bridges by Bruker are supported. Since these bridges don't have a
-computer interface additional hardware is required, a @code{Meilhaus
-4680} card and some additional, home-built electronics. This module is
-also different from others since there is an extra utility program,
-called @code{bmwb}, for controlling the bridge, which interacts with
-the corresponding module (the utility program gets started
-automatically when needed by the module). This utility program can
-also be used as a stand-alone program to control the bridge manually
-via a graphical user interface. If already started the module will
-communicate with it to control the microwave bridge - in a typical EPR
-experiment you will probably start the utility program first to adjust
-the bridge before starting the experiment.
-
-The modules for the microwave bridges get loaded by specifying
+Currently the @code{Gentec Maestro} power/energy meter is supported.
+The module for the device gets loaded by specifying
 @example
-x_bmwb
-q_bmwb
+gentec_maestro
 @end example
 @noindent
 in the @code{DEVICES} section.
-
+ 
 @noindent
-@strong{List of microwave bridge functions}:
+@strong{List of powermeter functions}:
 @table @samp
-@item @ref{mw_bridge_name()}
-@item @ref{mw_bridge_run()}
-@item @ref{mw_bridge_frequency()}
-@item @ref{mw_bridge_attenuation()}
-@item @ref{mw_bridge_signal_phase()}
-@item @ref{mw_bridge_bias()}
-@item @ref{mw_bridge_mode()}
-@item @ref{mw_bridge_detector_current()}
-@item @ref{mw_bridge_afc_signal()}
-@item @ref{mw_bridge_unlocked_signal()}
-@item @ref{mw_bridge_uncalibrated_signal()}
-@item @ref{mw_bridge_afc_state()}
-@item @ref{mw_bridge_iris()}
-@item @ref{mw_bridge_max_frequency()}
-@item @ref{mw_bridge_min_frequency()}
-@item @ref{mw_bridge_lock()}
+@item @ref{powermeter_name()}
+@item @ref{powermeter_detector_name()}
+@item @ref{powermeter_scale()}
+@item @ref{powermeter_get_scale_limits()}
+@item @ref{powermeter_autoscale()}
+@item @ref{powermeter_trigger_level()}
+@item @ref{powermeter_wavelength()}
+@item @ref{powermeter_attenuator()}
+@item @ref{powermeter_get_wavelength_limits()}
+@item @ref{powermeter_get_reading()}
+@item @ref{powermeter_anticipation()}
+@item @ref{powermeter_zero_offset()}
+@item @ref{powermeter_multiplier()}
+@item @ref{powermeter_offset()}
+@item @ref{powermeter_get_laser_repetition_frequency()}
+@item @ref{powermeter_analog_output()}
 @end table
 
 @noindent
-@strong{Descriptions of microwave bridge functions}:
+@strong{Descriptions of powermeter functions}:
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
 
-@anchor{mw_bridge_name()}
-@findex mw_bridge_name()
+@anchor{powermeter_name()}
+@findex powermeter_name()
 
 @table @samp
-@item mw_bridge_name()
-Returns a string with the name of the microwave bridge being used.
+@item powermeter_name()
+Returns a string with the name of the powermeter being used.
 
 
-@anchor{mw_bridge_run()}
-@findex mw_bridge_run()
-@item mw_bridge_run()
-This function allows to start the program that controls the microwave
-bridge, @code{bmwb}, from the @code{PREPARATIONS} section of an
-@code{EDL} script. When the program is running coupling of the
-resonator etc.@ can be done before the experiment is started. If the
-@code{bmwb} is already running nothing happens (except that in case
-it's detected that the required microwave bridge isn't connected
-an error message is printed out and the @code{EDL} script is
-aborted).
+@anchor{powermeter_detector_name()}
+@findex powermeter_detector_name()
+@item powermeter_detector_name()
+Returns a string with the name of the detector connected to the
+device (the correct name can only be returned once the experiment
+has been started, during the test run @code{"QE12LP-S-MB"} is
+always returned).
 
 
-@anchor{mw_bridge_frequency()}
-@findex mw_bridge_frequency()
-@item mw_bridge_frequency()
-This function allows to set or query of the microwave bridge. If
-called with no argument the currently set microwave frequency is
-returned. If called with an argument the microwave frequency is
-set to that value. To find about the range of frequencies that can
-be set use the functions @code{@ref{mw_bridge_min_frequency()}} and
-@code{@ref{mw_bridge_min_frequency()}}. Note that the frequencies are
-only rough approximations of the real microwave frequencies.
+@anchor{powermeter_scale()}
+@findex powermeter_scale()
+@item powermeter_scale()
+Allows to query or set the scale (or range) in @code{J} or @code{W}.
+If called with no argument the cuurent scale setting is returned.
+If called with a valid scale setting the device gets switched to
+it. Note that the range of possible scale settings depends on the
+connected detector, the limits for the detector can be determined
+by calling @code{@ref{powermeter_get_scale_limits()}}. If called with
+a scale value that's within these limits but not fitting any of the
+possible values the next higer scale is set and a warning is printed
+out.
 
-The function can be used in the @code{EXPERIMENT} section only.
+@anchor{powermeter_get_scale_limits()}
+@findex powermeter_get_scale_limits()
+@item powermeter_get_scale_limits()
+This function takes no arguments and returns an array with two
+elements, the first one being the minimum scale setting for the
+currently connected connector (in @code{J} or @code{W}), and the
+second being the upper limit.
 
-
-@anchor{mw_bridge_attenuation()}
-@findex mw_bridge_attenuation()
-@item mw_bridge_attenuation()
-This function allows to set or query the current microwave attenuation
-settings. If called with no argument the attenuation set is returned.
-If called with an argument the attenuation is set to this value. The
-allowed range of attenuation is @code{0 dB} to @code{60 dB}.
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-@anchor{mw_bridge_signal_phase()}
-@findex mw_bridge_signal_phase()
-@item mw_bridge_signal_phase()
-This function allows to set or query the signal phase. If called with
-no argument the current setting of the signal phase is returned as a
-value between @code{0.0} and @code{1.0}. If a value in this range is
-passed to the function the signal phase is set accordingly.
-
-The function can be used in the @code{EXPERIMENT} section only.
+@anchor{powermeter_autoscale()}
+@findex powermeter_autoscale()
+@item powermeter_autoscale()
+allows to query if autoscaling is on or off or switch it on or off. If
+called with no argument it returns @code{1} if autoscaling is on,
+otherwise @code{0}. If called with a boolean argument, either the
+strings @code{"OFF"} or @code{"ON} or the @code{0} or a non-zero
+value, autoscaling is switched on or off accordingly.
 
 
-@anchor{mw_bridge_bias()}
-@findex mw_bridge_bias()
-@item mw_bridge_bias()
-This function allows to set and query the microwave bias level. If
-called with no argument the current setting of the bias level is
-returned as a value between @code{0.0} and @code{1.0}. If a value in
-this range is passed to the function the bias level is set
-accordingly.
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-
-@anchor{mw_bridge_mode()}
-@findex mw_bridge_mode()
-@item mw_bridge_mode()
-This function allows to set or query the mode of the bridge. If called
-with no argument the current mode setting is returned as an integer
-number, where @code{0} indicates standby mode, @code{1} tune mode
-and @code{2} operate mode. If called with one of these integers or
-one of the strings @code{"STANDBY"}, @code{"TUNE"} or @code{"OPERATE"}
-the bridge is switched to the requested mode.
-
-Note that, as a security feature to protect the microwave diode,
-when switching to tune mode the attenuation will be automatically
-raised to @code{20 dB} if it was set to a lower value before.
-
-The function can be used in the @code{EXPERIMENT} section only.
+@anchor{powermeter_trigger_level()}
+@findex powermeter_trigger_level()
+@item powermeter_trigger_level()
+This function is used to query or set the trigger level.Trigger levels
+can be between @code{0.1%} and @code{99.9%}. If the function is called
+without an argument it returns the currently used trigger level (in
+percent). If called with an argument the trigger level is set to that
+value (which should be a number between @code{0.1} and @code{99.9} -
+values between @code{0} and @code{100} get accepted and automatically
+corrected to either @code{0.1} or @code{99.9}, values outside this
+range result in an error).
 
 
-@anchor{mw_bridge_detector_current()}
-@findex mw_bridge_detector_current()
-@item mw_bridge_detector_current()
-This function takes no arguments and returns the measured value for
-the detector current as a value between @code{0.0} (minimum detector
-current) and @code{1.0} (maximum detector current).
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-
-@anchor{mw_bridge_afc_signal()}
-@findex mw_bridge_afc_signal()
-@item mw_bridge_afc_signal()
-This function takes no arguments and returns the measured value for
-the AFC signal as a value between @code{-1.0} (most negative AFC
-signal) and @code{1.0} (most positive AFC signal).
-
-The function can be used in the @code{EXPERIMENT} section only.
+@anchor{powermeter_wavelength()}
+@findex powermeter_wavelength()
+@item powermeter_wavelength()
+Allows to query or set the wavelength the device uses to apply
+corrections to the readings, taking into account
+wavelength-dependencies of the detector. Calling he function without
+an argument returns the currently used wavelength (in @code{m}).
+Calling it wit an argument (the wavelength in @code{m}) sets a new
+wavelength. The range of wavelengths that can be set depends on the
+detector in use and also if an attenuator (if available) is on or off.
+To find out about the allowed range of wavelengths use the function
+@code{@ref{powermeter_get_wavelength_limits()}}.
 
 
-@anchor{mw_bridge_unlocked_signal()}
-@findex mw_bridge_unlocked_signal()
-@item mw_bridge_unlocked_signal()
-This function can only be used with the @code{ER 046} X-band bridge
-and takes no arguments. It returns the measured signal from the bridge
-that indicates how unlocked it is as a value between @code{0.0}
-(locked) and @code{1.0} (unlocked).
+@anchor{powermeter_attenuator()}
+@findex powermeter_attenuator()
+@item powermeter_attenuator()
+This function allows to query if there's a attenuator available and if
+its on or off or, if an attenuator is available, to switc it on or
+off. If called without an argument the function returns @code{-1} if
+no attenuator is available, otherwise @code{0} or @code{1}, indicating
+if it's on or off. If an attenuator is available it can be also called
+with a boolean argument, either the strings @code{"OFF"} or @code{"ON}
+or @code{0} or a non-zero value, to switch the attenuator off or on.
+Trying to switch the attenuator on when none is available will result
+in an exception getting thrown.
 
-The function can be used in the @code{EXPERIMENT} section only.
-
-
-@anchor{mw_bridge_uncalibrated_signal()}
-@findex mw_bridge_uncalibrated_signal()
-@item mw_bridge_uncalibrated_signal()
-This function can only be used with the @code{ER 046} X-band bridge
-and takes no arguments. It returns the measured signal from the bridge
-that indicates how uncalibrated it is as a value between @code{0.0}
-(calibrated) and @code{1.0} (uncalibrated).
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-
-@anchor{mw_bridge_afc_state()}
-@findex mw_bridge_afc_state()
-@item mw_bridge_afc_state()
-This function can only be used with the @code{ER 051 QG} Q-band bridge
-and takes no arguments. It returns @code{1} if the AFC is switched on,
-otherwise @code{0}.
-
-The function can be used in the @code{EXPERIMENT} section only.
+Keep in mind that the range for wavelengt settings may depend on the
+attenuator being on or off. Thus switching the attenuator on or off
+while a wavelength is set which is not allowed for the requested new
+state of the attenuator will result in an error. See te function
+@code{@ref{powermeter_get_wavelength_limits()}} for finding out which
+wavelength ranges are allowed with the attenuator on or off.
 
 
-@anchor{mw_bridge_iris()}
-@findex mw_bridge_iris()
-@item mw_bridge_iris()
-This function allows to move the iris coupling up and down. It expects
-two arguments, a direction and a time. The direction can be either a
-string, @code{"UP"} or @code{"DOWN"}, or an integer of @code{1} and
-@code{-1}, indicating if the iris motor should decrease ("up") or
-increase ("down") coupling. The second argument is the time the
-iris motor is to be run, this must be at least @code{1 ms}.
-
-The function can be used in the @code{EXPERIMENT} section only.
-
-
-@anchor{mw_bridge_max_frequency()}
-@findex mw_bridge_max_frequency()
-@item mw_bridge_max_frequency()
-This function takes no arguments and returns a rough estimate of the
-maximum microwave frequency the bridge can produce.
+@anchor{powermeter_get_wavelength_limits()}
+@findex powermeter_get_wavelength_limits()
+@item powermeter_get_wavelength_limits()
+Function allows to determine the limits of the wavelengths that can be
+set for the currently connected detector. If called with no argument
+or a false boolean argument (@code{"OFF"} or @code{0}) an array with
+two elements is returned, with the first element holding the lower
+wavelength limit (in @code{m}) and the second the upper limit. If
+called with a true boolean argument (@code{"ON"} or a non-zero value)
+the limits with the attenuator switched on are returned in the same
+way. Note that the function will produce an error if the limits with
+the attenutor switched on are requested but no attenutator is
+available.
 
 
-@anchor{mw_bridge_min_frequency()}
-@findex mw_bridge_min_frequency()
-@item mw_bridge_min_frequency()
-This function takes no arguments and returns a rough estimate of the
-minimum microwave frequency the bridge can produce.
+@anchor{powermeter_get_reading()}
+@findex powermeter_get_reading()
+@item powermeter_get_reading()
+If called with no argument (or a false boolean argument, i.e.@:
+@code{0} or @code{"OFF"}) the function immediately returns the current
+reading of the powermeter as shown on the display. Note that calling
+this function at a higher rate than new data become available will
+result in the same data value getting returned more than once. To wait
+for the next new data value not yet ftched from the device to become
+available call the function with a true boolean argument (i.e.@:
+either a non-zero value or @code{"ON"}).
 
 
-@anchor{mw_bridge_lock()}
-@findex mw_bridge_lock()
-@item mw_bridge_lock()
-This function takes one argument, either a string of @code{"ON"} or
-@code{"OFF"} or an integer of @code{1} or @code{0}, and locks or
-unlocks the graphical interface of the @code{bmwb} program
-accordingly. This can be used to keep users from changing the
-microwave brdge settings manually while an experiment is running
-(the @code{Quit} button will still be usable to allow to switch off
-the bridge in emergencies).
+@anchor{powermeter_anticipation()}
+@findex powermeter_anticipation()
+@item powermeter_anticipation()
+Function allows to query if "anticipation processing" is on or off or
+to switch it on or off. If called with no argument the function
+returns @code{0} or @code{1} depending on anticipation being switched
+off or on. If called with a boolean argument, either the strings
+@code{"OFF"} or @code{"ON} or the @code{0} or a non-zero value,
+anticipation processing is switched off or on.
 
-The function can be used in the @code{EXPERIMENT} section only.
 
+@anchor{powermeter_zero_offset()}
+@findex powermeter_zero_offset()
+@item powermeter_zero_offset()
+Allows to query if a zero offset is being used or to switch if it on
+or off. If called with no argument the function return @code{1} or
+@code{0}, depending in a zer-offset being aplied or not. If called
+with a true boolean argument (i.e.@: a non-zero-value or @code{"ON"},
+the device is instructed to automatically subtract the currently
+measured value from all further measurements. Calling the function
+with a false boolean argument (@code{0} or @code{"OFF"} switches this
+preprocessing step off.
+
+
+@anchor{powermeter_multiplier()}
+@findex powermeter_multiplier()
+@item powermeter_multiplier()
+Allows to qery or set a multiplier that is applied to each measured
+value. If called without an argument the function returns the
+currently set multiplier, if called with a (numeric) value this is set
+as the new multiplier.
+
+
+@anchor{powermeter_offset()}
+@findex powermeter_offset()
+@item powermeter_offset()
+Allows to qery or set an offset that is added (after multiplying it
+with the multiplier to be queried r set with
+@code{@ref{powermeter_multiplier()}}) to each measured value. If called
+without an argument the function returns the currently set offset,
+if called with a (numeric) value this is set as the new offset.
+
+
+@anchor{powermeter_get_laser_repetition_frequency()}
+@findex powermeter_get_laser_repetition_frequency()
+@item powermeter_get_laser_repetition_frequency()
+This function accepts no arguments and returns the repetition rate of
+the laser (in @code{Hz}.
+
+
+@anchor{powermeter_analog_output()}
+@findex powermeter_analog_output()
+@item powermeter_analog_output()
+Th device has an analog output for the measured power or energy whcih
+can be enabled or disabled. This function allows to query if analog
+output is enabled or disabled and to switch it on or off. If called
+with no argument the function returns @code{1} or @code{0}, depending
+on the analog outpu being enabled or not. Calling it with a boolean
+argument, either the strings @code{"OFF"} or @code{"ON} or the
+@code{0} or a non-zero value, disables or enables the analog output.
 
 @end table
 
 
+@c @node Microwave Bridge Functions, Multi-Device Functions, Goniometer Functions, Device Functions
+@c @section Microwave Bridge Functions
+@c @cindex Microwave Bridge Functions
+@c 
+@c Currently the @code{ER 046} X-band and the @code{ER 051 QG} Q-band
+@c bridges by Bruker are supported. Since these bridges don't have a
+@c computer interface additional hardware is required, a @code{Meilhaus
+@c 4680} card and some additional, home-built electronics. This module is
+@c also different from others since there is an extra utility program,
+@c called @code{bmwb}, for controlling the bridge, which interacts with
+@c the corresponding module (the utility program gets started
+@c automatically when needed by the module). This utility program can
+@c also be used as a stand-alone program to control the bridge manually
+@c via a graphical user interface. If already started the module will
+@c communicate with it to control the microwave bridge - in a typical EPR
+@c experiment you will probably start the utility program first to adjust
+@c the bridge before starting the experiment.
+@c 
+@c The modules for the microwave bridges get loaded by specifying
+@c @example
+@c x_bmwb
+@c q_bmwb
+@c @end example
+@c @noindent
+@c in the @code{DEVICES} section.
+@c 
+@c @noindent
+@c @strong{List of microwave bridge functions}:
+@c @table @samp
+@c @item @ref{mw_bridge_name()}
+@c @item @ref{mw_bridge_run()}
+@c @item @ref{mw_bridge_frequency()}
+@c @item @ref{mw_bridge_attenuation()}
+@c @item @ref{mw_bridge_signal_phase()}
+@c @item @ref{mw_bridge_bias()}
+@c @item @ref{mw_bridge_mode()}
+@c @item @ref{mw_bridge_detector_current()}
+@c @item @ref{mw_bridge_afc_signal()}
+@c @item @ref{mw_bridge_unlocked_signal()}
+@c @item @ref{mw_bridge_uncalibrated_signal()}
+@c @item @ref{mw_bridge_afc_state()}
+@c @item @ref{mw_bridge_iris()}
+@c @item @ref{mw_bridge_max_frequency()}
+@c @item @ref{mw_bridge_min_frequency()}
+@c @item @ref{mw_bridge_lock()}
+@c @end table
+@c 
+@c @noindent
+@c @strong{Descriptions of microwave bridge functions}:
+@c 
+@c @c The anchor and the findex must come before the start of the table,
+@c @c otherwise the created HTML isn't valid
+@c 
+@c @anchor{mw_bridge_name()}
+@c @findex mw_bridge_name()
+@c 
+@c @table @samp
+@c @item mw_bridge_name()
+@c Returns a string with the name of the microwave bridge being used.
+@c 
+@c 
+@c @anchor{mw_bridge_run()}
+@c @findex mw_bridge_run()
+@c @item mw_bridge_run()
+@c This function allows to start the program that controls the microwave
+@c bridge, @code{bmwb}, from the @code{PREPARATIONS} section of an
+@c @code{EDL} script. When the program is running coupling of the
+@c resonator etc.@ can be done before the experiment is started. If the
+@c @code{bmwb} is already running nothing happens (except that in case
+@c it's detected that the required microwave bridge isn't connected
+@c an error message is printed out and the @code{EDL} script is
+@c aborted).
+@c 
+@c 
+@c @anchor{mw_bridge_frequency()}
+@c @findex mw_bridge_frequency()
+@c @item mw_bridge_frequency()
+@c This function allows to set or query of the microwave bridge. If
+@c called with no argument the currently set microwave frequency is
+@c returned. If called with an argument the microwave frequency is
+@c set to that value. To find about the range of frequencies that can
+@c be set use the functions @code{@ref{mw_bridge_min_frequency()}} and
+@c @code{@ref{mw_bridge_min_frequency()}}. Note that the frequencies are
+@c only rough approximations of the real microwave frequencies.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_attenuation()}
+@c @findex mw_bridge_attenuation()
+@c @item mw_bridge_attenuation()
+@c This function allows to set or query the current microwave attenuation
+@c settings. If called with no argument the attenuation set is returned.
+@c If called with an argument the attenuation is set to this value. The
+@c allowed range of attenuation is @code{0 dB} to @code{60 dB}.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c @anchor{mw_bridge_signal_phase()}
+@c @findex mw_bridge_signal_phase()
+@c @item mw_bridge_signal_phase()
+@c This function allows to set or query the signal phase. If called with
+@c no argument the current setting of the signal phase is returned as a
+@c value between @code{0.0} and @code{1.0}. If a value in this range is
+@c passed to the function the signal phase is set accordingly.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_bias()}
+@c @findex mw_bridge_bias()
+@c @item mw_bridge_bias()
+@c This function allows to set and query the microwave bias level. If
+@c called with no argument the current setting of the bias level is
+@c returned as a value between @code{0.0} and @code{1.0}. If a value in
+@c this range is passed to the function the bias level is set
+@c accordingly.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_mode()}
+@c @findex mw_bridge_mode()
+@c @item mw_bridge_mode()
+@c This function allows to set or query the mode of the bridge. If called
+@c with no argument the current mode setting is returned as an integer
+@c number, where @code{0} indicates standby mode, @code{1} tune mode
+@c and @code{2} operate mode. If called with one of these integers or
+@c one of the strings @code{"STANDBY"}, @code{"TUNE"} or @code{"OPERATE"}
+@c the bridge is switched to the requested mode.
+@c 
+@c Note that, as a security feature to protect the microwave diode,
+@c when switching to tune mode the attenuation will be automatically
+@c raised to @code{20 dB} if it was set to a lower value before.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_detector_current()}
+@c @findex mw_bridge_detector_current()
+@c @item mw_bridge_detector_current()
+@c This function takes no arguments and returns the measured value for
+@c the detector current as a value between @code{0.0} (minimum detector
+@c current) and @code{1.0} (maximum detector current).
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_afc_signal()}
+@c @findex mw_bridge_afc_signal()
+@c @item mw_bridge_afc_signal()
+@c This function takes no arguments and returns the measured value for
+@c the AFC signal as a value between @code{-1.0} (most negative AFC
+@c signal) and @code{1.0} (most positive AFC signal).
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_unlocked_signal()}
+@c @findex mw_bridge_unlocked_signal()
+@c @item mw_bridge_unlocked_signal()
+@c This function can only be used with the @code{ER 046} X-band bridge
+@c and takes no arguments. It returns the measured signal from the bridge
+@c that indicates how unlocked it is as a value between @code{0.0}
+@c (locked) and @code{1.0} (unlocked).
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_uncalibrated_signal()}
+@c @findex mw_bridge_uncalibrated_signal()
+@c @item mw_bridge_uncalibrated_signal()
+@c This function can only be used with the @code{ER 046} X-band bridge
+@c and takes no arguments. It returns the measured signal from the bridge
+@c that indicates how uncalibrated it is as a value between @code{0.0}
+@c (calibrated) and @code{1.0} (uncalibrated).
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_afc_state()}
+@c @findex mw_bridge_afc_state()
+@c @item mw_bridge_afc_state()
+@c This function can only be used with the @code{ER 051 QG} Q-band bridge
+@c and takes no arguments. It returns @code{1} if the AFC is switched on,
+@c otherwise @code{0}.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_iris()}
+@c @findex mw_bridge_iris()
+@c @item mw_bridge_iris()
+@c This function allows to move the iris coupling up and down. It expects
+@c two arguments, a direction and a time. The direction can be either a
+@c string, @code{"UP"} or @code{"DOWN"}, or an integer of @code{1} and
+@c @code{-1}, indicating if the iris motor should decrease ("up") or
+@c increase ("down") coupling. The second argument is the time the
+@c iris motor is to be run, this must be at least @code{1 ms}.
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @anchor{mw_bridge_max_frequency()}
+@c @findex mw_bridge_max_frequency()
+@c @item mw_bridge_max_frequency()
+@c This function takes no arguments and returns a rough estimate of the
+@c maximum microwave frequency the bridge can produce.
+@c 
+@c 
+@c @anchor{mw_bridge_min_frequency()}
+@c @findex mw_bridge_min_frequency()
+@c @item mw_bridge_min_frequency()
+@c This function takes no arguments and returns a rough estimate of the
+@c minimum microwave frequency the bridge can produce.
+@c 
+@c 
+@c @anchor{mw_bridge_lock()}
+@c @findex mw_bridge_lock()
+@c @item mw_bridge_lock()
+@c This function takes one argument, either a string of @code{"ON"} or
+@c @code{"OFF"} or an integer of @code{1} or @code{0}, and locks or
+@c unlocks the graphical interface of the @code{bmwb} program
+@c accordingly. This can be used to keep users from changing the
+@c microwave brdge settings manually while an experiment is running
+@c (the @code{Quit} button will still be usable to allow to switch off
+@c the bridge in emergencies).
+@c 
+@c The function can be used in the @code{EXPERIMENT} section only.
+@c 
+@c 
+@c @end table
 
-@node Multi-Device Functions, , Microwave Bridge Functions, Device Functions
+
+
+@node Multi-Device Functions, , Powermeter Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
