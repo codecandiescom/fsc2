@@ -3018,6 +3018,19 @@ device name, @code{'\n'} as the EOS character and set @code{set-reos}
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+Note that the device comes with teh GPIB address set to @code{4}. It's
+only possible to change the address via software. To do this set the
+GPIB address in the GPIB configuration file initially to @code{4} (and
+comment out a device that already has this address as well as
+pysically disconnect it from the bus or, at least, switch it out).
+Then use the @code{@ref{monochromator_set_gpib_address()}} function
+(from anywhere before the @code{EXPERIMENT} section) to set a
+different address. When this @code{EDL} script is run it will stop
+immediately during device initialization after the new GPIB address
+has been set. Now again edit the GPIB configuration file and change
+the monochromators GPIB address to the new one.
+
+@paragraphindent 0
 @strong{Status}: Untested
 
 @paragraphindent 0
@@ -3028,6 +3041,14 @@ device name, @code{'\n'} as the EOS character and set @code{set-reos}
 @item @ref{monochromator_wavenumber()}
 @item @ref{monochromator_groove_density()}
 @item @ref{monochromator_grating()}
+@item @ref{monochromator_shutter()}
+@item @ref{monochromator_filter()}
+@item @ref{monochromator_step_position()}
+@item @ref{monochromator_calibrate()}
+@item @ref{monochromator_calibration_factor()}
+@item @ref{monochromator_calibration_offset()}
+@item @ref{monochromator_reset_grating_zero()}
+@item @ref{monochromator_set_gpib_address()}
 @end table
 
 

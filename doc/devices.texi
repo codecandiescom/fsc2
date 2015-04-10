@@ -7083,8 +7083,9 @@ monochromator (actually, the module has only been tested with the
 SpectraPro-275}, both by @strong{Acton Research Corporation},
 monochromators by @strong{SPEX} controlled either via the
 @ref{spex_cd2a, CD2A Compudrive} or the @ref{spex232, SPEX232}
-interface are supported, and the (Newport) Oriel Cornerstone 130. The
-modules for the monochromators get loaded by specifying one of
+interface are supported, and the @strong{(Newport) Oriel}
+@ref{oriel_cs_130, Cornerstone 130}. The modules for the
+monochromators get loaded by specifying one of
 @example
 spectrapro_275
 spectrapro_300i
@@ -7139,12 +7140,15 @@ conjunction with the supported monochromatore).
 @item @ref{monochromator_scan_step()}
 @item @ref{monochromator_wavenumber_scan_limits()}
 @item @ref{monochromator_wavelength_scan_limits()}
+@item @ref{monochromator_shutter()}
 @item @ref{monochromator_shutter_limits()}
 @item @ref{monochromator_groove_density()}
 @item @ref{monochromator_grating()}
 @item @ref{monochromator_turret()}
 @c @item @ref{monochromator_entry_mirror()}
 @item @ref{monochromator_exit_mirror()}
+@item @ref{monochromator_filter()}
+@item @ref{monochromator_step_position()}
 @item @ref{monochromator_wavelength_axis()}
 @item @ref{monochromator_wavenumber_axis()}
 @item @ref{monochromator_calc_wavelength()}
@@ -7159,6 +7163,8 @@ conjunction with the supported monochromatore).
 @item @ref{monochromator_init_motor()}
 @item @ref{monochromator_enforce_wavelength()}
 @item @ref{monochromator_enforce_wavenumber()}
+@item @ref{monochromator_reset_grating_zero()}
+@item @ref{monochromator_set_gpib_address()}
 @end table
 
 @noindent
@@ -7306,22 +7312,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_wavenumber_scan_limits()}
 @findex monochromator_wavenumber_scan_limits()
 @item monochromator_wavenumber_scan_limits()
-The function does not take any arguments and returns an array with two
-elements, the first being the lower scan limit in absolute wavenumbers
-(in @code{cm^-1}) and the second the upper scan limit.
-
-Currently this function is only available for @strong{SPEX}
+This function is only supported for @strong{SPEX} monochromators. It
+does not take any arguments and returns an array with two elements,
+the first being the lower scan limit in absolute wavenumbers (in
+@code{cm^-1}) and the second the upper scan limit.
 monochromators.
 
 
 @anchor{monochromator_wavelength_scan_limits()}
 @findex monochromator_wavelength_scan_limits()
 @item monochromator_wavelength_scan_limits()
-The function does not take any arguments and returns an array with two
-elements, the first being the lower scan limit in wavelengths (in
-@code{m}) and the second the upper scan limit.
-
-Currently this function is only available for @strong{SPEX}
+This function is only supported for @strong{SPEX} monochromators. It
+does not take any arguments and returns an array with two elements,
+the first being the lower scan limit in wavelengths (in @code{m}) and
+the second the upper scan limit.
 monochromators.
 
 
@@ -7342,6 +7346,20 @@ shutter limit.
 
 Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
+
+
+@anchor{monochromator_shutter()}
+@findex monochromator_shutter()
+@item monochromator_shutter()
+This function is only supported for the @strong{Oriel} Cornerstone 130
+monocromators and allows to query or set the state of the built-in
+shuuter. If called with no argument the function returns @code{0} if
+the shuuter is open, otherwise @code{0}. If called with a true boolean
+argument, either the string @code{"OFF"} or the integer @code{0}, the
+shutter is opened, if called with @code{"ON"} or a non-zero integer
+the shutter is closed.
+
+This function can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{monochromator_groove_density()}
@@ -7373,14 +7391,16 @@ monochromators. It queries or sets a new grating. If called with no
 argument the function returns the number of the currently used grating
 (an integer between 1 and the maximum number of installed gratings).
 If called with an integer argument the monochromator switches to the
-grating indexed by the number if it is available.
+grating giveb by that number (if it is available).
 
 When switching to a new grating for the @ref{spectrapro_300i,
 SpectraPro-300i} the center wavelength the new grating is set to
-remains the same as for the previous grating. For the
-@ref{oriel_cs_130, Oriel Cornerstone 130} before switching gratings
-the built-in shutter is closed and has to explicitely opened and,
-when switching to grating #2 the system stops at the zero order
+remains the same as for the previous grating.
+
+With the @ref{oriel_cs_130, Oriel Cornerstone 130} before switching
+gratings the built-in shutter is closed and has to be explicitely
+re-opened (using the function @code{@ref{monochromator_shutter()}}).
+When switching to grating #2 the system stops at the zero order
 position while, when switching to grating #1 it goes to the maximum
 possible wavelength.
 
@@ -7428,6 +7448,39 @@ it moves exit diverter mirror to position the beam to the front port
 position, of called with a string argument of @code{"SIDE"} or an
 integer argument of @code{1} it moves the mirror to position the beam
 to the side port.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_filter()}
+@findex monochromator_filter()
+@item monochromator_filter()
+The function is only supported for @ref{oriel_cs_130, Oriel
+Cornerstone 130} monochromators, which have a wheel with up to 6
+filters. Since not all have a filter wheel, the existence of this
+function depends on the configuration for compiling the module. The
+function allows to query or set which filter is used. If called
+without an argument the filter currently in use is returned, as an
+integer between @code{1} and @code{6}. If called with an integer
+argument between these values the wheel is turned to the corresponding
+filter.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_step_position()}
+@findex monochromator_step_position()
+@item monochromator_step_position()
+The function is only supported for @ref{oriel_cs_130, Oriel
+Cornerstone 130} monochromators. It allows to directly query or set
+the position of the stepper motor driving the grating. If called with
+no argument the function returns its current position as an integer
+value. If called with an integer value the stepper motor is set to
+that position (if within the allowed range). This function is mostly
+meant for making small adjustments to the grating position during
+calibrations.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -7609,19 +7662,44 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_calibration_offset()}
-@findex monochromator_calibration_offset()
-@item monochromator_calibration_offset()
-The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators. It can be used to query or set a
-wavelength offset to be added
-
-
 @anchor{monochromator_calibration_factor()}
 @findex monochromator_calibration_factor()
 @item monochromator_calibration_factor()
 The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators.
+Cornerstone 130} monochromators. It allows to query or set a factor
+that is used (in conjunction with an offset value, see
+@code{@ref{monochromator_calibration_offset()}}) in calculating the
+wavelengths from grating positions. When called without an argument it
+returns the factor for the currently set grating. If called with a
+single argument, an integer of either @code{1} or @code{2} for grating
+#1 or #2, the factor for this grating is returned. If called with a
+grating number and another argument, this latter value is set as the
+factor for the addressed grating. Normally, you will call this
+function only after installing a new grating, using the factor
+provided by Oriel.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_calibration_offset()}a
+@findex monochromator_calibration_offset()
+@item monochromator_calibration_offset()
+The function is only supported for @ref{oriel_cs_130, Oriel
+Cornerstone 130} monochromators. It allows to query or set an offset
+that is used (in conjunction with a factor, see
+@code{@ref{monochromator_calibration_factor()}}) in calculating the
+wavelengths from grating positions. When called without an argument it
+returns the offset for the currently set grating. If called with a
+single argument, an integer of either @code{1} or @code{2} for grating
+#1 or #2, the offset for this grating is returned. If called with a
+grating number and another argument, this latter value is set as the
+offset for the addressed grating. Normally, you will call this
+function only after installing a new grating, using the offset
+provided by Oriel.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
 
@@ -7726,9 +7804,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_calibrate()
 @item monochromator_calibrate()
 The function is takes different arguments for the
-@ref{spectrapro_300i, SpectraPro 300i} and the @strong{SPEX}
-monochromators. It isn't available for the @ref{spectrapro_275,
-SpectraPro-275}.
+@ref{spectrapro_300i, SpectraPro 300i}, the @strong{SPEX} and the
+@ref{oriel_cs_130, Oriel Cornerstone 130} monochromators. It isn't
+available for the @ref{spectrapro_275, SpectraPro-275}.
 
 For the @ref{spectrapro_300i, SpectraPro-300i} it is for use in the
 dispersion calibration of a grating, i.e.@: the procedure where from a
@@ -7818,6 +7896,13 @@ function. Instead determine the current offset setting by a call
 without arguments and then call the function again with that offset as
 the first argument!.
 
+For the @ref{oriel_cs_130, Oriel Cornerstone 130} the function
+requires a single argument, the wavelength the monochromators
+grating is currently set to (which you know by e.g. moving it to the
+exact position of a line of a calibration sample). Calling this
+function then induces the device to update its internal algorithm to
+calculate wavelengths. It Should only be used for minor corrections.
+
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
@@ -7862,6 +7947,47 @@ the data in the state file have gotten out of synch from the real
 setting of the monochromator (e.g.@: because different program was
 used in between that drove the monochromator to a different wavenumber
 from the one stored in the state file).
+
+
+@anchor{monochromator_reset_grating_zero()}
+@findex monochromator_reset_grating_zero()
+@item monochromator_reset_grating_zero()
+This function only exists for the @strong{Oriel} @ref{oriel_cs_130}
+monochromator. It allows to reset the zero paramter (used internally
+by the device to calculate the wavelength) for both gratings to the
+values given in the manual in case they got corrupted.
+
+This function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{monochromator_set_gpib_address()}
+@findex monochromator_set_gpib_address()
+@item monochromator_set_gpib_address()
+This function only exists for the @strong{Oriel} @ref{oriel_cs_130}
+monochromator. This device comes with a preset GPIB address of
+@code{4} that can only be modified via software. In ordr to do so the
+device must be entered into the GPIB configuration file with this
+address of @code{4} (and an already existing device with this address
+must be temporarily commented out and at least switched off or
+disconnected from the bus). Then an @code{EDL} script must be written
+and run that calls this function somewhere before the
+@code{EXPERIMENT} section. E.@:g.@: use
+@example
+DEVICES:
+  oriel_cs_130;
+
+PREP:
+  monochromator_set_gpib_address( 17 );
+
+EXPERIMENT:
+@end example
+
+This sets a new GPIB address of @code{17} during initialization of the
+device and then stops the script immediately. The new GPIB address
+then has to be entered into the GPIB configuration file.
+
+If the GPIB address of the device is already set to the one this
+function is called with it has no effect.
 
 
 @end table

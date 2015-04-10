@@ -380,6 +380,10 @@ powermeter_detector_name( Var_T * v  UNUSED_ARG )
 
 /*-------------------------------------------------------*
  * Sets a new scale
+
+XXXXXXXXX  It's unclear from the documention how the scale setting
+XXXXXXXXX  interacts with the autoscale setting
+
  *-------------------------------------------------------*/
 
 Var_T *
@@ -477,6 +481,10 @@ powermeter_get_scale_limits( Var_T * v )
 
 /*-------------------------------------------------------*
  * Switch autoscale on or off
+
+XXXXXXXXX  It's unclear from the documention how the scale setting
+XXXXXXXXX  interacts with the autoscale setting
+
  *-------------------------------------------------------*/
 
 Var_T *
@@ -800,7 +808,7 @@ powermeter_attenuator( Var_T * v )
         if ( FSC2_MODE == EXPERIMENT )
         {
             if ( ! gm->att_is_available )
-                return vars_pus( INT_VAR, -1L );
+                return vars_push( INT_VAR, -1L );
 
             gentec_maestro_get_attenuator( );
         }
@@ -863,6 +871,12 @@ powermeter_attenuator( Var_T * v )
 
 /*---------------------------------------------------*
  * Switch zero offset on or off or query if it's on or off
+
+XXXXXXXXX How to set zero offset for different detector types
+XXXXXXXXX is unclear (or how to detect what kind of detector)
+XXXXXXXXX on has. There also doesn't seem to be a commond to
+XXXXXXXXX unset it for photodiodes...
+
  *---------------------------------------------------*/
 
 Var_T *
@@ -911,6 +925,12 @@ powermeter_zero_offset( Var_T * v )
 
 /*---------------------------------------------------*
  * Set or query the user multiplier
+
+XXXXXXXXX  It's undocumented if there are any restriction on
+XXXXXXXXX  the range the multiplier can be set to - needs to be
+XXXXXXXXX  tested (would make sense if only positive values would
+XXXXXXXXX  be allowed
+
  *---------------------------------------------------*/
 
 Var_T *
@@ -956,6 +976,11 @@ powermeter_multiplier( Var_T * v )
 
 /*---------------------------------------------------*
  * Set or query the user offset
+
+XXXXXXXXX  It's undocumented if there are any restriction on
+XXXXXXXXX  the range the offset can be set to - needs to be
+XXXXXXXXX  tested
+
  *---------------------------------------------------*/
 
 Var_T *
@@ -1000,6 +1025,7 @@ powermeter_offset( Var_T * v )
 
 
 /*---------------------------------------------------*
+ * Returns the laser repetition frequency
  *---------------------------------------------------*/
 
 Var_T *
@@ -1008,13 +1034,15 @@ powermeter_get_laser_repetition_frequency( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        return vars_push( FLOAT_VAR, henttec_meastro_get_laser_frequency( ) );
+        return vars_push( FLOAT_VAR, gentec_meastro_get_laser_frequency( ) );
 
     return vars_push( FLOAT_VAR, TEST_LASER_FREQUENCY );
 }
 
 
 /*---------------------------------------------------*
+ * Queries or sets the analog output (a voltage proportional
+ * to power or enerhy)
  *---------------------------------------------------*/
 
 Var_T *
@@ -1344,15 +1372,15 @@ gentec_maestro_get_scale( void )
 {
 	char reply[ 20 ];
 	long int index;
-	char *eptr;
+	char *ep;
 
 
-	if (    gentec_maestro_talk( "*GCR", reply, sizeof reply ) < 10
+	if (    gentec_maestro_talk( "*GCR", reply, sizeof reply ) < 8
          || strncmp( reply, "Range: ", 7 ) )
 		gentec_maestro_failure( );
 
-	index = strtol( reply + 7, &eptr, 10 );
-	if (    strcmp( eptr, "\r\n" )
+	index = strtol( reply + 7, &ep, 10 );
+	if (    *ep
          || index < gentec_maestro.min_scale_index
          || index > gentec_maestro.max_scale_index )
 		gentec_maestro_failure( );
@@ -1389,10 +1417,10 @@ gentec_maestro_get_autoscale( void )
 {
 	char reply[ 15 ];
 
-	if (    gentec_maestro_talk( "*GAS", reply, sizeof reply ) != 14
+	if (    gentec_maestro_talk( "*GAS", reply, sizeof reply ) != 12
 		 || strncmp( reply, "AutoScale: ", 11 )
 		 || ( reply[ 11 ] != '0' && reply[ 11 ] != '1' )
-		 || strcmp( reply + 12, "\r\n" ) )
+		 || reply[ 12 ] != '\0' )
 		gentec_maestro_failure( );
 
 	return gentec_maestro.autoscale_is_on = reply[ 11 ] == '1';
@@ -1430,12 +1458,12 @@ gentec_maestro_get_trigger_level( void )
     double level;
     char *ep;
 
-    if (    gentec_maestro_talk( "*GTL", reply, sizeof reply ) < 18
+    if (    gentec_maestro_talk( "*GTL", reply, sizeof reply ) < 16
          || strncmp( reply, "Trigger Level: ", 15 ) )
         gentec_maestro_failure( );
 
     level = strtod( reply, &ep );
-    if (    strcmp( ep, "\r\n" )
+    if (    *ep
          || level < MIN_TRIGGER_LEVEL
          || level > MAX_TRIGGER_LEVEL )
         gentec_maestro_failure( );
@@ -1454,9 +1482,9 @@ gentec_maestro_get_mode( void )
     char reply[ 10 ];
 
 
-    if (    gentec_maestro_talk( "*GMD", reply, sizeof reply ) != 9
+    if (    gentec_maestro_talk( "*GMD", reply, sizeof reply ) != 7
          || strncmp( reply, "Mode: ", 6 )
-         || strcmp( reply + 7, "\r\n" )
+         || reply[ 7 ] != '\0'
          || ! isdigit( ( int ) reply[ 6 ] ) )
         gentec_maestro_failure( );
 
@@ -1499,11 +1527,11 @@ gentec_maestro_get_current_value( void )
     char *ep;
 
 
-    if ( gentec_maestro_talk( "*CVU", reply, sizeof reply ) < 3 )
+    if ( gentec_maestro_talk( "*CVU", reply, sizeof reply ) < 1 )
         gentec_maestro_failure( );
 
     val = strtod( reply, &ep );
-    if (    strcmp( ep, "\r\n" )
+    if (    *ep
          || ( ( val == HUGE_VAL || val == -HUGE_VAL ) && errno == ERANGE ) )
         gentec_maestro_failure( );
 
@@ -1523,9 +1551,9 @@ gentec_maestro_check_for_new_value( void )
 
     gentec_maestro_talk( "*NVU", reply, sizeof reply );
 
-    if ( ! strcmp( reply, "New Data Available\r\n" ) )
+    if ( ! strcmp( reply, "New Data Available" ) )
         return 1;
-    else if ( ! strcmp( reply, "New Data Not Available\r\n" ) )
+    else if ( ! strcmp( reply, "New Data Not Available" ) )
         return 0;
 
     gentec_maestro_failure( );
@@ -1556,11 +1584,11 @@ gentec_maestro_get_laser_frequency( void )
     double freq;
     char *ep;
 
-    if ( gentec_maestro_talk( "*GRR", reply, sizeof reply ) < 3 )
+    if ( gentec_maestro_talk( "*GRR", reply, sizeof reply ) < 1 )
         gentec_maestro_failure( );
 
     freq = strtod( reply, &ep );
-    if (    strcmp( ep, "\r\n" )
+    if (    *ep
          || ( ( freq == HUGE_VAL || freq == -HUGE_VAL ) && errno == ERANGE )
          || freq < 0 )
         gentec_maestro_failure( );
@@ -1594,10 +1622,10 @@ gentec_maestro_get_joulemeter_binary_mode( void )
     char reply[ 30 ];
 
 
-    if (    gentec_maestro_talk( "*GBM", reply, sizeof reply ) != 26
+    if (    gentec_maestro_talk( "*GBM", reply, sizeof reply ) != 24
          || strncmp( reply, "Binary Joulemeter Mode: ", 24 )
          || ( reply[ 24 ] != '0' && reply[ 24 ] != '1' )
-         || strcmp( reply + 25, "\r\n" ) )
+         || reply[ 25 ] != '\0' )
         gentec_maestro_failure( );
 
     return reply[ 24 ] != '0';
@@ -1658,7 +1686,7 @@ gentec_maestro_get_wavelength( void )
     char *ep;
 
 
-    if (    gentec_maestro_talk( "*GWL", reply, sizeof reply ) < 8
+    if (    gentec_maestro_talk( "*GWL", reply, sizeof reply ) < 6
          || strncmp( reply, "PWC: ", 5 ) )
         gentec_maestro_failure( );
 
@@ -1669,7 +1697,7 @@ gentec_maestro_get_wavelength( void )
          || (    gentec_maestro.att_is_on
               && wl >= gentec_maestro.min_wavelength_with_att
               && wl <= gentec_maestro.max_wavelength_with_att )
-          || strcmp( ep, "\r\n" ) )
+          || *ep )
         gentec_maestro_failure( );
 
     gentec_maestro.wavelength = wl;
@@ -1703,10 +1731,10 @@ gentec_maestro_get_anticipation( void )
     char reply[ 20 ];
 
 
-    if (    gentec_maestro_talk( "*GAN", reply, sizeof reply ) != 17
+    if (    gentec_maestro_talk( "*GAN", reply, sizeof reply ) != 15
          || strncmp( reply, "Anticipation: ", 14 )
          || ( reply[ 14 ] != '0' && reply[ 14 ] != '1' )
-         || strcmp( reply + 15, "\r\n" ) )
+         || reply[ 15 ] != '\0' )
         gentec_maestro_failure( );
 
     return gentec_maestro.anticipation_is_on = reply[ 14 ] != '0';
@@ -1762,10 +1790,10 @@ gentec_maestro_test_zero_offset( void )
     char reply[ 10 ];
 
 
-    if (    gentec_maestro_talk( "*GZO", reply, sizeof reply ) != 9
+    if (    gentec_maestro_talk( "*GZO", reply, sizeof reply ) != 7
          || strncmp( reply, "Zero: ", 6 )
          || ( reply[ 6 ] != '0' && reply[ 6 ] != '1' )
-         || strcmp( reply + 7, "\r\n" ) )
+         || reply[ 7 ] != '\0' )
         gentec_maestro_failure( );
 
     return gentec_maestro.zero_offset_is_on = reply[ 6 ] != '0';
@@ -1802,14 +1830,13 @@ gentec_maestro_get_user_multiplier( void )
     char *ep;
 
     ;
-    if (    gentec_maestro_talk( "*GUM", reply, sizeof reply ) < 20
+    if (    gentec_maestro_talk( "*GUM", reply, sizeof reply ) < 18
          || strncmp( reply, "User Multiplier: ", 17 ) )
         gentec_maestro_failure( );
 
     mul = strtod( reply + 17, &ep );
-    if (    strcmp( ep, "\r\n" )
-         || mul < MIN_USER_MULTIPLIER
-         || mul > MAX_USER_MULTIPLIER )
+
+    if ( *ep || mul < MIN_USER_MULTIPLIER || mul > MAX_USER_MULTIPLIER )
         gentec_maestro_failure( );
 
     return gentec_maestro.user_multiplier = mul;
@@ -1846,12 +1873,12 @@ gentec_maestro_get_user_offset( void )
     char *ep;
 
     ;
-    if (    gentec_maestro_talk( "*GUO", reply, sizeof reply ) < 16
+    if (    gentec_maestro_talk( "*GUO", reply, sizeof reply ) < 14
          || strncmp( reply, "User Offset: ", 13 ) )
         gentec_maestro_failure( );
 
     offset = strtod( reply + 13, &ep );
-    if (    strcmp( ep, "\r\n" )
+    if (    *ep
          || offset < MIN_USER_OFFSET
          || offset > MAX_USER_OFFSET )
         gentec_maestro_failure( );
@@ -1906,10 +1933,10 @@ gentec_maestro_get_attenuator( void )
 
     fsc2_assert( gentec_maestro.att_is_available );
 
-    if (    gentec_maestro_talk( "*GAT", reply, sizeof reply ) != 15
+    if (    gentec_maestro_talk( "*GAT", reply, sizeof reply ) != 13
          || strncmp( reply, "Attenuator: ", 12 )
          || ( reply[ 12 ] != '0' && reply[ 12 ] != '1' )
-         || strcmp( reply + 13, "\r\n" ) )
+         || reply[ 13 ] != '\0' )
         gentec_maestro_failure( );
 
     return gentec_maestro.att_is_on = reply[ 12 ] != '0';
@@ -2023,7 +2050,7 @@ gentec_maestro_get_extended_status( void )
     int i;
 
 
-    if ( gentec_maestro_talk( "*ST2", reply, sizeof reply ) != 708 )
+    if ( gentec_maestro_talk( "*ST2", reply, sizeof reply ) != 706 )
         gentec_maestro_failure( );
 
     /* Check for basic layout */
@@ -2045,7 +2072,7 @@ gentec_maestro_get_extended_status( void )
 
     /* Now extract all the relevant values */
 
-    if ( strcmp( reply + 0x40 * 12, ":100000000\r\n" ) )
+    if ( strcmp( reply + 0x40 * 12, ":100000000" ) )
         gentec_maestro_failure( );
 
     /* Now extract all the values */
@@ -2196,9 +2223,10 @@ gentec_maestro_talk( const char * cmd,
 {
     gentec_maestro_command( cmd );
     if ( ( length = fsc2_lan_read( gentec_maestro.handle, reply, length - 1,
-                                   READ_TIMEOUT, UNSET ) ) < 3 )
+                                   READ_TIMEOUT, UNSET ) ) < 3
+         || strcmp( reply + length - 2, "\r\n" ) )
         gentec_maestro_failure( );
-    reply[ length ] = '\0';
+    reply[ length -= 2 ] = '\0';
     return length;
 }
 

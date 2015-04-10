@@ -35,13 +35,15 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-static
-struct {
+typedef struct {
     int          device;
     int          cur_grating;              /* 0: grating #1, 1: grating #2 */
 
     double       wavelength;               /* in m */
     double       max_test_wavelength[ 2 ];
+
+    unsigned int step;
+    unsigned int max_step;
 
     unsigned int num_lines[ 2 ];           /* in lines per mm */
     double       factor[ 2 ];
@@ -52,13 +54,18 @@ struct {
     int          filter;                  /* 0: filter #1, etc. */
 
     unsigned int gpib_address;
-} oriel_cs_130;
+} Oriel_CS_130;
+
+
+static Oriel_CS_130 oriel_cs_130;
 
 
 #define MAX_FILTER    6
 
 #define GRAT1ZERO      0.0872665
 #define GRAT2ZERO      3.2288589
+
+#define MAX_STEP       1000000     /* XXXXX We need to find out what this is! */
 
 
 
@@ -76,7 +83,7 @@ Var_T * monochromator_name( Var_T * v  UNUSED_ARG );
 Var_T * monochromator_grating( Var_T * v );
 Var_T * monochromator_wavelength( Var_T * v );
 Var_T * monochromator_wavenumber( Var_T * v );
-Var_T * monochromator_step( Var_T * v );
+Var_T * monochromator_step_position( Var_T * v );
 Var_T * monochromator_groove_density( Var_T * v );
 Var_T * monochromator_calibrate( Var_T *v );
 Var_T * monochromator_calibration_factor( Var_T * v );
@@ -103,8 +110,8 @@ static double oriel_cs_130_set_calibration_offset( int    grating,
 static void oriel_cs_130_set_zero( void );
 static double oriel_cs_130_get_wavelength( void );
 static double oriel_cs_130_set_wavelength( double wl );
-static int oriel_cs_130_get_set( void );
-static void oriel_cs_130_set_set( int step );
+static unsigned int oriel_cs_130_get_step( void );
+static unsigned int oriel_cs_130_set_step( unsigned int step );
 static bool oriel_cs_130_get_shutter( void );
 static bool oriel_cs_130_set_shutter( bool on_off );
 #if HAS_FILTER
@@ -113,12 +120,12 @@ static int oriel_cs_130_set_filter( int filter );
 #endif
 static int oriel_cs_130_get_error( void );
 static void oriel_cs_130_command( const char * cmd );
-static void oriel_cs_130_talk( const char * cmd,
+static long oriel_cs_130_talk( const char * cmd,
                                char       * reply,
-                               long       * length );
+                               long         length );
 static void oriel_cs_130_failure( void );
-static void oriel_cs_130_get_gpib_adress( unsigned int addr );
-static void oriel_cs_130_set_gpib_adress( unsigned int addr );
+static unsigned int oriel_cs_130_get_gpib_address( void );
+static void oriel_cs_130_set_gpib_address( unsigned int addr );
 static double oriel_cs_130_wl2wn( double wl );
 static double oriel_cs_130_wn2wl( double wn );
 
@@ -170,7 +177,7 @@ oriel_cs_130_init_hook( void )
 int
 oriel_cs_130_exp_hook( void )
 {
-    /* Initialize the power supply*/
+    /* Initialize the device */
 
     if ( oriel_cs_130_init( DEVICE_NAME ) )
     {
@@ -223,6 +230,7 @@ monochromator_grating( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * Queries or sets the wavelength the current grating is set to
  *--------------------------------------------------------*/
 
 Var_T *
@@ -248,12 +256,12 @@ monochromator_wavelength( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        double max_wl = 4.0e-0 * oriel_cs_130.num_lines[ grating ] / 3;
+        double max_wl = 4.0 * oriel_cs_130.num_lines[ grating ] / 3;
 
         if ( wl > max_wl )
         {
-            print( FATAL, "Requested Wavelength of %.2f nm too large, maximum "
-                   "for grating %d is %.2f nm.\n", wl * 1.0e9, grating + 1,
+            print( FATAL, "Requested Wavelength of %.3f nm too large, maximum "
+                   "for grating %d is %.3f nm.\n", wl * 1.0e9, grating + 1,
                    max_wl * 1.0e9 );
             THROW( EXCEPTION );
         }
@@ -272,6 +280,7 @@ monochromator_wavelength( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * Queries or sets the wavenumbera the current grating is set to
  *--------------------------------------------------------*/
 
 Var_T *
@@ -307,11 +316,11 @@ monochromator_wavenumber( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        double max_wl = 4.0e-0 * oriel_cs_130.num_lines[ grating ] / 3;
+        double max_wl = 4.0 * oriel_cs_130.num_lines[ grating ] / 3;
 
         if ( wl > max_wl )
         {
-            print( FATAL, "Requested Wavelength of %.5f cm^-1 too small, "
+            print( FATAL, "Requested Wavenumber of %.5f cm^-1 too small, "
                    "mimimum for grating %d is %.5f cm^-1.\n",
                    wn, grating + 1, oriel_cs_130_wl2wn( max_wl ) );
             THROW( EXCEPTION );
@@ -335,16 +344,41 @@ monochromator_wavenumber( Var_T * v )
  *--------------------------------------------------------*/
 
 Var_T *
-monochromator_step( Var_T * v )
+monochromator_step_position( Var_T * v )
 {
+    long step;
+
+
     if ( ! v )
         return vars_push( INT_VAR, oriel_cs_130.step );
 
-    
+    step = get_long( v, "step position" );
+    too_many_arguments( v );
+
+    if ( step < 0 )
+    {
+        print( FATAL, "Invalid negative step position.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( step > MAX_STEP )
+    {
+        print( FATAL, "requested step position of %ld out of range, maximum "
+               "is %d\n", step, MAX_STEP );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        oriel_cs_130_set_step( step );
+    else
+        oriel_cs_130.step = step;
+
+    return vars_push( INT_VAR, step );
 }
 
 
 /*--------------------------------------------------------*
+ * Queries or sets the groove density of a grating
  *--------------------------------------------------------*/
 
 Var_T *
@@ -355,14 +389,14 @@ monochromator_groove_density( Var_T * v )
 
 
     if ( ! v )
-        return vars_push( FLOAT_VAR,
-                            oriel_cs_130.num_lines[ oriel_cs_130.cur_grating ]
-                          * 1000.0 );
+        grating = oriel_cs_130.cur_grating;
+    else
+    {
+        grating = get_strict_long( v, "grating number" ) - 1;
+        v = vars_pop( v );
+    }
 
-    grating = get_strict_long( v, "grating number" ) - 1;
-    v = vars_pop( v );
-
-    if ( grating != 0 && grating != 1 )
+    if ( grating < 0 && grating > 1 )
     {
         print( FATAL, "Invalid grating number %ld, can only be 1 or 2.\n",
                grating + 1 );
@@ -374,7 +408,8 @@ monochromator_groove_density( Var_T * v )
         return vars_push( FLOAT_VAR,
                           1000.0 * oriel_cs_130.num_lines[ grating ] );
 
-    num_lines = lrnd( 0.001 * get_double( v, "number of lines per m" ) );
+    num_lines = lrnd( 0.001 * get_strict_long( v, "number of lines per m" ) );
+    too_many_arguments( v );
 
     if ( num_lines <= 0 )
     {
@@ -392,13 +427,14 @@ monochromator_groove_density( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * Tell the monochromator about the current wavelength which it
+ * then will use for calibration purposes.
  *--------------------------------------------------------*/
 
 Var_T *
 monochromator_calibrate( Var_T * v )
 {
     double wl;
-    double max_wl;
 
 
     if ( ! v )
@@ -408,23 +444,24 @@ monochromator_calibrate( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    double wl = get_double( v, "current avelength" );
+    wl = get_double( v, "current wavelength" );
 
-    if ( wl < 0 )
+    if ( wl <= 0 )
     {
-        print( FATAL, "Invaid negative wavelength.\n" );
+        print( FATAL, "Invalid zero or negative wavelength.\n" );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        double max_wl = 4.0e-0 * oriel_cs_130.num_lines[ grating ] / 3;
+        double max_wl =
+                4.0 * oriel_cs_130.num_lines[ oriel_cs_130.cur_grating ] / 3;
 
         if ( wl > max_wl )
         {
-            print( FATAL, "Requested Wavelength of %.2f nm too large, maximum "
-                   "for grating %d is %.2f nm.\n", wl * 1.0e9, grating + 1,
-                   max_wl * 1.0e9 );
+            print( FATAL, "Requested Wavelength of %.3f nm too large, maximum "
+                   "for grating %d is %.3f nm.\n", wl * 1.0e9,
+                   oriel_cs_130.cur_grating + 1, max_wl * 1.0e9 );
             THROW( EXCEPTION );
         }
 
@@ -461,7 +498,7 @@ monochromator_calibration_factor( Var_T * v )
     v = vars_pop( v );
 
     if ( ! v )
-        return vars_push( FLOAT_VAR,oriel_cs_130.factor[ grating ] );
+        return vars_push( FLOAT_VAR, oriel_cs_130.factor[ grating ] );
 
     factor = get_double( v, "calibration factor" );
 
@@ -590,10 +627,13 @@ monochromator_filter( Var_T * v )
 
 
 /*-------------------------------------------------------*
+ * Resets the gratings zero values (back) to the values
+ * given in the manual - only to be used in case the values
+ * in the monochromators internal memory have become corrupted!
  *-------------------------------------------------------*/
 
 Var_T *
-monochromator_reset_grating_zero( Var_T * v )
+monochromator_reset_grating_zeros( Var_T * v )
 {
     too_many_arguments( v );
 
@@ -605,6 +645,12 @@ monochromator_reset_grating_zero( Var_T * v )
 
 
 /*-------------------------------------------------------*
+ * Allows to set a new GPIB address - can only be called during
+ * PREPARATION section and, if the new address differes from the
+ * one already set for the device, the EDL script stops after
+ * having set the new address during initialization (since then
+ * no further communication via the old address is possible
+ * anymore).
  *-------------------------------------------------------*/
 
 Var_T *
@@ -639,7 +685,8 @@ monochromator_set_gpib_address( Var_T * v )
  * Internal functions for initializing the monochromator
  *-------------------------------------------------------*/
 
-static bool
+static
+bool
 oriel_cs_130_init( const char * name )
 {
     int i;
@@ -651,10 +698,10 @@ oriel_cs_130_init( const char * name )
        reports do so and then stop because the device can now not be
        talked to anymore. */
 
-    if (    oriel_cs_130.gpib_address > 0
-         && oriel_cs_130.gpib_address != oriel_cs_130_get_gib_address( ) )
+    if (    oriel_cs_130.gpib_address >= 0
+         && oriel_cs_130.gpib_address != oriel_cs_130_get_gpib_address( ) )
     {
-        oriel_cs_130_get_gib_address( oriel_cs_130.gpib_address );
+        oriel_cs_130_set_gpib_address( oriel_cs_130.gpib_address );
         print( FATAL, "GPIB address has been changed, modify the GPIB "
                "configuration file and restart the EDL script.\n" );
         THROW( EXCEPTION );
@@ -673,9 +720,9 @@ oriel_cs_130_init( const char * name )
 
     oriel_cs_130_command( "UNITS NM\n" );
 
-    /* Determine which grating is in use amd all information abiout both
-       the gratings. Also check if during the test run a wavelength was
-       requested that's larger than possible. */
+    /* Determine which grating is in use and all information about both of
+       them. Also check if during the test run a wavelength was requested
+       that's larger than possible. */
 
     oriel_cs_130_get_grating( );
 
@@ -685,13 +732,13 @@ oriel_cs_130_init( const char * name )
         oriel_cs_130_get_calibration_factor( i );
         oriel_cs_130_get_calibration_offset( i );
 
-        double max_wl = 4.0e-0 * oriel_cs_130.num_lines[ i ] / 3;
+        double max_wl = 4.0 * oriel_cs_130.num_lines[ i ] / 3;
 
         if ( oriel_cs_130.max_test_wavelength[ i ] > max_wl )
         {
-            print( FATAL, "During the test run a wavelength of %.2f nm was "
+            print( FATAL, "During the test run a wavelength of %.3f nm was "
                    "requested for grating %d, which is larger than the "
-                   "maximum of %.2f nm for that grating.\n",
+                   "maximum of %.3f nm for that grating.\n",
                    oriel_cs_130.max_test_wavelength[ i ], i + 1, max_wl );
             THROW( EXCEPTION );
         }
@@ -715,18 +762,18 @@ oriel_cs_130_init( const char * name )
  * for the first and 1 for the second
  *----------------------------------------------*/
 
-static int
+static
+int
 oriel_cs_130_get_grating( void )
 {
     char reply[ 100 ];
-    long length = 100;
 
-    oriel_cs_130_talk( "GRAT?\n", reply, &length );
 
-    if ( length < 1 || ( reply[ 0 ] != '1' && reply[ 0 ] != '2' ) )
+    if (    oriel_cs_130_talk( "GRAT?\n", reply, sizeof reply ) < 1
+         || ( reply[ 0 ] != '1' && reply[ 0 ] != '2' ) )
         oriel_cs_130_failure( );
 
-    return reply[ 0 ] - '1';
+    return oriel_cs_130.cur_grating = reply[ 0 ] - '1';
 }
 
 
@@ -735,7 +782,8 @@ oriel_cs_130_get_grating( void )
  * argument is 0 for grating #1 and 1 for and #2
  *----------------------------------------------*/
 
-static int
+static
+int
 oriel_cs_130_set_grating( int grating )
 {
     char cmd[ ] = "GRAT *\n";
@@ -765,12 +813,12 @@ oriel_cs_130_set_grating( int grating )
  * and 1 for grating #2.
  *--------------------------------*/
 
-static unsigned int
+static
+unsigned int
 oriel_cs_130_get_number_of_lines( int grating )
 {
     char req[ ] = "GRAT*LINES?\n";
     char reply[ 100 ];
-    long length = 100;
     unsigned long val;
     char * ep;
 
@@ -778,9 +826,8 @@ oriel_cs_130_get_number_of_lines( int grating )
     fsc2_assert( grating == 0 || grating == 1 );
 
     req[ 4 ] = grating ? '1' : '2';
-    oriel_cs_130_talk( req, reply, &length );
-
-    if ( length < 1 || ! isdigit( ( int ) reply[ 0 ] ) )
+    if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
     val = strtoul( reply, &ep, 10 );
@@ -797,7 +844,8 @@ oriel_cs_130_get_number_of_lines( int grating )
  * #2, the second the number of lines (per mm)
  *--------------------------------*/
 
-static unsigned int
+static
+unsigned int
 oriel_cs_130_set_number_of_lines( int          grating,
                                   unsigned int num_lines )
 {
@@ -819,13 +867,14 @@ oriel_cs_130_set_number_of_lines( int          grating,
 /*--------------------------------*
  *--------------------------------*/
 
-static void
+static
+void
 oriel_cs_130_calibrate( double wl )
 {
     char cmd[ 100 ];
 
-    sprintf( cmd, "CALIBRATE %.2f\n", wl );
-    oriel_cs_command( cmd );
+    sprintf( cmd, "CALIBRATE %.3f\n", wl );
+    oriel_cs_130_command( cmd );
 }
 
 
@@ -840,17 +889,15 @@ oriel_cs_130_get_calibration_factor( int grating )
 {
     char req[ ] = "GRAT*FACTOR?\n";
     char reply[ 100 ];
-    long length = 100;
     double val;
     char * ep;
 
 
     fsc2_assert( grating == 0 || grating == 1 );
 
-    req[ 4 ] = grating ? '1' : '2';
-    oriel_cs_130_talk( req, reply, &length );
-
-    if ( length < 1 || ! isdigit( ( int ) reply[ 0 ] ) )
+    req[ 4 ] = grating + '1';
+    if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
     val = strtod( reply, &ep );
@@ -867,7 +914,8 @@ oriel_cs_130_get_calibration_factor( int grating )
  * #1 and 1 for #2, second argument the new factor.
  *--------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_set_calibration_factor( int    grating,
                                      double factor )
 {
@@ -892,12 +940,12 @@ oriel_cs_130_set_calibration_factor( int    grating,
  * and 1 for grating #2.
  *--------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_get_calibration_offset( int grating )
 {
     char req[ ] = "GRAT*OFFSTE?\n";
     char reply[ 100 ];
-    long length = 100;
     double val;
     char * ep;
 
@@ -905,9 +953,7 @@ oriel_cs_130_get_calibration_offset( int grating )
     fsc2_assert( grating == 0 || grating == 1 );
 
     req[ 4 ] = grating ? '1' : '2';
-    oriel_cs_130_talk( req, reply, &length );
-
-    if (    length < 1
+    if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
          || (    reply[ 0 ] != '-'
               && reply[ 0 ] != '+'
               && ! isdigit( ( int ) reply[ 0 ] ) ) )
@@ -927,7 +973,8 @@ oriel_cs_130_get_calibration_offset( int grating )
  * and 1 for #2, second argument the new offset.
  *--------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_set_calibration_offset( int    grating,
                                      double offset )
 {
@@ -951,7 +998,8 @@ oriel_cs_130_set_calibration_offset( int    grating,
  * to be according to the manual.
  *--------------------------------*/
 
-static void
+static
+void
 oriel_cs_130_set_zero( void )
 {
     char buf[ 100 ];
@@ -972,21 +1020,19 @@ static double
 oriel_cs_130_get_wavelength( void )
 {
     char reply[ 100 ];
-    long length = 100;
     double val;
     char *ep;
 
 
-    oriel_cs_130_talk( "WAVE?\n", reply, &length );
-
-    if ( length < 1 || ! isdigit( ( int ) reply[ 0 ] ) )
+    if (    oriel_cs_130_talk( "WAVE?\n", reply, sizeof reply ) < 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
     val = strtod( reply, &ep );
     if ( *ep || val == -HUGE_VAL || val == HUGE_VAL )
         oriel_cs_130_failure( );
 
-    return oriel_cs_130.wavelength = val;
+    return oriel_cs_130.wavelength = 1.0e-9 * val;
 }
 
 
@@ -997,31 +1043,35 @@ oriel_cs_130_get_wavelength( void )
  * new wavelength as reported by the device.
  *--------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_set_wavelength( double wl )
 {
     char cmd[ 100 ];
-    int err;
+
 
     fsc2_assert( wl >= 0 );
 
+    sprintf( cmd, "GOWAVE %.3f\n", 1.0e9 * wl );
+
+    /* Make sure we don't set a wavelnegth that's already set */
+
+    wl = 1.0e-9 * strtod( cmd + 7, NULL );
     if ( wl == oriel_cs_130.wavelength )
         return wl;
 
-    sprintf( cmd, "GOWAVE %.2f\n", wl );
+    sprintf( cmd, "GOWAVE %.3f\n", 1.0e9 * wl );
     oriel_cs_130_command( cmd );
 
     /* Check for errors - the value might be out of range */
 
-    err = oriel_cs_130_get_error( );
-
-    switch ( err )
+    switch ( oriel_cs_130_get_error( ) )
     {
         case -1 :
             break;
 
         case 3 :
-            print( FATAL, "Device reports requested wavelength of %.2f nm to "
+            print( FATAL, "Device reports requested wavelength of %.3f nm to "
                    "be out of range.\n", wl );
             THROW( EXCEPTION );
 
@@ -1029,8 +1079,9 @@ oriel_cs_130_set_wavelength( double wl )
             oriel_cs_130_failure( );
     }
 
-    /* Get the exact wavelength from the device */
+    /* Get the exact wavelength and step position from the device */
 
+    oriel_cs_130_get_step( );
     return oriel_cs_130_get_wavelength( );
 }
 
@@ -1039,22 +1090,24 @@ oriel_cs_130_set_wavelength( double wl )
  * Returns the current "step position"
  *--------------------------------*/
 
-static int
-oriel_cs_130_get_set( void )
+static
+unsigned int
+oriel_cs_130_get_step( void )
 {
     char reply[ 100 ];
-    long length = 100;
-    long step;
+    unsigned long step;
     char *ep;
 
 
-    oriel_cs_130_talk( "STEP?\n", reply, &length );
-
-    step =strtol( reply, &ep, 10 );
-    if ( *ep || step > 0 || step > INT_MAX )
+    if (    oriel_cs_130_talk( "STEP?\n", reply, sizeof reply ) < 1
+            || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
-    return step;
+    step = strtoul( reply, &ep, 10 );
+    if ( *ep || step > UINT_MAX )
+        oriel_cs_130_failure( );
+
+    return oriel_cs_130.step = step;
 }
 
 
@@ -1062,13 +1115,37 @@ oriel_cs_130_get_set( void )
  * Moves the monochromator by the given number of steps
  *--------------------------------*/
 
-static void
-oriel_cs_130_set_set( int step )
+static
+unsigned int
+oriel_cs_130_set_step( unsigned int step )
 {
     char cmd[ 100 ];
 
-    sprintf( cmd, "STEP %d\n", step );
+
+    fsc2_assert( step <= MAX_STEP );
+
+    if ( step == oriel_cs_130.step )
+        return step;
+
+    sprintf( cmd, "STEP %u\n", step );
     oriel_cs_130_command( cmd );
+
+    switch ( oriel_cs_130_get_error( ) )
+    {
+        case -1 :
+            break;
+
+        case 3 :
+            print( FATAL, "Device reports requested step %u to be out of "
+                   "range.\n", step );
+            THROW( EXCEPTION );
+
+        default :
+            oriel_cs_130_failure( );
+    }
+
+    oriel_cs_130_get_wavelength( );
+    return oriel_cs_130_get_step( );
 }
 
 
@@ -1076,16 +1153,15 @@ oriel_cs_130_set_set( int step )
  * Returns if the shutter is closed
  *--------------------------------*/
 
-static bool
+static
+bool
 oriel_cs_130_get_shutter( void )
 {
     char reply[ 100 ];
-    long length = 100;
 
 
-    oriel_cs_130_talk( "SHUTTER?\n", reply, &length );
-
-    if ( length != 3 || ( reply[ 0 ] != 'C' && reply[ 0 ] != 'O' ) )
+    if (    oriel_cs_130_talk( "SHUTTER?\n", reply, sizeof reply ) != 1
+         || ( reply[ 0 ] != 'C' && reply[ 0 ] != 'O' ) )
         oriel_cs_130_failure( );
 
     return oriel_cs_130.shutter_state = reply[ 0 ] == 'C';
@@ -1097,7 +1173,8 @@ oriel_cs_130_get_shutter( void )
  *  (if called with a 'true' value) the shutter
  *--------------------------------*/
 
-static bool
+static
+bool
 oriel_cs_130_set_shutter( bool on_off )
 {
     char cmd[ ] = "SHUTTER *\n";
@@ -1120,40 +1197,34 @@ oriel_cs_130_set_shutter( bool on_off )
  *----------------------------------------------------*/
 
 #if HAS_FILTER
-static int
+static
+int
 oriel_cs_130_get_filter( void )
 {
     char reply[ 100 ];
-    long length = 100;
-    int val;
 
 
     fsc2_assert( HAS_FILTER );
 
-    oriel_cs_130_talk( "FILRER?\n", reply, &length );
-
-    if ( length != 1 || ! isdigit( ( int ) reply[ 0 ] ) )
+    if (    oriel_cs_130_talk( "FILTER?\n", reply,sizeof reply ) != 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
-    /* If '0' got returned the filter wheel is out of position and we
-       need to reset the error byte by reading it */
+    /* If '0' got returned the filter wheel is out of position (or there
+       isn't one) and we need to reset the error byte by reading it */
 
     if ( reply[ 0 ] == '0' )
     {
-        int err = oriel_cs_130_get_error( );
-
-        if ( err == 6 )
-        {
+        if ( oriel_cs_130_get_error( ) == 6 )
             print( FATAL, "Device has no filter wheel.\n" );
-            THROW( EXCEPTION );
-        }
-
-        oriel_cs_130_failure( );
+        else
+            print( FATAL, "Filter wheel is out of position.\n" );
+        THROW( EXCEPTION );
     }
     else if ( reply[ 0 ] - '0' > MAX_FILTER )
         oriel_cs_130_failure( );
 
-    return oriel_cs_130.filter = val - '1';
+    return oriel_cs_130.filter = reply[ 0 ] - '1';
 }
 #endif
 
@@ -1163,14 +1234,15 @@ oriel_cs_130_get_filter( void )
  *----------------------------------------------------*/
 
 #if HAS_FILTER
-static int
+static
+int
 oriel_cs_130_set_filter( int filter )
 {
     char cmd = "FILTER *\n";
 
     fsc2_assert( filter >= 0 && filter < MAX_FILTER );
 
-    if ( filter == oriel_cs_130.filter != filter )
+    if ( filter == oriel_cs_130.filter )
         return filter;
 
     cmd[ 7 ] = '1' + filter;
@@ -1193,45 +1265,42 @@ oriel_cs_130_set_filter( int filter )
  * error, otherwise the error code.
  *--------------------------------------------------*/
 
-static int
+static
+int
 oriel_cs_130_get_error( void )
 {
     unsigned long int b;
     char reply[ 100 ];
-    long length = 100;
     char *ep;
 
-    oriel_cs_130_talk( "STB?\n", reply, &length );
-    if ( length < 1 ||  isdigit( ( int ) reply[ 0 ] ) )
+
+    if (    oriel_cs_130_talk( "STB?\n", reply, sizeof reply ) < 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
     b = strtoul( reply, &ep, 10 );
     if ( *ep || b == ULONG_MAX )
         oriel_cs_130_failure( );
 
-    if ( ! ( b & 0x20 ) )
+    if ( b == 0 )
         return -1;
 
-    length = 100;
-    oriel_cs_130_talk( "ERROR?\n", reply, &length );
-    if ( length < 1 ||  isdigit( ( int ) reply[ 0 ] ) )
+    if (    oriel_cs_130_talk( "ERROR?\n", reply, sizeof reply ) != 1
+         || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
-    b = strtoul( reply, &ep, 10 );
-    if ( *ep || ! ( b <= 3 || ( b >= 6 && b <= 9 ) ) )
-        oriel_cs_130_failure( );
-
-    return b;
+    return reply[ 0 ] - '0';
 }
 
 /*--------------------------------*
  * Sends a message to the device.
  *--------------------------------*/
 
-static void
+static
+void
 oriel_cs_130_command( const char * cmd )
 {
-    if ( gpib_write( oriel_cs_130.device, cmd, strlen(cmd ) ) == FAILURE )
+    if ( gpib_write( oriel_cs_130.device, cmd, strlen( cmd ) ) == FAILURE )
         oriel_cs_130_failure( );
 }
 
@@ -1242,18 +1311,20 @@ oriel_cs_130_command( const char * cmd )
  *-------------------------------------*/
 
 static
-void
+long
 oriel_cs_130_talk( const char * cmd,
                    char       * reply,
-                   long       * length )
+                   long         length )
 {
     if (    gpib_write( oriel_cs_130.device, cmd, strlen( cmd ) ) == FAILURE
-         || gpib_read( oriel_cs_130.device, reply, length ) == FAILURE
-         || reply[ *length - 2 ] != '\r'
-         || reply[ *length - 1 ] != '\n' )
+         || gpib_read( oriel_cs_130.device, reply, &length ) == FAILURE
+         || reply[ length - 2 ] != '\r'
+         || reply[ length - 1 ] != '\n' )
         oriel_cs_130_failure( );
 
-    reply[ *length -= 2 ] = '\0';
+    reply[ length -= 2 ] = '\0';
+
+    return length;
 }
 
 
@@ -1269,23 +1340,24 @@ oriel_cs_130_failure( void )
 
 
 /*-----------------------------------------*
+ * Returns the currently used GPIB address
  *-----------------------------------------*/
 
-static unsigned int
-oriel_cs_130_get_gpib_adress( void )
+static
+unsigned int
+oriel_cs_130_get_gpib_address( void )
 {
     char reply[ 100 ];
-    long length = 100;
-    unsiged long addr;
+    unsigned long addr;
     char *ep;
 
 
-    oriel_cs_130_talk( cmd, reply, &length );
-    if ( reply < 1 )
+    if (    oriel_cs_130_talk( "ADDRESS?\n", reply, sizeof reply ) < 1
+            || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
 
     addr = strtoul( reply, &ep, 10 );
-    if ( ( *ep != '\0' && *ep != '\r' ) || addr > 30 )
+    if ( *ep || addr > 30 )
         oriel_cs_130_failure( );
 
     return addr;
@@ -1293,16 +1365,24 @@ oriel_cs_130_get_gpib_adress( void )
 
 
 /*-----------------------------------------*
+ * Sets a new GPIB address. That's the only way to change it and
+ * when this has been done we can't continue talking to the device...
  *-----------------------------------------*/
 
-static void
-oriel_cs_130_set_gpib_adress( unsigned int addr )
+static
+void
+oriel_cs_130_set_gpib_address( unsigned int addr )
 {
     char cmd[ 100 ];
 
+
     fsc2_assert( addr <= 30 );
 
-    sprintf( cmd, "ADDRES %u\n", addr );
+    if ( addr == oriel_cs_130_get_gpib_address( ) )
+        return;
+
+    sprintf( cmd, "ADDRESS %2u\n", addr );
+    oriel_cs_130_command( cmd );
 }
 
 
@@ -1310,7 +1390,8 @@ oriel_cs_130_set_gpib_adress( unsigned int addr )
  * Converts a wavelength into a wavenumber
  *-----------------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_wl2wn( double wl )
 {
     fsc2_assert( wl > 0 );
@@ -1322,7 +1403,8 @@ oriel_cs_130_wl2wn( double wl )
  * Converts a wavenumber into a wavelength
  *-----------------------------------------*/
 
-static double
+static
+double
 oriel_cs_130_wn2wl( double wn )
 {
     fsc2_assert( wn > 0 );
@@ -1337,4 +1419,3 @@ oriel_cs_130_wn2wl( double wn )
  * indent-tabs-mode: nil
  * End:
  */
-

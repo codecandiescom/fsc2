@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -167,6 +167,7 @@ spectrapro_300i     // Acton SpectaPro-300i
 spectrapro_275      // Acton SpectaPro-275
 spex_cd2a           // SPEX monocromator with CD2A interface
 spex232             // SPEX monocromator with SPEX232 interface
+oriel_cs_130        // Oriel/Newport Cornerstone 130
 
 
 // Power Supplies (Thurlby&Thandar PL330DP, F.u.G. MCN700-2000)
@@ -215,10 +216,15 @@ smsmotor
 ffc;
 
 
+// Power/Energy meters
+
+gentec_maestro             // Gentec Maestro Laser Power and Energy Meter
+
+
 // Microwave bridges
 
-x_bmwb;
-q_bmwb;
+x_bmwb
+q_bmwb
 
 
 // FFT pseudo-module
