@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -246,16 +246,14 @@ fsc2_serial_exp_init( int log_level )
     for ( i = 0; i < Num_Serial_Ports; i++ )
     {
         if ( ! ( Serial_Ports[ i ].have_lock =
-	               fsc2_obtain_uucp_lock( strrchr( Serial_Ports[ i ].dev_file,
-                                                   '/' ) + 1 ) ) )
+                        fsc2_obtain_uucp_lock( Serial_Ports[ i ].dev_file ) ) )
         {
-            print( FATAL, "Device %s is locked by another process.\n",
+            print( FATAL, "Failed to obtain lock for device %s.\n",
                    Serial_Ports[ i ].dev_name );
 
             for ( i--; i > 0; i-- )
             {
-                fsc2_release_uucp_lock( strrchr( Serial_Ports[ i ].dev_file,
-                                                 '/' ) + 1 );
+                fsc2_release_uucp_lock( Serial_Ports[ i ].dev_file );
                 Serial_Ports[ i ].have_lock = UNSET;
                 close_serial_log( i );
             }
@@ -290,8 +288,7 @@ fsc2_serial_cleanup( void )
             fsc2_serial_close( i );
         else if ( Serial_Ports[ i ].have_lock )
         {
-            fsc2_release_uucp_lock( strrchr( Serial_Ports[ i ].dev_file, '/' )
-                                    + 1 );
+            fsc2_release_uucp_lock( Serial_Ports[ i ].dev_file );
             Serial_Ports[ i ].have_lock = UNSET;
         }
 
@@ -555,8 +552,7 @@ fsc2_serial_close( int sn )
 
     if ( Serial_Ports[ sn ].have_lock )
     {
-        fsc2_release_uucp_lock( strrchr( Serial_Ports[ sn ].dev_file, '/' )
-                                + 1 );
+        fsc2_release_uucp_lock( Serial_Ports[ sn ].dev_file );
         Serial_Ports[ sn ].have_lock = UNSET;
     }
 }

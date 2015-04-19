@@ -152,7 +152,7 @@ pci_mio_16e_1_exp_hook( void )
         pci_mio_16e_1.msc_state.reserved_by =
                     T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
 
-    if ( ! fsc2_obtain_uucp_lock( device_name ) )
+    if ( ! fsc2_obtain_uucp_lock( BOARD_DEVICE_FILE ) )
     {
         print( FATAL, "Failed to obtain lock for board.\n" );
         THROW( EXCEPTION );
@@ -207,7 +207,7 @@ pci_mio_16e_1_exp_hook( void )
 
         ni_daq_close( pci_mio_16e_1.board );
         lower_permissions( );
-        fsc2_release_uucp_lock( device_name );
+        fsc2_release_uucp_lock( BOARD_DEVICE_FILE );
         THROW( EXCEPTION );
     }
 
@@ -223,7 +223,7 @@ pci_mio_16e_1_exp_hook( void )
         {
             ni_daq_close( pci_mio_16e_1.board );
             lower_permissions( );
-            fsc2_release_uucp_lock( device_name );
+            fsc2_release_uucp_lock( BOARD_DEVICE_FILE );
             print( FATAL, "Failure to initialize AO channels\n ");
             THROW( EXCEPTION );
         }
@@ -247,7 +247,7 @@ pci_mio_16e_1_end_of_exp_hook( void )
     {
         raise_permissions( );
         ni_daq_close( pci_mio_16e_1.board );
-        fsc2_release_uucp_lock( device_name );
+        fsc2_release_uucp_lock( BOARD_DEVICE_FILE );
         lower_permissions( );
     }
 
