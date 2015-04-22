@@ -26,6 +26,10 @@
 
 #include "oriel_cs_130.conf"
 
+#if NUM_GRATINGS < 1 || NUM_GRATINGS > 9
+#error "Number of gratings in configration must be between 1 and 9"
+#endif
+
 
 /*--------------------------------*
  * Global variables of the module
@@ -37,23 +41,24 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 typedef struct {
     int          device;
-    int          cur_grating;              /* 0: grating #1, 1: grating #2 */
+    int          cur_grating;                    /* 0: grating #1, etc. */
 
-    double       wavelength;               /* in m */
-    double       max_test_wavelength[ 2 ];
+    double       wavelength;                     /* in m */
+    double       max_test_wavelength[ NUM_GRATINGS ];
 
     unsigned int step;
     unsigned int max_step;
 
-    unsigned int num_lines[ 2 ];           /* in lines per mm */
-    double       factor[ 2 ];
-    double       offset[ 2 ];
+    unsigned int num_lines[ NUM_GRATINGS ];      /* in lines per mm */
+    double       factor[ NUM_GRATINGS ];
+    double       offset[ NUM_GRATINGS ];
+    double       zero[ NUM_GRATINGS ];
 
-    bool         shutter_state;           /* true if shutter closed */
+    bool         shutter_state;                  /* true if shutter closed */
 
-    int          filter;                  /* 0: filter #1, etc. */
+    int          filter;                         /* 0: filter #1, etc. */
 
-    unsigned int gpib_address;
+    int          gpib_address;
 } Oriel_CS_130;
 
 
@@ -62,18 +67,15 @@ static Oriel_CS_130 oriel_cs_130;
 
 #define MAX_FILTER    6
 
-#define GRAT1ZERO      0.0872665
-#define GRAT2ZERO      3.2288589
-
 #define MAX_STEP       1000000     /* XXXXX We need to find out what this is! */
 
 
 
 #define TEST_WAVELENGTH      5.5e-7
 #define TEST_STEP            100
-#define TEST_GRATING_NUMBER  1
+#define TEST_GRATING_NUMBER  0
 #define TEST_SHUTTER_STATE   0
-#define TEST_FILTER          1
+#define TEST_FILTER          0
 
 int oriel_cs_130_init_hook( void );
 int oriel_cs_130_exp_hook( void );
@@ -90,7 +92,7 @@ Var_T * monochromator_calibration_factor( Var_T * v );
 Var_T * monochromator_calibration_offset( Var_T * v );
 Var_T * monochromator_shutter( Var_T * v );
 Var_T * monochromator_filter( Var_T * v );
-Var_T * monochromator_reset_grating_zero( Var_T * v );
+Var_T * monochromator_grating_zero( Var_T * v );
 Var_T * monochromator_set_gpib_address( Var_T * v );
 
 
@@ -107,14 +109,16 @@ static double oriel_cs_130_set_calibration_factor( int    grating,
 static double oriel_cs_130_get_calibration_offset( int grating );
 static double oriel_cs_130_set_calibration_offset( int    grating,
                                                    double offset );
-static void oriel_cs_130_set_zero( void );
+static double oriel_cs_130_get_zero( int    gratings );
+static void oriel_cs_130_set_zero( int    gratings,
+                                   double zero );
 static double oriel_cs_130_get_wavelength( void );
 static double oriel_cs_130_set_wavelength( double wl );
 static unsigned int oriel_cs_130_get_step( void );
 static unsigned int oriel_cs_130_set_step( unsigned int step );
 static bool oriel_cs_130_get_shutter( void );
 static bool oriel_cs_130_set_shutter( bool on_off );
-#if HAS_FILTER
+#if defined HAS_FILTER_WHEEL
 static int oriel_cs_130_get_filter( void );
 static int oriel_cs_130_set_filter( int filter );
 #endif
@@ -124,7 +128,7 @@ static long oriel_cs_130_talk( const char * cmd,
                                char       * reply,
                                long         length );
 static void oriel_cs_130_failure( void );
-static unsigned int oriel_cs_130_get_gpib_address( void );
+static int oriel_cs_130_get_gpib_address( void );
 static void oriel_cs_130_set_gpib_address( unsigned int addr );
 static double oriel_cs_130_wl2wn( double wl );
 static double oriel_cs_130_wn2wl( double wn );
@@ -137,6 +141,9 @@ static double oriel_cs_130_wn2wl( double wn );
 int
 oriel_cs_130_init_hook( void )
 {
+    int i;
+
+
     /* Set global variable to indicate that GPIB bus is needed */
 
     Need_GPIB = SET;
@@ -147,18 +154,17 @@ oriel_cs_130_init_hook( void )
 
     oriel_cs_130.wavelength = TEST_WAVELENGTH;
     oriel_cs_130.step = TEST_STEP;
-    oriel_cs_130.max_test_wavelength[ 0 ] = 0;
-    oriel_cs_130.max_test_wavelength[ 1 ] = 0;
 
     oriel_cs_130.cur_grating = TEST_GRATING_NUMBER;
-    oriel_cs_130.num_lines[ 0 ] = 1000;
-    oriel_cs_130.num_lines[ 0 ] = 2000;
 
-    oriel_cs_130.factor[ 0 ] = 1;
-    oriel_cs_130.factor[ 1 ] = 1;
-
-    oriel_cs_130.offset[ 0 ] = 0;
-    oriel_cs_130.offset[ 1 ] = 0;
+    for ( i = 0; i < NUM_GRATINGS; i++ )
+    {
+        oriel_cs_130.max_test_wavelength[ i ] = 0;
+        oriel_cs_130.num_lines[ i ] = 600;
+        oriel_cs_130.factor[ i ] = 1;
+        oriel_cs_130.offset[ i ] = 0.025;
+        oriel_cs_130.zero[ i ] = i * 2 * M_PI / NUM_GRATINGS + 0.0872665;
+    }
 
     oriel_cs_130.shutter_state = TEST_SHUTTER_STATE;
 
@@ -213,9 +219,10 @@ monochromator_grating( Var_T * v )
 
         too_many_arguments( v );
 
-        if ( grating < 1 || grating > 2 )
+        if ( grating < 1 || grating > NUM_GRATINGS )
         {
-            print( FATAL, "Invalid grating number, must be 1 or 2.\n" );
+            print( FATAL, "Invalid grating number %ld, must be between 1 and "
+                   "%d.\n", grating + 1, NUM_GRATINGS );
             THROW( EXCEPTION );
         }
 
@@ -350,7 +357,7 @@ monochromator_step_position( Var_T * v )
 
 
     if ( ! v )
-        return vars_push( INT_VAR, oriel_cs_130.step );
+      return vars_push( INT_VAR, oriel_cs_130.step );
 
     step = get_long( v, "step position" );
     too_many_arguments( v );
@@ -396,10 +403,10 @@ monochromator_groove_density( Var_T * v )
         v = vars_pop( v );
     }
 
-    if ( grating < 0 && grating > 1 )
+    if ( grating < 0 && grating > NUM_GRATINGS )
     {
-        print( FATAL, "Invalid grating number %ld, can only be 1 or 2.\n",
-               grating + 1 );
+        print( FATAL, "Invalid grating number %ld, can only be between 1 and "
+               "%d.\n", grating + 1, NUM_GRATINGS );
         THROW( EXCEPTION );
     }
 
@@ -488,10 +495,10 @@ monochromator_calibration_factor( Var_T * v )
 
     grating = get_strict_long( v, "grating number" ) - 1;
 
-    if ( grating != 0 && grating != 1 )
+    if ( grating < 1 || grating > NUM_GRATINGS )
     {
-        print( FATAL, "Invalid grating number %ld, can only be 1 or 2.\n",
-               grating + 1 );
+        print( FATAL, "Invalid grating number %ld, can only be between 1 and "
+               "%d.\n", grating + 1, NUM_GRATINGS );
         THROW( EXCEPTION );
     }
 
@@ -533,17 +540,17 @@ monochromator_calibration_offset( Var_T * v )
 
     grating = get_strict_long( v, "grating number" ) - 1;
 
-    if ( grating != 0 && grating != 1 )
+    if ( grating < 1 || grating > NUM_GRATINGS )
     {
-        print( FATAL, "Invalid grating number %ld, can only be 1 or 2.\n",
-               grating + 1 );
+        print( FATAL, "Invalid grating number %ld, can only be between 1 and "
+               "%d.\n", grating + 1, NUM_GRATINGS );
         THROW( EXCEPTION );
     }
 
     v = vars_pop( v );
 
     if ( ! v )
-        return vars_push( FLOAT_VAR,oriel_cs_130.offset[ grating ] );
+        return vars_push( FLOAT_VAR, oriel_cs_130.offset[ grating ] );
 
     offset = get_double( v, "calibration offset" );
 
@@ -582,7 +589,7 @@ monochromator_shutter( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-#if ! defined HAS_FILTER
+#if ! defined HAS_FILTER_WHEEL
 Var_T *
 monochromator_filter( Var_T * v  UNUSED_ARG )
 {
@@ -597,8 +604,10 @@ monochromator_filter( Var_T * v )
     long int filter;
 
 
+#if 0
     if ( FSC2_MODE == TEST )
-        oriel_cs_130.filter_has_been_useed = SET;
+        oriel_cs_130.filter_has_been_used = SET;
+#endif
 
     if ( v == 0 )
         return vars_push( INT_VAR, oriel_cs_130.filter + 1L );
@@ -610,7 +619,7 @@ monochromator_filter( Var_T * v )
     {
         print( FATAL, "Invalid filter number %ld, must be between 1 and %d.\n",
                filter, MAX_FILTER );
-        THROW( EXCEPYION );
+        THROW( EXCEPTION );
     }
 
     if ( filter != oriel_cs_130.filter )
@@ -633,14 +642,47 @@ monochromator_filter( Var_T * v )
  *-------------------------------------------------------*/
 
 Var_T *
-monochromator_reset_grating_zeros( Var_T * v )
+monochromator_grating_zero( Var_T * v )
 {
-    too_many_arguments( v );
+    long int grating;
+    double zero;
+
+
+    if ( ! v )
+    {
+        print( FATAL, "At least one argument, the grating number, is "
+               "required.\n" );
+        THROW( EXCEPTION );
+    }
+
+    grating = get_strict_long( v, "grating number" ) - 1;
+
+    if ( grating < 1 || grating > NUM_GRATINGS )
+    {
+        print( FATAL, "Invalid grating number %ld, can only be between 1 and "
+               "%d.\n", grating + 1, NUM_GRATINGS );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_pop( v );
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, oriel_cs_130.zero[ grating ] );
+
+    zero = get_double( v, "grating zero" );
+
+    if ( zero < 0 )
+    {
+        print( FATAL, "invalid negative grating zero value.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( FSC2_MODE == EXPERIMENT )
-        oriel_cs_130_set_zero( );
+        oriel_cs_130_set_zero( grating, zero );
+    else
+        oriel_cs_130.zero[ grating ] = zero;
 
-    return vars_push( INT_VAR, 1L );
+    return vars_push( FLOAT_VAR, oriel_cs_130.zero[ grating ] );
 }
 
 
@@ -716,7 +758,7 @@ oriel_cs_130_init( const char * name )
 
     oriel_cs_130_get_error( );
 
-    /* Switch to nano-meter units */
+    /* Switch to nanometer units */
 
     oriel_cs_130_command( "UNITS NM\n" );
 
@@ -726,11 +768,12 @@ oriel_cs_130_init( const char * name )
 
     oriel_cs_130_get_grating( );
 
-    for ( i = 0; i < 2; ++i )
+    for ( i = 0; i < NUM_GRATINGS; ++i )
     {
         oriel_cs_130_get_number_of_lines( i );
         oriel_cs_130_get_calibration_factor( i );
         oriel_cs_130_get_calibration_offset( i );
+        oriel_cs_130_get_zero( i );
 
         double max_wl = 4.0 * oriel_cs_130.num_lines[ i ] / 3;
 
@@ -749,7 +792,7 @@ oriel_cs_130_init( const char * name )
 
     oriel_cs_130_get_shutter( );
 
-#if HAS_FILTER
+#if defined HAS_FILTER_WHEEL
     oriel_cs_130_get_filter( );
 #endif
 
@@ -770,7 +813,7 @@ oriel_cs_130_get_grating( void )
 
 
     if (    oriel_cs_130_talk( "GRAT?\n", reply, sizeof reply ) < 1
-         || ( reply[ 0 ] != '1' && reply[ 0 ] != '2' ) )
+         || ( reply[ 0 ] - '0' < 1 || reply[ 0 ] - '0' > NUM_GRATINGS ) )
         oriel_cs_130_failure( );
 
     return oriel_cs_130.cur_grating = reply[ 0 ] - '1';
@@ -789,7 +832,7 @@ oriel_cs_130_set_grating( int grating )
     char cmd[ ] = "GRAT *\n";
 
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     if ( oriel_cs_130.cur_grating == grating )
         return grating;
@@ -823,9 +866,9 @@ oriel_cs_130_get_number_of_lines( int grating )
     char * ep;
 
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
-    req[ 4 ] = grating ? '1' : '2';
+    req[ 4 ] = grating + '1';
     if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_130_failure( );
@@ -851,13 +894,13 @@ oriel_cs_130_set_number_of_lines( int          grating,
 {
     char cmd[ 100 ];
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
     fsc2_assert( num_lines > 0 );
 
     if ( oriel_cs_130.num_lines[ grating ] == num_lines )
         return num_lines;
 
-    sprintf( cmd, "GRAT%dLINES %u\n", grating, num_lines );
+    sprintf( cmd, "GRAT%dLINES %u\n", grating + 1, num_lines );
     oriel_cs_130_command( cmd );
 
     return oriel_cs_130.num_lines[ grating ] = num_lines;
@@ -893,7 +936,7 @@ oriel_cs_130_get_calibration_factor( int grating )
     char * ep;
 
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
     if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
@@ -921,13 +964,13 @@ oriel_cs_130_set_calibration_factor( int    grating,
 {
     char cmd[ 100 ];
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
     fsc2_assert( factor >= 1.0e-6 );
 
     if ( factor == oriel_cs_130.factor[ grating ] )
         return factor;
 
-    sprintf( cmd, "GRAT%dFACTOR %.6f\n", grating, factor );
+    sprintf( cmd, "GRAT%dFACTOR %.6f\n", grating + 1, factor );
     oriel_cs_130_command( cmd );
 
     return oriel_cs_130.factor[ grating ] = factor;
@@ -950,9 +993,9 @@ oriel_cs_130_get_calibration_offset( int grating )
     char * ep;
 
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
-    req[ 4 ] = grating ? '1' : '2';
+    req[ 4 ] = grating + '1';
     if (    oriel_cs_130_talk( req, reply, sizeof reply ) < 1
          || (    reply[ 0 ] != '-'
               && reply[ 0 ] != '+'
@@ -981,12 +1024,12 @@ oriel_cs_130_set_calibration_offset( int    grating,
     char cmd[ 100 ];
 
 
-    fsc2_assert( grating == 0 || grating == 1 );
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     if ( offset == oriel_cs_130.offset[ grating ] )
         return offset;
 
-    sprintf( cmd, "GRAT%dOFFSET %.6f\n", grating, offset );
+    sprintf( cmd, "GRAT%dOFFSET %.6f\n", grating + 1, offset );
     oriel_cs_130_command( cmd );
 
     return oriel_cs_130.offset[ grating ] = offset;
@@ -994,21 +1037,53 @@ oriel_cs_130_set_calibration_offset( int    grating,
 
 
 /*--------------------------------*
- * Resets the grating zero values to what they're supposed
- * to be according to the manual.
+ * Sets a gratings zero value.
+ *--------------------------------*/
+
+static
+double
+oriel_cs_130_get_zero( int    grating )
+{
+    char cmd[ ] = "GRAT*ZERO?\n";
+    char reply[ 100 ];
+    double zero;
+    char *ep;
+
+
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
+
+    cmd[ 4 ] = grating + '1';
+    
+    if ( oriel_cs_130_talk( cmd, reply, sizeof reply ) < 1 )
+        oriel_cs_130_failure( );
+
+    zero = strtod( reply, &ep );
+    if ( *ep || zero < 0 || zero == HUGE_VAL )
+        oriel_cs_130_failure( );
+
+    return oriel_cs_130.zero[ grating ] = zero;
+}
+
+
+/*--------------------------------*
+ * Sets a gratings zero value.
  *--------------------------------*/
 
 static
 void
-oriel_cs_130_set_zero( void )
+oriel_cs_130_set_zero( int    grating,
+                       double zero )
 {
     char buf[ 100 ];
 
-    sprintf( buf, "GRAT1ZERO %.7f\n", GRAT1ZERO );
+
+    fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
+    fsc2_assert( zero >= 0 );
+
+    sprintf( buf, "GRAT%dZERO %.7f\n", grating + 1, zero );
     oriel_cs_130_command( buf );
 
-    sprintf( buf, "GRAT2ZERO %.7f\n", GRAT2ZERO );
-    oriel_cs_130_command( buf );
+    oriel_cs_130.zero[ grating ] = zero;
 }
 
 
@@ -1128,6 +1203,7 @@ oriel_cs_130_set_step( unsigned int step )
         return step;
 
     sprintf( cmd, "STEP %u\n", step );
+    fprintf( stderr, "%s", cmd );
     oriel_cs_130_command( cmd );
 
     switch ( oriel_cs_130_get_error( ) )
@@ -1196,15 +1272,13 @@ oriel_cs_130_set_shutter( bool on_off )
  * of position.
  *----------------------------------------------------*/
 
-#if HAS_FILTER
+#if defined HAS_FILTER_WHEEL
 static
 int
 oriel_cs_130_get_filter( void )
 {
     char reply[ 100 ];
 
-
-    fsc2_assert( HAS_FILTER );
 
     if (    oriel_cs_130_talk( "FILTER?\n", reply,sizeof reply ) != 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
@@ -1233,12 +1307,12 @@ oriel_cs_130_get_filter( void )
  * Switches to a new filter and waits for it to be in position.
  *----------------------------------------------------*/
 
-#if HAS_FILTER
+#if defined HAS_FILTER_WHEEL
 static
 int
 oriel_cs_130_set_filter( int filter )
 {
-    char cmd = "FILTER *\n";
+    char cmd[ ] = "FILTER *\n";
 
     fsc2_assert( filter >= 0 && filter < MAX_FILTER );
 
@@ -1246,12 +1320,12 @@ oriel_cs_130_set_filter( int filter )
         return filter;
 
     cmd[ 7 ] = '1' + filter;
-    oriel_cs_130__command( cmd );
+    oriel_cs_130_command( cmd );
 
     /* Wait for the new filter position to become set */
 
     do
-        fsc2_usleep( 100000 );
+      fsc2_usleep( 100000, UNSET );
     while ( oriel_cs_130_get_filter( ) != filter );
 
     return oriel_cs_130.filter = filter;
@@ -1270,7 +1344,7 @@ int
 oriel_cs_130_get_error( void )
 {
     unsigned long int b;
-    char reply[ 100 ];
+    char reply[ 4 ];
     char *ep;
 
 
@@ -1344,7 +1418,7 @@ oriel_cs_130_failure( void )
  *-----------------------------------------*/
 
 static
-unsigned int
+int
 oriel_cs_130_get_gpib_address( void )
 {
     char reply[ 100 ];
@@ -1378,7 +1452,7 @@ oriel_cs_130_set_gpib_address( unsigned int addr )
 
     fsc2_assert( addr <= 30 );
 
-    if ( addr == oriel_cs_130_get_gpib_address( ) )
+    if ( ( int ) addr == oriel_cs_130_get_gpib_address( ) )
         return;
 
     sprintf( cmd, "ADDRESS %2u\n", addr );

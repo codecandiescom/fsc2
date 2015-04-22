@@ -7163,7 +7163,7 @@ conjunction with the supported monochromatore).
 @item @ref{monochromator_init_motor()}
 @item @ref{monochromator_enforce_wavelength()}
 @item @ref{monochromator_enforce_wavenumber()}
-@item @ref{monochromator_reset_grating_zero()}
+@item @ref{monochromator_grating_zero()}
 @item @ref{monochromator_set_gpib_address()}
 @end table
 
@@ -7949,13 +7949,19 @@ used in between that drove the monochromator to a different wavenumber
 from the one stored in the state file).
 
 
-@anchor{monochromator_reset_grating_zero()}
-@findex monochromator_reset_grating_zero()
-@item monochromator_reset_grating_zero()
+@anchor{monochromator_grating_zero()}
+@findex monochromator_grating_zero()
+@item monochromator_grating_zero()
 This function only exists for the @strong{Oriel} @ref{oriel_cs_130}
-monochromator. It allows to reset the zero paramter (used internally
-by the device to calculate the wavelength) for both gratings to the
-values given in the manual in case they got corrupted.
+monochromator. It allows to query or set the gratung zero parameter
+(used internally by the device to calculate the center position of
+ä grating). It expects at least one argument, the grating number.
+If no more arguments exist it returns the currently used zero paramter
+for the grating. If called with a second, positive argument this is
+used set as the zero paramter for the grating. This function should
+only be called with two arguments if the internal memory of the device
+became corrupted and the zero position argument should be the one
+from the data sheet for the device.
 
 This function can only be used in the @code{EXPERIMENT} section.
 
@@ -7985,6 +7991,11 @@ EXPERIMENT:
 This sets a new GPIB address of @code{17} during initialization of the
 device and then stops the script immediately. The new GPIB address
 then has to be entered into the GPIB configuration file.
+
+Note: Use this function only if you really have to. If you
+inadvertently set an address you don't know afterwards you'll have a
+hard time figuring out what it is and will have to do up to 31 trials
+to find it out before the device is under control again!
 
 If the GPIB address of the device is already set to the one this
 function is called with it has no effect.

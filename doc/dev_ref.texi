@@ -3047,7 +3047,7 @@ the monochromators GPIB address to the new one.
 @item @ref{monochromator_calibrate()}
 @item @ref{monochromator_calibration_factor()}
 @item @ref{monochromator_calibration_offset()}
-@item @ref{monochromator_reset_grating_zero()}
+@item @ref{monochromator_grating_zero()}
 @item @ref{monochromator_set_gpib_address()}
 @end table
 

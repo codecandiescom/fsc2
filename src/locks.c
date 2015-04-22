@@ -47,6 +47,8 @@ fsc2_obtain_uucp_lock( const char * name )
     mode_t mask;
 
 
+    fsc2_assert( name && *name );
+
     if ( ( fn = strrchr( name, '/' ) ) )
     {
         if ( ! *++fn )
@@ -147,6 +149,8 @@ fsc2_release_uucp_lock( const char * name )
 	char *fn = NULL;
 
 
+    fsc2_assert( name && *name );
+
     if ( ( fn = strrchr( name, '/' ) ) )
     {
         if ( ! *++fn )
@@ -208,7 +212,7 @@ fsc2_release_fcntl_lock( FILE * fp )
     struct flock fl;
 
 
-    fsc2_assert( fp  );
+    fsc2_assert( fp );
 
     fl.l_type   = F_UNLCK;
     fl.l_whence = SEEK_SET;

@@ -454,15 +454,15 @@ monochromator_laser_line, -1, EXP;
 monochromator_shutter_limits, -1, ALL;
 monochromator_wavenumber_scan_limits, 0, ALL;
 monochromator_wavelength_scan_limits, 0, ALL;
-monochromtor_init_motor, 0, PREP;
+monochromator_init_motor, 0, PREP;
 monochromator_enforce_wavelength, 1, PREP;
 monochromator_enforce_wavenumber, 1, PREP;
 monochromator_filter, -1, EXP;
-monocromator_step_position, -1, EXP;
+monochromator_step_position, -1, EXP;
 monochromator_shutter, -1, EXP;
 monochromator_calibration_factor, -1, EXP;
 monochromator_calibration_offset, -1, EXP;
-monochromator_reset_grating_zeros, 0, EXP;
+monochromator_grating_zero, -1, EXP;
 monochromator_set_gpib_address, 1, PREP;
 
 
