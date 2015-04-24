@@ -3008,8 +3008,11 @@ library are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Description}: Monochromator with two gratings, shutter and
-optional filter wheel (with 6 filters). If a filter wheel is installed
-has to be specified in the device's onfiguration file.
+optional filter wheel (with up to 6 filters). The number of gratings,
+the maximum wavelengths for these gratings, the minumum and maximum
+positions of the stepper motor for the gratings and if a filter wheel
+is installed (and how many usable filters are available) has to be
+setin the device's onfiguration file.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*

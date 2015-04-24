@@ -27,8 +27,8 @@
 
 #include "oriel_cs_260.conf"
 
-#if NUM_GRATINGS < 1 || NUM_GRATINGS > 9
-#error "Number of gratings in configration must be between 1 and 9"
+#if NUM_GRATINGS != 2 && NUM_GRATINGS != 3
+#error "Number of gratings in configration must be 2 or 3"
 #endif
 
 
@@ -642,6 +642,7 @@ monochromator_shutter( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * Queries or sets the filter in the filter wheel (if installed)
  *--------------------------------------------------------*/
 
 #if ! defined HAS_FILTER_WHEEL
@@ -686,6 +687,7 @@ monochromator_filter( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * Queries or sets the mirror controlling whoch output port is used.
  *--------------------------------------------------------*/
 
 Var_T *
@@ -694,7 +696,7 @@ monochromator_output_port( Var_T * v )
     int outport;
 
 
-    if ( v == 0 )
+    if ( ! v )
         return vars_push( INT_VAR, oriel_cs_260.outport + 1L );
 
     if ( v->type != STR_VAR )
@@ -1495,7 +1497,7 @@ oriel_cs_260_set_outport( int outport )
 
     fsc2_assert( outport == 0 || outport == 1 );
 
-    cmd[ 8 ] = '1' + outport + '1';
+    cmd[ 8 ] = outport + '1';
     if ( ! oriel_cs_260_command( cmd, Max_Outport_Switch_Delay ) )
     {
         print( FATAL, "Failed to switch to %s output port.\n",

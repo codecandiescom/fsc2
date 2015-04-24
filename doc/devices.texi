@@ -7467,14 +7467,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_filter()
 @item monochromator_filter()
 The function is only supported for @ref{oriel_cs_260, Oriel
-Cornerstone 260} monochromators, which have a wheel with up to 6
-filters. Since not all have a filter wheel, the existence of this
-function depends on the configuration for compiling the module. The
-function allows to query or set which filter is used. If called
-without an argument the filter currently in use is returned, as an
-integer between @code{1} and @code{6}. If called with an integer
-argument between these values the wheel is turned to the corresponding
-filter.
+Cornerstone 260} monochromators having a wheel with up to 6 filters
+(and if support for the filter wheel is compiled in). Since not all
+have a filter wheel, the existence of this function depends on the
+configuration for compiling the module. The function allows to query
+or set which filter is used. If called without an argument the filter
+currently in use is returned, as an integer between @code{1} and
+@code{6}. If called with an integer argument between these values the
+wheel is turned to the corresponding filter.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
