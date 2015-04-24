@@ -239,7 +239,7 @@ oriel_cs_260_exp_hook( void )
 {
     /* Initialize the device */
 
-    if ( oriel_cs_260_init( DEVICE_NAME ) )
+    if ( ! oriel_cs_260_init( DEVICE_NAME ) )
     {
         print( FATAL, "Initialization of device failed: %s.\n",
                gpib_last_error( ) );
@@ -847,7 +847,6 @@ oriel_cs_260_init( const char * name )
 
     /* Clear a possibly set error byte by reading it */
 
-    fprintf( stderr, "Checking error value\n" );
     oriel_cs_260_get_error( );
 
     /* Switch to nanometer units */
@@ -902,7 +901,7 @@ oriel_cs_260_get_grating( void )
     char reply[ 30 ];
 
 
-    if (    oriel_cs_260_talk( "GRAT?\n", reply, sizeof reply, UNSET ) != 1
+    if (    oriel_cs_260_talk( "GRAT?\n", reply, sizeof reply, UNSET ) < 5
          || ! isdigit( ( int ) *reply )
          || ( *reply - '0' < 1 || *reply - '0' > NUM_GRATINGS )
          || reply[ 1 ] != ',' )
@@ -1097,7 +1096,7 @@ static
 double
 oriel_cs_260_get_calibration_offset( int grating )
 {
-    char req[ ] = "GRAT*OFFSTE?\n";
+    char req[ ] = "GRAT*OFFSET?\n";
     char reply[ 100 ];
     double val;
     char * ep;
@@ -1580,10 +1579,7 @@ oriel_cs_260_command( const char * cmd,
     }
 
     if ( ! strcmp( buf, "0\r\n" ) )
-    {
-        fprintf( stderr, "Got andshake\n" );
         return SET;
-    }
 
     len = 1;
     if ( gpib_read( oriel_cs_260.device, buf, &len ) == FAILURE )
