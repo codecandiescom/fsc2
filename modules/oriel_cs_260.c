@@ -899,12 +899,13 @@ static
 int
 oriel_cs_260_get_grating( void )
 {
-    char reply[ 3 ];
+    char reply[ 30 ];
 
 
-    if (    oriel_cs_260_talk( "GRAT?\n", reply, sizeof reply, SET ) != 1
+    if (    oriel_cs_260_talk( "GRAT?\n", reply, sizeof reply, UNSET ) != 1
          || ! isdigit( ( int ) *reply )
-         || ( *reply - '0' < 1 || *reply - '0' > NUM_GRATINGS ) )
+         || ( *reply - '0' < 1 || *reply - '0' > NUM_GRATINGS )
+         || reply[ 1 ] != ',' )
         oriel_cs_260_failure( );
 
     return oriel_cs_260.grating = *reply - '1';
@@ -1651,7 +1652,7 @@ oriel_cs_260_talk( const char * cmd,
        "0\r\n" - or something is seriously weird. */
 
     if (    gpib_read( oriel_cs_260.device, buf, &hs_len ) == FAILURE
-         || ! strncmp( buf, "0\r\n", 3 ) )
+         || strncmp( buf, "0\r\n", 3 ) )
         oriel_cs_260_failure( );
 
     return length;
