@@ -1505,27 +1505,21 @@ oriel_cs_260_set_outport( int outport )
     
 
 /*--------------------------------------------------*
- * Reads the status byte and if this indicates that there was
- * an error, the error error code. Returns -1 if there was no
- * error, otherwise the error code.
+ * Requests the error state. Returns -1 if there was no
+ * error, otherwise the error code as documented in the
+ * manual.
  *--------------------------------------------------*/
 
 static
 int
 oriel_cs_260_get_error( void )
 {
-    char reply[ 4 ];
+    char reply[ 3 ];
 
 
-    if (    oriel_cs_260_talk( "STB?\n", reply, 4, SET ) != 2
-         || ( strcmp( reply, "00" ) && strcmp( reply, "20x" ) ) )
-        oriel_cs_260_failure( );
-
-    if ( *reply == '0' )
-        return -1;
-
-    if (    oriel_cs_260_talk( "ERROR?\n", reply, 3, SET ) != 1
-         || ! isdigit( ( int ) reply[ 0 ] ) )
+    if (    oriel_cs_260_talk( "ERROR?\n", reply, sizeof reply, SET ) != 1
+         || ! isdigit( ( int ) *reply )
+         || ( *reply > '3' && ! ( *reply >= '6' && *reply <= 9 ) ) )
         oriel_cs_260_failure( );
 
     return reply[ 0 ] - '0';
