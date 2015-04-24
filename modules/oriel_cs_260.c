@@ -1220,8 +1220,8 @@ oriel_cs_260_get_wavelength( void )
 
     /* Note: the device may return a negative wavelength... */
 
-    if (   oriel_cs_260_talk( "WAVE?\n", reply, sizeof reply, UNSET ) < 1
-        || ( ! isdigit( ( int ) && *reply != '-' ) )
+    if (    oriel_cs_260_talk( "WAVE?\n", reply, sizeof reply, UNSET ) < 1
+         || ( ! isdigit( ( int ) *reply ) && *reply != '-' ) )
         oriel_cs_260_failure( );
 
     val = strtod( reply, &ep );
