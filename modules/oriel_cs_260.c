@@ -722,7 +722,7 @@ monochromator_output_port( Var_T * v )
     else
         oriel_cs_260.outport = outport;
 
-    return vars_push( STR_VAR, oriel_cs_260.outport + 1L );
+    return vars_push( INT_VAR, oriel_cs_260.outport + 1L );
 }
 
 
