@@ -1459,7 +1459,7 @@ oriel_cs_260_set_filter( int filter )
     if ( filter == oriel_cs_260.filter )
         return filter;
 
-    cmd[ 7 ] = '1' + filter + '1';
+    cmd[ 7 ] = filter + '1';
     if ( ! oriel_cs_260_command( cmd, Max_Filter_Delay ) )
     {
         print( FATAL, "Failed to switch to filter #%d.\n", filter + 1 );

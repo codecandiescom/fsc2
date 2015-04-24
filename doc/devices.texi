@@ -7195,8 +7195,8 @@ current grating).
 Please note: for @strong{SPEX} monochromators doing a scan calling
 this function automatically aborts the currently running scan.
 
-Also note: the @code{Oriel Cornerstone 260} may under certain
-circumstances return negative wavelengths, but does not accept
+Also note: the @ref{oriel_cs_260, Oriel Cornerstone 260} may under
+certain circumstances return negative wavelengths, but does not accept
 them.
 
 
@@ -7219,8 +7219,8 @@ this function automatically aborts the currently running scan. This
 function isn't yet available for the @ref{spectrapro_275,
 SpectraPro-275}.
 
-Also note: the @code{Oriel Cornerstone 260} may under certain
-circumstances return negative wavenumbers, but does not accept
+Also note: the @ref{oriel_cs_260, Oriel Cornerstone 260} may under
+certain circumstances return negative wavenumbers, but does not accept
 them.
 
 
@@ -7409,9 +7409,10 @@ remains the same as for the previous grating.
 With the @ref{oriel_cs_260, Oriel Cornerstone 260} before switching
 gratings the built-in shutter is closed and has to be explicitely
 re-opened (using the function @code{@ref{monochromator_shutter()}}).
-When switching to grating #2 the system stops at the zero order
-position while, when switching to grating #1 it goes to the maximum
-possible wavelength.
+Also kep in mind that after switching gratings the wavelength may be
+set to 0.@: order, so make sure you set a wavelength before re-opening
+the shutter in order to avoid exposing the detector to excessive
+levels of radiation!
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script. It isn't available for the @ref{spectrapro_275,
