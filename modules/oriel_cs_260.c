@@ -847,6 +847,7 @@ oriel_cs_260_init( const char * name )
 
     /* Clear a possibly set error byte by reading it */
 
+    fprintf( stderr, "Checking error value\n" );
     oriel_cs_260_get_error( );
 
     /* Switch to nanometer units */
@@ -1526,7 +1527,8 @@ oriel_cs_260_get_error( void )
 }
 
 /*--------------------------------*
- * Sends a message to the device.
+ * Sends a message to the device, not expecting a reply but just
+ * a handshake within 'wait_for' seconds
  *--------------------------------*/
 
 static
@@ -1571,8 +1573,11 @@ oriel_cs_260_command( const char * cmd,
         }
     }
 
-    if ( strcmp( buf, "0\r\n" ) )
+    if ( ! strcmp( buf, "0\r\n" ) )
+    {
+        fprintf( stderr, "Got andshake\n" );
         return SET;
+    }
 
     len = 1;
     if ( gpib_read( oriel_cs_260.device, buf, &len ) == FAILURE )
