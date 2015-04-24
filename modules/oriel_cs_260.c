@@ -1573,7 +1573,7 @@ oriel_cs_260_command( const char * cmd,
         wait_for -=   ( after.tv_sec  + 1.0e-6 * after.tv_usec  )
                     - ( before.tv_sec + 1.0e-6 * before.tv_usec );
 
-xs        if ( wait_for <= 0 )
+        if ( wait_for <= 0 )
             oriel_cs_260_failure( );
 
         before = after;
