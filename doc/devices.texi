@@ -7084,14 +7084,14 @@ SpectraPro-275}, both by @strong{Acton Research Corporation},
 monochromators by @strong{SPEX} controlled either via the
 @ref{spex_cd2a, CD2A Compudrive} or the @ref{spex232, SPEX232}
 interface are supported, and the @strong{(Newport) Oriel}
-@ref{oriel_cs_130, Cornerstone 130}. The modules for the
+@ref{oriel_cs_260, Cornerstone 260}. The modules for the
 monochromators get loaded by specifying one of
 @example
 spectrapro_275
 spectrapro_300i
 spex_cd2a
 spex232
-oriel_cs_130
+oriel_cs_260
 @end example
 in the @code{DEVICES} section. 
 
@@ -7148,7 +7148,8 @@ conjunction with the supported monochromatore).
 @c @item @ref{monochromator_entry_mirror()}
 @item @ref{monochromator_exit_mirror()}
 @item @ref{monochromator_filter()}
-@item @ref{monochromator_step_position()}
+@item @ref{monochromator_output_port()}
+@item @ref{monochromator_step()}
 @item @ref{monochromator_wavelength_axis()}
 @item @ref{monochromator_wavenumber_axis()}
 @item @ref{monochromator_calc_wavelength()}
@@ -7351,7 +7352,7 @@ automatically aborts the currently running scan.
 @anchor{monochromator_shutter()}
 @findex monochromator_shutter()
 @item monochromator_shutter()
-This function is only supported for the @strong{Oriel} Cornerstone 130
+This function is only supported for the @strong{Oriel} Cornerstone 260
 monocromators and allows to query or set the state of the built-in
 shuuter. If called with no argument the function returns @code{0} if
 the shuuter is open, otherwise @code{0}. If called with a true boolean
@@ -7371,7 +7372,7 @@ argument it returns the number of grooves per m of the grating indexed
 by the number (an integer between 1 and the maximum number of installed
 gratings) passed to the function.
 
-For the @strong{Oriel Cornerstone 130} the function may also be called
+For the @strong{Oriel Cornerstone 260} the function may also be called
 with the a second argument, the umber of lines per meter of the
 grating. This number is sent to the device and then used by it to
 calculate the wavelengths and wavenumbers. This two-argument version
@@ -7386,7 +7387,7 @@ SpectraPro-275}.
 @findex monochromator_grating()
 @item monochromator_grating()
 The function is only supported for @ref{spectrapro_300i,
-SpectraPro-300i} and @ref{oriel_cs_130, Oriel Cornerstone 130}
+SpectraPro-300i} and @ref{oriel_cs_260, Oriel Cornerstone 260}
 monochromators. It queries or sets a new grating. If called with no
 argument the function returns the number of the currently used grating
 (an integer between 1 and the maximum number of installed gratings).
@@ -7397,7 +7398,7 @@ When switching to a new grating for the @ref{spectrapro_300i,
 SpectraPro-300i} the center wavelength the new grating is set to
 remains the same as for the previous grating.
 
-With the @ref{oriel_cs_130, Oriel Cornerstone 130} before switching
+With the @ref{oriel_cs_260, Oriel Cornerstone 260} before switching
 gratings the built-in shutter is closed and has to be explicitely
 re-opened (using the function @code{@ref{monochromator_shutter()}}).
 When switching to grating #2 the system stops at the zero order
@@ -7456,8 +7457,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_filter()}
 @findex monochromator_filter()
 @item monochromator_filter()
-The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators, which have a wheel with up to 6
+The function is only supported for @ref{oriel_cs_260, Oriel
+Cornerstone 260} monochromators, which have a wheel with up to 6
 filters. Since not all have a filter wheel, the existence of this
 function depends on the configuration for compiling the module. The
 function allows to query or set which filter is used. If called
@@ -7470,17 +7471,46 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_step_position()}
-@findex monochromator_step_position()
-@item monochromator_step_position()
-The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators. It allows to directly query or set
-the position of the stepper motor driving the grating. If called with
-no argument the function returns its current position as an integer
-value. If called with an integer value the stepper motor is set to
-that position (if within the allowed range). This function is mostly
-meant for making small adjustments to the grating position during
-calibrations.
+@anchor{monochromator_output_port()}
+@findex monochromator_output_port()
+@item monochromator_boutput_port()
+The function is only supported for @ref{oriel_cs_260, Oriel
+Cornerstone 260} monochromators, which have a motorized mirror that
+allows selecting one of two output ports. If called without an
+argument the function returns @code{1} if the exit mirror is set for
+the axial port and @code{2} for the lateral port. If called with
+a string argument of @code{"AXIAL"} or @code{"LATERAL"} the mirror
+is set to the corresponding output port (and returns @code{1} or
+@code{2} for te newly set output port).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{monochromator_step()}
+@findex monochromator_step()
+@item monochromator_step()
+The function is only supported for @ref{oriel_cs_260, Oriel
+Cornerstone 260} monochromators. It allows to directly query or set
+the position of the stepper motor moving the gratings. If called
+without any arguments the function returns the current position as an
+integer value.
+
+If called with just an integer value the stepper motor is moved by
+that amount of steps upwards or downwars. If an additional boolean
+argument, which is set to true (i.e. either @code{1} or the string
+@code{"ON"}) the function only tests if moving the motor by this
+amount is possible. If called wit one or two arguments the function
+always returns either @code{0} or @code{1}, indicating if the move is
+possible. If an actual attempt to step the motor fails the function
+does not throw an exception but merely emits a warning.
+
+Note: if can't reliably checked during the test run if an attempt to
+move the stepper motor will fail, so during the test run the function
+will always return successful.
+
+This function is mostly meant for making small adjustments to the
+grating position w.g.@: during calibrations.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -7665,8 +7695,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibration_factor()}
 @findex monochromator_calibration_factor()
 @item monochromator_calibration_factor()
-The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators. It allows to query or set a factor
+The function is only supported for @ref{oriel_cs_260, Oriel
+Cornerstone 260} monochromators. It allows to query or set a factor
 that is used (in conjunction with an offset value, see
 @code{@ref{monochromator_calibration_offset()}}) in calculating the
 wavelengths from grating positions. When called without an argument it
@@ -7685,8 +7715,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibration_offset()}a
 @findex monochromator_calibration_offset()
 @item monochromator_calibration_offset()
-The function is only supported for @ref{oriel_cs_130, Oriel
-Cornerstone 130} monochromators. It allows to query or set an offset
+The function is only supported for @ref{oriel_cs_260, Oriel
+Cornerstone 260} monochromators. It allows to query or set an offset
 that is used (in conjunction with a factor, see
 @code{@ref{monochromator_calibration_factor()}}) in calculating the
 wavelengths from grating positions. When called without an argument it
@@ -7805,7 +7835,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_calibrate()
 The function is takes different arguments for the
 @ref{spectrapro_300i, SpectraPro 300i}, the @strong{SPEX} and the
-@ref{oriel_cs_130, Oriel Cornerstone 130} monochromators. It isn't
+@ref{oriel_cs_260, Oriel Cornerstone 260} monochromators. It isn't
 available for the @ref{spectrapro_275, SpectraPro-275}.
 
 For the @ref{spectrapro_300i, SpectraPro-300i} it is for use in the
@@ -7896,7 +7926,7 @@ function. Instead determine the current offset setting by a call
 without arguments and then call the function again with that offset as
 the first argument!.
 
-For the @ref{oriel_cs_130, Oriel Cornerstone 130} the function
+For the @ref{oriel_cs_260, Oriel Cornerstone 260} the function
 requires a single argument, the wavelength the monochromators
 grating is currently set to (which you know by e.g. moving it to the
 exact position of a line of a calibration sample). Calling this
@@ -7952,7 +7982,7 @@ from the one stored in the state file).
 @anchor{monochromator_grating_zero()}
 @findex monochromator_grating_zero()
 @item monochromator_grating_zero()
-This function only exists for the @strong{Oriel} @ref{oriel_cs_130}
+This function only exists for the @strong{Oriel} @ref{oriel_cs_260}
 monochromator. It allows to query or set the gratung zero parameter
 (used internally by the device to calculate the center position of
 ä grating). It expects at least one argument, the grating number.
@@ -7969,7 +7999,7 @@ This function can only be used in the @code{EXPERIMENT} section.
 @anchor{monochromator_set_gpib_address()}
 @findex monochromator_set_gpib_address()
 @item monochromator_set_gpib_address()
-This function only exists for the @strong{Oriel} @ref{oriel_cs_130}
+This function only exists for the @strong{Oriel} @ref{oriel_cs_260}
 monochromator. This device comes with a preset GPIB address of
 @code{4} that can only be modified via software. In ordr to do so the
 device must be entered into the GPIB configuration file with this
@@ -7980,7 +8010,7 @@ and run that calls this function somewhere before the
 @code{EXPERIMENT} section. E.@:g.@: use
 @example
 DEVICES:
-  oriel_cs_130;
+  oriel_cs_260;
 
 PREP:
   monochromator_set_gpib_address( 17 );

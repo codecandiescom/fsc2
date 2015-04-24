@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -436,8 +436,8 @@ gpib_write( int          dev,
  * Function for reading data from a device. Exoects the device
  * number, a pointer to memory for storing the data sent by the
  * device and a pointer to a long that on enry contains the
- * maximum number of bytes to be read and on exit the number of
- * bytes that were actually sent by the device.
+ * maximum number of bytes to be read and, on exit, the number
+ * of bytes that were actually sent by the device.
  *--------------------------------------------------------------*/
 
 int
@@ -476,9 +476,9 @@ gpib_read( int    dev,
 
     /* The expected answer is either a line with the number of bytes
        that got read (which can't be larger then the number of bytes
-       we asked for) or a single NAK character (either because memory
-       allocation for a large enough buffer or the call of gpib_read()
-       failed) */
+       we asked for but smaller) or a single NAK character (either
+       because memory allocation for a large enough buffer or the
+       actual call of gpib_read() failed) */
 
     if (    sread( GPIB_fd, line, 1 ) != 1
          || *line == NAK
@@ -495,8 +495,8 @@ gpib_read( int    dev,
         return FAILURE;
     }
 
-    /* Send a single ACK char as acknowledgment and then read the data sent
-       by the device */
+    /* Send a single ACK char as acknowledgment and then read the data
+       obtained from the device */
 
     if (    swrite( GPIB_fd, STR_ACK, 1 ) != 1
          || sread( GPIB_fd, buffer, val ) != val )

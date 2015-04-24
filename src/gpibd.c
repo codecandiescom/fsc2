@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1022,7 +1022,7 @@ gpibd_read( int    fd,
     }
 
     /* First send the length of the buffer as a line-feed terminated line,
-       wait for an ACK character as acknowledgement and then send the data */
+       wait for an ACK character as acknowledgment and then send the data */
 
     mlen = sprintf( line, "%lu\n", len );
     if (    swrite( fd, line, mlen ) != mlen
