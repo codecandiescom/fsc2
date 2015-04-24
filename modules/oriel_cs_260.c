@@ -1579,7 +1579,7 @@ xs        if ( wait_for <= 0 )
         before = after;
     }
 
-    if ( ! strcmp( buf, "0\r\n" ) )
+    if ( ! strncmp( buf, "0\r\n", 3 ) )
         return SET;
 
     len = 1;
