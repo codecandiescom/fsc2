@@ -1516,15 +1516,20 @@ int
 oriel_cs_260_get_error( void )
 {
     char reply[ 3 ];
+    long len = oriel_cs_260_talk( "ERROR?\n", reply, sizeof reply, UNSET );
 
 
-    if (    oriel_cs_260_talk( "ERROR?\n", reply, sizeof reply, SET ) != 1
+    if ( len == 0 )     /* no error */
+        return -1;
+
+    if (    len != 1
          || ! isdigit( ( int ) *reply )
          || ( *reply > '3' && ! ( *reply >= '6' && *reply <= 9 ) ) )
         oriel_cs_260_failure( );
 
     return reply[ 0 ] - '0';
 }
+
 
 /*--------------------------------*
  * Sends a message to the device, not expecting a reply but just
@@ -1559,18 +1564,18 @@ oriel_cs_260_command( const char * cmd,
         len = 3;
         gettimeofday( &before, NULL );
 
-        if ( gpib_read( oriel_cs_260.device, buf, &len ) == FAILURE )
-        {
-            gettimeofday( &after, NULL );
+        if ( gpib_read( oriel_cs_260.device, buf, &len ) == SUCCESS )
+            break;
+
+        gettimeofday( &after, NULL );
             
-            wait_for -=   ( after.tv_sec  + 1.0e-6 * after.tv_usec  )
-                        - ( before.tv_sec + 1.0e-6 * before.tv_usec );
+        wait_for -=   ( after.tv_sec  + 1.0e-6 * after.tv_usec  )
+                    - ( before.tv_sec + 1.0e-6 * before.tv_usec );
 
-            if ( wait_for <= 0 )
-                oriel_cs_260_failure( );
+        if ( wait_for <= 0 )
+            oriel_cs_260_failure( );
 
-            before = after;
-        }
+        before = after;
     }
 
     if ( ! strcmp( buf, "0\r\n" ) )
