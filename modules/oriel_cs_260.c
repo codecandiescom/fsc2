@@ -319,7 +319,7 @@ monochromator_wavelength( Var_T * v )
     if ( wl > Max_Wavelengths[ grating ] )
     {
         print( FATAL, "Requested Wavelength of %.3f nm too large, maximum "
-               "for grating #%d is %.3f nm.\n", wl * 1.0e9, grating + 1,
+               "for grating #%d is %.3f nm.\n", 1.0e9 * wl, grating + 1,
                1.0e9 * Max_Wavelengths[ grating ] );
         THROW( EXCEPTION );
     }
@@ -1248,7 +1248,7 @@ oriel_cs_260_set_wavelength( double wl )
 
     sprintf( cmd, "GOWAVE %.3f\n", 1.0e9 * wl );
 
-    /* Make sure we don't set a wavelnegth that's already set */
+    /* Avoid setting a wavelnegth that's already set */
 
     wl = 1.0e-9 * strtod( cmd + 7, NULL );
     if ( wl == oriel_cs_260.wavelength )
@@ -1559,11 +1559,12 @@ oriel_cs_260_command( const char * cmd,
        the timeout, givem in seconds via 'wait_for', is over before
        giving up. */
 
+    gettimeofday( &before, NULL );
+
     while ( 1 )
     {
         len = 3;
-        gettimeofday( &before, NULL );
-
+  
         if ( gpib_read( oriel_cs_260.device, buf, &len ) == SUCCESS )
             break;
 
@@ -1572,7 +1573,7 @@ oriel_cs_260_command( const char * cmd,
         wait_for -=   ( after.tv_sec  + 1.0e-6 * after.tv_usec  )
                     - ( before.tv_sec + 1.0e-6 * before.tv_usec );
 
-        if ( wait_for <= 0 )
+xs        if ( wait_for <= 0 )
             oriel_cs_260_failure( );
 
         before = after;

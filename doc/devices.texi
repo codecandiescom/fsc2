@@ -7195,6 +7195,10 @@ current grating).
 Please note: for @strong{SPEX} monochromators doing a scan calling
 this function automatically aborts the currently running scan.
 
+Also note: the @code{Oriel Cornerstone 260} may under certain
+circumstances return negative wavelengths, but does not accept
+them.
+
 
 @anchor{monochromator_wavenumber()}
 @findex monochromator_wavenumber()
@@ -7214,6 +7218,10 @@ Please note: for @strong{SPEX} monochromators doing a scan calling
 this function automatically aborts the currently running scan. This
 function isn't yet available for the @ref{spectrapro_275,
 SpectraPro-275}.
+
+Also note: the @code{Oriel Cornerstone 260} may under certain
+circumstances return negative wavenumbers, but does not accept
+them.
 
 
 @anchor{monochromator_laser_line()}
