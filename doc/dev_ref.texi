@@ -2997,44 +2997,45 @@ library are part of the @code{fsc2} package)
 
 @node oriel_cs_260, oriel_matrix, ni6601, Device Reference
 @iftex
-@subheading Newport Oriel Corne4rstone Monochromator
+@subheading Oriel (Newport) Cornerstone 260 Monochromator
 @end iftex
 @ifnottex
-@section Newport Oriel Corne4rstone Monochromator
+@section Oriel (Newport) Cornerstone 260 Monochromator
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{oriel_matrix}
+@strong{Module name}: @code{oriel_cs_260}
 
 @paragraphindent 0
-@strong{Description}: Monochromator with two gratings, shutter and
-optional filter wheel (with up to 6 filters). The number of gratings,
-the maximum wavelengths for these gratings, the minumum and maximum
+@strong{Description}: Monochromator with two or three gratings,
+shutter, a motorized mirro to select one of two output ports and,
+optional, a filter wheel with up to 6 filters. The number of gratings,
+the maximum wavelengths for the gratings, the minumum and maximum
 positions of the stepper motor for the gratings and if a filter wheel
 is installed (and how many usable filters are available) has to be
 setin the device's onfiguration file.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{"ORIEL_CS_260"} as the
-device name, @code{'\n'} as the EOS character and set @code{set-reos}
+@strong{Controlled via}: GPIB bus (IEEE 488).@* In the GPIB
+configuration file use @code{"ORIEL_CS_260"} as the device name,
+@code{0x0a} as the EOS character and set @code{set-reos}
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-Note that the device comes with teh GPIB address set to @code{4}. It's
-only possible to change the address via software. To do this set the
-GPIB address in the GPIB configuration file initially to @code{4} (and
+Note that the device comes with the GPIB address set to @code{4}. This
+address can only be changed via software. To do this set the GPIB
+address in the GPIB configuration file initially to @code{4} (and
 comment out a device that already has this address as well as
-pysically disconnect it from the bus or, at least, switch it out).
-Then use the @code{@ref{monochromator_set_gpib_address()}} function
-(from anywhere before the @code{EXPERIMENT} section) to set a
-different address. When this @code{EDL} script is run it will stop
-immediately during device initialization after the new GPIB address
-has been set. Now again edit the GPIB configuration file and change
-the monochromators GPIB address to the new one.
+swxitching off). Then use the
+@code{@ref{monochromator_set_gpib_address()}} function (from anywhere
+before the @code{EXPERIMENT} section) to set a different address. When
+this @code{EDL} script is run it will stop immediately during device
+initialization after the new GPIB address has been set. Now again edit
+the GPIB configuration file and change the monochromators GPIB address
+to the new one.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Status}: Semi-tested
 
 @paragraphindent 0
 @strong{Supported functions}:
