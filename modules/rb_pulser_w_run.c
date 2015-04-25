@@ -333,7 +333,7 @@ rb_pulser_w_phase_channel_setup( void )
         mw_start +=   mw_card->intr_delay + mw_card->next->intr_delay
                     + mw_card->delay * rb_pulser_w.timebase;
 
-        dT = Ticks_rnd( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
+        dT = Ticks_rnd(   ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
                         / rb_pulser_w.timebase );
 
         /* The phase pulse must have a minimum length so that Leendert's
@@ -351,7 +351,7 @@ rb_pulser_w_phase_channel_setup( void )
 
         if ( dT > MAX_TICKS )
         {
-            print( FATAL, "Microwave pulse #%ld comes too late to for phase "
+            print( FATAL, "Microwave pulse #%ld comes too late for phase "
                    "switching.\n", pulses[ i ]->num );
             THROW( EXCEPTION );
         }

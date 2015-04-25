@@ -65,12 +65,12 @@
 #define TB_CLOCK_2        2
 
 #define ERT_DELAY         0
-#define MW_DELAY_0        1
-#define MW_DELAY_1        2
-#define MW_DELAY_2        3
-#define MW_DELAY_3        4
-#define MW_DELAY_4        5
-#define MW_DELAY_5        6
+#define MW_DELAY_0        1      /* delay before 1st MW pulse */
+#define MW_DELAY_1        2      /* creates the first MW pulse */
+#define MW_DELAY_2        3      /* delay between 1st and 2nd MW pulse */
+#define MW_DELAY_3        4      /* creates 2nd MW pulse */
+#define MW_DELAY_4        5      /* delay between 2nd and 3rd MW pulse */
+#define MW_DELAY_5        6      /* creates 3rd MW pulse */
 #define PHASE_DELAY_0     7
 #define PHASE_DELAY_1     8
 #define PHASE_DELAY_2     9
@@ -176,7 +176,7 @@ struct Function {
 
 struct Pulse {
     long num;                /* number of the pulse (automatically created
-                                pulses have negative, normal pulses
+                                pulses have negative wile normal pulses have
                                 positive numbers */
     bool is_active;          /* set if the pulse is really used */
     bool was_active;

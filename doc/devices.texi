@@ -3755,7 +3755,7 @@ pulser}. For this module a defense pulse, starting at the very start
 of the pulse pattern and lasting to some time after the end of the
 last microwave pulse, is created in order to protect amplifiers and
 receivers from excessive levels of microwave power. But in some
-situations such an aautomatic creation of a defense pulse is not
+situations such an automatic creation of a defense pulse is not
 desirable, in which case this function can be called during the
 @code{PREPARATIONS} section of the @code{EDL} script before a defense
 pulse is defined. It can be called with a string argument of either
