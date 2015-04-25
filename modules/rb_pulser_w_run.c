@@ -203,7 +203,7 @@ rb_pulser_w_mw_channel_setup( void )
         fsc2_assert( cur_card != NULL && cur_card->next != NULL );
 
         /* Figure out where the microwave pulse starts and test that it
-           neither starts too early or "collides" with its predecessor */
+           neither starts too early nor "collides" with its predecessor */
 
         start += cur_card->intr_delay + cur_card->next->intr_delay;
 
