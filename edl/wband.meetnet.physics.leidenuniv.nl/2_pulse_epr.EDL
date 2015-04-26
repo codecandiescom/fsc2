@@ -1,6 +1,6 @@
 === TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
 === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
-=== P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
+=== P1_POS int [ 160 : 167772150 ] [ 160 ] "Position of 1st MW pulse" "ns"
 === P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
 === P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2nd MW pulse" "ns"
 === PULSE_DIST int [ 70 : 167772150 ] [ 400 ] "Pulse distance" "ns"

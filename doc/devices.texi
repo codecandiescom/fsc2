@@ -30,7 +30,7 @@
 * Lock-In Functions::
 * Digitizer Functions::
 * Pulser Functions::
-* Synthesizer Functions::
+* RF Synthesizer Functions::
 * Temperature Controller Functions::
 * Multimeter Functions::
 * Boxcar Integrator Functions::
@@ -173,39 +173,54 @@ cards.
 @section Magnet Functions
 @cindex Magnet Functions
 
+The following modules for control the field of a magnet currently exist:
+@table @code
+@item @ref{aeg_x_band}
+Home-built controller for AEG magnet, X-band, Berlin
 
-All the following functions may be used to control the field of a magnet.
-Currently the following magnet power supplies are supported:
-@table @samp
-@item aeg_x_band
-AEG magnet for X-band with home-built controller
-@item aeg_s_band
-AEG magnet for S-band with home-built controller
-@item bh15_fc
+@item @ref{aeg_s_band}
+Home-built controller for AEG magnet, S-band
+
+@item @ref{bh15_fc}
 Bruker BF15 Field Controller
-@item er032m
+
+@item @ref{er032m}
 Bruker ER032M Field Controller
-@item keithley228a
-Berlin W-band magnet sweep power supply Keithley 228A
-@item ips20_4
-Berlin 360 GHz spectrometer Oxford Instruments magnet sweep power supply
-@item ips120_10
-Leiden J-band spectrometer Oxford Instruments magnet power supply
-@item ips120_10_mod
-Leiden W-band spectrometer Oxford Instruments magnet power supply (with
-additional modulation input)
-@item s_band_magnet_broad
-Frankfurt S-band magnet via home-built DAC, broad field range
-@item s_band_magnet_narrow
-Frankfurt S-band magnet via home-built DAC, narrow field range
-@item hjs_sfc
-Pseudo-device for magnet control in the Osnabrueck group (without field
-measurement)
-@item hjs_fc
-Pseudo-device for magnet control in the Osnabrueck group
-@item fsps25
-Frankfurt Sweep Power Supply
+
+@item @ref{keithley228a}
+Keithley 228A, W-band magnet sweep power supply, Berlin
+
+@item @ref{ips20_4}
+Oxford Instruments IPS20_4, 360 GHz spectrometer, Berlin magnet sweep
+power supply, Berlin
+
+@item @ref{ips120_10}
+Oxford Instruments IP120_10, J-band spectrometer, Leiden
+
+@item @ref{ips120_10_mod}
+Oxford Instruments IPS120_10 with modification for additional
+modulation input, W-band spectrometer, Leiden
+
+@item @ref{s_band_magnet_broad}
+Home-built controller using a DAC for broad field range, S-band
+magnet, Frankfurt/Main
+
+@item @ref{s_band_magnet_narrow}
+Home-built controller using a DAC for narrow field range, S-band
+magnet. Frankfurt/Main
+
+@item @ref{hjs_sfc}
+Pseudo-device for magnet control (without field measurement), Osnabrück
+
+@item @ref{hjs_fc}
+Pseudo-device for magnet control, Osnabrück
+
+@item @ref{fsps25}
+Home-built Sweep Power Supply, Frankfurt/Main
 @end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 Since it is not possible for the @strong{AEG} magnets to measure the
 field using just the magnet power supply it is necessary also to specify
@@ -214,22 +229,23 @@ name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
-All magnet power supplies (except the ones used with the Oxford Instruments
-magnets) don't do continuous sweeps but the field current is stepped instead.
-Thus many of the functions discussed in the following don't expect sweep rates
-are but field (or current, see below) step sizes for defining a sweep. The
-only exception are the power supplies for the Oxford magnets, here only
-continuous sweeps can be done and sweep rates must be specified.
+All magnet power supplies (except the ones used with the Oxford
+Instruments magnets) don't do continuous sweeps but the field current
+is stepped. Thus many of the functions discussed in the following
+don't expect sweep rates but field (or current, see below) step sizes
+for defining a sweep. The only exception are the power supplies for
+the Oxford magnets, here only continuous sweeps can be done and sweep
+rates must be specified.
 
-If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
-the program will try to calibrate the field sweep parameters at the
-start of the experiment, i.e.@: it will sweep the field up and down for
-some time, so please be patient. Also see below on how to reduce the
-amount of time spent for field calibration. If the program finds during
-the calibration procedure that the sweep speed isn't set to the highest
-speed it will stop and ask you to do so. When running in batch mode
-having the sweep speed not set to the highest possible speed will
-make @code{fsc2} skip the @code{EDL} script.
+If an @strong{AEG} magnet module is listed in the @code{DEVICES}
+section the program will try to calibrate the field sweep parameters
+at the start of the experiment, i.e.@: it will sweep the field up and
+down for some time, so please be patient. Also see below on how to
+reduce the amount of time spent for field calibration. If during the
+calibration procedure the program finds that the sweep speed isn't set
+to the highest speed it will stop and ask you to do so. When running
+in batch mode having the sweep speed not set to the highest possible
+one this will make @code{fsc2} skip the @code{EDL} script.
 
 The @ref{keithley228a, Keithley 228A power supply} is used for the
 sweep coil of the Berlin W-band magnet. Because there is no
@@ -822,42 +838,56 @@ switching off the power supply.
 @section Gaussmeter Functions
 @cindex Gaussmeter Functions
 
+Currently, the following gaussmeters are implemented:
+@table @code
+@item @ref{bh15}
+Bruker BH15, Hall probe controller
 
-Currently, the following gaussmeters are implemented: @ref{bh15,
-Bruker BH15} Hall probe controller, @ref{er035m, Bruker ER035M} NMR
-gaussmeter, @ref{pt2025, Metrolab PT2025} NMR gaussmeter and, finally,
-the @ref{bnm12, Bruke BNM12 NMR} gaussmeter. The range of fields that
-can be measured with the @ref{er035m, Bruker ER035M} NMR gaussmeter
-depends on the probe being used. With the F0 probe (S-band) the range
-is @w{460 G} to @w{2390 G} while with the F1 probe (X-band) a range
-between @w{1460 G} and @w{19900 G} can be measured. With the
-@ref{bh15, BH15} field controller a range between @w{-50 G} and
-@w{2300 G} can be used. Finally, for the @ref{pt2025, Metrolab PT2025}
-it is currently assumed that a probe for the field range between
-@w{1.5 T} and @w{3.4 T} (W-band) is used.
+@item @ref{er035m}
+Bruker ER035M, NMR gaussmeter accessed via GPIB and used as field controller
 
-The modules defining the gaussmeter functions (to be listed in the
-@code{DEVICES} section) are:
-@example
-er035m
-er035m_s
-er035m_sa
-er035m_sas
-bh15
-pt2025
-bnm12
-@end example
+@item @ref{er035m, er035m_s}
+Bruker ER035M, NMR gaussmeter accessed via serial port and used as
+field controller
+
+@item @ref{er035m_sa}
+Bruker ER035M, NMR gaussmeter accessed via GPIB and used as
+stand-alone device
+
+@item @ref{er035m_sa, er035m_sas}
+Bruker ER035M, NMR gaussmeter accessed via serial port and used as
+stand-alone device
+
+@item @ref{pt2025}
+Metrolab PT2025, NMR gaussmeter
+
+@item @ref{bnm12}
+Bruker BNM12, NMR gaussmeter
+@end table
 @noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
+
+
+ The range of fields that can be measured with the @strong{Bruker
+ER035M} NMR gaussmeter depends on the probe being used. With the F0
+probe (S-band) the range is @w{460 G} to @w{2390 G} while with the F1
+probe (X-band) a range between @w{1460 G} and @w{19900 G} can be
+measured. With the @ref{bh15, BH15} field controller a range between
+@w{-50 G} and @w{2300 G} can be used. Finally, for the @ref{pt2025,
+Metrolab PT2025} it is currently assumed that a probe for the field
+range between @w{1.5 T} and @w{3.4 T} (W-band) is used.
+
 The modules with names starting with @ref{er035m} are for the
 @ref{er035m, Bruker ER035M} NMR gaussmeter. @code{er035m} and
 @code{er035m_sa} are to be used when the device is controlled via the
 GPIB bus while @code{er035m_s} and @code{er035m_sas} expect the device
-to be connected to a serial port of the computer. (If you're wondering
-why there are versions for both the GPIB bus and the serial port, the
-explanation is that some of the @ref{er035m, ER035M} gaussmeters
-simple don't seem to work with the GPIB bus even though they should.)
-The @ref{bh15} module is for the Hall controller used in some setups,
-the @ref{pt2025} module is for the @ref{pt2025, Metrolab 2025} NMR
+to be connected to a serial port of the computer. (Should you be
+wondering why there are versions for both GPIB and the serial port,
+the explanation is that some of the @strong{ER035M} gaussmeters simple
+don't seem to work with the GPIB bus even though they should.) The
+@ref{bh15} module is for the Hall controller used in some setups, the
+@ref{pt2025} module is for the @ref{pt2025, Metrolab 2025} NMR
 gaussmeter. The last module, @ref{bnm12}, is for the @ref{bnm12,
 Bruker BNM12} gaussmeter.
 
@@ -1020,20 +1050,27 @@ instead.
 @section Lock-In Functions
 @cindex Lock-In Functions
 
-Modules for five different lock-in amplifiers are implemented. Most
-are by Stanford Research, @ref{sr510, SR510}, @ref{sr530, SR530},
-@ref{sr810, SR810} and @ref{sr830, SR830}. The fifth is the
-@ref{er023m, Bruker ER023M Signal Channel} used in spectrometers of
-the ESP series. The module names to be specified in the @code{DEVICES}
-section are
-@example
-sr510
-sr530
-sr810
-sr830
-er023m
-@end example
+Modules for the following lock-in amplifiers exist:
+@table @code
+@item @ref{sr510}
+Stanford Research SR510
+
+@item @ref{sr530}
+Stanford Research SR530
+
+@item @ref{sr810}
+Stanford Research SR810
+
+@item @ref{sr830}
+Stanford Research SR830
+
+@item @ref{er023m}
+Bruker ER023M Signal Channel (used in spectrometers of the ESP series)
+@end table
 @noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
+
 Because the models have different capabilities, some of the functions
 are either only defined for parts of the models or may expect slightly
 different parameters.
@@ -1640,66 +1677,71 @@ The function can only be used in the @code{EXPERIMENT} section.
 @section Digitizer Functions
 @cindex Digitizer Functions
 
-The digitizing oscilloscopes currently implemented are:
-@table @samp
-@item by Tektronix:
-@table @samp
-@item TDS520, TDS520A, TDS520C
-@item TDS540
-@item TDS744A
-@item TDS754A
-@end table
-@item by LeCroy
-@table @samp
-@item 94xx series
-9400 (with the WP01 Waveform Processing option), 9410, 9420, 9424,
-9424E, 9450
-@item 93xx series
-9304, 9304A, 9304AM, 9304AL, 9304C, 9304CM, 9304CL,
+Modules for the following digitizing oscilloscopes currently exist:
+@table @code
+@item @ref{tds520}
+Tektronix TDS520
+
+@item @ref{tds520a}
+Tektronix TDS520A
+
+@item @ref{tds520c}
+Tektronix TDS520C
+
+@item @ref{tds540}
+Tektronix TDS540
+
+@item @ref{tds744a}
+Tektronix TDS744A
+
+@item @ref{tds754a}
+Tektronix TDS754A
+
+@item @ref{lecroy9400}
+LeCroy 9400 (with the WP01 Waveform Processing option)
+
+@item @ref{lecroy9410}
+LeCroy 9410
+
+@item @ref{lecroy9420}
+LeCroy 9420
+
+@item @ref{lecroy9424}
+LeCroy 9424
+
+@item @ref{lecroy9424e}
+LeCroy 9424e
+
+@item @ref{lecroy9450}
+LeCroy 9450
+
+@item @code{lecroy93xx}
+LeCroy 9304, 9304A, 9304AM, 9304AL, 9304C, 9304CM, 9304CL,
 9310, 9310A, 9310AM, 9310AL, 9310C, 9310CM, 9310CL,
 9314, 9314A, 9314AM, 9314AL, 9314C, 9314CM, 9314CL,
 9350, 9350A, 9350AM, 9350AL, 9350C, 9350CM, 9350CL,
 9354, 9354A, 9354AM, 9354AL, 9354C, 9354CM, 9354CL, 9354TM, 9354CTM,
-@c 9361, 9362,
-9370, 9370C, 9370CM, 9370CL,
-9374, 9374C, 9374CM, 9374CL, 9374TM, 9374CTM,
-9384, 9384A, 9384AM, 9384AL, 9384C, 9384CM, 9384CL, 9384TM, 9384CTM
-@item Waverunner, Waverunner-2 and X-Stream series
-LT224, LT322, LT342, LT342L, LT344, LT344L, LT364, LT364L,@*
+
+@item @ref{lecroy_wr}, @ref{lecroy_wr, lecroy_wr_l}, @ref{lecroy_wr, lecroy_wr_s}
+LeCroy Waverunner, Waverunner-2 and X-Stream series controlled via GPIB, LAN or
+serial port (models LT224, LT322, LT342, LT342L, LT344, LT344L, LT364, LT364L,@*
 LT262, LT264, LT264M, LT354M, LT354ML, LT372, LT372M, LT374, LT374M,
 LT374L, LT584, LT584M and LT584L, 44Xi, 44MXi, 62Xi, 64Xi, 64MXi,
-104Xi, 104MXi, 204Xi, 204MXi
-@item WaveSurfer series
-422, 424, 432, 434, 452 and 454
+104Xi, 104MXi, 204Xi, 204MXi)
+
+@item @ref{lecroy_ws}, @ref{lecroy_ws, lecroy_ws_g}
+LeCroy WaveSurfer series controlled via LAN or GPIB (models 422, 424,
+432, 434, 452 and 454)
 @end table
-@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 In some cases there exists a module for each of the supported models
 (Textronix and LeCroy 94xx series) while in all others, due to the
-huge number of different models in a series) there's only a single
+huge number of different models in a series, there's only a single
 module that, depending on the settings in the configuration file for
-the module, gets taylored for one of the modules in the series.
-The corresponding module names to be used in the @code{DEVICES}
-section are
-@example
-tds520
-tds520a
-tds540
-tds744a
-tds754a
-lecroy9400
-lecroy9410
-lecroy9420
-lecroy9424
-lecroy9424e
-lecroy9450
-lecroy93xx
-lecroy_wr   (Waveruner and X-Stream, GPIB)
-lecroy_wr_l (Waveruner and X-Stream, LAN)
-lecroy_wr_s (Waveruner and X-Stream, serial port)
-lecroy_ws   (LAN)
-lecroy_ws_g (GPIB)
-@end example
+the module, gets taylored for one of the models in the series.
 
 When specifying digitizer channels or trigger inputs you should use only
 the following symbolic names (internally these symbolic names get
@@ -3083,33 +3125,41 @@ re-lock the keyboard call it again with a non-zero argument,
 @end table
 
 
-@node Pulser Functions, Synthesizer Functions, Digitizer Functions, Device Functions
+@node Pulser Functions, RF Synthesizer Functions, Digitizer Functions, Device Functions
 @section Pulser Functions
 @cindex Pulser Functions
 
-Currently, there are three pulser/spectrometer combinations implemented:
-@itemize @bullet
-@item Sony/Tektronix DG2020 (S-band spectrometer, Frankfurt/Main)
-@item Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
-@item Tektronix HFS9003 (W-band spectrometer, Berlin)
-@item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
-@item Interface Technology RS690 (360 GHz spectrometer, Berlin)
-@item Rulbus Pulser for J-band (275 GHz spectrometer), Leiden
-@item Rulbus Pulser for W-band (95 GHz spectrometer), Leiden
-@item TEGAM 2714A Arbitrary Waveform Generator (as single channel pulser)
-@end itemize
-To load the functions for one of these pulsers use in the @code{DEVICES}
-section one of the lines
-@example
-dg2020_f;
-dg2020_b;
-hfs9003;
-ep385;
-rs690;
-rb_pulser_j;
-rb_pulser_w;
-tegam2714a_p;
-@end example
+Currently, the following pulser/spectrometer combinations are implemented:
+@table @code
+@item @ref{dg2020_f}
+d Sony/Tektronix DG2020 with support for phase switching (S-band
+spectrometer, Frankfurt/Main)
+
+@item @ref{dg2020_b}
+Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
+
+@item @ref{hfs9000}
+Tektronix HFS9003 (W-band spectrometer, Berlin)
+
+@item @ref{ep385}
+Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
+
+@item @ref{rs690}
+Interface Technology RS690 (360 GHz spectrometer, Berlin)
+
+@item @ref{rb_pulser_j}
+Rulbus Pulser for J-band (275 GHz spectrometer), Leiden
+
+@item @ref{rb_pulser_w}
+Rulbus Pulser for W-band (95 GHz spectrometer), Leiden
+
+@item @ref{tegam2714a_p}
+TEGAM 2714A Arbitrary Waveform Generator (as single channel pulser)
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
+
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing
 with the pulsers differs slightly. Thus there is a whole chapter dealing
@@ -3783,25 +3833,30 @@ the potential dangers involved.
 
 
 
-@node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
-@section Synthesizer Functions
-@cindex Synthesizer Functions
-Supported synthesizers so far are the @strong{Hewlett-Packard} models
-@ref{hp8647a, HP8647A}, @ref{hp8648b, HP8648B}, @ref{hp8672a, HP8672A}
-and the @ref{rs_sml01, Rohde&Schwarz SML01}. Their modules are loaded
-by specifying
-@example
-hp8647a
-hp8648b
-hp8672a
-rs_sml01
-@end example
+@node RF Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
+@section RF Synthesizer Functions
+@cindex RF Synthesizer Functions
+Modules for the following RF synthesizers exist:
+@table @code
+@item @ref{hp8647a}
+Hewlett-Packard HP8647A
+
+@item @ref{hp8648b}
+Hewlett-Packard HP8648B
+
+@item @ref{hp8672a}
+Hewlett-Packard HP8672A
+
+@item @ref{rs_sml01}
+Rhode&Schwarz SML01
+@end table
 @noindent
-in the @code{DEVICES} section.
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 
 @noindent
-@strong{List of synthesizer functions}:
+@strong{List of RF synthesizer functions}:
 @table @samp
 @item @ref{synthesizer_name()}
 @item @ref{synthesizer_state()}
@@ -4365,23 +4420,24 @@ least @w{20 ns} apart).
 @end table
 
 
-@node Temperature Controller Functions, Multimeter Functions, Synthesizer Functions, Device Functions
+@node Temperature Controller Functions, Multimeter Functions, RF Synthesizer Functions, Device Functions
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
-The only currently implemented temperature controllers are the
-@ref{lakeshore330, Lake Shore 330}, @ref{itc503, Oxford Instruments
-ITC503} and the @ref{bvt3000, Bruker BVT3000}. Their modules get
-loaded by specifying
-@example
-lakeshore330
-itc503
-bvt3000
-@end example
-@noindent
-in the @code{DEVICES} section. All functions for the temperature
-controllers can only be used in the @code{EXPERIMENT} section of
-the @code{EDL} script.
 
+Modules for the following temperature controllers exist:
+@table @code
+@item @ref{lakeshore330}
+Lake Shore 330
+
+@item @ref{itc503}
+Oxford Instruments ITC503
+
+@item @ref{bvt3000}
+Bruker BVT3000
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 @noindent
 @strong{List of temperature controller functions}:
@@ -4411,6 +4467,10 @@ the @code{EDL} script.
 
 @noindent
 @strong{Descriptions of temperature controller functions}:
+
+All functions for the temperature controllers can only be used in the
+@code{EXPERIMENT} section of the @code{EDL} script.
+
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
@@ -4766,15 +4826,18 @@ argument at all.
 @node Multimeter Functions, Boxcar Integrator Functions, Temperature Controller Functions, Device Functions
 @section Multimeter Functions
 @cindex Multimeter Functions
-The only currently supported digital multimeters are the
-@ref{kontron4060, Kontron 4060} and the @ref{schlum7150, Schlumberger
-7150}. The modules are loaded by specifying one of
-@example
-kontron4060
-schlumberger7140
-@end example
+
+Modules for the following digital multimeters exist:
+@table @code
+@item @ref{kontron4060}
+Kontron 4060
+
+@item @ref{schlum7150}
+Schlumberger 7150
+@end table
 @noindent
-in the @code{DEVICES} section.
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 @noindent
 @strong{List of multimeter functions}:
@@ -4881,15 +4944,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Boxcar Integrator Functions
 @cindex Boxcar Integrator Functions
 Currently there is only rudimentary support for one type of boxcar
-integrator, the @ref{egg4402, EG&G PARC 4402}. Its module is loaded by
-specifying
-@example
-egg4402
-@end example
+integrator:
+@table @code
+@item @ref{egg4402}
+EG&G PARC 4402
+@end table
 @noindent
-in the @code{DEVICES} section. All functions for the boxcar integrator
-can only be used in the @code{EXPERIMENT} section of the @code{EDL}
-script.
+To use the module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 @noindent
 @strong{List of boxcar functions}:
@@ -4904,6 +4966,9 @@ script.
 
 @noindent
 @strong{Descriptions of boxcar functions}:
+
+All functions for the boxcar integrator can only be used in the
+@code{EXPERIMENT} section of the @code{EDL} script.
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
@@ -4982,18 +5047,27 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Frequency Counter Functions, DAQ Functions, Boxcar Integrator Functions, Device Functions
 @section Frequency Counter Functions
 @cindex Frequency Counter Functions
-Currently three frequency counters are supported, the Hewlett-Packard
-counters HP5340A, HP5342A, HP5343A, EIP Microwave Inc.@: EIP371 and
-the Agilent 53181A. The modules get loaded by specifying
-@example
-hp5340a
-hp5342a
-hp5343a
-eip371
-agilent_53181a
-@end example
+
+The following modules for frequency counters exist:
+@table @code
+@item @ref{hp5340a}
+Hewlett-Packard HP5340A
+
+@item @ref{hp5342a}
+Hewlett-Packard HP5342A
+
+@item @ref{hp5343a}
+Hewlett-Packard HP5343A
+
+@item @ref{eip371}
+EIP Microwave Inc.@: EIP371
+
+@item @ref{agilent_53181a}
+Agilent 53181A
+@end table
 @noindent
-in the @code{DEVICES} section. 
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 @noindent
 @strong{List of frequency counter functions}:
@@ -5163,14 +5237,28 @@ only by used in the @code{EXPERIMENT} section.
 @node DAQ Functions, DIO Functions, Frequency Counter Functions, Device Functions
 @section DAQ Functions
 @cindex DAQ Functions
-Currently, the supported data acquisition (DAQ) devices are the
-@ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1} card, the
-@ref{me6000, Meilhaus Electronic GmbH ME-6000 and ME-6100}
-digital-to-analog converter cards, a @ref{hjs_daadc, home-built DA and
-AD converter} from the group of H.-J.@: Steinhoff at the University of
-Osnabrueck and the 12-bit @ref{rb8509, RB8509 ADC} and the 12-bit
-@ref{rb8510, RB8510 DAC} card connected via the @strong{Rulbus}
-(Rijksuniversiteit Leiden BUS).
+
+Modules for the following data acquisition (DAQ) devices exist:
+@table @code
+@item @ref{pci_mio_16e_1}
+National Instruments PCI-MIO-16E-1
+
+@item @ref{me6000}
+Meilhaus Electronic GmbH ME-6000 and ME-6100 digital-to-analog
+converter cards,
+
+@item @ref{hjs_daadc}
+Home-built DA and AD converter,  group of H.-J.@: Steinhoff, Osnabrück
+
+@item @ref{rb8509}
+Rulbus 12-bit ADC card RB8509, Leiden
+
+@item @ref{rb8510}
+Rulbus 12-bit DAC RB8510, Leiden
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 Both the @ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1} and
 the @ref{me6000, Meilhaus ME-6000 and ME-6100} cards, require that a
@@ -5180,18 +5268,6 @@ have been successfully installed.
 The Rulbus @ref{rb8509} and @ref{rb8510} ADC and DAC cards both
 require that the Rulbus kernel module and an additional library
 (coming with @code{fsc2}) have been successfully installed.
-
-The modules for these devices are loaded by specifying
-@example
-pci_mio_16e_1
-me6000
-hjs_daadc
-rb8509
-rb8510
-@end example
-@noindent
-in the @code{DEVICES} section. 
-
 
 @noindent
 @strong{List of DAQ functions}:
@@ -6111,15 +6187,18 @@ immediately.
 @node DIO Functions, Event Counter Functions, DAQ Functions, Device Functions
 @section DIO Functions
 @cindex DIO Functions
-Currently, the the @ref{witio_48, Wasco WITIO-48} ISA DIO card by
-Messcomp Datentechnik GmbH and the DIO subsystem of cards by Meilhaus
-Electronic GmbH are supported. The module for the cards get loaded by
-specifying
-@example
-witio_48
-me_dio
-@end example
-in the @code{DEVICES} section. 
+
+Modules for the following DIOs exist:
+@table @code
+@item @ref{witio_48}
+Wasco WITIO-48 ISA DIO card by Messcomp Datentechnik GmbH
+
+@item @ref{me_dio_X}
+DIO subsystem of cards by Meilhaus Electronic GmbH
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 Both cards reqyuire the use of of a kernel module and an additional
 library that have been successfully installed. The driver and library
@@ -6365,15 +6444,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Event Counter Functions, CCD Camera Functions, DIO Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
-The only currently supported event counter is the @ref{ni6601,
-National Instruments GPCT 6601} card. It can be used for counting as
-well as for creating pulses. The module for this card is loaded by
-specifying
-@example
-ni6601
-@end example
+
+Currently only a module for one event counter exists:
+@table @code
+@item @ref{ni6601}
+National Instruments GPCT 6601, allows counting and creation of pulses
+@end table
 @noindent
-in the @code{DEVICES} section. 
+To use the module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 Use of this card requires that a kernel module and an additional
 library (both coming with @code{fsc2}) have been successfully
@@ -6789,15 +6868,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section CCD Camera Functions
 @cindex CCD Camera Functions
 
-Currently supplied CCD camera are the @ref{rs_spec10, Roper
-Scientific Spec-10} (without a shutter and with LN cooling) and the
-@ref{oriel_matrix, Newport Oriel Matrix Sprectrometer}. Their modules
-are loaded by specifying
-@example
-rs_spec10
-oriel_matrix
-@end example
-in the @code{DEVICES} section. 
+Modules for the following CCD cameras exist:
+@table @code
+@item @ref{rs_spec10}
+Roper Scientific Spec-10
+
+@item @ref{oriel_matrix}
+Newport Oriel Matrix Sprectrometer
+
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 The module for the @ref{rs_spec10, Roper Scientific Spec-10} requires
 the PVCAM library supplied by @ref{rs_spec10, Roper Scientific} to be
@@ -7077,23 +7159,26 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-Currently the @ref{spectrapro_300i, SpectraPro-300i} series of
-monochromator (actually, the module has only been tested with the
-@ref{spectrapro_300i, 308i}) and the @ref{spectrapro_275,
-SpectraPro-275}, both by @strong{Acton Research Corporation},
-monochromators by @strong{SPEX} controlled either via the
-@ref{spex_cd2a, CD2A Compudrive} or the @ref{spex232, SPEX232}
-interface are supported, and the @strong{(Newport) Oriel}
-@ref{oriel_cs_260, Cornerstone 260}. The modules for the
-monochromators get loaded by specifying one of
-@example
-spectrapro_275
-spectrapro_300i
-spex_cd2a
-spex232
-oriel_cs_260
-@end example
-in the @code{DEVICES} section. 
+Modules for the following monochromators exist:
+@table @code
+@item @ref{spectrapro_275}
+SpectraPro-275
+
+@item @ref{spectrapro_300i}
+SpectraPro-300i (tested with a 308i)
+
+@item @ref{spex_cd2a}
+Monochromators by SPEX contrilled via the CD2A Compudrive interface
+
+@item @ref{spex232}
+Monochromators by SPEX contrilled SPEX232 interface
+
+@item @ref{oriel_cs_260}
+Oriel (Newport) Cornerstone 260
+@end table
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 There are two different types of monochromators by @strong{SPEX}. They
 are either wavelength- or wavenumber-driven. In case of
@@ -8047,16 +8132,18 @@ function is called with it has no effect.
 @section Power Supply Functions
 @cindex Power Supply Functions
 
-The currently supplied power supplies are the @ref{thurlby330,
-Thurlby&Thandar PL330DP} and the @ref{mcn700_2000, F.u.G. Elektronik
-GmbH MCN700-2000}. The modules for these power supplies are loaded by
-specifying
-@example
-thurlby330
-mcn700_2000
-@end example
+Modules for the following power supplies exist:
+@table @code
+@item @ref{thurlby330}
+Thurlby&Thandar PL330DP
+
+@item @ref{mcn700_2000}
+F.u.G. Elektronik GmbH MCN700-2000
+@end table
 @noindent
-in the @code{DEVICES} section. 
+@noindent
+To use a module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 
 @noindent
@@ -8210,15 +8297,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Microwave Attenuator Functions
 @cindex Microwave Attenuator Functions
 
-The only currently supported computer controllable microwave attenuator
-is a home-built device from the group of H.-J.@: Steinhoff at the
-University of Osnabrueck. It works with a stepper motor controlled via
-the serial port. The module for the device is loaded by specifying
-@example
-hjs_attenuator
-@end example
+A module for a single computer controllable microwave attenuator exists:
+@table @code
+@item @ref{hjs_attenuator}
+Stepper motor controlled attenuator, home-built in the group of the
+group of H.-J.@: Steinhoff, Osnabrück
+@end table
 @noindent
-in the @code{DEVICES} section. 
+To use the module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
 
 To load the device module a default calibration file is required that
 states which attenuation gets set for the settings of the stepper
@@ -8334,20 +8421,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Light Chopper Functions, Goniometer Functions, Microwave Attenuator Functions, Device Functions
 @section Light Chopper Functions
 @cindex Light Chopper Functions
-Currently there's just a single supported light chopper. It is a
-chopper used in the group of G.@: Gescheidt (Graz University of
-Technology, Austria), that, via some home-build
-electronics@footnote{see Ph.D.@: thesis by Torsten Zytowski, Z@"urich
-1998} is indirectly controlled by a data acquisition device, currently
-the @ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1} DAQ card.
-The module for the device is loaded by specifying
-@example
-gg_chopper
-@end example
+
+A module for a single computer controlled light chopper exists:
+@table @code
+@item @ref{gg_chopper}
+Home-built light chopper@footnote{see Ph.D.@: thesis by Torsten
+Zytowski, Z@"urich 1998}, controlled by a data acquisition device,
+currently the @ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1}
+DAQ card, group of G.@: Gescheidt, TU Graz
+@end table
 @noindent
-in the @code{DEVICES} section. Please note that the name of the module
-for the DAQ device (@ref{pci_mio_16e_1, PCI-MIO-16E-1}) must be listed
-before this module.
+To use the module in an experiment put its name into the
+@code{DEVICES} section of the @code{EDL} script. Please note that the
+name of the module for the DAQ device (@ref{pci_mio_16e_1,
+PCI-MIO-16E-1}) must be listed before this module.
 
 Unless a choppers frequency has already been set during the
 @code{PREPARATIONS} section the chopper will only start to rotate
@@ -8412,19 +8499,17 @@ e.g.@: to trigger an acquisition.
 @section Goniometer Functions
 @cindex Goniometer Functions
 
-
-Currently there's only one supported goniometer, the ER218 PG1 by
-Bruker, for which additionally a Meilhaus card with DIO capabilities
-(and a bit of extra electronics) are needed. The module for the device
-is loaded by
-specifying
-@example
-er218
-@end example
+A single module for a computer controlled goniometer exists:
+@table @code
+@item @ref{er218}
+Bruker ER218 PG1, needs a a Meilhaus card with DIO capabilities
+and a bit of one-built electronics
+@end table
 @noindent
-in the @code{DEVICES} section. Please note that the name of the module
-for the DIO device (@ref{me_dio_X, Meilhaus DIO subsystem}) must be
-listed before this module.
+To use the module in an experiment put its name into the
+@code{DEVICES} section of the @code{EDL} script. Please note that the
+name of the module for the DIO device (@ref{me_dio_X, Meilhaus DIO
+subsystem}) must be listed before this module.
 
 @noindent
 @strong{List of goniometer functions}:
@@ -8539,14 +8624,16 @@ This function can only be used in the @code{EXPERIMENT} section.
 @section Powermeter Functions
 @cindex Powermeter Functions
 
-Currently the @code{Gentec Maestro} power/energy meter is supported.
-The module for the device gets loaded by specifying
-@example
-gentec_maestro
-@end example
+A single module for a power/energy meter exists:
+@table @code
+@item @ref{gentec_maestro}
+Gentec Maestro power/energy meter
+@end table
 @noindent
-in the @code{DEVICES} section.
- 
+@noindent
+To use the module in an experiment put its name into the @code{DEVICES}
+section of the @code{EDL} script.
+
 @noindent
 @strong{List of powermeter functions}:
 @table @samp
