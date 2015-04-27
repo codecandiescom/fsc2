@@ -25,7 +25,6 @@
 
 
 int GPIB_fd = -1;
-static volatile sig_atomic_t Gpibd_replied = 0;
 static char err_msg[ GPIB_ERROR_BUFFER_LENGTH + 1 ];
 
 
@@ -50,10 +49,6 @@ static int extract_long( char * line,
 static int extract_int( char * line,
                         char   ec,
                         int  * val );
-#ifndef GPIB_LIBRARY_NONE
-static void gpib_sig_handler( int signo );
-#endif
-
 static void block_signals( sigset_t * old_mask );
 
 
@@ -973,24 +968,8 @@ extract_int( char * line,
 
 
 /*---------------------------------------------------*
- * Signal handler for signal send by the daemon when
- * it's done with its initialization
- *---------------------------------------------------*/
-
-#ifndef GPIB_LIBRARY_NONE
-static
-void
-gpib_sig_handler( int signo )
-{
-    if ( signo == SIGUSR1 )
-        Gpibd_replied = 1;
-}
-#endif
-
-
-/*---------------------------------------------------*
- * Blocks "DO_QUIT" and SIGALRM to make sure we're not getting
- * interrupted while we're talking with the GPIB daemon.
+ * Blocks "DO_QUIT" and SIGALRM to make sure we don't get
+ * interrupted while talking with the GPIB daemon.
  *---------------------------------------------------*/
 
 static
