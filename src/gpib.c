@@ -465,7 +465,7 @@ gpib_read( int    dev,
     block_signals( &old_mask );
 
     /* Send the 'magic value' for gpib_read(), the device ID and the
-       maximum number of bytes to be read */
+       maximum number of bytes to be read. */
 
 	len = sprintf( line, "%d %d %ld\n", GPIB_READ, dev, *length );
 	if ( swrite( GPIB_fd, line, len ) != len )
@@ -693,8 +693,7 @@ connect_to_gpibd( void )
 {
     int sock_fd;
     struct sockaddr_un serv_addr;
-    char reply;
-    ssize_t len;
+    char reply = ACK;
 
 
     /* Try to get a socket */
@@ -734,12 +733,12 @@ connect_to_gpibd( void )
        deal with our connection. NAK means there are already too many
        connections. */
 
-    if (    ( len = read( sock_fd, &reply, 1 ) ) != 1
+    if (    read( sock_fd, &reply, 1 ) != 1
          || reply != ACK )
     {
         shutdown( sock_fd, SHUT_RDWR );
         close( sock_fd );
-        if ( len == 1 && reply == NAK )
+        if ( reply == NAK )
             print( FATAL, "Too many concurrent users of GPIB.\n" );
         return -2;
     }
@@ -762,63 +761,54 @@ start_gpibd( void )
 {
 	const char *a[ 2 ] = { NULL, NULL };
 	pid_t pid;
-    struct sigaction sact;
-    struct sigaction old_sact;
+    char c;
+    int ret;
+    int p[ 2 ];
 
+
+    if ( pipe( p ) == -1 )
+        return -2;
 
     if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
         a[ 0 ] = srcdir "gpibd";
     else
         a[ 0 ] = bindir "gpibd";
 
-	/* Install a signal handler to catch signal from the daemon that tells
-       us it's done with its initialization and now accepts connections */
-
-	Gpibd_replied = 0;
-    sact.sa_handler = gpib_sig_handler;
-    sigemptyset( &sact.sa_mask );
-    sact.sa_flags = 0;
-    if ( sigaction( SIGUSR1, &sact, &old_sact ) == -1 )
-        return -2;
-
     /* Fork of the daemon as a new child process */
 
-	raise_permissions( );
-
 	if ( ( pid = fork( ) ) < 0 )
-	{
-		lower_permissions( );
-        sigaction( SIGUSR1, &old_sact, NULL );
 		return -2;
-	}
 
 	if ( pid == 0 )
 	{
-        /* The daemon doesn't need to communicate in any way except via its
-           socket file, so close all channels that are open per default. */
+        /* The daemon doesn't stdin and stdout and stderr only to be able
+           to send back 1a single character (wich we're going to try to
+           read from the pipe) when it's ready to accept connections. */
 
 		close( STDIN_FILENO );
 		close( STDOUT_FILENO );
-		close( STDERR_FILENO );
+
+        if ( dup2( p[ 1 ], STDERR_FILENO ) == -1 )
+            _exit( EXIT_FAILURE );
 
 		execv( a[ 0 ], ( char ** ) a );
 		_exit( EXIT_FAILURE );
 	}
 
-	lower_permissions( );
+	/* Wait for the daemon to send a single character (voa the pipe) that tells
+       us that it's prepared to accept connections. Also check for the case
+       that it exited. */
 
-	/* Wait for the daemon to send the signal that tells us that it's prepared
-	   to accept connections, also check for the case that it exited again */
+    while ( ( ret = read( p[ 0 ], &c, 1 ) ) != 1 )
+    {
+        if ( pid == waitpid( pid, NULL, WNOHANG ) )
+            return -2;
 
-    while ( ! Gpibd_replied && waitpid( pid, NULL, WNOHANG ) == 0 )
-        fsc2_usleep( 20000, SET );
+        if ( ret == -1 && errno == EINTR )
+            continue;
 
-	sigaction( SIGUSR1, &old_sact, NULL );
-
-    /* Signal back failure if the daemon exited */
-
-	if ( ! Gpibd_replied )
-		return -2;
+        return -2;
+    }
 
     /* Otherwise return the result of an attempt to connect to it */
 
@@ -838,24 +828,23 @@ swrite( int          fd,
         const char * buf,
         ssize_t      len )
 {
-    ssize_t n = len,
-            ret;
+    ssize_t n = len;
 
 
-    if ( len == 0 )
-        return 0;
-
-    do
+    while ( n )
     {
-        if ( ( ret = write( fd, buf, n ) ) < 1 )
+        int ret;
+
+        if ( ( ret = write( fd, buf, n ) ) == -1 )
         {
-            if  ( ret == -1 && errno != EINTR )
-                return -1;
-            ret = 0;
-            continue;
+            if  ( errno == EINTR )
+                continue;
+            return -1;
         }
+
         buf += ret;
-    } while ( ( n -= ret ) > 0 );
+        n   -= ret;
+    }
 
     return len;
 }
@@ -872,24 +861,28 @@ sread( int       fd,
        char    * buf,
        ssize_t   len )
 {
-    ssize_t n = len,
-            ret;
+    ssize_t n = len;
 
 
-    if ( len == 0 )
-        return 0;
-
-    do
+    while ( n )
     {
-        if ( ( ret = read( fd, buf, n ) ) < 1 )
+        int ret;
+
+        switch ( ret = read( fd, buf, n ) )
         {
-            if ( ret == 0 || errno != EINTR )
+            case -1 :
+                if ( errno == EINTR )
+                    break;
                 return -1;
-            ret = 0;
-            continue;
+
+            case 0 :
+                return -1;
+
+            default :
+                buf += ret;
+                n   -= ret;
         }
-        buf += ret;
-    } while ( ( n -= ret ) > 0 );
+    }
 
     return len;
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -876,15 +876,10 @@ check_for_further_errors( Compilation_T * c_old,
 static void
 quitting_handler( int signo )
 {
-    int errno_saved;
-
-
     if ( signo != QUITTING )     /* should never happen... */
         return;
 
-    errno_saved = errno;
     Fsc2_Internals.child_is_quitting = QUITTING_RAISED;
-    errno = errno_saved;
 }
 
 

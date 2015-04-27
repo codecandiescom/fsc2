@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -592,15 +592,15 @@ f_wait( Var_T * v )
        return with to the point where we called sigsetjmp() with a non-zero
        return value.
 
-       Actually, there is still one race condition left: When the DO_QUIT
+       Actually, there is still one race condition left: when the DO_QUIT
        signal comes in after the sigsetjmp() but before 'Can_Jmp_Alrm' is set
        the signal handler will not siglongjmp() but simply return. In this
        (fortunately rather improbable case) the DO_QUIT signal will get lost
        and pause() will be run until the SIGALRM is triggered. But the only
        scenario for this to happen is when the user clicks on the stop button
        at an really unlucky moment. And if the wait period isn't too long he
-       will probably never notice that he triggered the race condition -
-       otherwise he simply has to click the stop button another time. */
+       will probably never notice that she triggered the race condition -
+       otherwise she simply has to click the stop button another time. */
 
     if ( sigsetjmp( Alrm_Env, 1 ) == 0 )
     {

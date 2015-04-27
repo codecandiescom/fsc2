@@ -229,20 +229,28 @@ main( void )
        a debugger at this point. */
 
     if ( ( gd = getenv( "GPIBD_DEBUG" ) ) != NULL && *gd != '\0' )
-    {
-        fprintf( stderr, "gpibd process pid = %d\n", getpid( ) );
         raise( SIGSTOP );
-    }
 #endif
 
-    /* Send parent a signal to tell it we're listening on the socket */
+    /* Send parent a single character (via stderr), telling it we're listening
+       on the socket */
 
-    if ( kill( getppid( ), SIGUSR1 ) )
+    while ( 1 )
     {
-        shutdown( fd, SHUT_RDWR );
-        close( fd );
-        unlink( GPIBD_SOCK_FILE );
-        return EXIT_FAILURE;
+        char c = ACK;
+        int ret = write( STDERR_FILENO, &c, 1 );
+
+        if ( ret == 1 )
+            break;
+        else if ( ret == 0 )
+            continue;
+        else
+        {
+            shutdown( fd, SHUT_RDWR );
+            close( fd );
+            unlink( GPIBD_SOCK_FILE );
+            return EXIT_FAILURE;
+        }
     }
 
     /* Wait for connections and quit when no clients exist anymore (the
