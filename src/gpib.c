@@ -52,6 +52,10 @@ static int extract_int( char * line,
 static void block_signals( sigset_t * old_mask );
 
 
+#define NO_DAEMON         -1
+#define FAILED_TO_CONNECT -2
+
+
 /*--------------------------------------------------*
  * If not yet running start the "GPIB daemon", then
  * connect to it and inform it about our PID.
@@ -74,18 +78,18 @@ gpib_init( void )
     fsc2_assert( Fsc2_Internals.I_am == PARENT );
 
     /* If the file descriptor already has a non-negative value the GPIB
-       is already up */
+       daemon mus be already up and we're connected to it */
 
 	if ( GPIB_fd >= 0 )
 		return SUCCESS;
 
-	/* Try to connect to the gpibd daemon - if that fails because it's
-	   not yet running (when the call returned -1) try to start it and
-       then again try to connect */
+	/* Try to connect to the GPIB daemon - if that fails because it's
+	   not yet running try to start it and then again try to connect */
 
-	if (    ( GPIB_fd = connect_to_gpibd( ) ) < 0
-		 && (    GPIB_fd == -2
-              || ( GPIB_fd = start_gpibd( ) ) < 0 ) )
+    if ( ( GPIB_fd = connect_to_gpibd( ) ) == NO_DAEMON )
+        GPIB_fd = start_gpibd( );
+
+    if ( GPIB_fd == FAILED_TO_CONNECT )
 	{
 		GPIB_fd = -1;
         strcpy( err_msg, "Failed to connect to GPIB daemon, see '" );
@@ -97,7 +101,7 @@ gpib_init( void )
     block_signals( &old_mask );
 
 	/* Send the magic number for gpib_init() and our PID. The expected
-       reply is either a NAK or ACK character */
+       reply on success is an ACK character, on failyre a NAK */
 
 	len = sprintf( line, "%d %ld\n", GPIB_INIT, ( long ) getpid( ) );
 	if (    swrite( GPIB_fd, line, len ) != len
@@ -688,13 +692,13 @@ connect_to_gpibd( void )
 {
     int sock_fd;
     struct sockaddr_un serv_addr;
-    char reply = ACK;
+    char reply;
 
 
     /* Try to get a socket */
 
     if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
-        return -2;
+        return FAILED_TO_CONNECT;
 
     memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
@@ -711,21 +715,12 @@ connect_to_gpibd( void )
 
         shutdown( sock_fd, SHUT_RDWR );
         close( sock_fd );
-        if ( saved_errno == ECONNREFUSED || saved_errno == ENOENT )
-            return -1;
-        return -2;
+        return ( saved_errno == ECONNREFUSED || saved_errno == ENOENT ) ?
+               NO_DAEMON : FAILED_TO_CONNECT;
     }
 
-    if ( swrite( sock_fd, STR_ACK, 1 ) != 1 )
-    {
-        shutdown( sock_fd, SHUT_RDWR );
-        close( sock_fd );
-        print( FATAL, "Connection to GPIB daemon failed.\n" );
-        return -2;
-    }
-
-    /* Try to read a single character that tells if the daemon is able to
-       deal with our connection. NAK means there are already too many
+    /* Try to read a single character that tells us if the daemon is able
+	   to deal with our connection. NAK means there are already too many
        connections. */
 
     if (    read( sock_fd, &reply, 1 ) != 1
@@ -735,7 +730,7 @@ connect_to_gpibd( void )
         close( sock_fd );
         if ( reply == NAK )
             print( FATAL, "Too many concurrent users of GPIB.\n" );
-        return -2;
+        return FAILED_TO_CONNECT;
     }
         
     return sock_fd;
@@ -745,8 +740,8 @@ connect_to_gpibd( void )
 
 /*-----------------------------------------------------------*
  * Starts the GPIB daemon and then opens a connection to it.
- * Returns a file descriptor for a socket on success or -2
- * or -1 on failure.
+ * Returns a file descriptor for a socket on success or a
+ * negative value on failure.
  *-----------------------------------------------------------*/
 
 #ifndef GPIB_LIBRARY_NONE
@@ -756,56 +751,63 @@ start_gpibd( void )
 {
 	const char *a[ 2 ] = { NULL, NULL };
 	pid_t pid;
-    char c;
+    char c = 0x11;
     int ret;
     int p[ 2 ];
 
 
     if ( pipe( p ) == -1 )
-        return -2;
+        return FAILED_TO_CONNECT;
 
     if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
         a[ 0 ] = srcdir "gpibd";
     else
         a[ 0 ] = bindir "gpibd";
 
-    /* Fork of the daemon as a new child process */
+    /* Create a new child process for the GPIB daemon. */
 
-	if ( ( pid = fork( ) ) < 0 )
-		return -2;
+	if ( ( pid = fork( ) ) == -1 )
+		return FAILED_TO_CONNECT;
 
 	if ( pid == 0 )
 	{
-        /* The daemon doesn't stdin and stdout and stderr only to be able
-           to send back 1a single character (wich we're going to try to
-           read from the pipe) when it's ready to accept connections. */
+        /* The daemon doesn't need stdin and stderr, and stdout only to be
+           able to send back a single character (which we're going to try to
+           read from the pipe) when it's ready to accept connections. (We
+           use stdout for this since stderr gets written to by the GPIB
+           library on errors.) */
 
 		close( STDIN_FILENO );
-		close( STDOUT_FILENO );
+		close( STDERR_FILENO );
 
-        if ( dup2( p[ 1 ], STDERR_FILENO ) == -1 )
+        close( p[ 0 ] );
+        if ( dup2( p[ 1 ], STDOUT_FILENO ) == -1 )
             _exit( EXIT_FAILURE );
+        close( p[ 1 ] );
 
 		execv( a[ 0 ], ( char ** ) a );
 		_exit( EXIT_FAILURE );
 	}
 
-	/* Wait for the daemon to send a single character (voa the pipe) that tells
-       us that it's prepared to accept connections. Also check for the case
-       that it exited. */
+	/* Wait for the daemon to send a single character (via the pipe) that
+       tells us that it's prepared to accept connections. */
 
+    close( p[ 1 ] );
     while ( ( ret = read( p[ 0 ], &c, 1 ) ) != 1 )
     {
-        if ( pid == waitpid( pid, NULL, WNOHANG ) )
-            return -2;
+        /* Daemon may have quit, resulting in a SIGCHLD. Check for that first.
+           All other errors not related to signals aren't acceptable. */
 
-        if ( ret == -1 && errno == EINTR )
-            continue;
-
-        return -2;
+        if (    pid == waitpid( pid, NULL, WNOHANG )
+             || errno != EINTR )
+        {
+            close( p[ 0 ] );
+            return FAILED_TO_CONNECT;
+        }
     }
+    close( p[ 0 ] );
 
-    /* Otherwise return the result of an attempt to connect to it */
+    /* Return the result of an attempt to connect to the daemon. */
 
 	return connect_to_gpibd( );
 }

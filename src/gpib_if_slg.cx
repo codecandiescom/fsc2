@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -411,14 +411,13 @@ gpib_init_device( const char * device_name,
         free( cur_dev );
 
         sprintf( gpib_error_msg, "Can't initialize device %s, not found in "
-                 "GPIB configuration file", device_name );
+                 "GPIB configuration file or device file missing",
+                 device_name );
 
         if ( ll > LL_NONE )
         {
             gpib_log_date( );
-            fprintf( gpib_log, "Can't initialize device %s, not found in "
-                     "GPIB configuration file\n", device_name );
-            gpib_log_function_end( "gpib_init_device", device_name );
+            fprintf( gpib_log, "%s\n", gpib_error_msg );
         }
 
         return FAILURE;

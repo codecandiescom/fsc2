@@ -188,6 +188,7 @@ main( void )
     fd_set fds;
     struct timeval timeout;
     char err_msg[ GPIB_ERROR_BUFFER_LENGTH ];
+    char c = ACK;
 #ifndef NDEBUG
     const char *gd;
 #endif
@@ -207,7 +208,7 @@ main( void )
         unlink( GPIBD_SOCK_FILE );
     }
 
-    /* Create a UNIX domain socket we're going to listen on for connections */
+    /* Create the UNIX domain socket we're going to listen on for connections */
 
     if ( ( fd = create_socket( ) ) == -1 )
         return EXIT_FAILURE;
@@ -232,26 +233,11 @@ main( void )
         raise( SIGSTOP );
 #endif
 
-    /* Send parent a single character (via stderr), telling it we're listening
-       on the socket */
+    /* Send parent a single character (via stdout which is connected to a
+       pipe), telling it we're now waiting for connections on the socket. */
 
-    while ( 1 )
-    {
-        char c = ACK;
-        int ret = write( STDERR_FILENO, &c, 1 );
-
-        if ( ret == 1 )
-            break;
-        else if ( ret == 0 )
-            continue;
-        else
-        {
-            shutdown( fd, SHUT_RDWR );
-            close( fd );
-            unlink( GPIBD_SOCK_FILE );
-            return EXIT_FAILURE;
-        }
-    }
+     write( STDOUT_FILENO, &c, 1 );
+     close( STDOUT_FILENO );
 
     /* Wait for connections and quit when no clients exist anymore (the
        first client will connect more or less immediately since it's our
@@ -262,7 +248,7 @@ main( void )
         FD_ZERO( &fds );
         FD_SET( fd, &fds );
 
-        timeout.tv_sec  = 5;
+        timeout.tv_sec  = 10;
         timeout.tv_usec = 0; 
 
         /* Wait for a new clients trying to connect and regularly check if
@@ -303,7 +289,6 @@ new_client( int fd )
     socklen_t cli_len = sizeof cli_addr;
     int cli_fd;
     pthread_attr_t attr;
-    char c;
 
 
     /* Accept connection by the new client */
@@ -311,15 +296,6 @@ new_client( int fd )
     if ( ( cli_fd = accept( fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
         return;
-
-    /* Check if client sends an ACK character */
-
-    if ( sread( cli_fd, &c, 1 ) != 1 || c != ACK )
-    {
-        shutdown( cli_fd, SHUT_RDWR );
-        close( cli_fd );
-        return;
-    }
 
     /* If all the threads we're prepared to run are used up check if there
        are dead clients and close connections for those, and if then there
@@ -330,15 +306,6 @@ new_client( int fd )
          && check_connections( ) >= MAX_THREADS )
     {
         swrite( cli_fd, STR_NAK, 1 );
-        shutdown( cli_fd, SHUT_RDWR );
-        close( cli_fd );
-        return;
-    }
-
-    /* Send single ACK character, if that fails close down the connection */
-
-    if ( swrite( cli_fd, STR_ACK, 1 ) != 1 )
-    {
         shutdown( cli_fd, SHUT_RDWR );
         close( cli_fd );
         return;
