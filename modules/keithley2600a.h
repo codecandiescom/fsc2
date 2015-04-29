@@ -157,6 +157,41 @@ typedef struct
 #define AUTOZERO_AUTO  2
 
 
+
+int keithely2600a_get_sense( unsigned int ch );
+int keithely2600a_set_sense( unsigned int ch,
+                             int          sense );
+int keithely2600a_get_source_offmode( unsigned int ch );
+int keithely2600a_set_source_offmode( unsigned int ch,
+                                      int          souarce_offmode );
+bool keithely2600a_get_source_output( unsigned int ch );
+bool keithely2600a_set_source_output( unsigned int ch,
+                                      bool         source_output );
+bool keithely2600a_get_source_highc( unsigned int ch );
+int keithely2600a_set_source_highc( unsigned int ch,
+                                    bool         source_highc );
+int keithely2600a_get_source_func( unsigned int ch );
+int keithely2600a_set_source_func( unsigned int ch,
+                                   int          source_func );
+bool keithely2600a_get_measure_autorangev( unsigned int ch );
+bool keithely2600a_set_measure_autorangev( unsigned int ch,
+                                           bool         autorange );
+bool keithely2600a_get_measure_autorangei( unsigned int ch );
+bool keithely2600a_set_measure_autorangei( unsigned int ch,
+                                           bool         autorange );
+int keithely2600a_get_measure_autozero( unsigned int ch );
+int keithely2600a_set_measure_autozero( unsigned int ch,
+                                        int          autozero );
+bool keithley2600a_get_compliance( unsigned int ch );
+double keithley2600a_set_source_levelv( unsigned int ch,
+                                        double       volts );
+double keithley2600a_get_source_levelv( unsigned int ch );
+double keithley2600a_set_source_leveli( unsigned int ch,
+                                        double       amps );
+double keithley2600a_get_source_leveli( unsigned int ch );
+
+
+
 #endif
 
 

@@ -21,6 +21,9 @@
 #include "keithley2600a.h"
 
 
+extern Max_Limit * keithley2600s_max_limitv;
+extern Max_Limit * keithley2600s_max_limiti;
+
 static size_t keithley2600a_command( const char * cmd );
 static size_t keithley2600a_talk( const char * cmd,
 								  char       * reply,
@@ -43,7 +46,6 @@ int
 keithely2600a_get_sense( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -68,7 +70,6 @@ keithely2600a_set_sense( unsigned int ch,
 						 int          sense )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert(    sense == SENSE_LOCAL
@@ -96,7 +97,6 @@ keithely2600a_get_source_offmode( unsigned int ch )
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.offmode)", smu[ ch ] );
@@ -119,7 +119,6 @@ keithely2600a_set_source_offmode( unsigned int ch,
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.source.offmode=%d", smu[ ch ], source_offmode );
@@ -137,7 +136,6 @@ bool
 keithely2600a_get_source_output( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -160,7 +158,6 @@ keithely2600a_set_source_output( unsigned int ch,
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.source.output=%d", smu[ ch ], source_output );
@@ -180,7 +177,6 @@ bool
 keithely2600a_get_source_highc( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -203,7 +199,6 @@ keithely2600a_set_source_highc( unsigned int ch,
                                 bool         source_highc )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -240,7 +235,6 @@ keithely2600a_get_source_func( unsigned int ch )
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.func)", smu[ ch ] );
@@ -262,7 +256,6 @@ keithely2600a_set_source_func( unsigned int ch,
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    source_func == OUTPUT_DCAMPS
                  || source_func == OUTPUT_DCVOLTS );
@@ -282,7 +275,6 @@ bool
 keithely2600a_get_measure_autorangev( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -306,7 +298,6 @@ keithely2600a_set_measure_autorangev( unsigned int ch,
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.measure.autorangev=%s", smu[ ch ], autorange );
@@ -324,7 +315,6 @@ bool
 keithely2600a_get_measure_autorangei( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -347,8 +337,6 @@ keithely2600a_set_measure_autorangei( unsigned int ch,
                                       bool         autorange )
 {
     char buf[ 50 ];
-    long len;
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -367,7 +355,6 @@ int
 keithely2600a_get_measure_autozero( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -392,7 +379,6 @@ keithely2600a_set_measure_autozero( unsigned int ch,
 {
     char buf[ 50 ];
 
-
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( autozero >= AUTOZERO_OFF && autozero <= AUTOZERO_AUTO )
 
@@ -411,7 +397,6 @@ bool
 keithley2600a_get_compliance( unsigned int ch )
 {
     char buf[ 50 ];
-
 
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -434,7 +419,6 @@ keithley2600a_set_source_levelv( unsigned int ch,
 								 double       volts )
 {
 	char buf[ 50 ];
-
 
 	fsc2_assert( ch < MAX_CHANNELS );
 	fsc2_assert( volts <= MAX_SOURCE_LEVELV && - MAX_SOURCE_LEVELV );
@@ -480,7 +464,6 @@ keithley2600a_set_source_leveli( unsigned int ch,
 								 double       amps )
 {
 	char buf[ 50 ];
-
 
 	fsc2_assert( ch < MAX_CHANNELS );
 	fsc2_assert( volts <= MAX_SOURCE_LEVELI && - MAX_SOURCE_LEVELI );
