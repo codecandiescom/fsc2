@@ -47,6 +47,7 @@
 * hp5340a::         HP Frequency Counter HP5340A
 * hp5342a::         HP Frequency Counter HP5342A
 * hp5343a::         HP Frequency Counter HP5343A
+* hp5352b::         HP Frequency Counter HP5352B
 * hp8647a::         HP RF Synthesizer HP8647A
 * hp8648b::         HP RF Synthesizer HP8648B
 * hp8672a::         HP RF Synthesizer HP8672A
@@ -238,8 +239,8 @@ to @w{19900 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 @strong{Module name}: @code{agilent_53181a}
 
 @paragraphindent 0
-@strong{Description}: @uref{http://www.home.agilent.com/,Agilent})
-frequency counter 53181A.
+@strong{Description}: Agilent (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter 53181A.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1218,9 +1219,9 @@ In the GPIB configuration file use @code{"HFS9000"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/,Agilent}) frequency counter
-HP5340A. This is a very old device even pre-dating the GPIB-standard.
-Only its capability to return the measured frequency can be used.
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5340A.
+This is a very old device, even pre-dating the GPIB-standard. Only its
+capability to return the measured frequency can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1254,10 +1255,10 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/,Agilent}) frequency counter
-HP5342A, frequency range @w{500 MHz} to @w{18 GHz}. This is a
-very old device even pre-dating the GPIB-standard. Only its
-capability to return the measured frequency can be used.
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5342A,
+frequency range @w{500 MHz} to @w{18 GHz}. This is a very old device,
+even pre-dating the GPIB-standard. Only its capability to return the
+measured frequency can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1279,7 +1280,7 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 
 @c #############################################################
 
-@node hp5343a, hp8647a, hp5342a, Device Reference
+@node hp5343a, hp5352b, hp5342a, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5343A
 @end iftex
@@ -1292,9 +1293,9 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/,Agilent}) frequency counter
+@uref{http://www.keysight.com/,Keysight}) frequency counter
 HP5343A, frequency range @w{500 MHz} to @w{26.5 GHz}. This is a
-very old device even pre-dating the GPIB-standard. Only its
+very old device, even pre-dating the GPIB-standard. Only its
 capability to return the measured frequency can be used.
 
 @paragraphindent 0
@@ -1318,7 +1319,45 @@ extremely similar to the @ref{hp5342a}.
 
 @c #############################################################
 
-@node hp8647a, hp8648b, hp5343a, Device Reference
+@node hp5352b, hp8647a, hp5343a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5352B
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5352B
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5352b}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5352B,
+frequency range @w{500 MHz} to @w{46 GHz}. This is a very old device
+even pre-dating the GPIB-standard. Only its capability to return the
+measured frequency can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5352B"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp8647a, hp8648b, hp5352b, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -1331,7 +1370,7 @@ extremely similar to the @ref{hp5342a}.
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/Agilent}) RF synthesizer HP8647A with
+@uref{http://www.keysight.com/,Keysight}) RF synthesizer HP8647A with
 support for output level normalization via frequency/amplitude table
 files. For safety reasons only output attenuations below @w{-5 dB} are
 allowed -- change the configuration file to allow higher output
@@ -1386,9 +1425,9 @@ In the GPIB configuration file use @code{"HP8647A"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/,Agilent}) RF synthesizer HP8648B
-with support for output level normalization via frequency/amplitude
-table files.
+@uref{http://www.keysight.com/,Keysight}) RF synthesizer HP8648B with
+support for output level normalization via frequency/amplitude table
+files.
 
 Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 dB}
 to @w{14.5 dB} in @w{0.1 dB} steps.
@@ -1439,9 +1478,9 @@ In the GPIB configuration file use @code{"HP8647B"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
-@uref{http://www.home.agilent.com/,Agilent}) RF synthesizer HP8672A
-with support for output level normalization via frequency/amplitude
-table files
+@uref{http://www.keysight.com/,Keysight}) RF synthesizer HP8672A with
+support for output level normalization via frequency/amplitude table
+files
 
 Frequency range is @w{2 GHz} to @w{9 GHz}, attenuation range @w{-120 dB}
 to @w{10 dB} in @w{1 dB} steps.

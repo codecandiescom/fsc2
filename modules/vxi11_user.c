@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -41,10 +41,12 @@
 
 #include "vxi11_user.h"
 
+
 /* Client and link for core channel */
 
 static CLIENT          * core_client = NULL;
 static Create_LinkResp * core_link;
+
 
 /* Client and link for async channel (needed for device_abort()), optional */
 
@@ -102,7 +104,7 @@ static const char * vxi11_sperror( Device_ErrorCode error );
  * ->
  *    1. Name of the device to be used in error messages etc.
  *    2. IP address of the device (either in dotted-quad form
- *       or as a name that can be resolved via DNS request)
+ *       or as a name that can be resolved via a DNS look-up)
  *    3. VXI-11 name of the device
  *    4. Maximum timeout (in microseconds) to wait for the
  *       connection if it's locked by another process (0 is
@@ -122,7 +124,7 @@ vxi11_open( const char * dev_name,
 
 
     /* Keep the module writers from calling the function anywhere else
-       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       than in the exp- and end_of_exp-hook functions and in the EXPERIMENT
        section */
 
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING

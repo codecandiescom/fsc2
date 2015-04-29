@@ -749,9 +749,8 @@ static
 int
 start_gpibd( void )
 {
-	const char *a[ 2 ] = { NULL, NULL };
 	pid_t pid;
-    char c = 0x11;
+    char c;
     int ret;
     int p[ 2 ];
 
@@ -759,18 +758,14 @@ start_gpibd( void )
     if ( pipe( p ) == -1 )
         return FAILED_TO_CONNECT;
 
-    if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
-        a[ 0 ] = srcdir "gpibd";
-    else
-        a[ 0 ] = bindir "gpibd";
-
     /* Create a new child process for the GPIB daemon. */
 
 	if ( ( pid = fork( ) ) == -1 )
 		return FAILED_TO_CONNECT;
-
-	if ( pid == 0 )
+	else if ( pid == 0 )
 	{
+        const char *a[ 2 ] = { NULL, NULL };
+
         /* The daemon doesn't need stdin and stderr, and stdout only to be
            able to send back a single character (which we're going to try to
            read from the pipe) when it's ready to accept connections. (We
@@ -785,6 +780,11 @@ start_gpibd( void )
             _exit( EXIT_FAILURE );
         close( p[ 1 ] );
 
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            a[ 0 ] = srcdir "gpibd";
+        else
+            a[ 0 ] = bindir "gpibd";
+
 		execv( a[ 0 ], ( char ** ) a );
 		_exit( EXIT_FAILURE );
 	}
@@ -795,11 +795,11 @@ start_gpibd( void )
     close( p[ 1 ] );
     while ( ( ret = read( p[ 0 ], &c, 1 ) ) != 1 )
     {
-        /* Daemon may have quit, resulting in a SIGCHLD. Check for that first.
-           All other errors not related to signals aren't acceptable. */
+        /* Daemon may have quit, resulting in a SIGCHLD. Avoid leaving a
+           zombie. Errors not related to other signals aren't acceptable. */
 
         if (    pid == waitpid( pid, NULL, WNOHANG )
-             || errno != EINTR )
+             || ( ret == -1 && errno != EINTR ) )
         {
             close( p[ 0 ] );
             return FAILED_TO_CONNECT;

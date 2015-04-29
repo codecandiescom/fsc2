@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -94,7 +94,6 @@ int vxi11_read( char   * /* buffer      */,
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
  * tab-width: 4
  * indent-tabs-mode: nil
  * End:

@@ -170,7 +170,8 @@ fsc2_lan_open( const char * dev_name,
     }
 
     /* Also disable the TCP Nagle algorithm which might slow down response
-       times unnecessarily */
+       times unnecessarily (it delays sending small packets for short
+       delays of time) */
 
     switch_on = 1;
     if ( setsockopt( sock_fd, IPPROTO_TCP, TCP_NODELAY,
