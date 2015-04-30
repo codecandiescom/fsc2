@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -47,6 +47,11 @@
 * hp5340a::         HP Frequency Counter HP5340A
 * hp5342a::         HP Frequency Counter HP5342A
 * hp5343a::         HP Frequency Counter HP5343A
+* hp5350a::         HP Frequency Counter HP5350A
+* hp5350b::         HP Frequency Counter HP5350B
+* hp5351a::         HP Frequency Counter HP5351A
+* hp5351b::         HP Frequency Counter HP5351B
+* hp5352a::         HP Frequency Counter HP5352A
 * hp5352b::         HP Frequency Counter HP5352B
 * hp8647a::         HP RF Synthesizer HP8647A
 * hp8648b::         HP RF Synthesizer HP8648B
@@ -1280,7 +1285,7 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 
 @c #############################################################
 
-@node hp5343a, hp5352b, hp5342a, Device Reference
+@node hp5343a, hp5350a, hp5342a, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5343A
 @end iftex
@@ -1319,7 +1324,197 @@ extremely similar to the @ref{hp5342a}.
 
 @c #############################################################
 
-@node hp5352b, hp8647a, hp5343a, Device Reference
+@node hp5350a, hp5350b, hp5343a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5350A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5350A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5350a}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5350A,
+frequency range @w{500 MHz} to @w{20 GHz}. Only its capability to
+return the measured frequency and setting the resulution can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5350A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested (but should work out of the box since it's
+nearly identical to the tested HP5352B)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp5350b, hp5351a, hp5350a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5350B
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5350B
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5350b}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5350B,
+frequency range @w{500 MHz} to @w{20 GHz}. Only its capability to
+return the measured frequency and setting the resulution can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5350B"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested (but should work out of the box since it's
+nearly identical to the tested HP5352B)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp5351a, hp5351b, hp5350b, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5351A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5351A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5351a}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5351A,
+frequency range @w{500 MHz} to @w{26.5 GHz}. Only its capability to
+return the measured frequency and setting the resulution can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5351A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested (but should work out of the box since it's
+nearly identical to the tested HP5352B)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp5351b, hp5352a, hp5351a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5351B
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5351B
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5351b}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5351B,
+frequency range @w{500 MHz} to @w{26.5 GHz}. Only its capability to
+return the measured frequency and setting the resulution can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5351B"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested (but should work out of the box since it's
+nearly identical to the tested HP5352B)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp5352a, hp5352b, hp5351b, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5352A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5352A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5352ä}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter HP5352A,
+frequency range @w{500 MHz} to @w{40 GHz}. Only its capability to
+return the measured frequency and setting the resulution can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5352A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested (but should work out of the box since it's
+nearly identical to the tested HP5352B)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp5352b, hp8647a, hp5352a, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5352B
 @end iftex
@@ -1333,9 +1528,8 @@ extremely similar to the @ref{hp5342a}.
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
 @uref{http://www.keysight.com/,Keysight}) frequency counter HP5352B,
-frequency range @w{500 MHz} to @w{46 GHz}. This is a very old device
-even pre-dating the GPIB-standard. Only its capability to return the
-measured frequency can be used.
+frequency range @w{500 MHz} to @w{46 GHz}.Only its capability to
+return the measured frequency and setting the resulution can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1344,7 +1538,7 @@ In the GPIB configuration file use @code{"HP5352B"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:

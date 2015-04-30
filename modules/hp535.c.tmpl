@@ -24,15 +24,15 @@
 
 /* Include configuration information for the device */
 
-#include "hp5352b.conf"
+#include "hp535_tmpl.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-int hp5352b_init_hook(       void );
-int hp5352b_exp_hook(        void );
-int hp5352b_end_of_exp_hook( void );
+int hp535_tmpl_init_hook(       void );
+int hp535_tmpl_exp_hook(        void );
+int hp535_tmpl_end_of_exp_hook( void );
 
 
 Var_T * freq_counter_name(       Var_T * v );
@@ -41,24 +41,24 @@ Var_T * freq_counter_resolution( Var_T * v );
 Var_T * freq_counter_command(    Var_T * v );
 
 
-static bool hp5352b_init( const char * name );
+static bool hp535_tmpl_init( const char * name );
 
-static double hp5352b_get_freq( void );
+static double hp535_tmpl_get_freq( void );
 
-static double hp5352b_set_resolution( int );
-static bool hp5352b_command( const char * );
+static double hp535_tmpl_set_resolution( int );
+static bool hp535_tmpl_command( const char * );
 
 
 static struct {
     int device;
 	int res;
 	bool is_res;
-} hp5352b;
+} hp535_tmpl;
 
 
 /* Define the frequency that the driver returns during the test run */
 
-#define HP5352B_TEST_FREQUENCY  9.3e9
+#define HP535_TMPL_TEST_FREQUENCY  9.3e9
 
 
 
@@ -72,14 +72,14 @@ static struct {
  *--------------------------------------------------------*/
 
 int
-hp5352b_init_hook( void )
+hp535_tmpl_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed */
 
     Need_GPIB = SET;
 
-    hp5352b.device = -1;
-	hp5352b.is_res = UNSET;
+    hp535_tmpl.device = -1;
+	hp535_tmpl.is_res = UNSET;
     return 1;
 }
 
@@ -88,9 +88,9 @@ hp5352b_init_hook( void )
  *--------------------------------------------------------*/
 
 int
-hp5352b_exp_hook( void )
+hp535_tmpl_exp_hook( void )
 {
-    if ( ! hp5352b_init( device_name ) )
+    if ( ! hp535_tmpl_init( device_name ) )
     {
         print( FATAL, "Initialization of device failed: %s.\n",
                gpib_last_error( ) );
@@ -105,12 +105,12 @@ hp5352b_exp_hook( void )
  *--------------------------------------------------------*/
 
 int
-hp5352b_end_of_exp_hook( void )
+hp535_tmpl_end_of_exp_hook( void )
 {
-    if ( hp5352b.device != -1 )
+    if ( hp535_tmpl.device != -1 )
     {
-        gpib_local( hp5352b.device );
-        hp5352b.device = -1;
+        gpib_local( hp535_tmpl.device );
+        hp535_tmpl.device = -1;
     }
 
     return 1;
@@ -142,9 +142,9 @@ freq_counter_measure( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == TEST )
-        return vars_push( FLOAT_VAR, HP5352B_TEST_FREQUENCY );
+        return vars_push( FLOAT_VAR, HP535_TMPL_TEST_FREQUENCY );
 
-    return vars_push( FLOAT_VAR, hp5352b_get_freq( ) );
+    return vars_push( FLOAT_VAR, hp535_tmpl_get_freq( ) );
 }
 
 
@@ -196,11 +196,11 @@ freq_counter_resolution( Var_T * v )
 				   "using %.3f Hz  instead.\n", resolution, res[ i ] );
 	}
 
-	hp5352b.res = i;
-	hp5352b.is_res = SET;
+	hp535_tmpl.res = i;
+	hp535_tmpl.is_res = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		hp5352b_set_resolution( i );
+		hp535_tmpl_set_resolution( i );
 
 	return vars_push( FLOAT_VAR, res[ i ] );
 }
@@ -224,7 +224,7 @@ freq_counter_command( Var_T * v )
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            hp5352b_command( cmd );
+            hp535_tmpl_command( cmd );
             T_free( cmd );
             TRY_SUCCESS;
         }
@@ -250,23 +250,23 @@ freq_counter_command( Var_T * v )
  *--------------------------------------------------------*/
 
 static bool
-hp5352b_init( const char * name )
+hp535_tmpl_init( const char * name )
 {
-    if ( gpib_init_device( name, &hp5352b.device ) == FAILURE )
+    if ( gpib_init_device( name, &hp535_tmpl.device ) == FAILURE )
         return FAIL;
 
     /* Tell device to use internal sample rate and to output data only if
        addressed as talker (don't lock the keyboard, the user is supposed
        to do settings at the front panel) */
 
-    if ( gpib_write( hp5352b.device, "CLR\r\n", 5 ) == FAILURE )
+    if ( gpib_write( hp535_tmpl.device, "CLR\r\n", 5 ) == FAILURE )
         return FAIL;
 
-    if ( gpib_write( hp5352b.device, "SAMPLE,FAST\r\n", 13 ) == FAILURE )
+    if ( gpib_write( hp535_tmpl.device, "SAMPLE,FAST\r\n", 13 ) == FAILURE )
         return FAIL;
 
-    if ( hp5352b.is_res )
-        hp5352b_set_resolution( hp5352b.res );
+    if ( hp535_tmpl.is_res )
+        hp535_tmpl_set_resolution( hp535_tmpl.res );
 
     return OK;
 }
@@ -281,7 +281,7 @@ hp5352b_init( const char * name )
  *---------------------------------------------------*/
 
 static double
-hp5352b_get_freq( void )
+hp535_tmpl_get_freq( void )
 {
     char buf[ 25 ];
     long len;
@@ -290,7 +290,7 @@ hp5352b_get_freq( void )
 
 
 	len = 24;
-    if ( gpib_read( hp5352b.device, buf, &len ) == FAILURE )
+    if ( gpib_read( hp535_tmpl.device, buf, &len ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
 			   gpib_last_error( ) );
@@ -303,7 +303,7 @@ hp5352b_get_freq( void )
         THROW( EXCEPTION );
     }
 
-    if ( buf[ 2 ] != '\r' || buf[ 23 ] != '\n' )
+    if ( buf[ 22 ] != '\r' || buf[ 23 ] != '\n' )
     {
         print( FATAL, "Device returned unexpected data.\n" );
         THROW( EXCEPTION );
@@ -313,11 +313,16 @@ hp5352b_get_freq( void )
     errno = 0;
     res = strtod( buf, &ep );
 
-    if ( *ep || ( ( res == HUGE_VAL || res == -HUGE_VAL ) && errno == ERANGE ) )
+    if ( *ep || ( res == HUGE_VAL && errno == ERANGE ) || res < 0 )
     {
         print( FATAL, "Device returned unexpected data.\n" );
         THROW( EXCEPTION );
     }
+
+    /* If there are no input the device seems to return some out-range value */
+
+    if ( res < 0.9999 * MIN_FREQUENCY || res > 1.0001 * MAX_FREQUENCY )
+        res = 0;
 
     return res;
 }
@@ -327,7 +332,7 @@ hp5352b_get_freq( void )
  *--------------------------------------------------------*/
 
 static double
-hp5352b_set_resolution( int res )
+hp535_tmpl_set_resolution( int res )
 {
 	char cmd[ ] = "RESOL,*\r\n";
 
@@ -335,7 +340,7 @@ hp5352b_set_resolution( int res )
 	fsc2_assert( res >= 0 && res <= 6 );
 
 	cmd[ 2 ] = res + '0';
-    if ( gpib_write( hp5352b.device, cmd, 3 ) == FAILURE )
+    if ( gpib_write( hp535_tmpl.device, cmd, 3 ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
 			   gpib_last_error( ) );
@@ -349,9 +354,9 @@ hp5352b_set_resolution( int res )
  *--------------------------------------------------------------*/
 
 static bool
-hp5352b_command( const char * cmd )
+hp535_tmpl_command( const char * cmd )
 {
-    if ( gpib_write( hp5352b.device, cmd, strlen( cmd ) ) == FAILURE )
+    if ( gpib_write( hp535_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
 			   gpib_last_error( ) );

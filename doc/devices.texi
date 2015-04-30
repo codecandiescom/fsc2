@@ -5059,7 +5059,22 @@ Hewlett-Packard HP5342A
 @item @ref{hp5343a}
 Hewlett-Packard HP5343A
 
-@item @ref{hp5343a}
+@item @ref{hp5350a}
+Hewlett-Packard HP5350A
+
+@item @ref{hp5350b}
+Hewlett-Packard HP5350B
+
+@item @ref{hp5351a}
+Hewlett-Packard HP5351A
+
+@item @ref{hp5351b}
+Hewlett-Packard HP5351B
+
+@item @ref{hp5352a}
+Hewlett-Packard HP5352A
+
+@item @ref{hp5352b}
 Hewlett-Packard HP5352B
 
 @item @ref{eip371}
@@ -5116,15 +5131,16 @@ MHz} to @w{300 MHz}, @code{2} for the band between @w{100 MHz} and
 @anchor{freq_counter_resolution()}
 @findex freq_counter_resolution()
 @item freq_counter_resolution()
-This function only exists for the @ref{eip371} and the @ref{hp5342a},
-@ref{hp5343a} and @ref{hp5352b}. It allows to set (but not query) the
-resolution frequency measurements are done with. It expects a single
-floating point argument, the resolution in @code{Hz}. Since the
-devices only accepts resolutions of @w{1 Hz}, @w{10 Hz}, @w{100 Hz},
-@w{1 kHz}, @w{10 kHz}, @w{100 kHz} and @w{1 MHz}, values differing
-from these resolutions will be adjusted to the next higher resolution
-(if there's a deviation of more than @w{1%} a warning is printed
-out).
+This function only exists for the EIP (@ref{eip371}) and the HP
+counters (@ref{hp5342a}, @ref{hp5343a}, @ref{hp5350a}, @ref{hp5350b},
+@ref{hp5351a}, @ref{hp5351b}, @ref{hp5352a} and @ref{hp5352b}). It
+allows to set (but not query) the resolution frequency measurements
+are done with. It expects a single floating point argument, the
+resolution in @code{Hz}. Since the devices only accepts resolutions of
+@w{1 Hz}, @w{10 Hz}, @w{100 Hz}, @w{1 kHz}, @w{10 kHz}, @w{100 kHz}
+and @w{1 MHz}, values differing from these resolutions will be
+adjusted to the next higher resolution (if there's a deviation of more
+than @w{1%} a warning is printed out).
 
 
 @anchor{freq_counter_coupling()}

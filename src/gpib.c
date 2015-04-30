@@ -732,7 +732,7 @@ connect_to_gpibd( void )
             print( FATAL, "Too many concurrent users of GPIB.\n" );
         return FAILED_TO_CONNECT;
     }
-        
+
     return sock_fd;
 }
 #endif

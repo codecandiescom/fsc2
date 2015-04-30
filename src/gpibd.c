@@ -430,6 +430,7 @@ gpib_handler( void * null  UNUSED_ARG )
     long cmd;
     char *eptr;
     int ret;
+    int client_is_listening;
     int ( * gpibd_func[ ] )( int, char * ) = { gpibd_init,
                                                gpibd_shutdown,
                                                gpibd_init_device,
@@ -446,8 +447,8 @@ gpib_handler( void * null  UNUSED_ARG )
 
 
     /* Wait for our thread ID to become available in the list of threads
-       and the copy the socket file descriptor we're going to communicate
-       on to a local variable. */
+       and then copy the socket file descriptor we're going to communicate
+       over to a local variable. */
 
     while ( fd == -1 )
     {
@@ -463,10 +464,15 @@ gpib_handler( void * null  UNUSED_ARG )
         pthread_mutex_unlock( &gpib_mutex );
     }
 
+    /* Now that we're all set up send the client a single ACK character to
+       tell it that we're ready to receive it's requests */
+
+    client_is_listening = swrite( fd, STR_ACK, 1 ) == 1;
+
     /* Now keep on waiting for requests from the client until the client
        either tells us it's finished or a severe error is detected */
 
-    while ( 1 )
+    while ( client_is_listening )
     {
         /* Get a line-feed terminated line from the client */
 
@@ -503,7 +509,7 @@ gpib_handler( void * null  UNUSED_ARG )
         /* Quit on failed gpib_init() and always on gpib_shutdown() command */
 
         if ( ( cmd == GPIB_INIT && ret == -1 ) || cmd == GPIB_SHUTDOWN )
-            break;
+            client_is_listening = 0;
     }
 
     /* Close the socket and remove ourself from the list of threads */

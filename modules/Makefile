@@ -27,6 +27,7 @@ s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
 hp864_list      := hp8647a hp8648b
 hp534_list      := hp5342a hp5343a
+hp535_list      := hp5350a hp5350b hp5351a hp5351b hp5352a hp5352b
 lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 
@@ -119,7 +120,8 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a              \
 				   $(hp534_list) ips20_4 ips120_10 ips120_10_mod itc503      \
 				   keithley228a kontron4060 lakeshore330 pt2025 sr510 sr530  \
 				   sr810 sr830 thurlby330 mcn700_2000 schlum7150 bh15_fc     \
-				   eip371 agilent_53181a gentec_maestro oriel_cs_260 hp5352b
+				   eip371 agilent_53181a oriel_cs_260 $(hp535_list)
+#                   gentec_maestro 
 
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
@@ -294,6 +296,14 @@ modules:
 			sed -e "s/hp534_tmpl/$$n/g"                             \
 				-e "s/HP534_TMPL/$$o/g"                             \
 				hp534.c.tmpl > $$n.c;                               \
+		fi;                                                         \
+	done;
+	@for n in $(hp535_list); do                                     \
+		o=`echo $$n | tr "a-z" "A-Z"`;                              \
+		if [ ! -e $$n.c -o hp535.c.tmpl -nt $$n.c ]; then           \
+			sed -e "s/hp535_tmpl/$$n/g"                             \
+				-e "s/HP535_TMPL/$$o/g"                             \
+				hp535.c.tmpl > $$n.c;                               \
 		fi;                                                         \
 	done;
 	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do    \

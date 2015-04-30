@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -24,16 +24,17 @@ Parts of @code{fsc2} has been written while I was working in the
 groups of Prof.@: Th.@: Prisner (J.-W.-Goethe-Universit@"at,
 Frankfurt/Main) and Prof.@: K.@: M@"obius (Freie Universit@"at
 Berlin). Both where so kind to allow me to spend quite some amount of
-time on it. Prof.@: R.@: Bittl and Prof.@: D.@: Stehlik (Freie
-Universit@"at Berlin), Prof.@: H.-J.@: Steinhoff (Universt@"at
-Osnabr@"uck), Prof.@: P.@: Hildebrandt (Technische Universit@"at
-Berlin), Prof.@: G.@: Gescheidt (Universit@"at Basel,
-Switzerland/Technische Universit@"at Graz, Austria), Prof.@: J.@:
-Schmidt and Prof.@: E.@: Groenen (Universiteit Leiden, Netherlands),
-Alexander Schnegg (HMI Berlin) supported the development by employing
-me to extend and improve the program and write further device drivers.
+time on it. Prof.@: R.@: Bittl and Prof.@: D.@: Stehlik (FU Berlin),
+Prof.@: H.-J.@: Steinhoff (Universt@"at Osnabr@"uck), Prof.@: P.@:
+Hildebrandt (Technische Universit@"at Berlin), Prof.@: G.@: Gescheidt
+(Universit@"at Basel, Switzerland/Technische Universit@"at Graz,
+Austria), Prof.@: J.@: Schmidt and Prof.@: E.@: Groenen (Universiteit
+Leiden, Netherlands), Prof.@: W@. Lubitz (MPI M@"uhlheim)), Dr.@: A.@:
+Schnegg (HMI Berlin) and Prof.@: J.@: Behrends (FU Berlin) supported
+the development by employing me to extend and improve the program and
+write further device modules.
 
-Special thanks go to Anton Savitsky (Freie Universit@"at Berlin) for
+Special thanks go to Anton Savitsky (FU Berlin/MPI M@"uhlheim) for
 writing the modules for the @w{Thurlby 330} and @w{F.u.E. Elektronik}
 @w{MCN 700-2000} power supplies, Sergey Veber (International
 Tomography Center, Novosibirsk), who wrote the the module for the
@@ -41,8 +42,8 @@ Tomography Center, Novosibirsk), who wrote the the module for the
 (California State University, Northridge) for contributing the module
 for the Newport Oriel Matrix Spectrometer, Ivo Alxneit (Paul Scherrer
 Institute, Villingen, Switzerland) for writing the module for the
-SpectraPro-275 monochromator and Christoph Oelm@"uller (Freie
-Universit@"at Berlin), who wrote the @code{EDL} mode for @code{vim}.
+SpectraPro-275 monochromator and Christoph Oelm@"uller (FU Berlin),
+who wrote the @code{EDL} mode for @code{vim}.
 
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant
@@ -54,14 +55,14 @@ had to deal with it. Then, at the FU Berlin, Stefan Weber, Chris W.@:
 M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling, Michael
 Fuhs, Anton Savitsky, Alexander Schnegg, Radek Kowalczyk, Martin
 Fuchs, Celine Els@"asser, Marc Brecht, Hauke Studier, Jana Nieder,
-Irina Karyagina, Sergey Veber, Christian Teutloff, Ringo Wenzel and
-Rolf Simon Schoenfeld took over. Iwo Gatlik, Tomasz Motylewski,
-Daniela Hristova (Basel/TU Graz), Huib Block, Peter Gast and Silvia
-Sottini (Leiden, Netherlands), Clinton McCrowey and Jussi Eloranta
-(Cal State Northridge, USA). (There are some more people that have
-used the program and that I may have forgotten - please complain to me
-if I did.) I would like to thank them not only for the constant stream
-of bug reports and proposals for improvements or new features (and I
+Irina Karyagina, Christian Teutloff, Ringo Wenzel and Rolf Simon
+Schoenfeld took over. Iwo Gatlik, Tomasz Motylewski, Daniela Hristova
+(Basel/TU Graz), Huib Block, Peter Gast and Silvia Sottini (Leiden,
+Netherlands), Clinton McCrowey and Jussi Eloranta (Cal State
+Northridge, USA). (There are some more people that have used the
+program and that I may have forgotten - please complain to me if I
+did.) I would like to thank them not only for the constant stream of
+bug reports and proposals for improvements or new features (and I
 sometimes needed quite a bit of convincing even though they where
 right) but especially for their enduring patience. Much too often,
 when they had to do an important experiment, things didn't work and

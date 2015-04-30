@@ -46,6 +46,12 @@ rulbus/lib/parser.output
 modules/bmwb
 modules/hp5342a.c
 modules/hp5343a.c
+modules/hp5350a.c
+modules/hp5350b.c
+modules/hp5351a.c
+modules/hp5351b.c
+modules/hp5352a.c
+modules/hp5352b.c
 modules/hp864*.c
 modules/hp864*.map
 modules/hp864*_gpib.c
