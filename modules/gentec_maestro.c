@@ -230,7 +230,7 @@ static Gentec_Maestro * gm;
 #define TEST_SCALE_INDEX      17
 #define TEST_WAVELENGTH       650
 #define TEST_HEAD_NAME        "QE12LP-S-MB"
-#define TEST_TRIGGER_LEVEL    0.02
+#define TEST_TRIGGER_LEVEL    2.0
 #define TEST_USER_MULTIPLIER  1.0
 #define TEST_USER_OFFSET      0.0
 #define TEST_LASER_FREQUENCY  100.0
@@ -569,7 +569,7 @@ powermeter_trigger_level( Var_T * v )
         return vars_push( FLOAT_VAR, 100 * gm->trigger_level );
     }
 
-    level = get_double( v, "level" );
+    level = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( level < 0 || level > 100 )
@@ -622,7 +622,7 @@ powermeter_wavelength( Var_T * v )
         return vars_push( FLOAT_VAR, 1.0e-9 * gm->wavelength );
     }
 
-    wl = get_double( v, "wavelength" );
+    wl = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( wl <= 0 )
@@ -976,7 +976,7 @@ powermeter_multiplier( Var_T * v )
         return vars_push( FLOAT_VAR, gm->user_multiplier );
     }
 
-    mul = get_double( v, "multiplier" );
+    mul = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( mul < MIN_USER_MULTIPLIER || mul > MAX_USER_MULTIPLIER )
@@ -1026,7 +1026,7 @@ powermeter_offset( Var_T * v )
         return vars_push( FLOAT_VAR, gm->user_offset );
     }
 
-    offset = get_double( v, "offset" );
+    offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( offset < MIN_USER_OFFSET || offset > MAX_USER_OFFSET )
@@ -1458,7 +1458,6 @@ double
 gentec_maestro_set_trigger_level( double level )
 {
 	char cmd[ 100 ];
-
 
 	fsc2_assert( level >= 0.05 && level < 99.95 );
 
