@@ -1086,7 +1086,8 @@ based on a device by B. Kinzer.
 power- and energy meter.
 
 @paragraphindent 0
-@strong{Controlled via} LAN (raw TCP)
+@strong{Controlled via} USB or LAN (raw TCP) - see the configuration
+file to find out how to compile the module for use of USB or LAN connection,
 
 @paragraphindent 0
 @strong{Status}: Untested

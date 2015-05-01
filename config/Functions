@@ -555,7 +555,7 @@ powermeter_name, 0, ALL;
 powermeter_detector_name, 0, ALL;
 powermeter_scale, -1, ALL;
 powermeter_get_scale_limits, 0, EXP;
-powermeter_autocale, -1, ALL;
+powermeter_autoscale, -1, ALL;
 powermeter_trigger_level, -1, ALL;
 powermeter_wavelength, -1, ALL;
 powermeter_get_wavelength_limits, -1, EXP;

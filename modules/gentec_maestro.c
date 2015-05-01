@@ -24,6 +24,10 @@
 
 #if defined USE_USB
 
+#if defined USE_LAN
+#error "Error in configuration file, on;e one of 'USE_USB' and 'USE_LAN' can defined."
+#endif
+
 #include "serial.h"
 
 #define SERIAL_BAUDRATE B115200
@@ -64,7 +68,7 @@ Var_T * powermeter_name( Var_T * v  UNUSED_ARG );
 Var_T * powermeter_detector_name( Var_T * v  UNUSED_ARG );
 Var_T * powermeter_scale( Var_T * v );
 Var_T * powermeter_get_scale_limits( Var_T * v );
-Var_T * powermeter_autocale( Var_T * v );
+Var_T * powermeter_autoscale( Var_T * v );
 Var_T * powermeter_trigger_level( Var_T * v );
 Var_T * powermeter_wavelength( Var_T * v );
 Var_T * powermeter_get_wavelength_limits( Var_T * v );
@@ -514,7 +518,7 @@ XXXXXXXXX  interacts with the autoscale setting
  *-------------------------------------------------------*/
 
 Var_T *
-powermeter_autocale( Var_T * v )
+powermeter_autoscale( Var_T * v )
 {
     bool as;
 
@@ -1293,7 +1297,7 @@ gentec_maestro_init( void )
     if ( set_autoscale && ! set_scale )
         gentec_maestro_set_autoscale( UNSET );
     else if ( ! set_autoscale && set_scale )
-        gentec_maestro_set_scale( gmt->scale_index );
+        gentec_maestro_set_scale( gm->scale_index );
     else if ( set_autoscale && set_scale )
     {
         if ( gm->autoscale_is_on )
