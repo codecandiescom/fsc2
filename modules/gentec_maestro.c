@@ -594,7 +594,7 @@ powermeter_trigger_level( Var_T * v )
     }
 
     if ( fabs( level - gm->trigger_level ) > 0.01 )
-        print( WARN, "Adjuted trigger level to %.1f%%.\n",
+        print( WARN, "Adjusted trigger level to %.1f%%.\n",
                gm->trigger_level );
 
     return vars_push( FLOAT_VAR, 100 * gm->trigger_level );
@@ -1460,9 +1460,9 @@ gentec_maestro_set_trigger_level( double level )
 	char cmd[ 100 ];
 
 
-	fsc2_assert( level >= 0.0005 && level < 0.9995 );
+	fsc2_assert( level >= 0.05 && level < 99.95 );
 
-	printf( cmd, "*STL%.*f", level < 0.0995 ? 2 : 1, 100 * level );
+	printf( cmd, "*STL%.1f", level );
 	gentec_maestro_command( cmd );
 
     return gentec_maestro.trigger_level = strtod( cmd + 4, NULL );
