@@ -566,7 +566,7 @@ powermeter_trigger_level( Var_T * v )
 
         if ( FSC2_MODE == EXPERIMENT )
             gentec_maestro_get_trigger_level( );
-        return vars_push( FLOAT_VAR, 100 * gm->trigger_level );
+        return vars_push( FLOAT_VAR, gm->trigger_level );
     }
 
     level = get_double( v, NULL );
@@ -597,7 +597,7 @@ powermeter_trigger_level( Var_T * v )
         print( WARN, "Adjusted trigger level to %.1f%%.\n",
                gm->trigger_level );
 
-    return vars_push( FLOAT_VAR, 100 * gm->trigger_level );
+    return vars_push( FLOAT_VAR, gm->trigger_level );
 }
 
 
@@ -1461,7 +1461,7 @@ gentec_maestro_set_trigger_level( double level )
 
 	fsc2_assert( level >= 0.05 && level < 99.95 );
 
-	printf( cmd, "*STL%.1f", level );
+	sprintf( cmd, "*STL%.1f", level );
 	gentec_maestro_command( cmd );
 
     return gentec_maestro.trigger_level = strtod( cmd + 4, NULL );
@@ -1489,7 +1489,7 @@ gentec_maestro_get_trigger_level( void )
          || level > MAX_TRIGGER_LEVEL )
         gentec_maestro_failure( );
 
-    return gentec_maestro.trigger_level = 0.01 * level;
+    return gentec_maestro.trigger_level = level;
 }
 
 
