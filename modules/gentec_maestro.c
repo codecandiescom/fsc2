@@ -631,7 +631,7 @@ powermeter_wavelength( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT && gentec_maestro.att_is_available )
         gentec_maestro_get_attenuator( );
 
     wl_nm = lrnd( 1.0e9 * wl );
