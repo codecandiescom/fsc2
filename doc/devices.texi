@@ -8800,7 +8800,7 @@ If called with no argument (or a false boolean argument, i.e.@:
 reading of the powermeter as shown on the display. Note that calling
 this function at a higher rate than new data become available will
 result in the same data value getting returned more than once. To wait
-for the next new data value not yet ftched from the device to become
+for the next new data value not yet fetched from the device to become
 available call the function with a true boolean argument (i.e.@:
 either a non-zero value or @code{"ON"}).
 
