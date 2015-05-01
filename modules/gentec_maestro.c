@@ -1461,7 +1461,7 @@ gentec_maestro_set_trigger_level( double level )
 
 	fsc2_assert( level >= 0.05 && level < 99.95 );
 
-	sprintf( cmd, "*STL%.1f", level );
+	sprintf( cmd, "*STL%.*f", level >= 9.95 ? 1 : 2, level );
 	gentec_maestro_command( cmd );
 
     return gentec_maestro.trigger_level = strtod( cmd + 4, NULL );
@@ -2185,8 +2185,11 @@ gentec_maestro_get_extended_status( void )
     strcpy( gentec_maestro.head_name,
             gentec_maestro_status_entry_to_string( reply + 0x1a * 12 ) );
 
-    d =   0.1
-      * lrnd( 10 * gentec_maestro_status_entry_to_float( reply + 0x2e * 12 ) ); 
+    /* Note: in the extended status the trigger level gets returned as a
+       fraction, not a percentage! */
+
+    d = 0.1 * lrnd( 1000
+                 * gentec_maestro_status_entry_to_float( reply + 0x2e * 12 ) ); 
    if ( d < 0.1 || d > 99.9 )
         gentec_maestro_failure( );
     gentec_maestro.trigger_level = d;
