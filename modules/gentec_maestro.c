@@ -99,7 +99,7 @@ static double gentec_maestro_get_laser_frequency( void );
 static bool gentec_maestro_set_joulemeter_binary_mode( bool on_off );
 static bool gentec_maestro_get_joulemeter_binary_mode( void );
 static bool gentec_maestro_set_analog_output( bool on_off );
-static double gentec_maestro_set_wavelength( double wavelength );
+static double gentec_maestro_set_wavelength( long int wl );
 static double gentec_maestro_get_wavelength( void );
 static bool gentec_maestro_set_anticipation( bool on_off );
 static bool gentec_maestro_get_anticipation( void );
@@ -1274,9 +1274,9 @@ gentec_maestro_init( void )
             }
         }
         else if (    gmt->min_test_wavelength_unknown < gm->min_wavelength
-                  || gmt->max_test_wavelength_unknown < gm->max_wavelength )
+                  || gmt->max_test_wavelength_unknown > gm->max_wavelength )
         {
-            print( FATAL, "During tests an ot of range wavelength was "
+            print( FATAL, "During tests an out-of-range wavelength was "
                    "requested.\n" );
             return UNSET;
         }
@@ -1675,11 +1675,9 @@ gentec_maestro_set_analog_output( bool on_off )
 
 static
 double
-gentec_maestro_set_wavelength( double wavelength )
+gentec_maestro_set_wavelength( long int wl )
 {
     char cmd[ 30 ];
-    long wl = lrnd( 1.0e9 * wavelength );
-
 
     fsc2_assert(    (    ! gentec_maestro.att_is_on
                       && wl >= gentec_maestro.min_wavelength
