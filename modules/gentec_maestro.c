@@ -244,15 +244,14 @@ gentec_maestro_init_hook( void )
        exception on failure), for communication via LAN set global variable
        to indicate that the device is controlled via LAN */
 
-#if defined USE_USE
-    gm.handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
+#if defined USE_USB
+    gm->handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
 #else
     Need_LAN = SET;
+    gm->handle = -1;
 #endif
 
     /* Initialize the structure for the device as good as possible */
-
-    gm->handle = -1;
 
     gm->mode = TEST_MODE;
     gm->mode_has_been_set = UNSET;
@@ -2423,11 +2422,13 @@ gentec_maestro_talk( const char * cmd,
 					 long         length )
 {
     gentec_maestro_command( cmd );
+
+    length--;
 #if defined USE_USB
     if (    ! gentec_maestro_serial_comm( SERIAL_READ, reply, &length )
          || length < 3
 #else
-    if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length - 1,
+    if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length,
                                       READ_TIMEOUT, UNSET ) ) < 3
 #endif
          || strcmp( reply + length - 2, "\r\n" ) )
@@ -2474,14 +2475,15 @@ gentec_maestro_serial_comm( int type,
             /* Use 8-N-1, ignore flow control and modem lines, enable
                reading and set the baud rate. */
 
-            cfsetispeed( gentec_maestro.tio, SERIAL_BAUDRATE );
-            cfsetospeed( gentec_maestro.tio, SERIAL_BAUDRATE );
-
             gentec_maestro.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
             gentec_maestro.tio->c_cflag |= CS8 | CLOCAL | CREAD;
             gentec_maestro.tio->c_iflag  = IGNBRK;
             gentec_maestro.tio->c_oflag  = 0;
             gentec_maestro.tio->c_lflag  = 0;
+
+            cfsetispeed( gentec_maestro.tio, SERIAL_BAUDRATE );
+            cfsetospeed( gentec_maestro.tio, SERIAL_BAUDRATE );
+
             fsc2_tcflush( gentec_maestro.handle, TCIOFLUSH );
             fsc2_tcsetattr( gentec_maestro.handle, TCSANOW,
                             gentec_maestro.tio );
