@@ -172,7 +172,7 @@ typedef struct
     
     char head_name[ 33 ];
 
-    double trigger_level;      /* between 0.1 and 0.99 */
+    double trigger_level;      /* between 0.1 and 99.9 (in percent) */
     bool trigger_level_has_been_set;
 
     bool autoscale_is_on;
@@ -579,7 +579,7 @@ powermeter_trigger_level( Var_T * v )
     }
 
     if ( level < MIN_TRIGGER_LEVEL )
-        print( WARN, "Trigger level too low, adjusting to %f%%.\n",
+        print( WARN, "Trigger level too low, adjusting to %.1f%%.\n",
                level = MIN_TRIGGER_LEVEL );
     if ( level > MAX_TRIGGER_LEVEL )
         print( WARN, "Trigger level too high, adjusting to %.1f%%.\n",
@@ -2185,8 +2185,9 @@ gentec_maestro_get_extended_status( void )
     strcpy( gentec_maestro.head_name,
             gentec_maestro_status_entry_to_string( reply + 0x1a * 12 ) );
 
-    d = gentec_maestro_status_entry_to_float( reply + 0x2e * 12 );
-    if ( d < 0.001 || d > 0.999 )
+    d =   0.1
+      * lrnd( 10 * gentec_maestro_status_entry_to_float( reply + 0x2e * 12 ) ); 
+   if ( d < 0.1 || d > 99.9 )
         gentec_maestro_failure( );
     gentec_maestro.trigger_level = d;
 
