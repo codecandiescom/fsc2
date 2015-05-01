@@ -2093,7 +2093,7 @@ gentec_maestro_get_extended_status( void )
 
     /* Now extract all the relevant values */
 
-    if ( strcmp( reply + 0x40 * 12, ":100000000" ) )
+    if ( strncmp( reply + 0x3a * 12, ":100000000", 10 ) )
         gentec_maestro_failure( );
 
     /* Now extract all the values */
@@ -2144,7 +2144,7 @@ gentec_maestro_get_extended_status( void )
     gentec_maestro.max_wavelength = v;
 
     v = gentec_maestro_status_entry_to_int( reply + 0x10 * 12 );
-    if ( v )
+    if ( v < 0 )
         gentec_maestro_failure( );
     gentec_maestro.min_wavelength = v;
 
@@ -2171,7 +2171,7 @@ gentec_maestro_get_extended_status( void )
     gentec_maestro.max_wavelength_with_att = v;
 
     v = gentec_maestro_status_entry_to_int( reply + 0x18 * 12 );
-    if ( v )
+    if ( v < 0 )
         gentec_maestro_failure( );
     gentec_maestro.min_wavelength_with_att = v;
 
@@ -2186,7 +2186,7 @@ gentec_maestro_get_extended_status( void )
             gentec_maestro_status_entry_to_string( reply + 0x1a * 12 ) );
 
     d = gentec_maestro_status_entry_to_float( reply + 0x2e * 12 );
-    if ( v < 0.001 || v > 0.999 )
+    if ( d < 0.001 || d > 0.999 )
         gentec_maestro_failure( );
     gentec_maestro.trigger_level = d;
 
@@ -2227,7 +2227,7 @@ static
 double
 gentec_maestro_index_to_scale( int index )
 {
-	fsc2_assert( index < 0 || index > MAX_SCALE );
+	fsc2_assert( index >= 0 && index <= MAX_SCALE );
 	return ( ( index & 1 ) ? 3 : 1 ) * 1.0e-12 * pow( 10, index / 2 );
 }
 
@@ -2257,7 +2257,7 @@ gentec_maestro_scale_to_index( double   scale,
 			return i;
         }
 
-		if ( scale < 1.0001 *r )
+		if ( scale < 1.0001 * r )
 			return i;
 	}
 
@@ -2431,7 +2431,7 @@ gentec_maestro_talk( const char * cmd,
     if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length,
                                       READ_TIMEOUT, UNSET ) ) < 3
 #endif
-         || strcmp( reply + length - 2, "\r\n" ) )
+         || strncmp( reply + length - 2, "\r\n", 2 ) )
         gentec_maestro_failure( );
     reply[ length -= 2 ] = '\0';
     return length;
@@ -2475,11 +2475,10 @@ gentec_maestro_serial_comm( int type,
             /* Use 8-N-1, ignore flow control and modem lines, enable
                reading and set the baud rate. */
 
-            gentec_maestro.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-            gentec_maestro.tio->c_cflag |= CS8 | CLOCAL | CREAD;
-            gentec_maestro.tio->c_iflag  = IGNBRK;
-            gentec_maestro.tio->c_oflag  = 0;
-            gentec_maestro.tio->c_lflag  = 0;
+            gentec_maestro.tio->c_cflag = CS8 | CLOCAL | CREAD;
+            gentec_maestro.tio->c_iflag = IGNBRK;
+            gentec_maestro.tio->c_oflag = 0;
+            gentec_maestro.tio->c_lflag = 0;
 
             cfsetispeed( gentec_maestro.tio, SERIAL_BAUDRATE );
             cfsetospeed( gentec_maestro.tio, SERIAL_BAUDRATE );
