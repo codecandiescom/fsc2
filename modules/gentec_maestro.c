@@ -636,27 +636,32 @@ powermeter_wavelength( Var_T * v )
 
     wl_nm = lrnd( 1.0e9 * wl );
 
-    if (    ! gm->att_is_on
-         && ( wl_nm < gm->min_wavelength || wl_nm > gm->max_wavelength ) )
-    {
-        print( FATAL, "Requested wavelength is out of range, must be (with "
-               "attenuator off) between %ld nm and %ld nm.\n",
-               gm->min_wavelength, gm->max_wavelength );
-        THROW( EXCEPTION );
-    }
-
-    if (    gm->att_is_on
-         && (    wl_nm < gm->min_wavelength_with_att 
-              || wl_nm > gm->max_wavelength_with_att ) )
-    {
-        print( FATAL, "Requested wavelength is out of range, must be (with "
-               "attenuator on) between %ld nm and %ld nm.\n",
-               gm->min_wavelength_with_att, gm->max_wavelength_with_att );
-        THROW( EXCEPTION );
-    }
+    if ( fabs( wl_nm - 1.0e9 * wl ) > 0.1 )
+        print( WARN, "Wavelength has been adjusted to %ld nm.\n", wl_nm );
 
     if ( FSC2_MODE == EXPERIMENT )
+    {
+        if (    ! gm->att_is_on
+             && ( wl_nm < gm->min_wavelength || wl_nm > gm->max_wavelength ) )
+        {
+            print( FATAL, "Requested wavelength is out of range, must be "
+                   "(with attenuator off) between %ld nm and %ld nm.\n",
+                   gm->min_wavelength, gm->max_wavelength );
+            THROW( EXCEPTION );
+        }
+
+        if (    gm->att_is_on
+             && (    wl_nm < gm->min_wavelength_with_att 
+                  || wl_nm > gm->max_wavelength_with_att ) )
+        {
+            print( FATAL, "Requested wavelength is out of range, must be "
+                   "(with attenuator on) between %ld nm and %ld nm.\n",
+                   gm->min_wavelength_with_att, gm->max_wavelength_with_att );
+            THROW( EXCEPTION );
+        }
+
         gentec_maestro_set_wavelength( wl_nm );
+    }
     else
     {
         gm->wavelength = wl_nm;
@@ -683,9 +688,6 @@ powermeter_wavelength( Var_T * v )
 
         gm->wavelength_has_been_set = SET;
     }
-
-    if ( fabs( wl_nm - 1.0e9 ) > 0.1 )
-        print( WARN, "Wavelength has been adjusted to %ld nm.\n", wl_nm );
 
     return vars_push( FLOAT_VAR, 1.0e-9 * wl_nm );
 }
@@ -1706,19 +1708,18 @@ gentec_maestro_get_wavelength( void )
     long wl;
     char *ep;
 
-
     if (    gentec_maestro_talk( "*GWL", reply, sizeof reply ) < 6
          || strncmp( reply, "PWC: ", 5 ) )
         gentec_maestro_failure( );
 
     wl = strtol( reply + 5, &ep, 10 );
-    if (     (    ! gentec_maestro.att_is_on
-               && wl >= gentec_maestro.min_wavelength
-               && wl <= gentec_maestro.max_wavelength )
+    if (    *ep
+         || (    ! gentec_maestro.att_is_on
+               && wl < gentec_maestro.min_wavelength
+               && wl > gentec_maestro.max_wavelength )
          || (    gentec_maestro.att_is_on
-              && wl >= gentec_maestro.min_wavelength_with_att
-              && wl <= gentec_maestro.max_wavelength_with_att )
-          || *ep )
+              && wl < gentec_maestro.min_wavelength_with_att
+              && wl > gentec_maestro.max_wavelength_with_att ) )
         gentec_maestro_failure( );
 
     gentec_maestro.wavelength = wl;
@@ -2091,20 +2092,12 @@ gentec_maestro_get_extended_status( void )
                 gentec_maestro_failure( );
     }
 
-    /* Now extract all the relevant values */
-
     if ( strncmp( reply + 0x3a * 12, ":100000000", 10 ) )
         gentec_maestro_failure( );
 
-    /* Now extract all the values */
+    /* Now extract all the relevant values */
 
     v = gentec_maestro_status_entry_to_int( reply + 0x04 * 12 );
-
-#define POWER_MODE     0     /* power in W  */
-#define ENERGY_MODE    1     /* energy in J */
-#define SSE_MODE       2     /* single shot energy in J */
-#define DBM_MODE       6     /* power in dBm */
-#define NO_DETECTOR    7
 
     if (    v != POWER_MODE
          && v != ENERGY_MODE
