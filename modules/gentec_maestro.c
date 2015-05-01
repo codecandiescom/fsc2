@@ -635,7 +635,6 @@ powermeter_wavelength( Var_T * v )
         gentec_maestro_get_attenuator( );
 
     wl_nm = lrnd( 1.0e9 * wl );
-
     if ( fabs( wl_nm - 1.0e9 * wl ) > 0.1 )
         print( WARN, "Wavelength has been adjusted to %ld nm.\n", wl_nm );
 
@@ -1193,7 +1192,7 @@ gentec_maestro_init( void )
                   || gmt->wavelength > gm->min_wavelength )
         {
             print( FATAL, "During preparations a wavelength (with "
-                   " attenutaor off) was set that is out of range.\n" );
+                   " attenuator off) was set that is out of range.\n" );
             return UNSET;
         }
     }
@@ -1223,7 +1222,7 @@ gentec_maestro_init( void )
          && (    gmt->min_test_wavelength < gm->min_wavelength
               || gmt->max_test_wavelength > gm->max_wavelength ) )
     {
-        print( FATAL, "During tests an ot of range wavelength was "
+        print( FATAL, "During tests an out-of-range wavelength was "
                "requested.\n" );
         return UNSET;
     }
@@ -1269,7 +1268,7 @@ gentec_maestro_init( void )
                                                  gm->max_wavelength_with_att )
 
             {
-                print( FATAL, "During tests an ot of range wavelength was "
+                print( FATAL, "During tests an out-of-range wavelength was "
                        "requested.\n" );
                 return UNSET;
             }
