@@ -655,7 +655,7 @@ powermeter_wavelength( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == TEST )
+    if ( FSC2_MODE == EXPERIMENT )
         gentec_maestro_set_wavelength( wl_nm );
     else
     {
