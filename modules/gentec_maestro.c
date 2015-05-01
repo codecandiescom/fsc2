@@ -2515,13 +2515,12 @@ gentec_maestro_serial_comm( int type,
 
             /* Try to read from the device */
 
-            if ( ( len = fsc2_serial_read( gentec_maestro.handle, buf, *lptr,
+            if ( ( *lptr = fsc2_serial_read( gentec_maestro.handle, buf, *lptr,
                                            NULL, READ_TIMEOUT, UNSET ) ) <= 0 )
             {
-                if ( len == 0 )
+                if ( *lptr == 0 )
                     stop_on_user_request( );
 
-                *lptr = 0;
                 return FAIL;
             }
             break;
