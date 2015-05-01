@@ -322,7 +322,7 @@ gentec_maestro_test_hook( void )
     gentec_maestro_test = gentec_maestro;
     strcpy( gentec_maestro_test.head_name, gentec_maestro.head_name );
 
-    gm = &gentec_maestro;
+    gm = &gentec_maestro_test;
 
     gm->mode_has_been_set = UNSET;
     gm->scale_index_has_been_set = UNSET;
@@ -580,25 +580,22 @@ powermeter_trigger_level( Var_T * v )
 
     if ( level < MIN_TRIGGER_LEVEL )
         print( WARN, "Trigger level too low, adjusting to %f%%.\n",
-            level = MIN_TRIGGER_LEVEL );
+               level = MIN_TRIGGER_LEVEL );
     if ( level > MAX_TRIGGER_LEVEL )
-        print( WARN, "Trigger level too high, adjusting to %f%%.\n",
-            level = MAX_TRIGGER_LEVEL );
- 
-    
-    level *= 0.01;
+        print( WARN, "Trigger level too high, adjusting to %.1f%%.\n",
+               level = MAX_TRIGGER_LEVEL );
 
     if ( FSC2_MODE == EXPERIMENT )
         gentec_maestro_set_trigger_level( level );
     else
     {
-        gm->trigger_level = 0.0001 * lrnd( 10000 * level );
+        gm->trigger_level = 0.1 * lrnd( 10 * level );
         gm->trigger_level_has_been_set = SET;
     }
 
-    if ( fabs( level - gm->trigger_level ) > 0.0001 )
-        print( WARN, "djuted trigger level to %.*f%%.\n",
-               gm->trigger_level < 0.1 ? 2 : 1, 100 * gm->trigger_level );
+    if ( fabs( level - gm->trigger_level ) > 0.01 )
+        print( WARN, "Adjuted trigger level to %.1f%%.\n",
+               gm->trigger_level );
 
     return vars_push( FLOAT_VAR, 100 * gm->trigger_level );
 }
@@ -1487,7 +1484,7 @@ gentec_maestro_get_trigger_level( void )
          || strncmp( reply, "Trigger Level: ", 15 ) )
         gentec_maestro_failure( );
 
-    level = strtod( reply, &ep );
+    level = strtod( reply + 15, &ep );
     if (    *ep
          || level < MIN_TRIGGER_LEVEL
          || level > MAX_TRIGGER_LEVEL )
