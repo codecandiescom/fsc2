@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -53,7 +53,7 @@ Var_T * motor_acceleration(  Var_T * v );
 static void smsmotor_init( void );
 static void smsmotor_open( void );
 static double smsmotor_goto( long   dev,
-							 double pos );
+                             double pos );
 static void smsmotor_fail( void );
 static void smsmotor_set_speed( long   dev,
                                 double speed );
@@ -65,14 +65,14 @@ static double smsmotor_get_acceleration( long  dev );
 
 static struct {
     int              sn;
-	bool             is_open;
-	double           position[ DEVICE_COUNT ];
-	double           lower_limit[ DEVICE_COUNT ];
-	double           upper_limit[ DEVICE_COUNT ];
-	double           abs_min_position[ DEVICE_COUNT ];
-	double           abs_max_position[ DEVICE_COUNT ];
-	double           rel_min_position[ DEVICE_COUNT ];
-	double           rel_max_position[ DEVICE_COUNT ];
+    bool             is_open;
+    double           position[ DEVICE_COUNT ];
+    double           lower_limit[ DEVICE_COUNT ];
+    double           upper_limit[ DEVICE_COUNT ];
+    double           abs_min_position[ DEVICE_COUNT ];
+    double           abs_max_position[ DEVICE_COUNT ];
+    double           rel_min_position[ DEVICE_COUNT ];
+    double           rel_max_position[ DEVICE_COUNT ];
     bool             is_rel_mode[ DEVICE_COUNT ];
     double           init_speed[ DEVICE_COUNT ];
     double           speed[ DEVICE_COUNT ];
@@ -103,23 +103,23 @@ static struct {
 int
 smsmotor_init_hook( void )
 {
-	long i;
+    long i;
 
 
     /* Request the seral port for the module */
 
     smsmotor.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
-	smsmotor.is_open = UNSET;
+    smsmotor.is_open = UNSET;
 
     /* Initialize the device structure */
 
-	for ( i = 0; i < DEVICE_COUNT; i++ )
-	{
-		smsmotor.position[ i ]= 0.0;
-		smsmotor.abs_min_position[ i ]    =   0.5 * HUGE_VAL;
-		smsmotor.abs_max_position[ i ]    = - 0.5 * HUGE_VAL;
-		smsmotor.rel_min_position[ i ]    =   0.5 * HUGE_VAL;
-		smsmotor.rel_max_position[ i ]    = - 0.5 * HUGE_VAL;
+    for ( i = 0; i < DEVICE_COUNT; i++ )
+    {
+        smsmotor.position[ i ]= 0.0;
+        smsmotor.abs_min_position[ i ]    =   0.5 * HUGE_VAL;
+        smsmotor.abs_max_position[ i ]    = - 0.5 * HUGE_VAL;
+        smsmotor.rel_min_position[ i ]    =   0.5 * HUGE_VAL;
+        smsmotor.rel_max_position[ i ]    = - 0.5 * HUGE_VAL;
         smsmotor.is_rel_mode[ i ]         = SET;
         smsmotor.lower_limit[ i ]         = default_limits[ i ][ 0 ];
         smsmotor.upper_limit[ i ]         = default_limits[ i ][ 1 ];
@@ -127,9 +127,9 @@ smsmotor_init_hook( void )
         smsmotor.speed_is_set[ i ]        = UNSET;
         smsmotor.acceleration_is_set[ i ] = UNSET;
         smsmotor.acceleration[ i ]        = TEST_ACCELERATION;
-	}
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -140,8 +140,8 @@ smsmotor_init_hook( void )
 int
 smsmotor_exp_hook( void )
 {
-	smsmotor_init( );
-	return 1;
+    smsmotor_init( );
+    return 1;
 }
 
 
@@ -153,14 +153,14 @@ int
 smsmotor_end_of_exp_hook( void )
 {
     if ( smsmotor.is_open )
-	{
+    {
 #ifndef SMSMOTOR_TEST
         fsc2_serial_close( smsmotor.sn );
 #endif
         smsmotor.is_open = UNSET;
     }
 
-	return 1;
+    return 1;
 }
 
 
@@ -185,64 +185,64 @@ motor_name( Var_T * v  UNUSED_ARG )
 Var_T *
 motor_position( Var_T * v )
 {
-	long dev;
-	double position;
+    long dev;
+    double position;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing device number argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing device number argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	dev = get_strict_long( v, "device number" ) - 1;
+    dev = get_strict_long( v, "device number" ) - 1;
 
-	if ( dev < 0 || dev >= DEVICE_COUNT )
-	{
-		print( FATAL, "Invalid device number of %ld, must be between 1 and "
-			   "%d.\n", dev + 1, DEVICE_COUNT );
-		THROW( EXCEPTION );
-	}
+    if ( dev < 0 || dev >= DEVICE_COUNT )
+    {
+        print( FATAL, "Invalid device number of %ld, must be between 1 and "
+               "%d.\n", dev + 1, DEVICE_COUNT );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-		return vars_push( FLOAT_VAR, smsmotor.position[ dev ] );
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, smsmotor.position[ dev ] );
 
-	position = get_double( v, "position" );
+    position = get_double( v, "position" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
+    if ( FSC2_MODE != EXPERIMENT )
+    {
         smsmotor.is_rel_mode[ dev ] = UNSET;
-		smsmotor.abs_min_position[ dev ] =
+        smsmotor.abs_min_position[ dev ] =
                             d_min( smsmotor.abs_min_position[ dev ], position );
-		smsmotor.abs_max_position[ dev ] =
+        smsmotor.abs_max_position[ dev ] =
                             d_max( smsmotor.abs_max_position[ dev ], position );
 
-		return vars_push( FLOAT_VAR, smsmotor.position[ dev ] = position );
-	}
+        return vars_push( FLOAT_VAR, smsmotor.position[ dev ] = position );
+    }
 
-	if ( position > smsmotor.upper_limit[ dev ] )
-	{
-		print( FATAL, "Requested position of %f is larger then upper limit of "
-			   "%f for device #%ld\n", position, smsmotor.upper_limit[ dev ],
-			   dev + 1 );
-		THROW( EXCEPTION );
-	}
+    if ( position > smsmotor.upper_limit[ dev ] )
+    {
+        print( FATAL, "Requested position of %f is larger then upper limit of "
+               "%f for device #%ld\n", position, smsmotor.upper_limit[ dev ],
+               dev + 1 );
+        THROW( EXCEPTION );
+    }
 
-	if ( position < smsmotor.lower_limit[ dev ] )
-	{
-		print( FATAL, "Requested position of %f is lower then lower limit of "
-			   "%f for device #%ld\n", position, smsmotor.lower_limit[ dev ],
-			   dev + 1 );
-		THROW( EXCEPTION );
-	}
+    if ( position < smsmotor.lower_limit[ dev ] )
+    {
+        print( FATAL, "Requested position of %f is lower then lower limit of "
+               "%f for device #%ld\n", position, smsmotor.lower_limit[ dev ],
+               dev + 1 );
+        THROW( EXCEPTION );
+    }
 
-	return vars_push( FLOAT_VAR,
-					  smsmotor.position[ dev ] = smsmotor_goto( dev,
-																position ) );
+    return vars_push( FLOAT_VAR,
+                      smsmotor.position[ dev ] = smsmotor_goto( dev,
+                                                                position ) );
 }
 
 
@@ -253,39 +253,39 @@ motor_position( Var_T * v )
 Var_T *
 motor_move_relative( Var_T * v )
 {
-	long dev;
-	double step;
+    long dev;
+    double step;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing device number argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing device number argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	dev = get_strict_long( v, "device number" ) - 1;
+    dev = get_strict_long( v, "device number" ) - 1;
 
-	if ( dev < 0 || dev >= DEVICE_COUNT )
-	{
-		print( FATAL, "Invalid device number of %ld, must be between 1 and "
-			   "%d.\n", dev + 1, DEVICE_COUNT );
-		THROW( EXCEPTION );
-	}
+    if ( dev < 0 || dev >= DEVICE_COUNT )
+    {
+        print( FATAL, "Invalid device number of %ld, must be between 1 and "
+               "%d.\n", dev + 1, DEVICE_COUNT );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing amount position change.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing amount position change.\n" );
+        THROW( EXCEPTION );
+    }
 
-	step = get_double( v, "amount position change" );
+    step = get_double( v, "amount position change" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
+    if ( FSC2_MODE != EXPERIMENT )
+    {
         if ( smsmotor.is_rel_mode[ dev ] ) {
             smsmotor.rel_min_position[ dev ] =
                                       d_min( smsmotor.rel_min_position[ dev ],
@@ -303,27 +303,27 @@ motor_move_relative( Var_T * v )
                                       d_max( smsmotor.abs_max_position[ dev ],
                                              smsmotor.position[ dev ] + step );
         }
-		return vars_push( FLOAT_VAR, smsmotor.position[ dev ] += step );
-	}
+        return vars_push( FLOAT_VAR, smsmotor.position[ dev ] += step );
+    }
 
-	if ( smsmotor.position[ dev ] + step > smsmotor.upper_limit[ dev ] )
-	{
-		print( FATAL, "Resulting position of %f is larger then upper limit of "
-			   "%f for device #%ld\n", smsmotor.position[ dev ] + step,
-			   smsmotor.upper_limit[ dev ], dev + 1 );
-		THROW( EXCEPTION );
-	}
+    if ( smsmotor.position[ dev ] + step > smsmotor.upper_limit[ dev ] )
+    {
+        print( FATAL, "Resulting position of %f is larger then upper limit of "
+               "%f for device #%ld\n", smsmotor.position[ dev ] + step,
+               smsmotor.upper_limit[ dev ], dev + 1 );
+        THROW( EXCEPTION );
+    }
 
-	if ( smsmotor.position[ dev ] + step < smsmotor.lower_limit[ dev ] )
-	{
-		print( FATAL, "Resulting position of %f is lower then lower limit of "
-			   "%f for device #%ld\n", smsmotor.position[ dev ] + step,
-			   smsmotor.lower_limit[ dev ], dev + 1 );
-		THROW( EXCEPTION );
-	}
+    if ( smsmotor.position[ dev ] + step < smsmotor.lower_limit[ dev ] )
+    {
+        print( FATAL, "Resulting position of %f is lower then lower limit of "
+               "%f for device #%ld\n", smsmotor.position[ dev ] + step,
+               smsmotor.lower_limit[ dev ], dev + 1 );
+        THROW( EXCEPTION );
+    }
 
-	return vars_push( FLOAT_VAR, smsmotor.position[ dev ] =
-					    smsmotor_goto( dev, smsmotor.position[ dev ] + step ) );
+    return vars_push( FLOAT_VAR, smsmotor.position[ dev ] =
+                        smsmotor_goto( dev, smsmotor.position[ dev ] + step ) );
 }
 
 
@@ -343,24 +343,24 @@ motor_limits( Var_T * v )
     double limits[ 2 ];
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing device number argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing device number argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	dev = get_strict_long( v, "device number" ) - 1;
+    dev = get_strict_long( v, "device number" ) - 1;
 
-	if ( dev < 0 || dev >= DEVICE_COUNT )
-	{
-		print( FATAL, "Invalid device number of %ld, must be between 1 and "
-			   "%d.\n", dev + 1, DEVICE_COUNT );
-		THROW( EXCEPTION );
-	}
+    if ( dev < 0 || dev >= DEVICE_COUNT )
+    {
+        print( FATAL, "Invalid device number of %ld, must be between 1 and "
+               "%d.\n", dev + 1, DEVICE_COUNT );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
+    if ( v == NULL )
     {
         limits[ 0 ] =  smsmotor.lower_limit[ dev ];
         limits[ 1 ] =  smsmotor.upper_limit[ dev ];
@@ -434,24 +434,24 @@ motor_speed( Var_T * v )
     double speed;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing device number argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing device number argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	dev = get_strict_long( v, "device number" ) - 1;
+    dev = get_strict_long( v, "device number" ) - 1;
 
-	if ( dev < 0 || dev >= DEVICE_COUNT )
-	{
-		print( FATAL, "Invalid device number of %ld, must be between 1 and "
-			   "%d.\n", dev + 1, DEVICE_COUNT );
-		THROW( EXCEPTION );
-	}
+    if ( dev < 0 || dev >= DEVICE_COUNT )
+    {
+        print( FATAL, "Invalid device number of %ld, must be between 1 and "
+               "%d.\n", dev + 1, DEVICE_COUNT );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
+    if ( v == NULL )
         return vars_push( FLOAT_VAR, smsmotor.speed[ dev ] );
 
     speed = get_double( v, "speed" );
@@ -494,24 +494,24 @@ motor_acceleration( Var_T * v )
     double acc;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing device number argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing device number argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	dev = get_strict_long( v, "device number" ) - 1;
+    dev = get_strict_long( v, "device number" ) - 1;
 
-	if ( dev < 0 || dev >= DEVICE_COUNT )
-	{
-		print( FATAL, "Invalid device number of %ld, must be between 1 and "
-			   "%d.\n", dev + 1, DEVICE_COUNT );
-		THROW( EXCEPTION );
-	}
+    if ( dev < 0 || dev >= DEVICE_COUNT )
+    {
+        print( FATAL, "Invalid device number of %ld, must be between 1 and "
+               "%d.\n", dev + 1, DEVICE_COUNT );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
+    if ( v == NULL )
         return vars_push( FLOAT_VAR, smsmotor.acceleration[ dev ] );
 
     acc = get_double( v, "maximum acceleration" );
@@ -551,32 +551,32 @@ motor_acceleration( Var_T * v )
 static void
 smsmotor_init( void )
 {
-	char buf[ 40 ];
-	char reply[ 40 ];
-	long i;
-	long len = 0;
+    char buf[ 40 ];
+    char reply[ 40 ];
+    long i;
+    long len = 0;
 
 
-	/* Open connection to device */
+    /* Open connection to device */
 
-	smsmotor_open( );
+    smsmotor_open( );
 
 #ifndef SMSMOTOR_TEST
 
-	for ( i = 0; i < DEVICE_COUNT; i++ )
-	{
+    for ( i = 0; i < DEVICE_COUNT; i++ )
+    {
         /* Ask for the current position */
 
-		sprintf( buf, "%ld npos ", i + 1 );
-		if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
-								   WAIT_TIME, UNSET ) <= 0
-			 || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
-										  " \r\n", WAIT_TIME, UNSET ) ) <= 3
+        sprintf( buf, "%ld npos ", i + 1 );
+        if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
+                                   WAIT_TIME, UNSET ) <= 0
+             || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
+                                          " \r\n", WAIT_TIME, UNSET ) ) <= 3
              || strncmp( reply + len - 3, " \r\n", 3 ) )
-			smsmotor_fail( );
+            smsmotor_fail( );
 
-		reply[ len - 3 ] = '\0';
-		smsmotor.position[ i ] = T_atod( reply );
+        reply[ len - 3 ] = '\0';
+        smsmotor.position[ i ] = T_atod( reply );
 
         /* Check that the reported position is within the limits we're going
            to set */
@@ -600,33 +600,33 @@ smsmotor_init( void )
         /* Check that all positions set during the test run we're within
            the limits we're going to set */
 
-		if (    smsmotor.abs_min_position[ i ] < smsmotor.lower_limit[ i ]
+        if (    smsmotor.abs_min_position[ i ] < smsmotor.lower_limit[ i ]
              || smsmotor.rel_min_position[ i ] + smsmotor.position[ i ]
                                                   < smsmotor.lower_limit[ i ] )
-		{
-			print( FATAL, "During the test run a position was requested for "
+        {
+            print( FATAL, "During the test run a position was requested for "
                    "device #%ld which is lower that the lower limit of %f.\n",
-				   i + 1, smsmotor.lower_limit[ i ] );
-			THROW( EXCEPTION );
-		}
+                   i + 1, smsmotor.lower_limit[ i ] );
+            THROW( EXCEPTION );
+        }
 
-		if (    smsmotor.abs_max_position[ i ] > smsmotor.upper_limit[ i ]
+        if (    smsmotor.abs_max_position[ i ] > smsmotor.upper_limit[ i ]
              || smsmotor.rel_max_position[ i ] + smsmotor.position[ i ]
                                                   > smsmotor.upper_limit[ i ] )
-		{
-			print( FATAL, "During the test run a position was requested for "
+        {
+            print( FATAL, "During the test run a position was requested for "
                    "device #%ld which is larger that the upper limit of %f.\n",
-				   i + 1, smsmotor.upper_limit[ i ] );
-			THROW( EXCEPTION );
-		}
+                   i + 1, smsmotor.upper_limit[ i ] );
+            THROW( EXCEPTION );
+        }
 
         /* Set the limits */
 
-		sprintf( buf, "%f %f %ld setnlimit ", smsmotor.lower_limit[ i ],
+        sprintf( buf, "%f %f %ld setnlimit ", smsmotor.lower_limit[ i ],
                  smsmotor.upper_limit[ i ], i + 1 );
-		if ( fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
+        if ( fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
                                 WAIT_TIME, UNSET ) <= 0 )
-			smsmotor_fail( );
+            smsmotor_fail( );
 
         /* Set a maximum speed if asked to during the PREPARATIONS section,
            otherwise just fetch the current setting */
@@ -641,7 +641,7 @@ smsmotor_init( void )
         if ( smsmotor.acceleration_is_set[ i ] )
             smsmotor_set_acceleration( i, smsmotor.init_acceleration[ i ] );
         smsmotor.acceleration[ i ] = smsmotor_get_acceleration( i );
-	}
+    }
 #endif
 }
 
@@ -724,7 +724,7 @@ smsmotor_open( void )
             fsc2_serial_close( smsmotor.sn );
             print( FATAL, "Invalid setting for number of bits per character "
                    "in configuration file for the device.\n" );
-			THROW( EXCEPTION );
+            THROW( EXCEPTION );
     }
 
     smsmotor.tio->c_cflag |= CLOCAL | CREAD;
@@ -754,62 +754,62 @@ smsmotor_open( void )
 
 static double
 smsmotor_goto( long   dev,
-			   double pos )
+               double pos )
 {
 #ifndef SMSMOTOR_TEST
-	char buf[ 40 ];
-	char reply[ 30 ];
-	long len;
+    char buf[ 40 ];
+    char reply[ 30 ];
+    long len;
 
 
-	/* Send the command to move to the new position */
+    /* Send the command to move to the new position */
 
-	sprintf( buf, "%.6f %ld nm ", pos, dev + 1 );
-	len = strlen( buf );
+    sprintf( buf, "%.6f %ld nm ", pos, dev + 1 );
+    len = strlen( buf );
 
-	if ( fsc2_serial_write( smsmotor.sn, buf, len, WAIT_TIME, UNSET ) != len )
-		smsmotor_fail( );
+    if ( fsc2_serial_write( smsmotor.sn, buf, len, WAIT_TIME, UNSET ) != len )
+        smsmotor_fail( );
 
-	/* Now wait until the device reports that the final position has been
-	   reached, give the user a chance to interrupt */
+    /* Now wait until the device reports that the final position has been
+       reached, give the user a chance to interrupt */
 
-	sprintf( buf, "%ld nst ", dev + 1 );
-	len = strlen( buf );
+    sprintf( buf, "%ld nst ", dev + 1 );
+    len = strlen( buf );
 
-	while ( 1 )
-	{
-		if (    fsc2_serial_write( smsmotor.sn, buf, len,
-								   WAIT_TIME, UNSET ) != len
-			 || fsc2_serial_read( smsmotor.sn, reply, 4, " \r\n",
-								  WAIT_TIME, UNSET ) != 4 )
-			smsmotor_fail( );
+    while ( 1 )
+    {
+        if (    fsc2_serial_write( smsmotor.sn, buf, len,
+                                   WAIT_TIME, UNSET ) != len
+             || fsc2_serial_read( smsmotor.sn, reply, 4, " \r\n",
+                                  WAIT_TIME, UNSET ) != 4 )
+            smsmotor_fail( );
 
-		if ( reply[ 0 ] == '0' )
-			break;
+        if ( reply[ 0 ] == '0' )
+            break;
 
-		if ( check_user_request ( ) )
-		{
-			sprintf( buf, "%ld nabort ", dev + 1 );
-			fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
-							   WAIT_TIME, UNSET );
-			THROW( USER_BREAK_EXCEPTION );
-		}
-	}
+        if ( check_user_request ( ) )
+        {
+            sprintf( buf, "%ld nabort ", dev + 1 );
+            fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
+                               WAIT_TIME, UNSET );
+            THROW( USER_BREAK_EXCEPTION );
+        }
+    }
 
-	/* Get the new position value from the device */
+    /* Get the new position value from the device */
 
-	sprintf( buf, "%ld npos ", dev + 1 );
-	if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
-							   WAIT_TIME, UNSET ) <= 0
-		 || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
+    sprintf( buf, "%ld npos ", dev + 1 );
+    if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
+                               WAIT_TIME, UNSET ) <= 0
+         || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
                                       " \r\n", WAIT_TIME, UNSET ) ) < 2
-		 || strncmp( reply + len - 3, " \r\n", 3 ) )
-			smsmotor_fail( );
+         || strncmp( reply + len - 3, " \r\n", 3 ) )
+            smsmotor_fail( );
 
-	reply[ len - 3 ] = '\0';
-	return T_atod( reply );
+    reply[ len - 3 ] = '\0';
+    return T_atod( reply );
 #else
-	return pos;
+    return pos;
 #endif
 }
 
@@ -820,7 +820,7 @@ smsmotor_goto( long   dev,
 
 static void
 smsmotor_set_speed( long   dev,
-                       double speed )
+                    double speed )
 {
 #ifndef SMSMOTOR_TEST
     char buf[ 30 ];
@@ -919,7 +919,7 @@ smsmotor_get_acceleration( long  dev )
 static void
 smsmotor_fail( void )
 {
-	print( FATAL, "Can't access the device.\n" );
+    print( FATAL, "Can't access the device.\n" );
     THROW( EXCEPTION );
 }
 

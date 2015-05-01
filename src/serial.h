@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -54,8 +54,8 @@
 int fsc2_request_serial_port( const char * /* dev_file */,
                               const char * /* dev_name */  );
 
-struct termios *fsc2_serial_open( int /* sn       */,
-                                  int /* flags    */  );
+struct termios * fsc2_serial_open( int /* sn       */,
+                                   int /* flags    */  );
 
 void fsc2_serial_close( int /* sn */ );
 

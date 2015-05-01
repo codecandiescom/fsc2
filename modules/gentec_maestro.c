@@ -20,8 +20,33 @@
 
 #include "fsc2_module.h"
 #include "gentec_maestro.conf"
-#include "lan.h"
 #include <float.h>
+
+#if defined USE_USB
+
+#include "serial.h"
+
+#define SERIAL_BAUDRATE B115200
+
+enum {
+       SERIAL_INIT,
+       SERIAL_READ,
+       SERIAL_WRITE,
+       SERIAL_EXIT
+};
+
+static bool gentec_maestro_serial_comm( int type,
+                                        ... );
+
+#elif defined USE_LAN
+
+#include "lan.h"
+
+#else
+
+#error "Neither 'USE_USB' nor 'USE_LAN' are defined in configuration file."
+
+#endif
 
 
 /* Hook functions */
@@ -55,7 +80,7 @@ Var_T * powermeter_analog_output( Var_T * v );
 
 /* Internal functions */
 
-static bool gentec_maestro_init( const char * dev_name );
+static bool gentec_maestro_init( void );
 static double gentec_maestro_set_scale( int index );
 static double gentec_maestro_get_scale( void );
 static bool gentec_maestro_set_autoscale( bool on_off );
@@ -88,16 +113,18 @@ static unsigned long gentec_maestro_status_entry_to_int( const char * e );
 static double gentec_maestro_status_entry_to_float( const char * e );
 static char * gentec_maestro_status_entry_to_string( const char * e );
 static void gentec_maestro_get_extended_status( void );
-static void gentec_maestro_command( const char * cmd );
-static long gentec_maestro_talk( const char * cmd,
-                                 char       * reply,
-					             long         length );
-static void gentec_maestro_failure( void );
 static double gentec_maestro_index_to_scale( int index );
 static int gentec_maestro_scale_to_index( double   scale,
                                           bool   * no_fit );
 static char const * gentec_maestro_format( double v );
 static const char * gentec_maestro_pretty_print_scale( int index );
+static void gentec_maestro_open( void );
+static void gentec_maestro_close( void );
+static void gentec_maestro_command( const char * cmd );
+static long gentec_maestro_talk( const char * cmd,
+                                 char       * reply,
+					             long         length );
+static void gentec_maestro_failure( void );
 
 
 /* Global variables */
@@ -164,6 +191,10 @@ typedef struct
 
     bool continuous_transmission_is_on;
     bool energy_mode_is_on;
+
+#if defined USE_USB
+    struct termios * tio;        /* serial port terminal interface structure */
+#endif
 } Gentec_Maestro;
 
 
@@ -209,9 +240,15 @@ gentec_maestro_init_hook( void )
 {
     gm = &gentec_maestro;
 
-    /* Set global variable to indicate that the device is controlled via LAN */
+    /* If communication is via USB request the necessary serial port (throws
+       exception on failure), for communication via LAN set global variable
+       to indicate that the device is controlled via LAN */
 
+#if defined USE_USE
+    gm.handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
+#else
     Need_LAN = SET;
+#endif
 
     /* Initialize the structure for the device as good as possible */
 
@@ -319,20 +356,15 @@ gentec_maestro_exp_hook( void )
     bool is_ok;
 
 
-    CLOBBER_PROTECT( is_ok );
-
     TRY
     {
-        is_ok = gentec_maestro_init( DEVICE_NAME );
+        is_ok = gentec_maestro_init( );
         TRY_SUCCESS;
     }
     OTHERWISE
-        is_ok = UNSET;
-
-    if ( ! is_ok && gentec_maestro.handle != -1 )
     {
-        fsc2_lan_close( gentec_maestro.handle );
-        gentec_maestro.handle = -1;
+        is_ok = UNSET;
+        gentec_maestro_close( );
     }
 
     return is_ok;
@@ -345,12 +377,7 @@ gentec_maestro_exp_hook( void )
 int
 gentec_maestro_end_of_exp_hook( void )
 {
-    if ( gentec_maestro.handle != -1 )
-    {
-        fsc2_lan_close( gentec_maestro.handle );
-        gentec_maestro.handle = -1;
-    }
-
+    gentec_maestro_close( );
     return 1;
 }
 
@@ -1034,7 +1061,7 @@ powermeter_get_laser_repetition_frequency( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        return vars_push( FLOAT_VAR, gentec_meastro_get_laser_frequency( ) );
+        return vars_push( FLOAT_VAR, gentec_maestro_get_laser_frequency( ) );
 
     return vars_push( FLOAT_VAR, TEST_LASER_FREQUENCY );
 }
@@ -1077,7 +1104,7 @@ powermeter_analog_output( Var_T * v )
 
 static
 bool
-gentec_maestro_init( const char * dev_name )
+gentec_maestro_init( void )
 {
     Gentec_Maestro * gmt = &gentec_maestro_test;
     bool set_autoscale,
@@ -1086,15 +1113,9 @@ gentec_maestro_init( const char * dev_name )
          set_att;
 
 
-    /* Try to open a connection to the device */
+    /* Try to open a connection to the device (throws exception on failure) */
 
-    if ( ( gentec_maestro.handle = fsc2_lan_open( dev_name, NETWORK_ADDRESS,
-                                                  PORT, OPEN_TIMEOUT,
-                                                  UNSET ) ) == -1 )
-    {
-        print( FATAL, "Failed to connect to device.\n" );
-        return UNSET;
-    }
+    gentec_maestro_open( );
 
     /* Store all properties that might have been set during the preparation
        phase in the structure used for tests */
@@ -1114,13 +1135,14 @@ gentec_maestro_init( const char * dev_name )
     /* Disable continupus transmission of data, binary transfers and get the
        currect settings of the device */
     
-    gentec_maestro_set_joulemeter_binary_mode( UNSET );
     gentec_maestro_continuous_transmission( UNSET );
+    gentec_maestro_set_joulemeter_binary_mode( UNSET );
     gentec_maestro_get_extended_status( );
 
     /* Check if there's a detector head connected at all - without one
        all the rest is futile. */
 
+    gentec_maestro_get_mode( );
     if ( gm->mode == NO_DETECTOR )
     {
         print( FATAL, "No detector head is connected.\n" );
@@ -2198,52 +2220,6 @@ gentec_maestro_get_extended_status( void )
 
 
 /*---------------------------------------------------*
- *---------------------------------------------------*/
-
-static
-void
-gentec_maestro_command( const char * cmd )
-{
-    long len = strlen( cmd );
-
-    if ( fsc2_lan_write( gentec_maestro.handle, cmd, strlen( cmd ),
-                         WRITE_TIMEOUT, UNSET ) != len )
-        gentec_maestro_failure( );
-}
-
-
-/*---------------------------------------------------*
- *---------------------------------------------------*/
-
-static
-long
-gentec_maestro_talk( const char * cmd,
-					 char       * reply,
-					 long         length )
-{
-    gentec_maestro_command( cmd );
-    if ( ( length = fsc2_lan_read( gentec_maestro.handle, reply, length - 1,
-                                   READ_TIMEOUT, UNSET ) ) < 3
-         || strcmp( reply + length - 2, "\r\n" ) )
-        gentec_maestro_failure( );
-    reply[ length -= 2 ] = '\0';
-    return length;
-}
-
-
-/*---------------------------------------------------*
- *---------------------------------------------------*/
-
-static
-void
-gentec_maestro_failure( void )
-{
-    print( FATAL, "Communication with powermeter failed.\n" );
-    THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------*
  * Converts a scale index (must be between 0 and 41) to
  * the corresponding scale
  *---------------------------------------------------*/
@@ -2376,6 +2352,188 @@ gentec_maestro_pretty_print_scale( int index )
 
     return ret;
 }   
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+static
+void
+gentec_maestro_open( void )
+{
+#if defined USE_USB
+    if ( ! gentec_maestro_serial_comm( SERIAL_INIT ) )
+#else
+    if ( ( gentec_maestro.handle = fsc2_lan_open( DEVICE_NAME, NETWORK_ADDRESS,
+                                                  PORT, OPEN_TIMEOUT,
+                                                  UNSET ) ) == -1 )
+#endif
+    {
+        print( FATAL, "ailed to connect to device.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+static
+void
+gentec_maestro_close( void )
+{
+#if defined USE_USB
+    gentec_maestro_serial_comm( SERIAL_EXIT );
+#else
+    if ( gentec_maestro.handle != -1 )
+    {
+        fsc2_lan_close( gentec_maestro.handle );
+        gentec_maestro.handle = -1;
+    }
+#endif
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static
+void
+gentec_maestro_command( const char * cmd )
+{
+#if defined USE_USB
+    if ( ! gentec_maestro_serial_comm( SERIAL_WRITE, cmd ) )
+#else
+    long len = strlen( cmd );
+
+    if ( fsc2_lan_write( gentec_maestro.handle, cmd, len,
+                         WRITE_TIMEOUT, UNSET ) != len )
+#endif
+        gentec_maestro_failure( );
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static
+long
+gentec_maestro_talk( const char * cmd,
+					 char       * reply,
+					 long         length )
+{
+    gentec_maestro_command( cmd );
+#if defined USE_USB
+    if (    ! gentec_maestro_serial_comm( SERIAL_READ, reply, &length )
+         || length < 3
+#else
+    if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length - 1,
+                                      READ_TIMEOUT, UNSET ) ) < 3
+#endif
+         || strcmp( reply + length - 2, "\r\n" ) )
+        gentec_maestro_failure( );
+    reply[ length -= 2 ] = '\0';
+    return length;
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static
+void
+gentec_maestro_failure( void )
+{
+    print( FATAL, "Communication with powermeter failed.\n" );
+    THROW( EXCEPTION );
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+#if defined USE_USB
+static bool
+gentec_maestro_serial_comm( int type,
+                            ... ){
+    va_list ap;
+    char * buf;
+    ssize_t len;
+    size_t * lptr;
+
+
+    switch ( type )
+    {
+        case SERIAL_INIT :
+            /* Open the serial port for reading and writing. */
+
+            if ( ( gentec_maestro.tio = fsc2_serial_open( gentec_maestro.handle,
+                                                          O_RDWR ) ) == NULL )
+                return FAIL;
+
+            /* Use 8-N-1, ignore flow control and modem lines, enable
+               reading and set the baud rate. */
+
+            cfsetispeed( gentec_maestro.tio, SERIAL_BAUDRATE );
+            cfsetospeed( gentec_maestro.tio, SERIAL_BAUDRATE );
+
+            gentec_maestro.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+            gentec_maestro.tio->c_cflag |= CS8 | CLOCAL | CREAD;
+            gentec_maestro.tio->c_iflag  = IGNBRK;
+            gentec_maestro.tio->c_oflag  = 0;
+            gentec_maestro.tio->c_lflag  = 0;
+            fsc2_tcflush( gentec_maestro.handle, TCIOFLUSH );
+            fsc2_tcsetattr( gentec_maestro.handle, TCSANOW,
+                            gentec_maestro.tio );
+            break;
+
+        case SERIAL_EXIT :
+            fsc2_serial_close( gentec_maestro.handle );
+            break;
+
+        case SERIAL_WRITE :
+            va_start( ap, type );
+            buf = va_arg( ap, char * );
+            va_end( ap );
+
+            len = strlen( buf );
+            if ( fsc2_serial_write( gentec_maestro.handle, buf, len,
+                                    WRITE_TIMEOUT, SET ) != len )
+            {
+                if ( len == 0 )
+                    stop_on_user_request( );
+                return FAIL;
+            }
+            break;
+
+        case SERIAL_READ :
+            va_start( ap, type );
+            buf = va_arg( ap, char * );
+            lptr = va_arg( ap, size_t * );
+            va_end( ap );
+
+            /* Try to read from the device */
+
+            if ( ( len = fsc2_serial_read( gentec_maestro.handle, buf, *lptr,
+                                           NULL, READ_TIMEOUT, UNSET ) ) <= 0 )
+            {
+                if ( len == 0 )
+                    stop_on_user_request( );
+
+                *lptr = 0;
+                return FAIL;
+            }
+            break;
+
+        default :
+            print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+                   __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+    }
+
+    return OK;
+}
+#endif
 
 
 /*

@@ -165,8 +165,9 @@ Suported devices
  Frequency counters:
 
   * Hewlett-Packard Frequency Counter HP5340A
-  * Hewlett-Packard Frequency Counter HP5342A
-  * Hewlett-Packard Frequency Counter HP5343A
+  * Hewlett-Packard Frequency Counters HP5342A, HP5343A
+  * Hewlett-Packard Frequency Counters HP5350A, HP5350B, HP5351A, HP5351B,
+    HP5352A, HP5352B
   * EIP Microwave. Inc. Frequency Counter 371
   * Agilent Frequency Counter 53181A
 
@@ -231,19 +232,22 @@ Suported devices
     package)
 
 
-fsc2 works with three different GPIB driver/library combinations, the
-Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
-Instruments driver (http://www.natinst.com) and a driver for NI PCII
+fsc2 works with four different GPIB driver/library combinations, the
+Linux Lab Project driver (http://www.llp.fu-berlin.de, now defunct),
+the National Instruments driver (http://www.natinst.com, for some
+values of "works"), the "Linux GPIB Package drivers from Sourveforge
+(http://linux-gpib.sourceforge.net) and a driver for NI PCII
 and AT-GPIB TNT (ISA) cards I wrote and which can be downloaded from
 
     http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz
 
+(though I recommend to use the driver from Sourceforge!)
 
 Support
 -------
 
 While I am prepared to help for free as far as my time allows, you also
-can hire me for e.g. writing drivers for unsupported devices, creating
+can hire me for e.g. writing modules for unsupported devices, creating
 scripts for experiments, installation support, instructing users etc.
 Please send me an email to discuss conditions.
 
