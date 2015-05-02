@@ -96,7 +96,9 @@ static bool gentec_maestro_check_for_new_value( void );
 static bool gentec_maestro_continuous_transmission( bool on_off );
 static double gentec_maestro_get_laser_frequency( void );
 static bool gentec_maestro_set_joulemeter_binary_mode( bool on_off );
+#if 0
 static bool gentec_maestro_get_joulemeter_binary_mode( void );
+#endif
 static bool gentec_maestro_set_analog_output( bool on_off );
 static double gentec_maestro_set_wavelength( long int wl );
 static double gentec_maestro_get_wavelength( void );
@@ -108,7 +110,9 @@ static double gentec_maestro_set_user_multiplier( double mul );
 static double gentec_maestro_get_user_multiplier( void );
 static double gentec_maestro_set_user_offset( double offset );
 static double gentec_maestro_get_user_offset( void );
+#if 0
 static bool gentec_maestro_set_energy_mode( bool on_off );
+#endif
 static bool gentec_maestro_set_attenuator( bool on_off );
 static bool gentec_maestro_get_attenuator( void );
 static unsigned long gentec_maestro_status_entry_to_int( const char * e );
@@ -803,11 +807,11 @@ powermeter_get_reading( Var_T * v )
             if ( upper_wait_limit && max_wait <= 0 )
             {
                 print( FATAL, "Device didn't measure a new value within "
-                       "the requested time interval of %.3 s.\n", mw );
+                       "the requested time interval of %.3f s.\n", mw );
                 THROW( EXCEPTION );
             }
 
-            delay = l_max( delay, max_wait );
+            delay = l_min( delay, max_wait );
             fsc2_usleep( delay, UNSET );
             stop_on_user_request( );
         }
@@ -1675,6 +1679,7 @@ gentec_maestro_set_joulemeter_binary_mode( bool on_off )
  * for energy measurements.
  *---------------------------------------------------*/
 
+#if 0
 static
 bool
 gentec_maestro_get_joulemeter_binary_mode( void )
@@ -1690,6 +1695,7 @@ gentec_maestro_get_joulemeter_binary_mode( void )
 
     return reply[ 24 ] != '0';
 }
+#endif
 
 
 /*---------------------------------------------------*
@@ -1938,6 +1944,7 @@ gentec_maestro_get_user_offset( void )
  * Switches single shot energy mode on or off
  *---------------------------------------------------*/
 
+#if 0
 static
 bool
 gentec_maestro_set_energy_mode( bool on_off )
@@ -1948,6 +1955,7 @@ gentec_maestro_set_energy_mode( bool on_off )
     gentec_maestro_command( cmd );
     return gentec_maestro.energy_mode_is_on = on_off;
 }
+#endif
 
 
 /*---------------------------------------------------*
