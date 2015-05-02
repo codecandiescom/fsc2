@@ -757,17 +757,12 @@ powermeter_get_reading( Var_T * v )
 
     if ( v )
     {
-        wait_for_new = get_boolean( v );
+        wait_for_new = SET;
 
-        if ( ( v = vars_pop( v ) ) )
+        if ( ( mw = get_double( v, NULL ) ) > 0 )
         {
-            mw = get_double( v, NULL );
-
-            if ( mw > 0 )
-            {
-                max_wait = lrnd( 1000000 * mw );
-                upper_wait_limit = SET;
-            }
+            max_wait = lrnd( 1000000 * mw );
+            upper_wait_limit = SET;
         }
 
         too_many_arguments( v );

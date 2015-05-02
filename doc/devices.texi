@@ -8801,12 +8801,17 @@ reading of the powermeter as shown on the display. Note that calling
 this function at a higher rate than new data become available will
 result in the same data value getting returned more than once.
 
-To wait for the next new data value not yet fetched from the device
-to becomeavailable call the function with a true boolean argument
-(i.e.@: either a non-zero value or @code{"ON"}). A second, optional
-argument, a positive time in seconds, allows to set an upper limit on
-the time the function will wait for new data to become available - if
-this time limit is exceeded the program is aborted.
+To wait for the next new data value not yet fetched from the device to
+become available call the function with a floating point argument.
+This will instruct the function to inquire from the device if new data
+are available and waiting for them. If the value passed to the
+function is @code{0} or negative, the function will only return once a
+new value as become available. If it is called with a positive,
+non-zero value this used as an upper limit (in seconds) the function
+will wait for a new data point - when this limit is exeeded the
+function aborts the experiment. Note though that each check for new
+data being available requires (with USB/serial port communication)
+about @w{10 ms}.
 
 
 @anchor{powermeter_anticipation()}
