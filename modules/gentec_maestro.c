@@ -125,6 +125,8 @@ static void gentec_maestro_command( const char * cmd );
 static long gentec_maestro_talk( const char * cmd,
                                  char       * reply,
 					             long         length );
+static long gentec_maestro_read( char * buf,
+                                 long   length );
 static void gentec_maestro_failure( void );
 
 
@@ -791,8 +793,8 @@ powermeter_get_reading( Var_T * v )
         {
             if ( upper_wait_limit && ( max_wait =- delay ) < 0 )
             {
-                print( FATAL, "Devive didn't measure new value in requeted "
-                       "time interval.\n" );
+                print( FATAL, "Device didn't measure a new value within "
+                       "the requested time interval.\n" );
                 THROW( EXCEPTION );
             }
 
@@ -2084,32 +2086,37 @@ static
 void
 gentec_maestro_get_extended_status( void )
 {
-    char reply[ 709 ];
+    char reply[ 708 ];
+    char *r;
     long int v;
     double d;
     int i;
 
-    if ( gentec_maestro_talk( "*ST2", reply, sizeof reply ) != 706 )
-        gentec_maestro_failure( );
+    gentec_maestro_command( "*ST2" );
 
-    /* Check for basic layout */
+    /* Read all the lines into our buffer and do basic sanity checks */
 
-    for ( i = 0; i <= 0x39; i++ )
+    for ( i = 0, r = reply; i <= 0x39; r += 12, i++ )
     {
-        char r[ 7 ];
+        char b[ 7 ];
         int j;
 
-        sprintf( r, ":0%04X", i );
-        if (    strncmp( reply + 12 * i, r, 6 )
-             || strncmp( reply + 12 * i + 10, "\r\n", 2 ) )
+        if ( gentec_maestro_read( r, 12 ) != 12 )
             gentec_maestro_failure( );
 
-        for ( j = 12 * i + 6; j < 12 * i + 10; ++j )
-            if ( ! isxdigit( ( int ) reply[ j ] ) )
+        sprintf( b, ":0%04X", i );
+        if ( strncmp( r, b, 6 ) || strncmp( r + 10, "\r\n", 2 ) )
+            gentec_maestro_failure( );
+
+        for ( j = 6; j < 10; ++j )
+            if ( ! isxdigit( ( int ) r[ j ] ) )
                 gentec_maestro_failure( );
     }
 
-    if ( strncmp( reply + 0x3a * 12, ":100000000", 10 ) )
+    /* Get the final line */
+
+    if (    gentec_maestro_read( r, 12 ) != 12
+         || strncmp( r, ":100000000\r\n", 12 ) )
         gentec_maestro_failure( );
 
     /* Now extract all the relevant values */
@@ -2441,19 +2448,33 @@ gentec_maestro_talk( const char * cmd,
 					 char       * reply,
 					 long         length )
 {
-    gentec_maestro_command( cmd );
+    fsc2_assert( length >= 4 );
 
-    length--;
+    gentec_maestro_command( cmd );
+    gentec_maestro_read( reply, --length );
+    reply[ length -= 2 ] = '\0';
+    return length;
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static
+long
+gentec_maestro_read( char * reply,
+                     long   length )
+{
 #if defined USE_SERIAL
     if (    ! gentec_maestro_serial_comm( SERIAL_READ, reply, &length )
-         || length < 3
 #else
     if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length,
                                       READ_TIMEOUT, UNSET ) ) < 3
 #endif
+         || length < 3
          || strncmp( reply + length - 2, "\r\n", 2 ) )
         gentec_maestro_failure( );
-    reply[ length -= 2 ] = '\0';
+
     return length;
 }
 
@@ -2540,10 +2561,11 @@ gentec_maestro_serial_comm( int type,
             lptr = va_arg( ap, size_t * );
             va_end( ap );
 
-            /* Try to read from the device */
+            /* Try to read from the device (reads need to stop on "\r\n") */
 
             if ( ( *lptr = fsc2_serial_read( gentec_maestro.handle, buf, *lptr,
-                                           NULL, READ_TIMEOUT, UNSET ) ) <= 0 )
+                                             "\r\n", READ_TIMEOUT, UNSET ) )
+                 <= 0 )
             {
                 if ( *lptr == 0 )
                     stop_on_user_request( );
