@@ -100,13 +100,14 @@ ag54830b        := ag54830b.c ag54830b_gpib.c
 ag54830b_l      := ag54830b_l.c ag54830b_net.c $(vxi11_list) vxi11_user.c
 rs_smb100a      := rs_smb100a.c rs_smb100a_util.c rs_smb100a_lan.c \
 				   rs_smb100a_lexer.c $(vxi11_list) vxi11_user.c
-
+keithley2600a   := keithley2600a.c $(vxi11_list) vxi11_user.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
 # pre-installed software or extra hardware
 
-comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l ag54830b_l rs_smb100a
+comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l ag54830b_l rs_smb100a \
+                   keithley2600a
 
 
 # Now follow modules that only get created on demand (they require either

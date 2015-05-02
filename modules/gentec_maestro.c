@@ -216,10 +216,10 @@ static Gentec_Maestro * gm;
 #define MAX_SCALE            41
 #define MIN_TRIGGER_LEVEL    0.1
 #define MAX_TRIGGER_LEVEL    99.9
-#define MIN_USER_MULTIPLIER  -DBL_MAX      /* not documented */
-#define MAX_USER_MULTIPLIER  DBL_MAX       /* not documented */
-#define MIN_USER_OFFSET      -DBL_MAX      /* not documented */
-#define MAX_USER_OFFSET      DBL_MAX       /* not documented */
+#define MIN_USER_MULTIPLIER  -FLT_MAX      /* not documented */
+#define MAX_USER_MULTIPLIER  FLT_MAX       /* not documented */
+#define MIN_USER_OFFSET      -FLT_MAX      /* not documented */
+#define MAX_USER_OFFSET      FLT_MAX       /* not documented */
 
 
 enum {
@@ -243,6 +243,7 @@ enum {
 
 
 /*---------------------------------------------------*
+ * Init hook, called when the module is loaded
  *---------------------------------------------------*/
 
 int
@@ -320,6 +321,7 @@ gentec_maestro_init_hook( void )
 
 
 /*---------------------------------------------------*
+ * Test hook, called at the start of the test run
  *---------------------------------------------------*/
 
 int
@@ -346,6 +348,7 @@ gentec_maestro_test_hook( void )
 
 
 /*---------------------------------------------------*
+ * End-of-test hook, called after the end of the test run
  *---------------------------------------------------*/
 
 int
@@ -357,6 +360,7 @@ gentec_maestro_end_of_test_hook( void )
 
 
 /*---------------------------------------------------*
+ * Exp hook, called at the start of the experiment
  *---------------------------------------------------*/
 
 int
@@ -381,6 +385,7 @@ gentec_maestro_exp_hook( void )
 
 
 /*---------------------------------------------------*
+ * End-of-exp hook, called at the end of the experiment
  *---------------------------------------------------*/
 
 int
@@ -415,11 +420,7 @@ powermeter_detector_name( Var_T * v  UNUSED_ARG )
 
 
 /*-------------------------------------------------------*
- * Sets a new scale
-
-XXXXXXXXX  It's unclear from the documention how the scale setting
-XXXXXXXXX  interacts with the autoscale setting
-
+ * Sets a new scale (note: this switches autoscaling off)
  *-------------------------------------------------------*/
 
 Var_T *
@@ -1012,7 +1013,7 @@ powermeter_multiplier( Var_T * v )
 
     if ( mul < MIN_USER_MULTIPLIER || mul > MAX_USER_MULTIPLIER )
     {
-        print( FATAL, "Multiplier out of range, must be between %g and %d.\n",
+        print( FATAL, "Multiplier out of range, must be between %g and %g.\n",
                MIN_USER_MULTIPLIER, MAX_USER_MULTIPLIER );
         THROW( EXCEPTION );
     }
@@ -1062,7 +1063,7 @@ powermeter_offset( Var_T * v )
 
     if ( offset < MIN_USER_OFFSET || offset > MAX_USER_OFFSET )
     {
-        print( FATAL, "Offset out of range, must be between %g and %d.\n",
+        print( FATAL, "Offset out of range, must be between %g and %g.\n",
                MIN_USER_OFFSET, MAX_USER_OFFSET );
         THROW( EXCEPTION );
     }
@@ -1142,7 +1143,6 @@ gentec_maestro_init( void )
          set_scale,
          set_wavelength,
          set_att;
-
 
     /* Try to open a connection to the device (throws exception on failure) */
 
@@ -1411,6 +1411,9 @@ gentec_maestro_set_scale( int index )
 	sprintf( cmd, "*SCS%02d", index );
 	gentec_maestro_command( cmd );
 
+    /* Note: setting a scale unsets autoscaling */
+
+    gentec_maestro.autoscale_is_on = UNSET;
 	return gentec_maestro_index_to_scale( gentec_maestro.scale_index = index );
 }
 
@@ -2512,7 +2515,7 @@ gentec_maestro_failure( void )
 /*---------------------------------------------------*
  * Function for opening and closing a connection as well
  * as reading or writing data when the the device is
- * connected via the serial or USB port (the latter just
+ * connected via the serial port or USB (the latter just
  * being a USB-to-serial converter)
  *---------------------------------------------------*/
 

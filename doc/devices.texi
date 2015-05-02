@@ -8702,14 +8702,15 @@ always returned).
 @findex powermeter_scale()
 @item powermeter_scale()
 Allows to query or set the scale (or range) in @code{J} or @code{W}.
-If called with no argument the cuurent scale setting is returned.
-If called with a valid scale setting the device gets switched to
-it. Note that the range of possible scale settings depends on the
-connected detector, the limits for the detector can be determined
-by calling @code{@ref{powermeter_get_scale_limits()}}. If called with
-a scale value that's within these limits but not fitting any of the
-possible values the next higer scale is set and a warning is printed
-out.
+If called with no argument the cuurent scale setting is returned. If
+called with a valid scale setting the device gets switched to it. Note
+that the range of possible scale settings depends on the connected
+detector, the limits for the detector can be determined by calling
+@code{@ref{powermeter_get_scale_limits()}}. If called with a scale
+value that's within these limits but not fitting any of the possible
+values the next higer scale is set and a warning is printed out. Note
+that setting a scale will unset autoscaling,
+
 
 @anchor{powermeter_get_scale_limits()}
 @findex powermeter_get_scale_limits()
@@ -8718,6 +8719,7 @@ This function takes no arguments and returns an array with two
 elements, the first one being the minimum scale setting for the
 currently connected connector (in @code{J} or @code{W}), and the
 second being the upper limit.
+
 
 @anchor{powermeter_autoscale()}
 @findex powermeter_autoscale()
@@ -8760,19 +8762,19 @@ To find out about the allowed range of wavelengths use the function
 @findex powermeter_attenuator()
 @item powermeter_attenuator()
 This function allows to query if there's a attenuator available and if
-its on or off or, if an attenuator is available, to switc it on or
+its on or off or, if an attenuator is available, to switch it on or
 off. If called without an argument the function returns @code{-1} if
 no attenuator is available, otherwise @code{0} or @code{1}, indicating
-if it's on or off. If an attenuator is available it can be also called
-with a boolean argument, either the strings @code{"OFF"} or @code{"ON}
-or @code{0} or a non-zero value, to switch the attenuator off or on.
-Trying to switch the attenuator on when none is available will result
-in an exception getting thrown.
+that it's on or off. If an attenuator is available it can be also
+called with a boolean argument, either the strings @code{"OFF"} or
+@code{"ON} or @code{0} or a non-zero value, to switch the attenuator
+off or on. Trying to switch the attenuator on when none is available
+will result in the experiment being aborted.
 
-Keep in mind that the range for wavelengt settings may depend on the
+Keep in mind that the range for wavelength settings may depend on the
 attenuator being on or off. Thus switching the attenuator on or off
 while a wavelength is set which is not allowed for the requested new
-state of the attenuator will result in an error. See te function
+state of the attenuator will result in an error. See the function
 @code{@ref{powermeter_get_wavelength_limits()}} for finding out which
 wavelength ranges are allowed with the attenuator on or off.
 
@@ -8795,23 +8797,21 @@ available.
 @anchor{powermeter_get_reading()}
 @findex powermeter_get_reading()
 @item powermeter_get_reading()
-If called with no argument (or a false boolean argument, i.e.@:
-@code{0} or @code{"OFF"}) the function immediately returns the current
-reading of the powermeter as shown on the display. Note that calling
-this function at a higher rate than new data become available will
-result in the same data value getting returned more than once.
+If called with no argument the function immediately returns the
+current reading of the powermeter as shown on the display. Note that
+calling this function at a higher rate than new data become available
+will result in the same data value getting returned more than once.
 
-To wait for the next new data value not yet fetched from the device to
-become available call the function with a floating point argument.
-This will instruct the function to inquire from the device if new data
-are available and waiting for them. If the value passed to the
-function is @code{0} or negative, the function will only return once a
-new value as become available. If it is called with a positive,
-non-zero value this used as an upper limit (in seconds) the function
-will wait for a new data point - when this limit is exeeded the
-function aborts the experiment. Note though that each check for new
-data being available requires (with USB/serial port communication)
-about @w{10 ms}.
+To wait for a newly measured data value call the function with a
+floating point argument. This will instruct the function to inquire
+from the device if new data are available and wait until one becomes
+available. If the value passed to the function is @code{0} or
+negative, the function will only return once a new value has become
+available. If the value is positive and non-zero it interpreted as an
+upper limit (in seconds) the function is to wait for a new data point
+- when this limit is exeeded the function aborts the experiment. Note
+though that a check for new data being available requires (with
+USB/serial port communication) in the order of @w{10 ms}.
 
 
 @anchor{powermeter_anticipation()}
