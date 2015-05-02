@@ -20,6 +20,7 @@
 
 #include "fsc2_module.h"
 #include "gentec_maestro.conf"
+#include <sys/time.h>
 #include <float.h>
 
 #if defined USE_SERIAL && defined USE_LAN
@@ -745,6 +746,7 @@ Var_T *
 powermeter_get_reading( Var_T * v )
 {
     double lf;
+    double mw;
     bool wait_for_new = UNSET;
     long max_wait = 0;
     bool upper_wait_limit = UNSET;
@@ -755,7 +757,7 @@ powermeter_get_reading( Var_T * v )
 
         if ( ( v = vars_pop( v ) ) )
         {
-            double mw = get_double( v, NULL );
+            mw = get_double( v, NULL );
 
             if ( mw > 0 )
             {
@@ -767,38 +769,45 @@ powermeter_get_reading( Var_T * v )
         too_many_arguments( v );
     }
 
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, TEST_VALUE );
+
     /* If were supposed to wait for a new value and there's none
        recheck with twice the laser frequency (or all 100 ms if
        the laser frequency is 0), but never slower than every
        100 ms. Also give the user a chance to abort. */
 
-    if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( FLOAT_VAR, TEST_VALUE );
-
     if ( wait_for_new )
     {
         long delay = 100000;
+        struct timeval before;
 
-        lf = gentec_maestro_get_laser_frequency( );
-
-        if ( lf != 0 )
+        if ( ( lf = gentec_maestro_get_laser_frequency( ) ) != 0 )
             delay = 500000 / lf;      /* half the time between laser shots */
 
         delay = l_min( delay, 100000 );
-
+        
         if ( upper_wait_limit && max_wait < delay )
             delay = max_wait;
 
+        gettimeofday( &before, NULL );
+
         while ( ! gentec_maestro_check_for_new_value( ) )
         {
-            if ( upper_wait_limit && ( max_wait =- delay ) < 0 )
+            struct timeval after;
+            gettimeofday( &after, NULL );
+            max_wait -=   1000000 * ( after.tv_sec  - before.tv_sec )
+                        +           ( after.tv_usec - before.tv_usec );
+            before = after;
+
+            if ( upper_wait_limit && max_wait <= 0 )
             {
                 print( FATAL, "Device didn't measure a new value within "
-                       "the requested time interval.\n" );
+                       "the requested time interval of %.3 s.\n", mw );
                 THROW( EXCEPTION );
             }
 
-            stop_on_user_request( );
+            delay = l_max( delay, max_wait );
             fsc2_usleep( delay, UNSET );
             stop_on_user_request( );
         }
@@ -2451,7 +2460,7 @@ gentec_maestro_talk( const char * cmd,
     fsc2_assert( length >= 4 );
 
     gentec_maestro_command( cmd );
-    gentec_maestro_read( reply, --length );
+    length = gentec_maestro_read( reply, --length );
     reply[ length -= 2 ] = '\0';
     return length;
 }
