@@ -22,34 +22,32 @@
 #include "gentec_maestro.conf"
 #include <float.h>
 
-#if defined USE_USB
-
-#if defined USE_LAN
-#error "Error in configuration file, on;e one of 'USE_USB' and 'USE_LAN' can defined."
+#if defined USE_SERIAL && defined USE_LAN
+#error "Error in configuration file, on;e one of 'USE_SERIAL' and 'USE_LAN' can defined."
 #endif
 
+#if ! defined USE_SERIAL && ! defined USE_LAN
+#error "Neither 'USE_SERIAL' nor 'USE_LAN' are defined in configuration file."
+#endif
+
+
+#if defined USE_SERIAL
 #include "serial.h"
 
 #define SERIAL_BAUDRATE B115200
 
 enum {
-       SERIAL_INIT,
-       SERIAL_READ,
-       SERIAL_WRITE,
-       SERIAL_EXIT
+    SERIAL_INIT,
+    SERIAL_READ,
+    SERIAL_WRITE,
+    SERIAL_EXIT
 };
 
 static bool gentec_maestro_serial_comm( int type,
                                         ... );
 
-#elif defined USE_LAN
-
+#else                    /* USE_LAN defined */
 #include "lan.h"
-
-#else
-
-#error "Neither 'USE_USB' nor 'USE_LAN' are defined in configuration file."
-
 #endif
 
 
@@ -103,8 +101,7 @@ static double gentec_maestro_set_wavelength( long int wl );
 static double gentec_maestro_get_wavelength( void );
 static bool gentec_maestro_set_anticipation( bool on_off );
 static bool gentec_maestro_get_anticipation( void );
-static bool gentec_maestro_set_zero_offset( void );
-static bool gentec_maestro_clear_zero_offset( void );
+static bool gentec_maestro_zero_offset( bool on_off );
 static bool gentec_maestro_test_zero_offset( void );
 static double gentec_maestro_set_user_multiplier( double mul );
 static double gentec_maestro_get_user_multiplier( void );
@@ -196,7 +193,7 @@ typedef struct
     bool continuous_transmission_is_on;
     bool energy_mode_is_on;
 
-#if defined USE_USB
+#if defined USE_SERIAL
     struct termios * tio;        /* serial port terminal interface structure */
 #endif
 } Gentec_Maestro;
@@ -218,11 +215,13 @@ static Gentec_Maestro * gm;
 #define MAX_USER_OFFSET      DBL_MAX       /* not documented */
 
 
-#define POWER_MODE     0     /* power in W  */
-#define ENERGY_MODE    1     /* energy in J */
-#define SSE_MODE       2     /* single shot energy in J */
-#define DBM_MODE       6     /* power in dBm */
-#define NO_DETECTOR    7
+enum {
+    POWER_MODE  = 0,        /* power in W  */
+    ENERGY_MODE = 1,        /* energy in J */
+    SSE_MODE    = 2,        /* single shot energy in J */
+    DBM_MODE    = 6,        /* power in dBm */
+    NO_DETECTOR = 7         /* no probe head connected */
+};
 
 
 #define TEST_MODE             ENERGY_MODE
@@ -248,7 +247,7 @@ gentec_maestro_init_hook( void )
        exception on failure), for communication via LAN set global variable
        to indicate that the device is controlled via LAN */
 
-#if defined USE_USB
+#if defined USE_SERIAL
     gm->handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
 #else
     Need_LAN = SET;
@@ -735,7 +734,9 @@ powermeter_get_wavelength_limits( Var_T * v )
 
 /*---------------------------------------------------*
  * Get a value from the device - if called with a true
- * argument make sure it's a new value.
+ * argument make sure it's a new value. An optional
+ * third argument is a maximum time (in seconds) we're
+ * prepared to wait for a new value.
  *---------------------------------------------------*/
 
 Var_T *
@@ -743,10 +744,26 @@ powermeter_get_reading( Var_T * v )
 {
     double lf;
     bool wait_for_new = UNSET;
+    long max_wait = 0;
+    bool upper_wait_limit = UNSET;
 
     if ( v )
+    {
         wait_for_new = get_boolean( v );
-    too_many_arguments( v );
+
+        if ( ( v = vars_pop( v ) ) )
+        {
+            double mw = get_double( v, NULL );
+
+            if ( mw > 0 )
+            {
+                max_wait = lrnd( 1000000 * mw );
+                upper_wait_limit = SET;
+            }
+        }
+
+        too_many_arguments( v );
+    }
 
     /* If were supposed to wait for a new value and there's none
        recheck with twice the laser frequency (or all 100 ms if
@@ -758,22 +775,30 @@ powermeter_get_reading( Var_T * v )
 
     if ( wait_for_new )
     {
-        if ( ! gentec_maestro_check_for_new_value( ) )
+        long delay = 100000;
+
+        lf = gentec_maestro_get_laser_frequency( );
+
+        if ( lf != 0 )
+            delay = 500000 / lf;      /* half the time between laser shots */
+
+        delay = l_min( delay, 100000 );
+
+        if ( upper_wait_limit && max_wait < delay )
+            delay = max_wait;
+
+        while ( ! gentec_maestro_check_for_new_value( ) )
         {
-            unsigned long delay = 100000;
-
-            lf = gentec_maestro_get_laser_frequency( );
-
-            if ( lf != 0 )
-                delay = 500000 / lf;
-
-            delay = l_min( delay, 100000 );
-
-            do
+            if ( upper_wait_limit && ( max_wait =- delay ) < 0 )
             {
-                stop_on_user_request( );
-                fsc2_usleep( delay, UNSET );
-            } while ( ! gentec_maestro_check_for_new_value( ) );
+                print( FATAL, "Devive didn't measure new value in requeted "
+                       "time interval.\n" );
+                THROW( EXCEPTION );
+            }
+
+            stop_on_user_request( );
+            fsc2_usleep( delay, UNSET );
+            stop_on_user_request( );
         }
     }
 
@@ -935,12 +960,7 @@ powermeter_zero_offset( Var_T * v )
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-    {
-        if ( zo )
-            gentec_maestro_set_zero_offset( );
-        else
-            gentec_maestro_clear_zero_offset( );
-    }
+        gentec_maestro_zero_offset( zo );
     else
     {
         gm->zero_offset_is_on = zo;
@@ -1451,7 +1471,8 @@ gentec_maestro_get_autoscale( void )
 
 
 /*---------------------------------------------------*
- * Set a new trigger level
+ * Set a new trigger level, argument must be a percentage
+ * between 0.1 and 99.9.
  *---------------------------------------------------*/
 
 static
@@ -1470,6 +1491,8 @@ gentec_maestro_set_trigger_level( double level )
 
 
 /*---------------------------------------------------*
+ * Returns te trigger level, a number in percent between
+ * 0.1 and 99.9.
  *---------------------------------------------------*/
 
 static
@@ -1495,6 +1518,8 @@ gentec_maestro_get_trigger_level( void )
 
 
 /*---------------------------------------------------*
+ * Returns the current display mode, which depends on
+ * the connected proobe head.
  *---------------------------------------------------*/
 
 static
@@ -1506,38 +1531,32 @@ gentec_maestro_get_mode( void )
 
     if (    gentec_maestro_talk( "*GMD", reply, sizeof reply ) != 7
          || strncmp( reply, "Mode: ", 6 )
-         || reply[ 7 ] != '\0'
-         || ! isdigit( ( int ) reply[ 6 ] ) )
+         || reply[ 7 ] != '\0' )
         gentec_maestro_failure( );
 
-    switch ( reply[ 6 ] )
-    {
-        case '0':
+    if ( reply[ 6 ] - '0' == POWER_MODE )
             return gentec_maestro.mode = POWER_MODE;
-
-        case '1' :
+    else if ( reply[ 6 ] - '0' == ENERGY_MODE )
             return gentec_maestro.mode = ENERGY_MODE;
-
-        case '2' :
+    else if ( reply[ 6 ] - '0' == SSE_MODE )
             return gentec_maestro.mode = SSE_MODE;
-
-        case '6' :
+    else if ( reply[ 6 ] - '0' == DBM_MODE )
             return gentec_maestro.mode = DBM_MODE;
-
-        case '7' :
+    else if ( reply[ 6 ] - '0' == NO_DETECTOR )
             return gentec_maestro.mode = NO_DETECTOR;
 
-        default :
-            gentec_maestro_failure( );
-    }
+    gentec_maestro_failure( );
 
-    /* We never should end up here... */
+    /* We'll never get here... */
 
     return -1;
 }
 
 
 /*---------------------------------------------------*
+ * Requests a data point from the device (note that it
+ * will return an already sent value if no new data
+ * point as been measured since.
  *---------------------------------------------------*/
 
 static
@@ -1562,6 +1581,7 @@ gentec_maestro_get_current_value( void )
 
 
 /*---------------------------------------------------*
+ * Returns if a newly measured value is available
  *---------------------------------------------------*/
 
 static
@@ -1584,6 +1604,8 @@ gentec_maestro_check_for_new_value( void )
 
 
 /*---------------------------------------------------*
+ * Switches te mode were the device constantly sends new
+ * data points when they become available on and off
  *---------------------------------------------------*/
 
 static
@@ -1596,6 +1618,7 @@ gentec_maestro_continuous_transmission( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Returns the repetition frequency of the laser
  *---------------------------------------------------*/
 
 static
@@ -1620,6 +1643,8 @@ gentec_maestro_get_laser_frequency( void )
 
 
 /*---------------------------------------------------*
+ * Switches binary transmission mode for enery measurements
+ * on or off.
  *---------------------------------------------------*/
 
 static
@@ -1635,6 +1660,8 @@ gentec_maestro_set_joulemeter_binary_mode( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Returns if device is in binary transmission mode
+ * for energy measurements.
  *---------------------------------------------------*/
 
 static
@@ -1655,6 +1682,7 @@ gentec_maestro_get_joulemeter_binary_mode( void )
 
 
 /*---------------------------------------------------*
+ * Switches analog output of measured values on or off
  *---------------------------------------------------*/
 
 static
@@ -1671,6 +1699,9 @@ gentec_maestro_set_analog_output( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Sets a new "personal wavelength" (i.e. the wavelength
+ * usd for corrections using a table built into the probe
+ * head)
  *---------------------------------------------------*/
 
 static
@@ -1686,7 +1717,7 @@ gentec_maestro_set_wavelength( long int wl )
                       && wl >= gentec_maestro.min_wavelength_with_att
                       && wl <= gentec_maestro.max_wavelength_with_att ) );
 
-    snprintf( cmd, sizeof cmd, "*PWC%ld", wl );
+    snprintf( cmd, sizeof cmd, "*PWC%05ld", wl );
     gentec_maestro_command( cmd );
 
     gentec_maestro.wavelength = wl;
@@ -1695,6 +1726,7 @@ gentec_maestro_set_wavelength( long int wl )
 
 
 /*---------------------------------------------------*
+ * Returns the currently set wavelength
  *---------------------------------------------------*/
 
 static
@@ -1725,6 +1757,7 @@ gentec_maestro_get_wavelength( void )
 
 
 /*---------------------------------------------------*
+ * Switches the "anticipation" feature on or off
  *---------------------------------------------------*/
 
 static
@@ -1741,6 +1774,7 @@ gentec_maestro_set_anticipation( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Returns if the anticpation feature is on or off
  *---------------------------------------------------*/
 
 static
@@ -1761,45 +1795,24 @@ gentec_maestro_get_anticipation( void )
 
 
 /*---------------------------------------------------*
+ * Switches "zero offset" on (in whic case the current
+ * ata value will be subtracted from future measurements)
+ * or off.
  *---------------------------------------------------*/
 
 static
 bool
-gentec_maestro_set_zero_offset( void )
+gentec_maestro_zero_offset( bool on_off )
 {
-    const char *cmd;
-
-
-    /* There are different commands for setting the zero offset for
-       photodiodes and other detectors. Pick the correct one by
-       checking the dector name - photodiode names start with either
-       "PH" or "PE" */
-
-    if (    strncmp( gentec_maestro.head_name, "PH", 2 )
-         && strncmp( gentec_maestro.head_name, "PE", 2 ) )
-        cmd = "*SOU";
-    else
-        cmd = "*SDZ";
+    const char *cmd = on_off ? "*DOU" : "*COU";
 
     gentec_maestro_command( cmd );
-
-    return gentec_maestro.zero_offset_is_on = SET;
+    return gentec_maestro.zero_offset_is_on = on_off;
 }
 
 
 /*---------------------------------------------------*
- *---------------------------------------------------*/
-
-static
-bool
-gentec_maestro_clear_zero_offset( void )
-{
-    gentec_maestro_command( "*COU" );
-    return gentec_maestro.zero_offset_is_on = UNSET;
-}
-
-
-/*---------------------------------------------------*
+ * Returns if a zero offset is applied
  *---------------------------------------------------*/
 
 static
@@ -1820,6 +1833,7 @@ gentec_maestro_test_zero_offset( void )
 
 
 /*---------------------------------------------------*
+ * Sets a new user multiplier
  *---------------------------------------------------*/
 
 static
@@ -1838,6 +1852,7 @@ gentec_maestro_set_user_multiplier( double mul )
 
 
 /*---------------------------------------------------*
+ * Returns the current value of the user multiplier
  *---------------------------------------------------*/
 
 static
@@ -1863,6 +1878,7 @@ gentec_maestro_get_user_multiplier( void )
 
 
 /*---------------------------------------------------*
+ * Sets the user offset, a value subtracted from all data points
  *---------------------------------------------------*/
 
 static
@@ -1881,6 +1897,7 @@ gentec_maestro_set_user_offset( double offset )
 
 
 /*---------------------------------------------------*
+ * Returns the current value of the user offset
  *---------------------------------------------------*/
 
 static
@@ -1907,6 +1924,7 @@ gentec_maestro_get_user_offset( void )
 
 
 /*---------------------------------------------------*
+ * Switches single shot energy mode on or off
  *---------------------------------------------------*/
 
 static
@@ -1915,7 +1933,6 @@ gentec_maestro_set_energy_mode( bool on_off )
 {
     char cmd[ ] = "*SSE*";
 
-
     cmd[ 4 ] = on_off ? '1' : '0';
     gentec_maestro_command( cmd );
     return gentec_maestro.energy_mode_is_on = on_off;
@@ -1923,6 +1940,7 @@ gentec_maestro_set_energy_mode( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Switches the attenuator (if available) on or off
  *---------------------------------------------------*/
 
 static
@@ -1930,7 +1948,6 @@ bool
 gentec_maestro_set_attenuator( bool on_off )
 {
     char cmd[ ] = "*ATT*";
-
 
     fsc2_assert( gentec_maestro.att_is_available );
 
@@ -1941,6 +1958,7 @@ gentec_maestro_set_attenuator( bool on_off )
 
 
 /*---------------------------------------------------*
+ * Returns if the attenuator is on or off (if available)
  *---------------------------------------------------*/
 
 static
@@ -1948,7 +1966,6 @@ bool
 gentec_maestro_get_attenuator( void )
 {
     char reply[ 16 ];
-
 
     fsc2_assert( gentec_maestro.att_is_available );
 
@@ -1963,7 +1980,7 @@ gentec_maestro_get_attenuator( void )
 
 
 /*---------------------------------------------------*
- * Converts a status entry too a 4-byte integer
+ * Converts a status entry to a 4-byte integer
  *---------------------------------------------------*/
 
 static
@@ -2031,6 +2048,7 @@ gentec_maestro_status_entry_to_float( const char * e )
 
 
 /*---------------------------------------------------*
+ * Converts a status entry into a string
  *---------------------------------------------------*/
 
 static
@@ -2057,6 +2075,9 @@ gentec_maestro_status_entry_to_string( const char * e )
 
 
 /*---------------------------------------------------*
+ * Reads in the "extended status" and sets up the
+ * structure describing the state of the device
+ * accordingly
  *---------------------------------------------------*/
 
 static
@@ -2067,7 +2088,6 @@ gentec_maestro_get_extended_status( void )
     long int v;
     double d;
     int i;
-
 
     if ( gentec_maestro_talk( "*ST2", reply, sizeof reply ) != 706 )
         gentec_maestro_failure( );
@@ -2322,6 +2342,7 @@ gentec_maestro_format( double v )
 
 
 /*---------------------------------------------------*
+ * Returns a user readable string for a scale index
  *---------------------------------------------------*/
 
 static
@@ -2347,14 +2368,15 @@ gentec_maestro_pretty_print_scale( int index )
 }   
 
 
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Opens a connection to the device
+ *---------------------------------------------------*/
 
 static
 void
 gentec_maestro_open( void )
 {
-#if defined USE_USB
+#if defined USE_SERIAL
     if ( ! gentec_maestro_serial_comm( SERIAL_INIT ) )
 #else
     if ( ( gentec_maestro.handle = fsc2_lan_open( DEVICE_NAME, NETWORK_ADDRESS,
@@ -2368,14 +2390,15 @@ gentec_maestro_open( void )
 }
 
 
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Closes the connection to the device
+ *---------------------------------------------------*/
 
 static
 void
 gentec_maestro_close( void )
 {
-#if defined USE_USB
+#if defined USE_SERIAL
     gentec_maestro_serial_comm( SERIAL_EXIT );
 #else
     if ( gentec_maestro.handle != -1 )
@@ -2388,13 +2411,14 @@ gentec_maestro_close( void )
 
 
 /*---------------------------------------------------*
+ * Sends a string a command to the device, no reply expected
  *---------------------------------------------------*/
 
 static
 void
 gentec_maestro_command( const char * cmd )
 {
-#if defined USE_USB
+#if defined USE_SERIAL
     if ( ! gentec_maestro_serial_comm( SERIAL_WRITE, cmd ) )
 #else
     long len = strlen( cmd );
@@ -2407,6 +2431,8 @@ gentec_maestro_command( const char * cmd )
 
 
 /*---------------------------------------------------*
+ * Sends a single string to the device and then reads
+ * in the device's reply.
  *---------------------------------------------------*/
 
 static
@@ -2418,7 +2444,7 @@ gentec_maestro_talk( const char * cmd,
     gentec_maestro_command( cmd );
 
     length--;
-#if defined USE_USB
+#if defined USE_SERIAL
     if (    ! gentec_maestro_serial_comm( SERIAL_READ, reply, &length )
          || length < 3
 #else
@@ -2433,6 +2459,9 @@ gentec_maestro_talk( const char * cmd,
 
 
 /*---------------------------------------------------*
+ * Called whenever the communication with the device fails,
+ * either because the device doesn't react in time or since
+ * it sent invalid data.
  *---------------------------------------------------*/
 
 static
@@ -2444,18 +2473,22 @@ gentec_maestro_failure( void )
 }
 
 
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for opening and closing a connection as well
+ * as reading or writing data when the the device is
+ * connected via the serial or USB port (the latter just
+ * being a USB-to-serial converter)
+ *---------------------------------------------------*/
 
-#if defined USE_USB
+#if defined USE_SERIAL
 static bool
 gentec_maestro_serial_comm( int type,
-                            ... ){
+                            ... )
+{
     va_list ap;
     char * buf;
     ssize_t len;
     size_t * lptr;
-
 
     switch ( type )
     {
