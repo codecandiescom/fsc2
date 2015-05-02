@@ -2091,14 +2091,14 @@ gentec_maestro_status_entry_to_string( const char * e )
 /*---------------------------------------------------*
  * Reads in the "extended status" and sets up the
  * structure describing the state of the device
- * accordingly
+ * accordingly.
  *---------------------------------------------------*/
 
 static
 void
 gentec_maestro_get_extended_status( void )
 {
-    char reply[ 708 ];
+    char reply[ 0x3a * 12 ];
     char *r;
     long int v;
     double d;
@@ -2451,7 +2451,10 @@ gentec_maestro_command( const char * cmd )
 
 /*---------------------------------------------------*
  * Sends a single string to the device and then reads
- * in the device's reply.
+ * in the device's single line reply. The input buffer
+ * must have room for the replY (including a carriage
+ * return and a line-feed at the end). The CR and LF
+ * are removed and the returned string is nul-terminated.
  *---------------------------------------------------*/
 
 static
@@ -2460,10 +2463,10 @@ gentec_maestro_talk( const char * cmd,
 					 char       * reply,
 					 long         length )
 {
-    fsc2_assert( length >= 4 );
+    fsc2_assert( length >= 3 );
 
     gentec_maestro_command( cmd );
-    length = gentec_maestro_read( reply, --length );
+    length = gentec_maestro_read( reply, length );
     reply[ length -= 2 ] = '\0';
     return length;
 }
