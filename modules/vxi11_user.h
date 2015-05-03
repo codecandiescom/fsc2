@@ -63,9 +63,10 @@
 
 
 int vxi11_open( const char * /* dev_name   */,
-                const char * /* address    */,
-                const char * /* vxi11_name */,
-                long         /* us_timeout */  );
+                const char * /* address      */,
+                const char * /* vxi11_name   */,
+                bool         /* create_async */,
+                long         /* us_timeout   */  );
 
 int vxi11_close( void );
 

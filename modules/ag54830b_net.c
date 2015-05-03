@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Anton Savitsky / Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -32,8 +32,8 @@ static void ag54830b_l_failure( void );
 bool
 ag54830b_l_init( const char * name )
 {
-	if ( vxi11_open( name, NETWORK_ADDRESS,
-					 VXI11_NAME, 100000 ) == FAILURE )
+	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
+					 UNSET, 100000 ) == FAILURE )
         return FAIL;
 
 	ag54830b_l.device = 0;

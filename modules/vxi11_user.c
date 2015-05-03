@@ -31,9 +31,6 @@
  *
  *  http://www.vxibus.org/files/VXI_Specs/VXI-11.zip
  *
- *  Please note: for devices that support an async channel (as needed for
- *  device_abort()) you must define the macro 'DEVICE_SUPPORTS_ASYNC_CHANNEL'.
- *
  *  Separate device locking (e.g. using a lock file) isn't necessary
  *  since it's part of the VXI11 protocol.
  */
@@ -44,16 +41,15 @@
 
 /* Client and link for core channel */
 
-static CLIENT          * core_client = NULL;
-static Create_LinkResp * core_link;
+static CLIENT          * core_client   = NULL;
+static Create_LinkResp * core_link     = NULL;
 
 
-/* Client and link for async channel (needed for device_abort()), optional */
+/* Client and link for (optional) asynchronous channel */
 
-#if defined DEVICE_SUPPORTS_ASYNC_CHANNEL
 static CLIENT          * async_client  = NULL;
-#endif
-static Create_LinkResp * async_link;
+static Create_LinkResp * async_link    = NULL;
+
 
 static const char      * name          = NULL;
 static const char      * ip            = NULL;
@@ -106,7 +102,8 @@ static const char * vxi11_sperror( Device_ErrorCode error );
  *    2. IP address of the device (either in dotted-quad form
  *       or as a name that can be resolved via a DNS look-up)
  *    3. VXI-11 name of the device
- *    4. Maximum timeout (in microseconds) to wait for the
+ *    4. Flag, if set also an async connection is created
+ *    5. Maximum timeout (in microseconds) to wait for the
  *       connection if it's locked by another process (0 is
  *       interpreted to mean a nearly infinite timeout)
  *
@@ -118,6 +115,7 @@ int
 vxi11_open( const char * dev_name,
             const char * address,
             const char * vxi11_name,
+            bool         create_async,
             long         us_timeout )
 {
     Create_LinkParms link_parms;
@@ -151,9 +149,20 @@ vxi11_open( const char * dev_name,
         return FAILURE;
     }
 
+    /* Open log file after we have the connection open and locked */
+
+    log_fp = fsc2_lan_open_log( name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_open", name );
+
     if ( ! ( core_client = clnt_create( ip, DEVICE_CORE,
                                         DEVICE_CORE_VERSION, "tcp" ) ) )
     {
+        fsc2_lan_log_message( log_fp, clnt_spcreateerror( "Failed to open a "
+                                                          "channel to the "
+                                                          "device" ) );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        log_fp = fsc2_lan_close_log( log_fp );
+
         ip   = T_free( ( char * ) ip );
         name = T_free( ( char * ) name );
 
@@ -174,52 +183,101 @@ vxi11_open( const char * dev_name,
 
     if ( ! core_link || core_link->error )
     {
-        ip   = T_free( ( char * ) ip );
-        name = T_free( ( char * ) name );
+        fsc2_lan_log_message( log_fp, "Failed to connect to device: %s\n",
+                              core_link
+                              ? vxi11_sperror( core_link->error )
+                              : "unknown reasons" );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        log_fp = fsc2_lan_close_log( log_fp );
 
         print( FATAL, "Failed to connect to device: %s\n",
-               core_link ? vxi11_sperror( core_link->error ) :
-                           "unknown reasons" );
+               core_link ?
+               vxi11_sperror( core_link->error ) : "unknown reasons" );
 
+        if ( core_link )
+            destroy_link_1( &core_link->lid, core_client );
         core_link = NULL;
+
         clnt_destroy( core_client );
         core_client = NULL;
+
+        ip   = T_free( ( char * ) ip );
+        name = T_free( ( char * ) name );
 
         return FAILURE;
     }
 
-    /* Open log file after we have the connection open and locked */
-
-    log_fp = fsc2_lan_open_log( name );
-    fsc2_lan_log_function_start( log_fp, "vxi11_open", name );
-
     /* Steve D. Sharples found that some Agilent Infiniium scopes return 0 as
        the maximum size of data they're prepared to accept. That's obviously
-       in violation of Rule B.6..3, item 3, which requires a size of at least
+       in violation of Rule B.6.3, item 3, which requires a size of at least
        1024. To make sure things work correctly set this to the minimum required
-       value of 1024 (according to Rule B.6.3). */
+       value of 1024 (as according to Rule B.6.3). */
 
     if ( core_link->maxRecvSize == 0 )
         core_link->maxRecvSize = 1024;
 
-#if defined DEVICE_SUPPORTS_ASYNC_CHANNEL
-    if ( ( async_client = clnt_create( ip, DEVICE_ASYNC,
-                                       DEVICE_ASYNC_VERSION, "tcp" ) ) )
-    {
-        async_link = create_link_1( &link_parms, async_client );
+    /* If no async connection is to be created we're done */
 
-        if ( async->link )
-        {
-            if ( fsc2_lan_log_level( ) >= LL_ERR )
-                fsc2_lan_log_message( log_fp, "Failed to set up async "
-                                      "channel: %s",
-                                      vxi11_sperror( async_link->error ) );
-            clnt_destroy( async_client );
-            async_link   = NULL;
-            async_client = NULL;
-        }
+    if ( ! create_async )
+    {
+        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        return SUCCESS;
     }
-#endif
+
+    if ( ! ( async_client = clnt_create( ip, DEVICE_ASYNC,
+                                         DEVICE_ASYNC_VERSION, "tcp" ) ) )
+    {
+        fsc2_lan_log_message( log_fp, clnt_spcreateerror( "Failed to open "
+                                                          "async channel to "
+                                                          "device" ) );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        log_fp = fsc2_lan_close_log( log_fp );
+
+        destroy_link_1( &core_link->lid, core_client );
+        core_link = NULL;
+
+        clnt_destroy( core_client );
+        core_client = NULL;
+
+        ip   = T_free( ( char * ) ip );
+        name = T_free( ( char * ) name );
+
+        print( FATAL, "%s",
+               clnt_spcreateerror( "Failed to open async connection to "
+                                   "device" ) );
+        return FAILURE;
+    }
+        
+    async_link = create_link_1( &link_parms, async_client );
+
+    if ( ! async_link || async_link->error )
+    {
+        fsc2_lan_log_message( log_fp, "Failed to set up async "
+                              "channel: %s",
+                                  async_link
+                              ? vxi11_sperror( async_link->error )
+                              : "unknown reasons" );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        log_fp = fsc2_lan_close_log( log_fp );
+
+        if ( async_link )
+            destroy_link_1( &async_link->lid, async_client );
+        async_link = NULL;
+
+        clnt_destroy( async_client );
+        async_client = NULL;
+
+        destroy_link_1( &core_link->lid, core_client );
+        core_link = NULL;
+
+        clnt_destroy( core_client );
+        core_client = NULL;
+
+        ip          = T_free( ( char * ) ip );
+        name        = T_free( ( char * ) name );
+
+        return FAILURE;
+    }
 
     fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
     return SUCCESS;
@@ -234,6 +292,7 @@ int
 vxi11_close( void )
 {
     Device_Error *dev_error;
+    int ret = SUCCESS;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -253,51 +312,45 @@ vxi11_close( void )
 
     fsc2_lan_log_function_start( log_fp, "vxi11_close", name );
 
-#if defined DEVICE_SUPPORTS_ASYNC_CHANNEL
-    if ( async_link )
+    if ( async_client )
     {
-        dev_error = destroy_link_1( &async_link->lid, async_client );
-        if ( dev_error->error && fsc2_lan_log_level( ) >= LL_ERR )
-            fsc2_lan_log_message( log_fp, "Error in vxi11_close() for "
-                                  "async channel: %s",
-                                  vxi11_sperror( dev_error->error ) );
+        if ( async_link )
+        {
+            dev_error = destroy_link_1( &async_link->lid, async_client );
+            if ( dev_error && dev_error->error )
+                fsc2_lan_log_message( log_fp, "Failed tp close async link: %s",
+                                      vxi11_sperror( dev_error->error ) );
+            async_link = NULL;
+            ret = FAILURE;
+        }
+
         clnt_destroy( async_client );
-        async_link   = NULL;
         async_client = NULL;
     }
-#endif
 
     dev_error = destroy_link_1( &core_link->lid, core_client );
-    core_link = NULL;
 
-    if ( dev_error->error )
+    if ( dev_error && dev_error->error )
     {
-        if ( fsc2_lan_log_level( ) >= LL_ERR )
-            fsc2_lan_log_message( log_fp, "Error in vxi11_close(): %s",
-                                  vxi11_sperror( dev_error->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_close", name );
-
-        log_fp = fsc2_lan_close_log( log_fp );
-
-        core_client = NULL;
-        ip          = T_free( ( char * ) ip );
-        name        = T_free( ( char * ) name );
-
-        print( FATAL, "Failed to close connection to device.\n" );
-        return FAILURE;
+        fsc2_lan_log_message( log_fp, "Failed to close core link: %s",
+                              vxi11_sperror( dev_error->error ) );
+        ret = FAILURE;
     }
 
+    core_link = NULL;
+
     clnt_destroy( core_client );
+    core_client = NULL;
 
     fsc2_lan_log_function_end( log_fp, "vxi11_close", name );
-
     log_fp = fsc2_lan_close_log( log_fp );
 
-    core_client = NULL;
     ip          = T_free( ( char * ) ip );
     name        = T_free( ( char * ) name );
 
-    return SUCCESS;
+    if ( ret == FAILURE )
+        print( WARN, "Couldn't properly close connection to device." );
+    return ret;
 }
 
 
@@ -580,14 +633,13 @@ vxi11_device_trigger( void )
  * Function for aborting an in-progress call.
  *
  * Please note: Not all devices support this function. If
- * one does define the macro DEVICE_SUPPORTS_ASYNC_CHANNEL
- * otherwise this function does nothing.
+ * the device was opened without a async channel calling
+ * this function will throw an exception.
  *---------------------------------------------------------*/
 
 static int
 vxi11_abort( void )
 {
-#if defined DEVICE_SUPPORTS_ASYNC_CHANNEL
     Device_Error *dev_error;
 
 
@@ -605,15 +657,15 @@ vxi11_abort( void )
         return FAILURE;
     }
 
-    if ( ! async_link )
+    if ( ! async_client || ! async_link )
     {
         print( FATAL, "Internal module error, async channel isn't open.\n" );
-        return FAILURE:
+        return FAILURE;
     }
 
     fsc2_lan_log_function_start( log_fp, "vxi11_abort", name );
 
-    dev_error = device_abort_1( &async_link->lid );
+    dev_error = device_abort_1( &async_link->lid, async_client );
 
     if ( dev_error->error )
     {
@@ -627,7 +679,6 @@ vxi11_abort( void )
     }
 
     fsc2_lan_log_function_end( log_fp, "vxi11_abort", name );
-#endif
     return SUCCESS;
 }
 
@@ -637,7 +688,7 @@ vxi11_abort( void )
  * ->
  *    1. pointer to buffer with data
  *    2. pointer with length of bufffer
- *    3. boolean that indicates if a transfer mey be
+ *    3. boolean that indicates if a transfer may be
  *       aborted
  *
  * On return the value pointed to by the second argument
@@ -709,9 +760,13 @@ vxi11_write( const char * buffer,
     {
         Device_WriteResp *write_resp;
 
-        /* Give the user a chance to interrupt the transfer */
+        /* If an async channel is open give the user a chance to interrupt
+           the transfer */
 
-        if ( async_link && allow_abort && check_user_request( ) )
+        if (    async_client
+             && async_link
+             && allow_abort
+             && check_user_request( ) )
         {
             vxi11_abort( );
             THROW( USER_BREAK_EXCEPTION );
@@ -836,9 +891,13 @@ vxi11_read( char   * buffer,
 
     do
     {
-        /* Give the user a chance to interrupt the transfer */
+        /* If an async channel is open give the user a chance to interrupt
+           the transfer */
 
-        if ( async_link && allow_abort && check_user_request( ) )
+        if (    async_client
+             && async_link
+             && allow_abort
+             && check_user_request( ) )
         {
             vxi11_abort( );
             THROW( USER_BREAK_EXCEPTION );

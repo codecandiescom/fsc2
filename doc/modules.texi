@@ -1695,6 +1695,7 @@ The function
 int vxi11_open( const char * dev_name,
 	            const char * address,
 			    const char * vxi11_name,
+                bool         create_async,
 			    long         us_timeout )
 @end example
 @noindent
@@ -1705,20 +1706,25 @@ the log file), its IP address, either as a hostname (like
 @code{"hex.discworld.unseen.edu"}) or or a numeric IP address in
 dotted-quad format (like @code{"123.97.243.12"}), the name assigned to
 the device for the VXI-11 protocol (often per default set to
-@code{"inst0"}) and a positive or zero maximum time (in micro-seconds,
-a zero value means a nearly indefinitely long timeout) to wait for a
-device being locked by another process to become unlocked. Please note
-that the function can't be called when an connection has already been
-created. On success the function returns @code{SUCCESS}, on failure
-(either because the connection has already been opened, connecting to
-the device fails or not enough memory is available) it returns
+@code{"inst0"}), flag that indicates if also an asynchronous
+connection should be established (in order to be able to abort long
+transfers, but note that not all devices support tis) and a positive
+or zero maximum time (in micro-seconds, were a zero value means a
+nearly indefinitely long timeout) to wait for a device being locked by
+another process to become unlocked. Please note that the function
+can't be called when a connection has already been created. On
+success the function returns @code{SUCCESS}, on failure (either
+because the connection has already been opened, connecting to the
+device fails or not enough memory is available) it returns
 @code{FAILURE} after printing out an error message. Please note that
-the time the call will take depends on the device and can take up
-to 25 seconds.
+the time the call will take depends on the device and can take up to
+25 seconds.
 
 Opening the connection to the device also locks it for exclusive use,
 thus it's not necessary to obtain a different lock, e.g.@: by calling
-@code{@ref{fsc2_obtain_lock()}}.
+@code{@ref{fsc2_obtain_lock()}}. But it also requires that
+@code{@ref{vxi11_close()}} is called when you're done with it,
+otherwise the device may refuse new connections!
 
 
 @anchor{vxi11_close()}
@@ -1729,9 +1735,9 @@ void vxi11_close( void )
 @end example
 @noindent
 is the opposite of @code{@ref{vxi11_open()}}, i.e.@: it closes down the
-existing connection. The function normally returns @code{SUCCESS}
-but when there were no connection or shutting down teh connection
-failed an error messages is printed out and @code{FAILURE} is
+existing connection(s). The function normally returns @code{SUCCESS}
+but when there were no connection or shutting down the connection(s)
+failed an warning messages is printed out and @code{FAILURE} is
 returned.
 
 
@@ -1831,9 +1837,10 @@ int vxi11_write( const char * buffer,
 is for sending data to the device. It takes three arguments, a pointer
 to an array with the data, a pointer to a variable with the length of
 that array and a flag that tells if the write operation may be
-interrupted. An write operation can only be interrupted if the data
-can only be send in more than one package and when the user clicks on
-the @code{STOP} button - in that case the operation is aborted and a
+interrupted when the user clicks on the @code{STOP} button. An write
+operation can only be interrupted if the device was opened with the
+@code{create_async} flag set to true and the data are sent in more
+than one package - in that case the operation is aborted and a
 @code{USER_BREAK_EXCEPTION} gets thrown. On success the function
 returns @code{SUCCESS}, on failure (because there's no connection,
 invalid arguments or the operation takes longer than the write
@@ -1855,9 +1862,10 @@ reads data send by the device. It takes three arguments, a pointer to
 an array for storing the received data, a pointer to a variable with
 the length of that array (i.e.@: the maximum length of the message
 that can be accepted) and a flag that tells if the read operation may
-be interrupted. A read operation can only be interrupted if the data
-get send by the device in more than one package and when the user
-clicks on the @code{STOP} button - in that case the operation is
+be interrupted when the user clicks on the @code{STOP} button. A read
+operation can only be interrupted if the device was opened with the
+@code{create_async} flag set to true and the data get send by the
+device in more than one package - in that case the operation is
 aborted and a @code{USER_BREAK_EXCEPTION} gets thrown. On success the
 function returns @code{SUCCESS}, on failure (because there's no
 connection, invalid arguments or the operation takes longer than the

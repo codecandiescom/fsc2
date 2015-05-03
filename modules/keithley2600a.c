@@ -43,8 +43,8 @@ keithley2600a_exp_hook( void )
     char reply[ 100 ];
     size_t length;
 
-	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS,
-					 VXI11_NAME, 100000 ) == FAILURE )
+	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
+                     UNSET, 100000 ) == FAILURE )
         return FAIL;
 
 	vxi11_set_timeout( READ, READ_TIMEOUT );

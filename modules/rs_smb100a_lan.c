@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -52,8 +52,8 @@ rs_smb100a_init( const char * name )
     int i;
 
 
-	if ( vxi11_open( name, NETWORK_ADDRESS,
-					 VXI11_NAME, 100000 ) == FAILURE )
+	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
+                     UNSET, 100000 ) == FAILURE )
         return FAIL;
 
 	rs_smb100a.device = 0;

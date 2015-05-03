@@ -219,12 +219,17 @@ smsmotor
 
 // Frankfurt frequency controller
 
-ffc;
+ffc
 
 
 // Power/Energy meters
 
 gentec_maestro             // Gentec Maestro Laser Power and Energy Meter
+
+
+// SourceMeters
+
+keithley2600a
 
 
 // Microwave bridges
