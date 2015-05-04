@@ -654,6 +654,9 @@ keithley2600a_open( void )
                      UNSET, OPEN_TIMEOUT ) == FAILURE )
         return FAIL;
 
+    k26->is_open = SET;
+    fprintf( stderr, "Open succeeded.\n" );
+
     /* Set a timeout for reads and writes, clear the device and lock
        out the keyboard. */
 
@@ -666,7 +669,8 @@ keithley2600a_open( void )
         return FAIL;
     }
 
-    k26->is_open = SET;
+    fprintf( stderr, "Set-up succeeded.\n" );
+
     return OK;
 }
 
@@ -689,6 +693,8 @@ keithley2600a_close( void )
 
     if ( vxi11_close( ) == FAILURE )
         return FAIL;
+
+    fprintf( stderr, "Close succeeded.\n" );
 
     k26->is_open = UNSET;
     return OK;

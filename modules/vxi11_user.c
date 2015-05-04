@@ -318,7 +318,7 @@ vxi11_close( void )
         {
             dev_error = destroy_link_1( &async_link->lid, async_client );
             if ( dev_error && dev_error->error )
-                fsc2_lan_log_message( log_fp, "Failed tp close async link: %s",
+                fsc2_lan_log_message( log_fp, "Failed to close async link: %s",
                                       vxi11_sperror( dev_error->error ) );
             async_link = NULL;
             ret = FAILURE;
