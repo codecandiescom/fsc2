@@ -37,11 +37,29 @@ Keithley2600A_T * k26 = &keithley2600a;
  *--------------------------------------------------------------*/
 
 int
+keithley2600a_test_hook( void )
+{
+    k26 = &keithley2600a_test;
+
+    return OK;
+}
+
+
+/*--------------------------------------------------------------*
+ * Start of experiment hook
+ *--------------------------------------------------------------*/
+
+int
 keithley2600a_exp_hook( void )
 {
     k26 = &keithley2600a;
 
-    return keithley2600a_open( );
+    if ( ! keithley2600a_open( ) )
+        return FAIL;
+
+    keithley2600a_get_state( );
+
+    return OK;
 }
    
 

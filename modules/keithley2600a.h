@@ -165,6 +165,7 @@ extern Keithley2600A_T * k26;
 
 /* Hook functions */
 
+int keithley2600a_test_hook( void );
 int keithley2600a_exp_hook( void );
 int keithley2600a_end_of_exp_hook( void );
 
@@ -176,6 +177,8 @@ Var_T * sourcemeter_output( Var_T * v );
 
 
 /* Internal functions */
+
+void keithley2600a_get_state( void );
 
 int keithley2600a_get_sense( unsigned int ch );
 int keithley2600a_set_sense( unsigned int ch,

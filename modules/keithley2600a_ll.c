@@ -40,6 +40,32 @@ static const char *smu[ ] = { "smua", "smub" };
  * Returns the sense mode of the channel
  *---------------------------------------------------------------*/
 
+void
+keithley2600a_get_state( void )
+{
+    unsigned int ch;
+
+    for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    {
+        keithley2600a_get_sense( ch );
+        
+        keithley2600a_get_source_offmode( ch );
+        keithley2600a_get_source_output( ch );
+        keithley2600a_get_source_highc( ch );
+        keithley2600a_get_source_func( ch );
+        keithley2600a_get_measure_autorangev( ch );
+        keithley2600a_get_measure_autorangei( ch );
+        keithley2600a_get_measure_autozero( ch );
+        keithley2600a_get_source_levelv( ch );
+        keithley2600a_get_source_leveli( ch );
+    }
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the sense mode of the channel
+ *---------------------------------------------------------------*/
+
 int
 keithley2600a_get_sense( unsigned int ch )
 {
