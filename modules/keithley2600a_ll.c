@@ -19,23 +19,21 @@
 
 
 #include "keithley2600a.h"
+#include "vxi11_user.h"
 
 
-extern Max_Limit * keithley2600s_max_limitv;
-extern Max_Limit * keithley2600s_max_limiti;
-
-static size_t keithley2600a_command( const char * cmd );
-static size_t keithley2600a_talk( const char * cmd,
-								  char       * reply,
-								  size_t       max_len,
-								  bool         is_exact_len );
-static void keithley2600a_failure( void );
+static bool line_to_bool( const char * line );
+static int line_to_int( const char * line );
+static double line_to_double( const char * line );
+static bool command( const char * cmd );
+static bool talk( const char * cmd,
+                  char       * reply,
+                  size_t       length );
+static void comm_failure( void );
 
 
 static const char *smu[ ] = { "smua", "smub" };
 
-
-Keithley2600A_T keithley2600a;
 
 
 /*---------------------------------------------------------------*
@@ -43,21 +41,22 @@ Keithley2600A_T keithley2600a;
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_get_sense( unsigned int ch )
+keithley2600a_get_sense( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.sense)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, 2, SET );
-    if (    (    buf[ 0 ] - '0' != SENSE_LOCAL
-			  && buf[ 0 ] - '0' != SENSE_REMOTE
-			  && buf[ 0 ] - '0' != SENSE_CALA )
-		 || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.sense[ cha ] = buf[ 0 ] - '0';
+    keithley2600a.sense[ ch ] = line_to_bool( buf );
+    if (    keithley2600a.sense[ ch ] != SENSE_LOCAL
+		 || keithley2600a.sense[ ch ] != SENSE_REMOTE
+		 || keithley2600a.sense[ ch ] != SENSE_CALA )
+        comm_failure( );
+
+    return keithley2600a.sense[ ch ];
 }
 
 
@@ -66,7 +65,7 @@ keithely2600a_get_sense( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_set_sense( unsigned int ch,
+keithley2600a_set_sense( unsigned int ch,
 						 int          sense )
 {
     char buf[ 50 ];
@@ -82,7 +81,7 @@ keithely2600a_set_sense( unsigned int ch,
 				 || keithley2600a_get_source_output( ch ) == OUTPUT_OFF );
 
     sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
-	keithley2600a_command( buf );
+	command( buf );
 
     return keithley2600a.sense[ ch ] = sense;
 }
@@ -93,19 +92,16 @@ keithely2600a_set_sense( unsigned int ch,
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_get_source_offmode( unsigned int ch )
+keithley2600a_get_source_offmode( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.offmode)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, 2, SET );
-    if (    ( buf[ 0 ] - '0' < OUTPUT_NORMAL || buf[ 0 ] - '0' > OUTPUT_ZERO )
-		 || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.offmode[ cha ] = buf[ 0 ] - '0';
+    return keithley2600a.source.offmode[ ch ] = line_to_bool( buf );
 }
 
 
@@ -114,17 +110,17 @@ keithely2600a_get_source_offmode( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_set_source_offmode( unsigned int ch,
-								  int          souarce_offmode )
+keithley2600a_set_source_offmode( unsigned int ch,
+								  int          source_offmode )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.source.offmode=%d", smu[ ch ], source_offmode );
-	keithley2600a_command( buf );
+	command( buf );
 
-    return keithley2600a.source.output[ ch ] = source_output;
+    return keithley2600a.source.offmode[ ch ] = source_offmode;
 }
 
 
@@ -133,18 +129,16 @@ keithely2600a_set_source_offmode( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_get_source_output( unsigned int ch )
+keithley2600a_get_source_output( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.output)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, 2, SET );
-    if ( ( buf[ 0 ] != '0' && buf[ 0 ] != '1' ) || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.output[ cha ] = buf[ 0 ] == '1';
+    return keithley2600a.source.output[ ch ] = line_to_bool( buf );
 }
 
 
@@ -153,15 +147,15 @@ keithely2600a_get_source_output( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_set_source_output( unsigned int ch,
+keithley2600a_set_source_output( unsigned int ch,
                                  bool         source_output )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.source.output=%d", smu[ ch ], source_output );
-	keithley2600a_command( buf );
+    sprintf( buf, "%s.source.output=%d", smu[ ch ], ( int ) source_output );
+	command( buf );
 
 	/* ZZZZZZZZZZZ  Get any comliance levels changes when switching off? */
 
@@ -174,18 +168,16 @@ keithely2600a_set_source_output( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_get_source_highc( unsigned int ch )
+keithley2600a_get_source_highc( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.highc)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, 2, SET );
-    if ( ( buf[ 0 ] != '0' && buf[ 0 ] != '1' ) || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.highc[ ch ] = buf[ 0 ] - '0';
+    return keithley2600a.source.highc[ ch ] = line_to_bool( buf );
 }
 
 
@@ -195,15 +187,15 @@ keithely2600a_get_source_highc( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_set_source_highc( unsigned int ch,
+keithley2600a_set_source_highc( unsigned int ch,
                                 bool         source_highc )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.source.highc=%d", smu[ ch ], source_highc );
-	keithley2600a_command( buf );
+    sprintf( buf, "%s.source.highc=%d", smu[ ch ], ( int ) source_highc );
+	command( buf );
 
     /* Switching to high-capacity mode also changes a few other settings */
 
@@ -231,18 +223,16 @@ keithely2600a_set_source_highc( unsigned int ch,
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_get_source_func( unsigned int ch )
+keithley2600a_get_source_func( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.func)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, 2, SET );
-    if ( ( buf[ 0 ] != '0' && buf[ 0 ] != '1' ) || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.func[ ch ] = buf[ 0 ] - '0';
+    return keithley2600a.source.func[ ch ] = line_to_bool( buf );
 }
 
 
@@ -251,7 +241,7 @@ keithely2600a_get_source_func( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_set_source_func( unsigned int ch,
+keithley2600a_set_source_func( unsigned int ch,
                                int          source_func )
 {
     char buf[ 50 ];
@@ -261,7 +251,8 @@ keithely2600a_set_source_func( unsigned int ch,
                  || source_func == OUTPUT_DCVOLTS );
 
     sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
-	keithley2600a_command( buf );
+	command( buf );
+
     return keithley2600a.source.func[ ch ] = source_func;
 }
 
@@ -272,18 +263,16 @@ keithely2600a_set_source_func( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_get_measure_autorangev( unsigned int ch )
+keithley2600a_get_measure_autorangev( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autorangev)", smu[ ch ] );
-	keithley2600a_command( buf );
-    if ( ( buf[ 0 ] != '0' && buf[ 0 ] != '1' ) || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.measure.autorangev[ ch ] = buf[ 0 ] == '1';
+    return keithley2600a.measure.autorangev[ ch ] = line_to_bool( buf );
 }
 
 
@@ -293,15 +282,16 @@ keithely2600a_get_measure_autorangev( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_set_measure_autorangev( unsigned int ch,
+keithley2600a_set_measure_autorangev( unsigned int ch,
                                       bool         autorange )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.measure.autorangev=%s", smu[ ch ], autorange );
-	keithley2600a_command( buf );
+    sprintf( buf, "%s.measure.autorangev=%d", smu[ ch ], ( int ) autorange );
+	command( buf );
+
     return keithley2600a.measure.autorangev[ ch ] = autorange;
 }
 
@@ -312,18 +302,16 @@ keithely2600a_set_measure_autorangev( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_get_measure_autorangei( unsigned int ch )
+keithley2600a_get_measure_autorangei( unsigned int ch )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autorangei)", smu[ ch ] );
-	keithley2600a_command( buf );
-    if ( ( buf[ 0 ] != '0' && buf[ 1 ] != '1' ) || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.measure.autorangei[ ch ] = buf[ 0 ] == '1';
+    return keithley2600a.measure.autorangei[ ch ] = line_to_bool( buf );
 }
 
 
@@ -333,15 +321,16 @@ keithely2600a_get_measure_autorangei( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithely2600a_set_measure_autorangei( unsigned int ch,
+keithley2600a_set_measure_autorangei( unsigned int ch,
                                       bool         autorange )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.measure.autorangei=%d", smu[ ch ], autorange );
-	keithley2600a_command( buf );
+    sprintf( buf, "%s.measure.autorangei=%d", smu[ ch ], ( int ) autorange );
+	command( buf );
+
     return keithley2600a.measure.autorangei[ ch ] = autorange;
 }
 
@@ -352,19 +341,21 @@ keithely2600a_set_measure_autorangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_get_measure_autozero( unsigned int ch )
+keithley2600a_get_measure_autozero( unsigned int ch )
 {
     char buf[ 50 ];
+    int autozero;
 
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autozero)", smu[ ch ] );
-	keithley2600a_command( buf );
-    if (    ( buf[ 0 ] - '0' < AUTOZRO_OFF && buf[ 1 ] - '0' > AUTOZERO_AUTO ) )
-         || buf[ 1 ] != '\n' )
-        keithley2600a_failure( );
+	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.measure.autozero[ ch ] = buf[ 0 ] == '1';
+    autozero = line_to_int( buf );
+    if ( autozero < AUTOZERO_OFF || autozero > AUTOZERO_AUTO )
+        comm_failure( );
+
+    return keithley2600a.measure.autozero[ ch ] = autozero;
 }
 
 
@@ -374,17 +365,18 @@ keithely2600a_get_measure_autozero( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithely2600a_set_measure_autozero( unsigned int ch,
+keithley2600a_set_measure_autozero( unsigned int ch,
                                     int          autozero )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( autozero >= AUTOZERO_OFF && autozero <= AUTOZERO_AUTO )
+    fsc2_assert( autozero >= AUTOZERO_OFF && autozero <= AUTOZERO_AUTO );
 
-    sprintf( buf, smu[ ch ] "measure.autozero=%d", autozero );
-	keithley2600a_command( buf );
-    return keithley2600a.measure.autozero[ ch ] = autozeroa;
+    sprintf( buf, "%s.measure.autozero=%d", smu[ ch ], autozero );
+	command( buf );
+
+    return keithley2600a.measure.autozero[ ch ] = autozero;
 }
 
 
@@ -401,10 +393,9 @@ keithley2600a_get_compliance( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.source.compliance)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf - 1, UNSET );
-	buf[ strlen( buf ) ] = '\0';
+	talk( buf, buf, sizeof buf );
     if ( strcmp( buf, "false\n" ) && strcmp( buf, "true\n" ) )
-        keithley2600a_failure( );
+        comm_failure( );
 
     return buf[ 0 ] == 't';
 }
@@ -420,11 +411,11 @@ keithley2600a_set_source_levelv( unsigned int ch,
 {
 	char buf[ 50 ];
 
-	fsc2_assert( ch < MAX_CHANNELS );
+	fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert( volts <= MAX_SOURCE_LEVELV && - MAX_SOURCE_LEVELV );
 
 	sprintf( buf, "%s.source.levelv=%.5g\n", smu[ ch ], volts );
-	keithley2600a_command( buf );
+	command( buf );
 
 	return keithley2600a_get_source_levelv( ch );
 }
@@ -438,20 +429,18 @@ double
 keithley2600a_get_source_levelv( unsigned int ch )
 {
 	char buf[ 50 ];
-	char *ep;
 	double volts;
 
-	fsc2_assert( ch < MAX_CHANNELS );
+	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "print(%s.source.levelv)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf - 1, UNSET );
+	talk( buf, buf, sizeof buf );
 
-	buf[ strlen( buf ) ] = '\0';
-	volts = strtod( buf, &ep );
-	if ( *ep != '\n' || fabs( volts ) > 1.001 * MAX_SOURCE_LEVELV )
-		keitley2600a_failure( );
+	volts = line_to_double( buf );
+	if ( fabs( volts ) > 1.001 * MAX_SOURCE_LEVELV )
+		comm_failure( );
 
-	return keithley2600a.sourve.levelv[ c ] = volts;
+	return keithley2600a.source.levelv[ ch ] = volts;
 }
 
 
@@ -465,11 +454,11 @@ keithley2600a_set_source_leveli( unsigned int ch,
 {
 	char buf[ 50 ];
 
-	fsc2_assert( ch < MAX_CHANNELS );
-	fsc2_assert( volts <= MAX_SOURCE_LEVELI && - MAX_SOURCE_LEVELI );
+	fsc2_assert( ch < NUM_CHANNELS );
+	fsc2_assert( amps <= MAX_SOURCE_LEVELI && amps <= - MAX_SOURCE_LEVELI );
 
 	sprintf( buf, "%s.source.leveli=%.5g\n", smu[ ch ], amps );
-	keithley2600a_command( buf );
+	command( buf );
 
 	return keithley2600a_get_source_leveli( ch );
 }
@@ -483,60 +472,153 @@ double
 keithley2600a_get_source_leveli( unsigned int ch )
 {
 	char buf[ 50 ];
-	char *ep;
 	double amps;
 
-	fsc2_assert( ch < MAX_CHANNELS );
+	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "print(%s.source.leveli)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf - 1, UNSET );
+	talk( buf, buf, sizeof sizeof buf );
 
-	buf[ strlen( buf ) ] = '\0';
-	amps = strtod( buf, &ep );
-	if ( *ep != '\n' || fabs( amps ) > 1.001 * MAX_SOURCE_LEVELI )
-		keitley2600a_failure( );
+	amps = line_to_double( buf );
+	if ( fabs( amps ) > 1.001 * MAX_SOURCE_LEVELI )
+		comm_failure( );
 
-	return keithley2600a.sourve.leveli[ c ] = v;
+	return keithley2600a.source.leveli[ ch ] = amps;
 }
 
 
-/*---------------------------------------------------------------*
- * Sends a command to the device, not expecting a reply
- *---------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts a line as received from the device to a boolean value
+ *--------------------------------------------------------------*/
 
 static
-size_t
-keithley2600a_command( const char * cmd )
+bool
+line_to_bool( const char * line )
 {
-	return strlen( cmd );
+    bool res = *line == '1';
+
+    if ( ( *line != '0' && *line != '1' ) || *++line != '.' )
+        comm_failure( );
+
+    while ( *++line == '0' )
+        /* empty */ ;
+    if ( strcmp( line, "e00\n" ) )
+        comm_failure( );
+
+    return res;
 }
 
 
-/*---------------------------------------------------------------*
- * Sends a command to the device, expecting a reply with, if
- * 'is_exact_len' set, 'max_len' characters, otherwise up to
- * 'max_len' characters.
- *---------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Converts a line as received from the device to an int
+ *--------------------------------------------------------------*/
 
 static
-size_t
-keithley2600a_talk( const char * cmd,
-					char       * reply,
-					size_t       max_len,
-					bool         is_exact_len )
+int
+line_to_int( const char * line )
 {
-	return max_len;
+    double dres;
+    int res;
+    char *ep;
+
+    if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
+        comm_failure( );
+
+    dres = strtod( line, &ep );
+    if ( *ep != '\n' || *++ep || dres > INT_MAX || dres < INT_MIN )
+        comm_failure( );
+
+    res = lrnd( dres );
+    if ( dres - res != 0 )
+        comm_failure( );
+
+    return res;
 }
 
+
+/*--------------------------------------------------------------*
+ * Converts a line as received from the device to a double
+ *--------------------------------------------------------------*/
+
+static
+double
+line_to_double( const char * line )
+{
+    double res;
+    char *ep;
+
+    if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
+        comm_failure( );
+
+    errno = 0;
+    res = strtod( line, &ep );
+    if (    *ep != '\n'
+         || *++ep
+         || ( ( res == HUGE_VAL || res == - HUGE_VAL ) && errno == ERANGE ) )
+        comm_failure( );
+
+    return res;
+}
+
+
+/*--------------------------------------------------------------*
+ * Sends a command to the device
+ *--------------------------------------------------------------*/
+
+static
+bool
+command( const char * cmd )
+{
+	size_t len = strlen( cmd );
+
+    
+	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+		comm_failure( );
+
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*
+ * Sends a command to the device and returns its reply. The
+ * value pointed to by 'length' must not be larger than the
+ * reply buffer. Note that only one less character will be
+ * read since the last character is reserved for the training
+ * '\0' which is automatically appended.
+ *--------------------------------------------------------------*/
+
+static
+bool
+talk( const char * cmd,
+      char       * reply,
+      size_t       length )
+{
+    fsc2_assert( length > 1 );
+
+	size_t len = strlen( cmd );
+
+	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+		comm_failure( );
+
+    length--;
+	if ( vxi11_read( reply, &length, UNSET ) != SUCCESS || length < 1 )
+		comm_failure( );
+
+    reply[ length ] = '\0';
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
 static
 void
-keithley2600a_failure( void )
+comm_failure( void )
 {
-    print( FATAL, "Communication with source-meter failed.\n" );
+    print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
 }
-
 
 
 /*

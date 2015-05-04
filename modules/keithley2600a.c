@@ -18,9 +18,7 @@
  */
 
 
-#include "fsc2_module.h"
-#include "keithley2600a.conf"
-#include "vxi11_user.h"
+#include "keithley2600a.h"
 
 
 const char device_name[ ]  = DEVICE_NAME;
@@ -28,18 +26,13 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 
-static bool keithkey2600a_command( const char * cmd );
-static void keithley2600a_comm_failure( void );
-static bool keithley2600a_talk( const char * cmd,
-                                char *       reply,
-                                size_t *     length );
-
-int keithley2600a_exp_hook( void );
+Keithley2600A_T keithley2600a;
 
 
 int
 keithley2600a_exp_hook( void )
 {
+#if 0
     char reply[ 100 ];
     size_t length;
 
@@ -59,66 +52,11 @@ keithley2600a_exp_hook( void )
     reply[ length ]= '\0';
 
     fprintf( stderr, "Reply: %s\n", reply );
+#endif
 
     return OK;
 }
    
-
-
-/*--------------------------------------------------------------*
- *--------------------------------------------------------------*/
-
-static
-bool
-keithkey2600a_command( const char * cmd )
-{
-	size_t len = strlen( cmd );
-
-    
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
-		keithley2600a_comm_failure( );
-
-//	fsc2_usleep( 4000, UNSET );
-
-	return OK;
-}
-
-
-/*--------------------------------------------------------------*
- *--------------------------------------------------------------*/
-
-static
-bool
-keithley2600a_talk( const char * cmd,
-                    char *       reply,
-                    size_t *     length )
-{
-	size_t len = strlen( cmd );
-
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
-		keithley2600a_comm_failure( );
-
-//	fsc2_usleep( 4000, UNSET );
-
-	if ( vxi11_read( reply, length, UNSET ) != SUCCESS )
-		keithley2600a_comm_failure( );
-
-	return OK;
-}
-
-
-/*--------------------------------------------------------------*
- *--------------------------------------------------------------*/
-
-static
-void
-keithley2600a_comm_failure( void )
-{
-    print( FATAL, "Comm failure\n" );
-    THROW( EXCEPTION );
-}
-
-
 
 /*
  * Local variables:

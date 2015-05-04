@@ -22,8 +22,6 @@
 #define KEITHLEY2600A_H_
 
 
-//#include "fsc2.h"
-
 #include "fsc2_module.h"
 #include "keithley2600a.conf"
 
@@ -58,13 +56,13 @@
 
 /* Minimum limit values (for compliance) - maximum values depend on range */
 
-#if defined 2601A || defined _2602A
+#if defined _2601A || defined _2602A
 #define MIN_LIMITV  1.0e-2
 #else
 #define MIN_LIMITV  2.0e-2
 #endif
 
-#if defined 2601A || defined _2602A || defined 2611A || defined _2612A
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
 #define MIN_LIMITI 1.0e-8
 #else
 #define MIN_LIMITI 1.0e-10
@@ -77,6 +75,44 @@ typedef struct
 	double limit;
 } Max_Limit;
 
+
+extern Max_Limit keithley2600s_max_limitv[ ];
+extern Max_Limit keithley2600s_max_limiti[ ];
+
+
+#define SENSE_LOCAL     0
+#define SENSE_REMOTE    1
+#define SENSE_CALA      3
+
+
+#define OUTPUT_NORMAL    0
+#define OUTPUT_HIGH_Z    1
+#define OUTPUT_ZERO      2
+
+
+/* Channel source output states (on/off) */
+
+#define OUTPUT_OFF       0
+#define OUTPUT_ON        1
+
+/* Channel source modes (current/voltage) */
+
+#define OUTPUT_DCAMPS    0
+#define OUTPUT_DCVOLTS   1
+
+/* Channel autorange states (on/off) */
+
+#define AUTORANGE_OFF    0
+#define AUTORANGE_ON     1
+
+
+/* Channel autozero modes (off/once/auto) */
+
+#define AUTOZERO_OFF     0
+#define AUTOZERO_ONCE    1
+#define AUTOZERO_AUTO    2
+
+
 typedef struct
 {
 	int    offmode[ NUM_CHANNELS ];
@@ -87,8 +123,8 @@ typedef struct
     double rangev[ NUM_CHANNELS ];
     double rangei[ NUM_CHANNELS ];
 
-	double levelv[ MAX_CHANNELS ];
-	double leveli[ MAX_CHANNELS ];
+	double levelv[ NUM_CHANNELS ];
+	double leveli[ NUM_CHANNELS ];
 
     double lowrangev[ NUM_CHANNELS ];
     double lowrangei[ NUM_CHANNELS ];
@@ -115,72 +151,43 @@ typedef struct
 
 typedef struct
 {
-	int sense[ NUM_ChANNELS ];
+	int sense[ NUM_CHANNELS ];
 
     Source_T  source;
     Measure_T measure;
 } Keithley2600A_T;
 
 
-
-#define SENSE_LOCAL    0
-#define SENSE_REMOTE   1
-#define SENSE_CALA     3
+extern Keithley2600A_T keithley2600a;
 
 
-
-#define OUTPUT_NORMAL  0
-#define OUTPUT_HIGH_Z  1
-#define OUTPUT_ZERO    2
-
-
-/* Channel source output states (on/off) */
-
-#define OUTPUT_OFF     0
-#define OUTPUT_ON      1
-
-/* Channel source modes (current/voltage) */
-
-#define OUTPUT_DCAMPS  0
-#define OUTPUT_DCVOLTS 1
-
-/* Channel autorange states (on/off) */
-
-#define AUTORANGE_OFF  0
-#define AUTORANGE_ON   1
-
-
-/* Channel autozero modes (off/once/auto) */
-
-#define AUTOZERO_OFF   0
-#define AUTOZERO_ONCE  1
-#define AUTOZERO_AUTO  2
+int keithley2600a_exp_hook( void );
 
 
 
-int keithely2600a_get_sense( unsigned int ch );
-int keithely2600a_set_sense( unsigned int ch,
+int keithley2600a_get_sense( unsigned int ch );
+int keithley2600a_set_sense( unsigned int ch,
                              int          sense );
-int keithely2600a_get_source_offmode( unsigned int ch );
-int keithely2600a_set_source_offmode( unsigned int ch,
-                                      int          souarce_offmode );
-bool keithely2600a_get_source_output( unsigned int ch );
-bool keithely2600a_set_source_output( unsigned int ch,
+int keithley2600a_get_source_offmode( unsigned int ch );
+int keithley2600a_set_source_offmode( unsigned int ch,
+                                      int          source_offmode );
+bool keithley2600a_get_source_output( unsigned int ch );
+bool keithley2600a_set_source_output( unsigned int ch,
                                       bool         source_output );
-bool keithely2600a_get_source_highc( unsigned int ch );
-int keithely2600a_set_source_highc( unsigned int ch,
+bool keithley2600a_get_source_highc( unsigned int ch );
+int keithley2600a_set_source_highc( unsigned int ch,
                                     bool         source_highc );
-int keithely2600a_get_source_func( unsigned int ch );
-int keithely2600a_set_source_func( unsigned int ch,
+int keithley2600a_get_source_func( unsigned int ch );
+int keithley2600a_set_source_func( unsigned int ch,
                                    int          source_func );
-bool keithely2600a_get_measure_autorangev( unsigned int ch );
-bool keithely2600a_set_measure_autorangev( unsigned int ch,
+bool keithley2600a_get_measure_autorangev( unsigned int ch );
+bool keithley2600a_set_measure_autorangev( unsigned int ch,
                                            bool         autorange );
-bool keithely2600a_get_measure_autorangei( unsigned int ch );
-bool keithely2600a_set_measure_autorangei( unsigned int ch,
+bool keithley2600a_get_measure_autorangei( unsigned int ch );
+bool keithley2600a_set_measure_autorangei( unsigned int ch,
                                            bool         autorange );
-int keithely2600a_get_measure_autozero( unsigned int ch );
-int keithely2600a_set_measure_autozero( unsigned int ch,
+int keithley2600a_get_measure_autozero( unsigned int ch );
+int keithley2600a_set_measure_autozero( unsigned int ch,
                                         int          autozero );
 bool keithley2600a_get_compliance( unsigned int ch );
 double keithley2600a_set_source_levelv( unsigned int ch,
