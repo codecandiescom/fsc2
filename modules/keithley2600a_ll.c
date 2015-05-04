@@ -529,7 +529,7 @@ line_to_bool( const char * line )
 
     while ( *++line == '0' )
         /* empty */ ;
-    if ( strcmp( line, "e00\n" ) )
+    if ( strcmp( line, "e+00\n" ) )
         comm_failure( );
 
     return res;
