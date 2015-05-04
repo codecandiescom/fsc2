@@ -57,7 +57,16 @@ keithley2600a_exp_hook( void )
     if ( ! keithley2600a_open( ) )
         return FAIL;
 
-    keithley2600a_get_state( );
+    TRY
+    {
+        keithley2600a_get_state( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        keithley2600a_close( );
+        RETHROW;
+    }
 
     return OK;
 }
