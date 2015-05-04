@@ -1,0 +1,7 @@
+DEVICES:
+
+keithley2600a;
+
+EXPERIMENT:
+
+print( "Output state: #\n", sourcemeter_output( 1 ) );

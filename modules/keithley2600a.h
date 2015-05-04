@@ -151,51 +151,76 @@ typedef struct
 
 typedef struct
 {
-	int sense[ NUM_CHANNELS ];
+    bool      is_open;
+
+	int       sense[ NUM_CHANNELS ];
 
     Source_T  source;
     Measure_T measure;
 } Keithley2600A_T;
 
 
-extern Keithley2600A_T keithley2600a;
+extern Keithley2600A_T * k26;
 
+
+/* Hook functions */
 
 int keithley2600a_exp_hook( void );
+int keithley2600a_end_of_exp_hook( void );
 
 
+/* EDL functions */
+
+Var_T * sourcemeter_name( Var_T * v );
+Var_T * sourcemeter_output( Var_T * v );
+
+
+/* Internal functions */
 
 int keithley2600a_get_sense( unsigned int ch );
 int keithley2600a_set_sense( unsigned int ch,
                              int          sense );
+
 int keithley2600a_get_source_offmode( unsigned int ch );
 int keithley2600a_set_source_offmode( unsigned int ch,
                                       int          source_offmode );
+
 bool keithley2600a_get_source_output( unsigned int ch );
 bool keithley2600a_set_source_output( unsigned int ch,
                                       bool         source_output );
+
 bool keithley2600a_get_source_highc( unsigned int ch );
 int keithley2600a_set_source_highc( unsigned int ch,
                                     bool         source_highc );
+
 int keithley2600a_get_source_func( unsigned int ch );
 int keithley2600a_set_source_func( unsigned int ch,
                                    int          source_func );
+
 bool keithley2600a_get_measure_autorangev( unsigned int ch );
 bool keithley2600a_set_measure_autorangev( unsigned int ch,
                                            bool         autorange );
+
 bool keithley2600a_get_measure_autorangei( unsigned int ch );
 bool keithley2600a_set_measure_autorangei( unsigned int ch,
                                            bool         autorange );
+
 int keithley2600a_get_measure_autozero( unsigned int ch );
 int keithley2600a_set_measure_autozero( unsigned int ch,
                                         int          autozero );
+
 bool keithley2600a_get_compliance( unsigned int ch );
+
+double keithley2600a_get_source_levelv( unsigned int ch );
 double keithley2600a_set_source_levelv( unsigned int ch,
                                         double       volts );
-double keithley2600a_get_source_levelv( unsigned int ch );
+
+double keithley2600a_get_source_leveli( unsigned int ch );
 double keithley2600a_set_source_leveli( unsigned int ch,
                                         double       amps );
-double keithley2600a_get_source_leveli( unsigned int ch );
+
+bool keithley2600a_open( void );
+bool keithley2600a_close( void );
 
 
 

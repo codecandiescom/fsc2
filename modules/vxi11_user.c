@@ -376,8 +376,14 @@ vxi11_set_timeout( int  dir,
 
     if ( dir == READ )
         read_timeout  = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
-    else
+    else if ( dir == WRITE )
         write_timeout = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
+    else
+    {
+        print( FATAL, "Internal error in module, invalid direction for "
+               "timeout.\n" );
+        return FAILURE;
+    }
 
     return SUCCESS;
 }

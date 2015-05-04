@@ -549,7 +549,7 @@ freq_contr_name, 0, ALL;
 freq_contr_change_freq, 1, EXP;
 
 
-/* Power/Energy meter functions */
+/* Power/Energy meter functions (Gentec Maestro) */
 
 powermeter_name, 0, ALL;
 powermeter_detector_name, 0, ALL;
@@ -567,6 +567,13 @@ powermeter_multiplier, -1, ALL;
 powermeter_offset, -1, ALL;
 powermeter_get_laser_repetition_frequency, 0, EXP;
 powermeter_analog_output, -1, ALL;
+
+
+
+/* Source-meter functions (Keithley2600A) */
+
+sourcemeter_name, 0, ALL;
+sourcemeter_output, -1, ALL;
 
 
 /* Function exported by the microwave bridge modules */

@@ -22,7 +22,7 @@ KEYTHLEY2600A {
 	global:
 				generic_type;
 				device_name;
-				leithley2600a_*_hook;
+				keithley2600a_*_hook;
 				sourcemeter_*;
 
 	local:      *;

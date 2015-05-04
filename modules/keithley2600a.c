@@ -24,39 +24,103 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+static unsigned int get_channel( Var_T ** v );
 
 
-Keithley2600A_T keithley2600a;
+static Keithley2600A_T keithley2600a;
+static Keithley2600A_T keithley2600a_test;
+Keithley2600A_T * k26 = &keithley2600a;
 
+
+/*--------------------------------------------------------------*
+ * Start of experiment hook
+ *--------------------------------------------------------------*/
 
 int
 keithley2600a_exp_hook( void )
 {
-#if 0
-    char reply[ 100 ];
-    size_t length;
+    k26 = &keithley2600a;
 
-	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
-                     UNSET, 100000 ) == FAILURE )
-        return FAIL;
-
-	vxi11_set_timeout( READ, READ_TIMEOUT );
-	vxi11_set_timeout( WRITE, WRITE_TIMEOUT );
-
-	vxi11_device_clear( );
-
-	vxi11_lock_out( SET );
-
-    length = sizeof reply - 1;
-    keithley2600a_talk( "print(smua.sense)", reply, &length );
-    reply[ length ]= '\0';
-
-    fprintf( stderr, "Reply: %s\n", reply );
-#endif
-
-    return OK;
+    return keithley2600a_open( );
 }
    
+
+/*--------------------------------------------------------------*
+ * End of experiment hook
+ *--------------------------------------------------------------*/
+
+int
+keithley2600a_end_of_exp_hook( void )
+{
+    return keithley2600a_close( );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns the device name
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_name( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*--------------------------------------------------------------*
+ * Switches output for the selected channel on or off
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_output( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    if ( v )
+    {
+        bool on_off = get_boolean( v );
+
+        if ( FSC2_MODE == EXPERIMENT )
+            keithley2600a_set_source_output( ch, on_off );
+        else
+            k26->source.output[ ch ] = on_off;
+    }
+
+    return vars_push( INT_VAR, k26->source.output[ ch ] ? 1L : 0L );
+}
+
+
+
+/*--------------------------------------------------------------*
+ * Helper function for extracting the channel number from the
+ * variables passed to an EDL function
+ *--------------------------------------------------------------*/
+
+static
+unsigned int
+get_channel( Var_T ** v )
+{
+    long ch;
+
+    if ( ! *v )
+    {
+        print( FATAL, "Missing channel argument.\n" );
+        THROW( EXCEPTION );
+    }
+
+    ch = get_strict_long( *v, "channel number" );
+
+    if ( ch < 1 || ch > NUM_CHANNELS )
+    {
+        print( FATAL, "Invalid channel number %ld\n", ch );
+        THROW( EXCEPTION );
+    }
+
+    *v = vars_pop( *v );
+    return ch - 1;
+}
+
+
 
 /*
  * Local variables:

@@ -50,13 +50,13 @@ keithley2600a_get_sense( unsigned int ch )
     sprintf( buf, "print(%s.sense)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    keithley2600a.sense[ ch ] = line_to_bool( buf );
-    if (    keithley2600a.sense[ ch ] != SENSE_LOCAL
-		 || keithley2600a.sense[ ch ] != SENSE_REMOTE
-		 || keithley2600a.sense[ ch ] != SENSE_CALA )
+    k26->sense[ ch ] = line_to_bool( buf );
+    if (    k26->sense[ ch ] != SENSE_LOCAL
+		 || k26->sense[ ch ] != SENSE_REMOTE
+		 || k26->sense[ ch ] != SENSE_CALA )
         comm_failure( );
 
-    return keithley2600a.sense[ ch ];
+    return k26->sense[ ch ];
 }
 
 
@@ -83,7 +83,7 @@ keithley2600a_set_sense( unsigned int ch,
     sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
 	command( buf );
 
-    return keithley2600a.sense[ ch ] = sense;
+    return k26->sense[ ch ] = sense;
 }
 
 
@@ -101,7 +101,7 @@ keithley2600a_get_source_offmode( unsigned int ch )
     sprintf( buf, "print(%s.source.offmode)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.offmode[ ch ] = line_to_bool( buf );
+    return k26->source.offmode[ ch ] = line_to_bool( buf );
 }
 
 
@@ -120,7 +120,7 @@ keithley2600a_set_source_offmode( unsigned int ch,
     sprintf( buf, "%s.source.offmode=%d", smu[ ch ], source_offmode );
 	command( buf );
 
-    return keithley2600a.source.offmode[ ch ] = source_offmode;
+    return k26->source.offmode[ ch ] = source_offmode;
 }
 
 
@@ -138,7 +138,7 @@ keithley2600a_get_source_output( unsigned int ch )
     sprintf( buf, "print(%s.source.output)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.output[ ch ] = line_to_bool( buf );
+    return k26->source.output[ ch ] = line_to_bool( buf );
 }
 
 
@@ -159,7 +159,7 @@ keithley2600a_set_source_output( unsigned int ch,
 
 	/* ZZZZZZZZZZZ  Get any comliance levels changes when switching off? */
 
-    return keithley2600a.source.output[ ch ] = source_output;
+    return k26->source.output[ ch ] = source_output;
 }
 
 
@@ -177,7 +177,7 @@ keithley2600a_get_source_highc( unsigned int ch )
     sprintf( buf, "print(%s.source.highc)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.highc[ ch ] = line_to_bool( buf );
+    return k26->source.highc[ ch ] = line_to_bool( buf );
 }
 
 
@@ -201,20 +201,21 @@ keithley2600a_set_source_highc( unsigned int ch,
 
     if ( source_highc )
     {
-        if ( keithley2600a.source.limiti[ ch ] < 1.e-6 )
-            keithley2600a.source.limiti[ ch ] = 1.e-6;
+//        keithley2600a_get_source_limiti( ch );
+        if ( k26->source.limiti[ ch ] < 1.0e-6 )
+            k26->source.limiti[ ch ] = 1.0e-6;
 
-        if ( keithley2600a.source.rangei[ ch ] < 1.e-6 )
-            keithley2600a.source.rangei[ ch ] = 1.e-6;
+        if ( k26->source.rangei[ ch ] < 1.e-6 )
+            k26->source.rangei[ ch ] = 1.e-6;
 
-        if ( keithley2600a.source.lowrangei[ ch ] < 1.e-6 )
-            keithley2600a.source.lowrangei[ ch ] = 1.e-6;
+        if ( k26->source.lowrangei[ ch ] < 1.e-6 )
+            k26->source.lowrangei[ ch ] = 1.e-6;
 
-        if ( keithley2600a.measure.lowrangei[ ch ] < 1.e-6 )
-            keithley2600a.measure.lowrangei[ ch ] = 1.e-6;
+        if ( k26->measure.lowrangei[ ch ] < 1.e-6 )
+            k26->measure.lowrangei[ ch ] = 1.e-6;
     }
 
-    return keithley2600a.source.highc[ ch ] = source_highc;
+    return k26->source.highc[ ch ] = source_highc;
 }
 
 
@@ -232,7 +233,7 @@ keithley2600a_get_source_func( unsigned int ch )
     sprintf( buf, "print(%s.source.func)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.source.func[ ch ] = line_to_bool( buf );
+    return k26->source.func[ ch ] = line_to_bool( buf );
 }
 
 
@@ -253,7 +254,7 @@ keithley2600a_set_source_func( unsigned int ch,
     sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
 	command( buf );
 
-    return keithley2600a.source.func[ ch ] = source_func;
+    return k26->source.func[ ch ] = source_func;
 }
 
 
@@ -272,7 +273,7 @@ keithley2600a_get_measure_autorangev( unsigned int ch )
     sprintf( buf, "print(%s.measure.autorangev)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.measure.autorangev[ ch ] = line_to_bool( buf );
+    return k26->measure.autorangev[ ch ] = line_to_bool( buf );
 }
 
 
@@ -292,7 +293,7 @@ keithley2600a_set_measure_autorangev( unsigned int ch,
     sprintf( buf, "%s.measure.autorangev=%d", smu[ ch ], ( int ) autorange );
 	command( buf );
 
-    return keithley2600a.measure.autorangev[ ch ] = autorange;
+    return k26->measure.autorangev[ ch ] = autorange;
 }
 
 
@@ -311,7 +312,7 @@ keithley2600a_get_measure_autorangei( unsigned int ch )
     sprintf( buf, "print(%s.measure.autorangei)", smu[ ch ] );
 	talk( buf, buf, sizeof buf );
 
-    return keithley2600a.measure.autorangei[ ch ] = line_to_bool( buf );
+    return k26->measure.autorangei[ ch ] = line_to_bool( buf );
 }
 
 
@@ -331,7 +332,7 @@ keithley2600a_set_measure_autorangei( unsigned int ch,
     sprintf( buf, "%s.measure.autorangei=%d", smu[ ch ], ( int ) autorange );
 	command( buf );
 
-    return keithley2600a.measure.autorangei[ ch ] = autorange;
+    return k26->measure.autorangei[ ch ] = autorange;
 }
 
 
@@ -355,7 +356,7 @@ keithley2600a_get_measure_autozero( unsigned int ch )
     if ( autozero < AUTOZERO_OFF || autozero > AUTOZERO_AUTO )
         comm_failure( );
 
-    return keithley2600a.measure.autozero[ ch ] = autozero;
+    return k26->measure.autozero[ ch ] = autozero;
 }
 
 
@@ -376,7 +377,7 @@ keithley2600a_set_measure_autozero( unsigned int ch,
     sprintf( buf, "%s.measure.autozero=%d", smu[ ch ], autozero );
 	command( buf );
 
-    return keithley2600a.measure.autozero[ ch ] = autozero;
+    return k26->measure.autozero[ ch ] = autozero;
 }
 
 
@@ -402,26 +403,6 @@ keithley2600a_get_compliance( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
- * Sets a source voltage for the channel
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_set_source_levelv( unsigned int ch,
-								 double       volts )
-{
-	char buf[ 50 ];
-
-	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( volts <= MAX_SOURCE_LEVELV && - MAX_SOURCE_LEVELV );
-
-	sprintf( buf, "%s.source.levelv=%.5g\n", smu[ ch ], volts );
-	command( buf );
-
-	return keithley2600a_get_source_levelv( ch );
-}
-
-
-/*---------------------------------------------------------------*
  * Returns the source voltage for the channel
  *---------------------------------------------------------------*/
 
@@ -440,27 +421,27 @@ keithley2600a_get_source_levelv( unsigned int ch )
 	if ( fabs( volts ) > 1.001 * MAX_SOURCE_LEVELV )
 		comm_failure( );
 
-	return keithley2600a.source.levelv[ ch ] = volts;
+	return k26->source.levelv[ ch ] = volts;
 }
 
 
 /*---------------------------------------------------------------*
- * Sets a source current for the channel
+ * Sets a source voltage for the channel
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_set_source_leveli( unsigned int ch,
-								 double       amps )
+keithley2600a_set_source_levelv( unsigned int ch,
+								 double       volts )
 {
 	char buf[ 50 ];
 
 	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( amps <= MAX_SOURCE_LEVELI && amps <= - MAX_SOURCE_LEVELI );
+	fsc2_assert( volts <= MAX_SOURCE_LEVELV && - MAX_SOURCE_LEVELV );
 
-	sprintf( buf, "%s.source.leveli=%.5g\n", smu[ ch ], amps );
+	sprintf( buf, "%s.source.levelv=%.5g\n", smu[ ch ], volts );
 	command( buf );
 
-	return keithley2600a_get_source_leveli( ch );
+	return keithley2600a_get_source_levelv( ch );
 }
 
 
@@ -483,7 +464,27 @@ keithley2600a_get_source_leveli( unsigned int ch )
 	if ( fabs( amps ) > 1.001 * MAX_SOURCE_LEVELI )
 		comm_failure( );
 
-	return keithley2600a.source.leveli[ ch ] = amps;
+	return k26->source.leveli[ ch ] = amps;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets a source current for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_source_leveli( unsigned int ch,
+								 double       amps )
+{
+	char buf[ 50 ];
+
+	fsc2_assert( ch < NUM_CHANNELS );
+	fsc2_assert( amps <= MAX_SOURCE_LEVELI && amps <= - MAX_SOURCE_LEVELI );
+
+	sprintf( buf, "%s.source.leveli=%.5g\n", smu[ ch ], amps );
+	command( buf );
+
+	return keithley2600a_get_source_leveli( ch );
 }
 
 
@@ -581,10 +582,10 @@ command( const char * cmd )
 
 /*--------------------------------------------------------------*
  * Sends a command to the device and returns its reply. The
- * value pointed to by 'length' must not be larger than the
- * reply buffer. Note that only one less character will be
- * read since the last character is reserved for the training
- * '\0' which is automatically appended.
+ * value of length' must not be larger than the reply buffer.
+ * Note that only one less character will be read since the
+ * last character is reserved for the training '\0' which is
+ * appended automatically.
  *--------------------------------------------------------------*/
 
 static
@@ -610,6 +611,67 @@ talk( const char * cmd,
 
 
 /*--------------------------------------------------------------*
+ * Opens connection to the device and sets iy up for further work
+ *--------------------------------------------------------------*/
+
+bool
+keithley2600a_open( void )
+{
+    /* Never try to open the device more than once */
+
+    if ( k26->is_open )
+        return SUCCESS;
+
+    /* Try to open an connection to the device */
+
+	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
+                     UNSET, OPEN_TIMEOUT ) == FAILURE )
+        return FAIL;
+
+    /* Set a timeout for reads and writes, clear the device and lock
+       out the keyboard. */
+
+    if (    vxi11_set_timeout( READ, READ_TIMEOUT ) == FAILURE
+         || vxi11_set_timeout( WRITE, WRITE_TIMEOUT ) == FAILURE
+         || vxi11_device_clear( ) == FAILURE
+         || vxi11_lock_out( SET ) == FAILURE )
+    {
+        vxi11_close( );
+        return FAIL;
+    }
+
+    k26->is_open = SET;
+    return OK;
+}
+
+
+/*--------------------------------------------------------------*
+ * Closes connection to the device
+ *--------------------------------------------------------------*/
+
+bool
+keithley2600a_close( void )
+{
+    if ( ! k26->is_open )
+        return OK;
+
+    /* Unlock the keyboard */
+
+    vxi11_lock_out( UNSET );
+
+    /* Close connection to the device */
+
+    if ( vxi11_close( ) == FAILURE )
+        return FAIL;
+
+    k26->is_open = UNSET;
+    return OK;
+}
+
+
+/*--------------------------------------------------------------*
+ * Called whenever something hishy happens during communication
+ * (including the device sending unexpected data)
  *--------------------------------------------------------------*/
 
 static
