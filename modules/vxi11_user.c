@@ -102,8 +102,10 @@ static const char * vxi11_sperror( Device_ErrorCode error );
  *    2. IP address of the device (either in dotted-quad form
  *       or as a name that can be resolved via a DNS look-up)
  *    3. VXI-11 name of the device
- *    4. Flag, if set also an async connection is created
- *    5. Maximum timeout (in microseconds) to wait for the
+ *    4. Flag that tells if a exclusive lock on the device
+ *       should be requested.
+ *    5. Flag, if set also an async connection is created
+ *    6. Maximum timeout (in microseconds) to wait for the
  *       connection if it's locked by another process (0 is
  *       interpreted to mean a nearly infinite timeout)
  *
@@ -115,6 +117,7 @@ int
 vxi11_open( const char * dev_name,
             const char * address,
             const char * vxi11_name,
+            bool         lock_device,
             bool         create_async,
             long         us_timeout )
 {
@@ -171,10 +174,10 @@ vxi11_open( const char * dev_name,
         return FAILURE;
     }
 
-    /* Set up link parameters - we need to lock the device */
+    /* Set up link parameters */
 
     link_parms.clientId     = 0;         /* not needed here */
-    link_parms.lockDevice   = 1;
+    link_parms.lockDevice   = lock_device;
     link_parms.lock_timeout = us_timeout ?
                               lrnd( 0.001 * us_timeout ) : LONG_MAX;
     link_parms.device       = ( char * ) vxi11_name;

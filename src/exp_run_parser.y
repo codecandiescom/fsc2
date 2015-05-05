@@ -126,7 +126,13 @@ eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
                                      YYACCEPT; }
 ;
 
-line:    lhs '=' expr              { vars_assign( $3, $1 ); }
+line:    lhs '=' expr              { if ( $3->type == STR_VAR )
+                                     {
+                                         print( FATAL, "A string can't be "
+                                                "assigned to a variable.\n" );
+                                         THROW( EXCEPTION );
+                                     }
+                                     vars_assign( $3, $1 ); }
        | lhs E_PLSA expr           { vars_assign( vars_add( $1, $3 ), $1 ); }
        | lhs E_MINA expr           { vars_assign( vars_sub( $1, $3 ), $1 ); }
        | lhs E_MULA expr           { vars_assign( vars_mult( $1, $3 ), $1 ); }

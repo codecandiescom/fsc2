@@ -556,7 +556,7 @@ endif
 ifeq ($(MAKECMDGOALS),release)
 	CFLAGS += -DNDEBUG
 else
-	CFLAGS += -ggdb3
+	CFLAGS += -ggdb3 -gdwarf-2
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 		CFLAGS += -DLIBC_MDEBUG
 	endif

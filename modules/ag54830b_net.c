@@ -33,7 +33,7 @@ bool
 ag54830b_l_init( const char * name )
 {
 	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
-					 UNSET, 100000 ) == FAILURE )
+					 SET, UNSET, 100000 ) == FAILURE )
         return FAIL;
 
 	ag54830b_l.device = 0;

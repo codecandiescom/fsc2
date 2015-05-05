@@ -79,7 +79,7 @@ FOREVER {
 		IF lockin_is_overload( ) {
 			WHILE lockin_is_overload( ) {
 				IF Cur_sens_index <= 1 {
-					print( "Can't make login sensitivity small enough\n" );
+					print( "Can't make lock-in sensitivity small enough\n" );
 					abort( );
 				}
 				Cur_sens_index -= 1;

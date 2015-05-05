@@ -53,7 +53,7 @@ rs_smb100a_init( const char * name )
 
 
 	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
-                     UNSET, 100000 ) == FAILURE )
+                     SET, UNSET, 100000 ) == FAILURE )
         return FAIL;
 
 	rs_smb100a.device = 0;

@@ -95,7 +95,8 @@ sourcemeter_name( Var_T * v  UNUSED_ARG )
 
 
 /*--------------------------------------------------------------*
- * Switches output for the selected channel on or off
+ * returns source output state for the given channel or switches
+ * it on or off
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -110,12 +111,56 @@ sourcemeter_output( Var_T * v )
         if ( FSC2_MODE == EXPERIMENT )
             keithley2600a_set_source_output( ch, on_off );
         else
-            k26->source.output[ ch ] = on_off;
+            k26->source[ ch ].output = on_off;
     }
 
-    return vars_push( INT_VAR, k26->source.output[ ch ] ? 1L : 0L );
+    return vars_push( INT_VAR, k26->source[ ch ].output ? 1L : 0L );
 }
 
+
+/*--------------------------------------------------------------*
+ * Returns source high capacity state for the given channel
+ *  or switches it on or off
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_high_capacity( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    if ( v )
+    {
+        bool highc = get_boolean( v );
+
+        if ( FSC2_MODE == EXPERIMENT )
+            keithley2600a_set_source_highc( ch, highc );
+        else
+        {
+            k26->source[ ch ].highc = highc;
+
+            /* Switching to high-capacity mode also changes a few other
+               settings */
+
+            if ( highc )
+            {
+                if ( k26->source[ ch ].limiti < MIN_SOURCE_LIMITI_HIGHC )
+                    k26->source[ ch ].limiti = MIN_SOURCE_LIMITI_HIGHC;
+
+                if ( k26->source[ ch ].rangei < MIN_SOURCE_RANGEI_HIGHC )
+                    k26->source[ ch ].rangei = MIN_SOURCE_RANGEI_HIGHC;
+
+                if ( k26->source[ ch ].lowrangei < MIN_SOURCE_LOWRANGEI_HIGHC )
+                    k26->source[ ch ].lowrangei = MIN_SOURCE_LOWRANGEI_HIGHC;
+
+                if ( k26->measure[ ch ].lowrangei <
+                                                  MIN_MEASURE_LOWRANGEI_HIGHC )
+                    k26->measure[ ch ].lowrangei = MIN_MEASURE_LOWRANGEI_HIGHC;
+            }
+        }
+    }
+
+    return vars_push( INT_VAR, k26->source[ ch ].highc ? 1L : 0L );
+}
 
 
 /*--------------------------------------------------------------*

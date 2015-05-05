@@ -1695,6 +1695,7 @@ The function
 int vxi11_open( const char * dev_name,
 	            const char * address,
 			    const char * vxi11_name,
+                bool         lock_device,
                 bool         create_async,
 			    long         us_timeout )
 @end example
@@ -1706,25 +1707,28 @@ the log file), its IP address, either as a hostname (like
 @code{"hex.discworld.unseen.edu"}) or or a numeric IP address in
 dotted-quad format (like @code{"123.97.243.12"}), the name assigned to
 the device for the VXI-11 protocol (often per default set to
-@code{"inst0"}), flag that indicates if also an asynchronous
-connection should be established (in order to be able to abort long
-transfers, but note that not all devices support tis) and a positive
-or zero maximum time (in micro-seconds, were a zero value means a
-nearly indefinitely long timeout) to wait for a device being locked by
-another process to become unlocked. Please note that the function
-can't be called when a connection has already been created. On
-success the function returns @code{SUCCESS}, on failure (either
-because the connection has already been opened, connecting to the
-device fails or not enough memory is available) it returns
-@code{FAILURE} after printing out an error message. Please note that
-the time the call will take depends on the device and can take up to
-25 seconds.
+@code{"inst0"}), a flag that indicates if an exclusive lock on the
+device is required (should normally set to 'true'), a flag that
+indicates if also an asynchronous connection should be established (in
+order to be able to abort long transfers, but note that not all
+devices support tis) and a positive or zero maximum time (in
+micro-seconds, were a zero value means a nearly indefinitely long
+timeout) to wait for a device being locked by another process to
+become unlocked. Please note that the function can't be called when a
+connection has already been created. On success the function returns
+@code{SUCCESS}, on failure (either because the connection has already
+been opened, connecting to the device fails or not enough memory is
+available) it returns @code{FAILURE} after printing out an error
+message. Please note that the time the call will take depends on the
+device and can take up to 25 seconds.
 
-Opening the connection to the device also locks it for exclusive use,
-thus it's not necessary to obtain a different lock, e.g.@: by calling
-@code{@ref{fsc2_obtain_lock()}}. But it also requires that
-@code{@ref{vxi11_close()}} is called when you're done with it,
-otherwise the device may refuse new connections!
+Opening the connection to the device should normally done with a
+request for an exclusive lock (by the @code{lock_device} argument
+being set to true) in order to keep other processes from also
+accessing the device. With that it's not necessary to obtain a
+different lock, e.g.@: by calling @code{@ref{fsc2_obtain_lock()}}. But
+it also requires that @code{@ref{vxi11_close()}} is called when you're
+done with it, otherwise the device will refuse new connections!
 
 
 @anchor{vxi11_close()}

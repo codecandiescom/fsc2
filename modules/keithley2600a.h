@@ -25,6 +25,7 @@
 #include "fsc2_module.h"
 #include "keithley2600a.conf"
 
+/* Check that a model is defined */
 
 #if    ! defined _2601A && ! defined _2602A \
     && ! defined _2611A && ! defined _2612A \
@@ -32,58 +33,15 @@
 #error "No model has been defined in configuration file."
 #endif
 
-
-
-/* Maximium of channels */
-
-#if defined _2601A || defined _2611A || defined _2635A
-#define NUM_CHANNELS 1
-#else
-#define NUM_CHANNELS 2
-#endif
-
-
-/* Maximum output values */
-
-#if defined _2601A || defined _2602A
-#define MAX_SOURCE_LEVELV  40
-#define MAX_SOURCE_LEVELI   3
-#else
-#define MAX_SOURCE_LEVELV  200
-#define MAX_SOURCE_LEVELI  1.5
-#endif
-
-
-/* Minimum limit values (for compliance) - maximum values depend on range */
-
-#if defined _2601A || defined _2602A
-#define MIN_LIMITV  1.0e-2
-#else
-#define MIN_LIMITV  2.0e-2
-#endif
-
-#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
-#define MIN_LIMITI 1.0e-8
-#else
-#define MIN_LIMITI 1.0e-10
-#endif
-
-
-typedef struct
-{
-	double base;
-	double limit;
-} Max_Limit;
-
-
-extern Max_Limit keithley2600s_max_limitv[ ];
-extern Max_Limit keithley2600s_max_limiti[ ];
+#include "keithley2600a_limits.h"
 
 
 #define SENSE_LOCAL     0
 #define SENSE_REMOTE    1
 #define SENSE_CALA      3
 
+
+/* Outout off modes */
 
 #define OUTPUT_NORMAL    0
 #define OUTPUT_HIGH_Z    1
@@ -115,37 +73,40 @@ extern Max_Limit keithley2600s_max_limiti[ ];
 
 typedef struct
 {
-	int    offmode[ NUM_CHANNELS ];
-    bool   output[ NUM_CHANNELS ];
-    bool   highc[ NUM_CHANNELS ];
-    int    func[ NUM_CHANNELS ];
+	int    offmode;
+    bool   output;
+    bool   highc;
+    int    func;
 
-    double rangev[ NUM_CHANNELS ];
-    double rangei[ NUM_CHANNELS ];
+    bool   autorangev;
+    bool   autorangei;
 
-	double levelv[ NUM_CHANNELS ];
-	double leveli[ NUM_CHANNELS ];
+    double rangev;
+    double rangei;
 
-    double lowrangev[ NUM_CHANNELS ];
-    double lowrangei[ NUM_CHANNELS ];
+    double lowrangev;
+    double lowrangei;
 
-    double limitv[ NUM_CHANNELS ];
-    double limiti[ NUM_CHANNELS ];
+	double levelv;
+	double leveli;
+
+    double limitv;
+    double limiti;
 } Source_T;
 
 
 typedef struct
 {
-    bool   autorangev[ NUM_CHANNELS ];
-    bool   autorangei[ NUM_CHANNELS ];
+    bool   autorangev;
+    bool   autorangei;
 
-    double rangev[ NUM_CHANNELS ];
-    double rangei[ NUM_CHANNELS ];
+    double rangev;
+    double rangei;
 
-    double lowrangev[ NUM_CHANNELS ];
-    double lowrangei[ NUM_CHANNELS ];
+    double lowrangev;
+    double lowrangei;
 
-    int    autozero[ NUM_CHANNELS ];
+    int    autozero;
 } Measure_T;
     
 
@@ -155,8 +116,8 @@ typedef struct
 
 	int       sense[ NUM_CHANNELS ];
 
-    Source_T  source;
-    Measure_T measure;
+    Source_T  source[ NUM_CHANNELS ];
+    Measure_T measure[ NUM_CHANNELS ];
 } Keithley2600A_T;
 
 
@@ -174,11 +135,13 @@ int keithley2600a_end_of_exp_hook( void );
 
 Var_T * sourcemeter_name( Var_T * v );
 Var_T * sourcemeter_output( Var_T * v );
+Var_T * sourcemeter_high_capacity( Var_T * v );
 
 
 /* Internal functions */
 
 void keithley2600a_get_state( void );
+void keithley2600a_reset( void );
 
 int keithley2600a_get_sense( unsigned int ch );
 int keithley2600a_set_sense( unsigned int ch,
@@ -200,6 +163,49 @@ int keithley2600a_get_source_func( unsigned int ch );
 int keithley2600a_set_source_func( unsigned int ch,
                                    int          source_func );
 
+bool keithley2600a_get_source_autorangev( unsigned int ch );
+bool keithley2600a_set_source_autorangev( unsigned int ch,
+                                          bool         autorange );
+
+bool keithley2600a_get_source_autorangei( unsigned int ch );
+bool keithley2600a_set_source_autorangei( unsigned int ch,
+                                          bool         autorange );
+
+double keithley2600a_get_source_rangev( unsigned int ch );
+double keithley2600a_set_source_rangev( double       range,
+                                        unsigned int ch );
+
+double keithley2600a_get_source_rangei( unsigned int ch );
+double keithley2600a_set_source_rangei( double       range,
+                                        unsigned int ch );
+
+
+double keithley2600a_get_source_lowrangev( unsigned int ch );
+double keithley2600a_set_source_lowrangev( double   lowrange,
+                                           unsigned int ch );
+
+double keithley2600a_get_source_lowrangei( unsigned int ch );
+double keithley2600a_set_source_lowrangei( double   lowrange,
+                                           unsigned int ch );
+
+bool keithley2600a_get_compliance( unsigned int ch );
+
+double keithley2600a_get_source_levelv( unsigned int ch );
+double keithley2600a_set_source_levelv( unsigned int ch,
+                                        double       volts );
+
+double keithley2600a_get_source_leveli( unsigned int ch );
+double keithley2600a_set_source_leveli( unsigned int ch,
+                                        double       amps );
+
+double keithley2600a_get_source_limitv( unsigned int ch );
+double keithley2600a_set_source_limitv( unsigned int ch,
+                                        double       volts );
+
+double keithley2600a_get_source_limiti( unsigned int ch );
+double keithley2600a_set_source_limiti( unsigned int ch,
+                                        double       amps );
+
 bool keithley2600a_get_measure_autorangev( unsigned int ch );
 bool keithley2600a_set_measure_autorangev( unsigned int ch,
                                            bool         autorange );
@@ -212,19 +218,8 @@ int keithley2600a_get_measure_autozero( unsigned int ch );
 int keithley2600a_set_measure_autozero( unsigned int ch,
                                         int          autozero );
 
-bool keithley2600a_get_compliance( unsigned int ch );
-
-double keithley2600a_get_source_levelv( unsigned int ch );
-double keithley2600a_set_source_levelv( unsigned int ch,
-                                        double       volts );
-
-double keithley2600a_get_source_leveli( unsigned int ch );
-double keithley2600a_set_source_leveli( unsigned int ch,
-                                        double       amps );
-
 bool keithley2600a_open( void );
 bool keithley2600a_close( void );
-
 
 
 #endif

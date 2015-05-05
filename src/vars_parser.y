@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -90,7 +90,13 @@ line:    linet
 ;
 
 linet:   VAR_TOKEN                 { }        /* no assignment to be done */
-       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
+       | VAR_TOKEN '=' expr        { if ( $3->type == STR_VAR )
+                                     {
+                                         print( FATAL, "A string can't be "
+                                                "assigned to a variable.\n" );
+                                         THROW( EXCEPTION );
+                                     }
+                                     vars_assign( $3, $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 );
                                      Max_level = $1->dim; }

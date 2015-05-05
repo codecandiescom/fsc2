@@ -105,7 +105,13 @@ input:   /* empty */
 ;
 
 line:    P_TOK prop
-       | lhs '=' expr               { vars_assign( $3, $1 ); }
+       | lhs '=' expr               { if ( $3->type == STR_VAR )
+                                      {
+                                          print( FATAL, "A string can't be "
+                                                 "assigned to a variable.\n" );
+                                          THROW( EXCEPTION );
+                                      }
+                                      vars_assign( $3, $1 ); }
        | lhs PLSA expr              { vars_assign( vars_add( $1, $3 ), $1 ); }
        | lhs MINA expr              { vars_assign( vars_sub( $1, $3 ), $1 ); }
        | lhs MULA expr              { vars_assign( vars_mult( $1, $3 ), $1 ); }
