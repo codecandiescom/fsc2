@@ -87,7 +87,7 @@ DET_DELAY_CARD        "DELAY_11"
 
 # 13. Name of the delay card that creates the delay before the start of
 #     the RF pulse (the length of this pulse is set using the pulse mode
-#     of the Rhode&Schwarz synthesizer)
+#     of the Rohde&Schwarz synthesizer)
 
 RF_DELAY_CARD         "DELAY_12"
 

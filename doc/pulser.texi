@@ -1032,21 +1032,22 @@ For the @strong{Rulbus pulsers} there are several restrictions for the
 number of pulses that can be used. The @code{MICROWAVE} function can
 have a maximum of three active pulses at a moment while both the
 @code{RADIO_FREQUENCY}, the @code{LASER} (W-band configuration only)
-and the  @code{DETECTION} function allow only a single active pulse.
+and the @code{DETECTION} function allow only a single active pulse.
 Moreover, for the J-band configuration (module @code{rb_pulser_j}) the
-@code{RADIO_FREQUENCY} and @code{DETECTION} can't start before the first
-@code{MICROWAVE} pulse. In the W-band configuration the @code{DETECTION}
-pulse only can have a length of @w{0 s} or the length of the timebase
-(which is the default value if no pulse length has been set) and the
-@code{DEFNSE} pulse must always start at the very beginning of the pulse
-pattern (moreover, unless the function @ref{pulser_defense_pulse_mode()}
-with the appropriate argument before the definition of the @code{DETECTION}
-pulse it is created automatically). Pulses can have a maximum length of
-about @w{167 ms} and also delays between pulses (and before the start of
-a pulse) are restricted to this range of value. Finally, a
-@code{RADIO_FREQUENCY} pulse can only be created if the pulser is
-connected to the @strong{Rhode & Schwarz SML01} synthesizer (with SML-B3
-option), which has a built-in pulse unit.
+@code{RADIO_FREQUENCY} and @code{DETECTION} can't start before the
+first @code{MICROWAVE} pulse. In the W-band configuration the
+@code{DETECTION} pulse only can have a length of @w{0 s} or the length
+of the timebase (which is the default value if no pulse length has
+been set) and the @code{DEFNSE} pulse must always start at the very
+beginning of the pulse pattern (moreover, unless the function
+@ref{pulser_defense_pulse_mode()} with the appropriate argument before
+the definition of the @code{DETECTION} pulse it is created
+automatically). Pulses can have a maximum length of about @w{167 ms}
+and also delays between pulses (and before the start of a pulse) are
+restricted to this range of value. Finally, a @code{RADIO_FREQUENCY}
+pulse can only be created if the pulser is connected to the
+@ref{rs_sml01, Rohde&Schwarz SML01} synthesizer (with SML-B3 option),
+which has a built-in pulse unit.
 
 
 @c ########################################################

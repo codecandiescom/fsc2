@@ -3848,7 +3848,7 @@ Hewlett-Packard HP8648B
 Hewlett-Packard HP8672A
 
 @item @ref{rs_sml01}
-Rhode&Schwarz SML01
+Rohde&Schwarz SML01
 @end table
 @noindent
 To use a module in an experiment put its name into the @code{DEVICES}

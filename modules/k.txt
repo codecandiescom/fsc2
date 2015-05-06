@@ -1,0 +1,17 @@
+Critical points:
+
+Switching output on: everything for the sourcing mode must be correct
+
+If output is on:
+
+   a) changing output mode (voltage <-> current
+   b) switching off autorange
+
+When switching output on and HIGHC is on several settingsget modified
+automatically (without an error)
+
+Errors are only are reported when output is on and and one of these
+settings is set to something not possible - the error is even reported
+when it doesn't influence the current sourcing mode, i.e. trying to
+set too low a lowrangi even when in voltage sourcing mode.
+

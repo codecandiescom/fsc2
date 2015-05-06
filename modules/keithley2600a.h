@@ -73,10 +73,10 @@
 
 typedef struct
 {
-	int    offmode;
     bool   output;
-    bool   highc;
+    int    offmode;
     int    func;
+    bool   highc;
 
     bool   autorangev;
     bool   autorangei;
@@ -87,8 +87,8 @@ typedef struct
     double lowrangev;
     double lowrangei;
 
-	double levelv;
-	double leveli;
+    double levelv;
+    double leveli;
 
     double limitv;
     double limiti;
@@ -114,7 +114,7 @@ typedef struct
 {
     bool      is_open;
 
-	int       sense[ NUM_CHANNELS ];
+    int       sense[ NUM_CHANNELS ];
 
     Source_T  source[ NUM_CHANNELS ];
     Measure_T measure[ NUM_CHANNELS ];
@@ -134,14 +134,32 @@ int keithley2600a_end_of_exp_hook( void );
 /* EDL functions */
 
 Var_T * sourcemeter_name( Var_T * v );
-Var_T * sourcemeter_output( Var_T * v );
+Var_T * sourcemeter_output_state( Var_T * v );
+Var_T * sourcemeter_source_mode( Var_T * v );
+Var_T * sourcemeter_source_voltage( Var_T * v );
 Var_T * sourcemeter_high_capacity( Var_T * v );
 
 
-/* Internal functions */
+/* Internal functions from keithley2600a_ll.c */
+
+bool keithley2600a_open( void );
+bool keithley2600a_close( void );
+bool keithley2600a_cmd( const char * cmd );
+bool keithley2600a_talk( const char * cmd,
+                         char       * reply,
+                         size_t       length );
 
 void keithley2600a_get_state( void );
 void keithley2600a_reset( void );
+void keithley2600a_show_errors( void );
+
+bool keithley2600a_line_to_bool( const char * line );
+int keithley2600a_line_to_int( const char * line );
+double keithley2600a_line_to_double( const char * line );
+void keithley2600a_bad_data( void );
+
+
+/* Internal functions from keithley2600a_source.c */
 
 int keithley2600a_get_sense( unsigned int ch );
 int keithley2600a_set_sense( unsigned int ch,
@@ -176,19 +194,17 @@ double keithley2600a_set_source_rangev( double       range,
                                         unsigned int ch );
 
 double keithley2600a_get_source_rangei( unsigned int ch );
-double keithley2600a_set_source_rangei( double       range,
-                                        unsigned int ch );
+double keithley2600a_set_source_rangei( unsigned int ch,
+                                        double       range );
 
 
 double keithley2600a_get_source_lowrangev( unsigned int ch );
-double keithley2600a_set_source_lowrangev( double   lowrange,
-                                           unsigned int ch );
+double keithley2600a_set_source_lowrangev( unsigned int ch,
+                                           double       lowrange );
 
 double keithley2600a_get_source_lowrangei( unsigned int ch );
-double keithley2600a_set_source_lowrangei( double   lowrange,
-                                           unsigned int ch );
-
-bool keithley2600a_get_compliance( unsigned int ch );
+double keithley2600a_set_source_lowrangei( unsigned int ch,
+                                           double       lowrange );
 
 double keithley2600a_get_source_levelv( unsigned int ch );
 double keithley2600a_set_source_levelv( unsigned int ch,
@@ -206,6 +222,11 @@ double keithley2600a_get_source_limiti( unsigned int ch );
 double keithley2600a_set_source_limiti( unsigned int ch,
                                         double       amps );
 
+bool keithley2600a_get_compliance( unsigned int ch );
+
+
+/* Internal functions from keithley_measure.c */
+
 bool keithley2600a_get_measure_autorangev( unsigned int ch );
 bool keithley2600a_set_measure_autorangev( unsigned int ch,
                                            bool         autorange );
@@ -218,8 +239,19 @@ int keithley2600a_get_measure_autozero( unsigned int ch );
 int keithley2600a_set_measure_autozero( unsigned int ch,
                                         int          autozero );
 
-bool keithley2600a_open( void );
-bool keithley2600a_close( void );
+double keithley2600a_get_measure_lowrangev( unsigned int ch );
+double keithley2600a_set_measure_lowrangev( unsigned int ch,
+                                            double       lowrange );
+double keithley2600a_get_measure_lowrangei( unsigned int ch );
+double keithley2600a_set_measure_lowrangei( unsigned int ch,
+                                            double       lowrange );
+
+double keithley2600a_get_measure_rangev( unsigned int ch );
+double keithley2600a_set_measure_rangev( unsigned int ch,
+                                         double       range );
+double keithley2600a_get_measure_rangei( unsigned int ch );
+double keithley2600a_set_measure_rangei( unsigned int ch,
+                                         double       range );
 
 
 #endif
