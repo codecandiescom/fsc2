@@ -334,13 +334,12 @@ hp535_tmpl_get_freq( void )
 static double
 hp535_tmpl_set_resolution( int res )
 {
-	char cmd[ ] = "RESOL,*\r\n";
-
+	char cmd[ ] = "RESOL,x*\r\n";
 
 	fsc2_assert( res >= 0 && res <= 6 );
 
-	cmd[ 2 ] = res + '0';
-    if ( gpib_write( hp535_tmpl.device, cmd, 3 ) == FAILURE )
+	cmd[ 6 ] = res + '0';
+    if ( gpib_write( hp535_tmpl.device, cmd, 9 ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
 			   gpib_last_error( ) );
