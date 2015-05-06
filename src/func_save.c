@@ -2714,10 +2714,6 @@ T_fprintf( long         fn,
                      : ( ssize_t ) fwrite( p + written, 1, to_write - written,
                                            fl->fp );
 
-    fprintf( stderr, "count = %ld, written =  %ld, to_write = %ld\n",
-             count, written, to_write );
-
-
     if ( count == to_write - written )
     {
         if ( p != initial_buffer )
