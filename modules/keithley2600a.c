@@ -70,6 +70,9 @@ keithley2600a_test_hook( void )
     keithley2600a_test = keithley2600a;
     k26 = &keithley2600a_test;
 
+    /* Set up the structures for both channels with the device's default
+       settings */
+
     for ( ch = 0; ch < NUM_CHANNELS; ch++ )
     {
         k26->sense[ ch ]         = SENSE_LOCAL;
@@ -208,6 +211,109 @@ sourcemeter_keep_on_at_end( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Returns or sets the sense mode, i.e. 2- or 4-wire measurements
+ * (or calibration)
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_sense_mode( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int sense;
+
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) k26->sense[ ch ] );
+
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "LOCAL" )
+             || ! strcasecmp( v->val.sptr, "2-WiRE" ) )
+            sense = SENSE_LOCAL;
+        else if (    ! strcasecmp( v->val.sptr, "REMOTE" )
+                  || ! strcasecmp( v->val.sptr, "4-WiRE" ) )
+            sense = SENSE_REMOTE;
+        else if ( ! strcasecmp( v->val.sptr, "CALIBRATION" ) )
+            sense = SENSE_CALA;
+        else
+        {
+            print( FATAL, "Invalid sense mode argument: \"%s\".\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        sense = get_strict_long( v,"sense mode" );
+
+    if ( sense != SENSE_LOCAL && sense != SENSE_REMOTE && sense != SENSE_CALA )
+    {
+        print( FATAL, "Invalid sense mode argument: %d.\n", sense );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_sense( ch, sense );
+    else
+        k26->sense[ ch ] = sense;
+
+    return vars_push( INT_VAR, ( long ) k26->sense[ ch ] );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns source output off-mode for the given channel or sets it
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_offmode( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int mode;
+
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) k26->source[ ch ].offmode );
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "NORMAL" ) )
+            mode = OUTPUT_NORMAL;
+        else if (    ! strcasecmp( v->val.sptr, "HIGH_Z" )
+                  || ! strcasecmp( v->val.sptr, "HIGHZ" ) )
+            mode = OUTPUT_HIGH_Z;
+        else if ( ! strcasecmp( v->val.sptr, "ZERO" ) )
+            mode = OUTPUT_ZERO;
+        else
+        {
+            print( FATAL, "Invalid source off-mode argument: \"%s\".\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        mode = get_strict_long( v, "spurce mode" ) != 0;
+
+    too_many_arguments( v );
+
+    if ( mode < OUTPUT_NORMAL || mode > OUTPUT_ZERO )
+    {
+        print( FATAL, "Invalid source off-mode argument: %d.\n", mode );
+        THROW( EXCEPTION );
+    }
+
+    if ( mode == k26->source[ ch ].offmode )
+        return vars_push( INT_VAR, mode );
+
+    if (  FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_offmode( ch, mode );
+    else
+        k26->source[ ch ].offmode = mode;
+
+    return vars_push( INT_VAR, ( long ) k26->source[ ch ].offmode );
+}
+
+
+/*--------------------------------------------------------------*
  * Returns source output state for the given channel or switches
  * it on or off
  *--------------------------------------------------------------*/
@@ -312,6 +418,11 @@ sourcemeter_source_mode( Var_T * v )
         else if (    ! strcasecmp( v->val.sptr, "VOLTAGE" )
                   || ! strcasecmp( v->val.sptr, "VOLTS" ) )
             mode = OUTPUT_DCVOLTS;
+        else
+        {
+            print( FATAL, "Invalid argument: \"%s\".\n" );
+            THROW( EXCEPTION );
+        }
     }
     else
         mode = get_strict_long( v, "spurce mode" ) != 0;
@@ -489,20 +600,15 @@ sourcemeter_source_voltage_range( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
 
-    req_range = get_double( v, "source voltage range" );
+    req_range = fabs( get_double( v, "source voltage range" ) );
     too_many_arguments( v );
 
-    if ( req_range < 0 )
-    {
-        print( FATAL, "Invalid negative source voltage range requested.\n" );
-        THROW( EXCEPTION );
-    }
+    range = keithley2600a_best_source_rangev( ch, req_range );
 
-    range = keithley2600a_max_source_rangev( ch );
-    if ( req_range > range )
+    if ( range < 0 )
     {
         char * s1 = ppV( req_range );
-        char * s2 = ppV( range );
+        char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
 
         print( FATAL, "Can't set source voltage range to %s, maximum possible "
                "value under the current circumstances is %s.\n", s1, s2 );
@@ -510,8 +616,6 @@ sourcemeter_source_voltage_range( Var_T * v )
         T_free( s1 );
         THROW( EXCEPTION );
     }
-
-    range = keithley2600a_best_source_rangev( ch, req_range );
 
     if ( fabs( ( range - req_range ) / range ) > 0.001 )
     {
@@ -550,20 +654,15 @@ sourcemeter_source_current_range( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
 
-    req_range = get_double( v, "current voltage range" );
+    req_range = fabs( get_double( v, "current voltage range" ) );
     too_many_arguments( v );
 
-    if ( req_range < 0 )
-    {
-        print( FATAL, "Invalid negative source current range requested.\n" );
-        THROW( EXCEPTION );
-    }
+    range = keithley2600a_best_source_rangei( ch, req_range );
 
-    range = keithley2600a_max_source_rangei( ch );
-    if ( req_range > range )
+    if ( range < 0 )
     {
         char * s1 = ppV( req_range );
-        char * s2 = ppV( range );
+        char * s2 = ppV( keithley2600a_max_source_rangei( ch ) );
 
         print( FATAL, "Can't set source current range to %s, maximum possible "
                "value under the current circumstances is %s.\n", s1, s2 );
@@ -571,8 +670,6 @@ sourcemeter_source_current_range( Var_T * v )
         T_free( s1 );
         THROW( EXCEPTION );
     }
-
-    range = keithley2600a_best_source_rangei( ch, req_range );
 
     if ( fabs( ( range - req_range ) / range ) > 0.001 )
     {
@@ -598,12 +695,364 @@ sourcemeter_source_current_range( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Returns or sets if source voltage autoranging is on or off
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_voltage_autoranging( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    bool on_off;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->source[ ch ].autorangev ? 1L : 0L );
+
+    on_off = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( on_off == k26->source[ ch ].autorangev )
+        return vars_push( INT_VAR, on_off ? 1L : 0L );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_autorangev( ch, on_off );
+    else
+    {
+        /* Keep in mind that switching autoranging on may change the range
+           setting */
+
+        k26->source[ ch ].autorangev = on_off;
+        if ( on_off )
+            k26->source[ ch ].rangev =
+                  keithley2600a_best_source_rangev( ch,
+                                                    k26->source[ ch ].levelv );
+    }
+
+    return vars_push( INT_VAR, k26->source[ ch ].autorangev ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the source voltage autoranging low limit
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double req_range,
+           range;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
+
+    req_range = fabs( get_double( v, "source voltage autorange low limit" ) );
+    too_many_arguments( v );
+
+    /* Find nearest possible range */
+
+    range = keithley2600a_best_source_rangev( ch, req_range );
+
+    /* A negative result indicates that the value was too large */
+
+    if ( range < 0 )
+    {
+        char * s1 = ppV( req_range );
+        char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
+
+        print( FATAL, "Can't set source voltage autorange low limit to %s, "
+               "maximum possible value under the current circumstances "
+               "is %s.\n", s1, s2 );
+        T_free( s2 );
+        T_free( s1 );
+        THROW( EXCEPTION );
+    }
+
+    /* Warn if we had to modify the requested value */
+
+    if ( fabs( ( range - req_range ) / range ) > 0.001 )
+    {
+        char * s1 = ppV( req_range );
+        char * s2 = ppV( range );
+
+        print( WARN, "Had to adjust source voltage autorange low limit "
+               "from %s to %s.\n", s1, s2 );
+        T_free( s2 );
+        T_free( s1 );
+    }
+
+    /* Check that the value is reasonable */
+
+    if ( ! keithley2600a_check_source_lowrangev( ch, range ) )
+    {
+        char * s1 = ppV( range );
+        char * s2 = ppV( keithley2600a_min_measure_lowrangev( ch ) );
+        char * s3 = ppV( keithley2600a_max_source_rangev( ch ) );
+
+        print( FATAL, "Requested source voltage autorange low limit of %s "
+               "out of range, must be betwen %s and %s under current "
+               "circumstances.\n", s1, s2, s3 );
+        T_free( s1 );
+        T_free( s2 );
+        T_free( s3 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_lowrangev( ch, range );
+    else
+    {
+        k26->source[ ch ].lowrangev = range;
+        if ( k26->source[ ch ].autorangev )
+            k26->source[ ch ].rangev = d_max( range, k26->source[ ch ].rangev );
+    }
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the source current autoranging low limit
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_current_autorange_low_limit( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double req_range,
+           range;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
+
+    req_range = fabs( get_double( v, "source current autorange low limit" ) );
+    too_many_arguments( v );
+
+    /* Find nearest possible range */
+
+    range = keithley2600a_best_source_rangei( ch, req_range );
+
+    /* A negative result indicates that the value was too large */
+
+    if ( range < 0 )
+    {
+        char * s1 = ppA( req_range );
+        char * s2 = ppA( keithley2600a_max_source_rangei( ch ) );
+
+        print( FATAL, "Can't set source current autorange low limit to %s, "
+               "maximum possible value under the current circumstances "
+               "is %s.\n", s1, s2 );
+        T_free( s2 );
+        T_free( s1 );
+        THROW( EXCEPTION );
+    }
+
+    /* Warn if we had to modify the requested value */
+
+    if ( fabs( ( range - req_range ) / range ) > 0.001 )
+    {
+        char * s1 = ppA( req_range );
+        char * s2 = ppA( range );
+
+        print( WARN, "Had to adjust source current autorange low limit "
+               "from %s to %s.\n", s1, s2 );
+        T_free( s2 );
+        T_free( s1 );
+    }
+
+    /* Check that the value is reasonable */
+
+    if ( ! keithley2600a_check_source_lowrangei( ch, range ) )
+    {
+        char * s1 = ppA( range );
+        char * s2 = ppA( keithley2600a_min_measure_lowrangei( ch ) );
+        char * s3 = ppA( keithley2600a_max_source_rangei( ch ) );
+
+        print( FATAL, "Requested source current autorange low limit of %s "
+               "out of range, must be betwen %s and %s under current "
+               "circumstances.\n", s1, s2, s3 );
+        T_free( s1 );
+        T_free( s2 );
+        T_free( s3 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_lowrangei( ch, range );
+    else
+    {
+        k26->source[ ch ].lowrangei = range;
+        if ( k26->source[ ch ].autorangei )
+            k26->source[ ch ].rangei = d_max( range, k26->source[ ch ].rangei );
+    }
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets if source current autoranging is on or off
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_current_autoranging( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    bool on_off;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->source[ ch ].autorangei ? 1L : 0L );
+
+    on_off = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( on_off == k26->source[ ch ].autorangei )
+        return vars_push( INT_VAR, on_off ? 1L : 0L );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_autorangei( ch, on_off );
+    else
+    {
+        /* Keep in mind that switching autoranging on may change the range
+           setting */
+
+        k26->source[ ch ].autorangei = on_off;
+        if ( on_off )
+            k26->source[ ch ].rangei =
+                  keithley2600a_best_source_rangei( ch,
+                                                    k26->source[ ch ].leveli );
+    }
+
+    return vars_push( INT_VAR, k26->source[ ch ].autorangev ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the voltage compliance limit
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_compliance_voltage( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double limit;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].limitv );
+
+    /* Accept negative values, jut make 'em positive */
+
+    limit = fabs( get_double( v, "compliance voltage" ) );
+    too_many_arguments( v );
+    
+    if ( limit == k26->source[ ch ].limitv )
+        return vars_push( FLOAT_VAR, limit );
+
+    if ( ! keithley2600a_check_source_limitv( ch, limit ) )
+    {
+        char * s1 = ppV( limit );
+        char * s2 = ppV( keithley2600a_min_source_limitv( ch ) );
+        char * s3 = ppV( keithley2600a_max_source_limitv( ch ) );
+
+        print( FATAL, "Requested compliance voltage of %s is out of range, "
+               "must be between %s and %s und the current circumstances.\n",
+               s1, s2, s3 );
+        T_free( s1 );
+        T_free( s2 );
+        T_free( s3 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_limitv( ch, limit );
+    else
+        k26->source[ ch ].limitv = limit;
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].limitv );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the current compliance limit
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_compliance_current( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double limit;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].limiti );
+
+    /* Accept negative values, jut make 'em positive */
+
+    limit = fabs( get_double( v, "compliance current" ) );
+    too_many_arguments( v );
+    
+    if ( limit == k26->source[ ch ].limiti )
+        return vars_push( FLOAT_VAR, limit );
+
+    if ( ! keithley2600a_check_source_limiti( ch, limit ) )
+    {
+        char * s1 = ppA( limit );
+        char * s2 = ppA( keithley2600a_min_source_limiti( ch ) );
+        char * s3 = ppA( keithley2600a_max_source_limiti( ch ) );
+
+        print( FATAL, "Requested compliance current of %s is out of range, "
+               "must be between %s and %s und the current circumstances.\n",
+               s1, s2, s3 );
+        T_free( s1 );
+        T_free( s2 );
+        T_free( s3 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_limiti( ch, limit );
+    else
+        k26->source[ ch ].limiti = limit;
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].limiti );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the source delay
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_delay( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double delay;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].delay );
+
+    delay = get_double( v, "source delay" );
+
+    if ( delay < 0 )
+        delay = DELAY_AUTO;
+
+    if ( delay == k26->source[ ch ].delay )
+        vars_push( FLOAT_VAR, k26->source[ ch ].delay );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_delay( ch, delay );
+    else
+        k26->source[ ch ].delay = delay;
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].delay );
+}
+
+
+/*--------------------------------------------------------------*
  * Returns if source high capacity state for the given channel
  * is on or off or switches it on or off
  *--------------------------------------------------------------*/
 
 Var_T *
-sourcemeter_high_capacity( Var_T * v )
+sourcemeter_source_high_capacity( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
 
@@ -622,6 +1071,138 @@ sourcemeter_high_capacity( Var_T * v )
 
     return vars_push( INT_VAR, k26->source[ ch ].highc ? 1L : 0L );
 }
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the source sink mode of the channel
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_sink_mode( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    bool sink;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->source[ ch ].sink ? 1L : 0L );
+
+    sink = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( sink == k26->source[ ch ].sink )
+        return vars_push( INT_VAR, sink ? 1L : 0L );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_sink( ch, sink );
+    else
+        k26->source[ ch ].sink = sink;
+
+    return vars_push( INT_VAR, k26->source[ ch ].sink ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the source settling mode of the channel
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_settling_mode( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int settle;
+
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) k26->source[ ch ].settling );
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "SMOOTH" ) )
+             settle = SETTLE_SMOOTH;
+        else if ( ! strcasecmp( v->val.sptr, "FAST_RANGE" ) )
+            settle = SETTLE_FAST_RANGE;
+        else if ( ! strcasecmp( v->val.sptr, "FAST_POLARITY" ) )
+            settle = SETTLE_FAST_POLARITY;
+        else if ( ! strcasecmp( v->val.sptr, "DIRECT_IRANGE" ) )
+            settle = SETTLE_DIRECT_IRANGE;
+        else if ( ! strcasecmp( v->val.sptr, "SMOOTH_100NA" ) )
+            settle = SETTLE_SMOOTH_100NA;
+        else if ( ! strcasecmp( v->val.sptr, "FAST_ALL" ) )
+            settle = SETTLE_FAST_ALL;
+        else
+        {
+            print( FATAL, "Invalid settling mode argument: \"%s\".\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        settle = get_strict_long( v, "source_settling mode" );
+
+    too_many_arguments( v );
+
+    if (    settle != SETTLE_SMOOTH
+         && settle != SETTLE_FAST_RANGE
+         && settle != SETTLE_FAST_POLARITY
+         && settle != SETTLE_DIRECT_IRANGE
+         && settle != SETTLE_SMOOTH_100NA
+         && settle != SETTLE_FAST_ALL )
+    {
+        print( FATAL, "Invalid settling mode argument: %d.\n", settle );
+        THROW( EXCEPTION );
+    }
+
+    if ( settle == k26->source[ ch ].settling )
+        return vars_push( INT_VAR, settle );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_settling( ch,settle );
+    else
+        k26->source[ ch ].settling = settle;
+
+    return vars_push( INT_VAR, ( long ) k26->source[ ch ].settling );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the maximum source current when in normal off state
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_max_off_source_current( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double limit;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].offlimiti );
+
+    limit = fabs( get_double( v, "maximum current in normal off state" ) );
+    too_many_arguments( v );
+
+    if ( limit == k26->source[ ch ].offlimiti )
+         return vars_push( FLOAT_VAR, limit );
+
+    if ( ! keithley2600a_check_source_offlimiti( ch, limit ) )
+    {
+        char * s1 = ppA( limit );
+        char * s2 = ppA( keithley2600a_min_source_offlimiti( ch ) );
+        char * s3 = ppA( keithley2600a_max_source_offlimiti( ch ) );
+
+        print( FATAL, "Requesyed maximum current in normal off state of %s "
+               "out of range, must be between %s and %s.\n", s1, s2, s3 );
+        T_free( s1 );
+        T_free( s2 );
+        T_free( s3 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_source_offlimiti( ch, limit );
+    else
+        k26->source[ ch ].offlimiti = limit;
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].offlimiti );
+}                
 
 
 /*--------------------------------------------------------------*
@@ -722,6 +1303,7 @@ pretty_print( double v,
 
     return get_string( "%.5g p%c", v * 1.0e12, unit );
 }
+
 
 /*
  * Local variables:

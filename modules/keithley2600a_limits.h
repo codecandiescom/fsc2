@@ -77,10 +77,16 @@ bool keithley2600a_check_source_lowrangev( unsigned int ch,
 bool keithley2600a_check_source_lowrangei( unsigned int ch,
                                            double       lowrange );
 
+double keithley2600a_min_source_offlimiti( unsigned int ch );
+double keithley2600a_max_source_offlimiti( unsigned int ch );
+bool keithley2600a_check_source_offlimiti( unsigned int ch,
+                                           double       offlimiti );
+
 double keithley2600a_min_measure_lowrangev( unsigned int ch );
 double keithley2600a_min_measure_lowrangei( unsigned int ch );
 bool keithley2600a_check_measure_lowrangev( unsigned int ch,
                                             double       lowrange);
+
 bool keithley2600a_check_measure_lowrangei( unsigned int ch,
                                             double       lowrange );
 

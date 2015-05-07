@@ -24,6 +24,11 @@
 
 #include "fsc2_module.h"
 #include "keithley2600a.conf"
+#include "keithley2600a_limits.h"
+#include "keithley2600a_ll.h"
+#include "keithley2600a_source.h"
+#include "keithley2600a_measure.h"
+
 
 /* Check that a model is defined */
 
@@ -33,12 +38,11 @@
 #error "No model has been defined in configuration file."
 #endif
 
-#include "keithley2600a_limits.h"
+/* Sense modes */
 
-
-#define SENSE_LOCAL     0
-#define SENSE_REMOTE    1
-#define SENSE_CALA      3
+#define SENSE_LOCAL     0      /* 2-wire      */
+#define SENSE_REMOTE    1      /* 4-wire      */
+#define SENSE_CALA      3      /* calibration */
 
 
 /* Outout off modes */
@@ -62,6 +66,22 @@
 
 #define AUTORANGE_OFF    0
 #define AUTORANGE_ON     1
+
+
+/* Delay constants */
+
+#define DELAY_OFF        0.0
+#define DELAY_AUTO      -1.0
+
+
+/* Source settling modes */
+
+#define SETTLE_SMOOTH           0
+#define SETTLE_FAST_RANGE       1
+#define SETTLE_FAST_POLARITY    2
+#define SETTLE_DIRECT_IRANGE    3
+#define SETTLE_SMOOTH_100NA     4
+#define SETTLE_FAST_ALL       128
 
 
 /* Channel autozero modes (off/once/auto) */
@@ -92,6 +112,13 @@ typedef struct
 
     double limitv;
     double limiti;
+
+    double offlimiti;
+
+    double delay;
+    int    settling;
+
+    bool   sink;
 } Source_T;
 
 
@@ -138,127 +165,25 @@ int keithley2600a_end_of_exp_hook( void );
 
 Var_T * sourcemeter_name( Var_T * v );
 Var_T * sourcemeter_keep_on_at_end( Var_T * v );
+Var_T * sourcemeter_sense_mode( Var_T * v );
+Var_T * sourcemeter_source_offmode( Var_T * v );
 Var_T * sourcemeter_output_state( Var_T * v );
 Var_T * sourcemeter_source_mode( Var_T * v );
 Var_T * sourcemeter_source_voltage( Var_T * v );
 Var_T * sourcemeter_source_current( Var_T * v );
 Var_T * sourcemeter_source_voltage_range( Var_T * v );
 Var_T * sourcemeter_source_current_range( Var_T * v );
-Var_T * sourcemeter_high_capacity( Var_T * v );
-
-
-/* Internal functions from keithley2600a_ll.c */
-
-bool keithley2600a_open( void );
-bool keithley2600a_close( void );
-bool keithley2600a_cmd( const char * cmd );
-bool keithley2600a_talk( const char * cmd,
-                         char       * reply,
-                         size_t       length );
-
-void keithley2600a_get_state( void );
-void keithley2600a_reset( void );
-void keithley2600a_show_errors( void );
-
-bool keithley2600a_line_to_bool( const char * line );
-int keithley2600a_line_to_int( const char * line );
-double keithley2600a_line_to_double( const char * line );
-void keithley2600a_bad_data( void );
-
-
-/* Internal functions from keithley2600a_source.c */
-
-int keithley2600a_get_sense( unsigned int ch );
-int keithley2600a_set_sense( unsigned int ch,
-                             int          sense );
-
-int keithley2600a_get_source_offmode( unsigned int ch );
-int keithley2600a_set_source_offmode( unsigned int ch,
-                                      int          source_offmode );
-
-bool keithley2600a_get_source_output( unsigned int ch );
-bool keithley2600a_set_source_output( unsigned int ch,
-                                      bool         source_output );
-
-bool keithley2600a_get_source_highc( unsigned int ch );
-int keithley2600a_set_source_highc( unsigned int ch,
-                                    bool         source_highc );
-
-int keithley2600a_get_source_func( unsigned int ch );
-int keithley2600a_set_source_func( unsigned int ch,
-                                   int          source_func );
-
-bool keithley2600a_get_source_autorangev( unsigned int ch );
-bool keithley2600a_set_source_autorangev( unsigned int ch,
-                                          bool         autorange );
-
-bool keithley2600a_get_source_autorangei( unsigned int ch );
-bool keithley2600a_set_source_autorangei( unsigned int ch,
-                                          bool         autorange );
-
-double keithley2600a_get_source_rangev( unsigned int ch );
-double keithley2600a_set_source_rangev( unsigned int ch,
-                                        double       range );
-
-double keithley2600a_get_source_rangei( unsigned int ch );
-double keithley2600a_set_source_rangei( unsigned int ch,
-                                        double       range );
-
-
-double keithley2600a_get_source_lowrangev( unsigned int ch );
-double keithley2600a_set_source_lowrangev( unsigned int ch,
-                                           double       lowrange );
-
-double keithley2600a_get_source_lowrangei( unsigned int ch );
-double keithley2600a_set_source_lowrangei( unsigned int ch,
-                                           double       lowrange );
-
-double keithley2600a_get_source_levelv( unsigned int ch );
-double keithley2600a_set_source_levelv( unsigned int ch,
-                                        double       volts );
-
-double keithley2600a_get_source_leveli( unsigned int ch );
-double keithley2600a_set_source_leveli( unsigned int ch,
-                                        double       amps );
-
-double keithley2600a_get_source_limitv( unsigned int ch );
-double keithley2600a_set_source_limitv( unsigned int ch,
-                                        double       volts );
-
-double keithley2600a_get_source_limiti( unsigned int ch );
-double keithley2600a_set_source_limiti( unsigned int ch,
-                                        double       amps );
-
-bool keithley2600a_get_compliance( unsigned int ch );
-
-
-/* Internal functions from keithley_measure.c */
-
-bool keithley2600a_get_measure_autorangev( unsigned int ch );
-bool keithley2600a_set_measure_autorangev( unsigned int ch,
-                                           bool         autorange );
-
-bool keithley2600a_get_measure_autorangei( unsigned int ch );
-bool keithley2600a_set_measure_autorangei( unsigned int ch,
-                                           bool         autorange );
-
-int keithley2600a_get_measure_autozero( unsigned int ch );
-int keithley2600a_set_measure_autozero( unsigned int ch,
-                                        int          autozero );
-
-double keithley2600a_get_measure_lowrangev( unsigned int ch );
-double keithley2600a_set_measure_lowrangev( unsigned int ch,
-                                            double       lowrange );
-double keithley2600a_get_measure_lowrangei( unsigned int ch );
-double keithley2600a_set_measure_lowrangei( unsigned int ch,
-                                            double       lowrange );
-
-double keithley2600a_get_measure_rangev( unsigned int ch );
-double keithley2600a_set_measure_rangev( unsigned int ch,
-                                         double       range );
-double keithley2600a_get_measure_rangei( unsigned int ch );
-double keithley2600a_set_measure_rangei( unsigned int ch,
-                                         double       range );
+Var_T * sourcemeter_source_voltage_autoranging( Var_T * v );
+Var_T * sourcemeter_source_current_autoranging( Var_T * v );
+Var_T * sourcemeter_source_voltage_autorange_low_limit( Var_T * v );
+Var_T * sourcemeter_source_current_autorange_low_limit( Var_T * v );
+Var_T * sourcemeter_compliance_voltage( Var_T * v );
+Var_T * sourcemeter_compliance_current( Var_T * v );
+Var_T * sourcemeter_source_delay( Var_T * v );
+Var_T * sourcemeter_max_off_source_current( Var_T * v );
+Var_T * sourcemeter_source_high_capacity( Var_T * v );
+Var_T * sourcemeter_source_sink_mode( Var_T * v );
+Var_T * sourcemeter_source_settling_mode( Var_T * v );
 
 
 #endif

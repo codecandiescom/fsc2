@@ -574,6 +574,8 @@ powermeter_analog_output, -1, ALL;
 
 sourcemeter_name, 0, ALL;
 sourcemeter_keep_on_at_end, -1, ALL;
+sourcemeter_sense_mode, -1, EXP;
+sourcemeter_source_offmode, -1, EXP;
 sourcemeter_output_state, -1, EXP;
 sourcemeter_source_mode, -1, EXP;
 sourcemeter_source_voltage, -1, EXP;
@@ -581,7 +583,17 @@ sourcemeter_source_current, -1, EXP;
 sourcemeter_source_current, -1, EXP;
 sourcemeter_source_voltage_range, -1, EXP;
 sourcemeter_source_current_range, -1, EXP;
-sourcemeter_high_capacity, -1, EXP;
+sourcemeter_source_voltage_autoranging, -1, EXP;
+sourcemeter_source_voltage_autoranging, -1, EXP;
+sourcemeter_source_voltage_autorange_low_limit, -1, EXP;
+sourcemeter_source_current_autorange_low_limit, -1, EXP;
+sourcemeter_compliance_voltage, -1, EXP;
+sourcemeter_compliance_current, -1, EXP;
+sourcemeter_source_delay, -1, EXP;
+sourcemeter_max_off_source_current, -1, EXP;
+sourcemeter_source_high_capacity, -1, EXP;
+sourcemeter_source_sink_mode, -1, EXP;
+sourcemeter_source_settling_mode;
 
 
 /* Function exported by the microwave bridge modules */

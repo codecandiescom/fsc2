@@ -879,7 +879,8 @@ bool
 keithley2600a_check_source_lowrangev( unsigned int ch,
 									  double       lowrange )
 {
-	return lowrange >= keithley2600a_min_source_lowrangev( ch );
+	return    lowrange >= keithley2600a_min_source_lowrangev( ch )
+           && lowrange <= keithley2600a_max_source_rangev( ch );
 }
 
 
@@ -930,7 +931,45 @@ bool
 keithley2600a_check_measure_lowrangev( unsigned int ch,
 									   double       lowrange )
 {
-	return lowrange >= keithley2600a_min_measure_lowrangev( ch );
+	return    lowrange >= keithley2600a_min_measure_lowrangev( ch )
+           && lowrange <= keithley2600a_max_source_rangei( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the minimum off limit current - it's not properly documented
+ * but seems to be 10% of the lowest source current range setting
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_min_source_offlimiti( unsigned int ch  UNUSED_ARG )
+{
+    return 0.1 * Source_Ranges_I[ 0 ];
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the maximum off limit current - it's not properly documented
+ * but seems to be the highest source current range setting
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_max_source_offlimiti( unsigned int ch  UNUSED_ARG )
+{
+    return basic_max_source_rangei( );
+}
+
+
+/*---------------------------------------------------------------*
+ * Checks if off limit current s ok
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_check_source_offlimiti( unsigned int ch,
+                                      double       offlimiti )
+{
+    return    offlimiti >= keithley2600a_min_source_offlimiti( ch )
+           && offlimiti <= keithley2600a_max_source_offlimiti( ch );
 }
 
 
@@ -981,7 +1020,6 @@ keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
 
     return FAIL;
 }
-
 
 
 /*

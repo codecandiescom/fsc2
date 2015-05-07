@@ -527,6 +527,11 @@ keithley2600a_set_source_lowrangev( unsigned int ch,
     sprintf( buf, "%s.source.lowrangev=%.5g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
+    /* If the device is source auoranging the changed lower limit may have
+       resulted in a change of the range */
+
+    if ( k26->source[ ch ].autorangev )
+        keithley2600a_get_source_rangev( ch );
     return k26->source[ ch ].lowrangev = lowrange;
 }
 
@@ -568,6 +573,11 @@ keithley2600a_set_source_lowrangei( unsigned int ch,
     sprintf( buf, "%s.source.lowrangei=%.5g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
+    /* If the device is source auoranging the changed lower limit may have
+       resulted in a change of the range */
+
+    if ( k26->source[ ch ].autorangei )
+        keithley2600a_get_source_rangei( ch );
     return k26->source[ ch ].lowrangei = lowrange;
 }
 
@@ -772,6 +782,185 @@ keithley2600a_get_compliance( unsigned int ch )
         keithley2600a_bad_data( );
 
     return buf[ 0 ] == 't';
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the source delay for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_source_delay( unsigned int ch )
+{
+   char buf[ 50 ];
+   double delay;
+
+   fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.source.delay)", smu[ ch ] );
+	keithley2600a_talk( buf, buf, sizeof buf );
+ 
+    delay = keithley2600a_line_to_double( buf );
+    if ( delay < 0 && delay != DELAY_AUTO )
+        keithley2600a_bad_data( );
+
+    return k26->source[ ch ].delay = delay;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the source delay for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_source_delay( unsigned int ch,
+                                double       delay )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
+
+    printf( buf, "%s.source.delay=%.5g", smu[ ch ], delay );
+    keithley2600a_cmd( buf );
+
+    return k26->source[ ch ].delay = delay;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the off current limit
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_source_offlimiti( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    double limit;
+
+    sprintf( buf, "print(%s.source.offlimiti)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    limit = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_source_offlimiti( ch, limit ) )
+        keithley2600a_bad_data( );
+
+    return k26->source[ ch ].offlimiti = limit;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the off current limit
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_source_offlimiti( unsigned int ch,
+                                    double       limit )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_source_offlimiti( ch, limit ) );
+
+    sprintf( buf, "%s.source.offlimiti=%.5g)", smu[ ch ], limit );
+    keithley2600a_cmd( buf );
+
+    /* Better check result, it's not too well documented what the limits
+       really are */
+
+    return keithley2600a_get_source_offlimiti( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the sink mode for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_source_sink( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.source.sink)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->source[ ch ].sink = keithley2600a_line_to_bool( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the sink mode for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_source_sink( unsigned int ch,
+                               double       sink )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.source.offlimiti=%d)", smu[ ch ], sink ? 1 : 0 );
+    keithley2600a_cmd( buf );
+
+    return k26->source[ ch ].sink = sink;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the settling mode for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_source_settling( unsigned int ch )
+{
+    char buf[ 50 ];
+    int settle;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.source.setling)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    settle = keithley2600a_line_to_int( buf );
+    if (    settle != SETTLE_SMOOTH
+         && settle != SETTLE_FAST_RANGE
+         && settle != SETTLE_FAST_POLARITY
+         && settle != SETTLE_DIRECT_IRANGE
+         && settle != SETTLE_SMOOTH_100NA
+         && settle != SETTLE_FAST_ALL )
+        keithley2600a_bad_data( );
+
+    return k26->source[ ch ].settling = settle;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the settling mode for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_source_settling( unsigned int ch,
+                                   int          settle )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(    settle == SETTLE_SMOOTH
+                 || settle == SETTLE_FAST_RANGE
+                 || settle == SETTLE_FAST_POLARITY
+                 || settle == SETTLE_DIRECT_IRANGE
+                 || settle == SETTLE_SMOOTH_100NA
+                 || settle == SETTLE_FAST_ALL );
+
+    sprintf( buf, "%s.source.setling=%d", smu[ ch ], settle );
+    keithley2600a_cmd( buf );
+
+    return k26->source[ ch ].settling = settle;
 }
 
 
