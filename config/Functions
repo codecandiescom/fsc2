@@ -573,7 +573,14 @@ powermeter_analog_output, -1, ALL;
 /* Source-meter functions (Keithley2600A) */
 
 sourcemeter_name, 0, ALL;
-sourcemeter_output, -1, EXP;
+sourcemeter_keep_on_at_end, -1, ALL;
+sourcemeter_output_state, -1, EXP;
+sourcemeter_source_mode, -1, EXP;
+sourcemeter_source_voltage, -1, EXP;
+sourcemeter_source_current, -1, EXP;
+sourcemeter_source_current, -1, EXP;
+sourcemeter_source_voltage_range, -1, EXP;
+sourcemeter_source_current_range, -1, EXP;
 sourcemeter_high_capacity, -1, EXP;
 
 

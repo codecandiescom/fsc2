@@ -41,10 +41,10 @@ keithley2600a_open( void )
     /* Try to open an connection to the device */
 
 	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
-                     UNSET, UNSET, OPEN_TIMEOUT ) == FAILURE )
+                     false, false, OPEN_TIMEOUT ) == FAILURE )
         return FAIL;
 
-    k26->is_open = SET;
+    k26->is_open = true;
 
     /* Set a timeout for reads and writes, clear the device and lock
        out the keyboard. */
@@ -52,7 +52,7 @@ keithley2600a_open( void )
     if (    vxi11_set_timeout( READ, READ_TIMEOUT ) == FAILURE
          || vxi11_set_timeout( WRITE, WRITE_TIMEOUT ) == FAILURE
          || vxi11_device_clear( ) == FAILURE
-         || vxi11_lock_out( SET ) == FAILURE )
+         || vxi11_lock_out( true ) == FAILURE )
     {
         vxi11_close( );
         return FAIL;
@@ -74,14 +74,14 @@ keithley2600a_close( void )
 
     /* Unlock the keyboard */
 
-    vxi11_lock_out( UNSET );
+    vxi11_lock_out( false );
 
     /* Close connection to the device */
 
     if ( vxi11_close( ) == FAILURE )
         return FAIL;
 
-    k26->is_open = UNSET;
+    k26->is_open = false;
     return OK;
 }
 
@@ -96,7 +96,7 @@ keithley2600a_cmd( const char * cmd )
 	size_t len = strlen( cmd );
 
     
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		comm_failure( );
 
 	return OK;
@@ -121,7 +121,7 @@ keithley2600a_talk( const char * cmd,
     keithley2600a_cmd( cmd );
 
     length--;
-	if ( vxi11_read( reply, &length, UNSET ) != SUCCESS || length < 1 )
+	if ( vxi11_read( reply, &length, false ) != SUCCESS || length < 1 )
 		comm_failure( );
 
     reply[ length ] = '\0';
@@ -322,6 +322,7 @@ void
 comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
+    k26->comm_failed = true;
     THROW( EXCEPTION );
 }
 

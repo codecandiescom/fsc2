@@ -19,6 +19,8 @@
 @node Device Reference, Reserved Words, Installation, Top
 @appendix Device Reference
 
+List of devices, sorted by module name:
+
 @ifnottex
 
 @menu
@@ -117,6 +119,104 @@
 
 @end ifnottex
 
+@iftex
+
+@itemize
+@item @ref{aeg_s_band}      S-band AEG Magnet Power Supply
+@item @ref{aeg_x_band}      X-band AEG Magnet Power Supply
+@item @ref{agilent_53181a}  Agilent Frequency Counter 53181A
+@item @ref{bh15}            Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
+@item @ref{bh15_fc}         Bruker Hall Effect Field Controller BH 15 (as field controller)
+@item @ref{bnm12}           Bruker NMR Gaussmeter BNM12
+@item @ref{dg2020_b}        Sony/Tektronix Data Generator DG2020 (Berlin Version)
+@item @ref{dg2020_f}        Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
+@item @ref{egg4402}         EG&G PARC Box-Car Integrator 4402
+@item @ref{eip371}          EIP Microwave Counter 371
+@item @ref{ep385}           Bruker Pulse Programmer EP385
+@item @ref{epr_mod}         EPR Modulation Module
+@item @ref{er218}           Bruker Goniometer ER218 PG1
+@item @ref{er023m}          Bruker Signal Channel ER 023 M
+@item @ref{er032m}          Bruker Field controller ER 032 M 
+@item @ref{er035m}          Bruker NMR Gaussmeter ER 035 M
+@item @ref{er035m_sa}       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
+@item @ref{bvt3000}         Bruker BVT3000 Variable Temperature Unit
+@item @ref{fsps25}          Frankfurt Sweep Power Supply
+@item @ref{gentec_maestro}  Gentec Maestro Power/Energy Meter
+@item @ref{gg_chopper}      Light chopper (Gescheidt group, Graz)
+@item @ref{hfs9000}         Tektronix Stimulus System HFS9000 (Berlin W-Band)
+@item @ref{hp5340a}         HP Frequency Counter HP5340A
+@item @ref{hp5342a}         HP Frequency Counter HP5342A
+@item @ref{hp5343a}         HP Frequency Counter HP5343A
+@item @ref{hp5350a}         HP Frequency Counter HP5350A
+@item @ref{hp5350b}         HP Frequency Counter HP5350B
+@item @ref{hp5351a}         HP Frequency Counter HP5351A
+@item @ref{hp5351b}         HP Frequency Counter HP5351B
+@item @ref{hp5352a}         HP Frequency Counter HP5352A
+@item @ref{hp5352b}         HP Frequency Counter HP5352B
+@item @ref{hp8647a}         HP RF Synthesizer HP8647A
+@item @ref{hp8648b}         HP RF Synthesizer HP8648B
+@item @ref{hp8672a}         HP RF Synthesizer HP8672A
+@item @ref{hjs_attenuator}  Home-built microwave attenuator
+@item @ref{hjs_daadc}       Home-built AD and DA converter
+@item @ref{hjs_sfc}         Simple Field Control (HJS_SFC, Steinhoff group, Osnabrueck)
+@item @ref{hjs_fc}          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
+@item @ref{ips20_4}         Oxford Instruments Magnet Sweep Power Supply IPS20-4
+@item @ref{ips120_10}       Oxford Instruments Magnet Sweep Power Supply IPS120-10
+@item @ref{ips120_10_mod}   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
+@item @ref{itc503}          Oxford Instruments Temperature Controller ITC503
+@item @ref{keithley228a}    Magnet Power Supply Keithley 228A (Berlin W-Band)
+@item @ref{kontron4060}     Kontron 4060 Multimeter
+@item @ref{lakeshore330}    Lake Shore 330 Temperature Controller
+@item @ref{lecroy9400}      LeCroy Digitizing Oscilloscope 9400
+@item @ref{lecroy9410}      LeCroy Digitizing Oscilloscope 9410
+@item @ref{lecroy9420}      LeCroy Digitizing Oscilloscope 9420
+@item @ref{lecroy9424}      LeCroy Digitizing Oscilloscope 9424
+@item @ref{lecroy9424e}     LeCroy Digitizing Oscilloscope 9424E
+@item @ref{lecroy9450}      LeCroy Digitizing Oscilloscope 9450
+@item @ref{lecroy93xx}      LeCroy Digitizing Oscilloscope 93xx series
+@item @ref{lecroy_wr}       LeCroy Digitizing Oscilloscope Waverunner, Waverunner-2 and X-Stream
+@item @ref{lecroy_ws}       LeCroy Digitizing Oscilloscope WaveSurfer
+@item @ref{mcn700_2000}     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
+@item @ref{me6000}          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
+@item @ref{me_dio_X}        Meilhaus Electronic GmbH DAQ card DIO subsystem
+@item @ref{ni6601}          National Instruments 6601 GPCT card
+@item @ref{oriel_cs_260}    Newport Oriel Cornerstone 260 monohromator
+@item @ref{oriel_matrix}    Newport Oriel MMS Spectrometer
+@item @ref{pci_mio_16e_1}   National Instruments PCI-MIO-16E-1 DAQ card
+@item @ref{pt2025}          Metrolab NMR Teslameter PT2025
+@ @item @ref{q_bmwb}          Bruker ER 051 QG Q-Band Bridge
+@item @ref{rs_sml01}        Rohde & Schwarz SML01 Signal Generator
+@item @ref{rs_spec10}       Roper Scientific Spec-10 CCD Camera
+@item @ref{rb8509}          Rulbus 12-bit ADC Card
+@item @ref{rb8510}          Rulbus 12-bit DAC Card
+@item @ref{rb_pulser_j}     Rulbus Pulser (J-band version)
+@item @ref{rb_pulser_w}     Rulbus Pulser (W-band version)
+@item @ref{rs690}           Interface Technology RS690 Word Generator (Berlin 360 GHz)
+@item @ref{s_band_magnet_broad}   S-band Magnet Power Supply (broad range)
+@item @ref{s_band_magnet_narrow}  S-band Magnet Power Supply (narrow range)
+@item @ref{schlum7150}      Schlumberger Solartron 7150 Multimeter
+@item @ref{spectrapro_275}  Acton Research SpectraPro-275 Monochromator
+@item @ref{spectrapro_300i} Acton Research SpectraPro-300i Monochromator
+@item @ref{spex_cd2a}       SPEX Monochromators with CD2A Compudrive
+@item @ref{spex232}         SPEX Monochromators with SPEX232 interface
+@item @ref{sr510}           Stanford Research Lock-In Amplifier SR510
+@item @ref{sr530}           Stanford Research Lock-In Amplifier SR530
+@item @ref{sr810}           Stanford Research Lock-In Amplifier SR810
+@item @ref{sr830}           Stanford Research Lock-In Amplifier SR830
+@item @ref{tds520}          Tektronix Digitizing Oscilloscope TDS520
+@item @ref{tds520a}         Tektronix Digitizing Oscilloscope TDS520A
+@item @ref{tds520c}         Tektronix Digitizing Oscilloscope TDS520C
+@item @ref{tds540}          Tektronix Digitizing Oscilloscope TDS540
+@item @ref{tds744a}         Tektronix Digitizing Oscilloscope TDS744A
+@item @ref{tds754a}         Tektronix Digitizing Oscilloscope TDS754A
+@item @ref{tegam2714a_p}    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
+@item @ref{thurlby330}      Thurlby & Thandar Power Supply PL330DP
+@c @item @ref{x_bmwb}          Bruker ER 046 X-Band Bridge
+@item @ref{witio_48}        Wasco WITIO-48 DIO card
+@end itemize
+
+@end iftex
+
 
 Please note: Some of the devices listed above are typically part of
 complete spectrometers like the Bruker ESP300 and thus the complete
@@ -124,6 +224,7 @@ spectrometer can be controlled (and often extended) via @code{fsc2}.
 For example @code{fsc2} is being used to replace the legacy software
 for a number of ESP300 spectrometers, also allowing them to be used
 for all kinds of other techniques (ENDOR, time-resolved EPR etc.).
+
 
 
 @c #############################################################

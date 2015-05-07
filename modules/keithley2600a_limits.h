@@ -32,8 +32,10 @@
 #define NUM_CHANNELS 2
 #endif
 
-double keithley2600a_best_source_rangev( double volts );
-double keithley2600a_best_source_rangei( double amps );
+double keithley2600a_best_source_rangev( unsigned int ch,
+                                         double       volts );
+double keithley2600a_best_source_rangei( unsigned int ch,
+                                         double       amps );
 
 double keithley2600a_max_source_levelv( unsigned int ch );
 double keithley2600a_max_source_leveli( unsigned int ch );

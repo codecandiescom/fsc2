@@ -4,4 +4,6 @@ keithley2600a;
 
 EXPERIMENT:
 
-print( "Output state: #\n", sourcemeter_output( 1 ) );
+print( "\TOutput state: #\n", sourcemeter_output_state( 1, "ON" ) );
+print( "\TOutput state: #\n", sourcemeter_output_state( 1 ) );
+print( "\TOutput state: #\n", sourcemeter_source_voltage( 1, 13.41234 ) );

@@ -334,7 +334,7 @@ hp535_tmpl_get_freq( void )
 static double
 hp535_tmpl_set_resolution( int res )
 {
-	char cmd[ ] = "RESOL,x*\r\n";
+	char cmd[ ] = "RESOL,*\r\n";
 
 	fsc2_assert( res >= 0 && res <= 6 );
 

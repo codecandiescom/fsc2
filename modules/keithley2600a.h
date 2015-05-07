@@ -113,6 +113,8 @@ typedef struct
 typedef struct
 {
     bool      is_open;
+    bool      comm_failed;
+    bool      keep_on_at_end[ NUM_CHANNELS ];
 
     int       sense[ NUM_CHANNELS ];
 
@@ -126,6 +128,7 @@ extern Keithley2600A_T * k26;
 
 /* Hook functions */
 
+int keithley2600a_init_hook( void );
 int keithley2600a_test_hook( void );
 int keithley2600a_exp_hook( void );
 int keithley2600a_end_of_exp_hook( void );
@@ -134,9 +137,13 @@ int keithley2600a_end_of_exp_hook( void );
 /* EDL functions */
 
 Var_T * sourcemeter_name( Var_T * v );
+Var_T * sourcemeter_keep_on_at_end( Var_T * v );
 Var_T * sourcemeter_output_state( Var_T * v );
 Var_T * sourcemeter_source_mode( Var_T * v );
 Var_T * sourcemeter_source_voltage( Var_T * v );
+Var_T * sourcemeter_source_current( Var_T * v );
+Var_T * sourcemeter_source_voltage_range( Var_T * v );
+Var_T * sourcemeter_source_current_range( Var_T * v );
 Var_T * sourcemeter_high_capacity( Var_T * v );
 
 
@@ -190,8 +197,8 @@ bool keithley2600a_set_source_autorangei( unsigned int ch,
                                           bool         autorange );
 
 double keithley2600a_get_source_rangev( unsigned int ch );
-double keithley2600a_set_source_rangev( double       range,
-                                        unsigned int ch );
+double keithley2600a_set_source_rangev( unsigned int ch,
+                                        double       range );
 
 double keithley2600a_get_source_rangei( unsigned int ch );
 double keithley2600a_set_source_rangei( unsigned int ch,

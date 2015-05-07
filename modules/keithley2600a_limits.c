@@ -193,10 +193,10 @@ static Limit_Point Limits_V_to_I[ ] = { {  6.0, 3.0 },
 
 #elif defined _2611A || defined _2612A || defined _2635A || defined _2636A
 
-static Limit_Point Limits_V_to_I[ ] = { {  0.1, 200.0 },
+static Limit_Point Limits_I_to_V[ ] = { {  0.1, 200.0 },
                                         {  1.5,  20.0 } };
 
-static Limit_Point Limits_I_to_V[ ] = { {  20.0,  1.5 },
+static Limit_Point Limits_V_to_I[ ] = { {  20.0,  1.5 },
                                         { 200.0,  0.1 } };
 
 #endif
@@ -319,7 +319,8 @@ max_compliance_amps_limit( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_source_rangev( double volts )
+keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
+                                  double           volts )
 {
     size_t i;
     size_t num_ranges = sizeof  Source_Ranges_V / sizeof *Source_Ranges_V;
@@ -340,16 +341,24 @@ keithley2600a_best_source_rangev( double volts )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_source_rangei( double amps )
+keithley2600a_best_source_rangei( unsigned int ch  UNUSED_ARG,
+                                  double       amps )
 {
     size_t i;
     size_t num_ranges = sizeof Source_Ranges_I / sizeof *Source_Ranges_I;
 
     amps = fabs( amps );
 
+    /* Find the lowest ramge the value fits in, but keep in mind that there's
+       a raised minimum setting whet the channel is in high capacity mode */
+
     for ( i = 0; i < num_ranges; i++ )
         if ( amps <= Source_Ranges_I[ i ] )
+        {
+            if ( k26->source[ ch ].highc )
+                return d_max( Source_Ranges_I[ i ], MIN_SOURCE_RANGEI_HIGHC );
             return Source_Ranges_I[ i ];
+        }
 
     return -1;
 }
@@ -491,7 +500,8 @@ keithley2600a_min_source_rangev( unsigned int ch )
 	/* Otherwise we're limited by the output voltage set for the channel,
 	   the range must not be smaller */
 
-	return keithley2600a_best_source_rangev( k26->source[ ch ].levelv / 1.01 );
+	return keithley2600a_best_source_rangev( ch,
+                                             k26->source[ ch ].levelv / 1.01 );
 }
 
 
@@ -519,7 +529,7 @@ keithley2600a_max_source_rangev( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	/* If output is off or we're in current sourcing mode all ranges
-	   can be set, si return the maximum one */
+	   can be set, so return the maximum one */
 
 	if (    ! k26->source[ ch ].output
 		 || k26->source[ ch ].func == OUTPUT_DCAMPS )
@@ -550,7 +560,8 @@ keithley2600a_min_source_rangei( unsigned int ch )
 	/* Otherwise we're limited by the output current set for the channel,
 	   the range must not be smaller  */
 
-	return keithley2600a_best_source_rangei( k26->source[ ch ].leveli / 1.01 );
+	return keithley2600a_best_source_rangei( ch,
+                                             k26->source[ ch ].leveli / 1.01 );
 }
 
 
