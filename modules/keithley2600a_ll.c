@@ -211,8 +211,8 @@ keithley2600a_get_sense( unsigned int ch )
 
     k26->sense[ ch ] = keithley2600a_line_to_int( buf );
     if (    k26->sense[ ch ] != SENSE_LOCAL
-		 || k26->sense[ ch ] != SENSE_REMOTE
-		 || k26->sense[ ch ] != SENSE_CALA )
+		 && k26->sense[ ch ] != SENSE_REMOTE
+		 && k26->sense[ ch ] != SENSE_CALA )
         keithley2600a_bad_data( );
 
     return k26->sense[ ch ];
@@ -286,8 +286,8 @@ keithley2600a_line_to_int( const char * line )
         keithley2600a_bad_data( );
 
     res = lrnd( dres );
-//    if ( dres - res != 0 )a
-//        keithley2600a_bad_data( );
+    if ( dres - res != 0 )
+        keithley2600a_bad_data( );
 
     return res;
 }
