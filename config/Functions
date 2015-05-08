@@ -580,7 +580,6 @@ sourcemeter_output_state, -1, EXP;
 sourcemeter_source_mode, -1, EXP;
 sourcemeter_source_voltage, -1, EXP;
 sourcemeter_source_current, -1, EXP;
-sourcemeter_source_current, -1, EXP;
 sourcemeter_source_voltage_range, -1, EXP;
 sourcemeter_source_current_range, -1, EXP;
 sourcemeter_source_voltage_autoranging, -1, EXP;
