@@ -37,6 +37,12 @@ static Keithley2600A_T keithley2600a_test;
 Keithley2600A_T * k26 = &keithley2600a;
 
 
+#define TEST_VOLTAGE     1.0e-3
+#define TEST_CURRENT     1.0e-6
+#define TEST_POWER       1.0e-9
+#define TEST_RESISTANCE  1.0e3
+
+
 /*--------------------------------------------------------------*
  * Init hook
  *--------------------------------------------------------------*/
@@ -1203,6 +1209,78 @@ sourcemeter_max_off_source_current( Var_T * v )
 
     return vars_push( FLOAT_VAR, k26->source[ ch ].offlimiti );
 }                
+
+
+/*--------------------------------------------------------------*
+ * Returns a voltage reading
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_voltage( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+
+    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, VOLTAGE ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns a current reading
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_current( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, TEST_CURRENT );
+
+    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, CURRENT ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns a power reading
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_power( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, TEST_POWER );
+
+    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, POWER ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns a resistance reading
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_resistance( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, TEST_RESISTANCE );
+
+    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, RESISTANCE ) );
+}
 
 
 /*--------------------------------------------------------------*

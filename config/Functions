@@ -594,6 +594,10 @@ sourcemeter_max_off_source_current, -1, EXP;
 sourcemeter_source_high_capacity, -1, EXP;
 sourcemeter_source_sink_mode, -1, EXP;
 sourcemeter_source_settling_mode;
+sourcemeter_measure_voltage, -1, EXP;
+sourcemeter_measure_current, -1, EXP;
+sourcemeter_measure_power, -1, EXP;
+sourcemeter_measure_resistance, -1, EXP;
 
 
 /* Function exported by the microwave bridge modules */

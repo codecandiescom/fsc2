@@ -48,6 +48,9 @@ double keithley2600a_get_measure_rangei( unsigned int ch );
 double keithley2600a_set_measure_rangei( unsigned int ch,
                                          double       range );
 
+double keithley2600a_measure( unsigned int ch,
+							  int          what );
+
 
 #endif
 

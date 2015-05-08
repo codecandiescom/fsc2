@@ -319,6 +319,27 @@ keithley2600a_set_measure_rangei( unsigned int ch,
 }
 
 
+/*---------------------------------------------------------------*
+ * Makes a simple measurement of voltage, current, power or resistance
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_measure( unsigned int ch,
+                       int          what )
+{
+    static char method[ ] = { 'v', 'i', 'p', 'r' };
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(  what >= VOLTAGE && what <= RESISTANCE );
+
+    sprintf( buf, "print(%s.measure.%c)", smu[ ch ], method[ what ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return keithley2600a_line_to_double( buf );
+}
+
+
 /*
  * Local variables:
  * tab-width: 4

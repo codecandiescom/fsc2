@@ -91,6 +91,14 @@
 #define AUTOZERO_AUTO    2
 
 
+/* Macros for types of measurements */
+
+#define VOLTAGE      0
+#define CURRENT      1
+#define POWER        2
+#define RESISTANCE   3
+
+
 typedef struct
 {
     bool   output;
@@ -184,6 +192,10 @@ Var_T * sourcemeter_max_off_source_current( Var_T * v );
 Var_T * sourcemeter_source_high_capacity( Var_T * v );
 Var_T * sourcemeter_source_sink_mode( Var_T * v );
 Var_T * sourcemeter_source_settling_mode( Var_T * v );
+Var_T * sourcemeter_measure_voltage( Var_T * v );
+Var_T * sourcemeter_measure_current( Var_T * v );
+Var_T * sourcemeter_measure_power( Var_T * v );
+Var_T * sourcemeter_measure_resistance( Var_T * v );
 
 
 #endif
