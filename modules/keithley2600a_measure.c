@@ -333,7 +333,7 @@ keithley2600a_measure( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(  what >= VOLTAGE && what <= RESISTANCE );
 
-    sprintf( buf, "print(%s.measure.%c)", smu[ ch ], method[ what ] );
+    sprintf( buf, "print(%s.measure.%c())", smu[ ch ], method[ what ] );
     keithley2600a_talk( buf, buf, sizeof buf );
 
     return keithley2600a_line_to_double( buf );

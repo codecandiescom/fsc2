@@ -592,7 +592,7 @@ keithley2600a_get_source_leveli( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "print(%s.source.leveli)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof sizeof buf );
+	keithley2600a_talk( buf, buf, sizeof buf );
 
 	amps = keithley2600a_line_to_double( buf );
 	if ( ! keithley2600a_check_source_leveli( ch, amps ) )
