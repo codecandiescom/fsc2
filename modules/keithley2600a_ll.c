@@ -26,6 +26,9 @@ static void clear_errors( void );
 static void comm_failure( void );
 
 
+static const char *smu[ ] = { "smua", "smub" };
+
+
 /*--------------------------------------------------------------*
  * Opens connection to the device and sets iy up for further work
  *--------------------------------------------------------------*/
@@ -192,6 +195,57 @@ clear_errors( void )
 }
 
 
+/*---------------------------------------------------------------*
+ * Returns the sense mode of the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_get_sense( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.sense)", smu[ ch ] );
+	keithley2600a_talk( buf, buf, sizeof buf );
+
+    k26->sense[ ch ] = keithley2600a_line_to_int( buf );
+    if (    k26->sense[ ch ] != SENSE_LOCAL
+		 || k26->sense[ ch ] != SENSE_REMOTE
+		 || k26->sense[ ch ] != SENSE_CALA )
+        keithley2600a_bad_data( );
+
+    return k26->sense[ ch ];
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the sense mode of the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_set_sense( unsigned int ch,
+						 int          sense )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+	fsc2_assert(    sense == SENSE_LOCAL
+				 || sense == SENSE_REMOTE
+				 || sense == SENSE_CALA );
+
+	/* Calibration mode can only be switched to when output is off */
+
+	fsc2_assert(    sense != SENSE_CALA
+				 || keithley2600a_get_source_output( ch ) == OUTPUT_OFF );
+
+    sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
+	keithley2600a_cmd( buf );
+
+    return k26->sense[ ch ] = sense;
+}
+
+
 /*--------------------------------------------------------------*
  * Converts a line as received from the device to a boolean value
  *--------------------------------------------------------------*/
@@ -232,8 +286,8 @@ keithley2600a_line_to_int( const char * line )
         keithley2600a_bad_data( );
 
     res = lrnd( dres );
-    if ( dres - res != 0 )
-        keithley2600a_bad_data( );
+//    if ( dres - res != 0 )a
+//        keithley2600a_bad_data( );
 
     return res;
 }

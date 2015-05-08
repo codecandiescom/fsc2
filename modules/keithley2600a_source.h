@@ -22,10 +22,6 @@
 #define KEITHLEY2600A_SOURCE_H_
 
 
-int keithley2600a_get_sense( unsigned int ch );
-int keithley2600a_set_sense( unsigned int ch,
-                             int          sense );
-
 int keithley2600a_get_source_offmode( unsigned int ch );
 int keithley2600a_set_source_offmode( unsigned int ch,
                                       int          source_offmode );

@@ -25,57 +25,6 @@ static const char *smu[ ] = { "smua", "smub" };
 
 
 /*---------------------------------------------------------------*
- * Returns the sense mode of the channel
- *---------------------------------------------------------------*/
-
-int
-keithley2600a_get_sense( unsigned int ch )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-
-    sprintf( buf, "print(%s.sense)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
-
-    k26->sense[ ch ] = keithley2600a_line_to_bool( buf );
-    if (    k26->sense[ ch ] != SENSE_LOCAL
-		 || k26->sense[ ch ] != SENSE_REMOTE
-		 || k26->sense[ ch ] != SENSE_CALA )
-        keithley2600a_bad_data( );
-
-    return k26->sense[ ch ];
-}
-
-
-/*---------------------------------------------------------------*
- * Sets the sense mode of the channel
- *---------------------------------------------------------------*/
-
-int
-keithley2600a_set_sense( unsigned int ch,
-						 int          sense )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert(    sense == SENSE_LOCAL
-				 || sense == SENSE_REMOTE
-				 || sense == SENSE_CALA );
-
-	/* Calibration mode can only be switched to when output is off */
-
-	fsc2_assert(    sense != SENSE_CALA
-				 || keithley2600a_get_source_output( ch ) == OUTPUT_OFF );
-
-    sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
-	keithley2600a_cmd( buf );
-
-    return k26->sense[ ch ] = sense;
-}
-
-
-/*---------------------------------------------------------------*
  * Returns the output-off mode of the channel
  *---------------------------------------------------------------*/
 

@@ -35,6 +35,10 @@ void keithley2600a_get_state( void );
 void keithley2600a_reset( void );
 void keithley2600a_show_errors( void );
 
+int keithley2600a_get_sense( unsigned int ch );
+int keithley2600a_set_sense( unsigned int ch,
+                             int          sense );
+
 bool keithley2600a_line_to_bool( const char * line );
 int keithley2600a_line_to_int( const char * line );
 double keithley2600a_line_to_double( const char * line );
