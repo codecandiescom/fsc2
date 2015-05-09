@@ -46,6 +46,9 @@ Currently the following device type names are used:
 -  "synthesizer"
 -  "temperature controller"
 -  "voltmeter"
+   "frequency counter"
+   "powermeter"
+   "sourcemeter"
 
 
 You may define as many other macros as you need for a new device. Usually

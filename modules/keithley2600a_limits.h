@@ -95,6 +95,10 @@ bool keithley2600a_check_measure_rangev( unsigned int ch,
 bool keithley2600a_check_measure_rangei( unsigned int ch,
                                          double       range );
 
+bool keithley2600a_test_toggle_source_output( unsigned int ch );
+bool keithley2600a_test_toggle_source_func( unsigned int ch );
+
+
 #endif
 
 

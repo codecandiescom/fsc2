@@ -103,7 +103,7 @@ typedef struct
 {
     bool   output;
     int    offmode;
-    int    func;
+    bool   func;
     bool   highc;
 
     bool   autorangev;

@@ -102,49 +102,17 @@ keithley2600a_set_source_output( unsigned int ch,
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
-
-#if ! defined NDEBUG
-    /* Check all settings before witching the channel on - note that the tests
-       work only properly when the 'source.output' member of the structure for
-       the state of the channel is set. */
-
-    if ( source_output )
-    {
-        k26->source[ ch ].output = OUTPUT_ON;
-        if (    ! keithley2600a_check_source_levelv( ch,
-												   k26->source[ ch ].levelv )
-				|| ! keithley2600a_check_source_leveli( ch,
-												   k26->source[ ch ].leveli )
-				|| ! keithley2600a_check_source_rangev( ch,
-                                                   k26->source[ ch ].rangev )
-				|| ! keithley2600a_check_source_rangei( ch,
-                                                   k26->source[ ch ].rangei )
-				|| ! keithley2600a_check_source_limitv( ch,
-                                                   k26->source[ ch ].limitv )
-				|| ! keithley2600a_check_source_limiti( ch,
-                                                   k26->source[ ch ].limiti ) )
-        {
-            k26->source[ ch ].output = OUTPUT_OFF;
-            print( FATAL, "Can't switch output on with the current "
-                   "settings.\n" );
-            THROW( EXCEPTION );
-        }
-
-        k26->source[ ch ].output = OUTPUT_OFF;
-    }
-#endif
+    fsc2_assert(    k26->source[ ch ].output == source_output
+                 || keithley2600a_test_toggle_source_output( ch ) );
 
     sprintf( buf, "%s.source.output=%d", smu[ ch ], ( int ) source_output );
 	keithley2600a_cmd( buf );
-
-    if ( ! source_output )
-        return k26->source[ ch ].output = 0;
 
     /* Despite all our testing an attempt to switch output on may fail if the
        settings still aren't acceptable. So we'd always check if the output
        was in fact switched on. */
 
-    if ( ! keithley2600a_get_source_output( ch ) )
+    if ( ! keithley2600a_get_source_output( ch ) != source_output )
         keithley2600a_show_errors( );
 
     return k26->source[ ch ].output = source_output;
@@ -174,7 +142,7 @@ keithley2600a_get_source_highc( unsigned int ch )
  * it on also modifies a number of other settings!)
  *---------------------------------------------------------------*/
 
-int
+bool
 keithley2600a_set_source_highc( unsigned int ch,
                                 bool         source_highc )
 {
@@ -219,10 +187,10 @@ keithley2600a_set_source_highc( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Returns if the channel is set up as voltage of current source
+ * Returns if the channel is set up as voltage or current source
  *---------------------------------------------------------------*/
 
-int
+bool
 keithley2600a_get_source_func( unsigned int ch )
 {
     char buf[ 50 ];
@@ -240,15 +208,15 @@ keithley2600a_get_source_func( unsigned int ch )
  * Switches the channel between voltage of current source
  *---------------------------------------------------------------*/
 
-int
+bool
 keithley2600a_set_source_func( unsigned int ch,
-                               int          source_func )
+                               bool         source_func )
 {
     char buf[ 50 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert(    source_func == OUTPUT_DCAMPS
-                 || source_func == OUTPUT_DCVOLTS );
+    fsc2_assert(    source_func == k26->source[ ch ].func
+                 || keithley2600a_test_toggle_source_func( ch ) );
 
     sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
 	keithley2600a_cmd( buf );

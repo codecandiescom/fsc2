@@ -31,12 +31,12 @@ bool keithley2600a_set_source_output( unsigned int ch,
                                       bool         source_output );
 
 bool keithley2600a_get_source_highc( unsigned int ch );
-int keithley2600a_set_source_highc( unsigned int ch,
-                                    bool         source_highc );
+bool keithley2600a_set_source_highc( unsigned int ch,
+                                     bool         source_highc );
 
-int keithley2600a_get_source_func( unsigned int ch );
-int keithley2600a_set_source_func( unsigned int ch,
-                                   int          source_func );
+bool keithley2600a_get_source_func( unsigned int ch );
+bool keithley2600a_set_source_func( unsigned int ch,
+                                    bool         source_func );
 
 bool keithley2600a_get_source_autorangev( unsigned int ch );
 bool keithley2600a_set_source_autorangev( unsigned int ch,

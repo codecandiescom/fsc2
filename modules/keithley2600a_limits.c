@@ -54,9 +54,9 @@ static double basic_max_source_limiti( void );
 
 #if defined _2601A || defined _2602A
 
-static double Source_Ranges_V[ ] = { 0.1,       /* 100 mV */
-									 1.0,       /*   1  V */
-									 6.0,       /*   6  V */
+static double Source_Ranges_V[ ] = {  0.1,      /* 100 mV */
+									  1.0,      /*   1  V */
+									  6.0,      /*   6  V */
 									 40.0 };    /*  40  V */
 #define Measure_Ranges_V Source_Ranges_V
 
@@ -74,31 +74,31 @@ static double Source_Ranges_I[ ] = { 1.0e-7,    /* 100 nA */
 
 #elif defined _2611A || defined _2612A
 
-static double Source_Ranges_V[ ] = { 0.2,       /* 200 mV */
-									 2.0,       /*   2  V */
-									 20.0,      /*  20  V */
+static double Source_Ranges_V[ ] = {   0.2,     /* 200 mV */
+									   2.0,     /*   2  V */
+									  20.0,     /*  20  V */
 									 200.0 };   /* 200  V */
 
 #define Measure_Ranges_V Source_Ranges_V
 
-static double Source_Ranges_I[ ] = { 1.0e-7,    /* 100 nA */
-									 1.0e-6,    /*   1 uA */
-									 1.0e-5,    /*  10 uA */
-									 1.0e-4,    /* 100 uA */
-									 1.0e-3,    /*   1 mA */
-									 1.0e-2,    /*  10 mA */
-									 1.0e-1,    /* 100 mA */
-									 1.0,       /*   1  A */
-									 1.5,       /*  1.5 A */
+static double Source_Ranges_I[ ] = {  1.0e-7,   /* 100 nA */
+									  1.0e-6,   /*   1 uA */
+									  1.0e-5,   /*  10 uA */
+									  1.0e-4,   /* 100 uA */
+									  1.0e-3,   /*   1 mA */
+									  1.0e-2,   /*  10 mA */
+									  1.0e-1,   /* 100 mA */
+									  1.0,      /*   1  A */
+									  1.5,      /*  1.5 A */
 									 10.0 };    /*  10  A */
 
 #define Measure_Ranges_I Source_Ranges_I
 
 #elif defined _2635A || defined _2636A
 
-static double Source_Ranges_V[ ] = { 0.2,       /* 200 mV */
-									 2.0,       /*   2  V */
-									 20.0,      /*  20  V */
+static double Source_Ranges_V[ ] = {   0.2,     /* 200 mV */
+									   2.0,     /*   2  V */
+									  20.0,     /*  20  V */
 									 200.0 };   /* 200  V */
 
 #define Measure_Ranges_V Source_Ranges_V
@@ -1019,6 +1019,69 @@ keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
             return OK;
 
     return FAIL;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if output of channel can be toggled on or off
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_test_toggle_source_output( unsigned int ch )
+{
+    bool res;
+
+    /* Switching the channel off is always possible */
+
+    if ( k26->source[ ch ].output )
+        return true;
+
+    k26->source[ ch ].output = true;
+
+    res =    (    k26->source[ ch ].output == OUTPUT_DCAMPS
+               && keithley2600a_test_source_leveli( ch )
+               && keithley2600a_test_source_rangei( ch )
+               && keithley2600a_test_source_limitv( ch ) )
+          || (    k26->source[ ch ].output == OUTPUT_DCVOLTS
+               && keithley2600a_test_source_levelv( ch )
+               && keithley2600a_test_source_rangev( ch )
+               && keithley2600a_test_source_limiti( ch ) );
+
+    k26->source[ ch ].output = false;
+
+    return res;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if source function can be toggled (i.e from voltage to
+ * current source or vice versa)
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_test_toggle_source_func( unsigned int ch )
+{
+    bool res;
+
+    /* As long as output is off there's no possible problem */
+
+    if ( k26->source[ ch ].output )
+        return true;
+
+    k26->source[ ch ].func = ! k26->source[ ch ].func;
+
+    res =    (    k26->source[ ch ].func == OUTPUT_DCAMPS
+               && keithley2600a_test_source_leveli( ch )
+               && keithley2600a_test_source_rangei( ch )
+               && keithley2600a_test_source_limitv( ch ) )
+          || (   k26->source[ ch ].func == OUTPUT_DCVOLTS
+              && keithley2600a_test_source_levelv( ch )
+              && keithley2600a_test_source_rangev( ch )
+              && keithley2600a_test_source_limiti( ch ) );
+
+    k26->source[ ch ].func = ! k26->source[ ch ].func;
+
+    return res;
 }
 
 

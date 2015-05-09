@@ -26,10 +26,11 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 static unsigned int get_channel( Var_T ** v );
 static void correct_for_highc( unsigned int ch );
-static char * pretty_print( double v,
-                            char   unit );
-#define ppA( x ) pretty_print( x, 'A' )
-#define ppV( x ) pretty_print( x, 'V' )
+static char * pretty_print( double       v,
+                            const char * unit );
+
+#define ppA( x ) pretty_print( x, "A" )
+#define ppV( x ) pretty_print( x, "V" )
 
 
 static Keithley2600A_T keithley2600a;
@@ -39,8 +40,8 @@ Keithley2600A_T * k26 = &keithley2600a;
 
 #define TEST_VOLTAGE     1.0e-3
 #define TEST_CURRENT     1.0e-6
-#define TEST_POWER       1.0e-9
-#define TEST_RESISTANCE  1.0e3
+#define TEST_POWER       ( TEST_VOLTAGE * TEST_CURRENT )
+#define TEST_RESISTANCE  ( TEST_VOLTAGE / TEST_CURRENT )
 
 
 /*--------------------------------------------------------------*
@@ -338,58 +339,39 @@ sourcemeter_output_state( Var_T * v )
     if ( k26->source[ ch ].output == on_off )
         return vars_push( INT_VAR, on_off ? 1L : 0L );
 
-    /* Before switching the channel on check that all settings are possible */
+    /* Before switching the channel on check that settings don't conflict */
 
-    if ( on_off )
+    if ( ! keithley2600a_test_toggle_source_output( ch ) )
     {
-        /* Tests require that channel looks as if it is on */
-
-        k26->source[ ch ].output = true;
+        char *s1, *s2, *s3;
 
         if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
         {
-            if (    ! keithley2600a_test_source_leveli( ch )
-                 || ! keithley2600a_test_source_rangei( ch )
-                 || ! keithley2600a_test_source_limitv( ch ) )
-            {
-                char * s1 = ppA( k26->source[ ch ].leveli );
-                char * s2 = ppA( k26->source[ ch ].rangei );
-                char * s3 = ppV( k26->source[ ch ].levelv );
+            s1 = ppA( k26->source[ ch ].leveli );
+            s2 = ppA( k26->source[ ch ].rangei );
+            s3 = ppV( k26->source[ ch ].levelv );
 
-                print( FATAL, "Can't switch on channel %u as current source, "
-                       "combination of current level (%s), range (%s) "
-                       "or compliance voltage (%s) is not possible.\n",
-                       ch, s1, s2, s3 );
-                T_free( s3 );
-                T_free( s2 );
-                T_free( s1 );
-                k26->source[ ch ].output = false;
-                THROW( EXCEPTION );
-            }
+            print( FATAL, "Can't switch on channel %u as current source, "
+                   "combination of current level (%s), range (%s) and "
+                   "compliance voltage (%s) is not possible.\n",
+                   ch, s1, s2, s3 );
         }
         else
         {
-            if (    ! keithley2600a_test_source_levelv( ch )
-                 || ! keithley2600a_test_source_rangev( ch )
-                 || ! keithley2600a_test_source_limiti( ch ) )
-            {
-                char * s1 = ppV( k26->source[ ch ].levelv );
-                char * s2 = ppV( k26->source[ ch ].rangev );
-                char * s3 = ppA( k26->source[ ch ].leveli );
+            s1 = ppV( k26->source[ ch ].levelv );
+            s2 = ppV( k26->source[ ch ].rangev );
+            s3 = ppA( k26->source[ ch ].leveli );
 
-                print( FATAL, "Can't switch on channel %u as voltage source, "
-                       "combination of voltage level (%s), range (%s) or "
-                       "compliance current (%s)is not possible.\n",
-                       s1, s2, s3 );
-                T_free( s3 );
-                T_free( s2 );
-                T_free( s1 );
-                k26->source[ ch ].output = false;
-                THROW( EXCEPTION );
-            }
+            print( FATAL, "Can't switch on channel %u as voltage source, "
+                   "combination of voltage level (%s), range (%s) and "
+                   "compliance current (%s)is not possible.\n",
+                   ch, s1, s2, s3 );
         }
 
-        k26->source[ ch ].output = false;
+        T_free( s3 );
+        T_free( s2 );
+        T_free( s1 );
+        THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -410,11 +392,11 @@ Var_T *
 sourcemeter_source_mode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    int mode;
+    bool mode;
 
     if ( ! v )
-        return vars_push( INT_VAR, k26->source[ ch ].func == OUTPUT_DCAMPS ?
-                          0L : 1L );
+        return vars_push( INT_VAR,
+                          k26->source[ ch ].func == OUTPUT_DCAMPS ? 0L : 1L );
 
     if ( v->type == STR_VAR )
     {
@@ -439,63 +421,41 @@ sourcemeter_source_mode( Var_T * v )
     too_many_arguments( v );
 
     if ( mode == k26->source[ ch ].func )
-        return vars_push( INT_VAR, mode );
+        return vars_push( INT_VAR, mode == OUTPUT_DCAMPS ? 0L : 1L );
 
-    /* before switching the source function when output is on we need to
-       check that all settings for the new mode are correct */
+    /* before switching the source function we need to check that all
+       settings for the new mode are correct */
 
-    if ( k26->source[ ch ].output )
+    if ( ! keithley2600a_test_toggle_source_func( ch ) )
     {
-        int old_mode = k26->source[ ch ].func;
-
-        /* For testing the mode must already be set! */
-
-        k26->source[ ch ].func = mode;
+        char *s1, *s2, *s3;
 
         if ( mode == OUTPUT_DCAMPS )
         {
-            if (    ! keithley2600a_test_source_leveli( ch )
-                 || ! keithley2600a_test_source_rangei( ch )
-                 || ! keithley2600a_test_source_limitv( ch ) )
-            {
-                char * s1 = ppA( k26->source[ ch ].leveli );
-                char * s2 = ppA( k26->source[ ch ].rangei );
-                char * s3 = ppV( k26->source[ ch ].levelv );
+            s1 = ppA( k26->source[ ch ].leveli );
+            s2 = ppA( k26->source[ ch ].rangei );
+            s3 = ppV( k26->source[ ch ].levelv );
 
-                print( FATAL, "Can't switch to current sourrce mode, "
-                       "combination of current level (%s), range (%s) "
-                       "or compliance voltage (%s) is not possible.\n",
-                       s1, s2, s3 );
-                T_free( s3 );
-                T_free( s2 );
-                T_free( s1 );
-                k26->source[ ch ].func = old_mode;
-                THROW( EXCEPTION );
-            }
+            print( FATAL, "Can't switch to current sourrce mode for channel "
+                   "%u, combination of current level (%s), range (%s) "
+                   "and compliance voltage (%s) is not possible.\n",
+                   ch, s1, s2, s3 );
         }
         else
         {
-            if (    ! keithley2600a_test_source_levelv( ch )
-                 || ! keithley2600a_test_source_rangev( ch )
-                 || ! keithley2600a_test_source_limiti( ch ) )
-            {
-                char * s1 = ppV( k26->source[ ch ].levelv );
-                char * s2 = ppV( k26->source[ ch ].rangev );
-                char * s3 = ppA( k26->source[ ch ].leveli );
+            s1 = ppV( k26->source[ ch ].levelv );
+            s2 = ppV( k26->source[ ch ].rangev );
+            s3 = ppA( k26->source[ ch ].leveli );
 
-                print( FATAL, "Can't switch to current sourrce mode, "
-                       "combination of voltage level (%s), range (%s) or "
-                       "compliance current (%s)is not possible.\n",
-                       s1, s2, s3 );
-                T_free( s3 );
-                T_free( s2 );
-                T_free( s1 );
-                k26->source[ ch ].func = old_mode;
-                THROW( EXCEPTION );
-            }
+            print( FATAL, "Can't switch to current sourrce mode for channel "
+                   "%u, combination of voltage level (%s), range (%s) and "
+                   "compliance current (%s)is not possible.\n",
+                   ch, s1, s2, s3 );
         }
 
-        k26->source[ ch ].func = old_mode;
+        T_free( s3 );
+        T_free( s2 );
+        T_free( s1 );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -503,8 +463,8 @@ sourcemeter_source_mode( Var_T * v )
     else
         keithley2600a.source[ ch ].func = mode;
 
-    return vars_push( INT_VAR, k26->source[ ch ].func == OUTPUT_DCAMPS ?
-                      0L : 1L );
+    return vars_push( INT_VAR,
+                      k26->source[ ch ].func == OUTPUT_DCAMPS ? 0L : 1L );
 }
 
 
@@ -604,7 +564,14 @@ sourcemeter_source_voltage_range( Var_T * v )
            req_range;
 
     if ( ! v )
+    {
+        /* If autoranging is on range may have become modified */
+
+        if ( FSC2_MODE == EXPERIMENT && k26->source[ ch ].autorangev )
+            keithley2600a_get_source_rangev( ch );
+
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
+    }
 
     req_range = fabs( get_double( v, "source voltage range" ) );
     too_many_arguments( v );
@@ -658,7 +625,14 @@ sourcemeter_source_current_range( Var_T * v )
            req_range;
 
     if ( ! v )
+    {
+        /* If autoranging is on range may have become modified */
+
+        if ( FSC2_MODE == EXPERIMENT && k26->source[ ch ].autorangei )
+            keithley2600a_get_source_rangei( ch );
+
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
+    }
 
     req_range = fabs( get_double( v, "current voltage range" ) );
     too_many_arguments( v );
@@ -1361,25 +1335,36 @@ correct_for_highc( unsigned int ch )
 
 
 /*---------------------------------------------------------------------*
+ * Helper function for outputting floating point data in a scientific
+ * notation that is easy to read for the user. Returns an allocated
+ * string the caller has to deallocated using T_free(). The first
+ * argument is the number to output, the second a basic unit of
+ * measure to append at the end.
  *---------------------------------------------------------------------*/
 
 static
 char *
-pretty_print( double v,
-              char   unit )
+pretty_print( double       v,
+              const char * unit )
 {
     double av = fabs( v );
 
-    if ( av >= 1.0 )
-        return get_string( "%.5g %c", v, unit );
-    else if ( av >= 1.0e-3 )
-        return get_string( "%.5g m%c", v * 1.0e3, unit );
-    else if ( av >= 1.0e-6 )
-        return get_string( "%.5g u%c", v * 1.0e6, unit );
-    else if ( av >= 1.0e-9 )
-        return get_string(  "%.5g n%c", v * 1.0e9, unit );
+    if ( av >= 0.999995e6 )
+        return get_string( "%.5g M%s", 1.0e-6, v, unit );
+    else if ( av >= 0.999995e3 )
+        return get_string( "%.5g k%s", 1.0e-3, v, unit );
+    else if ( av >= 0.999995 )
+        return get_string( "%.5g %s", v, unit );
+    else if ( av >= 0.999995e-3 )
+        return get_string( "%.5g m%s", v * 1.0e3, unit );
+    else if ( av >= 0.999995e-6 )
+        return get_string( "%.5g u%s", v * 1.0e6, unit );
+    else if ( av >= 0.999995e-9 )
+        return get_string(  "%.5g n%s", v * 1.0e9, unit );
+    else if ( av >= 0.999995e-12 )
+        return get_string( "%.5g p%s", v * 1.0e12, unit );
 
-    return get_string( "%.5g p%c", v * 1.0e12, unit );
+    return get_string( "%.5g %s", v, unit );
 }
 
 
