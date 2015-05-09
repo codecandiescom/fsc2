@@ -1,4 +1,4 @@
-#  Copyright (C) 1999-2014 Jens Thoms Toerring
+#  Copyright (C) 1999-2015 Jens Thoms Toerring
 #
 #  This file is part of fsc2.
 #
@@ -462,6 +462,12 @@ clean:
 	done;
 	-for n in $(hp534_list); do                   \
 		$(RM) $(RMFLAGS) $$n.c;                   \
+	done;
+	-for n in $(hp535_list); do                   \
+		for m in "" _util _gpib; do               \
+			$(RM) $(RMFLAGS) $$n$$m.c;            \
+		done;                                     \
+		$(RM) $(RMFLAGS) $$n.map;                 \
 	done;
 	$(RM) $(RMFLAGS) vxi11_clnt.c
 	$(RM) $(RMFLAGS) *.fsc2_so

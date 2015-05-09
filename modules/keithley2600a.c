@@ -28,6 +28,8 @@ static unsigned int get_channel( Var_T ** v );
 static void correct_for_highc( unsigned int ch );
 static char * pretty_print( double       v,
                             const char * unit );
+static const char * ppc( unsigned int   ch,
+                         const char   * prefix );
 
 #define ppA( x ) pretty_print( x, "A" )
 #define ppV( x ) pretty_print( x, "V" )
@@ -351,10 +353,10 @@ sourcemeter_output_state( Var_T * v )
             s2 = ppA( k26->source[ ch ].rangei );
             s3 = ppV( k26->source[ ch ].levelv );
 
-            print( FATAL, "Can't switch on channel %u as current source, "
+            print( FATAL, "Can't switch on %sas current source, "
                    "combination of current level (%s), range (%s) and "
                    "compliance voltage (%s) is not possible.\n",
-                   ch, s1, s2, s3 );
+                   ppc( ch, "" ), s1, s2, s3 );
         }
         else
         {
@@ -362,10 +364,10 @@ sourcemeter_output_state( Var_T * v )
             s2 = ppV( k26->source[ ch ].rangev );
             s3 = ppA( k26->source[ ch ].leveli );
 
-            print( FATAL, "Can't switch on channel %u as voltage source, "
+            print( FATAL, "Can't switch on %sas voltage source, "
                    "combination of voltage level (%s), range (%s) and "
-                   "compliance current (%s)is not possible.\n",
-                   ch, s1, s2, s3 );
+                   "compliance current (%s) is not possible.\n",
+                   ppc( ch, "" ), s1, s2, s3 );
         }
 
         T_free( s3 );
@@ -436,10 +438,9 @@ sourcemeter_source_mode( Var_T * v )
             s2 = ppA( k26->source[ ch ].rangei );
             s3 = ppV( k26->source[ ch ].levelv );
 
-            print( FATAL, "Can't switch to current sourrce mode for channel "
-                   "%u, combination of current level (%s), range (%s) "
-                   "and compliance voltage (%s) is not possible.\n",
-                   ch, s1, s2, s3 );
+            print( FATAL, "Can't switch %sto current source mode, combination "
+                   "of current level (%s), range (%s) and compliance voltage "
+                   "(%s) is not possible.\n", ppc( ch, "" ), s1, s2, s3 );
         }
         else
         {
@@ -447,10 +448,9 @@ sourcemeter_source_mode( Var_T * v )
             s2 = ppV( k26->source[ ch ].rangev );
             s3 = ppA( k26->source[ ch ].leveli );
 
-            print( FATAL, "Can't switch to current sourrce mode for channel "
-                   "%u, combination of voltage level (%s), range (%s) and "
-                   "compliance current (%s)is not possible.\n",
-                   ch, s1, s2, s3 );
+            print( FATAL, "Can't switch %sto current source mode, combination "
+                   "of voltage level (%s), range (%s) and compliance current "
+                   "(%s) is not possible.\n", ppc( ch, "" ), s1, s2, s3 );
         }
 
         T_free( s3 );
@@ -489,8 +489,8 @@ sourcemeter_source_voltage( Var_T * v )
         char * s1 = ppV( volts );
         char * s2 = ppV( keithley2600a_max_source_levelv( ch ) );
 
-        print( FATAL, "Source voltage of %s is out of currently possible "
-               "range, may not exceed +/-%s.\n", s1, s2 );
+        print( FATAL, "Voltage of %s %sis out of currently possible range, "
+               "may not exceed +/-%s.\n", s1,  ppc( ch, "for" ), s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -531,8 +531,8 @@ sourcemeter_source_current( Var_T * v )
         char * s1 = ppA( amps );
         char * s2 = ppA( keithley2600a_max_source_leveli( ch ) );
 
-        print( FATAL, "Source current of %s is out of currently possible "
-               "range, may not exceed +/-%s.\n", s1, s2 );
+        print( FATAL, "Source current of %s %sis out of currently possible "
+               "range, may not exceed +/-%s.\n", s1, ppc( ch, "for" ), s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -583,8 +583,8 @@ sourcemeter_source_voltage_range( Var_T * v )
         char * s1 = ppV( req_range );
         char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
 
-        print( FATAL, "Can't set source voltage range to %s, maximum possible "
-               "value under the current circumstances is %s.\n", s1, s2 );
+        print( FATAL, "Can't set range %sto %s, maximum under current "
+               "circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -595,10 +595,20 @@ sourcemeter_source_voltage_range( Var_T * v )
         char * s1 = ppV( req_range );
         char * s2 = ppV( range );
 
-        print( WARN, "Had to adjust source voltage range from %s to %s.\n",
-               s1, s2 );
+        print( WARN, "Had to adjust range %sfrom %s to %s.\n",
+               ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
+    }
+
+    if ( ! keithley2600a_check_source_rangev( ch, range ) )
+    {
+        char *s1 = ppV( range );
+
+        print( FATAL, "Can't set range %sto %s under current circumstances.\n",
+               ppc( ch, "for" ), s1 );
+        T_free( s1 );
+        THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -644,8 +654,8 @@ sourcemeter_source_current_range( Var_T * v )
         char * s1 = ppV( req_range );
         char * s2 = ppV( keithley2600a_max_source_rangei( ch ) );
 
-        print( FATAL, "Can't set source current range to %s, maximum possible "
-               "value under the current circumstances is %s.\n", s1, s2 );
+        print( FATAL, "Can't set range %sto %s, maximum under the current "
+               "circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -656,10 +666,20 @@ sourcemeter_source_current_range( Var_T * v )
         char * s1 = ppA( req_range );
         char * s2 = ppA( range );
 
-        print( WARN, "Had to adjust source current range from %s to %s.\n",
-               s1, s2 );
+        print( WARN, "Had to adjust range %sfrom %s to %s.\n",
+               ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
+    }
+
+    if ( ! keithley2600a_check_source_rangei( ch, range ) )
+    {
+        char *s1 = ppA( range );
+
+        print( FATAL, "Can't set range %Sto %s under current circumstances.\n",
+               ppc( ch, "for" ), s1 );
+        T_free( s1 );
+        THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -739,9 +759,8 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
         char * s1 = ppV( req_range );
         char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
 
-        print( FATAL, "Can't set source voltage autorange low limit to %s, "
-               "maximum possible value under the current circumstances "
-               "is %s.\n", s1, s2 );
+        print( FATAL, "Can't set autorange low limit %sto %s, maximum under "
+               "current circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -754,8 +773,8 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
         char * s1 = ppV( req_range );
         char * s2 = ppV( range );
 
-        print( WARN, "Had to adjust source voltage autorange low limit "
-               "from %s to %s.\n", s1, s2 );
+        print( WARN, "Had to adjust autorange low limit %sfrom %s to %s.\n",
+               ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
     }
@@ -768,9 +787,9 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
         char * s2 = ppV( keithley2600a_min_measure_lowrangev( ch ) );
         char * s3 = ppV( keithley2600a_max_source_rangev( ch ) );
 
-        print( FATAL, "Requested source voltage autorange low limit of %s "
-               "out of range, must be betwen %s and %s under current "
-               "circumstances.\n", s1, s2, s3 );
+        print( FATAL, "Requested autorange low limit %sof %s out of range, "
+               "must be betwen %s and %s under current circumstances.\n",
+               ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
         T_free( s3 );
@@ -818,9 +837,8 @@ sourcemeter_source_current_autorange_low_limit( Var_T * v )
         char * s1 = ppA( req_range );
         char * s2 = ppA( keithley2600a_max_source_rangei( ch ) );
 
-        print( FATAL, "Can't set source current autorange low limit to %s, "
-               "maximum possible value under the current circumstances "
-               "is %s.\n", s1, s2 );
+        print( FATAL, "Can't set autorange low limit %sto %s, maximum under "
+               "current circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
         THROW( EXCEPTION );
@@ -833,8 +851,8 @@ sourcemeter_source_current_autorange_low_limit( Var_T * v )
         char * s1 = ppA( req_range );
         char * s2 = ppA( range );
 
-        print( WARN, "Had to adjust source current autorange low limit "
-               "from %s to %s.\n", s1, s2 );
+        print( WARN, "Had to adjust autorange low limit %sfrom %s to %s.\n",
+               ppc( ch, "for" ), s1, s2 );
         T_free( s2 );
         T_free( s1 );
     }
@@ -847,9 +865,9 @@ sourcemeter_source_current_autorange_low_limit( Var_T * v )
         char * s2 = ppA( keithley2600a_min_measure_lowrangei( ch ) );
         char * s3 = ppA( keithley2600a_max_source_rangei( ch ) );
 
-        print( FATAL, "Requested source current autorange low limit of %s "
-               "out of range, must be betwen %s and %s under current "
-               "circumstances.\n", s1, s2, s3 );
+        print( FATAL, "Requested autorange low limit %sof %s out of range, "
+               "must be betwen %s and %s under current circumstances.\n",
+               ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
         T_free( s3 );
@@ -933,9 +951,9 @@ sourcemeter_compliance_voltage( Var_T * v )
         char * s2 = ppV( keithley2600a_min_source_limitv( ch ) );
         char * s3 = ppV( keithley2600a_max_source_limitv( ch ) );
 
-        print( FATAL, "Requested compliance voltage of %s is out of range, "
-               "must be between %s and %s und the current circumstances.\n",
-               s1, s2, s3 );
+        print( FATAL, "Requested compliance voltage %sof %s is out of range, "
+               "must be between %s and %s und current circumstances.\n",
+               ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
         T_free( s3 );
@@ -978,9 +996,9 @@ sourcemeter_compliance_current( Var_T * v )
         char * s2 = ppA( keithley2600a_min_source_limiti( ch ) );
         char * s3 = ppA( keithley2600a_max_source_limiti( ch ) );
 
-        print( FATAL, "Requested compliance current of %s is out of range, "
-               "must be between %s and %s und the current circumstances.\n",
-               s1, s2, s3 );
+        print( FATAL, "Requested compliance current %sof %s is out of range, "
+               "must be between %s and %s und current circumstances.\n",
+               ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
         T_free( s3 );
@@ -1168,8 +1186,9 @@ sourcemeter_max_off_source_current( Var_T * v )
         char * s2 = ppA( keithley2600a_min_source_offlimiti( ch ) );
         char * s3 = ppA( keithley2600a_max_source_offlimiti( ch ) );
 
-        print( FATAL, "Requesyed maximum current in normal off state of %s "
-               "out of range, must be between %s and %s.\n", s1, s2, s3 );
+        print( FATAL, "Requested maximum current in normal off state %sof %s "
+               "out of range, must be between %s and %s.\n",
+               ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
         T_free( s3 );
@@ -1366,6 +1385,27 @@ pretty_print( double       v,
 
     return get_string( "%.5g %s", v, unit );
 }
+
+
+/*---------------------------------------------------------------------*
+ * measure to append at the end.
+ *---------------------------------------------------------------------*/
+
+static
+const char *
+ppc( unsigned int   ch,
+     const char   * prefix )
+{
+#if defined DONT_EXPECT_CHANNEL && NUM_CHANNELS == 1
+    return " ";
+#else
+    static char buf[ 50 ] = "for channel * ";
+
+    snprintf( buf, 49, "%s channel %u ", prefix, ch + 1 );
+    return buf;
+#endif
+}
+
 
 
 /*

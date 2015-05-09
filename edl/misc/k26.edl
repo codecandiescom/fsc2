@@ -5,5 +5,9 @@ keithley2600a;
 EXPERIMENT:
 
 print( "\TOutput state: #\n", sourcemeter_output_state( 1, "ON" ) );
+sourcemeter_source_voltage( 1, 10 V );
+sourcemeter_source_voltage_range( 1, 1 V );
+
 print( "\TOutput state: #\n", sourcemeter_output_state( 1 ) );
 print( "\TOutput state: #\n", sourcemeter_source_voltage( 1, 13.41234 ) );
+
