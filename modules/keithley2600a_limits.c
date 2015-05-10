@@ -320,7 +320,7 @@ max_compliance_amps_limit( unsigned int ch )
 
 double
 keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
-                                  double           volts )
+                                  double       volts )
 {
     size_t i;
     size_t num_ranges = sizeof  Source_Ranges_V / sizeof *Source_Ranges_V;
@@ -350,7 +350,7 @@ keithley2600a_best_source_rangei( unsigned int ch  UNUSED_ARG,
     amps = fabs( amps );
 
     /* Find the lowest ramge the value fits in, but keep in mind that there's
-       a raised minimum setting whet the channel is in high capacity mode */
+       a raised minimum setting when the channel is in high capacity mode */
 
     for ( i = 0; i < num_ranges; i++ )
         if ( amps <= Source_Ranges_I[ i ] )
@@ -615,12 +615,14 @@ keithley2600a_check_source_rangev( unsigned int ch,
     double min_range = keithley2600a_min_source_rangev( ch );
     double max_range = keithley2600a_max_source_rangev( ch );
 
+    range = fabs( range );
+
     for ( i = 0; i < Num_Source_Ranges_V; i++ )
         if ( Source_Ranges_V[ i ] == min_range )
             break;
 
     for ( ; i < Num_Source_Ranges_V && Source_Ranges_V[ i ] <= max_range; i++ )
-        if ( range == Source_Ranges_V[ i ] )
+        if ( range <= Source_Ranges_V[ i ] )
             return OK;
 
     return FAIL;
@@ -856,7 +858,7 @@ keithley2600a_min_source_lowrangev( unsigned int ch  UNUSED_ARG )
 
 
 /*---------------------------------------------------------------*
- * Retirns the minimum value for the source lowrange current setting
+ * Returns the minimum value for the source lowrange current setting
  *---------------------------------------------------------------*/
 
 double
@@ -997,7 +999,7 @@ keithley2600a_check_measure_rangev( unsigned int ch  UNUSED_ARG,
     size_t i;
 
     for ( i = 0; i < Num_Measure_Ranges_V; i++ )
-        if ( range == Measure_Ranges_V[ i ] )
+        if ( range <= Measure_Ranges_V[ i ] )
             return OK;
 
     return FAIL;
@@ -1015,7 +1017,7 @@ keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
     size_t i;
 
     for ( i = 0; i < Num_Measure_Ranges_I; i++ )
-        if ( range == Measure_Ranges_I[ i ] )
+        if ( range <= Measure_Ranges_I[ i ] )
             return OK;
 
     return FAIL;

@@ -22,6 +22,14 @@
 #define KEITHLEY2600A_MEASURE_H_
 
 
+double keithley2600a_get_measure_rangev( unsigned int ch );
+double keithley2600a_set_measure_rangev( unsigned int ch,
+                                         double       range );
+
+double keithley2600a_get_measure_rangei( unsigned int ch );
+double keithley2600a_set_measure_rangei( unsigned int ch,
+                                         double       range );
+
 bool keithley2600a_get_measure_autorangev( unsigned int ch );
 bool keithley2600a_set_measure_autorangev( unsigned int ch,
                                            bool         autorange );
@@ -40,13 +48,6 @@ double keithley2600a_set_measure_lowrangev( unsigned int ch,
 double keithley2600a_get_measure_lowrangei( unsigned int ch );
 double keithley2600a_set_measure_lowrangei( unsigned int ch,
                                             double       lowrange );
-
-double keithley2600a_get_measure_rangev( unsigned int ch );
-double keithley2600a_set_measure_rangev( unsigned int ch,
-                                         double       range );
-double keithley2600a_get_measure_rangei( unsigned int ch );
-double keithley2600a_set_measure_rangei( unsigned int ch,
-                                         double       range );
 
 double keithley2600a_measure( unsigned int ch,
 							  int          what );

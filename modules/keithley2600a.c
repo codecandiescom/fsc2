@@ -553,15 +553,18 @@ sourcemeter_source_current( Var_T * v )
 
 
 /*--------------------------------------------------------------*
- * Returns source voltage range or sets it for the given channel
+ * Returns source voltage range for the given channel or sets it
+ * (the value set is the lowest range that can be set under the
+ * current circumstances with the requested value used as the
+ * lower bound).
  *--------------------------------------------------------------*/
 
 Var_T *
 sourcemeter_source_voltage_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range,
-           req_range;
+    double req,
+           range;
 
     if ( ! v )
     {
@@ -573,66 +576,53 @@ sourcemeter_source_voltage_range( Var_T * v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
     }
 
-    req_range = fabs( get_double( v, "source voltage range" ) );
+    req = fabs( get_double( v, "source voltage range" ) );
     too_many_arguments( v );
 
-    range = keithley2600a_best_source_rangev( ch, req_range );
+    /* Get the next range that can be set under the current circumstances,
+       i.e. the range setting that's at last as large as the requested
+       value or, when we're in voltage sourcing mode and output is on,
+       the next range that covers the maximum of the requested value and
+       the voltage level. */
+
+    range = keithley2600a_best_source_rangev( ch, req );
+
+    /* Check that requested range isn't out of bounds, otherwiae correct it */
 
     if ( range < 0 )
-    {
-        char * s1 = ppV( req_range );
-        char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
-
-        print( FATAL, "Can't set range %sto %s, maximum under current "
-               "circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
-
-    if ( fabs( ( range - req_range ) / range ) > 0.001 )
-    {
-        char * s1 = ppV( req_range );
-        char * s2 = ppV( range );
-
-        print( WARN, "Had to adjust range %sfrom %s to %s.\n",
-               ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-    }
-
-    if ( ! keithley2600a_check_source_rangev( ch, range ) )
-    {
-        char *s1 = ppV( range );
-
-        print( FATAL, "Can't set range %sto %s under current circumstances.\n",
-               ppc( ch, "for" ), s1 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
+        req = range = keithley2600a_max_source_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_rangev( ch, range );
+    {
+        if (    k26->source[ ch ].output
+             && k26->sense[ ch ] == OUTPUT_DCVOLTS )
+            req = d_max( req, k26->source[ ch ].levelv );
+
+        keithley2600a_set_source_rangev( ch, req );
+    }
     else
     {
         k26->source[ ch ].rangev = range;
         k26->source[ ch ].autorangev = false;
     }
 
-    return vars_push( FLOAT_VAR, range );
+    return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
 }
 
 
 /*--------------------------------------------------------------*
- * Returns source current range or sets it for the given channel
+ * Returns source current range for the given channel or sets it
+ * (the value set is the lowest range that can be set under the
+ * current circumstances with the requested value used as the
+ * lower bound).
  *--------------------------------------------------------------*/
 
 Var_T *
 sourcemeter_source_current_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range,
-           req_range;
+    double req,
+           range;
 
     if ( ! v )
     {
@@ -644,58 +634,43 @@ sourcemeter_source_current_range( Var_T * v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
     }
 
-    req_range = fabs( get_double( v, "current voltage range" ) );
+    req = fabs( get_double( v, "source current range" ) );
     too_many_arguments( v );
 
-    range = keithley2600a_best_source_rangei( ch, req_range );
+    /* Get the next range that can be set under the current circumstances,
+       i.e. the range setting that's at last as large as the requested
+       value or, when we're in current sourcing mode and output is on,
+       the next range that covers the maximum of the requested value and
+       the current level. */
+
+    range = keithley2600a_best_source_rangei( ch, req );
+
+    /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
-    {
-        char * s1 = ppV( req_range );
-        char * s2 = ppV( keithley2600a_max_source_rangei( ch ) );
-
-        print( FATAL, "Can't set range %sto %s, maximum under the current "
-               "circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
-
-    if ( fabs( ( range - req_range ) / range ) > 0.001 )
-    {
-        char * s1 = ppA( req_range );
-        char * s2 = ppA( range );
-
-        print( WARN, "Had to adjust range %sfrom %s to %s.\n",
-               ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-    }
-
-    if ( ! keithley2600a_check_source_rangei( ch, range ) )
-    {
-        char *s1 = ppA( range );
-
-        print( FATAL, "Can't set range %Sto %s under current circumstances.\n",
-               ppc( ch, "for" ), s1 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
+        range = req = keithley2600a_max_source_rangei( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_rangei( ch, range );
+    {
+        if (    k26->source[ ch ].output
+             && k26->sense[ ch ] == OUTPUT_DCAMPS )
+            req = d_max( req, k26->source[ ch ].leveli );
+
+        keithley2600a_set_source_rangei( ch, req );
+    }
     else
     {
         k26->source[ ch ].rangei = range;
         k26->source[ ch ].autorangei = false;
     }
 
-    return vars_push( FLOAT_VAR, range );
+    return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
 }
 
 
 /*--------------------------------------------------------------*
- * Returns or sets if source voltage autoranging is on or off
+ * Returns or sets if source voltage autoranging is on or off.
+ * Switching it on can change the source range setting.
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -732,163 +707,8 @@ sourcemeter_source_voltage_autoranging( Var_T * v )
 
 
 /*--------------------------------------------------------------*
- * Returns or sets the source voltage autoranging low limit
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
-{
-    unsigned int ch = get_channel( &v );
-    double req_range,
-           range;
-
-    if ( ! v )
-        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
-
-    req_range = fabs( get_double( v, "source voltage autorange low limit" ) );
-    too_many_arguments( v );
-
-    /* Find nearest possible range */
-
-    range = keithley2600a_best_source_rangev( ch, req_range );
-
-    /* A negative result indicates that the value was too large */
-
-    if ( range < 0 )
-    {
-        char * s1 = ppV( req_range );
-        char * s2 = ppV( keithley2600a_max_source_rangev( ch ) );
-
-        print( FATAL, "Can't set autorange low limit %sto %s, maximum under "
-               "current circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
-
-    /* Warn if we had to modify the requested value */
-
-    if ( fabs( ( range - req_range ) / range ) > 0.001 )
-    {
-        char * s1 = ppV( req_range );
-        char * s2 = ppV( range );
-
-        print( WARN, "Had to adjust autorange low limit %sfrom %s to %s.\n",
-               ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-    }
-
-    /* Check that the value is reasonable */
-
-    if ( ! keithley2600a_check_source_lowrangev( ch, range ) )
-    {
-        char * s1 = ppV( range );
-        char * s2 = ppV( keithley2600a_min_measure_lowrangev( ch ) );
-        char * s3 = ppV( keithley2600a_max_source_rangev( ch ) );
-
-        print( FATAL, "Requested autorange low limit %sof %s out of range, "
-               "must be betwen %s and %s under current circumstances.\n",
-               ppc( ch, "for" ), s1, s2, s3 );
-        T_free( s1 );
-        T_free( s2 );
-        T_free( s3 );
-        THROW( EXCEPTION );
-    }
-
-    if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_lowrangev( ch, range );
-    else
-    {
-        k26->source[ ch ].lowrangev = range;
-        if ( k26->source[ ch ].autorangev )
-            k26->source[ ch ].rangev = d_max( range, k26->source[ ch ].rangev );
-    }
-
-    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
-}
-
-
-/*--------------------------------------------------------------*
- * Returns or sets the source current autoranging low limit
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_source_current_autorange_low_limit( Var_T * v )
-{
-    unsigned int ch = get_channel( &v );
-    double req_range,
-           range;
-
-    if ( ! v )
-        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
-
-    req_range = fabs( get_double( v, "source current autorange low limit" ) );
-    too_many_arguments( v );
-
-    /* Find nearest possible range */
-
-    range = keithley2600a_best_source_rangei( ch, req_range );
-
-    /* A negative result indicates that the value was too large */
-
-    if ( range < 0 )
-    {
-        char * s1 = ppA( req_range );
-        char * s2 = ppA( keithley2600a_max_source_rangei( ch ) );
-
-        print( FATAL, "Can't set autorange low limit %sto %s, maximum under "
-               "current circumstances is %s.\n", ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-        THROW( EXCEPTION );
-    }
-
-    /* Warn if we had to modify the requested value */
-
-    if ( fabs( ( range - req_range ) / range ) > 0.001 )
-    {
-        char * s1 = ppA( req_range );
-        char * s2 = ppA( range );
-
-        print( WARN, "Had to adjust autorange low limit %sfrom %s to %s.\n",
-               ppc( ch, "for" ), s1, s2 );
-        T_free( s2 );
-        T_free( s1 );
-    }
-
-    /* Check that the value is reasonable */
-
-    if ( ! keithley2600a_check_source_lowrangei( ch, range ) )
-    {
-        char * s1 = ppA( range );
-        char * s2 = ppA( keithley2600a_min_measure_lowrangei( ch ) );
-        char * s3 = ppA( keithley2600a_max_source_rangei( ch ) );
-
-        print( FATAL, "Requested autorange low limit %sof %s out of range, "
-               "must be betwen %s and %s under current circumstances.\n",
-               ppc( ch, "for" ), s1, s2, s3 );
-        T_free( s1 );
-        T_free( s2 );
-        T_free( s3 );
-        THROW( EXCEPTION );
-    }
-
-    if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_lowrangei( ch, range );
-    else
-    {
-        k26->source[ ch ].lowrangei = range;
-        if ( k26->source[ ch ].autorangei )
-            k26->source[ ch ].rangei = d_max( range, k26->source[ ch ].rangei );
-    }
-
-    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
-}
-
-
-/*--------------------------------------------------------------*
  * Returns or sets if source current autoranging is on or off
+ * Switching it on can change the source range setting.
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -921,6 +741,102 @@ sourcemeter_source_current_autoranging( Var_T * v )
     }
 
     return vars_push( INT_VAR, k26->source[ ch ].autorangev ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns the source voltage autoranging low limit for the channel
+ * or sets it (the requested value may get modified if necessary -
+ * it it's too large it gets set to the maximum possible value,
+ * otherwise it's set to next larger possible value). Note that
+ * setting it may also change the source range setting when the
+ * low limit is smaller than that and autoranging is on.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double req,
+           range;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
+
+    req = fabs( get_double( v, "source voltage autorange low limit" ) );
+    too_many_arguments( v );
+
+    /* Find nearest possible range */
+
+    range = keithley2600a_best_source_rangev( ch, req );
+
+    /* A negative result indicates that the value was too large and we
+       correct it down to the maximum */
+
+    if ( range < 0 )
+        req = range = keithley2600a_max_source_lowrangev( ch );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        req = d_max( req, keithley2600a_min_source_lowrangev( ch ) );
+        keithley2600a_set_source_lowrangev( ch, req );
+    }
+    else
+    {
+        k26->source[ ch ].lowrangev = range;
+        if ( k26->source[ ch ].autorangev )
+            k26->source[ ch ].rangev = d_max( range, k26->source[ ch ].rangev );
+    }
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns the source current autoranging low limit for the channel
+ * or sets it (the requested value may get modified if necessary -
+ * it it's too large it gets set to the maximum possible value,
+ * otherwise it's set to next larger possible value). Note that
+ * setting it may also change the source range setting when the
+ * low limit is smaller than that and autoranging is on.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_source_current_autorange_low_limit( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double req,
+           range;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
+
+    req = fabs( get_double( v, "source current autorange low limit" ) );
+    too_many_arguments( v );
+
+    /* Find nearest possible range */
+
+    range = keithley2600a_best_source_rangei( ch, req );
+
+    /* A negative result indicates that the value was too large and we
+       correct it down to the maximum */
+
+    if ( range < 0 )
+        req = range = keithley2600a_max_source_rangei( ch );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        req = d_max( req, keithley2600a_min_source_lowrangei( ch ) );
+        keithley2600a_set_source_lowrangei( ch, req );
+    }
+    else
+    {
+        k26->source[ ch ].lowrangei = range;
+        if ( k26->source[ ch ].autorangei )
+            k26->source[ ch ].rangei = d_max( range, k26->source[ ch ].rangei );
+    }
+
+    return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
 }
 
 

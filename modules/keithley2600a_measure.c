@@ -25,6 +25,106 @@ static const char *smu[ ] = { "smua", "smub" };
 
 
 /*---------------------------------------------------------------*
+ * Returns the setting of the measurement voltage range of the
+ * channel (but the value may change if autoranging is on and
+ * is overruled by the source voltage range while source function
+ * is voltage)
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_rangev( unsigned int ch )
+{
+    double range;
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rangev)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    range = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_measure_rangev( ch, range ) )
+        keithley2600a_bad_data( );
+
+    return range;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets a range for the measurement voltage of the channel, thereby
+ * disabling autoranging. Note that this value is "overruled" by
+ * the source voltage range if we're in voltage sourcing mode.
+ * The function returns the "active" value.
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_rangev( unsigned int ch,
+                                  double       range )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_measure_rangev( ch, range ) );
+
+    sprintf( buf, "%s.measure.rangev=%.5g", smu[ ch ], range );
+    keithley2600a_cmd( buf );
+
+    k26->measure[ ch ].autorangev = false;
+    return keithley2600a_get_measure_rangev( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the "active" setting of the source current range of
+ * the channel. This value may not be what has been set for the
+ * current range if we're in current sourcing mode, were the source
+ * current range setting overrules it.
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_rangei( unsigned int ch )
+{
+    double range;
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rangei)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    range = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_measure_rangei( ch, range ) )
+        keithley2600a_bad_data( );
+
+    return range;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets a range for the measure current of the channel (thereby
+ * disabling autoranging). Note that if we're in current sourcing
+ * mode this value has no effect and is overruled by the source
+ * current range. The function returns the actual value.
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_rangei( unsigned int ch,
+                                  double       range )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_measure_rangei( ch, range ) );
+
+    sprintf( buf, "%s.measure.rangei=%.5g", smu[ ch ], range );
+    keithley2600a_cmd( buf );
+
+    k26->measure[ ch ].autorangei = false;
+    return keithley2600a_get_measure_rangei( ch );
+}
+
+
+/*---------------------------------------------------------------*
  * Returns if autorange for voltage measurements with the channel
  * is on or off
  *---------------------------------------------------------------*/
@@ -230,92 +330,6 @@ keithley2600a_set_measure_lowrangei( unsigned int ch,
 	keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].lowrangei = lowrange;
-}
-
-
-/*---------------------------------------------------------------*
- * Returns the currently set voltage measurement range
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_get_measure_rangev( unsigned int ch )
-{
-    char buf[ 50 ];
-	double range;
-
-    fsc2_assert( ch < NUM_CHANNELS );
-
-    sprintf( buf, "print(%s.measure.rangev)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
-
-	range = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_measure_rangev( ch, range ) )
-		keithley2600a_bad_data( );
-
-    return k26->measure[ ch ].rangev = range;
-}
-
-
-/*---------------------------------------------------------------*
- * Sets the voltage measurement range
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_set_measure_rangev( unsigned int ch,
-								  double       range )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_measure_rangev( ch, range ) );
-
-    sprintf( buf, "%s.measure.rangev=%.5g", smu[ ch ], range );
-	keithley2600a_cmd( buf );
-
-    return k26->measure[ ch ].rangev = range;
-}
-
-
-/*---------------------------------------------------------------*
- * Returns the currently set current measurement range
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_get_measure_rangei( unsigned int ch )
-{
-    char buf[ 50 ];
-	double range;
-
-    fsc2_assert( ch < NUM_CHANNELS );
-
-    sprintf( buf, "print(%s.measure.rangei)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
-
-	range = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_measure_rangei( ch, range ) )
-		keithley2600a_bad_data( );
-
-    return k26->measure[ ch ].rangei = range;
-}
-
-
-/*---------------------------------------------------------------*
- * Sets the current measurement range
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_set_measure_rangei( unsigned int ch,
-								  double       range )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_measure_rangei( ch, range ) );
-
-    sprintf( buf, "%s.measure.rangei=%.5g", smu[ ch ], range );
-	keithley2600a_cmd( buf );
-
-    return k26->measure[ ch ].rangei = range;
 }
 
 
