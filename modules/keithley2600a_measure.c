@@ -70,6 +70,15 @@ keithley2600a_set_measure_rangev( unsigned int ch,
     keithley2600a_cmd( buf );
 
     k26->measure[ ch ].autorangev = false;
+
+    /* If we're in voltage sourcing mode what the device sets (and returns
+       on request) is always the source voltage range, but it remembers
+       what we've set as the range for the moment were we switch to
+       current sourcing mode */
+
+    if ( k26->source[ ch ].func == OUTPUT_DCVOLTS )
+        return k26->measure[ ch ].rangev = range;
+
     return keithley2600a_get_measure_rangev( ch );
 }
 
@@ -120,6 +129,15 @@ keithley2600a_set_measure_rangei( unsigned int ch,
     keithley2600a_cmd( buf );
 
     k26->measure[ ch ].autorangei = false;
+
+    /* If we're in current sourcing mode what the device sets (and returns
+       on request) is always the source current range, but it remembers
+       what we've set as the range for the moment were we switch to
+       voltage sourcing mode */
+
+    if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
+        return k26->measure[ ch ].rangei = range;
+
     return keithley2600a_get_measure_rangei( ch );
 }
 

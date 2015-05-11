@@ -27,8 +27,6 @@ static double max_source_volts_due_to_compliance( unsigned int ch );
 static double max_source_amps_due_to_compliance( unsigned int ch );
 static double max_compliance_volts_limit( unsigned int ch );
 static double max_compliance_amps_limit( unsigned int ch );
-static double basic_max_source_rangev( void );
-static double basic_max_source_rangei( void );
 static double basic_max_source_limitv( void );
 static double basic_max_source_limiti( void );
 
@@ -314,8 +312,8 @@ max_compliance_amps_limit( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
- * Returns the nearest voltage range for the requested range or level.
- * A negative value is returned if the value is too large.
+ * Returns the nearest source voltage range for the requested range
+ * or level. A negative value is returned if the value is too large.
  *---------------------------------------------------------------*/
 
 double
@@ -323,11 +321,10 @@ keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
                                   double       volts )
 {
     size_t i;
-    size_t num_ranges = sizeof  Source_Ranges_V / sizeof *Source_Ranges_V;
 
     volts = fabs( volts );
 
-    for ( i = 0; i < num_ranges; i++ )
+    for ( i = 0; i < Num_Source_Ranges_V; i++ )
         if ( volts <= Source_Ranges_V[ i ] )
             return Source_Ranges_V[ i ];
 
@@ -336,23 +333,22 @@ keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
         
 
 /*---------------------------------------------------------------*
- * Returns the nearest current range for the requested range or level.
- * A negative value is returned if the value is too large.
+ * Returns the nearest source current range for the requested range
+ * or level. A negative value is returned if the value is too large.
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_source_rangei( unsigned int ch  UNUSED_ARG,
+keithley2600a_best_source_rangei( unsigned int ch,
                                   double       amps )
 {
     size_t i;
-    size_t num_ranges = sizeof Source_Ranges_I / sizeof *Source_Ranges_I;
 
     amps = fabs( amps );
 
     /* Find the lowest ramge the value fits in, but keep in mind that there's
        a raised minimum setting when the channel is in high capacity mode */
 
-    for ( i = 0; i < num_ranges; i++ )
+    for ( i = 0; i < Num_Source_Ranges_I; i++ )
         if ( amps <= Source_Ranges_I[ i ] )
         {
             if ( k26->source[ ch ].highc )
@@ -506,18 +502,6 @@ keithley2600a_min_source_rangev( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
- * Returns the maximum voltage range that cam be set at all
- *---------------------------------------------------------------*/
-static
-double
-basic_max_source_rangev( void )
-{
-	return Source_Ranges_V[   sizeof  Source_Ranges_V
-							/ sizeof *Source_Ranges_V - 1 ];
-}
-
-
-/*---------------------------------------------------------------*
  * Returns the maximum voltage range that can be set under the
  * corrent conditions (this is dependent on the current compliance
  * setting)
@@ -533,7 +517,7 @@ keithley2600a_max_source_rangev( unsigned int ch )
 
 	if (    ! k26->source[ ch ].output
 		 || k26->source[ ch ].func == OUTPUT_DCAMPS )
-		return basic_max_source_rangev( );
+		return Source_Ranges_V[ Num_Source_Ranges_V - 1 ];
 
 	/* Otherwise the maximum range is only limited by the current
 	   compliance limit for the channel */
@@ -566,19 +550,6 @@ keithley2600a_min_source_rangei( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
- * Returns the maximum current range that cam be set at all
- *---------------------------------------------------------------*/
-
-static
-double
-basic_max_source_rangei( void )
-{
-	return Source_Ranges_I[   sizeof  Source_Ranges_I
-							/ sizeof *Source_Ranges_I - 1 ];
-}
-
-
-/*---------------------------------------------------------------*
  * Returns the maximum current range that cam be set under the
  * corrent conditions (this is dependent on the voltage compliance
  * setting)
@@ -594,7 +565,7 @@ keithley2600a_max_source_rangei( unsigned int ch )
 
 	if (    ! k26->source[ ch ].output
 		 || k26->source[ ch ].func == OUTPUT_DCVOLTS )
-		return basic_max_source_rangei( );
+		return Source_Ranges_I[ Num_Source_Ranges_I - 1 ];
 
 	/* Otherwise we're limited only by the voltage comliance value */
 
@@ -958,7 +929,7 @@ keithley2600a_min_source_offlimiti( unsigned int ch  UNUSED_ARG )
 double
 keithley2600a_max_source_offlimiti( unsigned int ch  UNUSED_ARG )
 {
-    return basic_max_source_rangei( );
+    return Source_Ranges_I[ Num_Source_Ranges_I - 1 ];
 }
 
 
@@ -1007,7 +978,7 @@ keithley2600a_check_measure_rangev( unsigned int ch  UNUSED_ARG,
 
 
 /*---------------------------------------------------------------*
- * Returns if a measure voltage range setting is ok
+ * Returns if a measure current range setting is ok
  *---------------------------------------------------------------*/
 
 bool
@@ -1084,6 +1055,73 @@ keithley2600a_test_toggle_source_func( unsigned int ch )
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
     return res;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the maximum measurement voltage range
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_max_measure_rangev( unsigned ch  UNUSED_ARG )
+{
+    return Measure_Ranges_V[ Num_Measure_Ranges_V - 1 ];
+}
+                                  
+
+/*---------------------------------------------------------------*
+ * Returns the maximum measurement current range
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_max_measure_rangei( unsigned ch  UNUSED_ARG )
+{
+    return Measure_Ranges_I[ Num_Measure_Ranges_I - 1 ];
+}
+                                  
+
+/*---------------------------------------------------------------*
+ * Returns the nearest measurement voltage range for the requested
+ * range. A negative value is returned if the value is too large.
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
+                                   double       volts )
+{
+    size_t i;
+
+    volts = fabs( volts );
+
+    for ( i = 0; i < Num_Measure_Ranges_V; i++ )
+        if ( volts <= Measure_Ranges_V[ i ] )
+            return Measure_Ranges_V[ i ];
+
+    return -1;
+}
+        
+
+/*---------------------------------------------------------------*
+ * Returns the nearest measur current range for the requested range.
+ * A negative value is returned if the value is too large.
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_best_measure_rangei( unsigned int ch  UNUSED_ARG,
+                                   double       amps )
+{
+    size_t i;
+
+    amps = fabs( amps );
+
+    /* Find the lowest ramge the value fits in, but keep in mind that there's
+       a raised minimum setting when the channel is in high capacity mode */
+
+    for ( i = 0; i < Num_Measure_Ranges_I; i++ )
+        if ( amps <= Measure_Ranges_I[ i ] )
+            return Source_Ranges_I[ i ];
+
+    return -1;
 }
 
 

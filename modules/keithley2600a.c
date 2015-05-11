@@ -42,8 +42,6 @@ Keithley2600A_T * k26 = &keithley2600a;
 
 #define TEST_VOLTAGE     1.0e-3
 #define TEST_CURRENT     1.0e-6
-#define TEST_POWER       ( TEST_VOLTAGE * TEST_CURRENT )
-#define TEST_RESISTANCE  ( TEST_VOLTAGE / TEST_CURRENT )
 
 
 /*--------------------------------------------------------------*
@@ -117,6 +115,12 @@ keithley2600a_test_hook( void )
         k26->measure[ ch ].lowrangei  = 1.0e-7;
 
         k26->measure[ ch ].autozero   = AUTOZERO_AUTO;
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->measure[ ch ].delay      = DELAY_OFF;
+#else                                  /* 2635A and 2636A */
+        k26->measure[ ch ].delay      = DELAY_AUTO;
+#endif
     }
  
     return OK;
@@ -567,14 +571,7 @@ sourcemeter_source_voltage_range( Var_T * v )
            range;
 
     if ( ! v )
-    {
-        /* If autoranging is on range may have become modified */
-
-        if ( FSC2_MODE == EXPERIMENT && k26->source[ ch ].autorangev )
-            keithley2600a_get_source_rangev( ch );
-
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
-    }
 
     req = fabs( get_double( v, "source voltage range" ) );
     too_many_arguments( v );
@@ -587,15 +584,18 @@ sourcemeter_source_voltage_range( Var_T * v )
 
     range = keithley2600a_best_source_rangev( ch, req );
 
-    /* Check that requested range isn't out of bounds, otherwiae correct it */
+    /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
         req = range = keithley2600a_max_source_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        /* Don't try to set a lower range than the active voltage level
+           if output is on and we're in voltage sourcing mode */
+
         if (    k26->source[ ch ].output
-             && k26->sense[ ch ] == OUTPUT_DCVOLTS )
+             && k26->source[ ch ].func == OUTPUT_DCVOLTS )
             req = d_max( req, k26->source[ ch ].levelv );
 
         keithley2600a_set_source_rangev( ch, req );
@@ -625,14 +625,7 @@ sourcemeter_source_current_range( Var_T * v )
            range;
 
     if ( ! v )
-    {
-        /* If autoranging is on range may have become modified */
-
-        if ( FSC2_MODE == EXPERIMENT && k26->source[ ch ].autorangei )
-            keithley2600a_get_source_rangei( ch );
-
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
-    }
 
     req = fabs( get_double( v, "source current range" ) );
     too_many_arguments( v );
@@ -652,8 +645,11 @@ sourcemeter_source_current_range( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        /* Don't try to set a lower range than the active current level
+           if output is on and we're in current sourcing mode */
+
         if (    k26->source[ ch ].output
-             && k26->sense[ ch ] == OUTPUT_DCAMPS )
+             && k26->source[ ch ].func == OUTPUT_DCAMPS )
             req = d_max( req, k26->source[ ch ].leveli );
 
         keithley2600a_set_source_rangei( ch, req );
@@ -774,7 +770,7 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
        correct it down to the maximum */
 
     if ( range < 0 )
-        req = range = keithley2600a_max_source_lowrangev( ch );
+        req = range = keithley2600a_max_source_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -1132,7 +1128,13 @@ sourcemeter_measure_voltage( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( k26->measure[ ch ].autorangev )
+            k26->measure[ ch ].rangev =
+                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+
         return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+    }
 
     return vars_push( FLOAT_VAR, keithley2600a_measure( ch, VOLTAGE ) );
 }
@@ -1150,7 +1152,13 @@ sourcemeter_measure_current( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( k26->measure[ ch ].autorangei )
+            k26->measure[ ch ].rangei =
+                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+
         return vars_push( FLOAT_VAR, TEST_CURRENT );
+    }
 
     return vars_push( FLOAT_VAR, keithley2600a_measure( ch, CURRENT ) );
 }
@@ -1168,7 +1176,17 @@ sourcemeter_measure_power( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( FLOAT_VAR, TEST_POWER );
+    {
+        if ( k26->measure[ ch ].autorangev )
+            k26->measure[ ch ].rangev =
+                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+
+        if ( k26->measure[ ch ].autorangei )
+            k26->measure[ ch ].rangei =
+                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+
+        return vars_push( FLOAT_VAR, TEST_VOLTAGE * TEST_CURRENT );
+    }
 
     return vars_push( FLOAT_VAR, keithley2600a_measure( ch, POWER ) );
 }
@@ -1186,9 +1204,177 @@ sourcemeter_measure_resistance( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( FLOAT_VAR, TEST_RESISTANCE );
+    {
+        if ( k26->measure[ ch ].autorangev )
+            k26->measure[ ch ].rangev =
+                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+
+        if ( k26->measure[ ch ].autorangei )
+            k26->measure[ ch ].rangei =
+                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+
+        return vars_push( FLOAT_VAR, TEST_VOLTAGE / TEST_CURRENT );
+    }
 
     return vars_push( FLOAT_VAR, keithley2600a_measure( ch, RESISTANCE ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns measure voltage range for the given channel or sets it
+ * (the value set is the lowest range that can be set under the
+ * current circumstances with the requested value used as the
+ * lower bound). Note that in voltage sourcing mode the source
+ * voltage range "overrules" the settings for the measure range.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_voltage_range( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double range;
+
+    if ( ! v )
+    {
+        if (    FSC2_MODE == EXPERIMENT
+             && k26->measure[ ch ].autorangev )
+            return vars_push( FLOAT_VAR,
+                              keithley2600a_get_measure_rangev( ch ) );
+
+        if ( k26->source[ ch ].func == OUTPUT_DCVOLTS )
+            return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
+
+        return vars_push( FLOAT_VAR, k26->measure[ ch ].rangev );
+    }
+
+    range = fabs( get_double( v, "measure voltage range" ) );
+    too_many_arguments( v );
+
+    /* Get the range setting that's at last as large as the requested value. */
+
+    range = keithley2600a_best_measure_rangev( ch, range );
+
+    /* Check that requested range isn't out of bounds, otherwise correct it */
+
+    if ( range < 0 )
+        range = keithley2600a_max_measure_rangev( ch );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_rangev( ch, range );
+    else
+    {
+        k26->measure[ ch ].rangev = range;
+        k26->measure[ ch ].autorangev = false;
+    }
+
+    if ( k26->source[ ch ].func == OUTPUT_DCVOLTS )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].rangev );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns measure current range for the given channel or sets it
+ * (the value set is the lowest range that can be set under the
+ * current circumstances with the requested value used as the
+ * lower bound). Note that in current sourcing mode the source
+ * current range "overrules" the settings for the measure range.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_current_range( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double range;
+
+    if ( ! v )
+    {
+        if (    FSC2_MODE == EXPERIMENT
+             && k26->measure[ ch ].autorangei )
+            return vars_push( FLOAT_VAR,
+                              keithley2600a_get_measure_rangei( ch ) );
+
+        if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
+            return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
+
+        return vars_push( FLOAT_VAR,  k26->measure[ ch ].rangei );
+    }
+
+    range = fabs( get_double( v, "measurment current range" ) );
+    too_many_arguments( v );
+
+    /* Get the range setting that's at last as large as the requested value. */
+
+    range = keithley2600a_best_measure_rangei( ch, range );
+
+    /* Check that requested range isn't out of bounds, otherwise correct it */
+
+    if ( range < 0 )
+        range = keithley2600a_max_measure_rangei( ch );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_rangei( ch, range );
+    else
+    {
+        k26->measure[ ch ].rangev = range;
+        k26->measure[ ch ].autorangev = false;
+    }
+
+    if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
+        return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].rangei );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns if voltage measure autoranging is on or off or sets it
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_voltage_autoranging( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    bool on_off;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->measure[ ch ].autorangev ? 1L : 0L );
+
+    on_off = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_autorangev( ch, on_off );
+    else
+        k26->measure[ ch ].autorangev = on_off;
+
+    return vars_push( INT_VAR, k26->measure[ ch ].autorangev ? 1L : 0L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns if current measure autoranging is on or off or sets it
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_current_autoranging( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    bool on_off;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->measure[ ch ].autorangei ? 1L : 0L );
+
+    on_off = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_autorangei( ch, on_off );
+    else
+        k26->measure[ ch ].autorangei = on_off;
+
+    return vars_push( INT_VAR, k26->measure[ ch ].autorangei ? 1L : 0L );
 }
 
 

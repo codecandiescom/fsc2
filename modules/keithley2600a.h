@@ -142,6 +142,8 @@ typedef struct
     double lowrangei;
 
     int    autozero;
+
+    double delay;
 } Measure_T;
     
 
@@ -196,6 +198,10 @@ Var_T * sourcemeter_measure_voltage( Var_T * v );
 Var_T * sourcemeter_measure_current( Var_T * v );
 Var_T * sourcemeter_measure_power( Var_T * v );
 Var_T * sourcemeter_measure_resistance( Var_T * v );
+Var_T * sourcemeter_measure_voltage_range( Var_T * v );
+Var_T * sourcemeter_measure_current_range( Var_T * v );
+Var_T * sourcemeter_measure_voltage_autoranging( Var_T * v );
+Var_T * sourcemeter_measure_current_autoranging( Var_T * v );
 
 
 #endif

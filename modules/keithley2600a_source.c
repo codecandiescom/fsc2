@@ -221,6 +221,17 @@ keithley2600a_set_source_func( unsigned int ch,
     sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
 	keithley2600a_cmd( buf );
 
+    /* Switching the sourcing mode may have an effect on the reported measure
+       range of the function we're switching from */
+
+    if ( source_func != k26->source[ ch ].func )
+    {
+        if ( source_func == OUTPUT_DCAMPS )
+            keithley2600a_get_measure_rangev( ch );
+        else
+            keithley2600a_get_measure_rangei( ch );
+    }
+
     return k26->source[ ch ].func = source_func;
 }
 

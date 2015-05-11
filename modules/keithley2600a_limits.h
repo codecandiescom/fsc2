@@ -98,6 +98,14 @@ bool keithley2600a_check_measure_rangei( unsigned int ch,
 bool keithley2600a_test_toggle_source_output( unsigned int ch );
 bool keithley2600a_test_toggle_source_func( unsigned int ch );
 
+double keithley2600a_max_measure_rangev( unsigned ch );
+double keithley2600a_max_measure_rangei( unsigned ch );
+
+double keithley2600a_best_measure_rangev( unsigned int ch,
+                                          double       volts );
+double keithley2600a_best_measure_rangei( unsigned int ch,
+                                          double       amps );
+
 
 #endif
 
