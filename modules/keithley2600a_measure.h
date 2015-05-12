@@ -38,16 +38,16 @@ bool keithley2600a_get_measure_autorangei( unsigned int ch );
 bool keithley2600a_set_measure_autorangei( unsigned int ch,
                                            bool         autorange );
 
-int keithley2600a_get_measure_autozero( unsigned int ch );
-int keithley2600a_set_measure_autozero( unsigned int ch,
-                                        int          autozero );
-
 double keithley2600a_get_measure_lowrangev( unsigned int ch );
 double keithley2600a_set_measure_lowrangev( unsigned int ch,
                                             double       lowrange );
 double keithley2600a_get_measure_lowrangei( unsigned int ch );
 double keithley2600a_set_measure_lowrangei( unsigned int ch,
                                             double       lowrange );
+
+int keithley2600a_get_measure_autozero( unsigned int ch );
+int keithley2600a_set_measure_autozero( unsigned int ch,
+                                        int          autozero );
 
 double keithley2600a_measure( unsigned int ch,
 							  int          what );

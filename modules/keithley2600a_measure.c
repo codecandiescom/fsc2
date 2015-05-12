@@ -63,8 +63,10 @@ keithley2600a_set_measure_rangev( unsigned int ch,
 {
     char buf[ 50 ];
 
+    range = fabs( range );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_measure_rangev( ch, range ) );
+    fsc2_assert( range <= keithley2600a_max_measure_rangev( ch ) );
 
     sprintf( buf, "%s.measure.rangev=%.5g", smu[ ch ], range );
     keithley2600a_cmd( buf );
@@ -122,8 +124,10 @@ keithley2600a_set_measure_rangei( unsigned int ch,
 {
     char buf[ 50 ];
 
+    range = fabs( range );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_measure_rangei( ch, range ) );
+    fsc2_assert( range <= keithley2600a_max_measure_rangei( ch ) );
 
     sprintf( buf, "%s.measure.rangei=%.5g", smu[ ch ], range );
     keithley2600a_cmd( buf );
@@ -221,6 +225,112 @@ keithley2600a_set_measure_autorangei( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
+ * Returns the lowest value the measurment voltage range can be
+ * set to while autoranging
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_lowrangev( unsigned int ch )
+{
+    char buf[ 50 ];
+    double lowrange;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.lowrangev)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    lowrange = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_measure_lowrangev( ch, lowrange ) )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].lowrangev = lowrange;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the lowest value the measurement voltage range can be set
+ * to while autoranging
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_lowrangev( unsigned int ch,
+                                     double       lowrange )
+{
+    char buf[ 50 ];
+
+    lowrange = fabs( lowrange );
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( lowrange <= keithley2600a_max_measure_rangev( ch ) );
+
+    sprintf( buf, "%s.measure.lowrangev=%.5g", smu[ ch ], lowrange );
+    keithley2600a_cmd( buf );
+
+    /* If the device is measurement autoranging the changed lower limit
+       may have resulted in a change of the range */
+
+    if ( k26->measure[ ch ].autorangev )
+        keithley2600a_get_measure_rangev( ch );
+
+    return keithley2600a_get_measure_lowrangev( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the lowest value the measurement current range can be
+ * set to while autoranging
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measurement_lowrangei( unsigned int ch )
+{
+    char buf[ 50 ];
+    double lowrange;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.lowrangei)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    lowrange = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_measure_lowrangei( ch, lowrange ) )
+        keithley2600a_bad_data( );
+
+    return keithley2600a_get_measure_lowrangei( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the lowest value the measurement current range can be set
+ * to while autoranging
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_lowrangei( unsigned int ch,
+                                     double       lowrange )
+{
+    char buf[ 50 ];
+
+    lowrange = fabs( lowrange );
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( lowrange <= keithley2600a_max_measure_rangei( ch ) );
+
+    sprintf( buf, "%s.measure.lowrangei=%.5g", smu[ ch ], lowrange );
+    keithley2600a_cmd( buf );
+
+    /* If the device is measurement autoranging the changed lower limit
+       may have resulted in a change of the range */
+
+    if ( k26->measure[ ch ].autorangei )
+        keithley2600a_get_measure_rangei( ch );
+
+    return keithley2600a_get_measure_lowrangei( ch );
+}
+
+
+/*---------------------------------------------------------------*
  * Returns if autozero for measurements with the channel
  * is off (0), once (1) or auto (2)
  *---------------------------------------------------------------*/
@@ -262,92 +372,6 @@ keithley2600a_set_measure_autozero( unsigned int ch,
 	keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].autozero = autozero;
-}
-
-
-/*---------------------------------------------------------------*
- * Returns the low range voltage setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_get_measure_lowrangev( unsigned int ch )
-{
-    char buf[ 50 ];
-	double lowrange;
-
-    fsc2_assert( ch < NUM_CHANNELS );
-
-    sprintf( buf, "print(%s.measure.lowrangev)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
-
-	lowrange = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_measure_lowrangev( ch, lowrange ) )
-		keithley2600a_bad_data( );
-
-    return k26->measure[ ch ].lowrangev = lowrange;
-}
-
-
-/*---------------------------------------------------------------*
- * Sets the low range voltage setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_set_measure_lowrangev( unsigned int ch,
-									 double       lowrange )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_measure_lowrangev( ch, lowrange ) );
-
-    sprintf( buf, "%s.measure.lowrangev=%.5g", smu[ ch ], lowrange );
-	keithley2600a_cmd( buf );
-
-    return k26->measure[ ch ].lowrangev = lowrange;
-}
-
-
-/*---------------------------------------------------------------*
- * Returns the low range current setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_get_measure_lowrangei( unsigned int ch )
-{
-    char buf[ 50 ];
-	double lowrange;
-
-    fsc2_assert( ch < NUM_CHANNELS );
-
-    sprintf( buf, "print(%s.measure.lowrangei)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
-
-	lowrange = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_measure_lowrangei( ch, lowrange ) )
-		keithley2600a_bad_data( );
-
-    return k26->measure[ ch ].lowrangei = lowrange;
-}
-
-
-/*---------------------------------------------------------------*
- * Sets the low range current setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_set_measure_lowrangei( unsigned int ch,
-									 double       lowrange )
-{
-    char buf[ 50 ];
-
-    fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_measure_lowrangei( ch, lowrange ) );
-
-    sprintf( buf, "%s.measure.lowrangei=%.5g", smu[ ch ], lowrange );
-	keithley2600a_cmd( buf );
-
-    return k26->measure[ ch ].lowrangei = lowrange;
 }
 
 

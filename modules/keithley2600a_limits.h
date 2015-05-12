@@ -84,11 +84,6 @@ bool keithley2600a_check_source_offlimiti( unsigned int ch,
 
 double keithley2600a_min_measure_lowrangev( unsigned int ch );
 double keithley2600a_min_measure_lowrangei( unsigned int ch );
-bool keithley2600a_check_measure_lowrangev( unsigned int ch,
-                                            double       lowrange);
-
-bool keithley2600a_check_measure_lowrangei( unsigned int ch,
-                                            double       lowrange );
 
 bool keithley2600a_check_measure_rangev( unsigned int ch,
                                          double       range );
@@ -106,6 +101,10 @@ double keithley2600a_best_measure_rangev( unsigned int ch,
 double keithley2600a_best_measure_rangei( unsigned int ch,
                                           double       amps );
 
+bool keithley2600a_check_measure_lowrangev( unsigned int ch,
+                                            double       lowrange );
+bool keithley2600a_check_measure_lowrangei( unsigned int ch,
+                                            double       lowrange );
 
 #endif
 

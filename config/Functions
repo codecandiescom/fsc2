@@ -601,6 +601,8 @@ sourcemeter_measure_voltage_range, -1, EXP;
 sourcemeter_measure_current_range, -1, EXP;
 sourcemeter_measure_voltage_autoranging, -1, EXP;
 sourcemeter_measure_current_autoranging, -1, EXP;
+sourcemeter_measure_voltage_autorange_low_limit, -1, EXP;
+sourcemeter_measure_current_autorange_low_limit, -1, EXP;
 
 
 /* Function exported by the microwave bridge modules */

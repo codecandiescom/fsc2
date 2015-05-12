@@ -38,6 +38,7 @@ void keithley2600a_show_errors( void );
 int keithley2600a_get_sense( unsigned int ch );
 int keithley2600a_set_sense( unsigned int ch,
                              int          sense );
+double keithley2600a_get_line_frequency( void );
 
 bool keithley2600a_line_to_bool( const char * line );
 int keithley2600a_line_to_int( const char * line );

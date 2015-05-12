@@ -155,6 +155,8 @@ typedef struct
 
     int       sense[ NUM_CHANNELS ];
 
+    double linefreq;
+
     Source_T  source[ NUM_CHANNELS ];
     Measure_T measure[ NUM_CHANNELS ];
 } Keithley2600A_T;
@@ -202,6 +204,8 @@ Var_T * sourcemeter_measure_voltage_range( Var_T * v );
 Var_T * sourcemeter_measure_current_range( Var_T * v );
 Var_T * sourcemeter_measure_voltage_autoranging( Var_T * v );
 Var_T * sourcemeter_measure_current_autoranging( Var_T * v );
+Var_T * sourcemeter_measure_voltage_autorange_low_limit( Var_T * v );
+Var_T * sourcemeter_measure_current_autorange_low_limit( Var_T * v );
 
 
 #endif

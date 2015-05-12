@@ -359,8 +359,10 @@ keithley2600a_set_source_rangev( unsigned int ch,
 {
     char buf[ 50 ];
 
+    range = fabs( range );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_source_rangev( ch, range ) );
+    fsc2_assert( range <= keithley2600a_max_source_rangev( ch ) );
 
     sprintf( buf, "%s.source.rangev=%.5g", smu[ ch ], range );
     keithley2600a_cmd( buf );
@@ -405,8 +407,10 @@ keithley2600a_set_source_rangei( unsigned int ch,
 {
     char buf[ 50 ];
 
+    range = fabs( range );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_source_rangei( ch, range ) );
+    fsc2_assert( range <= keithley2600a_max_source_rangev( ch ) );
 
     sprintf( buf, "%s.source.rangei=%.5g", smu[ ch ], range );
     keithley2600a_cmd( buf );
@@ -417,6 +421,8 @@ keithley2600a_set_source_rangei( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
+ * Returns the lowest value the source voltage range can be set
+ * to while autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -439,6 +445,8 @@ keithley2600a_get_source_lowrangev( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
+ * Sets the lowest value the source voltage range can be set
+ * to while autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -447,8 +455,10 @@ keithley2600a_set_source_lowrangev( unsigned int ch,
 {
     char buf[ 50 ];
 
+    lowrange = fabs( lowrange );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_source_lowrangev( ch, lowrange ) );
+    fsc2_assert( lowrange = keithley2600a_max_source_rangev( ch ) );
 
     sprintf( buf, "%s.source.lowrangev=%.5g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
@@ -458,11 +468,14 @@ keithley2600a_set_source_lowrangev( unsigned int ch,
 
     if ( k26->source[ ch ].autorangev )
         keithley2600a_get_source_rangev( ch );
-    return k26->source[ ch ].lowrangev = lowrange;
+
+    return keithley2600a_get_source_lowrangev( ch );
 }
 
 
 /*---------------------------------------------------------------*
+ * Returns the lowest value the source current range can be set
+ * to while autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -485,6 +498,8 @@ keithley2600a_get_source_lowrangei( unsigned int ch )
 
 
 /*---------------------------------------------------------------*
+ * Sets the lowest value the source current range can be set
+ * to while autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -493,18 +508,21 @@ keithley2600a_set_source_lowrangei( unsigned int ch,
 {
     char buf[ 50 ];
 
+    lowrange = fabs( lowrange );
+
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert( keithley2600a_check_source_lowrangei( ch, lowrange ) );
+    fsc2_assert( lowrange <= keithley2600a_max_source_rangev( ch ) );
 
     sprintf( buf, "%s.source.lowrangei=%.5g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
-    /* If the device is source auoranging the changed lower limit may have
+    /* If the device is source autoranging the changed lower limit may have
        resulted in a change of the range */
 
     if ( k26->source[ ch ].autorangei )
         keithley2600a_get_source_rangei( ch );
-    return k26->source[ ch ].lowrangei = lowrange;
+
+    return keithley2600a_get_source_lowrangei( ch );
 }
 
 

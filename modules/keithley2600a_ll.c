@@ -143,6 +143,8 @@ keithley2600a_get_state( void )
 
     clear_errors( );
 
+    keithley2600a_get_line_frequency( );
+
     for ( ch = 0; ch < NUM_CHANNELS; ch++ )
     {
         keithley2600a_get_sense( ch );
@@ -244,6 +246,26 @@ keithley2600a_set_sense( unsigned int ch,
 	keithley2600a_cmd( buf );
 
     return k26->sense[ ch ] = sense;
+}
+
+
+/*--------------------------------------------------------------*
+ * Requests the frequency of the power line
+ *--------------------------------------------------------------*/
+
+double
+keithley2600a_get_line_frequency( void )
+{
+    char buf[ 50 ] = "print(localnode.linefreq)";
+
+	keithley2600a_talk( buf, buf, sizeof buf );
+
+    k26->linefreq = keithley2600a_line_to_double( buf );
+
+    if ( k26->linefreq != 50 && k26->linefreq != 60 )
+        keithley2600a_bad_data( );
+
+    return k26->linefreq;
 }
 
 

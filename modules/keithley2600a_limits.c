@@ -871,45 +871,6 @@ keithley2600a_check_source_lowrangei( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Returns the minimum value for the measure lowrange voltage setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_min_measure_lowrangev( unsigned int ch  UNUSED_ARG )
-{
-	return Measure_Ranges_V[ 0 ];
-}
-
-
-/*---------------------------------------------------------------*
- * Retirns the minimum value for the measure lowrange current setting
- *---------------------------------------------------------------*/
-
-double
-keithley2600a_min_measure_lowrangei( unsigned int ch )
-{
-	if (    ! k26->source[ ch ].output
-		 || ! k26->source[ ch ].highc )
-		return Measure_Ranges_I[ 0 ];
-
-	return MIN_MEASURE_LOWRANGEI_HIGHC;
-}
-
-
-/*---------------------------------------------------------------*
- * Returns if a lowrange voltage setting is ok under current circumstances
- *---------------------------------------------------------------*/
-
-bool
-keithley2600a_check_measure_lowrangev( unsigned int ch,
-									   double       lowrange )
-{
-	return    lowrange >= keithley2600a_min_measure_lowrangev( ch )
-           && lowrange <= keithley2600a_max_source_rangei( ch );
-}
-
-
-/*---------------------------------------------------------------*
  * Returns the minimum off limit current - it's not properly documented
  * but seems to be 10% of the lowest source current range setting
  *---------------------------------------------------------------*/
@@ -943,19 +904,6 @@ keithley2600a_check_source_offlimiti( unsigned int ch,
 {
     return    offlimiti >= keithley2600a_min_source_offlimiti( ch )
            && offlimiti <= keithley2600a_max_source_offlimiti( ch );
-}
-
-
-/*---------------------------------------------------------------*
- * Returns if a measure lowrange current setting is ok under current
- * circumstances
- *---------------------------------------------------------------*/
-
-bool
-keithley2600a_check_measure_lowrangei( unsigned int ch,
-									   double       lowrange )
-{
-	return lowrange >= keithley2600a_min_measure_lowrangei( ch );
 }
 
 
@@ -1107,21 +1055,56 @@ keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_measure_rangei( unsigned int ch  UNUSED_ARG,
+keithley2600a_best_measure_rangei( unsigned int ch,
                                    double       amps )
 {
-    size_t i;
+    size_t i = 0;
 
     amps = fabs( amps );
 
-    /* Find the lowest ramge the value fits in, but keep in mind that there's
+    /* Find the lowest range the value fits in, but keep in mind that there's
        a raised minimum setting when the channel is in high capacity mode */
 
-    for ( i = 0; i < Num_Measure_Ranges_I; i++ )
+    
+    if ( k26->source[ ch ].highc )
+        for ( ; i < Num_Measure_Ranges_I; ++i )
+            if ( Measure_Ranges_I[ i ] >= MIN_MEASURE_LOWRANGEI_HIGHC )
+                break;
+
+    for ( ; i < Num_Measure_Ranges_I; i++ )
         if ( amps <= Measure_Ranges_I[ i ] )
             return Source_Ranges_I[ i ];
 
     return -1;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if a measurement lowrange voltage setting is possible
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_check_measure_lowrangev( unsigned int ch  UNUSED_ARG,
+                                       double       lowrange )
+{
+	return    lowrange >= Measure_Ranges_V[ 0 ]
+           && keithley2600a_max_measure_rangev( ch );;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if a measurement lowrange cuurent setting is possible
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_check_measure_lowrangei( unsigned int ch,
+                                       double       lowrange )
+{
+    double min = k26->source[ ch ].highc ?
+                 MIN_MEASURE_LOWRANGEI_HIGHC : Measure_Ranges_V[ 0 ];
+
+	return    lowrange >= min
+           && keithley2600a_max_measure_rangei( ch );;
 }
 
 
