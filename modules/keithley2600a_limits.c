@@ -44,6 +44,17 @@ static double basic_max_source_limiti( void );
 #endif
 
 
+
+/*..................................................................*
+ * Minimum and maximum factors, to be multiplied with the inverse of
+ * the line frequency, for the ADC integration time, i.e. the sampling
+ * time for a measurement pointxs
+ *..................................................................*/
+
+#define MIN_INTEGRATION_FACTOR   0.001
+#define MAX_INTEGRATION_FACTOR   25
+
+
 /*..................................................................*
  * Source and measurement voltage and current ranges (source and
  * voltage ranges are identical except for the current ranges of
@@ -1105,6 +1116,40 @@ keithley2600a_check_measure_lowrangei( unsigned int ch,
 
 	return    lowrange >= min
            && keithley2600a_max_measure_rangei( ch );;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the minimum integration time (in seconds)
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_min_measure_time( void )
+{
+    return MIN_INTEGRATION_FACTOR / k26->linefreq;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the maximum integration time (in seconds)
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_max_measure_time( void )
+{
+    return MAX_INTEGRATION_FACTOR / k26->linefreq;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if an integration time is possible
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_check_measure_time( double t )
+{
+    return    t >= keithley2600a_min_measure_time( )
+           && t <= keithley2600a_max_measure_time( );
 }
 
 

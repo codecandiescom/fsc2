@@ -99,6 +99,13 @@
 #define RESISTANCE   3
 
 
+/* Minimum and maximum factors (to be multiplied by the reciprocal of the
+   line frequency) for reading aperture/integration time */
+
+#define MIN_INTEGRATION_FACTOR 0.001
+#define MAZ_INTEGRATION_FACTOR 25
+
+
 typedef struct
 {
     bool   output;
@@ -142,6 +149,8 @@ typedef struct
     double lowrangei;
 
     int    autozero;
+
+    double time;
 
     double delay;
 } Measure_T;
@@ -200,12 +209,14 @@ Var_T * sourcemeter_measure_voltage( Var_T * v );
 Var_T * sourcemeter_measure_current( Var_T * v );
 Var_T * sourcemeter_measure_power( Var_T * v );
 Var_T * sourcemeter_measure_resistance( Var_T * v );
+Var_T * sourcemeter_measure_voltage_and_current( Var_T * v );
 Var_T * sourcemeter_measure_voltage_range( Var_T * v );
 Var_T * sourcemeter_measure_current_range( Var_T * v );
 Var_T * sourcemeter_measure_voltage_autoranging( Var_T * v );
 Var_T * sourcemeter_measure_current_autoranging( Var_T * v );
 Var_T * sourcemeter_measure_voltage_autorange_low_limit( Var_T * v );
 Var_T * sourcemeter_measure_current_autorange_low_limit( Var_T * v );
+Var_T * sourcemeter_measure_time( Var_T * v );
 
 
 #endif

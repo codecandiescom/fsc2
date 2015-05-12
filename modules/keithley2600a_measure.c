@@ -283,7 +283,7 @@ keithley2600a_set_measure_lowrangev( unsigned int ch,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_get_measurement_lowrangei( unsigned int ch )
+keithley2600a_get_measure_lowrangei( unsigned int ch )
 {
     char buf[ 50 ];
     double lowrange;
@@ -393,6 +393,71 @@ keithley2600a_measure( unsigned int ch,
     keithley2600a_talk( buf, buf, sizeof buf );
 
     return keithley2600a_line_to_double( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Makes a simple measurement of voltage, current, power or resistance
+ *---------------------------------------------------------------*/
+
+double const *
+keithley2600a_measure_iv( unsigned int ch )
+{
+    static double iv[ 2 ];
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.iv())", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return keithley2600a_line_to_doubles( buf, iv, 2 );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the time used for measuring a data point (AD converter
+ * integration time, ramge depends on the line frequency)
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_time( unsigned int ch )
+{
+    char buf[ 50 ];
+    double t;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.nplc)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    t = keithley2600a_line_to_double( buf ) / k26->linefreq;
+    if ( ! keithley2600a_check_measure_time( t ) )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].time = t;
+}
+
+
+
+/*---------------------------------------------------------------*
+ * Sets the time used for measuring a data point (AD converter
+ * integration time, ramge depends on the line frequency)
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_time( unsigned int ch,
+                                double       t )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_measure_time( t ) );
+
+    sprintf( buf, "%s.measure.nplc=%.3f", smu[ ch ], t * k26->linefreq );
+    keithley2600a_cmd( buf );
+
+    return keithley2600a_get_measure_time( ch );
 }
 
 

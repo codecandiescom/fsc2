@@ -342,6 +342,55 @@ keithley2600a_line_to_double( const char * line )
 
 
 /*--------------------------------------------------------------*
+ * Converts a line as received from the device into an
+ * array of doubles of the requested length
+ *--------------------------------------------------------------*/
+
+
+double *
+keithley2600a_line_to_doubles( const char * line,
+                               double     * buf,
+                               int          cnt )
+{
+    int i = 0;
+
+    fsc2_assert( cnt > 0 && buf );
+
+    /* Keep reading until end of line is reached or as many values
+       have been read as requested */
+
+    while ( 1 )
+    {
+        double res;
+        char *ep;
+
+        if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
+            keithley2600a_bad_data( );
+
+        errno = 0;
+        res = strtod( line, &ep );
+        if (    ( *ep != '\n' && *ep != ' ' )
+             || *++ep
+             || (    ( res == HUGE_VAL || res == - HUGE_VAL )
+                  && errno == ERANGE ) )
+            keithley2600a_bad_data( );
+
+        buf[ i++ ] = res;
+
+        if ( i == cnt )
+            return buf;
+
+        if ( *ep != ' ' )
+            keithley2600a_bad_data( );
+
+        line = ep++;
+        while ( *line == ' ' )
+            line++;
+    }
+}
+
+
+/*--------------------------------------------------------------*
  * Checks for errors reported by the device and if there are any
  * fetches the corresponding messages and throws an exception after
  * printing out the error messages.

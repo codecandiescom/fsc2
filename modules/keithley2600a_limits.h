@@ -106,6 +106,10 @@ bool keithley2600a_check_measure_lowrangev( unsigned int ch,
 bool keithley2600a_check_measure_lowrangei( unsigned int ch,
                                             double       lowrange );
 
+double keithley2600a_min_measure_time( void );
+double keithley2600a_max_measure_time( void );
+bool keithley2600a_check_measure_time( double t );
+
 #endif
 
 

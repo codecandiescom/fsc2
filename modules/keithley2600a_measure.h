@@ -51,7 +51,11 @@ int keithley2600a_set_measure_autozero( unsigned int ch,
 
 double keithley2600a_measure( unsigned int ch,
 							  int          what );
+double const * keithley2600a_measure_iv( unsigned int ch );
 
+double keithley2600a_get_measure_time( unsigned int ch );
+double keithley2600a_set_measure_time( unsigned int ch,
+                                       double       t );
 
 #endif
 

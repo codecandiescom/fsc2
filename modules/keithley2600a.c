@@ -33,6 +33,7 @@ static const char * ppc( unsigned int   ch,
 
 #define ppA( x ) pretty_print( x, "A" )
 #define ppV( x ) pretty_print( x, "V" )
+#define pps( x ) pretty_print( x, "s" )
 
 
 static Keithley2600A_T keithley2600a;
@@ -1216,6 +1217,42 @@ sourcemeter_measure_resistance( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Returns an array with a voltage and a current reading taken in
+ * parallel
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_voltage_and_current( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double vi[ 2 ];
+    const double *r;
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( k26->measure[ ch ].autorangev )
+            k26->measure[ ch ].rangev =
+                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+        if ( k26->measure[ ch ].autorangei )
+            k26->measure[ ch ].rangei =
+                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+
+        vi[ 0 ] = TEST_VOLTAGE;
+        vi[ 1 ] = TEST_CURRENT;
+        return vars_push( FLOAT_ARR, vi, 2 );
+    }
+
+    r = keithley2600a_measure_iv( ch );
+    vi[ 0 ] = r[ 1 ];
+    vi[ 1 ] = r[ 0 ];
+
+    return vars_push( FLOAT_ARR, vi, 2 );
+}
+
+
+/*--------------------------------------------------------------*
  * Returns measure voltage range for the given channel or sets it
  * (the value set is the lowest range that can be set under the
  * current circumstances with the requested value used as the
@@ -1464,6 +1501,49 @@ sourcemeter_measure_current_autorange_low_limit( Var_T * v )
 
     return vars_push( FLOAT_VAR, k26->measure[ ch ].lowrangei );
 }
+
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the integration time for measurements with
+ * the given channel (possible range depends on line frequence,
+ * must be between 0.001 and 25 times the line period)
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_time( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double t;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->measure[ ch ].time );
+
+    t = get_double( v, "measure time" );
+    too_many_arguments( v );
+
+    if ( ! keithley2600a_check_measure_time( t ) )
+    {
+        char *s1 = pps( t );
+        char *s2 = pps( keithley2600a_min_measure_time( ) );
+        char *s3 = pps( keithley2600a_max_measure_time( ) );
+
+        print( FATAL, "Requested measure time of %s for channel %snot "
+               "possible, must be between %s and %s.\n",
+               ppc( ch, "" ), s1, s2, s3 );
+        T_free( s3 );
+        T_free( s2 );
+        T_free( s1 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_time( ch, t );
+    else
+        k26->measure[ ch ].time = t;
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].time );
+} 
 
 
 /*--------------------------------------------------------------*

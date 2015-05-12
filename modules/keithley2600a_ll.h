@@ -43,6 +43,9 @@ double keithley2600a_get_line_frequency( void );
 bool keithley2600a_line_to_bool( const char * line );
 int keithley2600a_line_to_int( const char * line );
 double keithley2600a_line_to_double( const char * line );
+double * keithley2600a_line_to_doubles( const char * line,
+                                        double     * buf,
+                                        int          cnt );
 void keithley2600a_bad_data( void );
 
 
