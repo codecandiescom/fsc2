@@ -81,6 +81,18 @@ double keithley2600a_get_measure_delay( unsigned int ch );
 double keithley2600a_set_measure_delay( unsigned int ch,
                                         double       delay );
 
+int keithley2600a_get_measure_filter_type( unsigned int ch );
+int keithley2600a_set_measure_filter_type( unsigned int ch,
+                                           int          type );
+
+int keithley2600a_get_measure_filter_count( unsigned int ch );
+int keithley2600a_set_measure_filter_count( unsigned int ch,
+                                            int          count );
+
+bool keithley2600a_get_measure_filter_enabled( unsigned int ch );
+bool keithley2600a_set_measure_filter_enabled( unsigned int ch,
+                                               bool         on_off );
+
 
 #endif
 

@@ -169,16 +169,22 @@ keithley2600a_get_state( void )
 
         keithley2600a_get_measure_autorangev( ch );
         keithley2600a_get_measure_autorangei( ch );
+
         keithley2600a_get_measure_autozero( ch );
-        keithley2600a_get_measure_time( ch );
-         keithley2600a_get_measure_count( ch );
+
+        keithley2600a_get_measure_count( ch );
 
         keithley2600a_get_measure_time( ch );
+        keithley2600a_get_measure_delay( ch );
 
         keithley2600a_get_measure_rel_levelv( ch );
         keithley2600a_get_measure_rel_levelv_enabled( ch );
         keithley2600a_get_measure_rel_leveli( ch );
         keithley2600a_get_measure_rel_leveli_enabled( ch );
+
+        keithley2600a_get_measure_filter_type( ch );
+        keithley2600a_get_measure_filter_count( ch );
+        keithley2600a_get_measure_filter_enabled( ch );
     }
 }
 

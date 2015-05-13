@@ -90,6 +90,13 @@
 #define AUTOZERO_ONCE    1
 #define AUTOZERO_AUTO    2
 
+/* Filter types */
+
+#define FILTER_MOVING_AVG  0
+#define FILTER_REPEAT_AVG  1
+#define FILTER_MEDIAN      2
+
+#define MAX_FILTER_COUNT   100
 
 /* Macros for types of measurements */
 
@@ -137,10 +144,19 @@ typedef struct
 } Source_T;
 
 
-typedef struct {
+typedef struct
+{
     double level;
     bool   enabled;
 } Rel_T;
+
+typedef struct
+{
+    int  type;
+    int  count;
+    bool enabled;
+} Filter_T;
+
 
 typedef struct
 {
@@ -163,6 +179,8 @@ typedef struct
 
     Rel_T  relv;
     Rel_T  reli;
+
+    Filter_T filter;
 } Measure_T;
     
 
@@ -231,6 +249,8 @@ Var_T * sourcemeter_measure_time( Var_T * v );
 Var_T * sourcemeter_measure_voltage_offset( Var_T * v );
 Var_T * sourcemeter_measure_current_offset( Var_T * v );
 Var_T * sourcemeter_measure_delay( Var_T * v );
+Var_T * sourcemeter_measure_filter_type( Var_T * v );
+Var_T * sourcemeter_measure_filter_count( Var_T * v );
 
 
 #endif

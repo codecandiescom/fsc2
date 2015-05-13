@@ -703,6 +703,134 @@ keithley2600a_set_measure_delay( unsigned int ch,
 }
 
 
+/*---------------------------------------------------------------*
+ * Returns the measure filter type for the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_get_measure_filter_type( unsigned int ch )
+{
+    char buf[ 50 ];
+    int type;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.filter.type)", smu[ ch ] );
+    kethley2600a_talk( buf, buf, sizeof buf );
+
+    type = keithley2600a_line_to_int( buf );
+    if (    type != FILTER_MOVING_AVG
+         && type != FILTER_REPEAT_AVG
+         && type != FILTER_MEDIAN )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].filter.type = type;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the measure filter type for the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_set_measure_filter_type( unsigned int ch,
+                                       int          type )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(    type == FILTER_MOVING_AVG
+                 || type == FILTER_REPEAT_AVG
+                 || type == FILTER_MEDIAN );
+
+    sprintf( buf, "%s.measure.filter.type=%d", smu[ ch ], type );
+    kethley2600a_cmd( buf );
+
+    return k26->measure[ ch ].filter.type = type;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the measure filter count for the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_get_measure_filter_count( unsigned int ch )
+{
+    char buf[ 50 ];
+    int count;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.filter.count)", smu[ ch ] );
+    kethley2600a_talk( buf, buf, sizeof buf );
+
+    count = keithley2600a_line_to_int( buf );
+    if ( count < 1 || count > MAX_FILTER_COUNT )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].filter.count = count;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the measure filter count for the channel
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_set_measure_filter_count( unsigned int ch,
+                                        int          count )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( count >= 1 && count <= MAX_FILTER_COUNT );
+
+    sprintf( buf, "%s.measure.filter.count=%d", smu[ ch ], count );
+    kethley2600a_cmd( buf );
+
+    return k26->measure[ ch ].filter.count = count;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if the measure filter for the channel is enabled
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_get_measure_filter_enabled( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.filter.enabled)", smu[ ch ] );
+    kethley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->measure[ ch ].filter.enabled =
+                                            keithley2600a_line_to_bool( buf );;
+}
+
+
+/*---------------------------------------------------------------*
+ * Enables or disabled the measure filter for the channel
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_set_measure_filter_enabled( unsigned int ch,
+                                          bool         on_off )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.measure.filter.enabled=%d", smu[ ch ], on_off ? 1 : 0 );
+    kethley2600a_cmd( buf );
+
+    return k26->measure[ ch ].filter.enabled = on_off;
+}
+
+
 /*
  * Local variables:
  * tab-width: 4

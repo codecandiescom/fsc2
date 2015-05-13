@@ -8949,6 +8949,8 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @item @ref{sourcemeter_measure_delay()}
 @item @ref{sourcemeter_measure_voltage_offset()}
 @item @ref{sourcemeter_measure_current_offset()}
+@item @ref{sourcemeter_measure_filter_type()}
+@item @ref{sourcemeter_measure_filter_count()}
 @end table
 
 @noindent
@@ -9330,6 +9332,10 @@ setting) a value of @code{9.91e37} is returned and a warning printed
 out. The function does not accept any arguments (beside the channel
 number).
 
+Note that the returned value may have been subject to filtering if
+a filter count other than @code{0} has been set via the function
+@code{@ref{sourcemeter_measure_filter_count()}}.
+
 
 @anchor{sourcemeter_measure_current()}
 @findex sourcemeter_measure_current()
@@ -9341,6 +9347,10 @@ measurement current range by more than a factor of @code{1.02}
 setting) a value of @code{9.91e37} is returned and a warning printed
 out. The function does not accept any arguments (beside the channel
 number).
+
+Note that the returned value may have been subject to filtering if
+a filter count other than @code{0} has been set via the function
+@code{@ref{sourcemeter_measure_filter_count()}}.
 
 
 @anchor{sourcemeter_measure_power()}
@@ -9354,6 +9364,10 @@ is off or it exceeds the maximum range setting) a value of
 @code{9.91e37} is returned and a warning printed out. The function
 does not accept any arguments (beside the channel number).
 
+Note that the returned value may have been subject to filtering if
+a filter count other than @code{0} has been set via the function
+@code{@ref{sourcemeter_measure_filter_count()}}.
+
 
 @anchor{sourcemeter_measure_resistance()}
 @findex sourcemeter_measure_resistance()
@@ -9365,6 +9379,10 @@ measurement range by more than a factor of @code{1.02} (because either
 autoranging is off or it exceeds the maximum range setting) a value of
 @code{9.91e37} is returned and a warning printed out. The function
 does not accept any arguments (beside the channel number).
+
+Note that the returned value may have been subject to filtering if
+a filter count other than @code{0} has been set via the function
+@code{@ref{sourcemeter_measure_filter_count()}}.
 
 
 @anchor{sourcemeter_measure_voltage_and_current()}
@@ -9379,6 +9397,10 @@ more than a factor of @code{1.02} (because either autoranging is off
 or it exceeds the maximum range setting) a value of @code{9.91e37} is
 returned for the out-of-range component and a warning printed out. The
 function does not accept any arguments (beside the channel number).
+
+Note that the returned values may have been subject to filtering if
+a filter count other than @code{0} has been set via the function
+@code{@ref{sourcemeter_measure_filter_count()}}.
 
 
 @anchor{sourcemeter_measure_voltage_autoranging()}
@@ -9545,6 +9567,47 @@ abother argument this used as the new measurement current offset.
 Note that this offset has no influence on power or resistance
 measurements and can't be used to measure currents exceeding the range
 of the device.
+
+
+@anchor{sourcemeter_measure_filter_type()}
+@findex sourcemeter_measure_filter_type()
+@item   sourcemeter_measure_filter_type()
+he device allows to set a digital measurement filter. There are three
+types of filters
+
+@table @code
+@item "MOVING_AVGy or 0
+(default for 2601A, 2002A, 2611A and 2612A)
+
+@item "REPEAT_AVG" or 1
+(default for 2635A and 2636A)
+
+@item "MEDIAN" or 2
+@end table
+
+This function allows to query the currently set filter type or change
+it. If called with no arguments (except the channel number) the
+currently set filter type is returned as one of the above listed
+numbers. If called with another argument, either one of the above
+listed strings or numbers, the filter is selected accordingly.
+
+Note tjat setting a filter does not enable it. You also have to set
+the number of points to be filtered over using the function
+@ref{sourcemeter_measure_filter_count()} to enable it.
+
+Using the @code{"REPEAT_AVG"} increases the measurement time by a
+factor equal to the filter count.
+
+
+@anchor{sourcemeter_measure_filter_count()}
+@findex sourcemeter_measure_filter_count()
+@item   sourcemeter_measure_filter_count()
+This function allows to query or set the number of data points
+included into filtering. If called with no arguments (beside the
+channel number) returns that number - if it is @code{0} filtering is
+disabled. Calling it with a number between @code{1} and @code{100}
+enables filtering, using this number of data points. Setting the
+filter count to @code{0} disables filtering/
 
 
 @end table

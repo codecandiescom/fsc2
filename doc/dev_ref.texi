@@ -2317,6 +2317,8 @@ the 2600A series of SourceMeters, i.e.@: 2601A, 2602A, 2611A, 2612A,
 @item @ref{sourcemeter_measure_time()}
 @item @ref{sourcemeter_measure_voltage_offset()}
 @item @ref{sourcemeter_measure_current_offset()}
+@item @ref{sourcemeter_measure_filter_type()}
+@item @ref{sourcemeter_measure_filter_count()}
 @end table
 
 

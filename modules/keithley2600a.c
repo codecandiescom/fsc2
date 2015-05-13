@@ -135,9 +135,18 @@ keithley2600a_test_hook( void )
 
         k26->measure[ ch ].reli.level = 0.0;
         k26->measure[ ch ].reli.enabled = false;
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->measure[ ch ].filter.type = 0;
+#else
+        k26->measure[ ch ].filter.type = 1;
+#endif
+
+        k26->measure[ ch ].filter.count = 1;
+        k26->measure[ ch ].filter.enabled = false;
     }
  
-    return OK;
+    return true;
 }
 
 
@@ -164,7 +173,7 @@ keithley2600a_exp_hook( void )
         RETHROW;
     }
 
-    return OK;
+    return true;
 }
    
 
@@ -1727,6 +1736,112 @@ sourcemeter_measure_delay( Var_T * v )
         k26->measure[ ch ].delay = delay;
 
     return vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the filter type for the measured voltages
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_filter_type( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int type;
+
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) k26->measure[ ch ].filter.type );
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "MOVING_AVG" ) )
+            type = FILTER_MOVING_AVG;
+        else if ( ! strcasecmp( v->val.sptr, "REPEAT_AVG" ) )
+            type = FILTER_REPEAT_AVG;
+        else if ( ! strcasecmp( v->val.sptr, "MEDIAN" ) )
+            type = FILTER_MEDIAN;
+        else
+        {
+            print( FATAL, "Unknown filter type: \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        type = get_strict_long( v, "filter type" );
+        if (    type != FILTER_MOVING_AVG
+             && type != FILTER_REPEAT_AVG
+             && type != FILTER_MEDIAN )
+        {
+            print( FATAL, "Unknown filter type: %d.\n", type );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_filter_type( ch, type );
+    else
+        k26->measure[ ch ].filter.type = type;
+
+    return vars_push( INT_VAR, ( long ) k26->measure[ ch ].filter.type );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the filter count for the measured voltages
+ * (zero disables filter) 
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_filter_count( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int count;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->measure[ ch ].filter.enabled ?
+                          ( long ) k26->measure[ ch ].filter.count : 0L );
+
+    count = get_strict_long( v, "filter count" );
+    too_many_arguments( v );
+
+    if ( count < 0 )
+    {
+        print( FATAL, "Invalid negative filter count.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( count > MAX_FILTER_COUNT )
+    {
+        print( FATAL, "Filter count of %ld too large, maximum is %d.\n",
+               count, MAX_FILTER_COUNT );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( count == 0 )
+            keithley2600a_set_measure_filter_enabled( ch, false );
+        else
+        {
+            keithley2600a_set_measure_filter_count( ch, count );
+            keithley2600a_set_measure_filter_enabled( ch, true );
+        }
+    }
+    else
+    {
+        if ( count == 0 )
+            k26->measure[ ch ].filter.enabled = false;
+        else
+        {
+            k26->measure[ ch ].filter.count = count;
+            k26->measure[ ch ].filter.enabled = true;
+        }
+    }
+
+    return vars_push( INT_VAR, k26->measure[ ch ].filter.enabled ?
+                               ( long ) k26->measure[ ch ].filter.count : 0L );
 }
 
 
