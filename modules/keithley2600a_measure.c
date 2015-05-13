@@ -716,7 +716,7 @@ keithley2600a_get_measure_filter_type( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.filter.type)", smu[ ch ] );
-    kethley2600a_talk( buf, buf, sizeof buf );
+    keithley2600a_talk( buf, buf, sizeof buf );
 
     type = keithley2600a_line_to_int( buf );
     if (    type != FILTER_MOVING_AVG
@@ -744,7 +744,7 @@ keithley2600a_set_measure_filter_type( unsigned int ch,
                  || type == FILTER_MEDIAN );
 
     sprintf( buf, "%s.measure.filter.type=%d", smu[ ch ], type );
-    kethley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].filter.type = type;
 }
@@ -763,7 +763,7 @@ keithley2600a_get_measure_filter_count( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.filter.count)", smu[ ch ] );
-    kethley2600a_talk( buf, buf, sizeof buf );
+    keithley2600a_talk( buf, buf, sizeof buf );
 
     count = keithley2600a_line_to_int( buf );
     if ( count < 1 || count > MAX_FILTER_COUNT )
@@ -787,7 +787,7 @@ keithley2600a_set_measure_filter_count( unsigned int ch,
     fsc2_assert( count >= 1 && count <= MAX_FILTER_COUNT );
 
     sprintf( buf, "%s.measure.filter.count=%d", smu[ ch ], count );
-    kethley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].filter.count = count;
 }
@@ -805,7 +805,7 @@ keithley2600a_get_measure_filter_enabled( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.filter.enabled)", smu[ ch ] );
-    kethley2600a_talk( buf, buf, sizeof buf );
+    keithley2600a_talk( buf, buf, sizeof buf );
 
     return k26->measure[ ch ].filter.enabled =
                                             keithley2600a_line_to_bool( buf );;
@@ -825,7 +825,7 @@ keithley2600a_set_measure_filter_enabled( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.measure.filter.enabled=%d", smu[ ch ], on_off ? 1 : 0 );
-    kethley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].filter.enabled = on_off;
 }
