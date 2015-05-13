@@ -389,9 +389,13 @@ keithley2600a_measure( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(  what >= VOLTAGE && what <= RESISTANCE );
 
+    if ( k26->measure[ ch ].count > 1 )
+        keithley2600a_set_measure_count( ch, 1 );
+
     sprintf( buf, "print(%s.measure.%c())", smu[ ch ], method[ what ] );
     keithley2600a_talk( buf, buf, sizeof buf );
 
+    k26->measure[ ch ].count = 1;
     return keithley2600a_line_to_double( buf );
 }
 
@@ -408,9 +412,13 @@ keithley2600a_measure_iv( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
+    if ( k26->measure[ ch ].count > 1 )
+        keithley2600a_set_measure_count( ch, 1 );
+
     sprintf( buf, "print(%s.measure.iv())", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf );
 
+    k26->measure[ ch ].count = 1;
     return keithley2600a_line_to_doubles( buf, iv, 2 );
 }
 
@@ -458,6 +466,197 @@ keithley2600a_set_measure_time( unsigned int ch,
     keithley2600a_cmd( buf );
 
     return keithley2600a_get_measure_time( ch );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the number of measurements to be done
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_get_measure_count( unsigned int ch )
+{
+    char buf[ 50 ];
+    int count;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.count)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    count = keithley2600a_line_to_int( buf );
+    if ( count <= 0 )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].count = count;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the number of measurements to be done
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_set_measure_count( unsigned int ch,
+                                 int          count )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( count > 0 );
+
+    sprintf( buf, "%s.measure.count=%d", smu[ ch ], count );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].count = count;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the measurement voltage offset
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_rel_levelv( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rel.levelv)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->measure[ ch ].relv.level = keithley2600a_line_to_double( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the measurement voltage offset
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_rel_levelv( unsigned int ch
+                                      double       offset )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.measure.rel.levelv=%.5g)", smu[ ch ], offset );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].relv.level = offset;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the measurement current offset
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_rel_leveli( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rel.leveli)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->measure[ ch ].reli.level = keithley2600a_line_to_double( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the measurement current offset
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_rel_leveli( unsigned int ch
+                                      double       offset )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.measure.rel.leveli=%.5g)", smu[ ch ], offset );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].reli.level = offset;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if the measurement voltage offset is enabled
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_get_measure_rel_levelv_enabled( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rel.enablev)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->measure[ ch ].relv.enabled = keithley2600a_line_to_bool( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets if the measurement voltage offset is enabled
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_set_measure_rel_levelv_enabled( unsigned int ch,
+                                              bool         on_off )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.measure.rel.enablev=%d", smu[ ch ], on_off );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].relv.enabled = on_off;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns if the measurement current offset is enabled
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_get_measure_rel_leveli_enabled( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.rel.enablei)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf );
+
+    return k26->measure[ ch ].reli.enabled = keithley2600a_line_to_bool( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets if the measurement current offset is enabled
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_set_measure_rel_leveli_enabled( unsigned int ch,
+                                              bool         on_off )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "%s.measure.rel.enablei=%d", smu[ ch ], on_off );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].reli.enabled = on_off;
 }
 
 

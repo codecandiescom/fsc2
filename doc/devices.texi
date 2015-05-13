@@ -45,6 +45,7 @@
 * Light Chopper Functions::
 * Goniometer Functions::
 * Powermeter Functions::
+* Sourcemeter Functions::
 @c * Microwave Bridge Functions::
 * Multi-Device Functions::
 @end menu
@@ -8640,7 +8641,7 @@ This function can only be used in the @code{EXPERIMENT} section.
 @end table
 
 
-@node Powermeter Functions, Multi-Device Functions, Goniometer Functions, Device Functions
+@node Powermeter Functions, Sourcemeter Functions, Goniometer Functions, Device Functions
 @section Powermeter Functions
 @cindex Powermeter Functions
 
@@ -8874,6 +8875,626 @@ with no argument the function returns @code{1} or @code{0}, depending
 on the analog outpu being enabled or not. Calling it with a boolean
 argument, either the strings @code{"OFF"} or @code{"ON} or the
 @code{0} or a non-zero value, disables or enables the analog output.
+
+@end table
+
+
+@node Sourcemeter Functions, Multi-Device Functions, Powermeter Functions, Device Functions
+@section Sourcemeter Functions
+@cindex Sourcemeter Functions
+
+A single module for a source-meter exists:
+@table @code
+@item @ref{keithley2600a}
+Keithley2600A SourceMeter series
+@end table
+@noindent
+@noindent
+This module can be compiled for any of the sourcemeters of that series
+(2601A, 2602A, 2611A, 2612A, 2635A or 2636A). To use the module in an
+experiment put its name into the @code{DEVICES} section of the
+@code{EDL} script.
+
+Please note: Most of the @code{EDL} funtions take at least a single
+argument, the number of the channel the function is to operate on.
+This is an integer, either @code{1} or @code{2}. If the module is
+compiled for a module that only has a single channel (2601A, 2611A or
+2635A) this may seem superfluous and it is possible for these models
+to compile the module so that no channel number has to be passed to
+the @code{EDL} functions, see the configuration file for the module
+for details. Unless that is the case and it's not explicitely
+mentioned in the description of the EDL functions assume that they all
+expect a channel number as their first argument.
+
+Unless explicitley stated otherwise the @code{EDL} functions can only
+be called within the @code{EXPERIMENT} section of an @code{EDL} script.
+
+@noindent
+@strong{List of sourcemeter functions}:
+@table @samp
+@item @ref{sourcemeter_name()}
+@item @ref{sourcemeter_keep_on_at_end()}
+@item @ref{sourcemeter_sense_mode()}
+@item @ref{sourcemeter_source_offmode()}
+@item @ref{sourcemeter_output_state()}
+@item @ref{sourcemeter_source_mode()}
+@item @ref{sourcemeter_source_voltage()}
+@item @ref{sourcemeter_source_current()}
+@item @ref{sourcemeter_source_voltage_range()}
+@item @ref{sourcemeter_source_current_range()}
+@item @ref{sourcemeter_source_voltage_autoranging()}
+@item @ref{sourcemeter_source_current_autoranging()}
+@item @ref{sourcemeter_source_voltage_autorange_low_limit()}
+@item @ref{sourcemeter_source_current_autorange_low_limit()}
+@item @ref{sourcemeter_compliance_voltage()}
+@item @ref{sourcemeter_compliance_current()}
+@item @ref{sourcemeter_test_compliance()}
+@item @ref{sourcemeter_source_delay()}
+@item @ref{sourcemeter_max_off_source_current()}
+@item @ref{sourcemeter_source_high_capacity()}
+@item @ref{sourcemeter_source_sink_mode()}
+@item @ref{sourcemeter_source_settling_mode()}
+@item @ref{sourcemeter_measure_voltage()}
+@item @ref{sourcemeter_measure_current()}
+@item @ref{sourcemeter_measure_power()}
+@item @ref{sourcemeter_measure_resistance()}
+@item @ref{sourcemeter_measure_voltage_and_current()}
+@item @ref{sourcemeter_measure_voltage_autoranging()}
+@item @ref{sourcemeter_measure_current_autoranging()}
+@item @ref{sourcemeter_measure_voltage_range()}
+@item @ref{sourcemeter_measure_current_range()}
+@item @ref{sourcemeter_measure_voltage_autorange_low_limit()}
+@item @ref{sourcemeter_measure_current_autorange_low_limit()}
+@item @ref{sourcemeter_measure_time()}
+@end table
+
+@noindent
+@strong{Descriptions of sourcemeter functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{sourcemeter_name()}
+@findex sourcemeter_name()
+
+@table @samp
+@item   sourcemeter_name()
+Returns a string with the name of the powermeter being used.
+
+This function can be called in the @code{PREPARATIONS} as well as
+in the @code{EXPERIMENT} section of an @code{EDL} script.
+
+
+@anchor{sourcemeter_keep_on_at_end()}
+@findex sourcemeter_keep_on_at_end()
+@item   sourcemeter_keep_on_at_end()
+Normally, at the end of the experiment all output channels of the
+sourcemeter automatically get switched off. If this function has been
+called this can be overruled. If called with no arguments all channels
+are left on. Otherwise it may be called with a channel number for the
+channel to be left on.
+
+This function can be called in the @code{PREPARATIONS} as well as
+in the @code{EXPERIMENT} section of an @code{EDL} script.
+
+
+@anchor{sourcemeter_sense_mode()}
+@findex sourcemeter_sense_mode()
+@item   sourcemeter_sense_mode()
+The device has three modes in which its channels can be operate. It
+can either do 2-wire ("local") or 4-wire ("remote") measurements and,
+beside that, operate in a calibration mode. This function allows query
+or set this mode for a channel. If called with no arguments (except
+the channel number) it returns an integer, either @code{0} for the
+2-wire ("local"), @code{1} for the 4-wire ("remote") mode or @code{3}
+for the "calibration" mode. if called with another argument, a string
+or an integer number, the channel gets set to the corresponding mode,
+with either @code{"LOCAL"} or @code{"2-WIRE"} or @code{0} for 2-wire,
+@code{"REMOTE"} or @code{"4-WIRE"} or @code{1} for 4-wire and
+@code{"CALIBRATION"} or @code{3} for calibration mode.
+
+
+@anchor{sourcemeter_source_offmode()}
+@findex sourcemeter_source_offmode()
+@item   sourcemeter_source_offmode()
+When a channel is switched off it can be in three output-off states:
+in "normal" off-state (the default) it will source @w{0 V}, in "high
+impedance" off-state a relay will be opened to isokate the device's
+output completely from the the circuitry connected to it (this should
+only be done when necessary to avoid excessive wear on the relay), and
+in "zero-output" off-state also @w{0 V} will be output, but the device
+can still be used as an ampere-meter.
+
+This function allows to determine the output-off state when called
+with no arguments beside the channel number. In that case it returns
+an integer, either @code{0} for the "normal" off mode, @code{1} for
+the "high impedance" off-state and @code{2} when in "zero-output"
+off-state.
+
+When called with an argument (beide the channel number) to set the
+output-off state it must be a string or an integer: use
+@code{"NORMAL"} or @code{1} to set the channel to "normal" off-state,
+@code{"HIGH_Z"}, @code{"HIGHZ"} or @code{2} for "high impedance"
+off-state and @code{"ZERO"} or @code{2} for "zero-output" off-state.
+
+
+@anchor{sourcemeter_output_state()}
+@findex sourcemeter_output_state()
+@item   sourcemeter_output_state()
+This function allows to determine if a channel is on or off (as a
+source) or to switch it on or off. If called with no arguments (beside
+the channel number) it returns an integer, either @code{0} or
+@code{1}, indicating if the channel is on or off. If called with
+another boolean argument (@code{"OFF"} or @code{0} for off and
+@code{"ON} or a non-zero integer for on) the channel is switched on or
+off accordingly as a source.
+
+Note that switching the channel on will not be possible (and an
+attempt will result in the @code{EDL} script being aborted) if
+settings aren't consistent, e.h.@: if the device is to output a
+voltage and the voltage to be output exceeds the selected voltage
+source range.
+
+
+@anchor{sourcemeter_source_mode()}
+@findex sourcemeter_source_mode()
+@item   sourcemeter_source_mode()
+The channels of the device can either be used as voltage or current
+sources. If this function is called for a channel without further
+arguments it returns @code{0} if the channel is set up as a current
+source and @code{1} if it's set as a voltage source (the default).
+
+Calling the function with an additional argument allows to switch
+between the channel working as a current or voltage source: if called
+with a string of @code{"CURRENT"} or @code{"AMPS"} or an integer vakue
+of @code{0} it's set up as a current source, and if called with
+@code{"VOLTAGE"}, @code{"VOLTS} or a non-zero integer it is set as
+a voltage source.
+
+Note that switching between vltage and current sourcing mode may have
+some side-effects on other settings.
+
+
+@anchor{sourcemeter_source_voltage()}
+@findex sourcemeter_source_voltage()
+@item   sourcemeter_source_voltage()
+The function returns or sets the voltage output when the channel is
+switched on and set to voltage sourcing mode. If called with no
+arguments (except the channel) it returns the set voltage. If called
+with another argument the voltage is set accordingly. Note that if
+output is on and the device is set to voltage sourcing mode and source
+voltage autoranging is off , the requested voltage may not exceed the
+previously (or per default) set source voltage range by a factor
+larger than @code{1.01}. Also note that high output voltages reduce
+the range of compliance current settings.
+
+
+@anchor{sourcemeter_source_current()}
+@findex sourcemeter_source_current()
+@item   sourcemeter_source_current()
+The function returns or sets the current output when the channel is
+switched on and set to current sourcing mode. If called with no
+arguments (except the channel) it returns the set current. If called
+with another argument the current is set accordingly. Note that if
+output is on and the device is set to current sourcing mode and source
+current autoranging is off, the requested current may not exceed the
+previously (or per default) set source voltage range by a factor
+larger than @code{1.01}. Also note that high output currents reduce
+the range of compliance voltage settings.
+
+
+@anchor{sourcemeter_source_voltage_range()}
+@findex sourcemeter_source_voltage_range()
+@item   sourcemeter_source_voltage_range()
+The function returns or sets a range for the source voltage (which may
+speed up setting a new output voltage slighty over the use of
+autoranging). If called with no argument (beside the channel number)
+the set source voltage range is returned. If called with another
+argument the source voltage range is set to the nearest range not
+less than that value (unless the value is larger than the largest
+possible range setting, in which case the largest one is set). Setting
+a source voltage range disables autoranging of the voltage range.
+Note that when outout is on and the device is in voltage sourcing
+mode, the new range must be large enough to accomodate for the
+currently output voltage.
+
+
+@anchor{sourcemeter_source_current_range()}
+@findex sourcemeter_source_current_range()
+@item   sourcemeter_source_current_range()
+The function returns or sets a range for the source current (which may
+speed up setting a new output current slighty over the use of
+autoranging). If called with no argument (beside the channel number)
+the set source current range is returned. If called with another
+argument the source cuurent range is set to the nearest range not less
+than that value (unless the value is larger than the largest possible
+range setting, in which case the largest one is set). Setting a source
+current range disables autoranging of the current range. Note that
+when outout is on and the device is in current sourcing mode, the new
+range must be large enough to accomodate for the currently output
+current. Also note that when the device is in high-capacitance output
+mode the lowest possible current range setting is @w{1 uA}.
+
+
+@anchor{sourcemeter_source_voltage_autoranging()}
+@findex sourcemeter_source_voltage_autoranging()
+@item   sourcemeter_source_voltage_autoranging()
+The function returns if souce voltage autoranging is on or off or
+switches it on or off. When autoranging is on the device selects the
+best source voltage range setting for the requested output voltages.
+
+If called with no arguments (except the channel number) it returns
+@code{0} is autoranging is off, otherwise @code{1}. if called with
+another boolean argument (@code{"OFF"} or @code{1} for off and
+@code{"ON"} or a non-zero integer for on) autoranging is switched off
+or on accordingly.
+
+
+@anchor{sourcemeter_source_current_autoranging()}
+@findex sourcemeter_source_current_autoranging()
+@item   sourcemeter_source_current_autoranging()
+The function returns if souce current autoranging is on or off or
+switches it on or off. When autoranging is on the device selects the
+best source current range setting for the requested output currents.
+
+If called with no arguments (except the channel number) it returns
+@code{0} is autoranging is off, otherwise @code{1}. if called with
+another boolean argument (@code{"OFF"} or @code{1} for off and
+@code{"ON"} or a non-zero integer for on) autoranging is switched off
+or on accordingly.
+
+
+@anchor{sourcemeter_source_voltage_autorange_low_limit()}
+@findex sourcemeter_source_voltage_autorange_low_limit()
+@item   sourcemeter_source_voltage_autorange_low_limit()
+When source voltage autoranging is enabled a lower limit can be set
+for the ranges the device may select (the lower the range the longer
+settling time may be). If called with no argument (except the channel
+number) the currently set lower limit is returned. If called with
+another argument the nearest range setting not smaller than this value
+is set (except for the case the value exceeds the highest range
+setting, then that is used).
+
+
+@anchor{sourcemeter_source_current_autorange_low_limit()}
+@findex sourcemeter_source_current_autorange_low_limit()
+@item   sourcemeter_source_current_autorange_low_limit()
+When source current autoranging is enabled a lower limit can be set
+for the ranges the device may select (the lower the range the longer
+settling times may be). If called with no argument (except the channel
+number) the currently set lower limit is returned. If called with
+another argument the nearest range setting not smaller than this value
+is set (except for the case the value exceeds the highest range
+setting, then that is used). Also note that when the device is in
+high-capacitance output mode the minimum possible low limit is @w{1
+uA}.
+
+
+@anchor{sourcemeter_compliance_voltage()}
+@findex sourcemeter_compliance_voltage()
+@item   sourcemeter_compliance_voltage()
+When the device is in current sourcing mode an upper bound for the
+voltage exists that will be output with the requested current, called
+the "compliance voltage". This function allows to query or set this
+value.
+
+If called with no arguments (beside the channel number) the currently
+set value for the compliance voltage is returned. If called with
+another argument this is set as the compliance voltage. Note that for
+large output current ranges the maximum the compliance voltage can be
+set to is reduced so that the product of source current range and the
+voltage range the compliance voltage falls into does not exceed a
+device dependend upper power limit (30 or @w{40 W}).
+
+
+@anchor{sourcemeter_compliance_current()}
+@findex sourcemeter_compliance_current()
+@item   sourcemeter_compliance_current()
+When the device is in voltage sourcing mode an upper bound for the
+current exists that will be used output with the requested voltage,
+called the "compliance current". This function allows to query or set
+this value.
+
+If called with no arguments (beside the channel number) the currently
+set value for the compliance current is returned. If called with
+another argument this is set as the compliance current. Note that for
+large output voltage ranges the maximum the compliance current can be
+set to is reduced so that the product of source voltage range and the
+current range the compliance current falls into does not exceed a device
+dependend upper power limit (30 or @w{40 W}).
+
+
+@anchor{sourcemeter_test_compliance()}
+@findex sourcemeter_test_compliance()
+@item   sourcemeter_test_compliance()
+This function returns if a channel output is currently clamped due to
+exceeding a compliance limit (i.e.@: if the curcuitry under test has a
+resistance of @w{1 Ohm} and the channel is set up to output @w{1 V}
+while a currnt compliance limit of @w{1 mA} is active). It accepts
+no arguments (beside the channel number) and returns @code{0} if
+the compliance limit hasn't been reached and @code{1} otherwise.
+
+
+@anchor{sourcemeter_source_delay()}
+@findex sourcemeter_source_delay()
+@item   sourcemeter_source_delay()
+When setting a new output voltage or current the device may need a
+certain amount of settling time. This function allows to query
+information about an additional settling time or to set it.
+
+If called with no arguments (except the channel number) the function
+returns either @code{0} if no additional settling time is used (this
+is the default), @code{-1} when a rang dependent settling time is
+added automatically by the device, or the value of a user-set
+additional settling time (in seconds). If called with another
+argument the additional settling time can be set. If the argument is
+@code{0} no additional settling tim ewill be used. If is negative the
+device will autmatically add a range dependend settling time. Any
+argument greater than @code{0} will be used as the additional settling
+time (in seconds).
+
+
+@anchor{sourcemeter_max_off_source_current()}
+@findex sourcemeter_max_off_source_current()
+@item   sourcemeter_max_off_source_current()
+When the output channel is off and the is in "normal" off-state
+it will output @w{0 V} but the device may still source (or sink)
+small currents. Its size can be controlled bia the maximum off
+current.
+
+If called with no arguments (beside the channel number) the function
+returns the maximum current the channel will source (or sink) when
+in "normal" off-state - the default setting is @code{1 mA}. If called
+with another argument a different maximum current for this state can
+be set. The lowest possible value is 10% of the smallest current range
+and the maximum the largest current the device can source.
+
+
+@anchor{sourcemeter_source_high_capacity()}
+@findex sourcemeter_source_high_capacity()
+@item sourcemeter_source_high_capacity()
+When doing measurements on test circuits with a high capacitance
+instabilities may rsult. To avoid this the source channels can be set
+to high-capacitance mode (for circuits with low capacitance
+instabilities may arise if high-capacitance mode is is on). This
+function allows to query if high-capacitance mode is on or off for a
+channel or switch it on or off.
+
+If called with no arguments (except the channel number) the function
+returns @code{0} if high-capacitance mode is off, otherwise @code{1}.
+If called with annother, boolean argument (@code{"OFF"} or @code{0}
+for off, @code{"ON"} or a non-zero integer for on) high-capacitance
+mode is switched off or on.
+
+
+@anchor{sourcemeter_source_sink_mode()}
+@findex sourcemeter_source_sink_mode()
+@item sourcemeter_source_sink_mode()
+Sink mode reduces source limit inaccuracy seen when the channel
+operates as voltage or current sink (but will introduce these
+inaccuracies when operating as a source). This function allows to
+query if sink mode is on or off or switch it on or off.
+
+When called with no argument (except the channel number) the function
+returns @code{0} if sink mode is off, otherwise @code{1}. If called
+with another, boolean argument (@code{"OFF"} or @code{0} for off,
+@code{"ON"} or a non-zero integer for on) sink mode is switched off or
+on.
+
+
+@anchor{sourcemeter_source_settling_mode()}
+@findex sourcemeter_source_settling_mode()
+@item   sourcemeter_source_settling_mode()
+The device has a number of different "settling" modes, that can speed
+up opertion under certain conditions (but may also introduce some
+problems). These are
+
+@table @code
+@item "SETTLE_SMOOTH" or 0
+Turns off all settling operations (default).
+
+@item "SETTLE_FAST_RANGE" or 1
+Instructs the device to use a faster procedure when changing ranges.
+
+@item "SETTLE_FAST_POLARITY" or 2
+Instructs the device to change polarity without going to zero
+
+@item "SETTLE_DIRECT_IRANGE" or 4
+Instructs the device to change the amps range directly.
+
+@item "SETTLE_SMOOTH_100NA" or 4
+Enables the use of range rampers for the 100 nA range (disabled per
+default for the 2602A and 2612A and always enabled for the 2636A).
+
+@item "SETTLE_FAST_ALL" or 128
+Enables all @code{SETTLE_FAST_*} operations.
+@end table
+
+When the function is called with no argument (except the channel
+number) on of the above listed number is returned for the current
+settling mode of the device. If called with one of the above listed
+strings or numbers the corresponding settling mode is set.
+
+
+@anchor{sourcemeter_measure_voltage()}
+@findex sourcemeter_measure_voltage()
+@item   sourcemeter_measure_voltage()
+The function instructs the device to do a single voltage measurement,
+which it then returns. If the voltage to be measured exceeds the
+measurement voltage range by more than a factor of @code{1.02}
+(because either autoranging is off or it exceeds the maximum range
+setting) a value of @code{9.91e37} is returned and a warning printed
+out. The function does not accept any arguments (beside the channel
+number).
+
+
+@anchor{sourcemeter_measure_current()}
+@findex sourcemeter_measure_current()
+@item   sourcemeter_measure_current()
+The function instructs the device to do a single current measurement,
+which it then returns. If the current to be measured exceeds the
+measurement current range by more than a factor of @code{1.02}
+(because either autoranging is off or it exceeds the maximum range
+setting) a value of @code{9.91e37} is returned and a warning printed
+out. The function does not accept any arguments (beside the channel
+number).
+
+
+@anchor{sourcemeter_measure_power()}
+@findex sourcemeter_measure_power()
+@item  sourcemeter_measure_power()
+The function instructs the device to do a single power measurement,
+which it then returns. If during the measurment it is detected that
+the voltage or current to be measured exceeds the measurement
+range by more than a factor of @code{1.02} (because either autoranging
+is off or it exceeds the maximum range setting) a value of
+@code{9.91e37} is returned and a warning printed out. The function
+does not accept any arguments (beside the channel number).
+
+
+@anchor{sourcemeter_measure_resistance()}
+@findex sourcemeter_measure_resistance()
+@item   sourcemeter_measure_resistance()
+The function instructs the device to do a single resistance
+measurement, which it then returns. If during the measurment it is
+detected that the voltage or current to be measured exceeds the
+measurement range by more than a factor of @code{1.02} (because either
+autoranging is off or it exceeds the maximum range setting) a value of
+@code{9.91e37} is returned and a warning printed out. The function
+does not accept any arguments (beside the channel number).
+
+
+@anchor{sourcemeter_measure_voltage_and_current()}
+@findex sourcemeter_measure_voltage_and_current()
+@item   sourcemeter_measure_voltage_and_current()
+The function instructs the device to do a single combined voltage and
+current measurement, which it then returns as an array with two
+elements (with the first element being set to the voltage, the second
+to the current). If during the measurment it is detected that the
+voltage or current to be measured exceeds the measurement range by
+more than a factor of @code{1.02} (because either autoranging is off
+or it exceeds the maximum range setting) a value of @code{9.91e37} is
+returned for the out-of-range component and a warning printed out. The
+function does not accept any arguments (beside the channel number).
+
+
+@anchor{sourcemeter_measure_voltage_autoranging()}
+@findex sourcemeter_measure_voltage_autoranging()
+@item   sourcemeter_measure_voltage_autoranging()
+As with the source ranges also measurement ranges can be either set
+manually (which can be sligtly faster) or automatically by the device.
+This function allows to query if measurement voltage autoranging is
+on or off or to switch it on or off. If called with no arguments
+(beside the channel number) the function return @code{0} if
+measurement voltage autoranging is off, otherwise @code{0}. If
+called with another, boolean argument (@code{"OFF"} or @code{0} for off,
+@code{"ON"} or a non-zero integer for on) autoraging is switched off
+or on.
+
+Note that when the device is in voltage sourcing mode the measurement
+volage range is always identical to the source voltage range, any
+settings concerning the measurement voltage range only take effect
+after switching to current sourcing mode.
+
+
+@anchor{sourcemeter_measure_current_autoranging()}
+@findex sourcemeter_measure_current_autoranging()
+@item   sourcemeter_measure_current_autoranging()
+As with the source ranges also measurement ranges can be either set
+manually (which can be sligtly faster) or automatically by the device.
+This function allows to query if measurement current autoranging is
+on or off or to switch it on or off. If called with no arguments
+(beside the channel number) the function return @code{0} if
+measurement current autoranging is off, otherwise @code{0}. If
+called with another, boolean argument (@code{"OFF"} or @code{0} for off,
+@code{"ON"} or a non-zero integer for on) autoraging is switched off
+or on.
+
+Note that when the device is in current sourcing mode the measurement
+current range is always identical to the source current range, any
+settings concerning the measurement current range only take effect
+after switching to voltage sourcing mode.
+
+
+@anchor{sourcemeter_measure_voltage_range()}
+@findex sourcemeter_measure_voltage_range()
+@item   sourcemeter_measure_voltage_range()
+If called with no arguments (beside the channel number) the function
+returns the measurement voltage range. This is either the one that has
+been previously set, or the range selected due to measurement voltage
+autoranging (if switched on) or, if the device is in voltage sourceing
+mode, the source voltage range (which then is also used for the
+measurement voltage range). If called with another argument the
+measurement voltage range is set to the nearest range not less than
+that value (unless the value is larger than the largest possible range
+setting, in which case the largest one is set). This also automaitcally
+disables measurement voltage autoranging. If the channel is currently
+in voltage sourcing mode the new setting only has an effect after
+swiching to current sourcing mode.
+
+
+@anchor{sourcemeter_measure_current_range()}
+@findex sourcemeter_measure_current_range()
+@item   sourcemeter_measure_current_range()
+If called with no arguments (beside the channel number) the function
+returns the measurement current range. This is either the one that has
+been previously set, or the range selected due to measurement current
+autoranging (if switched on) or, if the device is in current sourceing
+mode, the source current range (which then is also used for the
+measurement current range). If called with another argument the
+measurement current range is set to the nearest range not less than
+that value (unless the value is larger than the largest possible range
+setting, in which case the largest one is set). This also automaitcally
+disables measurement current autoranging. If the channel is currently
+in current sourcing mode the new setting only has an effect after
+swiching to voltage sourcing mode.
+
+Note that when the channnel is set to high-capacitance mode the lowest
+measurement current range that can be selected is @w{1 uA}.
+
+
+@anchor{sourcemeter_measure_voltage_autorange_low_limit()}
+@findex sourcemeter_measure_voltage_autorange_low_limit()
+@item   sourcemeter_measure_current_autorange_low_limit()
+When measurement voltage autoranging is on a lower limit for the
+ranges to be used can be set (which may speed up operation under
+certain circumstances). This function, when called with no arguments
+(except the channel number), returns the currently set lower limit. If
+called with another argument the low limitfor the measurement voltage
+range is set to the nearest range not less than that value (unless the
+value is larger than the largest possible range setting, in which case
+the largest one is set).
+
+
+@anchor{sourcemeter_measure_current_autorange_low_limit()}
+@findex sourcemeter_measure_current_autorange_low_limit()
+@item   sourcemeter_measure_current_autorange_low_limit()
+When measurement current autoranging is on a lower limit for the
+ranges to be used can be set (which may speed up operation under
+certain circumstances). This function, when called with no arguments
+(except the channel number), returns the currently set lower limit. If
+called with another argument the low limit for the measurement current
+range is set to the nearest range not less than that value (unless the
+value is larger than the largest possible range setting, in which case
+the largest one is set).
+
+Note that when the channnel is set to high-capacitance mode the lowest
+measurement current range and thus the lowest limit that can be
+selected is @w{1 uA}.
+
+
+@anchor{sourcemeter_measure_time()}
+@findex sourcemeter_measure_time()
+@item   sourcemeter_measure_time()
+When doing a voltage and/or current measurement the AD converter is
+sampled for a certain tiem - were longer time result in less noisy
+results. This function can be used to query (if called with no
+arguments except the channel number) or to set this "integration"
+time. The range of values returned or to be set depends on the line
+frequency: if the line frequency is @w{50 Hz} the possible range
+is from @w{20 us} to @w{0.5 s} while for a line frequency of @w{60 Hz}
+the range is @w{16.67 us} to @w{0.4167 s}.
+
 
 @end table
 
@@ -9113,7 +9734,7 @@ argument, either the strings @code{"OFF"} or @code{"ON} or the
 
 
 
-@node Multi-Device Functions, , Powermeter Functions, Device Functions
+@node Multi-Device Functions, , Sourcemeter Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 

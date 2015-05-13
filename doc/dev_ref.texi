@@ -67,6 +67,7 @@ List of devices, sorted by module name:
 * ips120_10_mod::   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
 * itc503::          Oxford Instruments Temperature Controller ITC503
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
+* keithley2600a::   Keithley SourceMeter 2600A series
 * kontron4060::     Kontron 4060 Multimeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
@@ -165,6 +166,7 @@ List of devices, sorted by module name:
 @item @ref{ips120_10_mod}   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
 @item @ref{itc503}          Oxford Instruments Temperature Controller ITC503
 @item @ref{keithley228a}    Magnet Power Supply Keithley 228A (Berlin W-Band)
+@item @ref{keithley2600a}   Keithley ourceMeter 2600A series
 @item @ref{kontron4060}     Kontron 4060 Multimeter
 @item @ref{lakeshore330}    Lake Shore 330 Temperature Controller
 @item @ref{lecroy9400}      LeCroy Digitizing Oscilloscope 9400
@@ -2195,7 +2197,7 @@ the temperature.
 
 @c #############################################################
 
-@node keithley228a, kontron4060, itc503, Device Reference
+@node keithley228a, keithley2600a, itc503, Device Reference
 @iftex
 @subheading Magnet Power Supply Keithley 228A (Berlin W-Band)
 @end iftex
@@ -2256,7 +2258,69 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 
 @c #############################################################
 
-@node kontron4060, lakeshore330, keithley228a, Device Reference
+@node keithley2600a, kontron4060, keithley228a, Device Reference
+@iftex
+@subheading Keithley SourceMeter 2600A series
+@end iftex
+@ifnottex
+@section Keithley SourceMeter 2600A series
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{keithley2600a}
+
+@paragraphindent 0
+This module can be compiled to support each of the devices from
+the 2600A series of SourceMeters, i.e.@: 2601A, 2602A, 2611A, 2612A,
+2635A and 2636A. See the configuration file for this module.
+
+@paragraphindent 0
+@strong{Controlled via}: LAN (VXI-11 protocol)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{sourcemeter_name()}
+@item @ref{sourcemeter_keep_on_at_end()}
+@item @ref{sourcemeter_sense_mode()}
+@item @ref{sourcemeter_source_offmode()}
+@item @ref{sourcemeter_output_state()}
+@item @ref{sourcemeter_source_mode()}
+@item @ref{sourcemeter_source_voltage()}
+@item @ref{sourcemeter_source_current()}
+@item @ref{sourcemeter_source_voltage_range()}
+@item @ref{sourcemeter_source_current_range()}
+@item @ref{sourcemeter_source_voltage_autoranging()}
+@item @ref{sourcemeter_source_current_autoranging()}
+@item @ref{sourcemeter_source_voltage_autorange_low_limit()}
+@item @ref{sourcemeter_source_current_autorange_low_limit()}
+@item @ref{sourcemeter_compliance_voltage()}
+@item @ref{sourcemeter_compliance_current()}
+@item @ref{sourcemeter_test_compliance()}
+@item @ref{sourcemeter_source_delay()}
+@item @ref{sourcemeter_max_off_source_current()}
+@item @ref{sourcemeter_source_high_capacity()}
+@item @ref{sourcemeter_source_sink_mode()}
+@item @ref{sourcemeter_source_settling_mode()}
+@item @ref{sourcemeter_measure_voltage()}
+@item @ref{sourcemeter_measure_current()}
+@item @ref{sourcemeter_measure_power()}
+@item @ref{sourcemeter_measure_resistance()}
+@item @ref{sourcemeter_measure_voltage_and_current()}
+@item @ref{sourcemeter_measure_voltage_autoranging()}
+@item @ref{sourcemeter_measure_current_autoranging()}
+@item @ref{sourcemeter_measure_voltage_range()}
+@item @ref{sourcemeter_measure_current_range()}
+@item @ref{sourcemeter_measure_voltage_autorange_low_limit()}
+@item @ref{sourcemeter_measure_current_autorange_low_limit()}
+@item @ref{sourcemeter_measure_time()}
+@end table
+
+
+
+@c #############################################################
+
+@node kontron4060, lakeshore330, keithley2600a, Device Reference
 @iftex
 @subheading Kontron 4060 Multimeter
 @end iftex

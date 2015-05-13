@@ -57,6 +57,27 @@ double keithley2600a_get_measure_time( unsigned int ch );
 double keithley2600a_set_measure_time( unsigned int ch,
                                        double       t );
 
+int keithley2600a_get_measure_count( unsigned int ch );
+int keithley2600a_set_measure_count( unsigned int ch,
+                                     int          count );
+
+double keithley2600a_get_measure_rel_levelv( unsigned int ch );
+double keithley2600a_set_measure_rel_levelv( unsigned int ch
+                                             double       offset );
+
+double keithley2600a_get_measure_rel_leveli( unsigned int ch );
+double keithley2600a_set_measure_rel_leveli( unsigned int ch
+                                             double       offset );
+
+bool keithley2600a_get_measure_rel_levelv_enabled( unsigned int ch );
+bool keithley2600a_set_measure_rel_levelv_enabled( unsigned int ch,
+                                                   bool         on_off );
+
+bool keithley2600a_get_measure_rel_leveli_enabled( unsigned int ch );
+bool keithley2600a_set_measure_rel_leveli_enabled( unsigned int ch,
+                                                   bool         on_off );
+
+
 #endif
 
 

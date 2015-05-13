@@ -44,6 +44,7 @@ Keithley2600A_T * k26 = &keithley2600a;
 #define TEST_LINE_FREQ   50
 #define TEST_VOLTAGE     1.0e-3
 #define TEST_CURRENT     1.0e-6
+#define TEST_COMPLIANCE  0L
 
 
 /*--------------------------------------------------------------*
@@ -125,6 +126,15 @@ keithley2600a_test_hook( void )
 #else                                  /* 2635A and 2636A */
         k26->measure[ ch ].delay      = DELAY_AUTO;
 #endif
+
+        k26->measure[ ch ].time = 1.0 / TEST_LINE_FREQ;
+        k26->measure[ ch ].count = 1;
+
+        k26->measure[ ch ].relv.level = 0.0;
+        k26->measure[ ch ].relv.enabled = false;
+
+        k26->measure[ ch ].reli.level = 0.0;
+        k26->measure[ ch ].reli.enabled = false;
     }
  
     return OK;
@@ -923,6 +933,26 @@ sourcemeter_compliance_current( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Returns if the compliance limit is reached
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_test_compliance( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        return vars_push( INT_VAR,
+                          keithley2600a_get_compliance( ch ) ? 1L : 0L );
+
+    return vars_push( INT_VAR, TEST_COMPLIANCE );
+}
+
+
+
+/*--------------------------------------------------------------*
  * Returns or sets the source delay
  *--------------------------------------------------------------*/
 
@@ -1120,19 +1150,29 @@ Var_T *
 sourcemeter_measure_voltage( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
+    double volts;
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        volts = keithley2600a_measure( ch, VOLTAGE );
+
+        if ( fabs( volts ) >= 9.9e37 )
+            print( WARN, "Voltage to be measure out of range.\n" );
+    }
+    else
     {
         if ( k26->measure[ ch ].autorangev )
             k26->measure[ ch ].rangev =
                           keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
 
-        return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+        volts =   TEST_CURRENT
+                - k26->measure[ ch ].relv.enabled ?
+                  k26->measure[ ch ].relv.level : 0
     }
 
-    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, VOLTAGE ) );
+    return vars_push( FLOAT_VAR, volts );
 }
 
 
@@ -1144,19 +1184,30 @@ Var_T *
 sourcemeter_measure_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
+    double amps;
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE != EXPERIMENT )
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        amps = keithley2600a_measure( ch, CURRENT );
+
+        if ( fabs( amps ) >= 9.9e37 )
+            print( WARN, "Current to be measure out of range.\n" );
+    }
+    else
     {
         if ( k26->measure[ ch ].autorangei )
             k26->measure[ ch ].rangei =
-                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+                         keithley2600a_best_measure_rangei( ch, TEST_CURRENT );
 
-        return vars_push( FLOAT_VAR, TEST_CURRENT );
+        amps =   TEST_CURRENT
+               - k26->measure[ ch ].reli.enabled ?
+                 k26->measure[ ch ].reli.level : 0
     }
 
-    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, CURRENT ) );
+    return vars_push( FLOAT_VAR, amps );
 }
 
 
@@ -1168,6 +1219,7 @@ Var_T *
 sourcemeter_measure_power( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
+    double p;
 
     too_many_arguments( v );
 
@@ -1184,7 +1236,12 @@ sourcemeter_measure_power( Var_T * v )
         return vars_push( FLOAT_VAR, TEST_VOLTAGE * TEST_CURRENT );
     }
 
-    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, POWER ) );
+    p = keithley2600a_measure( ch, POWER );
+
+    if ( fabs( p ) >= 9.9e37 )
+        print( WARN, "Out of range condition while measuring power.\n" );
+
+    return vars_push( FLOAT_VAR, p );
 }
 
 
@@ -1196,6 +1253,7 @@ Var_T *
 sourcemeter_measure_resistance( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
+    double r;
 
     too_many_arguments( v );
 
@@ -1212,7 +1270,12 @@ sourcemeter_measure_resistance( Var_T * v )
         return vars_push( FLOAT_VAR, TEST_VOLTAGE / TEST_CURRENT );
     }
 
-    return vars_push( FLOAT_VAR, keithley2600a_measure( ch, RESISTANCE ) );
+    r = keithley2600a_measure( ch, RESISTANCE );
+
+    if ( fabs( r ) > 9.9e37 )
+        print( WARN, "Out of range condition while measuring resistance.\n" );
+
+    return vars_push( FLOAT_VAR, r );
 }
 
 
@@ -1247,6 +1310,9 @@ sourcemeter_measure_voltage_and_current( Var_T * v )
     r = keithley2600a_measure_iv( ch );
     vi[ 0 ] = r[ 1 ];
     vi[ 1 ] = r[ 0 ];
+
+    if ( fabs( vi[ 0 ] ) >= 9.9e37 || fabs( vi[ 1 ] ) >= 9.9e37 )
+        print( WARN, "Measured voltage or current out of range.\n" );
 
     return vars_push( FLOAT_ARR, vi, 2 );
 }

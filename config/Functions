@@ -588,6 +588,7 @@ sourcemeter_source_voltage_autorange_low_limit, -1, EXP;
 sourcemeter_source_current_autorange_low_limit, -1, EXP;
 sourcemeter_compliance_voltage, -1, EXP;
 sourcemeter_compliance_current, -1, EXP;
+sourcemeter_test_compliance, -1, EDL;
 sourcemeter_source_delay, -1, EXP;
 sourcemeter_max_off_source_current, -1, EXP;
 sourcemeter_source_high_capacity, -1, EXP;
