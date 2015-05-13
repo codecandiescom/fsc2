@@ -2313,7 +2313,10 @@ the 2600A series of SourceMeters, i.e.@: 2601A, 2602A, 2611A, 2612A,
 @item @ref{sourcemeter_measure_current_range()}
 @item @ref{sourcemeter_measure_voltage_autorange_low_limit()}
 @item @ref{sourcemeter_measure_current_autorange_low_limit()}
+@item @ref{sourcemeter_measure_delay()}
 @item @ref{sourcemeter_measure_time()}
+@item @ref{sourcemeter_measure_voltage_offset()}
+@item @ref{sourcemeter_measure_current_offset()}
 @end table
 
 

@@ -8946,6 +8946,9 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @item @ref{sourcemeter_measure_voltage_autorange_low_limit()}
 @item @ref{sourcemeter_measure_current_autorange_low_limit()}
 @item @ref{sourcemeter_measure_time()}
+@item @ref{sourcemeter_measure_delay()}
+@item @ref{sourcemeter_measure_voltage_offset()}
+@item @ref{sourcemeter_measure_current_offset()}
 @end table
 
 @noindent
@@ -9226,12 +9229,12 @@ If called with no arguments (except the channel number) the function
 returns either @code{0} if no additional settling time is used (this
 is the default), @code{-1} when a rang dependent settling time is
 added automatically by the device, or the value of a user-set
-additional settling time (in seconds). If called with another
-argument the additional settling time can be set. If the argument is
-@code{0} no additional settling tim ewill be used. If is negative the
-device will autmatically add a range dependend settling time. Any
-argument greater than @code{0} will be used as the additional settling
-time (in seconds).
+additional settling time (in seconds). If called with another argument
+the additional settling time can be set. If the argument is @code{0}
+no additional settling time will be used. If it is negative the device
+will automatically add a range dependend settling time. Any argument
+greater than @code{0} will be used as the additional settling time (in
+seconds).
 
 
 @anchor{sourcemeter_max_off_source_current()}
@@ -9494,6 +9497,54 @@ time. The range of values returned or to be set depends on the line
 frequency: if the line frequency is @w{50 Hz} the possible range
 is from @w{20 us} to @w{0.5 s} while for a line frequency of @w{60 Hz}
 the range is @w{16.67 us} to @w{0.4167 s}.
+
+
+@anchor{sourcemeter_measure_delay()}
+@findex sourcemeter_measure_delay()
+@item   sourcemeter_measure_delay()
+The device allows to set an additional settling time before a
+measurement is done. Using this function this delay can be queried
+or set.
+
+If called with no arguments (except the channel number) the function
+returns either @code{0} if no additional settling time is used (this
+is the default for the 2601A, 2602A, 2611A and 2612A), @code{-1} (the
+default for the 2635A and 2636A) when a rang dependent settling time
+is added automatically by the device, or the value of a user-set
+additional settling time (in seconds). If called with another argument
+the additional settling time can be set. If the argument is @code{0}
+no additional settling time will be used. If it is negative the device
+will automatically add a range dependend settling time. Any argument
+greater than @code{0} will be used as the additional settling time (in
+seconds).
+
+
+@anchor{sourcemeter_measure_voltage_offset()}
+@findex sourcemeter_measure_voltage_offset()
+@item   sourcemeter_measure_voltage_offset()
+The device allows to set a value that automatically is subtracted from
+all voltage measurements. This offst can be queried or set via this
+function. If it is called with arguments (except the channel number)
+the currently active value of the offset is returned. If called with
+abother argument this used as the new measurement voltage offset.
+
+Note that this offset has no influence on power or resistance
+measurements and can't be used to measure voltages exceeding the range
+of the device.
+
+
+@anchor{sourcemeter_measure_current_offset()}
+@findex sourcemeter_measure_current_offset()
+@item   sourcemeter_measure_current_offset()
+The device allows to set a value that automatically is subtracted from
+all current measurements. This offst can be queried or set via this
+function. If it is called with arguments (except the channel number)
+the currently active value of the offset is returned. If called with
+abother argument this used as the new measurement current offset.
+
+Note that this offset has no influence on power or resistance
+measurements and can't be used to measure currents exceeding the range
+of the device.
 
 
 @end table

@@ -137,7 +137,7 @@ typedef struct
 } Source_T;
 
 
-typedef {
+typedef struct {
     double level;
     bool   enabled;
 } Rel_T;
@@ -228,6 +228,9 @@ Var_T * sourcemeter_measure_current_autoranging( Var_T * v );
 Var_T * sourcemeter_measure_voltage_autorange_low_limit( Var_T * v );
 Var_T * sourcemeter_measure_current_autorange_low_limit( Var_T * v );
 Var_T * sourcemeter_measure_time( Var_T * v );
+Var_T * sourcemeter_measure_voltage_offset( Var_T * v );
+Var_T * sourcemeter_measure_current_offset( Var_T * v );
+Var_T * sourcemeter_measure_delay( Var_T * v );
 
 
 #endif

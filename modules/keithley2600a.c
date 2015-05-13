@@ -1169,7 +1169,7 @@ sourcemeter_measure_voltage( Var_T * v )
 
         volts =   TEST_CURRENT
                 - k26->measure[ ch ].relv.enabled ?
-                  k26->measure[ ch ].relv.level : 0
+                  k26->measure[ ch ].relv.level : 0;
     }
 
     return vars_push( FLOAT_VAR, volts );
@@ -1204,7 +1204,7 @@ sourcemeter_measure_current( Var_T * v )
 
         amps =   TEST_CURRENT
                - k26->measure[ ch ].reli.enabled ?
-                 k26->measure[ ch ].reli.level : 0
+                 k26->measure[ ch ].reli.level : 0;
     }
 
     return vars_push( FLOAT_VAR, amps );
@@ -1610,6 +1610,124 @@ sourcemeter_measure_time( Var_T * v )
 
     return vars_push( FLOAT_VAR, k26->measure[ ch ].time );
 } 
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets an offset for the measured voltages
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_voltage_offset( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double offset;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->measure[ ch ].relv.enabled ?
+                                     k26->measure[ ch ].relv.level : 0.0 );
+
+    offset = get_double( v, "measure voltage offset" );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( offset == 0.0 )
+            keithley2600a_set_measure_rel_levelv_enabled( ch, false );
+        else
+        {
+            keithley2600a_set_measure_rel_levelv( ch, offset );
+            if ( ! k26->measure[ ch ].relv.enabled )
+                keithley2600a_set_measure_rel_levelv_enabled( ch, true );
+        }
+    }
+    else
+    {
+        if ( offset == 0.0 )
+            k26->measure[ ch ].relv.enabled = false;
+        else
+        {
+            k26->measure[ ch ].relv.level = offset;
+            k26->measure[ ch ].relv.enabled = true;
+        }
+    }
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].relv.enabled ?
+                                 k26->measure[ ch ].relv.level : 0.0 );
+}
+    
+
+/*--------------------------------------------------------------*
+ * Returns or sets an offset for the measured currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_current_offset( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double offset;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->measure[ ch ].reli.enabled ?
+                                     k26->measure[ ch ].reli.level : 0.0 );
+
+    offset = get_double( v, "measure current offset" );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( offset == 0.0 )
+            keithley2600a_set_measure_rel_leveli_enabled( ch, false );
+        else
+        {
+            keithley2600a_set_measure_rel_leveli( ch, offset );
+            if ( ! k26->measure[ ch ].reli.enabled )
+                keithley2600a_set_measure_rel_leveli_enabled( ch, true );
+        }
+    }
+    else
+    {
+        if ( offset == 0.0 )
+            k26->measure[ ch ].reli.enabled = false;
+        else
+        {
+            k26->measure[ ch ].reli.level = offset;
+            k26->measure[ ch ].reli.enabled = true;
+        }
+    }
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].reli.enabled ?
+                                 k26->measure[ ch ].reli.level : 0.0 );
+}
+    
+
+/*--------------------------------------------------------------*
+ * Returns or sets the measurement delay
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_measure_delay( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double delay;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
+
+    delay = get_double( v, "measurement delay" );
+
+    if ( delay < 0 )
+        delay = DELAY_AUTO;
+
+    if ( delay == k26->measure[ ch ].delay )
+        vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_measure_delay( ch, delay );
+    else
+        k26->measure[ ch ].delay = delay;
+
+    return vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
+}
 
 
 /*--------------------------------------------------------------*

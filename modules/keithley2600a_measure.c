@@ -535,7 +535,7 @@ keithley2600a_get_measure_rel_levelv( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_set_measure_rel_levelv( unsigned int ch
+keithley2600a_set_measure_rel_levelv( unsigned int ch,
                                       double       offset )
 {
     char buf[ 50 ];
@@ -572,7 +572,7 @@ keithley2600a_get_measure_rel_leveli( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_set_measure_rel_leveli( unsigned int ch
+keithley2600a_set_measure_rel_leveli( unsigned int ch,
                                       double       offset )
 {
     char buf[ 50 ];
@@ -657,6 +657,49 @@ keithley2600a_set_measure_rel_leveli_enabled( unsigned int ch,
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].reli.enabled = on_off;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the measure delay for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_measure_delay( unsigned int ch )
+{
+   char buf[ 50 ];
+   double delay;
+
+   fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.measure.delay)", smu[ ch ] );
+	keithley2600a_talk( buf, buf, sizeof buf );
+ 
+    delay = keithley2600a_line_to_double( buf );
+    if ( delay < 0 && delay != DELAY_AUTO )
+        keithley2600a_bad_data( );
+
+    return k26->measure[ ch ].delay = delay;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the measure delay for the channel
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_measure_delay( unsigned int ch,
+                                 double       delay )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
+
+    printf( buf, "%s.measure.delay=%.5g", smu[ ch ], delay );
+    keithley2600a_cmd( buf );
+
+    return k26->measure[ ch ].delay = delay;
 }
 
 
