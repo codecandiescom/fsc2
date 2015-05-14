@@ -9,9 +9,11 @@ sourcemeter_source_voltage( 1, 10 V );
 sourcemeter_source_voltage_range( 1, 1 V );
 
 print( "\TOutput state: #\n", sourcemeter_output_state( 1 ) );
-print( "\TOutput state: #\n", sourcemeter_source_voltage( 1, 13.41234 ) );
+print( "\TOutput voltage: #\n", sourcemeter_source_voltage( 1, 13.41234 V ) );
 
 print( "V = #\n", sourcemeter_measure_voltage( 1 ) );
 print( "I = #\n", sourcemeter_measure_current( 1 ) );
 print( "P = #\n", sourcemeter_measure_power( 1 ) );
 print( "R = #\n", sourcemeter_measure_resistance( 1 ) );
+
+sourcemeter_sweep_voltage_measure_voltage( 1, -1 V, 1 V, 21 );

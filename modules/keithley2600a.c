@@ -2243,7 +2243,7 @@ get_sweep_params( Var_T        * v,
     }
 
     *end = get_double( v, sweep_what == VOLTAGE ?
-                            "sweep end voltage" : "sweep end current" );
+                          "sweep end voltage" : "sweep end current" );
     if (    ( sweep_what == VOLTAGE && fabs( *end ) > MAX_SOURCE_LEVELV )
          || ( sweep_what == CURRENT && fabs( *end ) > MAX_SOURCE_LEVELI ) )
     {

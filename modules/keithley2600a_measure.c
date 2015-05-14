@@ -946,7 +946,7 @@ keithley2600a_sweep_and_measure( unsigned int ch,
                       "ch.trigger.source.linear%c(%.5g,%.5g,cnt)\n"
                       "ch.trigger.source.action=1\n"
                       "ch.trigger.measure.%c(mbuf)\n"
-                      "ch.trigger.measure.action=1\n",
+                      "ch.trigger.measure.action=1\n"
                       "ch.trigger.count=cnt\n"
                       "ch.trigger.arm.count=1\n"
                       "ch.source.output=1\n"
@@ -1082,7 +1082,7 @@ keithley2600a_sweep_and_measureiv( unsigned int ch,
                       "ch.trigger.source.linear%c(%.5g,%.5g,cnt)\n"
                       "ch.trigger.source.action=1\n"
                       "ch.trigger.measure.iv(ibuf,vbuf)\n"
-                      "ch.trigger.measure.action=1\n",
+                      "ch.trigger.measure.action=1\n"
                       "ch.trigger.count=cnt\n"
                       "ch.trigger.arm.count=1\n"
                       "ch.source.output=1\n"
