@@ -51,10 +51,13 @@ static Keithley2600A_T keithley2600a_test;
 Keithley2600A_T * k26 = &keithley2600a;
 
 
-#define TEST_LINE_FREQ   50
 #define TEST_VOLTAGE     1.0e-3
 #define TEST_CURRENT     1.0e-6
 #define TEST_COMPLIANCE  0L
+
+#if ! defined POWER_LINE_FREQ
+#define POWER_LINE_FREQ  50
+#endif
 
 
 /*--------------------------------------------------------------*
@@ -93,7 +96,7 @@ keithley2600a_test_hook( void )
     /* Set up the structures for both channels with the device's default
        settings */
 
-    k26->linefreq = TEST_LINE_FREQ;
+    k26->linefreq = POWER_LINE_FREQ;
 
     for ( ch = 0; ch < NUM_CHANNELS; ch++ )
     {
@@ -119,7 +122,6 @@ keithley2600a_test_hook( void )
         k26->source[ ch ].limitv     = 20.0;
         k26->source[ ch ].limiti     = 0.1;
 
-
         k26->measure[ ch ].autorangev = SET;
         k26->measure[ ch ].autorangei = SET;
 
@@ -137,7 +139,7 @@ keithley2600a_test_hook( void )
         k26->measure[ ch ].delay      = DELAY_AUTO;
 #endif
 
-        k26->measure[ ch ].time = 1.0 / TEST_LINE_FREQ;
+        k26->measure[ ch ].time = 1.0 / POWER_LINE_FREQ;
         k26->measure[ ch ].count = 1;
 
         k26->measure[ ch ].relv.level = 0.0;
@@ -518,7 +520,7 @@ sourcemeter_source_voltage( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].levelv );
 
-    volts = get_double( v, "source voltage" );
+    volts = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_source_levelv( ch, volts ) )
@@ -560,7 +562,7 @@ sourcemeter_source_current( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].leveli );
 
-    amps = get_double( v, "source current" );
+    amps = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_source_leveli( ch, amps ) )
@@ -605,7 +607,7 @@ sourcemeter_source_voltage_range( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
 
-    range = fabs( get_double( v, "source voltage range" ) );
+    range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the next range that can be set under the current circumstances,
@@ -658,7 +660,7 @@ sourcemeter_source_current_range( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
 
-    range = fabs( get_double( v, "source current range" ) );
+    range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the next range that can be set under the current circumstances,
@@ -789,7 +791,7 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
 
-    lowrange = fabs( get_double( v, "source voltage autorange low limit" ) );
+    lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -834,7 +836,7 @@ sourcemeter_source_current_autorange_low_limit( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
 
-    lowrange = fabs( get_double( v, "source current autorange low limit" ) );
+    lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -876,7 +878,7 @@ sourcemeter_compliance_voltage( Var_T * v )
 
     /* Accept negative values, jut make 'em positive */
 
-    limit = fabs( get_double( v, "compliance voltage" ) );
+    limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
     
     if ( limit == k26->source[ ch ].limitv )
@@ -921,7 +923,7 @@ sourcemeter_compliance_current( Var_T * v )
 
     /* Accept negative values, jut make 'em positive */
 
-    limit = fabs( get_double( v, "compliance current" ) );
+    limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
     
     if ( limit == k26->source[ ch ].limiti )
@@ -984,7 +986,7 @@ sourcemeter_source_delay( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].delay );
 
-    delay = get_double( v, "source delay" );
+    delay = get_double( v, NULL );
 
     if ( delay < 0 )
         delay = DELAY_AUTO;
@@ -1131,7 +1133,7 @@ sourcemeter_max_off_source_current( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].offlimiti );
 
-    limit = fabs( get_double( v, "maximum current in normal off state" ) );
+    limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     if ( limit == k26->source[ ch ].offlimiti )
@@ -1364,7 +1366,7 @@ sourcemeter_measure_voltage_range( Var_T * v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].rangev );
     }
 
-    range = fabs( get_double( v, "measure voltage range" ) );
+    range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the range setting that's at last as large as the requested value. */
@@ -1418,7 +1420,7 @@ sourcemeter_measure_current_range( Var_T * v )
         return vars_push( FLOAT_VAR,  k26->measure[ ch ].rangei );
     }
 
-    range = fabs( get_double( v, "measurment current range" ) );
+    range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the range setting that's at last as large as the requested value. */
@@ -1514,7 +1516,7 @@ sourcemeter_measure_voltage_autorange_low_limit( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].lowrangev );
 
-    lowrange = fabs( get_double( v, "measure voltage autorange low limit" ) );
+    lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -1560,8 +1562,7 @@ sourcemeter_measure_current_autorange_low_limit( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].lowrangei );
 
-    lowrange = fabs( get_double( v,
-                                 "measurement current autorange low limit" ) );
+    lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -1604,7 +1605,7 @@ sourcemeter_measure_time( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].time );
 
-    t = get_double( v, "measure time" );
+    t = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_measure_time( t ) )
@@ -1645,7 +1646,7 @@ sourcemeter_measure_voltage_offset( Var_T * v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].relv.enabled ?
                                      k26->measure[ ch ].relv.level : 0.0 );
 
-    offset = get_double( v, "measure voltage offset" );
+    offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1689,7 +1690,7 @@ sourcemeter_measure_current_offset( Var_T * v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].reli.enabled ?
                                      k26->measure[ ch ].reli.level : 0.0 );
 
-    offset = get_double( v, "measure current offset" );
+    offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1732,7 +1733,7 @@ sourcemeter_measure_delay( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
 
-    delay = get_double( v, "measurement delay" );
+    delay = get_double( v, NULL );
 
     if ( delay < 0 )
         delay = DELAY_AUTO;
@@ -2226,8 +2227,7 @@ get_sweep_params( Var_T        * v,
         THROW( EXCEPTION );
     }
 
-    *start = get_double( v, sweep_what == VOLTAGE ?
-                            "sweep start voltage" : "sweep start current" );
+    *start = get_double( v, NULL );
 
     if (    ( sweep_what == VOLTAGE && fabs( *start ) > MAX_SOURCE_LEVELV )
          || ( sweep_what == CURRENT && fabs( *start ) > MAX_SOURCE_LEVELI ) )
@@ -2242,8 +2242,7 @@ get_sweep_params( Var_T        * v,
         THROW( EXCEPTION );
     }
 
-    *end = get_double( v, sweep_what == VOLTAGE ?
-                          "sweep end voltage" : "sweep end current" );
+    *end = get_double( v, NULL );
     if (    ( sweep_what == VOLTAGE && fabs( *end ) > MAX_SOURCE_LEVELV )
          || ( sweep_what == CURRENT && fabs( *end ) > MAX_SOURCE_LEVELI ) )
     {

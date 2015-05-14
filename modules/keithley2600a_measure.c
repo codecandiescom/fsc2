@@ -499,7 +499,7 @@ keithley2600a_set_measure_time( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( keithley2600a_check_measure_time( t ) );
 
-    sprintf( buf, "%s.measure.nplc=%.3f", smu[ ch ], t * k26->linefreq );
+    sprintf( buf, "%s.measure.nplc=%.5g", smu[ ch ], t * k26->linefreq );
     keithley2600a_cmd( buf );
 
     return keithley2600a_get_measure_time( ch );

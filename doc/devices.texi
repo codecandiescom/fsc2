@@ -8886,7 +8886,7 @@ argument, either the strings @code{"OFF"} or @code{"ON} or the
 A single module for a source-meter exists:
 @table @code
 @item @ref{keithley2600a}
-Keithley2600A SourceMeter series
+Keithley2600A SourceMeter series (2601A, 2602A, 2611A, 2612A, 2635A, 2636A)
 @end table
 @noindent
 @noindent
@@ -9521,14 +9521,17 @@ selected is @w{1 uA}.
 @anchor{sourcemeter_measure_time()}
 @findex sourcemeter_measure_time()
 @item   sourcemeter_measure_time()
-When doing a voltage and/or current measurement the AD converter is
-sampled for a certain tiem - were longer time result in less noisy
-results. This function can be used to query (if called with no
+When doing a measurement the AD converter is sampled for a certain
+time, the "integration aperture", with longer times resulting in less
+noisy results. This function allows to query (if called with no
 arguments except the channel number) or to set this "integration"
-time. The range of values returned or to be set depends on the line
-frequency: if the line frequency is @w{50 Hz} the possible range
-is from @w{20 us} to @w{0.5 s} while for a line frequency of @w{60 Hz}
-the range is @w{16.67 us} to @w{0.4167 s}.
+time. The range of values returned or to that can set depends on the
+frequency of the power line: if the line frequency is @w{50 Hz} the
+possible range is from @w{20 us} to @w{0.5 s} while for a line
+frequency of @w{60 Hz} the range is @w{16.67 us} to @w{0.4167 s}.
+The default is @w{20 ms} for @w{f50 Hz} and @w{16.67 ms} for @w{60
+Hz}. Keep in mind that changing this value can have quite a large
+effect on the time averaged or sweep measurements require.
 
 
 @anchor{sourcemeter_measure_delay()}

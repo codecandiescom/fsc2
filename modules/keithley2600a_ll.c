@@ -156,15 +156,22 @@ keithley2600a_get_state( void )
 
         keithley2600a_get_source_levelv( ch );
         keithley2600a_get_source_leveli( ch );
+
         keithley2600a_get_source_rangev( ch );
         keithley2600a_get_source_rangei( ch );
+
         keithley2600a_get_source_autorangev( ch );
         keithley2600a_get_source_autorangei( ch );
+
         keithley2600a_get_source_lowrangev( ch );
         keithley2600a_get_source_lowrangei( ch );
+
         keithley2600a_get_source_delay( ch );
+
         keithley2600a_get_source_offlimiti( ch );
+
         keithley2600a_get_source_settling( ch );
+
         keithley2600a_get_source_sink( ch );
 
         keithley2600a_get_measure_autorangev( ch );
@@ -172,13 +179,17 @@ keithley2600a_get_state( void )
 
         keithley2600a_get_measure_autozero( ch );
 
-        keithley2600a_get_measure_count( ch );
+        /* Sefault to not doing single measurements */
+
+        if ( keithley2600a_get_measure_count( ch ) != 1 )
+            keithley2600a_set_measure_count( ch, 1 );
 
         keithley2600a_get_measure_time( ch );
         keithley2600a_get_measure_delay( ch );
 
         keithley2600a_get_measure_rel_levelv( ch );
         keithley2600a_get_measure_rel_levelv_enabled( ch );
+
         keithley2600a_get_measure_rel_leveli( ch );
         keithley2600a_get_measure_rel_leveli_enabled( ch );
 

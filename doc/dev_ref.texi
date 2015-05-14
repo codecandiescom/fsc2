@@ -2270,12 +2270,13 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 @strong{Module name}: @code{keithley2600a}
 
 @paragraphindent 0
-This module can be compiled to support each of the devices from
-the 2600A series of SourceMeters, i.e.@: 2601A, 2602A, 2611A, 2612A,
-2635A and 2636A. See the configuration file for this module.
+This module can be compiled to support each of the devices from the
+2600A series of Keithley SourceMeters, i.e.@: 2601A, 2602A, 2611A,
+2612A, 2635A and 2636A. See the configuration file for this module.
 
 @paragraphindent 0
-@strong{Controlled via}: LAN (VXI-11 protocol)
+@strong{Controlled via}: LAN (VXI-11 protocol), IP address must be set
+in configuration file for the module.
 
 @paragraphindent 0
 @strong{Supported functions}:
