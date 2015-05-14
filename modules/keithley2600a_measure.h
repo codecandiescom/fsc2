@@ -93,6 +93,18 @@ bool keithley2600a_get_measure_filter_enabled( unsigned int ch );
 bool keithley2600a_set_measure_filter_enabled( unsigned int ch,
                                                bool         on_off );
 
+double * keithley2600a_sweep_and_measure( unsigned int ch,
+                                         int           sweep_what,
+                                          int          measure_what,
+                                          double       start,
+                                          double       end,
+                                          int          num_points );
+double * keithley2600a_sweep_and_measureiv( unsigned int ch,
+                                            int          sweep_what,
+                                            double       start,
+                                            double       end,
+                                            int          num_points );
+
 
 #endif
 

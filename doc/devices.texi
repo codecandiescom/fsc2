@@ -8951,6 +8951,16 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @item @ref{sourcemeter_measure_current_offset()}
 @item @ref{sourcemeter_measure_filter_type()}
 @item @ref{sourcemeter_measure_filter_count()}
+@item @ref{sourcemeter_sweep_voltage_measure_voltage}
+@item @ref{sourcemeter_sweep_voltage_measure_current}
+@item @ref{sourcemeter_sweep_voltage_measure_power}
+@item @ref{sourcemeter_sweep_voltage_measure_resistance}
+@item @ref{sourcemeter_sweep_current_measure_voltage}
+@item @ref{sourcemeter_sweep_current_measure_current}
+@item @ref{sourcemeter_sweep_current_measure_power}
+@item @ref{sourcemeter_sweep_current_measure_resistance}
+@item @ref{sourcemeter_sweep_voltage_measure_voltage_and_current}
+@item @ref{sourcemeter_sweep_current_measure_voltage_and_current}
 @end table
 
 @noindent
@@ -9612,6 +9622,158 @@ channel number) returns that number - if it is @code{0} filtering is
 disabled. Calling it with a number between @code{1} and @code{100}
 enables filtering, using this number of data points. Setting the
 filter count to @code{0} disables filtering/
+
+
+@anchor{sourcemeter_sweep_voltage_measure_voltage}
+@findex sourcemeter_sweep_voltage_measure_voltage
+@item   sourcemeter_sweep_voltage_measure_voltage
+Function for doing a voltage sweep while measuring voltages. The
+function expects, beside the channel number, three arguments, the
+start and end voltage and the number of points of the sweep. It
+returns an array with as many voltage data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for voltage sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_voltage_measure_current}
+@findex sourcemeter_sweep_voltage_measure_current
+@item   sourcemeter_sweep_voltage_measure_current
+Function for doing a voltage sweep while doing measuring currents.
+The function expects, beside the channel number, three arguments, the
+start and end voltage and the number of points of the sweep. It
+returns an array with as many current data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for voltage sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_voltage_measure_power}
+@findex sourcemeter_sweep_voltage_measure_power
+@item   sourcemeter_sweep_voltage_measure_power
+Function for doing a voltage sweep while doing measuring powers. The
+function expects, beside the channel number, three arguments, the
+start and end voltage and the number of points of the sweep. It
+returns an array with as many power data points as there where points
+in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for voltage sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_voltage_measure_resistance}
+@findex sourcemeter_sweep_voltage_measure_resistance
+@item   sourcemeter_sweep_voltage_measure_resistance
+Function for doing a voltage sweep while measuring resistances. The
+function expects, beside the channel number, three arguments, the
+start and end voltage and the number of points of the sweep. It
+returns an array with as many resistance data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for voltage sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_current_measure_voltage}
+@findex sourcemeter_sweep_current_measure_voltage
+@item   sourcemeter_sweep_current_measure_voltage
+Function for doing a current sweep while measuring voltages. The
+function expects, beside the channel number, three arguments, the
+start and end current and the number of points of the sweep. It
+returns an array with as many voltage data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for current sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_current_measure_current}
+@findex sourcemeter_sweep_current_measure_current
+@item   sourcemeter_sweep_current_measure_current
+Function for doing a current sweep while measuring currents. The
+function expects, beside the channel number, three arguments, the
+start and end current and the number of points of the sweep. It
+returns an array with as many current data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for current sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_current_measure_power}
+@findex sourcemeter_sweep_current_measure_power
+@item   sourcemeter_sweep_current_measure_power
+Function for doing a current sweep while doing measuing powers. The
+function expects, beside the channel number, three arguments, the
+start and end current and the number of points of the sweep. It
+returns an array with as many power data points as there where points
+in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for current sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_current_measure_resistance}
+@findex sourcemeter_sweep_current_measure_resistance
+@item   sourcemeter_sweep_current_measure_resistance
+Function for doing a current sweep while measuring resistances. The
+function expects, beside the channel number, three arguments, the
+start and end current and the number of points of the sweep. It
+returns an array with as many resistance data points as there where
+points in the sweep.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for current sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_voltage_measure_voltage_and_current}
+@findex sourcemeter_sweep_voltage_measure_voltage_and_current
+@item   sourcemeter_sweep_voltage_measure_voltage_and_current
+Function for doing a voltage sweep while simultaneously measuring
+voltages and currents. The function expects, beside the channel
+number, three arguments, the start and end voltage and the number of
+points of the sweep. It returns an array with twice as many data
+points as there where points in the sweep, with the elements
+alternatingly set to the measured voltages and currents.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for voltage sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
+
+
+@anchor{sourcemeter_sweep_current_measure_voltage_and_current}
+@findex sourcemeter_sweep_current_measure_voltage_and_current
+@item   sourcemeter_sweep_current_measure_voltage_and_current
+Function for doing a current sweep while simultaneously measuring
+voltages and currents. The function expects, beside the channel
+number, three arguments, the start and end voltage and the number of
+points of the sweep. It returns an array with twice as many data
+points as there where points in the sweep, with the elements
+alternatingly set to the measured voltages and currents.
+
+After the end of the sweep the output is switched off and the device
+channel is set up for current sourcing. During the sweep all
+compliance, delay, integration time and filter settings are taken into
+account.
 
 
 @end table

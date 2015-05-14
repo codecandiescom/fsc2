@@ -32,6 +32,19 @@
 #define NUM_CHANNELS 2
 #endif
 
+/*..................................................................*
+ * Maximum source voltages and currents
+ *..................................................................*/
+
+#if defined _2601A || defined _2602A
+#define MAX_SOURCE_LEVELV  40.4
+#define MAX_SOURCE_LEVELI  3.03
+#else
+#define MAX_SOURCE_LEVELV  202.0
+#define MAX_SOURCE_LEVELI  1.515
+#endif
+
+
 double keithley2600a_best_source_rangev( unsigned int ch,
                                          double       volts );
 double keithley2600a_best_source_rangei( unsigned int ch,

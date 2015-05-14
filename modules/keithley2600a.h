@@ -30,11 +30,18 @@
 #include "keithley2600a_measure.h"
 
 
+/* Define the maximum number of points in a sweep - the value isn't
+   documented, so we have to ick something that's not too small but
+   still looks reasonable */
+
+#define MAX_SWEEP_POINTS  10001
+
+
 /* Check that a model is defined */
 
 #if    ! defined _2601A && ! defined _2602A \
     && ! defined _2611A && ! defined _2612A \
-    && ! defined _2635 && ! defined _2636A
+    && ! defined _2635A && ! defined _2636A
 #error "No model has been defined in configuration file."
 #endif
 
@@ -251,6 +258,16 @@ Var_T * sourcemeter_measure_current_offset( Var_T * v );
 Var_T * sourcemeter_measure_delay( Var_T * v );
 Var_T * sourcemeter_measure_filter_type( Var_T * v );
 Var_T * sourcemeter_measure_filter_count( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_voltage( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_current( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_power( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_resistance( Var_T * v );
+Var_T * sourcemeter_sweep_current_measure_voltage( Var_T * v );
+Var_T * sourcemeter_sweep_current_measure_current( Var_T * v );
+Var_T * sourcemeter_sweep_current_measure_power( Var_T * v );
+Var_T * sourcemeter_sweep_current_measure_resistance( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v );
+Var_T * sourcemeter_sweep_current_measure_voltage_and_current( Var_T * v );
 
 
 #endif

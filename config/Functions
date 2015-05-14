@@ -611,6 +611,16 @@ sourcemeter_measure_current_offset, -1, EXP;
 sourcemeter_measure_delay, -1, EXP;
 sourcemeter_measure_filter_type, -1, EXP;
 sourcemeter_measure_filter_count, -1, EXP;
+sourcemeter_sweep_voltage_measure_voltage, -1, EXP;
+sourcemeter_sweep_voltage_measure_current, -1, EXP;
+sourcemeter_sweep_voltage_measure_power, -1, EXP;
+sourcemeter_sweep_voltage_measure_resistance, -1, EXP;
+sourcemeter_sweep_current_measure_voltage, -1, EXP;
+sourcemeter_sweep_current_measure_current, -1, EXP;
+sourcemeter_sweep_current_measure_power, -1, EXP;
+sourcemeter_sweep_current_measure_resistance, -1, EXP;
+sourcemeter_sweep_voltage_measure_voltage_and_current, -1, EXP;
+sourcemeter_sweep_current_measure_voltage_and_current, -1, EXP;
 
 
 /* Function exported by the microwave bridge modules */

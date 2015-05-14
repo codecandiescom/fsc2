@@ -116,15 +116,16 @@ keithley2600a_cmd( const char * cmd )
 bool
 keithley2600a_talk( const char * cmd,
                     char       * reply,
-                    size_t       length )
+                    size_t       length,
+                    bool         allow_abort )
 {
     fsc2_assert( length > 1 );
 
     keithley2600a_cmd( cmd );
 
     length--;
-	if ( vxi11_read( reply, &length, false ) != SUCCESS || length < 1 )
-		keithley2600a_comm_failure( );
+    if ( vxi11_read( reply, &length, allow_abort ) != SUCCESS || length < 1 )
+        keithley2600a_comm_failure( );
 
     reply[ length ] = '\0';
 	return OK;
@@ -224,7 +225,7 @@ keithley2600a_get_sense( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.sense)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf );
+	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     k26->sense[ ch ] = keithley2600a_line_to_int( buf );
     if (    k26->sense[ ch ] != SENSE_LOCAL
@@ -272,7 +273,7 @@ keithley2600a_get_line_frequency( void )
 {
     char buf[ 50 ] = "print(localnode.linefreq)";
 
-	keithley2600a_talk( buf, buf, sizeof buf );
+	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     k26->linefreq = keithley2600a_line_to_double( buf );
 
@@ -383,8 +384,7 @@ keithley2600a_line_to_doubles( const char * line,
 
         errno = 0;
         res = strtod( line, &ep );
-        if (    ( *ep != '\n' && *ep != ' ' )
-             || *++ep
+        if (    ( *ep && *ep != '\n' && *ep != ' ' && *ep != ',' )
              || (    ( res == HUGE_VAL || res == - HUGE_VAL )
                   && errno == ERANGE ) )
             keithley2600a_bad_data( );
@@ -394,11 +394,8 @@ keithley2600a_line_to_doubles( const char * line,
         if ( i == cnt )
             return buf;
 
-        if ( *ep != ' ' )
-            keithley2600a_bad_data( );
-
-        line = ep++;
-        while ( *line == ' ' )
+        line = ++ep;
+        while ( *line == ' ' || *line == ',')
             line++;
     }
 }
@@ -417,7 +414,7 @@ keithley2600a_show_errors( void )
     int error_count;
     char * mess = NULL;
 
-    keithley2600a_talk( "print(errorqueue.count)", buf, sizeof buf );
+    keithley2600a_talk( "print(errorqueue.count)", buf, sizeof buf, false );
     if ( ( error_count = keithley2600a_line_to_int( buf ) ) < 0 )
         keithley2600a_bad_data( );
     else if ( error_count == 0 )
@@ -430,7 +427,7 @@ keithley2600a_show_errors( void )
         while ( error_count-- > 0 )
         {
             keithley2600a_talk( "code,emess,esev,enode=errorqueue.next()\n"
-                                "print(emess)", buf, sizeof buf );
+                                "print(emess)", buf, sizeof buf, false );
             mess = T_realloc( mess, strlen( mess ) + strlen( buf ) + 1 );
             strcat( mess, buf );
         }

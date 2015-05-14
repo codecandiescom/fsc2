@@ -32,20 +32,6 @@ static double basic_max_source_limiti( void );
 
 
 /*..................................................................*
- * Maximum source voltages and currents
- *..................................................................*/
-
-#if defined _2601A || defined _2602A
-#define MAX_SOURCE_LEVELV  40.4
-#define MAX_SOURCE_LEVELI  3.03
-#else
-#define MAX_SOURCE_LEVELV  202.0
-#define MAX_SOURCE_LEVELI  1.515
-#endif
-
-
-
-/*..................................................................*
  * Minimum and maximum factors, to be multiplied with the inverse of
  * the line frequency, for the ADC integration time, i.e. the sampling
  * time for a measurement pointxs

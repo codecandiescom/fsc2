@@ -29,7 +29,8 @@ bool keithley2600a_close( void );
 bool keithley2600a_cmd( const char * cmd );
 bool keithley2600a_talk( const char * cmd,
                          char       * reply,
-                         size_t       length );
+                         size_t       length,
+                         bool         allow_abort );
 
 void keithley2600a_get_state( void );
 void keithley2600a_reset( void );
