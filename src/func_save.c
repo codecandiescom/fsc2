@@ -989,7 +989,7 @@ batch_mode_file_open( char * name,
     char *new_name = NULL;
     struct stat stat_buf;
     FILE *fp = NULL;
-    gzFile *gp = NULL;
+    gzFile gp = NULL;
     File_List_T *old_File_List = NULL;
 
 
@@ -1050,7 +1050,7 @@ batch_mode_file_open( char * name,
                  new_name, name );
 
     if (    ( ! do_compress && ! ( fp = fopen( new_name, "w+"   ) ) )
-         || (   do_compress && ! ( fp = gzopen( new_name, "wb9" ) ) ) )
+         || (   do_compress && ! ( gp = gzopen( new_name, "wb9" ) ) ) )
     {
         switch( errno )
         {
@@ -1109,7 +1109,7 @@ batch_mode_file_open( char * name,
         if ( ! do_compress && fp )
             fclose( fp );
         else if ( do_compress && gp )
-            gzclose( fp );
+            gzclose( gp );
 
         T_free( new_name );
         EDL.File_List = old_File_List;
@@ -1198,7 +1198,7 @@ f_delf( Var_T * v )
     }
     else if ( fl->gzip && fl->gp )
     {
-        gzclose( fl->fp );
+        gzclose( fl->gp );
         fl->gp = NULL;
     }
 
