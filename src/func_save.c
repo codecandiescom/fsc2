@@ -2760,7 +2760,8 @@ T_fprintf( long         fn,
             fclose( fl->fp );
         else if ( fl->gzip && fl->gp )
             gzclose( fl->gp );
-        fl->fp = fl->gp = NULL;
+        fl->fp = NULL;
+        fl->gp = NULL;
         return written;
     }
 
