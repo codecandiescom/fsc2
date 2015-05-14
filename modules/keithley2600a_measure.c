@@ -841,7 +841,7 @@ keithley2600a_get_measure_filter_enabled( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.measure.filter.enabled)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.filter.enable)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].filter.enabled =
@@ -861,7 +861,7 @@ keithley2600a_set_measure_filter_enabled( unsigned int ch,
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.measure.filter.enabled=%d", smu[ ch ], on_off ? 1 : 0 );
+    sprintf( buf, "%s.measure.filter.enable=%d", smu[ ch ], on_off ? 1 : 0 );
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].filter.enabled = on_off;
