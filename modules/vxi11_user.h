@@ -46,6 +46,10 @@
 #define TIMEOUT            1
 
 
+#define VXI11_READ         0
+#define VXI11_WRITE        1
+
+
 #define	VXI11_DEFAULT_TIMEOUT	5000	/* in ms */
 
 

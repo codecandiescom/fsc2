@@ -47,7 +47,7 @@ double * keithley2600a_line_to_doubles( const char * line,
                                         double     * buf,
                                         int          cnt );
 void keithley2600a_bad_data( void );
-
+void keithley2600a_comm_failure( void );
 
 #endif
 

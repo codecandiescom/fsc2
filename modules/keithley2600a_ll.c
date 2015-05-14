@@ -23,7 +23,6 @@
 
 
 static void clear_errors( void );
-static void comm_failure( void );
 
 
 static const char *smu[ ] = { "smua", "smub" };
@@ -100,7 +99,7 @@ keithley2600a_cmd( const char * cmd )
 
     
 	if ( vxi11_write( cmd, &len, false ) != SUCCESS )
-		comm_failure( );
+		keithley2600a_comm_failure( );
 
 	return OK;
 }
@@ -125,7 +124,7 @@ keithley2600a_talk( const char * cmd,
 
     length--;
 	if ( vxi11_read( reply, &length, false ) != SUCCESS || length < 1 )
-		comm_failure( );
+		keithley2600a_comm_failure( );
 
     reply[ length ] = '\0';
 	return OK;
@@ -466,9 +465,8 @@ keithley2600a_bad_data( void )
  * Called whenever communication fails
  *--------------------------------------------------------------*/
 
-static
 void
-comm_failure( void )
+keithley2600a_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     k26->comm_failed = true;

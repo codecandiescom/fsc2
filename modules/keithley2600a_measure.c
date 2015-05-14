@@ -19,6 +19,7 @@
 
 
 #include "keithley2600a.h"
+#include "vxi11_user.h"
 
 
 static const char *smu[ ] = { "smua", "smub" };
@@ -147,7 +148,7 @@ keithley2600a_set_measure_rangei( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Returns if autorange for voltage measurements with the channel
+ * Returns if autoranging for voltage measurements with the channel
  * is on or off
  *---------------------------------------------------------------*/
 
@@ -186,7 +187,7 @@ keithley2600a_set_measure_autorangev( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Returns if autorange for current measurements with the channel
+ * Returns if autoranging for current measurements with the channel
  * is on or off
  *---------------------------------------------------------------*/
 
@@ -226,7 +227,7 @@ keithley2600a_set_measure_autorangei( unsigned int ch,
 
 /*---------------------------------------------------------------*
  * Returns the lowest value the measurment voltage range can be
- * set to while autoranging
+ * set to by autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -250,7 +251,7 @@ keithley2600a_get_measure_lowrangev( unsigned int ch )
 
 /*---------------------------------------------------------------*
  * Sets the lowest value the measurement voltage range can be set
- * to while autoranging
+ * to by autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -279,7 +280,7 @@ keithley2600a_set_measure_lowrangev( unsigned int ch,
 
 /*---------------------------------------------------------------*
  * Returns the lowest value the measurement current range can be
- * set to while autoranging
+ * set to by autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -303,7 +304,7 @@ keithley2600a_get_measure_lowrangei( unsigned int ch )
 
 /*---------------------------------------------------------------*
  * Sets the lowest value the measurement current range can be set
- * to while autoranging
+ * to by autoranging
  *---------------------------------------------------------------*/
 
 double
@@ -331,8 +332,8 @@ keithley2600a_set_measure_lowrangei( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Returns if autozero for measurements with the channel
- * is off (0), once (1) or auto (2)
+ * Returns if autozero for measurements with the channel is off (0),
+ * once (1) or auto (2)
  *---------------------------------------------------------------*/
 
 int
@@ -376,7 +377,7 @@ keithley2600a_set_measure_autozero( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Makes a simple measurement of voltage, current, power or resistance
+ * Does a measurement of voltage, current, power or resistance
  *---------------------------------------------------------------*/
 
 double
@@ -385,23 +386,43 @@ keithley2600a_measure( unsigned int ch,
 {
     static char method[ ] = { 'v', 'i', 'p', 'r' };
     char buf[ 50 ];
+    long timeout;
+    int cnt = 1;
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(  what >= VOLTAGE && what <= RESISTANCE );
 
-    if ( k26->measure[ ch ].count > 1 )
-        keithley2600a_set_measure_count( ch, 1 );
+    /* Doing a measurement can take quite some time (if the time for
+       measurements is set to the maximum and average filtering with
+       the maximum number of points is on, this alone will take 50 s,
+       and then there's also the pre-measurement delay), so raise the
+       read timeout accordingly with a bit to spare */
+
+    if (    k26->measure[ ch ].filter.enabled
+         && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
+        cnt = k26->measure[ ch ].filter.count;
+    timeout =   lrnd( 1.0e6 * (   k26->source[ ch ].delay
+                                + k26->measure[ ch ].delay
+                                + cnt * k26->measure[ ch ].time ) )
+              + READ_TIMEOUT;
+    
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+        keithley2600a_comm_failure( );
 
     sprintf( buf, "print(%s.measure.%c())", smu[ ch ], method[ what ] );
     keithley2600a_talk( buf, buf, sizeof buf );
 
-    k26->measure[ ch ].count = 1;
+    /* Reset the read timeout again */
+
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        keithley2600a_comm_failure( );
+
     return keithley2600a_line_to_double( buf );
 }
 
 
 /*---------------------------------------------------------------*
- * Makes a simple measurement of voltage, current, power or resistance
+ * Does a simultaneous measurement of voltage and current
  *---------------------------------------------------------------*/
 
 double const *
@@ -409,16 +430,32 @@ keithley2600a_measure_iv( unsigned int ch )
 {
     static double iv[ 2 ];
     char buf[ 50 ];
+    long timeout;
+    int cnt = 1;
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    if ( k26->measure[ ch ].count > 1 )
-        keithley2600a_set_measure_count( ch, 1 );
+    /* Make sure the read timeout is large enough */
+
+    if (    k26->measure[ ch ].filter.enabled
+         && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
+        cnt = k26->measure[ ch ].filter.count;
+    timeout =   lrnd( 1.0e6 * (   k26->source[ ch ].delay
+                                + k26->measure[ ch ].delay
+                                + cnt * k26->measure[ ch ].time ) )
+              + READ_TIMEOUT;
+    
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+        keithley2600a_comm_failure( );
 
     sprintf( buf, "print(%s.measure.iv())", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf );
 
-    k26->measure[ ch ].count = 1;
+    /* Reset the read timeout again */
+
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        keithley2600a_comm_failure( );
+
     return keithley2600a_line_to_doubles( buf, iv, 2 );
 }
 

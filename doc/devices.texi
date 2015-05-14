@@ -9540,6 +9540,10 @@ will automatically add a range dependend settling time. Any argument
 greater than @code{0} will be used as the additional settling time (in
 seconds).
 
+Note: while not documented it has been observed that the first
+measurement done after changing the delay takes quite a bit longer
+than it should, about three times the newly set delay time!
+
 
 @anchor{sourcemeter_measure_voltage_offset()}
 @findex sourcemeter_measure_voltage_offset()

@@ -358,13 +358,13 @@ vxi11_close( void )
 
 
 /*----------------------------------------------------------------*
- * Function for setting the timeout for a read or write operation
+ * Function for setting the timeout for read or write operations
  * ->
  *    1. Flag that tells if the timeout is for read or write
- *       operations - 0 stands for read, everything else for
- *       write operations.
- *    2. Timeout value in micro-seconds (o is interpreted to
- *       mean a nearly infinite timeout
+ *       operations - 0 means read, 1 for write operations.
+ *    2. Timeout value in micro-seconds (0 is interpreted to
+ *       mean the longest possible timeout - nearly 25 days
+ *       on 32-bit and about 300 Myears on 64-bit systems;-)
  *----------------------------------------------------------------*/
 
 int
@@ -377,9 +377,9 @@ vxi11_set_timeout( int  dir,
         return FAILURE;
     }
 
-    if ( dir == READ )
+    if ( dir == VXI11_READ )
         read_timeout  = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
-    else if ( dir == WRITE )
+    else if ( dir == VXI11_WRITE )
         write_timeout = us_timeout ? lrnd( 0.001 * us_timeout ) : LONG_MAX;
     else
     {
