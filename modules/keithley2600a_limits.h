@@ -45,6 +45,9 @@
 #endif
 
 
+#define keithley2600a_min_measure_lowrangei keithley2600a_min_source_lowrangei
+
+
 double keithley2600a_best_source_rangev( unsigned int ch,
                                          double       volts );
 double keithley2600a_best_source_rangei( unsigned int ch,

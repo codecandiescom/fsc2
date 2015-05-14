@@ -31,9 +31,6 @@ static double basic_max_source_limitv( void );
 static double basic_max_source_limiti( void );
 
 
-#define keithley2600a_min_measure_lowrangei keithley2600a_min_source_lowrangei
-
-
 /*..................................................................*
  * Minimum and maximum factors, to be multiplied with the inverse of
  * the line frequency, for the ADC integration time, i.e. the sampling
