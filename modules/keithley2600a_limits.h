@@ -98,9 +98,6 @@ double keithley2600a_max_source_offlimiti( unsigned int ch );
 bool keithley2600a_check_source_offlimiti( unsigned int ch,
                                            double       offlimiti );
 
-double keithley2600a_min_measure_lowrangev( unsigned int ch );
-double keithley2600a_min_measure_lowrangei( unsigned int ch );
-
 bool keithley2600a_check_measure_rangev( unsigned int ch,
                                          double       range );
 bool keithley2600a_check_measure_rangei( unsigned int ch,
