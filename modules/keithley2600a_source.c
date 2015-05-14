@@ -867,7 +867,7 @@ keithley2600a_get_source_settling( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.setling)", smu[ ch ] );
+    sprintf( buf, "print(%s.source.setlling)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     settle = keithley2600a_line_to_int( buf );
@@ -901,7 +901,7 @@ keithley2600a_set_source_settling( unsigned int ch,
                  || settle == SETTLE_SMOOTH_100NA
                  || settle == SETTLE_FAST_ALL );
 
-    sprintf( buf, "%s.source.setling=%d", smu[ ch ], settle );
+    sprintf( buf, "%s.source.settling=%d", smu[ ch ], settle );
     keithley2600a_cmd( buf );
 
     return k26->source[ ch ].settling = settle;
