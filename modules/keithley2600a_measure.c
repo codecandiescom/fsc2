@@ -1152,6 +1152,140 @@ keithley2600a_sweep_and_measureiv( unsigned int ch,
 }
 
 
+/*---------------------------------------------------------------*
+ * Does a contact check measurement - note that this not possible if
+ * output is off and on HIGH_Z output mode or the source current
+ * is limited to less than 1 mA.
+ *---------------------------------------------------------------*/
+
+bool
+keithley2600a_contact_check( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(    k26->source[ ch ].output
+                 || (    k26->source[ ch ].offmode != OUTPUT_HIGH_Z
+                      && k26->source[ ch ].offlimiti >=
+                                                 MIN_CONTACT_CURRENT_LIMIT ) );
+
+    sprintf( buf, "print(%s.contact.check())", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
+
+    return keithley2600a_line_to_bool( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Measures and returns the low and high resistance measured
+ * in a contact measurement
+ *---------------------------------------------------------------*/
+
+const double *
+keithley2600a_contact_resistance( unsigned int ch )
+{
+    char buf[ 50 ];
+    double r[ 2 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(    k26->source[ ch ].output
+                 || (    k26->source[ ch ].offmode != OUTPUT_HIGH_Z
+                      && k26->source[ ch ].offlimiti >=
+                                                 MIN_CONTACT_CURRENT_LIMIT ) );
+
+    sprintf( buf, "print(%s.contact.r())", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
+
+    return keithley2600a_line_to_doubles( buf, r, 2 );
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the contact threshold resistance
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_get_contact_threshold( unsigned int ch )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.contact.threshold)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
+
+    return k26->contact[ ch ].threshold = keithley2600a_line_to_double( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the contact threshold resistance
+ *---------------------------------------------------------------*/
+
+double
+keithley2600a_set_contact_threshold( unsigned int ch,
+                                     double       threshold )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( threshold >= 0 && threshold < 1e37 );
+
+    sprintf( buf, "%s.contact.threshold=%.5g", smu[ ch ], threshold );
+    keithley2600a_cmd( buf );
+
+    return k26->contact[ ch ].threshold = threshold;
+}
+
+
+/*---------------------------------------------------------------*
+ * Returns the contact measurement speed
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_get_contact_speed( unsigned int ch )
+{
+    char buf[ 50 ];
+    int speed;
+
+    fsc2_assert( ch < NUM_CHANNELS );
+
+    sprintf( buf, "print(%s.contact.threshold)", smu[ ch ] );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
+
+    speed = keithley2600a_line_to_int( buf );
+    if ( speed < CONTACT_FAST || speed > CONTACT_SLOW )
+        keithley2600a_bad_data( );
+
+    return k26->contact[ ch ].speed = speed;
+}
+
+
+/*---------------------------------------------------------------*
+ * Sets the contact measurement speed
+ *---------------------------------------------------------------*/
+
+int
+keithley2600a_set_contact_speed( unsigned int ch,
+                                 int          speed )
+{
+    char buf[ 50 ];
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( speed >= CONTACT_FAST && speed <= CONTACT_SLOW );
+
+    sprintf( buf, "%s.contact.speed=%d", smu[ ch ], speed );
+    keithley2600a_cmd( buf );
+
+    return k26->contact[ ch ].speed = speed;
+}
+
+
+
+
+
+
+
 /*
  * Local variables:
  * tab-width: 4

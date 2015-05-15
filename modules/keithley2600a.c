@@ -51,9 +51,12 @@ static Keithley2600A_T keithley2600a_test;
 Keithley2600A_T * k26 = &keithley2600a;
 
 
-#define TEST_VOLTAGE     1.0e-3
-#define TEST_CURRENT     1.0e-6
-#define TEST_COMPLIANCE  0L
+#define TEST_VOLTAGE         1.0e-3
+#define TEST_CURRENT         1.0e-6
+#define TEST_COMPLIANCE      0L
+#define TEST_CONTACT_R_LOW   5.0
+#define TEST_CONTACT_R_HIGH  8.0
+
 
 #if ! defined POWER_LINE_FREQ
 #define POWER_LINE_FREQ  50
@@ -156,6 +159,9 @@ keithley2600a_test_hook( void )
 
         k26->measure[ ch ].filter.count = 1;
         k26->measure[ ch ].filter.enabled = false;
+
+        k26->contact[ ch ].threshold = 50;
+        k26->contact[ ch ].speed = CONTACT_FAST;
     }
  
     return true;
@@ -876,7 +882,7 @@ sourcemeter_compliance_voltage( Var_T * v )
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].limitv );
 
-    /* Accept negative values, jut make 'em positive */
+    /* Accept negative values, just make 'em positive */
 
     limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
@@ -1309,7 +1315,7 @@ Var_T *
 sourcemeter_measure_voltage_and_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double vi[ 2 ];
+    double *vi;
     const double *r;
 
     too_many_arguments( v );
@@ -1323,12 +1329,14 @@ sourcemeter_measure_voltage_and_current( Var_T * v )
             k26->measure[ ch ].rangei =
                           keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
 
+        vi = T_malloc( 2 * sizeof *vi );
         vi[ 0 ] = TEST_VOLTAGE;
         vi[ 1 ] = TEST_CURRENT;
         return vars_push( FLOAT_ARR, vi, 2 );
     }
 
     r = keithley2600a_measure_iv( ch );
+    vi = T_malloc( 2 * sizeof *vi );
     vi[ 0 ] = r[ 1 ];
     vi[ 1 ] = r[ 0 ];
 
@@ -1857,6 +1865,7 @@ sourcemeter_measure_filter_count( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a voltage sweep while measuring voltages
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -1893,6 +1902,7 @@ sourcemeter_sweep_voltage_measure_voltage( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a voltage sweep while measuring currents
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -1929,6 +1939,7 @@ sourcemeter_sweep_voltage_measure_current( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a voltage sweep while measuring powers
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -1963,6 +1974,7 @@ sourcemeter_sweep_voltage_measure_power( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a voltage sweep while measuring resistances
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -1997,6 +2009,7 @@ sourcemeter_sweep_voltage_measure_resistance( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a current sweep while measuring voltages
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -2033,6 +2046,7 @@ sourcemeter_sweep_current_measure_voltage( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a current sweep while measuring currents
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -2069,6 +2083,7 @@ sourcemeter_sweep_current_measure_current( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a current sweep while measuring powers
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -2103,6 +2118,7 @@ sourcemeter_sweep_current_measure_power( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a current sweep while measuring resistances
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -2137,6 +2153,8 @@ sourcemeter_sweep_current_measure_resistance( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a voltage sweep while simultaneously measuring voltages
+ * and currents
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -2147,12 +2165,187 @@ sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v )
 
 
 /*--------------------------------------------------------------*
+ * Does a current sweep while simultaneously measuring voltages
+ * and currents
  *--------------------------------------------------------------*/
 
 Var_T *
 sourcemeter_sweep_current_measure_voltage_and_current( Var_T * v )
 {
     return do_iv_sweep( v, CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a contact check
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_contact_check( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+
+    too_many_arguments( v );
+
+    if (    ! k26->source[ ch ].output
+         && k26->source[ ch ].offmode == OUTPUT_HIGH_Z )
+    {
+        print( FATAL, "Contact check not possible while output is off in "
+               "HIGH-Z ,ode.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if (    ! k26->source[ ch ].output
+         && k26->source[ ch ].offlimiti < MIN_CONTACT_CURRENT_LIMIT )
+    {
+        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
+
+        print( FATAL, "Contact check not possible while current is limited "
+               "to less than %s.\n", s );
+        T_free( s );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        return vars_push( INT_VAR,
+                          keithley2600a_contact_check( ch ) ? 1L : 0L );
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a contact resistance measurement, returns lower resistance
+ * value in first element of array.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_contact_resistance( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    const double *r;
+    double *r12;
+
+    too_many_arguments( v );
+
+    if (    ! k26->source[ ch ].output
+         && k26->source[ ch ].offmode == OUTPUT_HIGH_Z )
+    {
+        print( FATAL, "Contact resistance measurement not possible while "
+               "output is off in HIGH-Z ,ode.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( k26->source[ ch ].leveli < MIN_CONTACT_CURRENT_LIMIT )
+    {
+        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
+
+        print( FATAL, "Contact resistance measurement not possible while "
+               "current is limited to less than %s.\n", s );
+        T_free( s );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        r12 = T_malloc( 2 * sizeof *r12 );
+        r12[ 0 ] =  TEST_CONTACT_R_LOW;
+        r12[ 1 ] =  TEST_CONTACT_R_HIGH;
+
+        return vars_push( FLOAT_ARR, r12, 2 );
+    }
+
+    r = keithley2600a_contact_resistance( ch );
+    r12 = T_malloc( 2 * sizeof *r12 );
+    r12[ 0 ] = r[ 1 ];
+    r12[ 1 ] = r[ 0 ];
+
+    return vars_push( FLOAT_ARR, r12, 2 );
+}
+       
+
+/*--------------------------------------------------------------*
+ * Returns or sets the resistance threshold used in contact measurements.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_contact_threshold( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    double threshold;
+
+    if ( ! v )
+        return vars_push( FLOAT_VAR, k26->contact[ ch ].threshold );
+
+    threshold = get_double( v, NULL );
+    too_many_arguments( v );
+
+    if ( threshold < 0 )
+    {
+        print( FATAL, "Invalid negative contact resistance threshold.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( threshold > 1.0e37 )
+        threshold = 1.0e37;
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_contact_threshold( ch, threshold );
+    else
+        k26->contact[ ch ].threshold = threshold;
+
+    return vars_push( FLOAT_VAR, k26->contact[ ch ].threshold );
+}
+
+
+/*--------------------------------------------------------------*
+ * Returns or sets the speed used in contact measurements.
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourecemeter_contact_speed( Var_T * v )
+{
+    unsigned int ch = get_channel( &v );
+    long int speed;
+
+    if ( ! v )
+        return vars_push( INT_VAR, k26->contact[ ch ].speed );
+
+    too_many_arguments( v );
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "FAST" ) )
+            speed = CONTACT_FAST;
+        else if ( ! strcasecmp( v->val.sptr, "MEDIUM" ) )
+            speed = CONTACT_MEDIUM;
+        else if ( ! strcasecmp( v->val.sptr, "SLOW" ) )
+            speed = CONTACT_SLOW;
+        else
+        {
+            print( FATAL, "Invalid contact measurement speed argument: "
+                   "\"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        speed = get_long( v, "contact measurement speed.\n" );
+
+        if ( speed < CONTACT_FAST || speed > CONTACT_SLOW )
+        {
+            print( FATAL, "Invalid contact measurement speed argument: %d\n",
+                   speed );
+            THROW( EXCEPTION );
+        }
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_set_contact_speed( ch, speed );
+    else
+        k26->contact[ ch ].speed = speed;
+
+    return vars_push( INT_VAR, k26->contact[ ch ].speed );
 }
 
 
@@ -2409,7 +2602,7 @@ pretty_print( double       v,
 
 
 /*---------------------------------------------------------------------*
- * measure to append at the end.
+ * Helper function for printing channel numbers
  *---------------------------------------------------------------------*/
 
 static

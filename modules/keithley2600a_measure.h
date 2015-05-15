@@ -105,6 +105,17 @@ double * keithley2600a_sweep_and_measureiv( unsigned int ch,
                                             double       end,
                                             int          num_points );
 
+bool keithley2600a_contact_check( unsigned int ch );
+const double * keithley2600a_contact_resistance( unsigned int ch );
+
+double keithley2600a_get_contact_threshold( unsigned int ch );
+double keithley2600a_set_contact_threshold( unsigned int ch,
+                                            double       threshold );
+
+int keithley2600a_get_contact_speed( unsigned int ch );
+int keithley2600a_set_contact_speed( unsigned int ch,
+                                     int          speed );
+
 
 #endif
 

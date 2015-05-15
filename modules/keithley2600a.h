@@ -120,6 +120,16 @@
 #define MAZ_INTEGRATION_FACTOR 25
 
 
+/* Contact measurement speeds */
+
+#define CONTACT_FAST    0
+#define CONTACT_MEDIUM  1
+#define CONTACT_SLOW    2
+
+#define MIN_CONTACT_CURRENT_LIMIT  1.0e-3   /* 1 mA */
+
+
+
 typedef struct
 {
     bool   output;
@@ -157,12 +167,20 @@ typedef struct
     bool   enabled;
 } Rel_T;
 
+
 typedef struct
 {
     int  type;
     int  count;
     bool enabled;
 } Filter_T;
+
+
+typedef struct
+{
+    double threshold;
+    int    speed;
+} Contact_T;
 
 
 typedef struct
@@ -203,6 +221,7 @@ typedef struct
 
     Source_T  source[ NUM_CHANNELS ];
     Measure_T measure[ NUM_CHANNELS ];
+    Contact_T contact[ NUM_CHANNELS ];
 } Keithley2600A_T;
 
 
@@ -268,6 +287,10 @@ Var_T * sourcemeter_sweep_current_measure_power( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_resistance( Var_T * v );
 Var_T * sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_voltage_and_current( Var_T * v );
+Var_T * sourcemeter_contact_check( Var_T * v );
+Var_T * sourcemeter_contact_resistance( Var_T * v );
+Var_T * sourcemeter_contact_threshold( Var_T * v );
+Var_T * sourecemeter_contact_speed( Var_T * v );
 
 
 #endif

@@ -1477,7 +1477,7 @@ using the fact that a non-zero value is always interpreted as TRUE:
   I = 6;
   Fact = 1;
 
-  WHILE I @{
+  WHILE I @{
       Fact *= I;
       I -= 1;
   @}
@@ -1612,7 +1612,7 @@ the factorial of 6 also could have been written as
   I = 6;
   Fact = 1;
 
-  UNTIL I == 0 @{
+  UNTIL I == 0 @{
       Fact *= I;
       I -= 1;
   @}

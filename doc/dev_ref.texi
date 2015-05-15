@@ -852,7 +852,7 @@ subsystem of (currently) a Meilhaus card, using some additional
 home-built electronics for latching data.
 
 @paragraphindent 0
-Many thanks to Marc A. Gluba (Helmholtz-Zentrum Berlin für Materialien
+Many thanks to Marc A. Gluba (Helmholtz-Zentrum Berlin f@"ur Materialien
 und Energie GmbH) for providing me with detailed and precise
 informations about the bit patterns to be send to the device.
 
@@ -1590,7 +1590,7 @@ nearly identical to the tested HP5352B)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{hp5352ä}
+@strong{Module name}: @code{hp5352a}
 
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
@@ -2330,6 +2330,10 @@ in configuration file for the module.
 @item @ref{sourcemeter_sweep_current_measure_resistance}
 @item @ref{sourcemeter_sweep_voltage_measure_voltage_and_current}
 @item @ref{sourcemeter_sweep_current_measure_voltage_and_current}
+@item @ref{sourcemeter_contact_check()}
+@item @ref{sourcemeter_contact_resistance()}
+@item @ref{sourcemeter_contact_threshold()}
+@item @ref{sourecemeter_contact_speed()}
 @end table
 
 

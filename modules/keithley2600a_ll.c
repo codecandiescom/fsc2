@@ -196,6 +196,9 @@ keithley2600a_get_state( void )
         keithley2600a_get_measure_filter_type( ch );
         keithley2600a_get_measure_filter_count( ch );
         keithley2600a_get_measure_filter_enabled( ch );
+
+        keithley2600a_get_contact_threshold( ch );
+        keithley2600a_get_contact_speed( ch );
     }
 }
 

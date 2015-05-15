@@ -98,7 +98,7 @@ enough it at least reduces the amount of changes to be done to an
 @section Using two (or more) devices of the same type
 @cindex Using two (or more) devices of the same type
 
-Wwhat if you need to use e.g.@: two digitizers simultaneously?
+What if you need to use e.g.@: two digitizers simultaneously?
 When the names of the functions for accessing both the digitizers are
 identical how does one specify which one to use for a command? Actually,
 it's quite simple. In the @code{DEVICES} section the two digitizers will
@@ -196,7 +196,7 @@ Oxford Instruments IPS20_4, 360 GHz spectrometer, Berlin magnet sweep
 power supply, Berlin
 
 @item @ref{ips120_10}
-Oxford Instruments IP120_10, J-band spectrometer, Leiden
+Oxford Instruments IPS120_10, J-band spectrometer, Leiden
 
 @item @ref{ips120_10_mod}
 Oxford Instruments IPS120_10 with modification for additional
@@ -211,10 +211,10 @@ Home-built controller using a DAC for narrow field range, S-band
 magnet. Frankfurt/Main
 
 @item @ref{hjs_sfc}
-Pseudo-device for magnet control (without field measurement), Osnabrück
+Pseudo-device for magnet control (without field measurement), Osnabr@"uck
 
 @item @ref{hjs_fc}
-Pseudo-device for magnet control, Osnabrück
+Pseudo-device for magnet control, Osnabr@"uck
 
 @item @ref{fsps25}
 Home-built Sweep Power Supply, Frankfurt/Main
@@ -3114,7 +3114,7 @@ reducing the time required to do an experiment.
 @anchor{digitizer_lock_keyboard()}
 @findex digitizer_lock_keyboard()
 @item digitizer_lock_keyboard()
-This funtion is only available for the @strong{Tectronix}
+This function is only available for the @strong{Tectronix}
 oszilloscopes. Usually, during an experiment the keyboard of the
 digitizer is locked. But for situations where it would be useful to be
 able to control the digitizer also via its keyboard it can be unlocked
@@ -5269,7 +5269,7 @@ Meilhaus Electronic GmbH ME-6000 and ME-6100 digital-to-analog
 converter cards,
 
 @item @ref{hjs_daadc}
-Home-built DA and AD converter,  group of H.-J.@: Steinhoff, Osnabrück
+Home-built DA and AD converter,  group of H.-J.@: Steinhoff, Osnabr@"uck
 
 @item @ref{rb8509}
 Rulbus 12-bit ADC card RB8509, Leiden
@@ -8100,7 +8100,7 @@ from the one stored in the state file).
 This function only exists for the @strong{Oriel} @ref{oriel_cs_260}
 monochromator. It allows to query or set the gratung zero parameter
 (used internally by the device to calculate the center position of
-ä grating). It expects at least one argument, the grating number.
+a grating). It expects at least one argument, the grating number.
 If no more arguments exist it returns the currently used zero paramter
 for the grating. If called with a second, positive argument this is
 used set as the zero paramter for the grating. This function should
@@ -8322,7 +8322,7 @@ A module for a single computer controllable microwave attenuator exists:
 @table @code
 @item @ref{hjs_attenuator}
 Stepper motor controlled attenuator, home-built in the group of the
-group of H.-J.@: Steinhoff, Osnabrück
+group of H.-J.@: Steinhoff, Osnabr@"uck
 @end table
 @noindent
 To use the module in an experiment put its name into the @code{DEVICES}
@@ -8961,6 +8961,10 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @item @ref{sourcemeter_sweep_current_measure_resistance}
 @item @ref{sourcemeter_sweep_voltage_measure_voltage_and_current}
 @item @ref{sourcemeter_sweep_current_measure_voltage_and_current}
+@item @ref{sourcemeter_contact_check()}
+@item @ref{sourcemeter_contact_resistance()}
+@item @ref{sourcemeter_contact_threshold()}
+@item @ref{sourecemeter_contact_speed()}
 @end table
 
 @noindent
@@ -9188,46 +9192,50 @@ uA}.
 @anchor{sourcemeter_compliance_voltage()}
 @findex sourcemeter_compliance_voltage()
 @item   sourcemeter_compliance_voltage()
-When the device is in current sourcing mode an upper bound for the
-voltage exists that will be output with the requested current, called
-the "compliance voltage". This function allows to query or set this
-value.
+When the device is in current sourcing mode an upper limit exists for
+the voltage that will be output to achieve a requested current. The
+limit is the "compliance voltage" and this function allows to query or
+set its value.
 
 If called with no arguments (beside the channel number) the currently
 set value for the compliance voltage is returned. If called with
 another argument this is set as the compliance voltage. Note that for
-large output current ranges the maximum the compliance voltage can be
-set to is reduced so that the product of source current range and the
-voltage range the compliance voltage falls into does not exceed a
-device dependent upper power limit (30 or @w{40 W}).
+the higher output current ranges the maximum the compliance voltage
+can be set to is reduced so that the product of source current range
+and the voltage range the compliance voltage falls into does not
+exceed a device dependent upper power limit (30 or @w{40 W}).
 
 
 @anchor{sourcemeter_compliance_current()}
 @findex sourcemeter_compliance_current()
 @item   sourcemeter_compliance_current()
 When the device is in voltage sourcing mode an upper bound for the
-current exists that will be used output with the requested voltage,
-called the "compliance current". This function allows to query or set
-this value.
+current exists that will be output for a requested voltage. The limit
+is called the "compliance current" and this function allows to query
+or set its value.
 
 If called with no arguments (beside the channel number) the currently
-set value for the compliance current is returned. If called with
-another argument this is set as the compliance current. Note that for
-large output voltage ranges the maximum the compliance current can be
-set to is reduced so that the product of source voltage range and the
-current range the compliance current falls into does not exceed a device
-depend-end upper power limit (30 or @w{40 W}).
+set value for thxe compliance current is returned. If called with
+another argument this is set as the new compliance current. Note that
+for higher output voltage ranges the maximum the compliance current can
+be set to is reduced so that the product of source voltage range and
+the current range the compliance current falls into does not exceed a
+device depend-end upper power limit (xs30 or @w{40 W}).
 
 
 @anchor{sourcemeter_test_compliance()}
 @findex sourcemeter_test_compliance()
 @item   sourcemeter_test_compliance()
 This function returns if a channel output is currently clamped due to
-exceeding a compliance limit (i.e.@: if the circuitry under test has a
+exceeding a compliance limit. I.e.@: if the circuitry under test has a
 resistance of @w{1 Ohm} and the channel is set up to output @w{1 V}
-while a current compliance limit of @w{1 mA} is active). It accepts
-no arguments (beside the channel number) and returns @code{0} if
-the compliance limit hasn't been reached and @code{1} otherwise.
+this would require a current of @w{1 A}. But if a current compliance
+limit of @w{1 mA} has been imposed this isn't posible and the function
+will return a @code{true} value.
+
+The function accepts no arguments (except the channel number) and
+returns @code{0} if the compliance limit hasn't been reached and
+@code{1} otherwise.
 
 
 @anchor{sourcemeter_source_delay()}
@@ -9252,17 +9260,16 @@ seconds).
 @anchor{sourcemeter_max_off_source_current()}
 @findex sourcemeter_max_off_source_current()
 @item   sourcemeter_max_off_source_current()
-When the output channel is off and the is in "normal" off-state
-it will output @w{0 V} but the device may still source (or sink)
-small currents. Its size can be controlled via the maximum off
-current.
+When a channel is switched off and it's in "normal" off-state it will
+output @w{0 V} but may still source (or sink) small currents. This
+current's size can be controlled via this function.
 
 If called with no arguments (beside the channel number) the function
-returns the maximum current the channel will source (or sink) when
-in "normal" off-state - the default setting is @code{1 mA}. If called
+returns the maximum current the channel will source (or sink) when in
+"normal" off-state - the default setting is @code{1 mA}. If called
 with another argument a different maximum current for this state can
-be set. The lowest possible value is 10% of the smallest current range
-and the maximum the largest current the device can source.
+be set. The lowest possible current is 10% of the smallest current
+range and the maximum is the largest current the device can source.
 
 
 @anchor{sourcemeter_source_high_capacity()}
@@ -9270,10 +9277,11 @@ and the maximum the largest current the device can source.
 @item sourcemeter_source_high_capacity()
 When doing measurements on test circuits with a high capacitance
 instabilities may result. To avoid this the source channels can be set
-to high-capacitance mode (but for circuits with low capacitance (below
-@w{100 nF}) other instabilities may arise instead if high-capacitance
-mode is on). This function allows to query if high-capacitance mode is
-on or off for a channel or switch it on or off.
+to high-capacitance mode (but note that for circuits with low
+capacitance (below @w{100 nF}) other instabilities may arise instead
+if high-capacitance mode is on). This function allows to query if
+high-capacitance mode is on or off for a channel or switch it on or
+off.
 
 If called with no arguments (except the channel number) the function
 returns @code{0} if high-capacitance mode is off, otherwise @code{1}.
@@ -9291,7 +9299,7 @@ autoranging low limits.
 @findex sourcemeter_source_sink_mode()
 @item sourcemeter_source_sink_mode()
 Sink mode reduces source limit inaccuracy seen when the channel
-operates as voltage or current sink (but will introduce these
+operates as a voltage or current sink (but will introduce these
 inaccuracies when operating as a source). This function allows to
 query if sink mode is on or off or switch it on or off.
 
@@ -9310,23 +9318,23 @@ up operation under certain conditions (but may also introduce some
 problems). These are
 
 @table @code
-@item "SETTLE_SMOOTH" or 0
+@item "SMOOTH" or 0
 Turns off all settling operations (default).
 
-@item "SETTLE_FAST_RANGE" or 1
+@item "FAST_RANGE" or 1
 Instructs the device to use a faster procedure when changing ranges.
 
 @item "SETTLE_FAST_POLARITY" or 2
 Instructs the device to change polarity without going to zero
 
-@item "SETTLE_DIRECT_IRANGE" or 4
+@item "DIRECT_IRANGE" or 3
 Instructs the device to change the amps range directly.
 
-@item "SETTLE_SMOOTH_100NA" or 4
+@item "SMOOTH_100NA" or 4
 Enables the use of range rampers for the 100 nA range (disabled per
 default for the 2602A and 2612A and always enabled for the 2636A).
 
-@item "SETTLE_FAST_ALL" or 128
+@item "FAST_ALL" or 128
 Enables all @code{SETTLE_FAST_*} operations.
 @end table
 
@@ -9344,8 +9352,8 @@ which it then returns. If the voltage to be measured exceeds the
 measurement voltage range by more than a factor of @code{1.02}
 (because either autoranging is off or it exceeds the maximum range
 setting) a value of @code{9.91e37} is returned and a warning printed
-out. The function does not accept any arguments (beside the channel
-number).
+out. The function does not accept any arguments except the channel
+number.
 
 Note that the returned value may have been subject to filtering if
 a filter count other than @code{0} has been set via the function
@@ -9360,8 +9368,8 @@ which it then returns. If the current to be measured exceeds the
 measurement current range by more than a factor of @code{1.02}
 (because either autoranging is off or it exceeds the maximum range
 setting) a value of @code{9.91e37} is returned and a warning printed
-out. The function does not accept any arguments (beside the channel
-number).
+out. The function does not accept any arguments except the channel
+number.
 
 Note that the returned value may have been subject to filtering if
 a filter count other than @code{0} has been set via the function
@@ -9377,7 +9385,7 @@ the voltage or current to be measured exceeds the measurement
 range by more than a factor of @code{1.02} (because either autoranging
 is off or it exceeds the maximum range setting) a value of
 @code{9.91e37} is returned and a warning printed out. The function
-does not accept any arguments (beside the channel number).
+does not accept any arguments except the channel number.
 
 Note that the returned value may have been subject to filtering if
 a filter count other than @code{0} has been set via the function
@@ -9393,25 +9401,25 @@ detected that the voltage or current to be measured exceeds the
 measurement range by more than a factor of @code{1.02} (because either
 autoranging is off or it exceeds the maximum range setting) a value of
 @code{9.91e37} is returned and a warning printed out. The function
-does not accept any arguments (beside the channel number).
+does not accept any arguments excpet the channel number.
 
 Note that the returned value may have been subject to filtering if
 a filter count other than @code{0} has been set via the function
 @code{@ref{sourcemeter_measure_filter_count()}}.
 
 
-@anchor{sourcemeter_measure_voltage_and_current()}
+@anchor{sourcemeter_measure_voltage_and_current()}x
 @findex sourcemeter_measure_voltage_and_current()
 @item   sourcemeter_measure_voltage_and_current()
-The function instructs the device to do a single combined voltage and
-current measurement, which it then returns as an array with two
-elements (with the first element being set to the voltage, the second
-to the current). If during the measurement it is detected that the
-voltage or current to be measured exceeds the measurement range by
-more than a factor of @code{1.02} (because either autoranging is off
-or it exceeds the maximum range setting) a value of @code{9.91e37} is
-returned for the out-of-range component and a warning printed out. The
-function does not accept any arguments (beside the channel number).
+The function instructs the device to do a single combined measurement
+pf voltage and current, which it then returns as an array with two
+elements (with the first element being the voltage, the second the
+current). If during the measurement it is detected that the voltage or
+current to be measured exceeds the measurement range by more than a
+factor of @code{1.02} (because either autoranging is off or it exceeds
+the maximum range setting) a value of @code{9.91e37} is returned for
+the out-of-range component and a warning printed out. The function
+does not accept any arguments except the channel number.
 
 Note that the returned values may have been subject to filtering if
 a filter count other than @code{0} has been set via the function
@@ -9431,10 +9439,11 @@ called with another, boolean argument (@code{"OFF"} or @code{0} for off,
 @code{"ON"} or a non-zero integer for on) autoranging is switched off
 or on.
 
-Note that when the device is in voltage sourcing mode the measurement
-voltage range is always identical to the source voltage range, any
+Note that when the device channel is in voltage sourcing mode the
+measurement voltage range is always identical to the source voltage
+range (which is then what the function returns on queries), any
 settings concerning the measurement voltage range only take effect
-after switching to current sourcing mode.
+once the channel is switched to current sourcing mode.
 
 
 @anchor{sourcemeter_measure_current_autoranging()}
@@ -9450,10 +9459,11 @@ called with another, boolean argument (@code{"OFF"} or @code{0} for off,
 @code{"ON"} or a non-zero integer for on) autoranging is switched off
 or on.
 
-Note that when the device is in current sourcing mode the measurement
-current range is always identical to the source current range, any
+Note that when the device channel is in current sourcing mode the
+measurement current range is always identical to the source current
+range (which is then what the function returns on queries), any
 settings concerning the measurement current range only take effect
-after switching to voltage sourcing mode.
+once the channel is switched to voltage sourcing mode.
 
 
 @anchor{sourcemeter_measure_voltage_range()}
@@ -9782,6 +9792,71 @@ After the end of the sweep the output is switched off and the device
 channel is set up for current sourcing. During the sweep all
 compliance, delay, integration time and filter settings are taken into
 account.
+
+
+@anchor{sourcemeter_contact_check()}
+@findex sourcemeter_contact_check()
+@item   sourcemeter_contact_check()
+The device allows to do some checks on the connection to the circuitry
+under test by testing for excessive resistances. By calling this
+function such a test is done and it returns @code{1} if the test
+succeeded (the connection seems to be ok) and @code{0} if it
+failed (there's too high a resistance). The function tales no
+arguments (except the channel number). The resistances measured
+during the test are compared to a threshold value, which is
+per default @w{50 Ohm} but which can be modified using the function
+@code{@ref{sourcemeter_contact_threshold()}}.
+
+Tests can be done even when the channel's output is off, though the
+off-mode may not be the HIGH-Z state (in that state the test circuitry
+is completely disconnected from the device by a relay). Tests can also
+not be done when the maximum current when the channel is switched off
+is set to a value below @w{1 mA}.
+
+
+@anchor{sourcemeter_contact_resistance()}
+@findex sourcemeter_contact_resistance()
+@item   sourcemeter_contact_resistance()
+Function does a contact check as the function
+@code{@ref{sourcemeter_contact_check()}} but returns an array with to
+elements, of which the first one is the lowest resistance measured
+during the check and the second the highest one. The function takes
+no arguments beside the channel number.
+
+The function can called even when the channel's output is off, though
+the off-mode may not be the HIGH-Z state (in that state the test
+circuitry is completely disconnected from the device by a relay). It
+also can't be used when the maximum current when the channel is
+switched off is set to a value below @w{1 mA}.
+
+
+@anchor{sourcemeter_contact_threshold()}
+@findex sourcemeter_contact_threshold()
+@item   sourcemeter_contact_threshold()
+This function allows to query or set the resistance threshold used in
+contact checks, as done by the
+@code{@ref{sourcemeter_contact_check()}} function. If called without
+arguments (beside the channel number) it returns the currently set
+threshold resistance. If called with another argument this is set as
+the threshold resistance (in Ohm) to be used in future tests. The
+resistance may not be lower than @w{o Ohm}, onbiously.
+
+
+@anchor{sourecemeter_contact_speed()}
+@findex sourecemeter_contact_speed()
+@item   sourecemeter_contact_speed()
+Contact checks, as done with the
+@code{@ref{sourcemeter_contact_check()}} function, can be done at
+three different speeds: fast, medium or slow. Higher speed setting
+can have a dramatic effect on the accuracy of the result.
+
+If called with no arguments (beside the channel number) the function
+returns a number, indicating the current speed setting, where @code{0}
+stands for the fast (also the default), @code{1} for the medium and
+@code{2} for the slow speed setting. If called with an argument,
+which is one of these integers or one of the strings @code{"FAST"},
+@code{"MEDIUM"} or @code{"SLOW"} the speed setting for future contact
+checks is set accordingly.
 
 
 @end table

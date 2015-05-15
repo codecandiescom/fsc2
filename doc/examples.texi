@@ -1274,7 +1274,7 @@ written to a file.
 25
 26 PREPARATIONS:
 27
-28 init_2d( 2, 0, N, 0, 1, start_field, field_step, "Time [µs]",
+28 init_2d( 2, 0, N, 0, 1, start_field, field_step, "Time [us]",
 29          "Field [G]", "Signal [mV] " );
 30 magnet_setup( start_field, field_step );
 31 digitizer_num_averages( Num_avg );
