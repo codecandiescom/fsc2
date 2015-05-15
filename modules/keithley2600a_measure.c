@@ -401,8 +401,10 @@ keithley2600a_measure( unsigned int ch,
     if (    k26->measure[ ch ].filter.enabled
          && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
         cnt = k26->measure[ ch ].filter.count;
-    timeout =   lrnd( 1.2e6 * (   k26->source[ ch ].delay
-                                + k26->measure[ ch ].delay
+    timeout =   lrnd( 1.2e6 * (   ( k26->source[ ch ].delay > 0 ?
+                                    k26->source[ ch ].delay : 0 )
+                                  + ( k26->measure[ ch ].delay > 0 ?
+                                      k26->measure[ ch ].delay : 0 )
                                 + cnt * k26->measure[ ch ].time ) )
               + READ_TIMEOUT;
     
@@ -440,8 +442,10 @@ keithley2600a_measure_iv( unsigned int ch )
     if (    k26->measure[ ch ].filter.enabled
          && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
         cnt = k26->measure[ ch ].filter.count;
-    timeout =   lrnd( 1.0e6 * (   k26->source[ ch ].delay
-                                + k26->measure[ ch ].delay
+    timeout =   lrnd( 1.0e6 * (   ( k26->source[ ch ].delay > 0 ?
+                                    k26->source[ ch ].delay : 0 )
+                                  + ( k26->measure[ ch ].delay > 0 ?
+                                      k26->measure[ ch ].delay : 0 )
                                 + cnt * k26->measure[ ch ].time ) )
               + READ_TIMEOUT;
     
@@ -923,8 +927,10 @@ keithley2600a_sweep_and_measure( unsigned int ch,
         cnt = k26->measure[ ch ].filter.count;
     timeout =   lrnd(   1.2e6
                       * num_points
-                      * (   k26->source[ ch ].delay
-                          + k26->measure[ ch ].delay
+                      * (   ( k26->source[ ch ].delay > 0 ?
+                              k26->source[ ch ].delay : 0 )
+                          + ( k26->measure[ ch ].delay > 0 ?
+                              k26->measure[ ch ].delay : 0 )
                           + cnt * k26->measure[ ch ].time ) )
               + READ_TIMEOUT;
     
@@ -1058,8 +1064,10 @@ keithley2600a_sweep_and_measureiv( unsigned int ch,
         cnt = k26->measure[ ch ].filter.count;
     timeout =   lrnd(   1.2e6
                       * num_points
-                      * (   k26->source[ ch ].delay
-                          + k26->measure[ ch ].delay
+                      * (   ( k26->source[ ch ].delay > 0 ?
+                              k26->source[ ch ].delay : 0 )
+                          + ( k26->measure[ ch ].delay > 0 ?
+                              k26->measure[ ch ].delay : 0 )
                           + cnt * k26->measure[ ch ].time ) )
               + READ_TIMEOUT;
     
