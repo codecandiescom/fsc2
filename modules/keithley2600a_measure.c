@@ -24,6 +24,10 @@
 
 static const char *smu[ ] = { "smua", "smub" };
 
+static char * prepare_sweep_list( const Var_T * v,
+                                  int         * num_points,
+                                  double      * max_value );
+
 
 /*---------------------------------------------------------------*
  * Returns the setting of the measurement voltage range of the
@@ -160,7 +164,7 @@ keithley2600a_get_measure_autorangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autorangev)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].autorangev = keithley2600a_line_to_bool( buf );
 }
@@ -180,7 +184,7 @@ keithley2600a_set_measure_autorangev( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.measure.autorangev=%d", smu[ ch ], ( int ) autorange );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].autorangev = autorange;
 }
@@ -199,7 +203,7 @@ keithley2600a_get_measure_autorangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autorangei)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].autorangei = keithley2600a_line_to_bool( buf );
 }
@@ -219,7 +223,7 @@ keithley2600a_set_measure_autorangei( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "%s.measure.autorangei=%d", smu[ ch ], ( int ) autorange );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].autorangei = autorange;
 }
@@ -345,7 +349,7 @@ keithley2600a_get_measure_autozero( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.autozero)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
 
     autozero = keithley2600a_line_to_int( buf );
     if ( autozero < AUTOZERO_OFF || autozero > AUTOZERO_AUTO )
@@ -370,7 +374,7 @@ keithley2600a_set_measure_autozero( unsigned int ch,
     fsc2_assert( autozero >= AUTOZERO_OFF && autozero <= AUTOZERO_AUTO );
 
     sprintf( buf, "%s.measure.autozero=%d", smu[ ch ], autozero );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].autozero = autozero;
 }
@@ -714,7 +718,7 @@ keithley2600a_get_measure_delay( unsigned int ch )
    fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "print(%s.measure.delay)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
  
     delay = keithley2600a_line_to_double( buf );
     if ( delay < 0 && delay != DELAY_AUTO )
@@ -874,20 +878,22 @@ keithley2600a_set_measure_filter_enabled( unsigned int ch,
 
 /*---------------------------------------------------------------*
  * Function for doing a voltage or current sweep and measuring
- * either voltage, current, power or resistance at each sweep step
- * position.
+ * either voltage, current, power, resistance or voltage and
+ * current at each sweep step position.
  *
  * ch            channel to be used
  * sweep_what    what to sweep (voltage or current)
- * measure_what  what to measure (voltage, current, power or resistance)
+ * measure_what  what to measure (voltage, current, power, resistance
+ *               or both voltage and current)
  * start         start voltage or current of sweep
  * end           end voltage or current of sweep
  * num_points    number of sweep step positions
  *
  * Returns a newly allocated array with as many doubles as the
- * number of points in the sweep.
+ * number of points in the sweep (or twice that many for simul-
+ * taneous meaurements of voltages and currents).
  *
- * Function switches output of and may change the source function.
+ * Function switches output off.
  *---------------------------------------------------------------*/
 
 double *
@@ -898,12 +904,14 @@ keithley2600a_sweep_and_measure( unsigned int ch,
                                  double       end,
                                  int          num_points )
 {
-    static char method[ ] = { 'v', 'i', 'p', 'r' };
+    static const char * method[ ] = { "v", "i", "p", "r", "iv" };
     char * cmd = NULL;
     char * buf = NULL;
     double * data = NULL;
     long timeout;
-    int cnt;
+    int cnt = 1;
+    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                          * num_points;
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(   (    sweep_what == VOLTAGE
@@ -915,8 +923,9 @@ keithley2600a_sweep_and_measure( unsigned int ch,
     fsc2_assert(    measure_what == VOLTAGE
                  || measure_what == CURRENT
                  || measure_what == POWER
-                 || measure_what == RESISTANCE );
-    fsc2_assert( num_points >= 1 );
+                 || measure_what == RESISTANCE
+                 || measure_what == VOLTAGE_AND_CURRENT);
+    fsc2_assert( num_points >= 2 );
 
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
@@ -938,59 +947,79 @@ keithley2600a_sweep_and_measure( unsigned int ch,
         keithley2600a_comm_failure( );
 
     /* Create the LUA commands to be sent to the device to set-up the
-       sweep, enable output, start the sweep. wait for it to finish,
+       sweep, enable output, start the sweep, wait for it to finish,
        disable output, print out the results and clean up. */
 
-    cmd = get_string( "ch=%s\n"
-                      "cnt=%d\n"
-                      "ch.source.output=0\n"
-                      "old_autorange=ch.source.autorange%c\n"
-                      "old_range=ch.source.range%c\n"
-                      "ch.source.range%c=%.5g\n"
-                      "ch.source.func=%d\n"
-                      "mbuf=ch.makebuffer(cnt)\n"
-                      "ch.trigger.source.linear%c(%.5g,%.5g,cnt)\n"
-                      "ch.trigger.source.action=1\n"
-                      "ch.trigger.measure.%c(mbuf)\n"
-                      "ch.trigger.measure.action=1\n"
-                      "ch.trigger.count=cnt\n"
-                      "ch.trigger.arm.count=1\n"
-                      "ch.source.output=1\n"
-                      "ch.trigger.initiate()\n"
-                      "waitcomplete()\n"
-                      "ch.source.output=0\n"
-                      "ch.printbuffer(1,cnt,mbuf)\n"
-                      "ch.source.range%c=old_range\n"
-                      "ch.source.autorange%c=old_autorange\n"
-                      "old_autorange=nil\n"
-                      "old_range=nil\n"
-                      "mbuf=nil\n"
-                      "cnt=nil\n"
-                      "ch=nil\n",
-                      smu[ ch ],
-                      num_points,
-                      method[ sweep_what ],
-                      method[ sweep_what ],
-                      method[ sweep_what ],
-                      d_max( fabs( start ), fabs( end ) ),
-                      sweep_what == VOLTAGE ? OUTPUT_DCVOLTS : OUTPUT_DCAMPS,
-                      method[ sweep_what ], start, end,
-                      method[ measure_what ],
-                      method[ sweep_what ],
-                      method[ sweep_what ] );
-
-    buf = T_malloc( 20 * cnt );
+    cmd = get_string(
+"function fsc2_sweep_and_measure( ch, sweep, measure, startl, endl, cnt )\n"
+"  ch.source.output = 0\n"
+"  local old_func = ch.source.func\n"
+"  local old_autorange\n"
+"  local old_range=ch.source.rangev\n"
+"  if sweep == \"v\" then\n"
+"    old_autorange = ch.source.autorangev\n"
+"    old_range = ch.source.rangev\n"
+"    ch.source.rangev = math.max( math.abs( startl ), math.abs( endl ) )\n"
+"    ch.trigger.source.limiti = ch.source.limiti\n"
+"    ch.source.func = ch.OUTPUT_DCVOLTS\n"
+"    ch.trigger.source.linearv( startl, endl, cnt )\n"
+"  else\n"
+"    old_autorange = ch.source.autorangei\n"
+"    old_range = ch.source.rangei\n"
+"    ch.source.rangei = math.max( math.abs( startl ), math.abs( endl ) )\n"
+"    ch.trigger.source.limitv = ch.source.limitv\n"
+"    ch.source.func = ch.OUTPUT_DCAMPS\n"
+"    ch.trigger.source.lineari( startl, endl, cnt )\n"
+"  end\n"
+"  local mbuf1 = ch.makebuffer( cnt )\n"
+"  local mbuf2\n"
+"  if measure ~= \"iv\" then\n"
+"    mbuf2 = ch.makebuffer( cnt )\n"
+"  end\n"
+"  ch.trigger.source.action = 1\n"
+"  if     measure == \"v\" then   ch.trigger.measure.v( mbuf1 )\n"
+"  elseif measure == \"i\" then   ch.trigger.measure.i( mbuf1 )\n"
+"  elseif measure == \"p\" then   ch.trigger.measure.p( mbuf1 )\n"
+"  elseif measure == \"r\" then   ch.trigger.measure.r( mbuf1 )\n"
+"  else                         ch.trigger.measure.iv( mbuf1, mbuf2 )\n"
+"  end\n"
+"  ch.trigger.measure.action = 1\n"
+"  ch.trigger.count = cnt\n"
+"  ch.trigger.arm.count = 1\n"
+"  ch.trigger.endsweep.action = ch.SOURCE_IDLE\n"
+"  ch.source.output = 1\n"
+"  ch.trigger.initiate( )\n"
+"  waitcomplete( )\n"
+"  ch.source.output = 0\n"
+"  if measure ~= \"iv\" then\n"
+"    ch.printbuffer( 1, cnt, mbuf1 )\n"
+"  else\n"
+"    ch.printbuffer( 1, cnt, mbuf1, mbuf2 )\n"
+"  end\n"
+"  ch.source.func=old_func\n"
+"  if sweep == \"v\" then\n"
+"    ch.source.rangev = old_range\n"
+"    ch.source.autorangev = old_autorange\n"
+"  else\n"
+"    ch.source.rangei = old_range\n"
+"    ch.source.autorangei = old_autorange\n"
+"  end\n"
+"end\n"
+"fsc2_sweep_and_measure( %s, \"%s\", \"%s\", %.5g, %.5g, %d )\n",
+smu[ ch ], method[ sweep_what ], method[ measure_what ], start, end,
+num_points );
 
     TRY
     {
-        keithley2600a_talk( cmd, buf, 20 * cnt, true );
+        buf = T_malloc( 20 * num_data_points );
+        keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
             keithley2600a_comm_failure( );
 
-        data = T_malloc( cnt * sizeof *data );
-        keithley2600a_line_to_doubles( buf, data, cnt );
+        data = T_malloc( num_data_points * sizeof *data );
+        keithley2600a_line_to_doubles( buf, data, num_data_points );
         buf = T_free( buf );
         TRY_SUCCESS;
     }
@@ -1016,45 +1045,46 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
 
 /*---------------------------------------------------------------*
- * Function for doing a voltage or current sweep and measuring
- * voltage and current simultaneously at each sweep step position.
+ * Function for doing a voltage or current list sweep and measuring
+ * either voltage, current, power, resistance or voltage and current
+ * at each sweep step position.
  *
  * ch            channel to be used
  * sweep_what    what to sweep (voltage or current)
- * start         start voltage or current of sweep
- * end           end voltage or current of sweep
- * num_points    number of sweep step positions
+ * measure_what  what to measure (voltage, current, power, resistance
+ *               or both voltage and current)
+ * list          EDL variable with a list of the values to be used
+ *               in the sweep
  *
- * Returns a newly allocated array with as twice as many doubles as
- * the number of points in the sweep, containing alternating pairs
- * of the measured voltages and currents.
+ * Returns a newly allocated array with as many doubles as the
+ * number of points in the sweep list (or twice that many for
+ * simultaneous meaurements of voltages and currents).
  *
- * Function switches output of and may change the source function.
+ * Function switches output off at end.
  *---------------------------------------------------------------*/
 
 double *
-keithley2600a_sweep_and_measureiv( unsigned int ch,
-                                   int          sweep_what,
-                                   double       start,
-                                   double       end,
-                                   int          num_points )
+keithley2600a_list_sweep_and_measure( unsigned int  ch,
+                                      int           sweep_what,
+                                      int           measure_what,
+                                      const Var_T * v )
 {
-    static char method[ ] = { 'v', 'i', 'p', 'r' };
+    static const char * method[ ] = { "v", "i", "p", "r", "iv" };
     char * cmd = NULL;
-    char * buf= NULL;
+    char * buf = NULL;
     double * data = NULL;
     long timeout;
-    int cnt;
+    int cnt = 1;
+    double max_val;
+    int num_points;
+    char * val_list = prepare_sweep_list( v, &num_points, &max_val );
+    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                          * v->len;
 
     fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert(   (    sweep_what == VOLTAGE
-                     && fabs( start ) <= MAX_SOURCE_LEVELV
-                     && fabs( end   ) <= MAX_SOURCE_LEVELV )
-                 || (    sweep_what == CURRENT
-                      && fabs( start ) <= MAX_SOURCE_LEVELI
-                      && fabs( end   ) <= MAX_SOURCE_LEVELI ) );
-    fsc2_assert( num_points >= 1 );
-
+    fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
+                 || ( sweep_what == CURRENT && max_val <= MAX_SOURCE_LEVELI ) );
+ 
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
        bit (20%) left to spare */
@@ -1072,63 +1102,87 @@ keithley2600a_sweep_and_measureiv( unsigned int ch,
               + READ_TIMEOUT;
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+    {
+        T_free( val_list );
         keithley2600a_comm_failure( );
+    }
 
     /* Create the LUA commands to be sent to the device to set-up the
        sweep, enable output, start the sweep. wait for it to finish,
        disable output, print out the results and clean up. */
 
-    cmd = get_string( "ch=%s\n"
-                      "cnt=%d\n"
-                      "ch.source.output=0\n"
-                      "old_autorange=ch.source.autorange%c\n"
-                      "old_range=ch.source.range%c\n"
-                      "ch.source.range%c=%.5g\n"
-                      "ch.source.func=%d\n"
-                      "vbuf=ch.makebuffer(cnt)\n"
-                      "ibuf=ch.makebuffer(cnt)\n"
-                      "ch.trigger.source.linear%c(%.5g,%.5g,cnt)\n"
-                      "ch.trigger.source.action=1\n"
-                      "ch.trigger.measure.iv(ibuf,vbuf)\n"
-                      "ch.trigger.measure.action=1\n"
-                      "ch.trigger.count=cnt\n"
-                      "ch.trigger.arm.count=1\n"
-                      "ch.source.output=1\n"
-                      "ch.trigger.initiate()\n"
-                      "waitcomplete()\n"
-                      "ch.source.output=0\n"
-                      "ch.printbuffer(1,cnt,vbuf,ibuf)\n"
-                      "ch.source.range%c=old_range\n"
-                      "ch.source.autorange%c=old_autorange\n"
-                      "old_autorange=nil\n"
-                      "old_range=nil\n"
-                      "ibuf=nil\n"
-                      "vbuf=nil\n"
-                      "cnt=nil\n"
-                      "ch=nil\n",
-                      smu[ ch ],
-                      num_points,
-                      method[ sweep_what ],
-                      method[ sweep_what ],
-                      method[ sweep_what ],
-                      d_max( fabs( start ), fabs( end ) ),
-                      sweep_what == VOLTAGE ? OUTPUT_DCVOLTS : OUTPUT_DCAMPS,
-                      method[ sweep_what ], start, end,
-                      method[ sweep_what ],
-                      method[ sweep_what ] );
-    buf = T_malloc( 2 * 20 * cnt );
-
     TRY
     {
-        keithley2600a_talk( cmd, buf, 20 * cnt, true );
+        cmd = get_string(
+"function fsc2_list_sweep_and_measure( ch, sweep, measure, list, maxl )\n"
+"  ch.source.output = 0\n"
+"  local old_func = ch.source.func\n"
+"  local old_autorange\n"
+"  local old_range=ch.source.rangev\n"
+"  if sweep == \"v\" then\n"
+"    old_autorange = ch.source.autorangev\n"
+"    old_range = ch.source.rangev\n"
+"    ch.source.rangev = maxl\n"
+"    ch.trigger.source.limiti = ch.source.limiti\n"
+"    ch.source.func = ch.OUTPUT_DCVOLTS\n"
+"    ch.trigger.source.listv( list )\n"
+"  else\n"
+"    old_autorange = ch.source.autorangei\n"
+"    old_range = ch.source.rangei\n"
+"    ch.source.rangei = maxl\n"
+"    ch.trigger.source.limitv = ch.source.limitv\n"
+"    ch.source.func = ch.OUTPUT_DCAMPS\n"
+"    ch.trigger.source.listi( list )\n"
+"  end\n"
+"  local mbuf1 = ch.makebuffer( #list )\n"
+"  local mbuf2\n"
+"  if measure ~= \"iv\" then\n"
+"    mbuf2 = ch.makebuffer( #list )\n"
+"  end\n"
+"  ch.trigger.source.action = 1\n"
+"  if     measure == \"v\" then   ch.trigger.measure.v( mbuf1 )\n"
+"  elseif measure == \"i\" then   ch.trigger.measure.i( mbuf1 )\n"
+"  elseif measure == \"p\" then   ch.trigger.measure.p( mbuf1 )\n"
+"  elseif measure == \"r\" then   ch.trigger.measure.r( mbuf1 )\n"
+"  else                         ch.trigger.measure.iv( mbuf1, mbuf2 )\n"
+"  end\n"
+"  ch.trigger.measure.action = 1\n"
+"  ch.trigger.count = #list\n"
+"  ch.trigger.arm.count = 1\n"
+"  ch.trigger.endsweep.action = ch.SOURCE_IDLE\n"
+"  ch.source.output = 1\n"
+"  ch.trigger.initiate( )\n"
+"  waitcomplete( )\n"
+"  ch.source.output = 0\n"
+"  if measure ~= \"iv\" then\n"
+"    ch.printbuffer( 1, #list, mbuf1 )\n"
+"  else\n"
+"    ch.printbuffer( 1, #list, mbuf1, mbuf2 )\n"
+"  end\n"
+"  ch.source.func=old_func\n"
+"  if sweep == \"v\" then\n"
+"    ch.source.rangev = old_range\n"
+"    ch.source.autorangev = old_autorange\n"
+"  else\n"
+"    ch.source.rangei = old_range\n"
+"    ch.source.autorangei = old_autorange\n"
+"  end\n"
+"end\n"
+"fsc2_list_sweep_and_measure( %s, \"%s\", \"%s\", { %s }, %.5g )\n",
+smu[ ch ], method[ sweep_what ], method[ measure_what ], val_list, max_val );
+
+        T_free( val_list );
+
+        buf = T_malloc( 20 * num_data_points );
+        keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
             keithley2600a_comm_failure( );
 
-        data = T_malloc( 2 * cnt * sizeof *data );
-        keithley2600a_line_to_doubles( buf, data, 2 * cnt );
-        T_free( buf );
+        data = T_malloc( num_data_points * sizeof *data );
+        keithley2600a_line_to_doubles( buf, data, num_data_points );
+        buf = T_free( buf );
         TRY_SUCCESS;
     }
     CATCH( USER_BREAK_EXCEPTION )
@@ -1149,6 +1203,53 @@ keithley2600a_sweep_and_measureiv( unsigned int ch,
 
     k26->source[ ch ].output = false;
     return data;
+}
+
+
+/*---------------------------------------------------------------*
+ * Helper function for assembling an ASCII comma-separated list of
+ * all values from a 1-dimensional integer or floating point EDL
+ * arrray - the returned char array has to be free()ed by the
+ * caller
+ *---------------------------------------------------------------*/
+
+static
+char *
+prepare_sweep_list( const Var_T * v,
+                    int         * num_points,
+                    double      * max_val )
+{
+    char * val_list;
+    char *ep;
+    int i;
+
+    fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
+    fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
+
+    *num_points = v->len;
+    *max_val = 0;
+
+    /* Create a string with all the values from the list, separated by
+       commas */
+
+    val_list = ep = T_malloc( 20 * *num_points );
+    for ( i = 0; i < *num_points; ep += strlen( ep ), i++ )
+    {
+        if ( v->type == INT_VAR )
+        {
+            sprintf( ep, "%ld,", v->val.lpnt[ i ] );
+            *max_val = d_max( *max_val, fabs( v->val.lpnt[ i ] ) );
+        }
+        else
+        {
+            sprintf( ep, "%.5g,", v->val.dpnt[ i ] );
+            *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
+        }
+    }
+
+    ep[ -1 ] = '\0';
+
+    return val_list;
 }
 
 
@@ -1279,11 +1380,6 @@ keithley2600a_set_contact_speed( unsigned int ch,
 
     return k26->contact[ ch ].speed = speed;
 }
-
-
-
-
-
 
 
 /*

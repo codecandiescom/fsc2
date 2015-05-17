@@ -2324,16 +2324,26 @@ in configuration file for the module.
 @item @ref{sourcemeter_sweep_voltage_measure_current}
 @item @ref{sourcemeter_sweep_voltage_measure_power}
 @item @ref{sourcemeter_sweep_voltage_measure_resistance}
+@item @ref{sourcemeter_sweep_voltage_measure_voltage_and_current}
 @item @ref{sourcemeter_sweep_current_measure_voltage}
 @item @ref{sourcemeter_sweep_current_measure_current}
 @item @ref{sourcemeter_sweep_current_measure_power}
 @item @ref{sourcemeter_sweep_current_measure_resistance}
-@item @ref{sourcemeter_sweep_voltage_measure_voltage_and_current}
 @item @ref{sourcemeter_sweep_current_measure_voltage_and_current}
+@item @ref{sourcemeter_list_sweep_voltage_measure_voltage}
+@item @ref{sourcemeter_list_sweep_voltage_measure_current}
+@item @ref{sourcemeter_list_sweep_voltage_measure_power}
+@item @ref{sourcemeter_list_sweep_voltage_measure_resistance}
+@item @ref{sourcemeter_list_sweep_voltage_measure_voltage_and_current}
+@item @ref{sourcemeter_list_sweep_current_measure_voltage}
+@item @ref{sourcemeter_list_sweep_current_measure_current}
+@item @ref{sourcemeter_list_sweep_current_measure_power}
+@item @ref{sourcemeter_list_sweep_current_measure_resistance}
+@item @ref{sourcemeter_list_sweep_current_measure_voltage_and_current}
 @item @ref{sourcemeter_contact_check()}
 @item @ref{sourcemeter_contact_resistance()}
 @item @ref{sourcemeter_contact_threshold()}
-@item @ref{sourecemeter_contact_speed()}
+@item @ref{sourcemeter_contact_speed()}
 @end table
 
 

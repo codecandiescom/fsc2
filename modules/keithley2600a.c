@@ -24,14 +24,21 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-static Var_T * do_iv_sweep( Var_T * v,
-                            int     sweep_what );
+static Var_T * do_sweep( Var_T * v,
+                         int     sweep_what,
+                         int     masure_what );
 static void get_sweep_params( Var_T        * v,
                               int            sweep_what,
                               unsigned int * ch,
                               double       * start,
                               double       * end,
                               int          * num_points );
+static Var_T * do_list_sweep( Var_T * v,
+                              int     sweep_what,
+                              int     measure_what );
+static Var_T * get_list_sweep_params( Var_T        * v,
+                                      int            sweep_what,
+                                      unsigned int * ch );
 static void check_sweep_data( const double * data,
                               int            num_points );
 static unsigned int get_channel( Var_T ** v );
@@ -1871,33 +1878,7 @@ sourcemeter_measure_filter_count( Var_T * v )
 Var_T *
 sourcemeter_sweep_voltage_measure_voltage( Var_T * v )
 {
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, VOLTAGE, &ch, &start, &end, &num_points );
-    
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, VOLTAGE, VOLTAGE,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double volts =   TEST_VOLTAGE
-                       - k26->measure[ ch ].relv.enabled ?
-                         k26->measure[ ch ].relv.level : 0;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = volts;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
+    return do_sweep( v, VOLTAGE, VOLTAGE );
 }
 
 
@@ -1908,33 +1889,7 @@ sourcemeter_sweep_voltage_measure_voltage( Var_T * v )
 Var_T *
 sourcemeter_sweep_voltage_measure_current( Var_T * v )
 {
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, VOLTAGE, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, VOLTAGE, CURRENT,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double amps =   TEST_CURRENT
-                      - k26->measure[ ch ].reli.enabled ?
-                        k26->measure[ ch ].reli.level : 0;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = amps;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
+    return do_sweep( v, VOLTAGE, CURRENT );
 }
 
 
@@ -1945,31 +1900,7 @@ sourcemeter_sweep_voltage_measure_current( Var_T * v )
 Var_T *
 sourcemeter_sweep_voltage_measure_power( Var_T * v )
 {
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, VOLTAGE, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, VOLTAGE, POWER,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double p = TEST_VOLTAGE * TEST_CURRENT;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = p;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
+    return do_sweep( v, VOLTAGE, POWER );
 }
 
 
@@ -1980,175 +1911,7 @@ sourcemeter_sweep_voltage_measure_power( Var_T * v )
 Var_T *
 sourcemeter_sweep_voltage_measure_resistance( Var_T * v )
 {
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, VOLTAGE, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, VOLTAGE, RESISTANCE,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double r = TEST_VOLTAGE / TEST_CURRENT;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = r;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
-}
-
-
-/*--------------------------------------------------------------*
- * Does a current sweep while measuring voltages
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_sweep_current_measure_voltage( Var_T * v )
-{
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, CURRENT, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, CURRENT, VOLTAGE,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double volts =   TEST_VOLTAGE
-                       - k26->measure[ ch ].relv.enabled ?
-                         k26->measure[ ch ].relv.level : 0;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = volts;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
-}
-
-
-/*--------------------------------------------------------------*
- * Does a current sweep while measuring currents
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_sweep_current_measure_current( Var_T * v )
-{
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, CURRENT, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, CURRENT, CURRENT,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double amps =   TEST_CURRENT
-                      - k26->measure[ ch ].reli.enabled ?
-                        k26->measure[ ch ].reli.level : 0;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = amps;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
-}
-
-
-/*--------------------------------------------------------------*
- * Does a current sweep while measuring powers
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_sweep_current_measure_power( Var_T * v )
-{
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, CURRENT, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, CURRENT, POWER,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double p = TEST_VOLTAGE * TEST_CURRENT;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = p;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
-}
-
-
-/*--------------------------------------------------------------*
- * Does a current sweep while measuring resistances
- *--------------------------------------------------------------*/
-
-Var_T *
-sourcemeter_sweep_current_measure_resistance( Var_T * v )
-{
-    unsigned int ch;
-    double start,
-           end;
-    int num_points;
-    double *data;
-
-    get_sweep_params( v, CURRENT, &ch, &start, &end, &num_points );
-
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        data = keithley2600a_sweep_and_measure( ch, CURRENT, RESISTANCE,
-                                                start, end, num_points );
-        check_sweep_data( data, num_points );
-    }
-    else
-    {
-        int i;
-        double r = TEST_VOLTAGE / TEST_CURRENT;
-
-        data = T_malloc( num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
-            data[ i ] = r;
-    }
-
-    return vars_push( FLOAT_ARR, data, num_points );
+    return do_sweep( v, VOLTAGE, RESISTANCE );
 }
 
 
@@ -2160,7 +1923,51 @@ sourcemeter_sweep_current_measure_resistance( Var_T * v )
 Var_T *
 sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v )
 {
-    return do_iv_sweep( v, VOLTAGE );
+    return do_sweep( v, VOLTAGE, VOLTAGE_AND_CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current sweep while measuring voltages
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_sweep_current_measure_voltage( Var_T * v )
+{
+    return do_sweep( v, CURRENT, VOLTAGE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current sweep while measuring currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_sweep_current_measure_current( Var_T * v )
+{
+    return do_sweep( v, CURRENT, CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current sweep while measuring powers
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_sweep_current_measure_power( Var_T * v )
+{
+    return do_sweep( v, CURRENT, POWER );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current sweep while measuring resistances
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_sweep_current_measure_resistance( Var_T * v )
+{
+    return do_sweep( v, CURRENT, RESISTANCE );
 }
 
 
@@ -2172,7 +1979,119 @@ sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v )
 Var_T *
 sourcemeter_sweep_current_measure_voltage_and_current( Var_T * v )
 {
-    return do_iv_sweep( v, CURRENT );
+    return do_sweep( v, CURRENT, VOLTAGE_AND_CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a voltage list sweep while measuring voltages
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_voltage_measure_voltage( Var_T * v )
+{
+    return do_list_sweep( v, VOLTAGE, VOLTAGE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a voltage list sweep while measuring currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_voltage_measure_current( Var_T * v )
+{
+    return do_list_sweep( v, VOLTAGE, CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a voltage list sweep while measuring powers
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_voltage_measure_power( Var_T * v )
+{
+    return do_list_sweep( v, VOLTAGE, POWER );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a voltage list_sweep while measuring resistances
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_voltage_measure_resistance( Var_T * v )
+{
+    return do_list_sweep( v, VOLTAGE, RESISTANCE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a voltage list sweep while simultaneously measuring voltages
+ * and currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_voltage_measure_voltage_and_current( Var_T * v )
+{
+    return do_list_sweep( v, VOLTAGE, VOLTAGE_AND_CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current list sweep while measuring voltages
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_current_measure_voltage( Var_T * v )
+{
+    return do_list_sweep( v, CURRENT, VOLTAGE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current list sweep while measuring currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_current_measure_current( Var_T * v )
+{
+    return do_list_sweep( v, CURRENT, CURRENT );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current list sweep while measuring powers
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_current_measure_power( Var_T * v )
+{
+    return do_list_sweep( v, CURRENT, POWER );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current list sweep while measuring resistances
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_current_measure_resistance( Var_T * v )
+{
+    return do_list_sweep( v, CURRENT, RESISTANCE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Does a current list sweep while simultaneously measuring voltages
+ * and currents
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_list_sweep_current_measure_voltage_and_current( Var_T * v )
+{
+    return do_list_sweep( v, CURRENT, VOLTAGE_AND_CURRENT );
 }
 
 
@@ -2303,7 +2222,7 @@ sourcemeter_contact_threshold( Var_T * v )
  *--------------------------------------------------------------*/
 
 Var_T *
-sourecemeter_contact_speed( Var_T * v )
+sourcemeter_contact_speed( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
     long int speed;
@@ -2350,54 +2269,152 @@ sourecemeter_contact_speed( Var_T * v )
 
 
 /*--------------------------------------------------------------*
- * Helper function for doing a sweep of either voltage or current
- * and simultaeously measuring voltage and current
+ * Helper function for doing a linear sweep
  *--------------------------------------------------------------*/
 
 static
 Var_T *
-do_iv_sweep( Var_T * v,
-             int     sweep_what )
+do_sweep( Var_T * v,
+          int     sweep_what,
+          int     measure_what )
 {
     unsigned int ch;
     double start,
            end;
     int num_points;
     double *data;
+    int num_data_points;
 
     get_sweep_params( v, sweep_what, &ch, &start, &end, &num_points );
+    num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                      * num_points;
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        data = keithley2600a_sweep_and_measureiv( ch, sweep_what,
-                                                  start, end, num_points );
-        check_sweep_data( data, 2 * num_points );
+        data = keithley2600a_sweep_and_measure( ch, sweep_what, measure_what,
+                                                start, end, num_points );
+        check_sweep_data( data, num_data_points );
     }
     else
     {
         int i;
-        double volts =   TEST_VOLTAGE
-                       - k26->measure[ ch ].relv.enabled ?
-                         k26->measure[ ch ].relv.level : 0;
-        double amps  =   TEST_CURRENT
-                       - k26->measure[ ch ].reli.enabled ?
-                         k26->measure[ ch ].reli.level : 0;
 
-        data = T_malloc( 2 * num_points * sizeof *data );
-        for ( i = 0; i < num_points; i++ )
+        data = T_malloc( num_data_points * sizeof *data );
+
+        if ( measure_what != VOLTAGE_AND_CURRENT )
         {
-            data[ 2 * i     ] = volts;
-            data[ 2 * i + 1 ] = amps;
+            double r;
+
+            if ( measure_what == VOLTAGE )
+                r =   TEST_VOLTAGE
+                    - ( k26->measure[ ch ].relv.enabled ?
+                        k26->measure[ ch ].relv.level : 0 );
+            else if ( measure_what == CURRENT )
+                r =   TEST_CURRENT
+                    - ( k26->measure[ ch ].reli.enabled ?
+                        k26->measure[ ch ].reli.level : 0 );
+            else if ( measure_what == POWER )
+                r = TEST_VOLTAGE * TEST_CURRENT;
+            else
+                r = TEST_VOLTAGE / TEST_CURRENT;
+
+            for ( i = 0; i < num_points; i++ )
+                data[ i ] = r;
+        }
+        else
+        {
+            double volts =   TEST_VOLTAGE
+                           - ( k26->measure[ ch ].relv.enabled ?
+                               k26->measure[ ch ].relv.level : 0 );
+            double amps  =   TEST_CURRENT
+                           - ( k26->measure[ ch ].reli.enabled ?
+                               k26->measure[ ch ].reli.level : 0 );
+
+            for ( i = 0; i < num_points; i++ )
+            {
+                data[ 2 * i     ] = volts;
+                data[ 2 * i + 1 ] = amps;
+            }
         }
     }
 
-    return vars_push( FLOAT_ARR, data, 2 * num_points );
+    return vars_push( FLOAT_ARR, data, num_data_points );
 }
 
 
 /*--------------------------------------------------------------*
+ * Helper function for doing a list sweep
+ *--------------------------------------------------------------*/
+
+static
+Var_T *
+do_list_sweep( Var_T * v,
+               int     sweep_what,
+               int     measure_what )
+{
+    unsigned int ch;
+    double *data;
+    int num_data_points;
+
+    v = get_list_sweep_params( v, sweep_what, &ch );
+    num_data_points = ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 ) * v->len;
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        data = keithley2600a_list_sweep_and_measure( ch, sweep_what,
+                                                     measure_what, v );
+        check_sweep_data( data, num_data_points );
+    }
+    else
+    {
+        int i;
+
+        data = T_malloc( num_data_points * sizeof *data );
+
+        if ( measure_what != VOLTAGE_AND_CURRENT )
+        {
+            double r;
+            if ( measure_what == VOLTAGE )
+                r =   TEST_VOLTAGE
+                    - ( k26->measure[ ch ].relv.enabled ?
+                        k26->measure[ ch ].relv.level : 0 );
+            else if ( measure_what == CURRENT )
+                r =   TEST_CURRENT
+                    - ( k26->measure[ ch ].reli.enabled ?
+                        k26->measure[ ch ].reli.level : 0 );
+            else if ( measure_what == POWER )
+                r = TEST_VOLTAGE * TEST_CURRENT;
+            else
+                r = TEST_VOLTAGE / TEST_CURRENT;
+
+            for ( i = 0; i < num_data_points; i++ )
+                data[ i ] = r;
+        }
+        else
+        {
+            double volts =   TEST_VOLTAGE
+                           - ( k26->measure[ ch ].relv.enabled ?
+                               k26->measure[ ch ].relv.level : 0 );
+            double amps  =   TEST_CURRENT
+                           - ( k26->measure[ ch ].reli.enabled ?
+                               k26->measure[ ch ].reli.level : 0 );
+
+            for ( i = 0; i < num_data_points / 2; i++ )
+            {
+                data[ 2 * i     ] = volts;
+                data[ 2 * i + 1 ] = amps;
+            }
+        }
+    }
+
+    return vars_push( FLOAT_ARR, data, num_data_points );
+}
+
+
+
+/*--------------------------------------------------------------*
  * Helper function for extracting the arguments to the various
- * sweep functions
+ * linear sweep functions
  *--------------------------------------------------------------*/
 
 static
@@ -2451,22 +2468,94 @@ get_sweep_params( Var_T        * v,
 
     np = get_strict_long( v, "number of points in sweep" );
 
-    if ( np < 0 )
+    if ( np < 2 )
     {
-        print( FATAL, "Invalid negativ number of points in sweep.\n" );
+        print( FATAL, "Invalid number of points in sweep %ld, must be at "
+               "least 2.\n", np );
         THROW( EXCEPTION );
     }
 
     if ( np > MAX_SWEEP_POINTS )
     {
-        print( FATAL, "Number of points in sweep too large, maximum is %d.\n",
-               MAX_SWEEP_POINTS );
+        print( FATAL, "Number of points in sweep %ld too large, maximum is "
+               "%d.\n", np, MAX_SWEEP_POINTS );
         THROW( EXCEPTION );
     }
 
     *num_points = np;
 
     too_many_arguments( v );
+}
+
+
+/*--------------------------------------------------------------*
+ * Helper function for extracting the arguments to the various
+ * list sweep functions
+ *--------------------------------------------------------------*/
+
+static
+Var_T *
+get_list_sweep_params( Var_T        * v,
+                       int            sweep_what,
+                       unsigned int * ch )
+{
+    const char * what = sweep_what == VOLTAGE ? "voltage" : "current";
+    const char * What = sweep_what == VOLTAGE ? "Voltage" : "Current";
+    ssize_t i;
+    double max_val = 0;
+        
+
+    *ch = get_channel( &v );
+
+    if ( ! v )
+    {
+        print( FATAL, "Missing %s sweep list argument.\n", what );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( v->type != INT_ARR && v->type != FLOAT_ARR ) || v->dim != 1)
+    {
+        print( FATAL, "%s sweep list argument isn't a 1-dimensional "
+               "array.\n", What );
+        THROW( EXCEPTION );
+    }
+
+    if ( v->len < 2 )
+    {
+        print( FATAL, "%s sweep list comtains less than 2 elements.\n",
+               What );
+        THROW( EXCEPTION );
+    }
+
+    if ( v->len > MAX_SWEEP_POINTS )
+    {
+        print( FATAL, "Number of points of %ld sweep list too large, "
+               "maximum is %d.\n", what, MAX_SWEEP_POINTS );
+        THROW( EXCEPTION );
+    }
+
+    if ( v->next )
+        print( WARN, "Too many arguments, discarding superfluous argument%s.\n",
+               v->next->next != NULL ? "s" : "" );
+
+    for ( i = 0; i < v->len; i++ )
+        if ( v->type == INT_VAR )
+            max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
+        else
+            max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
+
+    if (    ( sweep_what == VOLTAGE && max_val > MAX_SOURCE_LEVELV )
+         || ( sweep_what == CURRENT && max_val > MAX_SOURCE_LEVELI ) )
+    {
+        char * s = sweep_what == VOLTAGE ? ppV( max_val ) : ppA( max_val );
+
+        print( FATAL, "Largest value of %s in %s sweep list too large.\n",
+               s, what );
+        T_free( s );
+        THROW( EXCEPTION );
+    }
+
+    return v;
 }
 
 

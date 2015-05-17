@@ -107,10 +107,11 @@
 
 /* Macros for types of measurements */
 
-#define VOLTAGE      0
-#define CURRENT      1
-#define POWER        2
-#define RESISTANCE   3
+#define VOLTAGE              0
+#define CURRENT              1
+#define POWER                2
+#define RESISTANCE           3
+#define VOLTAGE_AND_CURRENT  4
 
 
 /* Minimum and maximum factors (to be multiplied by the reciprocal of the
@@ -281,16 +282,26 @@ Var_T * sourcemeter_sweep_voltage_measure_voltage( Var_T * v );
 Var_T * sourcemeter_sweep_voltage_measure_current( Var_T * v );
 Var_T * sourcemeter_sweep_voltage_measure_power( Var_T * v );
 Var_T * sourcemeter_sweep_voltage_measure_resistance( Var_T * v );
+Var_T * sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_voltage( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_current( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_power( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_resistance( Var_T * v );
-Var_T * sourcemeter_sweep_voltage_measure_voltage_and_current( Var_T * v );
 Var_T * sourcemeter_sweep_current_measure_voltage_and_current( Var_T * v );
+Var_T * sourcemeter_list_sweep_voltage_measure_voltage( Var_T * v );
+Var_T * sourcemeter_list_sweep_voltage_measure_current( Var_T * v );
+Var_T * sourcemeter_list_sweep_voltage_measure_power( Var_T * v );
+Var_T * sourcemeter_list_sweep_voltage_measure_resistance( Var_T * v );
+Var_T * sourcemeter_list_sweep_voltage_measure_voltage_and_current( Var_T * v );
+Var_T * sourcemeter_list_sweep_current_measure_voltage( Var_T * v );
+Var_T * sourcemeter_list_sweep_current_measure_current( Var_T * v );
+Var_T * sourcemeter_list_sweep_current_measure_power( Var_T * v );
+Var_T * sourcemeter_list_sweep_current_measure_resistance( Var_T * v );
+Var_T * sourcemeter_list_sweep_current_measure_voltage_and_current( Var_T * v );
 Var_T * sourcemeter_contact_check( Var_T * v );
 Var_T * sourcemeter_contact_resistance( Var_T * v );
 Var_T * sourcemeter_contact_threshold( Var_T * v );
-Var_T * sourecemeter_contact_speed( Var_T * v );
+Var_T * sourcemeter_contact_speed( Var_T * v );
 
 
 #endif

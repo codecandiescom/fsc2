@@ -99,11 +99,10 @@ double * keithley2600a_sweep_and_measure( unsigned int ch,
                                           double       start,
                                           double       end,
                                           int          num_points );
-double * keithley2600a_sweep_and_measureiv( unsigned int ch,
-                                            int          sweep_what,
-                                            double       start,
-                                            double       end,
-                                            int          num_points );
+double * keithley2600a_list_sweep_and_measure( unsigned int  ch,
+                                               int           sweep_what,
+                                               int           measure_what,
+                                               const Var_T * list );
 
 bool keithley2600a_contact_check( unsigned int ch );
 const double * keithley2600a_contact_resistance( unsigned int ch );

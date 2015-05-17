@@ -615,16 +615,26 @@ sourcemeter_sweep_voltage_measure_voltage, -1, EXP;
 sourcemeter_sweep_voltage_measure_current, -1, EXP;
 sourcemeter_sweep_voltage_measure_power, -1, EXP;
 sourcemeter_sweep_voltage_measure_resistance, -1, EXP;
+sourcemeter_sweep_current_measure_voltage_and_current, -1, EXP;
 sourcemeter_sweep_current_measure_voltage, -1, EXP;
 sourcemeter_sweep_current_measure_current, -1, EXP;
 sourcemeter_sweep_current_measure_power, -1, EXP;
 sourcemeter_sweep_current_measure_resistance, -1, EXP;
 sourcemeter_sweep_voltage_measure_voltage_and_current, -1, EXP;
-sourcemeter_sweep_current_measure_voltage_and_current, -1, EXP;
+sourcemeter_list_sweep_voltage_measure_voltage, -1, EXP;
+sourcemeter_list_sweep_voltage_measure_current, -1, EXP;
+sourcemeter_list_sweep_voltage_measure_power, -1, EXP;
+sourcemeter_list_sweep_voltage_measure_resistance, -1, EXP;
+sourcemeter_list_sweep_current_measure_voltage_and_current, -1, EXP;
+sourcemeter_list_sweep_current_measure_voltage, -1, EXP;
+sourcemeter_list_sweep_current_measure_current, -1, EXP;
+sourcemeter_list_sweep_current_measure_power, -1, EXP;
+sourcemeter_list_sweep_current_measure_resistance, -1, EXP;
+sourcemeter_list_sweep_voltage_measure_voltage_and_current, -1, EXP;
 sourcemeter_contact_check, -1, EXP;
 sourcemeter_contact_resistance, -1, EXP;
 sourcemeter_contact_threshold, -1, EXP;
-sourecemeter_contact_speed, -1, EXP;
+sourcemeter_contact_speed, -1, EXP;
 
 
 /* Function exported by the microwave bridge modules */
