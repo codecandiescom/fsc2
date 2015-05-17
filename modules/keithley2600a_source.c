@@ -364,7 +364,7 @@ keithley2600a_set_source_rangev( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( range <= keithley2600a_max_source_rangev( ch ) );
 
-    sprintf( buf, "%s.source.rangev=%.5g", smu[ ch ], range );
+    sprintf( buf, "%s.source.rangev=%.6g", smu[ ch ], range );
     keithley2600a_cmd( buf );
 
     k26->source[ ch ].autorangev = false;
@@ -412,7 +412,7 @@ keithley2600a_set_source_rangei( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( range <= keithley2600a_max_source_rangev( ch ) );
 
-    sprintf( buf, "%s.source.rangei=%.5g", smu[ ch ], range );
+    sprintf( buf, "%s.source.rangei=%.6g", smu[ ch ], range );
     keithley2600a_cmd( buf );
 
     k26->source[ ch ].autorangei = false;
@@ -460,7 +460,7 @@ keithley2600a_set_source_lowrangev( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( lowrange = keithley2600a_max_source_rangev( ch ) );
 
-    sprintf( buf, "%s.source.lowrangev=%.5g", smu[ ch ], lowrange );
+    sprintf( buf, "%s.source.lowrangev=%.6g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
     /* If the device is source autoranging the changed lower limit may have
@@ -513,7 +513,7 @@ keithley2600a_set_source_lowrangei( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( lowrange <= keithley2600a_max_source_rangev( ch ) );
 
-    sprintf( buf, "%s.source.lowrangei=%.5g", smu[ ch ], lowrange );
+    sprintf( buf, "%s.source.lowrangei=%.6g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
     /* If the device is source autoranging the changed lower limit may have
@@ -562,7 +562,7 @@ keithley2600a_set_source_levelv( unsigned int ch,
 	fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert( keithley2600a_check_source_levelv( ch, volts ) );
 
-	sprintf( buf, "%s.source.levelv=%.5g", smu[ ch ], volts );
+	sprintf( buf, "%s.source.levelv=%.6g", smu[ ch ], volts );
 	keithley2600a_cmd( buf );
 
     /* If autoranging is on setting a new level could nodify the range */
@@ -615,7 +615,7 @@ keithley2600a_set_source_leveli( unsigned int ch,
 	fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert( keithley2600a_check_source_leveli( ch, amps ) );
 
-	sprintf( buf, "%s.source.leveli=%.5g", smu[ ch ], amps );
+	sprintf( buf, "%s.source.leveli=%.6g", smu[ ch ], amps );
 	keithley2600a_cmd( buf );
 
 	return keithley2600a_get_source_leveli( ch );
@@ -658,7 +658,7 @@ keithley2600a_set_source_limitv( unsigned int ch,
 	fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert( keithley2600a_check_source_limitv( ch, volts ) );
 
-	sprintf( buf, "%s.source.limitv=%.5g", smu[ ch ], volts );
+	sprintf( buf, "%s.source.limitv=%.6g", smu[ ch ], volts );
 	keithley2600a_cmd( buf );
 
 	return keithley2600a_get_source_limitv( ch );
@@ -701,7 +701,7 @@ keithley2600a_set_source_limiti( unsigned int ch,
 	fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert( keithley2600a_check_source_limiti( ch, amps ) );
 
-	sprintf( buf, "%s.source.limiti=%.5g", smu[ ch ], amps );
+	sprintf( buf, "%s.source.limiti=%.6g", smu[ ch ], amps );
 	keithley2600a_cmd( buf );
 
 	return keithley2600a_get_source_limiti( ch );
@@ -765,7 +765,7 @@ keithley2600a_set_source_delay( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
 
-    printf( buf, "%s.source.delay=%.5g", smu[ ch ], delay );
+    printf( buf, "%s.source.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
     return k26->source[ ch ].delay = delay;
@@ -808,7 +808,7 @@ keithley2600a_set_source_offlimiti( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( keithley2600a_check_source_offlimiti( ch, limit ) );
 
-    sprintf( buf, "%s.source.offlimiti=%.5g)", smu[ ch ], limit );
+    sprintf( buf, "%s.source.offlimiti=%.6g)", smu[ ch ], limit );
     keithley2600a_cmd( buf );
 
     /* Better check result, it's not too well documented what the limits

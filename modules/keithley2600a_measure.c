@@ -73,7 +73,7 @@ keithley2600a_set_measure_rangev( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( range <= keithley2600a_max_measure_rangev( ch ) );
 
-    sprintf( buf, "%s.measure.rangev=%.5g", smu[ ch ], range );
+    sprintf( buf, "%s.measure.rangev=%.6g", smu[ ch ], range );
     keithley2600a_cmd( buf );
 
     k26->measure[ ch ].autorangev = false;
@@ -134,7 +134,7 @@ keithley2600a_set_measure_rangei( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( range <= keithley2600a_max_measure_rangei( ch ) );
 
-    sprintf( buf, "%s.measure.rangei=%.5g", smu[ ch ], range );
+    sprintf( buf, "%s.measure.rangei=%.6g", smu[ ch ], range );
     keithley2600a_cmd( buf );
 
     k26->measure[ ch ].autorangei = false;
@@ -269,7 +269,7 @@ keithley2600a_set_measure_lowrangev( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( lowrange <= keithley2600a_max_measure_rangev( ch ) );
 
-    sprintf( buf, "%s.measure.lowrangev=%.5g", smu[ ch ], lowrange );
+    sprintf( buf, "%s.measure.lowrangev=%.6g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
     /* If the device is measurement autoranging the changed lower limit
@@ -322,7 +322,7 @@ keithley2600a_set_measure_lowrangei( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( lowrange <= keithley2600a_max_measure_rangei( ch ) );
 
-    sprintf( buf, "%s.measure.lowrangei=%.5g", smu[ ch ], lowrange );
+    sprintf( buf, "%s.measure.lowrangei=%.6g", smu[ ch ], lowrange );
     keithley2600a_cmd( buf );
 
     /* If the device is measurement autoranging the changed lower limit
@@ -507,7 +507,7 @@ keithley2600a_set_measure_time( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( keithley2600a_check_measure_time( t ) );
 
-    sprintf( buf, "%s.measure.nplc=%.5g", smu[ ch ], t * k26->linefreq );
+    sprintf( buf, "%s.measure.nplc=%.6g", smu[ ch ], t * k26->linefreq );
     keithley2600a_cmd( buf );
 
     return keithley2600a_get_measure_time( ch );
@@ -587,7 +587,7 @@ keithley2600a_set_measure_rel_levelv( unsigned int ch,
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.measure.rel.levelv=%.5g)", smu[ ch ], offset );
+    sprintf( buf, "%s.measure.rel.levelv=%.6g)", smu[ ch ], offset );
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].relv.level = offset;
@@ -624,7 +624,7 @@ keithley2600a_set_measure_rel_leveli( unsigned int ch,
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "%s.measure.rel.leveli=%.5g)", smu[ ch ], offset );
+    sprintf( buf, "%s.measure.rel.leveli=%.6g)", smu[ ch ], offset );
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].reli.level = offset;
@@ -741,7 +741,7 @@ keithley2600a_set_measure_delay( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
 
-    printf( buf, "%s.measure.delay=%.5g", smu[ ch ], delay );
+    printf( buf, "%s.measure.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].delay = delay;
@@ -893,7 +893,7 @@ keithley2600a_set_measure_filter_enabled( unsigned int ch,
  * number of points in the sweep (or twice that many for simul-
  * taneous meaurements of voltages and currents).
  *
- * Function switches output off.
+ * Function switches output off at end.
  *---------------------------------------------------------------*/
 
 double *
@@ -951,53 +951,53 @@ keithley2600a_sweep_and_measure( unsigned int ch,
        disable output, print out the results and clean up. */
 
     cmd = get_string(
-"function fsc2_sweep_and_measure( ch, sweep, measure, startl, endl, cnt )\n"
+"function fsc2_sweep_and_measure(ch, sweep, measure, startl, endl, cnt)\n"
 "  ch.source.output = 0\n"
 "  local old_func = ch.source.func\n"
 "  local old_autorange\n"
 "  local old_range=ch.source.rangev\n"
-"  if sweep == \"v\" then\n"
+"  if sweep == 'v' then\n"
 "    old_autorange = ch.source.autorangev\n"
 "    old_range = ch.source.rangev\n"
-"    ch.source.rangev = math.max( math.abs( startl ), math.abs( endl ) )\n"
+"    ch.source.rangev = math.max(math.abs(startl), math.abs(endl))\n"
 "    ch.trigger.source.limiti = ch.source.limiti\n"
 "    ch.source.func = ch.OUTPUT_DCVOLTS\n"
-"    ch.trigger.source.linearv( startl, endl, cnt )\n"
+"    ch.trigger.source.linearv(startl, endl, cnt)\n"
 "  else\n"
 "    old_autorange = ch.source.autorangei\n"
 "    old_range = ch.source.rangei\n"
-"    ch.source.rangei = math.max( math.abs( startl ), math.abs( endl ) )\n"
+"    ch.source.rangei = math.max(math.abs(startl), math.abs(endl))\n"
 "    ch.trigger.source.limitv = ch.source.limitv\n"
 "    ch.source.func = ch.OUTPUT_DCAMPS\n"
-"    ch.trigger.source.lineari( startl, endl, cnt )\n"
+"    ch.trigger.source.lineari(startl, endl, cnt)\n"
 "  end\n"
-"  local mbuf1 = ch.makebuffer( cnt )\n"
+"  local mbuf1 = ch.makebuffer(cnt)\n"
 "  local mbuf2\n"
-"  if measure ~= \"iv\" then\n"
-"    mbuf2 = ch.makebuffer( cnt )\n"
+"  if measure ~= 'iv' then\n"
+"    mbuf2 = ch.makebuffer(cnt)\n"
 "  end\n"
 "  ch.trigger.source.action = 1\n"
-"  if     measure == \"v\" then   ch.trigger.measure.v( mbuf1 )\n"
-"  elseif measure == \"i\" then   ch.trigger.measure.i( mbuf1 )\n"
-"  elseif measure == \"p\" then   ch.trigger.measure.p( mbuf1 )\n"
-"  elseif measure == \"r\" then   ch.trigger.measure.r( mbuf1 )\n"
-"  else                         ch.trigger.measure.iv( mbuf1, mbuf2 )\n"
+"  if     measure == 'v' then   ch.trigger.measure.v(mbuf1)\n"
+"  elseif measure == 'i' then   ch.trigger.measure.i(mbuf1)\n"
+"  elseif measure == 'p' then   ch.trigger.measure.p(mbuf1)\n"
+"  elseif measure == 'r' then   ch.trigger.measure.r(mbuf1)\n"
+"  else                         ch.trigger.measure.iv(mbuf1, mbuf2)\n"
 "  end\n"
 "  ch.trigger.measure.action = 1\n"
 "  ch.trigger.count = cnt\n"
 "  ch.trigger.arm.count = 1\n"
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE\n"
 "  ch.source.output = 1\n"
-"  ch.trigger.initiate( )\n"
-"  waitcomplete( )\n"
+"  ch.trigger.initiate()\n"
+"  waitcomplete()\n"
 "  ch.source.output = 0\n"
-"  if measure ~= \"iv\" then\n"
-"    ch.printbuffer( 1, cnt, mbuf1 )\n"
+"  if measure ~= 'iv' then\n"
+"    ch.printbuffer(1, cnt, mbuf1)\n"
 "  else\n"
-"    ch.printbuffer( 1, cnt, mbuf1, mbuf2 )\n"
+"    ch.printbuffer(1, cnt, mbuf1, mbuf2)\n"
 "  end\n"
 "  ch.source.func=old_func\n"
-"  if sweep == \"v\" then\n"
+"  if sweep == 'v' then\n"
 "    ch.source.rangev = old_range\n"
 "    ch.source.autorangev = old_autorange\n"
 "  else\n"
@@ -1005,7 +1005,7 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 "    ch.source.autorangei = old_autorange\n"
 "  end\n"
 "end\n"
-"fsc2_sweep_and_measure( %s, \"%s\", \"%s\", %.5g, %.5g, %d )\n",
+"fsc2_sweep_and_measure(%s, '%s', '%s', %.6g, %.6g, %d)\n",
 smu[ ch ], method[ sweep_what ], method[ measure_what ], start, end,
 num_points );
 
@@ -1114,53 +1114,53 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     TRY
     {
         cmd = get_string(
-"function fsc2_list_sweep_and_measure( ch, sweep, measure, list, maxl )\n"
+"function fsc2_list_sweep_and_measure(ch, sweep, measure, list, maxl)\n"
 "  ch.source.output = 0\n"
 "  local old_func = ch.source.func\n"
 "  local old_autorange\n"
 "  local old_range=ch.source.rangev\n"
-"  if sweep == \"v\" then\n"
+"  if sweep == 'v' then\n"
 "    old_autorange = ch.source.autorangev\n"
 "    old_range = ch.source.rangev\n"
 "    ch.source.rangev = maxl\n"
 "    ch.trigger.source.limiti = ch.source.limiti\n"
 "    ch.source.func = ch.OUTPUT_DCVOLTS\n"
-"    ch.trigger.source.listv( list )\n"
+"    ch.trigger.source.listv(list)\n"
 "  else\n"
 "    old_autorange = ch.source.autorangei\n"
 "    old_range = ch.source.rangei\n"
 "    ch.source.rangei = maxl\n"
 "    ch.trigger.source.limitv = ch.source.limitv\n"
 "    ch.source.func = ch.OUTPUT_DCAMPS\n"
-"    ch.trigger.source.listi( list )\n"
+"    ch.trigger.source.listi(list)\n"
 "  end\n"
-"  local mbuf1 = ch.makebuffer( #list )\n"
+"  local mbuf1 = ch.makebuffer(#list)\n"
 "  local mbuf2\n"
-"  if measure ~= \"iv\" then\n"
-"    mbuf2 = ch.makebuffer( #list )\n"
+"  if measure ~= 'iv' then\n"
+"    mbuf2 = ch.makebuffer(#list)\n"
 "  end\n"
 "  ch.trigger.source.action = 1\n"
-"  if     measure == \"v\" then   ch.trigger.measure.v( mbuf1 )\n"
-"  elseif measure == \"i\" then   ch.trigger.measure.i( mbuf1 )\n"
-"  elseif measure == \"p\" then   ch.trigger.measure.p( mbuf1 )\n"
-"  elseif measure == \"r\" then   ch.trigger.measure.r( mbuf1 )\n"
-"  else                         ch.trigger.measure.iv( mbuf1, mbuf2 )\n"
+"  if     measure == 'v' then   ch.trigger.measure.v(mbuf1d )\n"
+"  elseif measure == 'i' then   ch.trigger.measure.i(mbuf1)\n"
+"  elseif measure == 'p' then   ch.trigger.measure.p(mbuf1)\n"
+"  elseif measure == 'r' then   ch.trigger.measure.r(mbuf1)\n"
+"  else                         ch.trigger.measure.iv(mbuf1, mbuf2)\n"
 "  end\n"
 "  ch.trigger.measure.action = 1\n"
 "  ch.trigger.count = #list\n"
 "  ch.trigger.arm.count = 1\n"
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE\n"
 "  ch.source.output = 1\n"
-"  ch.trigger.initiate( )\n"
-"  waitcomplete( )\n"
+"  ch.trigger.initiate()\n"
+"  waitcomplete()\n"
 "  ch.source.output = 0\n"
-"  if measure ~= \"iv\" then\n"
-"    ch.printbuffer( 1, #list, mbuf1 )\n"
+"  if measure ~= 'iv' then\n"
+"    ch.printbuffer(1, #list, mbuf1)\n"
 "  else\n"
-"    ch.printbuffer( 1, #list, mbuf1, mbuf2 )\n"
+"    ch.printbuffer(1, #list, mbuf1, mbuf2)\n"
 "  end\n"
 "  ch.source.func=old_func\n"
-"  if sweep == \"v\" then\n"
+"  if sweep == 'v' then\n"
 "    ch.source.rangev = old_range\n"
 "    ch.source.autorangev = old_autorange\n"
 "  else\n"
@@ -1168,10 +1168,10 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 "    ch.source.autorangei = old_autorange\n"
 "  end\n"
 "end\n"
-"fsc2_list_sweep_and_measure( %s, \"%s\", \"%s\", { %s }, %.5g )\n",
+"fsc2_list_sweep_and_measure(%s, '%s', '%s', {%s}, %.6g)\n",
 smu[ ch ], method[ sweep_what ], method[ measure_what ], val_list, max_val );
 
-        T_free( val_list );
+        val_list = T_free( val_list );
 
         buf = T_malloc( 20 * num_data_points );
         keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
@@ -1198,6 +1198,7 @@ smu[ ch ], method[ sweep_what ], method[ measure_what ], val_list, max_val );
         T_free( cmd );
         T_free( buf );
         T_free( data );
+        T_free( val_list );
         RETHROW;
     }
 
@@ -1230,22 +1231,21 @@ prepare_sweep_list( const Var_T * v,
     *max_val = 0;
 
     /* Create a string with all the values from the list, separated by
-       commas */
+       commata */
 
-    val_list = ep = T_malloc( 20 * *num_points );
-    for ( i = 0; i < *num_points; ep += strlen( ep ), i++ )
-    {
+    val_list = T_malloc( 13 * *num_points + 1 );
+
+    for ( i = 0, ep = val_list; i < *num_points; ep += strlen( ep ), i++ )
         if ( v->type == INT_VAR )
         {
-            sprintf( ep, "%ld,", v->val.lpnt[ i ] );
+            sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
             *max_val = d_max( *max_val, fabs( v->val.lpnt[ i ] ) );
         }
         else
         {
-            sprintf( ep, "%.5g,", v->val.dpnt[ i ] );
+            sprintf( ep, "%.6g,", v->val.dpnt[ i ] );
             *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
         }
-    }
 
     ep[ -1 ] = '\0';
 
@@ -1332,7 +1332,7 @@ keithley2600a_set_contact_threshold( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( threshold >= 0 && threshold < 1e37 );
 
-    sprintf( buf, "%s.contact.threshold=%.5g", smu[ ch ], threshold );
+    sprintf( buf, "%s.contact.threshold=%.6g", smu[ ch ], threshold );
     keithley2600a_cmd( buf );
 
     return k26->contact[ ch ].threshold = threshold;

@@ -9868,7 +9868,7 @@ before the sweep was started.
 @findex sourcemeter_list_sweep_voltage_measure_voltage_and_current
 @item   sourcemeter_list_sweep_voltage_measure_voltage_and_current
 Function for doing a voltage list sweep while simultaneously measuring
-oltages and currents. The function expects, beside the channel number,
+voltages and currents. The function expects, beside the channel number,
 a 1-dimensional array with the list of (at least 2 and not more than
 10001) voltages to be set during the sweep. It returns an array with
 twice as many data points as there where voltages in the list, with
@@ -9944,7 +9944,7 @@ before the sweep was started.
 @findex sourcemeter_list_sweep_current_measure_voltage_and_current
 @item   sourcemeter_list_sweep_current_measure_voltage_and_current
 Function for doing a current list sweep while simultaneously measuring
-oltages and currents. The function expects, beside the channel number,
+voltages and currents. The function expects, beside the channel number,
 a 1-dimensional array with the list of (at least 2 and not more than
 10001) currents to be set during the sweep. It returns an array with
 twice as many data points as there where currents in the list, with

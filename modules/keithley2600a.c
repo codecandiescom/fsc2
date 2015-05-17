@@ -2672,21 +2672,21 @@ pretty_print( double       v,
     double av = fabs( v );
 
     if ( av >= 0.999995e6 )
-        return get_string( "%.5g M%s", 1.0e-6, v, unit );
+        return get_string( "%.6g M%s", 1.0e-6, v, unit );
     else if ( av >= 0.999995e3 )
-        return get_string( "%.5g k%s", 1.0e-3, v, unit );
+        return get_string( "%.6g k%s", 1.0e-3, v, unit );
     else if ( av >= 0.999995 )
-        return get_string( "%.5g %s", v, unit );
+        return get_string( "%.6g %s", v, unit );
     else if ( av >= 0.999995e-3 )
-        return get_string( "%.5g m%s", v * 1.0e3, unit );
+        return get_string( "%.6g m%s", v * 1.0e3, unit );
     else if ( av >= 0.999995e-6 )
-        return get_string( "%.5g u%s", v * 1.0e6, unit );
+        return get_string( "%.6g u%s", v * 1.0e6, unit );
     else if ( av >= 0.999995e-9 )
-        return get_string(  "%.5g n%s", v * 1.0e9, unit );
+        return get_string(  "%.6g n%s", v * 1.0e9, unit );
     else if ( av >= 0.999995e-12 )
-        return get_string( "%.5g p%s", v * 1.0e12, unit );
+        return get_string( "%.6g p%s", v * 1.0e12, unit );
 
-    return get_string( "%.5g %s", v, unit );
+    return get_string( "%.6g %s", v, unit );
 }
 
 
