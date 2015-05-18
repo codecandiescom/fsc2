@@ -176,9 +176,9 @@ static int oriel_cs_260_set_outport( int port );
 static int oriel_cs_260_get_error( void );
 static bool oriel_cs_260_command( const char * cmd,
                                   double       wait_for );
-static long oriel_cs_260_talk( const char * cmd,
+static bool oriel_cs_260_talk( const char * cmd,
                                char       * reply,
-                               long         length,
+                               long       * length,
                                bool         exact_length );
 static void oriel_cs_260_failure( void );
 static int oriel_cs_260_get_gpib_address( void );
@@ -901,9 +901,11 @@ int
 oriel_cs_260_get_grating( void )
 {
     char reply[ 30 ];
+    long length = 30;
 
 
-    if (    oriel_cs_260_talk( "GRAT?\n", reply, sizeof reply, UNSET ) < 5
+    if (    oriel_cs_260_talk( "GRAT?\n", reply, &length, UNSET ) != SUCCESS
+         || length < 5
          || ! isdigit( ( int ) *reply )
          || ( *reply - '0' < 1 || *reply - '0' > NUM_GRATINGS )
          || reply[ 1 ] != ',' )
@@ -960,6 +962,7 @@ oriel_cs_260_get_number_of_lines( int grating )
 {
     char req[ ] = "GRAT*LINES?\n";
     char reply[ 100 ];
+    long length = 100;
     unsigned long val;
     char * ep;
 
@@ -967,7 +970,8 @@ oriel_cs_260_get_number_of_lines( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
@@ -1039,6 +1043,7 @@ oriel_cs_260_get_calibration_factor( int grating )
 {
     char req[ ] = "GRAT*FACTOR?\n";
     char reply[ 100 ];
+    long length = 100;
     double val;
     char * ep;
 
@@ -1046,7 +1051,8 @@ oriel_cs_260_get_calibration_factor( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
 
@@ -1100,6 +1106,7 @@ oriel_cs_260_get_calibration_offset( int grating )
 {
     char req[ ] = "GRAT*OFFSET?\n";
     char reply[ 100 ];
+    long length = 100;
     double val;
     char * ep;
 
@@ -1107,7 +1114,8 @@ oriel_cs_260_get_calibration_offset( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || (    *reply != '-'
               && *reply != '+'
               && ! isdigit( ( int ) *reply ) ) )
@@ -1162,6 +1170,7 @@ oriel_cs_260_get_zero( int    grating )
 {
     char cmd[ ] = "GRAT*ZERO?\n";
     char reply[ 100 ];
+    long length = 100;
     double zero;
     char *ep;
 
@@ -1170,7 +1179,8 @@ oriel_cs_260_get_zero( int    grating )
 
     cmd[ 4 ] = grating + '1';
     
-    if ( oriel_cs_260_talk( cmd, reply, sizeof reply, UNSET ) < 1 )
+    if (    oriel_cs_260_talk( cmd, reply, &length, UNSET ) != SUCCESS
+         || length < 1 )
         oriel_cs_260_failure( );
 
     zero = strtod( reply, &ep );
@@ -1216,13 +1226,15 @@ static double
 oriel_cs_260_get_wavelength( void )
 {
     char reply[ 100 ];
+    long length;
     double val;
     char *ep;
 
 
     /* Note: the device may return a negative wavelength... */
 
-    if (    oriel_cs_260_talk( "WAVE?\n", reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( "WAVE?\n", reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || ( ! isdigit( ( int ) *reply ) && *reply != '-' ) )
         oriel_cs_260_failure( );
 
@@ -1285,11 +1297,13 @@ long int
 oriel_cs_260_get_position( void )
 {
     char reply[ 100 ];
+    long length = 100;
     long pos;
     char *ep;
 
 
-    if (    oriel_cs_260_talk( "STEP?\n", reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( "STEP?\n", reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
@@ -1344,9 +1358,10 @@ bool
 oriel_cs_260_get_shutter( void )
 {
     char reply[ 3 ];
+    long length;
 
-
-    if (    oriel_cs_260_talk( "SHUTTER?\n", reply, sizeof reply, SET ) != 1
+    if (    oriel_cs_260_talk( "SHUTTER?\n", reply, &length, SET ) != SUCCESS
+         || length != 1
          || ( *reply != 'C' && *reply != 'O' ) )
         oriel_cs_260_failure( );
 
@@ -1420,9 +1435,11 @@ int
 oriel_cs_260_get_filter( void )
 {
     char reply[ 3 ];
+    long length = 3;
 
 
-    if (    oriel_cs_260_talk( "FILTER?\n", reply, sizeof reply, SET ) != 1
+    if (    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET ) != SUCCESS
+         || length != 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
@@ -1481,8 +1498,10 @@ int
 oriel_cs_260_get_outport( void )
 {
     char reply[ 3 ];
+    long length = 3;
 
-    if (    oriel_cs_260_talk( "OUTPORT?\n", reply, sizeof reply, SET ) != 1
+    if (    oriel_cs_260_talk( "OUTPORT?\n", reply, &length, SET ) != SUCCESS
+         || length != 1
          || ( *reply != '1' && *reply != '2' ) )
         oriel_cs_260_failure( );
 
@@ -1520,13 +1539,15 @@ int
 oriel_cs_260_get_error( void )
 {
     char reply[ 3 ];
-    long len = oriel_cs_260_talk( "ERROR?\n", reply, sizeof reply, UNSET );
+    long length = 3;
 
+    if ( oriel_cs_260_talk( "ERROR?\n", reply, &length, UNSET ) != SUCCESS )
+        oriel_cs_260_failure( );
 
-    if ( len == 0 )     /* no error */
+    if ( length == 0 )     /* no error */
         return -1;
 
-    if (    len != 1
+    if (    length != 1
          || ! isdigit( ( int ) *reply )
          || ( *reply > '3' && ! ( *reply >= '6' && *reply <= '9' ) ) )
         oriel_cs_260_failure( );
@@ -1557,7 +1578,7 @@ oriel_cs_260_command( const char * cmd,
         oriel_cs_260_failure( );
 
     /* Now try to read the acknowledgment ("handshake). On success it will
-       be just the string "0\r\n", otherwise "32\r\n". Te acknowledgment
+       be just the string "0\r\n", otherwise "32\r\n". The acknowledgment
        may take some time for commands like switcing gratings or for
        large wavelength changes. Thus repeat attempts to read until
        the timeout, givem in seconds via 'wait_for', is over before
@@ -1600,13 +1621,13 @@ oriel_cs_260_command( const char * cmd,
  *-------------------------------------*/
 
 static
-long
+bool
 oriel_cs_260_talk( const char * cmd,
                    char       * reply,
-                   long         length,
+                   long       * length,
                    bool         exact_length )
 {
-    char buf[ 3 ];
+    char buf[ 4 ];
     long hs_len = 3;
 
     if ( gpib_write( oriel_cs_260.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -1623,14 +1644,14 @@ oriel_cs_260_talk( const char * cmd,
 
     if ( exact_length )
     {
-        if ( gpib_read( oriel_cs_260.device, reply, &length ) == FAILURE )
+        if ( gpib_read( oriel_cs_260.device, reply, length ) == FAILURE )
             oriel_cs_260_failure( );
     }
     else
     {
         long len = 0;
 
-        while ( len < length )
+        while ( len < *length )
         {
             long x = 1;
 
@@ -1640,23 +1661,33 @@ oriel_cs_260_talk( const char * cmd,
                 break;
         }
 
-        length = len;
+        *length = len;
     }
 
-    if (    reply[ length - 2 ] != '\r'
-         || reply[ length - 1 ] != '\n' )
+    if (    reply[ *length - 2 ] != '\r'
+         || reply[ *length - 1 ] != '\n' )
         oriel_cs_260_failure( );
 
-    reply[ length -= 2 ] = '\0';
+    reply[ *length -= 2 ] = '\0';
 
     /* Finally, read the "handshake". It always should be the positive reply
        "0\r\n" - or something is seriously weird. */
 
     if (    gpib_read( oriel_cs_260.device, buf, &hs_len ) == FAILURE
-         || strncmp( buf, "0\r\n", 3 ) )
+         || hs_len != 3 )
         oriel_cs_260_failure( );
 
-    return length;
+    if ( ! strncmp( buf, "0\r\n", 3 ) )
+        return SUCCESS;
+
+    hs_len = 1;
+    if (    strncmp( buf, "32\r", 3 )
+         || gpib_read( oriel_cs_260.device, buf, &hs_len ) == FAILURE
+         || hs_len != 1
+         || *buf != '\n' )
+        oriel_cs_260_failure( );
+
+    return FAILURE;
 }
 
 
@@ -1669,11 +1700,13 @@ int
 oriel_cs_260_get_gpib_address( void )
 {
     char reply[ 100 ];
+    long length = 100;
     unsigned long addr;
     char *ep;
 
 
-    if (    oriel_cs_260_talk( "ADDRESS?\n", reply, sizeof reply, UNSET ) < 1
+    if (    oriel_cs_260_talk( "ADDRESS?\n", reply, &length, UNSET ) != SUCCESS
+         || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
 
