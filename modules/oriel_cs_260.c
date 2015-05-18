@@ -1358,7 +1358,7 @@ bool
 oriel_cs_260_get_shutter( void )
 {
     char reply[ 3 ];
-    long length;
+    long length = 3;
 
     if (    oriel_cs_260_talk( "SHUTTER?\n", reply, &length, SET ) != SUCCESS
          || length != 1
