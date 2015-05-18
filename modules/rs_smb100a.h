@@ -27,8 +27,37 @@
 #include "rs_smb100a.conf"
 
 
+#if    ! defined B101 && ! defined B102   \
+    && ! defined B103 && ! defined B106   \
+    && ! defined B112 && ! defined B112L
+#error "Hardware option of device not defined in configuration"
+#endif
+
+
+/* Define the minimum frequency the device can produce */
+
+#if defined B101 || defined B102 || defined B103 || defined B106
 #define MIN_FREQ        9.0e3            /* 9 kHz  */
+#else                                    /* B112 & B112L */
+#define  MIN_FREQ       1.0e5            /* 100 kHz */
+#endif
+
+
+/* Define the maximum frequency the device can produce */
+
+#if defined   B101
 #define MAX_FREQ        1.1e9            /* 1.1 GHz */
+#elif defined B102
+#define MAX_FREQ        2.2e9            /* 2.2 GHz */
+#elif defined B103
+#define MAX_FREQ        3.2e9            /* 3.2 GHz */
+#elif defined B106
+#define MAX_FREQ        6.0e9            /* 6.0 GHz */
+#else                                    /* B112 & B112L */
+#define MAX_FREQ        1.275e10         /* 12.75 GHz */
+#endif
+
+
 #define MIN_MIN_ATTEN   13.0             /* really the minimum attenuation */
 #define MAX_ATTEN      -140.0            /* -140 dBm */
 #define ATT_RESOLUTION  0.1              /* 0.1 dBm */
@@ -46,7 +75,7 @@
 
 #define MAX_AM_AMPL     1.0e2
 
-#define RS_SMB100A_TEST_RF_FREQ             1.4e7            /* 14 MHz */
+#define RS_SMB100A_TEST_RF_FREQ             1.4e8            /* 140 MHz */
 #define RS_SMB100A_TEST_MOD_TYPE            MOD_TYPE_FM
 #define RS_SMB100A_TEST_MOD_SOURCE          MOD_SOURCE_INT
 #define RS_SMB100A_TEST_MOD_FREQ            1.0e5            /* 100 kHz */

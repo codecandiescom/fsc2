@@ -1528,7 +1528,7 @@ oriel_cs_260_get_error( void )
 
     if (    len != 1
          || ! isdigit( ( int ) *reply )
-         || ( *reply > '3' && ! ( *reply >= '6' && *reply <= 9 ) ) )
+         || ( *reply > '3' && ! ( *reply >= '6' && *reply <= '9' ) ) )
         oriel_cs_260_failure( );
 
     return reply[ 0 ] - '0';
@@ -1612,10 +1612,10 @@ oriel_cs_260_talk( const char * cmd,
     if ( gpib_write( oriel_cs_260.device, cmd, strlen( cmd ) ) == FAILURE )
         oriel_cs_260_failure( );
 
-    /* Something strange is going on with this device: despite we have set
+    /* Something strange is going on with this device: despite having set
        that reading should stop after encountering a line-feed (which gets
        sent by the device at the end of each message) this doesn't get
-       recognized and a timeout ensues. Thus we treat this the follwoing way:
+       recognized and a timeout ensues. Thus we do it the following way:
        if the caller signals that it knows the exact size of the reply to
        be expected we call gpib_read() with this size and cross fingers.
        Otherwise we read byte by byte and check each time for the line-feed.

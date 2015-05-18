@@ -3905,17 +3905,17 @@ Returns a string with the name of the synthesizer being used.
 @anchor{synthesizer_state()}
 @findex synthesizer_state()
 @item synthesizer_state()
-The function queries or sets the output state of the synthesizer. i.e.@:
-to switch output of RF on or off. If called to set the output state it
-accepts one argument, either a non-zero value or the string @code{"ON"}
-to switch output on, or zero or the string @code{"OFF"} to switch it
-off. The synthesizer output is never switched on automatically!
+The function queries or sets the output state of the synthesizer,
+i.e.@: if output of RF is on or off or for switching it on or off. If
+called with no arguments it returns @code{0} or @code{1}, depending on
+the output being switched off or on. If called with a boolean argument
+output is switched on or off: if called with @code{0} or the string
+@code{"OFF"} output is switched off and if called with a non-zero
+value or the string @code{"ON"} output is switched on.
 
 Before the @code{EXPERIMENT} section this function can't be called in
-query mode, i.e.@: without an argument (unless the state has already been
-set by calling the function with an argument). In query mode it either
-returns either @code{1} or @code{0} to indicate the on/off state of the
-RF output.
+query mode, i.e.@: without an argument (unless the state has already
+been set by calling the function with an argument).
 
 
 @anchor{synthesizer_frequency()}
@@ -3929,12 +3929,12 @@ the frequency it accepts a frequency as the only argument. For the
 @w{2 GHz} and @w{18 GHz}. For the @ref{rs_sml01, Rohde&Schwarz SML01}
 the frequency range is @w{9 KHz} to @w{1.1 GHz}.
 
-If a attenuation table is used (@ref{synthesizer_use_table()} then on
+If an attenuation table is used (@ref{synthesizer_use_table()} then on
 setting a frequency also the attenuation is corrected according to the
 setting in the attenuation table for the frequency.
 
 The frequency set by the very first call of this function is also the
-function that is set automatically by a call of the function
+frequency that is set automatically by a call of the function
 @ref{synthesizer_reset_frequency()}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
@@ -3974,9 +3974,8 @@ for the @ref{hp8648b, HP8648B} between @w{+14.5 dB} and @w{-136 dB}
 (with the same resolution) and for the @ref{hp8672a, HP8672A} between
 @w{+3 dB} and @w{-120 dB} with a resolution of @w{1 dB}.
 
-For the @ref{rs_sml01, Rohde&Schwarz SML1} the allowed range of
-attenuations is from @w{+13 dBm} to @w{- 140 dBm} with a resolution of
-@w{0.1 dBm}.
+For the @ref{rs_sml01, Rohde&Schwarz SML01} the range of attenuations
+is from @w{+13 dBm} to @w{- 140 dBm} with a resolution of @w{0.1 dBm}.
 
 Currently for the @ref{hp8647a, HP8647A} the minimum attenuation that
 can be set from an @code{EDL} script is limited to @w{-5 dB}, should
@@ -3994,10 +3993,11 @@ when the attenuation has been set previously.
 @findex synthesizer_minimum_attenuation()
 @item synthesizer_minimum_attenuation()
 The function can be used to restrict the minimum output attenuation to
-avoid to inadvertently set too high output power levels. It can be
-called to both query and sets the minimum output attenuation. If called
-to set the attenuation it accepts one argument, the attenuation within
-the allowed range of attenuations of the device. Calling the function
+avoid inadvertently setting too high an output power level. It can be
+called to query the current setting (if called with no arguments) and
+to set a new minimum output attenuation. If called to set the
+attenuation it accepts one argument, the attenuation within the
+allowed range of attenuations of the device. Calling the function
 disables setting the attenuation by further calls of
 @ref{synthesizer_attenuation()} to ranges below the value set by this
 function.
@@ -4012,7 +4012,8 @@ of the RF power level is used. If called without an argument @code{1}
 is returned when automatic level control is switched on, otherwise
 @code{0}. If called with a boolean argument, either the string
 @code{"OFF"} or the integer @code{0}, automatic level control is
-switched off, if called with @code{"ON"} or @code{1} it's switched on.
+switched off, if called with @code{"ON"} or a non-zero value it's
+switched on.
 
 Before the the function has been called with an argument the query
 form of the function (i.e.@: calling it without an argument) can't be
@@ -4028,10 +4029,10 @@ corrections are done using a user created table stored in the
 synthesizer. If called with no argument @code{1} is returned when a
 user created table is used, otherwise @code{0}. If called with an
 empty string (@code{""}) as the argument use of a user table is
-switched off. Wehn called with a non-empty string (which may contain
+switched off. When called with a non-empty string (which may contain
 no more than 7 characters and must be the name of a table stored in
-the synthesizer) user level correction is switched on, using hat
-table.
+the synthesizers memory) user level corrections are switched on, using
+that table.
 
 Before the step frequency has been set by calling the function with an
 argument the query form of the function (i.e.@: calling it without an
@@ -4056,37 +4057,38 @@ argument) can't be used in the PREPARATIONS section.
 @anchor{synthesizer_sweep_up()}
 @findex synthesizer_sweep_up()
 @item synthesizer_sweep_up()
-If there has been set both a frequency and a step frequency the function
-will increment the synthesizers frequency. It returns the newly set
-frequency. The function can only be called in the @code{EXPERIMENT}
-section.
+If both a frequency and a step frequency has been set the function
+increments the synthesizers frequency by the previously set step
+frequency. It returns the newly set frequency. The function can only
+be called in the @code{EXPERIMENT} section.
 
 
 @anchor{synthesizer_sweep_down()}
 @findex synthesizer_sweep_down()
 @item synthesizer_sweep_down()
-If there has been set both a frequency and a step frequency the function
-will decrement the synthesizers frequency. It returns the newly set
-frequency. The function can only be called in the @code{EXPERIMENT}
-section.
+If both a frequency and a step frequency has been set the function
+decrements the synthesizers frequency by the previously set step
+frequency. It returns the newly set frequency. The function can only
+be called in the @code{EXPERIMENT} section.
 
 
 @anchor{synthesizer_reset_frequency()}
 @findex synthesizer_reset_frequency()
-@item synthesizer_reset_frequency()
-If a frequency has been set at all the function will reset the
-synthesizers frequency to the frequency that has been set at first. The
-function can only be called in the @code{EXPERIMENT} section.
+@item   synthesizer_reset_frequency()
+This function sets the frequency of the synthesizer to first first
+frequency it was set to since the currently run @code{EDL} script was
+started (if none was set it has no effect). The function can only be
+called in the @code{EXPERIMENT} section.
 
 
 @anchor{synthesizer_use_table()}
 @findex synthesizer_use_table()
 @item synthesizer_use_table()
-This function tells the program to also adjust the attenuation when a
-new frequency is set. To find out which attenuation has to be set for
-a new frequency a table file is used. The name of this table file can
-be passed to the function as a (string) argument. If no argument is
-given a default table file is used (typically this is
+This function tells the program to adjust the attenuator when a new
+frequency is set. To find out which attenuation has to be set for a
+new frequency a table file is used. The name of this table file can be
+passed to the function as a (string) argument. If no argument is given
+a default table file is used (typically this is
 @file{/usr/local/lib/fsc2/hp8647a.table} for the @ref{hp8647a},
 @file{/usr/local/lib/fsc2/hp8648b.table} for the @ref{hp8648b},
 @file{/usr/local/lib/fsc2/hp8672a.table} for the @ref{hp8672a} and
@@ -4116,7 +4118,7 @@ be valid:
 8.70000000MHz-2.40000000db
 @end example
 @noindent
-As you see also blank lines don't matter. Finally, all lines starting
+As you see also empty lines don't matter. Finally, all lines starting
 with a hash character, `@code{#}', are treated as comments.
 
 If a frequency is used that isn't in the table the attenuation to be used
@@ -7625,7 +7627,7 @@ move the stepper motor will fail, so during the test run the function
 will always return successful.
 
 This function is mostly meant for making small adjustments to the
-grating position w.g.@: during calibrations.
+grating position e.g.@: during calibrations.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

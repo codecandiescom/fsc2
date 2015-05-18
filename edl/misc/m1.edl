@@ -1,0 +1,8 @@
+DEVICES:
+
+oriel_cs_260;
+
+EXPERIMENT:
+
+monochromator_wavelength( 532 nm );
+monochromator_shutter( "OFF" );
