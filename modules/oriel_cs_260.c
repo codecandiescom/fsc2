@@ -1451,7 +1451,8 @@ oriel_cs_260_get_filter( void )
         if ( oriel_cs_260_get_error( ) == 6 )
             print( FATAL, "Device has no filter wheel.\n" );
         else
-            print( FATAL, "Filter wheel is out of position.\n" );
+            print( FATAL, "Filter wheel is reported to be out of "
+                   "position..\n" );
         THROW( EXCEPTION );
     }
     else if ( reply[ 0 ] - '0' > NUM_FILTERS )
