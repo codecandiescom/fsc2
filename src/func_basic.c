@@ -1994,8 +1994,8 @@ f_setseed( Var_T * v )
         }
         else
         {
-            print( SEVERE, "Positive integer argument and not a float "
-                   "variable as argument, using 1 instead.\n" );
+            print( SEVERE, "Positive integer argument needed and not a float "
+                   "variable, using 1 instead.\n" );
             arg = 1;
         }
 

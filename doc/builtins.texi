@@ -2473,7 +2473,9 @@ variance of 1. If called with a non-zero, positive argument it returns
 an array of Gaussian distributed random numbers where the argument
 specifies the size of the array. These random numbers are probably
 better suited for simulating noise than the ones returned by
-@code{@ref{random()}}.
+@code{@ref{random()}}. Note that in order to initialize the random
+generator to something other than the default seed you must call
+@code{@ref{set_seed()}}.
 
 
 @anchor{index_of_max()}
@@ -2603,8 +2605,9 @@ If called with no argument the function returns a single pseudo-random
 number in the interval @w{[0, 1]} (i.e. values larger or equal to 0
 and less or equal to 1). If called with a non-zero, positive argument
 it returns an array of random numbers where the argument specifies the
-size of the array. Note that you can initialize the random generator
-used by calling @code{@ref{set_seed()}}.
+size of the array. Note that in order to initialize the random
+generator to something other than the default seed you must call
+@code{@ref{set_seed()}}.
 
 
 @anchor{random2()}
@@ -2614,8 +2617,9 @@ If called with no argument the function returns a single pseudo-random
 number in the interval @w{[0, 1[} (i.e. values larger or equal to 0
 and less than 1). If called with a non-zero, positive argument it
 returns an array of random numbers where the argument specifies the
-size of the array. Note that you can initialize the random generator
-used by calling @code{@ref{set_seed()}}.
+size of the array. Note that in order to initialize the random
+generator to something other than the default seed you must call
+@code{@ref{set_seed()}}.
 
 
 @anchor{rms()}
