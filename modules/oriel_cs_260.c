@@ -1226,7 +1226,7 @@ static double
 oriel_cs_260_get_wavelength( void )
 {
     char reply[ 100 ];
-    long length;
+    long length = 100;
     double val;
     char *ep;
 
