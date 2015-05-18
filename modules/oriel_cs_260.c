@@ -1438,8 +1438,8 @@ oriel_cs_260_get_filter( void )
     long length = 3;
 
 
-    if (    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET ) != SUCCESS
-         || length != 1
+    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET );
+    if (    length != 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
