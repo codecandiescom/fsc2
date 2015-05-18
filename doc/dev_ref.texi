@@ -1454,7 +1454,7 @@ In the GPIB configuration file use @code{"HP5350A"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Untested (but should work out of the box since it's
-nearly identical to the tested HP5352B)
+nearly identical to the tested @ref{hp5352b, HP5352B}).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1492,7 +1492,7 @@ In the GPIB configuration file use @code{"HP5350B"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Untested (but should work out of the box since it's
-nearly identical to the tested HP5352B)
+nearly identical to the tested @ref{hp5352b, HP5352B}).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1530,7 +1530,7 @@ In the GPIB configuration file use @code{"HP5351A"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Untested (but should work out of the box since it's
-nearly identical to the tested HP5352B)
+nearly identical to the tested @ref{hp5352b, HP5352B}).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1568,7 +1568,7 @@ In the GPIB configuration file use @code{"HP5351B"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Untested (but should work out of the box since it's
-nearly identical to the tested HP5352B)
+nearly identical to the tested @ref{hp5352b, HP5352B}).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1606,7 +1606,7 @@ In the GPIB configuration file use @code{"HP5352A"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Untested (but should work out of the box since it's
-nearly identical to the tested HP5352B)
+nearly identical to the tested @ref{hp5352b, HP5352B}).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3438,12 +3438,12 @@ library are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Description}: Monochromator with two or three gratings,
-shutter, a motorized mirro to select one of two output ports and,
-optional, a filter wheel with up to 6 filters. The number of gratings,
-the maximum wavelengths for the gratings, the minumum and maximum
-positions of the stepper motor for the gratings and if a filter wheel
-is installed (and how many usable filters are available) has to be
-setin the device's onfiguration file.
+shutter, a motorized mirror to select one of two output ports and,
+optionally, a filter wheel with up to 6 filters. The number of
+gratings, the maximum wavelengths for the gratings, the minumum and
+maximum positions of the stepper motor for the gratings and if a
+filter wheel is installed (and how many usable filters are available)
+have to be setin the device's configuration file.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@* In the GPIB

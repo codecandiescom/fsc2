@@ -57,6 +57,8 @@ typedef struct {
 
     int          filter;                         /* 0: filter #1, etc. */
 
+    bool         has_filter;
+
     int outport;
 
     int gpib_address;
@@ -109,6 +111,20 @@ static double Max_Shutter_Delay        = 0.2;
 static double Max_Filter_Delay         = 10;
 static double Max_Outport_Switch_Delay = 10;
 
+
+/* Default settings for filter if not already set in configration file */
+
+#if defined HAS_FILTER_WHEEL
+
+#if ! defined NUM_FILTER_WHEEL_POSITIONS
+#define NUM_FILTER_WHEEL_POSITIONS 6
+#endif
+
+#if ! defined DEFAULT_FILTER_WHEEL_POSITION
+#define DEFAULT_FILTER_WHEEL_POSITION 1
+#endif
+
+#endif
 
 /* Values for test run */
 
@@ -168,8 +184,8 @@ static bool oriel_cs_260_do_step( long int step );
 static bool oriel_cs_260_get_shutter( void );
 static bool oriel_cs_260_set_shutter( bool on_off );
 #if defined HAS_FILTER_WHEEL
-static int oriel_cs_260_get_filter( void );
 static int oriel_cs_260_set_filter( int filter );
+static void oriel_cs_260_get_filter( void );
 #endif
 static int oriel_cs_260_get_outport( void );
 static int oriel_cs_260_set_outport( int port );
@@ -220,7 +236,8 @@ oriel_cs_260_init_hook( void )
 
     oriel_cs_260.shutter_state = TEST_SHUTTER_STATE;
 
-    oriel_cs_260.filter = TEST_FILTER;
+    oriel_cs_260.filter     = TEST_FILTER;
+    oriel_cs_260.has_filter = true;
 
     oriel_cs_260.outport = TEST_OUTPORT;
 
@@ -660,16 +677,22 @@ monochromator_filter( Var_T * v )
     long int filter;
 
 
+    if ( ! oriel_cs_260.has_filter )
+    {
+        print( FATAL, "During initialization no filter wheen was found.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( v == 0 )
         return vars_push( INT_VAR, oriel_cs_260.filter + 1L );
 
     filter = get_strict_long( v, "filter number" ) - 1;
     too_many_arguments( v );
 
-    if ( filter < 0 || filter >= NUM_FILTERS )
+    if ( filter < 0 || filter >= NUM_FILTER_WHEEL_POSITIONS )
     {
         print( FATAL, "Invalid filter number %ld, must be between 1 and %d.\n",
-               filter, NUM_FILTERS );
+               filter, NUM_FILTER_WHEEL_POSITIONS );
         THROW( EXCEPTION );
     }
 
@@ -1424,46 +1447,6 @@ oriel_cs_260_set_shutter( bool on_off )
 
 
 /*----------------------------------------------------*
- * Returns the number of the current filter, a number
- * between 0 and 5, or -1 if the filter wheel is out
- * of position.
- *----------------------------------------------------*/
-
-#if defined HAS_FILTER_WHEEL
-static
-int
-oriel_cs_260_get_filter( void )
-{
-    char reply[ 3 ];
-    long length = 3;
-
-
-    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET );
-    if (    length != 1
-         || ! isdigit( ( int ) *reply ) )
-        oriel_cs_260_failure( );
-
-    /* If '0' got returned the filter wheel is out of position (or there
-       isn't one) and we need to reset the error byte by reading it */
-
-    if ( *reply == '0' )
-    {
-        if ( oriel_cs_260_get_error( ) == 6 )
-            print( FATAL, "Device has no filter wheel.\n" );
-        else
-            print( FATAL, "Filter wheel is reported to be out of "
-                   "position..\n" );
-        THROW( EXCEPTION );
-    }
-    else if ( reply[ 0 ] - '0' > NUM_FILTERS )
-        oriel_cs_260_failure( );
-
-    return oriel_cs_260.filter = reply[ 0 ] - '1';
-}
-#endif
-
-
-/*----------------------------------------------------*
  * Switches to a new filter and waits for it to be in position.
  *----------------------------------------------------*/
 
@@ -1474,7 +1457,8 @@ oriel_cs_260_set_filter( int filter )
 {
     char cmd[ ] = "FILTER *\n";
 
-    fsc2_assert( filter >= 0 && filter < NUM_FILTERS );
+    fsc2_assert( oriel_cs_260.has_filter );
+    fsc2_assert( filter >= 0 && filter < NUM_FILTER_WHEEL_POSITIONS );
 
     if ( filter == oriel_cs_260.filter )
         return filter;
@@ -1487,6 +1471,54 @@ oriel_cs_260_set_filter( int filter )
     }
 
     return oriel_cs_260.filter = filter;
+}
+#endif
+
+
+/*----------------------------------------------------*
+ * Called from the initialization function to determine if a
+ * filter wheel exists and what it position it is in. If it's
+ * out of positon move it to the default position.
+ *----------------------------------------------------*/
+
+#if defined HAS_FILTER_WHEEL
+static
+void
+oriel_cs_260_get_filter( void )
+{
+    char reply[ 3 ];
+    long length = 3;
+
+
+    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET );
+    if (    length != 1
+         || ! isdigit( ( int ) *reply ) )
+        oriel_cs_260_failure( );
+
+    if ( *reply - '0' >=1 && *reply - '0' <= NUM_FILTER_WHEEL_POSITIONS )
+    {
+        oriel_cs_260.filter = reply[ 0 ] - '1';
+        oriel_cs_260.has_filter = true;
+        return;
+    }
+
+    /* If '0' got returned the filter wheel is out of position or there
+       isn't one. If it's out of position et it to the default position. */
+
+    if ( *reply == '0' )
+    {
+        if ( oriel_cs_260_get_error( ) == 6 )
+        {
+            oriel_cs_260.has_filter = false;
+            print( WARN, "No filter wheel available.\n" );
+            return;
+        }
+
+        oriel_cs_260_set_filter( DEFAULT_FILTER_WHEEL_POSITION - 1 );
+        return;
+    }
+
+    oriel_cs_260_failure( );
 }
 #endif
 
