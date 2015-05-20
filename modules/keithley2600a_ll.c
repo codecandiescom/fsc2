@@ -468,13 +468,13 @@ keithley2600a_prep_list_sweeps( void )
 
     cmd =
 "fsc2_list.sweep_and_measure = function (ch, sweep, meas, list, maxl)"
-"  local cnt = table.getn(list)
+"  local cnt = table.getn(list)"
 "  local f, ar, r"
 "  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, list, maxl)"
 "  else                 f, ar, r = fsc2_list.prep_sweepi(ch, list, maxl)"
 "  end"
-"  local mbuf1 = ch.makebuffer(table.getn(list))"
-"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(table.getn(list)) or nil"
+"  local mbuf1 = ch.makebuffer(cnt)"
+"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(cnt) or nil"
 "  fsc2_list.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
 "  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
