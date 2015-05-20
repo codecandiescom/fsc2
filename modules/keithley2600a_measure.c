@@ -1036,6 +1036,12 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
                  || ( sweep_what == CURRENT && max_val <= MAX_SOURCE_LEVELI ) );
  
+    /* If it hasn't been done yet send a few LUA functions to the device
+       needed for doing linear sweeps */
+
+    if ( ! k26->list_sweeps_prepared )
+        keithley2600a_prep_list_sweeps( );
+
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
        bit (20%) left to spare */
@@ -1058,70 +1064,12 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
         keithley2600a_comm_failure( );
     }
 
-    /* Create the LUA commands to be sent to the device to set-up the
-       sweep, enable output, start the sweep. wait for it to finish,
-       disable output, print out the results and clean up. */
-
     TRY
     {
-        cmd = get_string(
-"function fsc2_list_sweep_and_measure(ch, sweep, measure, list, maxl)"
-"  ch.source.output = 0"
-"  local old_func = ch.source.func"
-"  local old_autorange"
-"  local old_range=ch.source.rangev"
-"  if sweep == 'v' then"
-"    old_autorange = ch.source.autorangev"
-"    old_range = ch.source.rangev"
-"    ch.source.rangev = maxl"
-"    ch.trigger.source.limiti = ch.source.limiti"
-"    ch.source.func = ch.OUTPUT_DCVOLTS"
-"    ch.trigger.source.listv(list)"
-"  else"
-"    old_autorange = ch.source.autorangei"
-"    old_range = ch.source.rangei"
-"    ch.source.rangei = maxl"
-"    ch.trigger.source.limitv = ch.source.limitv"
-"    ch.source.func = ch.OUTPUT_DCAMPS"
-"    ch.trigger.source.listi(list)"
-"  end"
-"  local mbuf1 = ch.makebuffer(#list)"
-"  local mbuf2"
-"  if measure ~= 'iv' then"
-"    mbuf2 = ch.makebuffer(#list)"
-"  end"
-"  ch.trigger.source.action = 1"
-"  if     measure == 'v' then   ch.trigger.measure.v(mbuf1d )"
-"  elseif measure == 'i' then   ch.trigger.measure.i(mbuf1)"
-"  elseif measure == 'p' then   ch.trigger.measure.p(mbuf1)"
-"  elseif measure == 'r' then   ch.trigger.measure.r(mbuf1)"
-"  else                         ch.trigger.measure.iv(mbuf1, mbuf2)"
-"  end"
-"  ch.trigger.measure.action = 1"
-"  ch.trigger.count = #list"
-"  ch.trigger.arm.count = 1"
-"  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
-"  ch.source.output = 1"
-"  ch.trigger.initiate()"
-"  waitcomplete()"
-"  ch.source.output = 0"
-"  if measure ~= 'iv' then"
-"    ch.printbuffer(1, #list, mbuf1)"
-"  else"
-"    ch.printbuffer(1, #list, mbuf1, mbuf2)"
-"  end"
-"  ch.source.func=old_func"
-"  if sweep == 'v' then"
-"    ch.source.rangev = old_range"
-"    ch.source.autorangev = old_autorange"
-"  else"
-"    ch.source.rangei = old_range"
-"    ch.source.autorangei = old_autorange"
-"  end"
-"end"
-"fsc2_list_sweep_and_measure(%s, '%s', '%s', {%s}, %.6g)",
-smu[ ch ], method[ sweep_what ], method[ measure_what ], val_list, max_val );
-
+        cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', "
+                          "{%s}, %.6g)",
+                          smu[ ch ], method[ sweep_what ],
+                          method[ measure_what ], val_list, max_val );
         val_list = T_free( val_list );
 
         buf = T_malloc( 20 * num_data_points );

@@ -345,23 +345,26 @@ keithley2600a_get_line_frequency( void )
 
 
 /*--------------------------------------------------------------*
- * Prepares and sends functions to the device for doing linear
- * sweeps
+ * Prepares and sends LUA functions to the device for doing linear
+ * sweeps. Note that functions need to be relatively short (it's
+ * not documented how long they may be) since otherwise the input
+ * buffer of the device over-runs. No line-feeds are allowed at
+ * the ends of the lines of the funtions!
  *--------------------------------------------------------------*/
 
 void
 keithley2600a_prep_lin_sweeps( void )
 {
-    /* Create an empty table, we're going to put all functions needed for
-       linear sweeps into it */
+    /* Create an empty LUA table, we're going to put all functions needed
+       for linear sweeps into it */
 
     const char * cmd = "fsc2_lin = { }";
     keithley2600a_cmd( cmd );
 
-    /* Add function for doing the linear sweep - it first initializes the
-       source settings, the allocates memory for the results, sets up the
-       trigger system amd runs the sweep, then prints out the results and
-       resets the source settings */
+    /* Add LUA function for doing the linear sweep - it first initializes
+       the source settings, the allocates memory for the results, sets up
+       the trigger system amd runs the sweep, then prints out the results
+       and resets the source settings */
 
     cmd =
 "fsc2_lin.sweep_and_measure = function (ch, sweep, meas, startl, endl, cnt)"
@@ -370,8 +373,8 @@ keithley2600a_prep_lin_sweeps( void )
 "  else                 f, ar, r = fsc2_lin.prep_sweepi(ch, startl, endl, cnt)"
 "  end"
 "  local mbuf1 = ch.makebuffer(cnt)"
-"  local mbuf2 = measure ~= 'iv' and ch.makebuffer(cnt) or nil"
-"  fsc2_lin.run_sweep(ch, measure, cnt, mbuf1, mbuf2)"
+"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(cnt) or nil"
+"  fsc2_lin.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
 "  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
 "  end"
@@ -386,6 +389,8 @@ keithley2600a_prep_lin_sweeps( void )
 "end";
     keithley2600a_cmd( cmd );
 
+    /* LUA Function for preparing a linear voltage sweep */
+
     cmd = 
 "fsc2_lin.prep_sweepv = function (ch, startl, endl, cnt)"
 "  ch.source.output = 0"
@@ -398,6 +403,8 @@ keithley2600a_prep_lin_sweeps( void )
 "end";
     keithley2600a_cmd( cmd );
 
+    /* LUA Function for preparing a linear current sweep */
+
     cmd =
 "fsc2_lin.prep_sweepi = function (ch, startl, endl, cnt)"
 "  ch.source.output = 0"
@@ -409,6 +416,9 @@ keithley2600a_prep_lin_sweeps( void )
 "  return f, ar, r "
 "end";
     keithley2600a_cmd( cmd );
+
+    /* LUA function for setting up the trigger system and running the
+       linear sweep while measuring */
 
     cmd =
 "fsc2_lin.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
@@ -431,6 +441,106 @@ keithley2600a_prep_lin_sweeps( void )
     keithley2600a_cmd( cmd );
 
     k26->lin_sweeps_prepared = true;
+}
+
+
+/*--------------------------------------------------------------*
+ * Prepares and sends LUA functions to the device for doing list
+ * sweeps. Note that functions need to be relatively short (it's
+ * not documented how long they may be) since otherwise the input
+ * buffer of the device over-runs. No line-feeds are allowed at
+ * the ends of the lines of the funtions!
+ *--------------------------------------------------------------*/
+
+void
+keithley2600a_prep_list_sweeps( void )
+{
+    /* Create an empty LUA table, we're going to put all functions needed
+       for list sweeps into it */
+
+    const char * cmd = "fsc2_list = { }";
+    keithley2600a_cmd( cmd );
+
+    /* Add LUA function for doing the list sweep - it first initializes
+       the source settings, the allocates memory for the results, sets up
+       the trigger system amd runs the sweep, then prints out the results
+       and resets the source settings */
+
+    cmd =
+"fsc2_list.sweep_and_measure = function (ch, sweep, meas, list, maxl)"
+"  local f, ar, r"
+"  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, list, maxl)"
+"  else                 f, ar, r = fsc2_list.prep_sweepi(ch, list, maxl)"
+"  end"
+"  local mbuf1 = ch.makebuffer(#list)"
+"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(#lisr) or nil"
+"  fsc2_list.run_sweep(ch, meas, list, mbuf1, mbuf2)"
+"  if meas ~= 'iv' then printbuffer(1, #list, mbuf1)"
+"  else                 printbuffer(1, #list, mbuf2, mbuf1)"
+"  end"
+"  ch.source.func = f"
+"  if sweep == 'v' then"
+"    ch.source.rangev = r"
+"    ch.source.autorangev = ar"
+"  else"
+"    ch.source.rangei = r"
+"    ch.source.autorangei = ar"
+"  end "
+"end";
+    keithley2600a_cmd( cmd );
+
+    /* LUA Function for preparing a list voltage sweep */
+
+    cmd = 
+"fsc2_list.prep_sweepv = function (ch, list, maxl)"
+"  ch.source.output = 0"
+"  local f, ar, r = ch.source.func, ch.source.autorangev, ch.source.rangev"
+"  ch.source.rangev = maxl"
+"  ch.trigger.source.limiti = ch.source.limiti"
+"  ch.source.func = ch.OUTPUT_DCVOLTS"
+"  ch.trigger.source.listv(list)"
+"  return f, ar, r "
+"end";
+    keithley2600a_cmd( cmd );
+
+    /* LUA Function for preparing a list current sweep */
+
+    cmd =
+"fsc2_list.prep_sweepi = function (ch, list, maxl)"
+"  ch.source.output = 0"
+"  local f, ar, r = ch.source.func, ch.source.autorangei, ch.source.rangei"
+"  ch.source.rangei = maxl"
+"  ch.trigger.source.limitv = ch.source.limitv"
+"  ch.source.func = ch.OUTPUT_DCAMPS"
+"  ch.trigger.source.listi(list)"
+"  return f, ar, r "
+"end";
+    keithley2600a_cmd( cmd );
+
+    /* LUA function for setting up the trigger system and running the
+       list sweep while measuring */
+
+    cmd =
+"fsc2_list.run_sweep = function (ch, meas, list, mbuf1, mbuf2)"
+"  ch.trigger.source.action = 1"
+"  if     meas == 'v' then ch.trigger.measure.v(mbuf1)"
+"  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
+"  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
+"  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
+"  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
+"  end"
+"  ch.trigger.measure.action = 1"
+"  ch.trigger.count = #list"
+"  ch.trigger.arm.count = 1"
+"  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
+"  ch.source.output = 1"
+"  ch.trigger.initiate()"
+"  waitcomplete()"
+"  ch.source.output = 0 "
+"end";
+    keithley2600a_cmd( cmd );
+
+    k26->list_sweeps_prepared = true;
 }
 
 
