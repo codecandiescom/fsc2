@@ -149,27 +149,27 @@ keithley2600a_get_state( void )
     model = keithley2600a_get_model( );
 
 #if defined _2601A
-    if ( strcmp( model, "2601A" ) )
+    if ( strcmp( model, "2601A\n" ) )
         print( WARN, "Module was compiled for a 2601A but device reports it's "
                "a %s.\n", model );
 #elif defined _2602A
-    if ( strcmp( model, "2602A" ) )
+    if ( strcmp( model, "2602A\n" ) )
         print( WARN, "Module was compiled for a 2602A but device reports it's "
                "a %s.\n", model );
 #elif defined _2611A
-    if ( strcmp( model, "2611A" ) )
+    if ( strcmp( model, "2611A\n" ) )
         print( WARN, "Module was compiled for a 2611A but device reports it's "
                "a %s.\n", model );
 #elif defined _2612A
-    if ( strcmp( model, "2612A" ) )
+    if ( strcmp( model, "2612A\n" ) )
         print( WARN, "Module was compiled for a 2612A but device reports it's "
                "a %s.\n", model );
 #elif defined _2635A
-    if ( strcmp( model, "2612A" ) )
+    if ( strcmp( model, "2612A\n" ) )
         print( WARN, "Module was compiled for a 2635A but device reports it's "
                "a %s.\n", model );
 #elif defined _2636A
-    if ( strcmp( model, "2636A" ) )
+    if ( strcmp( model, "2636A\n" ) )
         print( WARN, "Module was compiled for a 2636A but device reports it's "
                "a %s.\n", model );
 #endif
@@ -510,7 +510,7 @@ keithley2600a_show_errors( void )
 void
 keithley2600a_bad_data( void )
 {
-    print( FATAL, "Devive sends unexpected data.\n" );
+    print( FATAL, "Devive sent unexpected data.\n" );
     THROW( EXCEPTION );
 }
 
