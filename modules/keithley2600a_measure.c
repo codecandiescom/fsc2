@@ -1146,7 +1146,7 @@ prepare_sweep_list( const Var_T * v,
             *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
         }
 
-        keithle2600a_cmd( buf );
+        keithley2600a_cmd( buf );
     }
 }
 
