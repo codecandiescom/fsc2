@@ -351,9 +351,10 @@ keithley2600a_get_line_frequency( void )
 /*--------------------------------------------------------------*
  * Prepares and sends LUA functions to the device for doing linear
  * sweeps. Note that functions need to be relatively short (it's
- * not documented how long they may be) since otherwise the input
- * buffer of the device over-runs. No line-feeds are allowed at
- * the ends of the lines of the funtions!
+ * not documented how long they may be but it looks like 1024
+ * bytes is the limit) since otherwise the input buffer of the
+ * device over-runs. No line-feeds are allowed at the ends of the
+ * lines of the funtions!
  *--------------------------------------------------------------*/
 
 void
@@ -451,9 +452,10 @@ keithley2600a_prep_lin_sweeps( void )
 /*--------------------------------------------------------------*
  * Prepares and sends LUA functions to the device for doing list
  * sweeps. Note that functions need to be relatively short (it's
- * not documented how long they may be) since otherwise the input
- * buffer of the device over-runs. No line-feeds are allowed at
- * the ends of the lines of the funtions!
+ * not documented how long they may be but it looks like 1024
+ * bytes is the limit) since otherwise the input buffer of the
+ * device over-runs. No line-feeds are allowed at the ends of the
+ * lines of the funtions!
  *--------------------------------------------------------------*/
 
 void
@@ -471,11 +473,11 @@ keithley2600a_prep_list_sweeps( void )
        and resets the source settings */
 
     cmd =
-"fsc2_list.sweep_and_measure = function (ch, sweep, meas, list, maxl)"
-"  local cnt = table.getn(list)"
+"fsc2_list.sweep_and_measure = function (ch, sweep, meas, maxl)"
+"  local cnt = table.getn(fsc2_list.list)"
 "  local f, ar, r"
-"  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, list, maxl)"
-"  else                 f, ar, r = fsc2_list.prep_sweepi(ch, list, maxl)"
+"  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, maxl)"
+"  else                 f, ar, r = fsc2_list.prep_sweepi(ch, maxl)"
 "  end"
 "  local mbuf1 = ch.makebuffer(cnt)"
 "  local mbuf2 = meas == 'iv' and ch.makebuffer(cnt) or nil"
@@ -497,13 +499,13 @@ keithley2600a_prep_list_sweeps( void )
     /* LUA Function for preparing a list voltage sweep */
 
     cmd = 
-"fsc2_list.prep_sweepv = function (ch, list, maxl)"
+"fsc2_list.prep_sweepv = function (ch, maxl)"
 "  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangev, ch.source.rangev"
 "  ch.source.rangev = maxl"
 "  ch.trigger.source.limiti = ch.source.limiti"
 "  ch.source.func = ch.OUTPUT_DCVOLTS"
-"  ch.trigger.source.listv(list)"
+"  ch.trigger.source.listv(fsc2_list.list)"
 "  return f, ar, r "
 "end";
     keithley2600a_cmd( cmd );
@@ -511,13 +513,13 @@ keithley2600a_prep_list_sweeps( void )
     /* LUA Function for preparing a list current sweep */
 
     cmd =
-"fsc2_list.prep_sweepi = function (ch, list, maxl)"
+"fsc2_list.prep_sweepi = function (ch, maxl)"
 "  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangei, ch.source.rangei"
 "  ch.source.rangei = maxl"
 "  ch.trigger.source.limitv = ch.source.limitv"
 "  ch.source.func = ch.OUTPUT_DCAMPS"
-"  ch.trigger.source.listi(list)"
+"  ch.trigger.source.listi(fsc2_list.list)"
 "  return f, ar, r "
 "end";
     keithley2600a_cmd( cmd );

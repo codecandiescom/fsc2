@@ -24,9 +24,9 @@
 
 static const char *smu[ ] = { "smua", "smub" };
 
-static char * prepare_sweep_list( const Var_T * v,
-                                  int         * num_points,
-                                  double      * max_value );
+static void prepare_sweep_list( const Var_T * v,
+                                int         * num_points,
+                                double      * max_value );
 
 
 /*---------------------------------------------------------------*
@@ -1028,9 +1028,6 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     int cnt = 1;
     double max_val;
     int num_points;
-    char * val_list = prepare_sweep_list( v, &num_points, &max_val );
-    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
-                          * v->len;
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
@@ -1059,18 +1056,17 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
               + READ_TIMEOUT;
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
-    {
-        T_free( val_list );
         keithley2600a_comm_failure( );
-    }
 
     TRY
     {
-        cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', "
-                          "{%s}, %.6g)", smu[ ch ], method[ sweep_what ],
-                          method[ measure_what ], val_list, max_val );
-        val_list = T_free( val_list );
+        prepare_sweep_list( v, &num_points, &max_val );
+        cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', %.6g)",
+                          smu[ ch ], method[ sweep_what ],
+                          method[ measure_what ], max_val );
 
+        double num_data_points = v->len
+                             * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
         buf = T_malloc( 20 * num_data_points );
         keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
         cmd = T_free( cmd );
@@ -1096,7 +1092,6 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
         T_free( cmd );
         T_free( buf );
         T_free( data );
-        T_free( val_list );
         RETHROW;
     }
 
@@ -1113,14 +1108,13 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
  *---------------------------------------------------------------*/
 
 static
-char *
+void
 prepare_sweep_list( const Var_T * v,
                     int         * num_points,
                     double      * max_val )
 {
-    char * val_list;
-    char *ep;
     int i;
+    char buf[ 50 ];
 
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
     fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
@@ -1128,26 +1122,24 @@ prepare_sweep_list( const Var_T * v,
     *num_points = v->len;
     *max_val = 0;
 
+    keithley2600a_cmd( "fsc2_list.list = {}" );
+
     /* Create a string with all the values from the list, separated by
        commata */
 
-    val_list = T_malloc( 13 * *num_points + 1 );
-
-    for ( i = 0, ep = val_list; i < *num_points; ep += strlen( ep ), i++ )
+    for ( i = 0; i < *num_points; i++ )
         if ( v->type == INT_VAR )
         {
-            sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
+            sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
+                     ( double ) v->val.lpnt[ i ] );
             *max_val = d_max( *max_val, fabs( v->val.lpnt[ i ] ) );
         }
         else
         {
-            sprintf( ep, "%.6g,", v->val.dpnt[ i ] );
+            sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
+                     v->val.dpnt[ i ] );
             *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
         }
-
-    ep[ -1 ] = '\0';
-
-    return val_list;
 }
 
 
