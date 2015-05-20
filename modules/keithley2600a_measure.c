@@ -1024,18 +1024,20 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     double * data = NULL;
     long timeout;
     int cnt = 1;
-    double max_val = prepare_sweep_list( v );
+    double max_val;
 
-    fsc2_assert( ch < NUM_CHANNELS );
-    fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
-                 || ( sweep_what == CURRENT && max_val <= MAX_SOURCE_LEVELI ) );
- 
     /* If it hasn't been done yet send a few LUA functions to the device
        needed for doing linear sweeps */
 
     if ( ! k26->list_sweeps_prepared )
         keithley2600a_prep_list_sweeps( );
 
+    max_value = prepare_sweep_list( v );
+
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
+                 || ( sweep_what == CURRENT && max_val <= MAX_SOURCE_LEVELI ) );
+ 
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
        bit (20%) left to spare */
@@ -1113,6 +1115,7 @@ prepare_sweep_list( const Var_T * v )
 
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
     fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
+
     keithley2600a_cmd( "fsc2_list.list = {}" );
 
     /* The obvious thing to do would be creating a string and pass it to
