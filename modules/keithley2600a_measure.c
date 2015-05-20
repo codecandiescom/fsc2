@@ -1032,7 +1032,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     if ( ! k26->list_sweeps_prepared )
         keithley2600a_prep_list_sweeps( );
 
-    max_value = prepare_sweep_list( v );
+    max_val = prepare_sweep_list( v );
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
