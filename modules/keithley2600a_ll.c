@@ -140,10 +140,39 @@ void
 keithley2600a_get_state( void )
 {
     unsigned int ch;
+    const char * model;
 
     clear_errors( );
 
     keithley2600a_get_line_frequency( );
+
+    model = keithley2600a_get_model( );
+
+#if defined _2601A
+    if ( strcmp( model, "2601A" ) )
+        print( WARN, "Module was compiled for a 2601A but device reports it's "
+               "a %s.\n", model );
+#elif defined _2602A
+    if ( strcmp( model, "2602A" ) )
+        print( WARN, "Module was compiled for a 2602A but device reports it's "
+               "a %s.\n", model );
+#elif defined _2611A
+    if ( strcmp( model, "2611A" ) )
+        print( WARN, "Module was compiled for a 2611A but device reports it's "
+               "a %s.\n", model );
+#elif defined _2612A
+    if ( strcmp( model, "2612A" ) )
+        print( WARN, "Module was compiled for a 2612A but device reports it's "
+               "a %s.\n", model );
+#elif defined _2635A
+    if ( strcmp( model, "2612A" ) )
+        print( WARN, "Module was compiled for a 2635A but device reports it's "
+               "a %s.\n", model );
+#elif defined _2636A
+    if ( strcmp( model, "2636A" ) )
+        print( WARN, "Module was compiled for a 2636A but device reports it's "
+               "a %s.\n", model );
+#endif
 
     for ( ch = 0; ch < NUM_CHANNELS; ch++ )
     {
@@ -216,7 +245,21 @@ keithley2600a_reset( void )
 
 
 /*---------------------------------------------------------------*
- * Resets the device
+ * Returns the model
+ *---------------------------------------------------------------*/
+
+const char *
+keithley2600a_get_model( void )
+{
+    static char buf[ 50 ];
+
+    keithley2600a_talk( "print(localnode.model)", buf, sizeof buf, false );
+    return buf;
+}
+
+
+/*---------------------------------------------------------------*
+ * Resets the error queue
  *---------------------------------------------------------------*/
 
 static

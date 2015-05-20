@@ -34,6 +34,7 @@ bool keithley2600a_talk( const char * cmd,
 
 void keithley2600a_get_state( void );
 void keithley2600a_reset( void );
+const char * keithley2600a_get_model( void );
 void keithley2600a_show_errors( void );
 
 int keithley2600a_get_sense( unsigned int ch );
