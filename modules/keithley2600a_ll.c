@@ -393,7 +393,7 @@ keithley2600a_prep_lin_sweeps( void )
 
     cmd = 
 "fsc2_lin.prep_sweepv = function (ch, startl, endl, cnt)"
-"  ch.source.output = 0"
+"  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangev, ch.source.rangev"
 "  ch.source.rangev = math.max(math.abs(startl), math.abs(endl))"
 "  ch.trigger.source.limiti = ch.source.limiti"
@@ -407,7 +407,7 @@ keithley2600a_prep_lin_sweeps( void )
 
     cmd =
 "fsc2_lin.prep_sweepi = function (ch, startl, endl, cnt)"
-"  ch.source.output = 0"
+"  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangei, ch.source.rangei"
 "  ch.source.rangei = math.max(math.abs(startl), math.abs(endl))"
 "  ch.trigger.source.limitv = ch.source.limitv"
@@ -422,21 +422,21 @@ keithley2600a_prep_lin_sweeps( void )
 
     cmd =
 "fsc2_lin.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
-"  ch.trigger.source.action = 1"
+"  ch.trigger.source.action = ch.ENABLE"
 "  if     meas == 'v' then ch.trigger.measure.v(mbuf1)"
 "  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
 "  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
 "  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
 "  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
 "  end"
-"  ch.trigger.measure.action = 1"
+"  ch.trigger.measure.action = ch.ENABLE"
 "  ch.trigger.count = cnt"
 "  ch.trigger.arm.count = 1"
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
-"  ch.source.output = 1"
+"  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
 "  waitcomplete()"
-"  ch.source.output = 0 "
+"  ch.source.output = ch.DISABLE "
 "end";
     keithley2600a_cmd( cmd );
 
@@ -468,15 +468,16 @@ keithley2600a_prep_list_sweeps( void )
 
     cmd =
 "fsc2_list.sweep_and_measure = function (ch, sweep, meas, list, maxl)"
+"  local cnt = table.getn(list)
 "  local f, ar, r"
 "  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, list, maxl)"
 "  else                 f, ar, r = fsc2_list.prep_sweepi(ch, list, maxl)"
 "  end"
 "  local mbuf1 = ch.makebuffer(table.getn(list))"
 "  local mbuf2 = meas ~= 'iv' and ch.makebuffer(table.getn(list)) or nil"
-"  fsc2_list.run_sweep(ch, meas, table.getn(list), mbuf1, mbuf2)"
-"  if meas ~= 'iv' then printbuffer(1, table.getn(list), mbuf1)"
-"  else                 printbuffer(1, table.getn(list), mbuf2, mbuf1)"
+"  fsc2_list.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
+"  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
+"  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
 "  end"
 "  ch.source.func = f"
 "  if sweep == 'v' then"
@@ -493,7 +494,7 @@ keithley2600a_prep_list_sweeps( void )
 
     cmd = 
 "fsc2_list.prep_sweepv = function (ch, list, maxl)"
-"  ch.source.output = 0"
+"  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangev, ch.source.rangev"
 "  ch.source.rangev = maxl"
 "  ch.trigger.source.limiti = ch.source.limiti"
@@ -507,7 +508,7 @@ keithley2600a_prep_list_sweeps( void )
 
     cmd =
 "fsc2_list.prep_sweepi = function (ch, list, maxl)"
-"  ch.source.output = 0"
+"  ch.source.output = ch.DISABLE"
 "  local f, ar, r = ch.source.func, ch.source.autorangei, ch.source.rangei"
 "  ch.source.rangei = maxl"
 "  ch.trigger.source.limitv = ch.source.limitv"
@@ -522,21 +523,21 @@ keithley2600a_prep_list_sweeps( void )
 
     cmd =
 "fsc2_list.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
-"  ch.trigger.source.action = 1"
+"  ch.trigger.source.action = ch.ENABLE"
 "  if     meas == 'v' then ch.trigger.measure.v(mbuf1)"
 "  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
 "  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
 "  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
 "  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
 "  end"
-"  ch.trigger.measure.action = 1"
+"  ch.trigger.measure.action = ch.ENABLE"
 "  ch.trigger.count = cnt"
 "  ch.trigger.arm.count = 1"
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
-"  ch.source.output = 1"
+"  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
 "  waitcomplete()"
-"  ch.source.output = 0 "
+"  ch.source.output = ch.DISABLE "
 "end";
     keithley2600a_cmd( cmd );
 

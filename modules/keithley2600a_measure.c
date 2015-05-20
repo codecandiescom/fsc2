@@ -1067,8 +1067,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     TRY
     {
         cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', "
-                          "{%s}, %.6g)",
-                          smu[ ch ], method[ sweep_what ],
+                          "{%s}, %.6g)", smu[ ch ], method[ sweep_what ],
                           method[ measure_what ], val_list, max_val );
         val_list = T_free( val_list );
 
