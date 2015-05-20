@@ -223,6 +223,9 @@ typedef struct
     Source_T  source[ NUM_CHANNELS ];
     Measure_T measure[ NUM_CHANNELS ];
     Contact_T contact[ NUM_CHANNELS ];
+
+    bool lin_sweeps_prepared;
+    bool list_sweeps_prepared;
 } Keithley2600A_T;
 
 

@@ -229,6 +229,9 @@ keithley2600a_get_state( void )
         keithley2600a_get_contact_threshold( ch );
         keithley2600a_get_contact_speed( ch );
     }
+
+    k26->lin_sweeps_prepared = true;
+    k26->list_sweeps_prepared = true;
 }
 
 
@@ -338,6 +341,96 @@ keithley2600a_get_line_frequency( void )
         keithley2600a_bad_data( );
 
     return k26->linefreq;
+}
+
+
+/*--------------------------------------------------------------*
+ * Prepares and sends functions to the device for doing linear
+ * sweeps
+ *--------------------------------------------------------------*/
+
+void
+keithley2600a_prep_lin_sweeps( void )
+{
+    /* Create an empty table, we're going to put all functions needed for
+       linear sweeps into it */
+
+    const char * cmd = "fsc2_lin = { }";
+    keithley2600a_cmd( cmd );
+
+    /* Add function for doing the linear sweep - it first initializes the
+       source settings, the allocates memory for the results, sets up the
+       trigger system amd runs the sweep, then prints out the results and
+       resets the source settings */
+
+    cmd =
+"fsc2_lin.sweep_and_measure = function (ch, sweep, meas, startl, endl, cnt)"
+"  local f, ar, r"
+"  if sweep == 'v' then f, ar, r = fsc2_lin.prep_sweepv(ch, startl, endl, cnt)"
+"  else                 f, ar, r = fsc2_lin.prep_sweepi(ch, startl, endl, cnt)"
+"  end"
+"  local mbuf1 = ch.makebuffer(cnt)"
+"  local mbuf2 = measure ~= 'iv' and ch.makebuffer(cnt) or nil"
+"  fsc2_lin.run_sweep(ch, measure, cnt, mbuf1, mbuf2)"
+"  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
+"  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
+"  end"
+"  ch.source.func = f"
+"  if sweep == 'v' then"
+"    ch.source.rangev = r"
+"    ch.source.autorangev = ar"
+"  else"
+"    ch.source.rangei = r"
+"    ch.source.autorangei = ar"
+"  end "
+"end";
+    keithley2600a_cmd( cmd );
+
+    cmd = 
+"fsc2_lin.prep_sweepv = function (ch, startl, endl, cnt)"
+"  ch.source.output = 0"
+"  local f, ar, r = ch.source.func, ch.source.autorangev, ch.source.rangev"
+"  ch.source.rangev = math.max(math.abs(startl), math.abs(endl))"
+"  ch.trigger.source.limiti = ch.source.limiti"
+"  ch.source.func = ch.OUTPUT_DCVOLTS"
+"  ch.trigger.source.linearv(startl, endl, cnt)"
+"  return f, ar, r "
+"end";
+    keithley2600a_cmd( cmd );
+
+    cmd =
+"fsc2_lin.prep_sweepi = function (ch, startl, endl, cnt)"
+"  ch.source.output = 0"
+"  local f, ar, r = ch.source.func, ch.source.autorangei, ch.source.rangei"
+"  ch.source.rangei = math.max(math.abs(startl), math.abs(endl))"
+"  ch.trigger.source.limitv = ch.source.limitv"
+"  ch.source.func = ch.OUTPUT_DCAMPS"
+"  ch.trigger.source.lineari(startl, endl, cnt)"
+"  return f, ar, r "
+"end";
+    keithley2600a_cmd( cmd );
+
+    cmd =
+"fsc2_lin.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
+"  ch.trigger.source.action = 1"
+"  if     meas == 'v' then ch.trigger.measure.v(mbuf1)"
+"  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
+"  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
+"  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
+"  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
+"  end"
+"  ch.trigger.measure.action = 1"
+"  ch.trigger.count = cnt"
+"  ch.trigger.arm.count = 1"
+"  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
+"  ch.source.output = 1"
+"  ch.trigger.initiate()"
+"  waitcomplete()"
+"  ch.source.output = 0 "
+"end";
+    keithley2600a_cmd( cmd );
+
+    k26->lin_sweeps_prepared = true;
 }
 
 
