@@ -473,8 +473,8 @@ keithley2600a_prep_list_sweeps( void )
 "  else                 f, ar, r = fsc2_list.prep_sweepi(ch, list, maxl)"
 "  end"
 "  local mbuf1 = ch.makebuffer(#list)"
-"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(#lisr) or nil"
-"  fsc2_list.run_sweep(ch, meas, list, mbuf1, mbuf2)"
+"  local mbuf2 = meas ~= 'iv' and ch.makebuffer(#list) or nil"
+"  fsc2_list.run_sweep(ch, meas, #list, mbuf1, mbuf2)"
 "  if meas ~= 'iv' then printbuffer(1, #list, mbuf1)"
 "  else                 printbuffer(1, #list, mbuf2, mbuf1)"
 "  end"
@@ -521,7 +521,7 @@ keithley2600a_prep_list_sweeps( void )
        list sweep while measuring */
 
     cmd =
-"fsc2_list.run_sweep = function (ch, meas, list, mbuf1, mbuf2)"
+"fsc2_list.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
 "  ch.trigger.source.action = 1"
 "  if     meas == 'v' then ch.trigger.measure.v(mbuf1)"
 "  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
@@ -530,7 +530,7 @@ keithley2600a_prep_list_sweeps( void )
 "  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
 "  end"
 "  ch.trigger.measure.action = 1"
-"  ch.trigger.count = #list"
+"  ch.trigger.count = cnt"
 "  ch.trigger.arm.count = 1"
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
 "  ch.source.output = 1"
