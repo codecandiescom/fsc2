@@ -39,10 +39,11 @@ alphabets are
 case sensitive
 
 keywords in Keyword are
-   s, ps, ns, us, ms, ks, Ms, G, pG, nG, uG, mG, kG, MG, T, pT, nT, uT, mT,
-   kT, MT, V, pV, nV, uV, mV, kV, MV, A, pA, nA, uA, mA, kA, MA, Hz, pHz,
-   nHz, uHz, mHz, kHz, MHz, dB, pdB, ndB, udB, mdB, kdB, MdB, cm^-1, J,
-   pJ, nJ, uJ, mJ, kJ, MJ, W, pW, nW, uW, mW, kW, MW 
+   s, fs, ps, ns, us, ms, ks, Ms, G, fg, pG, nG, uG, mG, kG, MG, T, fT, pT,
+   nT, uT, mT, kT, MT, V, fV, pV, nV, uV, mV, kV, MV, A, fA, pA, nA, uA, mA,
+   kA, MA, Hz, fHz, pHz, nHz, uHz, mHz, kHz, MHz, dB, fDB, pdB, ndB, udB, mdB,
+   kdB, MdB, cm^-1, J, fJ, pJ, nJ, uJ, mJ, kJ, MJ, W, fW, pW, nW, uW, mW, kW,
+   MW, cm^-1
 end keywords
 
 keywords in Keyword_strong are

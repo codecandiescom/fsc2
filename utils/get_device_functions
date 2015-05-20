@@ -20,9 +20,9 @@ close $f;
 
 my $al = '';
 if ( $ARGV[ 0 ] eq 'emacs' ) {
-	$al .= " \"$_\"" foreach sort @l;
+	$al .= " \"$_\"" foreach sort { $b cmp $a } @l;
 } elsif ( $ARGV[ 0 ] eq 'vim' ) {
-	$al .= " $_"  foreach sort @l;
+	$al .= " $_"  foreach sort { $b cmp $a } @l;
 }
 print "$al\n";
 
