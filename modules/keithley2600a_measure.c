@@ -24,9 +24,7 @@
 
 static const char *smu[ ] = { "smua", "smub" };
 
-static void prepare_sweep_list( const Var_T * v,
-                                int         * num_points,
-                                double      * max_value );
+static double prepare_sweep_list( const Var_T * v );
 
 
 /*---------------------------------------------------------------*
@@ -1026,8 +1024,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     double * data = NULL;
     long timeout;
     int cnt = 1;
-    double max_val;
-    int num_points;
+    double max_val = prepare_sweep_list( v );
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
@@ -1047,7 +1044,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
          && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
         cnt = k26->measure[ ch ].filter.count;
     timeout =   lrnd(   1.2e6
-                      * num_points
+                      * v->len
                       * (   ( k26->source[ ch ].delay > 0 ?
                               k26->source[ ch ].delay : 0 )
                           + ( k26->measure[ ch ].delay > 0 ?
@@ -1060,7 +1057,6 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
     TRY
     {
-        prepare_sweep_list( v, &num_points, &max_val );
         cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', %.6g)",
                           smu[ ch ], method[ sweep_what ],
                           method[ measure_what ], max_val );
@@ -1108,20 +1104,15 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
  *---------------------------------------------------------------*/
 
 static
-void
-prepare_sweep_list( const Var_T * v,
-                    int         * num_points,
-                    double      * max_val )
+double
+prepare_sweep_list( const Var_T * v )
 {
-    int i;
+    ssize_t i;
     char buf[ 50 ];
+    double max_val = 0;
 
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
     fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
-
-    *num_points = v->len;
-    *max_val = 0;
-
     keithley2600a_cmd( "fsc2_list.list = {}" );
 
     /* The obvious thing to do would be creating a string and pass it to
@@ -1131,23 +1122,25 @@ prepare_sweep_list( const Var_T * v,
        each of them successively to it. Not nice but better than getting
        into troubles that can be very ahr to explain to the users... */
 
-    for ( i = 0; i < *num_points; i++ )
+    for ( i = 0; i < v->len; i++ )
     {
         if ( v->type == INT_VAR )
         {
             sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
                      ( double ) v->val.lpnt[ i ] );
-            *max_val = d_max( *max_val, fabs( v->val.lpnt[ i ] ) );
+            max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
         }
         else
         {
             sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
                      v->val.dpnt[ i ] );
-            *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
+            max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
         }
 
         keithley2600a_cmd( buf );
     }
+
+    return max_val;
 }
 
 
