@@ -230,8 +230,8 @@ keithley2600a_get_state( void )
         keithley2600a_get_contact_speed( ch );
     }
 
-    k26->lin_sweeps_prepared = true;
-    k26->list_sweeps_prepared = true;
+    k26->lin_sweeps_prepared  = false;
+    k26->list_sweeps_prepared = false;
 }
 
 
