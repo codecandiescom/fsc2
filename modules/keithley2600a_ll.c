@@ -74,6 +74,11 @@ keithley2600a_close( void )
     if ( ! k26->is_open )
         return OK;
 
+
+    /* Remove functions we may have created */x
+
+    keithley2600a_cmd( "fsc2_list = nil fsc2_lin = nil" );
+
     /* Unlock the keyboard */
 
     vxi11_lock_out( false );
