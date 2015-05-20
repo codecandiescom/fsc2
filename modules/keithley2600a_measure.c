@@ -1124,10 +1124,15 @@ prepare_sweep_list( const Var_T * v,
 
     keithley2600a_cmd( "fsc2_list.list = {}" );
 
-    /* Create a string with all the values from the list, separated by
-       commata */
+    /* The obvious thing to do would be creating a string and pass it to
+       the device, but there's only a very small input buffer and too
+       many list elements easily could over-run it. Thuw we do it the
+       hard way and vreate a table for the sweep points and append
+       each of them successively to it. Not nice but better than getting
+       into troubles that can be very ahr to explain to the users... */
 
     for ( i = 0; i < *num_points; i++ )
+    {
         if ( v->type == INT_VAR )
         {
             sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
@@ -1140,6 +1145,9 @@ prepare_sweep_list( const Var_T * v,
                      v->val.dpnt[ i ] );
             *max_val = d_max( *max_val, fabs( v->val.dpnt[ i ] ) );
         }
+
+        keithle2600a_cmd( buf );
+    }
 }
 
 
