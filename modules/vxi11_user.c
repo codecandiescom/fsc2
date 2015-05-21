@@ -850,7 +850,7 @@ vxi11_read( char   * buffer,
             bool     allow_abort )
 {
     Device_ReadParms read_parms;
-    Device_ReadResp *read_resp;
+    Device_ReadResp * read_resp;
     size_t to_read = *length;
     size_t expected = *length;
     struct timeval before,
@@ -878,8 +878,8 @@ vxi11_read( char   * buffer,
 
     if ( buffer == NULL )
     {
-        print( FATAL, "Internal error in module, read data buffer is "
-               "NULL.\n" );
+        print( FATAL, "Internal error in module, buffer for data to be read "
+               "is NULL.\n" );
         return FAILURE;
     }
 
@@ -941,7 +941,7 @@ vxi11_read( char   * buffer,
 
             fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
             
-            print( FATAL, "Failed to read too many data from device.\n" );
+            print( FATAL, "Failed to read, too many data from device.\n" );
             return FAILURE;
         }
 
@@ -955,9 +955,8 @@ vxi11_read( char   * buffer,
         if ( read_resp->error && read_resp->error == VXI11_TIMEOUT_ERROR )
         {
             if ( fsc2_lan_log_level( ) >= LL_ERR )
-                fsc2_lan_log_message( log_fp, "Timeout: in vxi11_read() from "
-                                      "device, only %lu of %lu bytes got "
-                                      "transmitted: %s\n",
+                fsc2_lan_log_message( log_fp, "Timeout in vxi11_read(): only "
+                                      "%lu of %lu bytes got transmitted: %s\n",
                                       ( unsigned long ) *length,
                                       ( unsigned long ) to_read,
                                       vxi11_sperror( read_resp->error ) );
@@ -970,8 +969,7 @@ vxi11_read( char   * buffer,
         {
             if ( fsc2_lan_log_level( ) >= LL_ERR )
                 fsc2_lan_log_message( log_fp, "Error in vxi11_read(): "
-                                      "failed to read from device, only "
-                                      "%lu of %lu bytes got transmitted "
+                                      "only %lu of %lu bytes got transmitted "
                                       "before timeout: %s\n",
                                       ( unsigned long ) *length,
                                       ( unsigned long ) to_read,
