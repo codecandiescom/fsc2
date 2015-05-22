@@ -265,7 +265,7 @@ keithley2600a_get_model( void )
 {
     static char buf[ 50 ];
 
-    keithley2600a_talk( "printnumber(localnode.model)", buf, sizeof buf,
+    keithley2600a_talk( "print(localnode.model)", buf, sizeof buf,
                         false );
     return buf;
 }
@@ -715,7 +715,7 @@ keithley2600a_show_errors( void )
         while ( error_count-- > 0 )
         {
             keithley2600a_talk( "code,emess,esev,enode=errorqueue.next()\n"
-                                "printnumber(emess)", buf, sizeof buf, false );
+                                "print(emess)", buf, sizeof buf, false );
             mess = T_realloc( mess, strlen( mess ) + strlen( buf ) + 1 );
             strcat( mess, buf );
         }

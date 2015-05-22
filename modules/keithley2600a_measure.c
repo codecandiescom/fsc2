@@ -162,7 +162,7 @@ keithley2600a_get_measure_autorangev( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "printnumber(%s.measure.autorangev)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.autorangev)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].autorangev = keithley2600a_line_to_bool( buf );
@@ -201,7 +201,7 @@ keithley2600a_get_measure_autorangei( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "printnumber(%s.measure.autorangei)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.autorangei)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].autorangei = keithley2600a_line_to_bool( buf );
@@ -641,7 +641,7 @@ keithley2600a_get_measure_rel_levelv_enabled( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "printnumber(%s.measure.rel.enablev)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.rel.enablev)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].relv.enabled = keithley2600a_line_to_bool( buf );
@@ -678,7 +678,7 @@ keithley2600a_get_measure_rel_leveli_enabled( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "printnumber(%s.measure.rel.enablei)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.rel.enablei)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].reli.enabled = keithley2600a_line_to_bool( buf );
@@ -848,7 +848,7 @@ keithley2600a_get_measure_filter_enabled( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "printnumber(%s.measure.filter.enable)", smu[ ch ] );
+    sprintf( buf, "print(%s.measure.filter.enable)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->measure[ ch ].filter.enabled =
@@ -1188,7 +1188,7 @@ keithley2600a_contact_check( unsigned int ch )
                       && k26->source[ ch ].offlimiti >=
                                                  MIN_CONTACT_CURRENT_LIMIT ) );
 
-    sprintf( buf, "printnumber(%s.contact.check())", smu[ ch ] );
+    sprintf( buf, "print(%s.contact.check())", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return keithley2600a_line_to_bool( buf );
@@ -1212,7 +1212,7 @@ keithley2600a_contact_resistance( unsigned int ch )
                       && k26->source[ ch ].offlimiti >=
                                                  MIN_CONTACT_CURRENT_LIMIT ) );
 
-    sprintf( buf, "printnumber(%s.contact.r())", smu[ ch ] );
+    sprintf( buf, "print(%s.contact.r())", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return keithley2600a_line_to_doubles( buf, r, 2 );
