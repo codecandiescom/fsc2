@@ -1146,9 +1146,9 @@ prepare_sweep_list( const Var_T * v )
 
     while ( i < v->len )
     {
-        last = l_min( v->len, last + 79 );
+        last = l_min( v->len, last + 78 );
 
-        strcpy( buf, "fsc2.l={" );
+        strcpy( buf, "fsc2_list.l={" );
         ep = buf + strlen( buf );
     
         for ( ; i < last; ++i )
@@ -1164,7 +1164,7 @@ prepare_sweep_list( const Var_T * v )
             }
 
         strcpy( --ep,
-                "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) fsc2.l = nil" );
+                "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) fsc2_list.l = nil" );
         keithley2600a_cmd( buf );
     }
 
