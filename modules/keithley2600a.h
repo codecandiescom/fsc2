@@ -32,11 +32,11 @@
 
 /* Define the maximum number of points to be returned from a sweep - the
    value isn't documented and is derived from the observation that the
-   device stops sending anymore data after havin sent 11220 bytes (11
+   device may stop sending anymore data after having sent 10200 bytes (10
    VXI-11 send buffers of 1020 bytes). Now, each point it sends requires
-   up to 14 bytes and the value is the result of dividing 11220 by 14. */
+   up to 14 bytes and the value is the result of dividing 10200 by 14. */
 
-#define MAX_SWEEP_RESULT_POINTS  801
+#define MAX_SWEEP_RESULT_POINTS  728
 
 
 /* Check that a model is defined */
