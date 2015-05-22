@@ -1132,12 +1132,12 @@ prepare_sweep_list( const Var_T * v )
     for ( i = 0; i < last; ++i )
         if ( v->type == INT_VAR )
         {
-            ep += sprintf( buf, "%.6g,", ( double ) v->val.lpnt[ i ] );
+            ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
             max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
         }
         else
         {
-            ep += sprintf( buf, "%.6g,", v->val.dpnt[ i ] );
+            ep += sprintf( ep, "%.6g,", v->val.dpnt[ i ] );
             max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
         }
 
@@ -1154,12 +1154,12 @@ prepare_sweep_list( const Var_T * v )
         for ( ; i < last; ++i )
             if ( v->type == INT_VAR )
             {
-                ep += sprintf( buf, "%.6g,", ( double ) v->val.lpnt[ i ] );
+                ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
                 max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
             }
             else
             {
-                ep += sprintf( buf, "%.6g,", v->val.dpnt[ i ] );
+                ep += sprintf( ep, "%.6g,", v->val.dpnt[ i ] );
                 max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
             }
 
