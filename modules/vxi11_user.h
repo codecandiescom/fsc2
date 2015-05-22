@@ -58,9 +58,13 @@
 #define VCI11_TERMCHRSET_FLAG   ( 1 << 7 )
 
 
-#define VXI11_REQCNT_REASON     ( 1 << 0 )
-#define VXI11_CHR_REASON        ( 1 << 1 )
-#define VXI11_END_REASON        ( 1 << 2 )
+#define VXI11_REQCNT_REASON     ( 1 << 0 )  /* Transmission ended because as
+                                               many bytes as requested have
+                                               beed received */
+#define VXI11_CHR_REASON        ( 1 << 1 )  /* Transmission ended because the
+                                               'termchar' was received */
+#define VXI11_END_REASON        ( 1 << 2 )  /* Transmission ended because there
+                                               are no more bytes to receive */
 
 
 #define VXI11_TIMEOUT_ERROR     15

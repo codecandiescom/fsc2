@@ -479,6 +479,7 @@ keithley2600a_prep_list_sweeps( void )
 "  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, maxl)"
 "  else                 f, ar, r = fsc2_list.prep_sweepi(ch, maxl)"
 "  end"
+"  func_list.list = nil"
 "  local mbuf1 = ch.makebuffer(cnt)"
 "  local mbuf2 = meas == 'iv' and ch.makebuffer(cnt) or nil"
 "  fsc2_list.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
@@ -544,6 +545,18 @@ keithley2600a_prep_list_sweeps( void )
 "  ch.trigger.initiate()"
 "  waitcomplete()"
 "  ch.source.output = ch.DISABLE "
+"end";
+    keithley2600a_cmd( cmd );
+
+    // LUA function for appending array 'y' to array 'x' */
+
+    cmd =
+"fsc2_list.merge(a, b)"
+"  local sa = table.getn(a)"
+"  local sb = table.getn(b)"
+"  for i = 1, sb do"
+"    a[i + sa ] = b[ i ]"
+"  end "
 "end";
     keithley2600a_cmd( cmd );
 

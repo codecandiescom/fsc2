@@ -1110,36 +1110,61 @@ double
 prepare_sweep_list( const Var_T * v )
 {
     ssize_t i;
-    char buf[ 50 ];
+    ssize_t last;
+    char buf[ 1025 ];
+    char *ep;
     double max_val = 0;
 
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
     fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
 
-    keithley2600a_cmd( "fsc2_list.list = {}" );
-
     /* The obvious thing to do would be creating a string and pass it to
        the device, but there's only a very small input buffer and too
-       many list elements easily could over-run it. Thuw we do it the
-       hard way and vreate a table for the sweep points and append
-       each of them successively to it. Not nice but better than getting
-       into troubles that can be very ahr to explain to the users... */
+       many list elements easily will over-run it. Thus if necessary
+       we split up the list into smaller chunks (of 75 values, transfer
+       them and merge it into the table. */
 
-    for ( i = 0; i < v->len; i++ )
-    {
+    last = l_min( v->len, 83 );
+
+    strcpy( buf, "fsc2_list.list = {" );
+    ep = buf + strlen( buf );
+
+    for ( i = 0; i < last; ++i )
         if ( v->type == INT_VAR )
         {
-            sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
-                     ( double ) v->val.lpnt[ i ] );
+            ep += sprintf( buf, "%.6g,", ( double ) v->val.lpnt[ i ] );
             max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
         }
         else
         {
-            sprintf( buf, "table.insert(fsc2_list.list, %.6g)",
-                     v->val.dpnt[ i ] );
+            ep += sprintf( buf, "%.6g,", v->val.dpnt[ i ] );
             max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
         }
 
+    *--ep = '}';
+    keithley2600a_cmd( buf );
+
+    while ( i < v->len )
+    {
+        last = l_min( v->len, last + 79 );
+
+        strcpy( buf, "fsc2.l={" );
+        ep = buf + strlen( buf );
+    
+        for ( ; i < last; ++i )
+            if ( v->type == INT_VAR )
+            {
+                ep += sprintf( buf, "%.6g,", ( double ) v->val.lpnt[ i ] );
+                max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
+            }
+            else
+            {
+                ep += sprintf( buf, "%.6g,", v->val.dpnt[ i ] );
+                max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
+            }
+
+        strcpy( --ep,
+                "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) fsc2.l = nil" );
         keithley2600a_cmd( buf );
     }
 
