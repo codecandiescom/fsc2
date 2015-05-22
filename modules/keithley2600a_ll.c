@@ -381,7 +381,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  local mbuf2 = meas == 'iv' and ch.makebuffer(cnt) or nil"
 "  fsc2_lin.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
-"  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
+"  else                 printbuffer(1, cnt, mbuf1, mbuf2)"
 "  end"
 "  ch.source.output = ch.DISABLE "
 "  ch.source.func = f"
@@ -423,8 +423,9 @@ keithley2600a_prep_lin_sweeps( void )
 "end";
     keithley2600a_cmd( cmd );
 
-    /* LUA function for setting up the trigger system and running the
-       linear sweep while measuring */
+    /* LUA function for setting up the trigger system and starting the
+       linear sweep while measuring (we can already start reading values
+       while the sweep is running) */
 
     cmd =
 "fsc2_lin.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
@@ -433,7 +434,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
 "  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
 "  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
-"  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
+"  else                    ch.trigger.measure.iv(mbuf2, mbuf1)"
 "  end"
 "  ch.trigger.measure.action = ch.ENABLE"
 "  ch.trigger.count = cnt"
@@ -483,7 +484,7 @@ keithley2600a_prep_list_sweeps( void )
 "  local mbuf2 = meas == 'iv' and ch.makebuffer(cnt) or nil"
 "  fsc2_list.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
-"  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
+"  else                 printbuffer(1, cnt, mbuf1, mbuf2)"
 "  end"
 "  ch.source.output = ch.DISABLE "
 "  ch.source.func = f"
@@ -525,8 +526,9 @@ keithley2600a_prep_list_sweeps( void )
 "end";
     keithley2600a_cmd( cmd );
 
-    /* LUA function for setting up the trigger system and running the
-       list sweep while measuring */
+    /* LUA function for setting up the trigger system and starting the
+       list sweeping while measuring (we can start reading data while
+       the sweep is running) */
 
     cmd =
 "fsc2_list.run_sweep = function (ch, meas, cnt, mbuf1, mbuf2)"
@@ -535,7 +537,7 @@ keithley2600a_prep_list_sweeps( void )
 "  elseif meas == 'i' then ch.trigger.measure.i(mbuf1)"
 "  elseif meas == 'p' then ch.trigger.measure.p(mbuf1)"
 "  elseif meas == 'r' then ch.trigger.measure.r(mbuf1)"
-"  else                    ch.trigger.measure.iv(mbuf1, mbuf2)"
+"  else                    ch.trigger.measure.iv(mbuf2, mbuf1)"
 "  end"
 "  ch.trigger.measure.action = ch.ENABLE"
 "  ch.trigger.count = cnt"

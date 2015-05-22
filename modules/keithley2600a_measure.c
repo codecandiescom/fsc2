@@ -961,8 +961,8 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
     TRY
     {
-        buf = T_malloc( 20 * num_data_points );
-        keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
+        buf = T_malloc( 14 * num_data_points );
+        keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
@@ -1066,8 +1066,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
         double num_data_points = v->len
                              * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
-        buf = T_malloc( 20 * num_data_points );
-        keithley2600a_talk( cmd, buf, 20 * num_data_points, true );
+        buf = T_malloc( 14 * num_data_points );
+        keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
