@@ -479,7 +479,7 @@ keithley2600a_prep_list_sweeps( void )
 "  if sweep == 'v' then f, ar, r = fsc2_list.prep_sweepv(ch, maxl)"
 "  else                 f, ar, r = fsc2_list.prep_sweepi(ch, maxl)"
 "  end"
-"  func_list.list = nil"
+"  fsc2_list.list = nil"
 "  local mbuf1 = ch.makebuffer(cnt)"
 "  local mbuf2 = meas == 'iv' and ch.makebuffer(cnt) or nil"
 "  fsc2_list.run_sweep(ch, meas, cnt, mbuf1, mbuf2)"
