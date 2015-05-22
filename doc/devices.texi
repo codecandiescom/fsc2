@@ -907,7 +907,7 @@ The three gaussmeter modules, @ref{er035m}, @ref{er035m, er035m_s} and
 a magnet, @ref{aeg_s_band} and @ref{aeg_x_band}. In that case the
 gaussmeter module to be used for this purpose must be listed in the
 @code{DEVICES} section before the magnet module that relies on it and,
-if more than one of these gausmeter modules is to be used, as the
+if more than one of these gaussmeter modules is to be used, as the
 first gaussmeter module.
 
 The remaining modules, @ref{er035m_sa}, @ref{er035m_sa, er035m_sas},
@@ -929,6 +929,7 @@ already been loaded.
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
+@item @ref{gaussmeter_keep_going_on_field_error}
 @item @ref{find_field()} (deprecated)
 @item @ref{measure_field()} (deprecated)
 @end table
@@ -966,7 +967,7 @@ gets cut off, i.e.@: with this resolution setting a field of
 @anchor{gaussmeter_resolution()}
 @findex gaussmeter_resolution()
 @item gaussmeter_resolution()
-This function is defined in the modules for the @strong{Bruker} NMR
+This function exists for the modules for the @strong{Bruker} NMR
 gaussmeters (@ref{er035m}, @ref{er035m, er035m_s}, @ref{er035m_sa} and
 @ref{er035m_sa, er035m_sas}), the @ref{pt2025, Metrolab 2025} NMR
 gaussmeter and for the @ref{bnm12, Bruker BNM12} NMR gaussmeter. It
@@ -1004,13 +1005,18 @@ resolution is set to @code{0.1 G}.
 @findex gaussmeter_probe_orientation()
 @item gaussmeter_probe_orientation()
 This function is currently implemented for the @ref{pt2025, Metrolab
-2025} NMR gaussmeter @ref{pt2025} only. It allows to set or query the
-current probe orientation relative to the field. To set an orientation
-a parameter of @code{1} or @code{"+"} can be used to define an
-orientation parallel to the field and an argument of @code{0} or
-@code{"-"} for the antiparallel direction. On queries the function
-returns either @code{1} or @code{0}. The function can only be called
-in the @code{EXPERIMENT} section for queries.
+2025} NMR gaussmeter @ref{pt2025} and the the @strong{Bruker} NMR
+gaussmeters (@ref{er035m}, @ref{er035m, er035m_s}, @ref{er035m_sa} and
+@ref{er035m_sa, er035m_sas}). It allows to query the current probe
+orientation relative to the field, returning either @code{1} or
+@code{0} for an orientation parallel or anti-parallel to the field.
+
+For the @ref{pt2025, Metrolab 2025} it can also be used to change
+the orientation to parallel to the field by calling it with an
+argument of @code{1} or @code{"+"} and anti-parallel with an
+agument of @code{0} or @code{"-"}. 
+
+The function can only be called in the @code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_upper_search_limit()}
@@ -1029,6 +1035,25 @@ This function can be called to set of query the lower search limit (in
 Gauss) for the modules @ref{er035m}, @ref{er035m, er035m_s},
 @ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. The function can
 only be called in the @code{EXPERIMENT} section.
+
+
+@anchor{gaussmeter_keep_going_on_field_error()}
+@findex gaussmeter_keep_going_on_field_error()
+@item   gaussmeter_keep_going_on_field_error()
+This function only exists for the @strong{Bruker} NMR gauss-meters
+that don't are used for controlling the field ("stand alone" modules),
+@ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. When the lock on the
+field is lost and the module fails to reestablisj it, the function for
+measuring the field normally abort the @code{EDL} script. In some
+cases this can be detrimental since measuring the field is not always
+essential and aborting the whole experiment might be over-kill. To
+avoid that this function can be called (without any arguments). Once
+it has been called (somewhere in the @code{EXPERIMENT} section when
+the function @code{@ref{gaussmeter_field()}} detects that the lock on
+the field has lost and can't be reestablished, it prints out a warning
+and never again, during the execution of the @code{EDL} script,
+attempts to measure the field, instead always returning @code{-1.0}
+for the field value.
 
 
 @anchor{find_field()}

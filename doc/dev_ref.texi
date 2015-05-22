@@ -1072,6 +1072,7 @@ for unknown reasons didn't work correctly when controlled via GPIB.
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
+@item @ref{gaussmeter_keep_going_on_field_error}
 @end table
 
 

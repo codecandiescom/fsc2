@@ -46,12 +46,13 @@ int er035m_sas_test_hook(       void );
 int er035m_sas_exp_hook(        void );
 int er035m_sas_end_of_exp_hook( void );
 
-Var_T * gaussmeter_name(               Var_T * v );
-Var_T * gaussmeter_field(              Var_T * v );
-Var_T * gaussmeter_resolution(         Var_T * v );
-Var_T * gaussmeter_probe_orientation(  Var_T * v );
-Var_T * measure_field(                 Var_T * v );
-Var_T * gaussmeter_command(            Var_T * v );
+Var_T * gaussmeter_name( Var_T * v );
+Var_T * gaussmeter_field( Var_T * v );
+Var_T * gaussmeter_keep_going_on_field_error( Var_T * v );
+Var_T * gaussmeter_resolution( Var_T * v );
+Var_T * gaussmeter_probe_orientation( Var_T * v );
+Var_T * measure_field( Var_T * v );
+Var_T * gaussmeter_command( Var_T * v );
 Var_T * gaussmeter_upper_search_limit( Var_T * v );
 Var_T * gaussmeter_lower_search_limit( Var_T * v );
 
@@ -100,6 +101,9 @@ static struct {
     int              probe_type;
     long             upper_search_limit;
     long             lower_search_limit;
+
+    bool keep_going_on_bad_field;
+    bool is_bad_field;
 } nmr, nmr_stored;
 
 static const char *er035m_sas_eol = "\r\n";
@@ -121,8 +125,8 @@ enum {
 
 
 /* If the field is too unstable the gausmeter might never get to the state
-   where the field value is valid with the requested resolution eventhough
-   the look state is achieved. 'ER035M_SAS_MAX_RETRIES' determines the
+   where the field value is valid with the requested resolution even though
+   the lock state is achieved. 'ER035M_SAS_MAX_RETRIES' determines the
    maximum number of retries before we give up. With a value of 100 and the
    current setting for 'ER035M_SAS_WAIT' of 200 ms it will take at least
    20 s before this will happen.
@@ -183,6 +187,9 @@ er035m_sas_init_hook( void )
     nmr.resolution = UNDEF_RES;
     nmr.prompt     = '\0';
 
+    nmr.keep_going_on_bad_field = false;
+    nmr.is_bad_field = false;
+
     return 1;
 }
 
@@ -217,11 +224,15 @@ er035m_sas_exp_hook( void )
     if ( ! nmr.is_needed )
         return 1;
 
+    nmr.keep_going_on_bad_field = false;
+    nmr.is_bad_field = false;
+
     if ( ! er035m_sas_open( ) )
     {
         print( FATAL, "Failed to open serial port for the NMR gaussmeter.\n" );
         THROW( EXCEPTION );
     }
+
     fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 
     if ( ! er035m_sas_write( "REM" ) )
@@ -403,6 +414,22 @@ gaussmeter_name( Var_T * v  UNUSED_ARG )
 
 
 /*----------------------------------------------------------------*
+ * When called the module won't abort the EDL script if the
+ * gauss-meter loses the lock and can't reestablish it when
+ * trying to measure the field. Instead gaussmeter_field()
+ * will then stop attempting to measure the field and return
+ * -1.
+ *----------------------------------------------------------------*/
+
+Var_T *
+gaussmeter_keep_going_on_field_error( Var_T * v  UNUSED_ARG )
+{
+    nmr.keep_going_on_bad_field = true;
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
 Var_T *
@@ -425,6 +452,13 @@ measure_field( Var_T * v  UNUSED_ARG )
     size_t length;
     long retries;
 
+
+    /* We may have been asked not to abort despite failures to find
+       the field. In this case and if there already was a failure to
+       measure the field return -1. */
+
+    if ( nmr.keep_going_on_bad_field && nmr.is_bad_field )
+        return vars_push( FLOAT_VAR, -1.0 );
 
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
@@ -489,6 +523,15 @@ measure_field( Var_T * v  UNUSED_ARG )
                     break;
 
                 case 'A' :      /* FIELD ? -> error */
+                    if ( nmr.keep_going_on_bad_field )
+                    {
+                        print( SEVERE, "NMR gaussmeter not able to lock onto "
+                               "field, no further attempts to measure the "
+                               "field will be made.\n" );
+                        nmr.is_bad_field = true;
+                        return vars_push( FLOAT_VAR, -1.0 );
+                    }
+
                     print( FATAL, "NMR gaussmeter has an unidentifiable "
                            "problem.\n" );
                     THROW( EXCEPTION );
@@ -545,10 +588,7 @@ gaussmeter_resolution( Var_T * v )
     if ( v == NULL )
     {
         if ( FSC2_MODE == PREPARATION && nmr.resolution == UNDEF_RES )
-        {
             no_query_possible( );
-            THROW( EXCEPTION );
-        }
 
         if ( FSC2_MODE == TEST && nmr.resolution == UNDEF_RES )
             return vars_push( FLOAT_VAR, ER035M_TEST_RES );
@@ -601,29 +641,24 @@ gaussmeter_resolution( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * While the manual claims something different neither setting nor querying
+ * the modulation (and thereby the probe orientation) using the "MO" command
+ * does really seem to work. The only way to figure out the modulation in
+ * a reliable way seems to be to look at the status information using "PS".
  *--------------------------------------------------------*/
 
 Var_T *
 gaussmeter_probe_orientation( Var_T * v )
 {
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION )
-        {
-            no_query_possible( );
-            THROW( EXCEPTION );
-        }
+	too_many_arguments( v );
 
-        if ( FSC2_MODE == TEST )
-            return vars_push( INT_VAR, 1L );
+	if ( FSC2_MODE == PREPARATION )
+		no_query_possible( );
 
-        return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
-    }
+	if ( FSC2_MODE == TEST )
+		return vars_push( INT_VAR, 1L );
 
-    print( FATAL, "Device does not allow setting of probe orientation.\n" );
-    THROW( EXCEPTION );
-
-    return NULL;
+	return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
 }
 
 

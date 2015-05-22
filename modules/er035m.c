@@ -113,7 +113,7 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 #define ER035M_WAIT 200000    /* this means 200 ms for usleep() */
 
 /* If the field is unstable the gausmeter might never get to the state where
-   the field value is valid with the requested resolution even though the look
+   the field value is valid with the requested resolution even though the lock
    state is achieved. 'ER035M_S_MAX_RETRIES' tells how many times we retry in
    this case. With a value of 100 and the current setting of 'ER035M_S_WAIT'
    of 200 ms it will take at least 20 s before we finally give up.
@@ -600,29 +600,24 @@ gaussmeter_resolution( Var_T * v )
 
 
 /*--------------------------------------------------------*
+ * While the manual claims something different neither setting nor querying
+ * the modulation (and thereby the probe orientation) using the "MO" command
+ * does really seem to work. The only way to figure out the modulation in
+ * a reliable way seems to be to look at the status information using "PS".
  *--------------------------------------------------------*/
 
 Var_T *
 gaussmeter_probe_orientation( Var_T * v )
 {
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION )
-        {
-            no_query_possible( );
-            THROW( EXCEPTION );
-        }
+    too_many_arguments( v );
 
-        if ( FSC2_MODE == TEST )
-            return vars_push( INT_VAR, 1L );
+    if ( FSC2_MODE == PREPARATION )
+        no_query_possible( );
 
-        return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
-    }
+    if ( FSC2_MODE == TEST )
+        return vars_push( INT_VAR, 1L );
 
-    print( FATAL, "Device does not allow setting of probe orientation.\n" );
-    THROW( EXCEPTION );
-
-    return NULL;
+    return vars_push( INT_VAR, ( long ) nmr.probe_orientation );
 }
 
 

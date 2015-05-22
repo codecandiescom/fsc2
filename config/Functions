@@ -116,6 +116,7 @@ gaussmeter_probe_orientation, -1, ALL;
 gaussmeter_upper_search_limit, -1, EXP;  // er035m family only
 gaussmeter_lower_search_limit, -1, EXP;  // er035m family only
 gaussmeter_command, 1, EXP;
+gaussmeter_keep_going_on_field_error, 0, EXP;  // er035m_sa family only
 
 find_field, 0, EXP;             // return current field value (deprecated)
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
