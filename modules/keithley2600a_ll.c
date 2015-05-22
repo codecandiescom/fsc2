@@ -148,6 +148,11 @@ keithley2600a_get_state( void )
 
     clear_errors( );
 
+    /* Make sure all data will be sent in ASCII and with a prescision of 6 */
+
+    keithley2600a_cmd( "format.data = format.ASCII" );
+    keithley2600a_cmd( "format.asciiprecision = 6" );
+
     keithley2600a_get_line_frequency( );
 
     model = keithley2600a_get_model( );
@@ -260,7 +265,8 @@ keithley2600a_get_model( void )
 {
     static char buf[ 50 ];
 
-    keithley2600a_talk( "print(localnode.model)", buf, sizeof buf, false );
+    keithley2600a_talk( "printnumber(localnode.model)", buf, sizeof buf,
+                        false );
     return buf;
 }
 
@@ -288,7 +294,7 @@ keithley2600a_get_sense( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.sense)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.sense)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     k26->sense[ ch ] = keithley2600a_line_to_int( buf );
@@ -335,7 +341,7 @@ keithley2600a_set_sense( unsigned int ch,
 double
 keithley2600a_get_line_frequency( void )
 {
-    char buf[ 50 ] = "print(localnode.linefreq)";
+    char buf[ 50 ] = "printnumber(localnode.linefreq)";
 
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
@@ -695,7 +701,8 @@ keithley2600a_show_errors( void )
     int error_count;
     char * mess = NULL;
 
-    keithley2600a_talk( "print(errorqueue.count)", buf, sizeof buf, false );
+    keithley2600a_talk( "printnumber(errorqueue.count)", buf, sizeof buf,
+                        false );
     if ( ( error_count = keithley2600a_line_to_int( buf ) ) < 0 )
         keithley2600a_bad_data( );
     else if ( error_count == 0 )
@@ -708,7 +715,7 @@ keithley2600a_show_errors( void )
         while ( error_count-- > 0 )
         {
             keithley2600a_talk( "code,emess,esev,enode=errorqueue.next()\n"
-                                "print(emess)", buf, sizeof buf, false );
+                                "printnumber(emess)", buf, sizeof buf, false );
             mess = T_realloc( mess, strlen( mess ) + strlen( buf ) + 1 );
             strcat( mess, buf );
         }
