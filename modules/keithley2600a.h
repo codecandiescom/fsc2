@@ -34,7 +34,10 @@
    value isn't documented and is derived from the observation that the
    device may stop sending anymore data after having sent 10200 bytes (10
    VXI-11 send buffers of 1020 bytes). Now, each point it sends requires
-   up to 14 bytes and the value is the result of dividing 10200 by 14. */
+   up to 14 bytes (including a leading space and a trailing comma) and the
+   value is the result of dividing 10200 by 14. For simultaneous measrements
+   of voltage and current the two data points get sent, which reduces the
+   number of points in a sweep to halve that value. */
 
 #define MAX_SWEEP_RESULT_POINTS  728
 
@@ -44,7 +47,7 @@
 #if    ! defined _2601A && ! defined _2602A \
     && ! defined _2611A && ! defined _2612A \
     && ! defined _2635A && ! defined _2636A
-#error "No model has been defined in configuration file."
+#error "No supported model defined in configuration file."
 #endif
 
 /* Sense modes */

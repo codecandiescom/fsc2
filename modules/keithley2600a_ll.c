@@ -148,7 +148,9 @@ keithley2600a_get_state( void )
 
     clear_errors( );
 
-    /* Make sure all data will be sent in ASCII and with a prescision of 6 */
+    /* Make sure all data will be sent in ASCII and with a prescision of
+       6 digits (this may be a bit over the top but for some measurement
+       ranges the data sheet claims an accuracy of better than 10^-5) */
 
     keithley2600a_cmd( "format.data = format.ASCII" );
     keithley2600a_cmd( "format.asciiprecision = 6" );
