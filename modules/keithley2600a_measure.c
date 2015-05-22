@@ -1163,7 +1163,7 @@ prepare_sweep_list( int           measure_what,
                 max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
             }
 
-        strcpy( --ep, "} fsc2_list.merge() fsc2_list.l = nilxs" );
+        strcpy( --ep, "} fsc2_list.merge() fsc2_list.l = nil" );
         keithley2600a_cmd( buf );
     }
 
