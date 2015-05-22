@@ -929,7 +929,7 @@ already been loaded.
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
-@item @ref{gaussmeter_keep_going_on_field_error}
+@item @ref{gaussmeter_keep_going_on_field_error()}
 @item @ref{find_field()} (deprecated)
 @item @ref{measure_field()} (deprecated)
 @end table
