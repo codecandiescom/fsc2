@@ -383,6 +383,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
 "  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
 "  end"
+"  ch.source.output = ch.DISABLE "
 "  ch.source.func = f"
 "  if sweep == 'v' then"
 "    ch.source.rangev = r"
@@ -440,8 +441,6 @@ keithley2600a_prep_lin_sweeps( void )
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
 "  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
-"  waitcomplete()"
-"  ch.source.output = ch.DISABLE "
 "end";
     keithley2600a_cmd( cmd );
 
@@ -486,6 +485,7 @@ keithley2600a_prep_list_sweeps( void )
 "  if meas ~= 'iv' then printbuffer(1, cnt, mbuf1)"
 "  else                 printbuffer(1, cnt, mbuf2, mbuf1)"
 "  end"
+"  ch.source.output = ch.DISABLE "
 "  ch.source.func = f"
 "  if sweep == 'v' then"
 "    ch.source.rangev = r"
@@ -543,19 +543,18 @@ keithley2600a_prep_list_sweeps( void )
 "  ch.trigger.endsweep.action = ch.SOURCE_IDLE"
 "  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
-"  waitcomplete()"
-"  ch.source.output = ch.DISABLE "
 "end";
     keithley2600a_cmd( cmd );
 
-    // LUA function for appending array 'y' to array 'x' */
+    /* LUA function for appending array 'fsc2_list.l' to array
+       'fsc2_list.listx' */
 
     cmd =
-"fsc2_list.merge = function (a, b)"
-"  local sa = table.getn(a)"
-"  local sb = table.getn(b)"
+"fsc2_list.merge = function ()"
+"  local sa = table.getn(fsc2_list.list)"
+"  local sb = table.getn(fsc2_list.l)"
 "  for i = 1, sb do"
-"    a[i + sa ] = b[ i ]"
+"    fsc2_list.list[i + sa ] = fsc2_list.l[ i ]"
 "  end "
 "end";
     keithley2600a_cmd( cmd );

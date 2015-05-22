@@ -24,7 +24,8 @@
 
 static const char *smu[ ] = { "smua", "smub" };
 
-static double prepare_sweep_list( const Var_T * v );
+static double prepare_sweep_list( int           measure_what,
+                                  const Var_T * v );
 
 
 /*---------------------------------------------------------------*
@@ -1032,7 +1033,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     if ( ! k26->list_sweeps_prepared )
         keithley2600a_prep_list_sweeps( );
 
-    max_val = prepare_sweep_list( v );
+    max_val = prepare_sweep_list( measure_what, v );
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    ( sweep_what == VOLTAGE && max_val <= MAX_SOURCE_LEVELV )
@@ -1107,7 +1108,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
 static
 double
-prepare_sweep_list( const Var_T * v )
+prepare_sweep_list( int           measure_what,
+                                  const Var_T * v )
 {
     ssize_t i;
     char buf[ 1025 ];
@@ -1115,7 +1117,10 @@ prepare_sweep_list( const Var_T * v )
     double max_val = 0;
 
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
-    fsc2_assert( v->dim == 1 && v->len >= 2 && v->len <= MAX_SWEEP_POINTS );
+    fsc2_assert( v->dim == 1 && v->len >= 2
+                 && (    (    measure_what != VOLTAGE_AND_CURRENT
+                           && v->len <= MAX_SWEEP_RESULT_POINTS )
+                      || v->len <= MAX_SWEEP_RESULT_POINTS / 2 ) );
 
     /* The obvious thing to do would be creating a string and pass it to
        the device, but there's only a very small input buffer and too
@@ -1146,7 +1151,7 @@ prepare_sweep_list( const Var_T * v )
         strcpy( buf, "fsc2_list.l={" );
         ep = buf + strlen( buf );
     
-        for ( ; i < v->len && ep - buf <= 947; ++i )
+        for ( ; i < v->len && ep - buf <= 974; ++i )
             if ( v->type == INT_VAR )
             {
                 ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
@@ -1158,8 +1163,7 @@ prepare_sweep_list( const Var_T * v )
                 max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
             }
 
-        strcpy( --ep, "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) "
-                      "fsc2_list.l = nil" );
+        strcpy( --ep, "} fsc2_list.merge() fsc2_list.l = nilxs" );
         keithley2600a_cmd( buf );
     }
 

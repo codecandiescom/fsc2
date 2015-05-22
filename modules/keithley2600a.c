@@ -27,17 +27,19 @@ const char generic_type[ ] = DEVICE_TYPE;
 static Var_T * do_sweep( Var_T * v,
                          int     sweep_what,
                          int     masure_what );
-static void get_sweep_params( Var_T        * v,
-                              int            sweep_what,
-                              unsigned int * ch,
-                              double       * start,
-                              double       * end,
-                              int          * num_points );
+static void get_lin_sweep_params( Var_T        * v,
+                                  int            sweep_what,
+                                  int            measure_what,
+                                  unsigned int * ch,
+                                  double       * start,
+                                  double       * end,
+                                  int          * num_points );
 static Var_T * do_list_sweep( Var_T * v,
                               int     sweep_what,
                               int     measure_what );
 static Var_T * get_list_sweep_params( Var_T        * v,
                                       int            sweep_what,
+                                      int            measure_what,
                                       unsigned int * ch );
 static void check_sweep_data( const double * data,
                               int            num_points );
@@ -2285,7 +2287,8 @@ do_sweep( Var_T * v,
     double *data;
     int num_data_points;
 
-    get_sweep_params( v, sweep_what, &ch, &start, &end, &num_points );
+    get_lin_sweep_params( v, sweep_what, measure_what, &ch, &start, &end,
+                          &num_points );
     num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
                       * num_points;
 
@@ -2356,7 +2359,7 @@ do_list_sweep( Var_T * v,
     double *data;
     int num_data_points;
 
-    v = get_list_sweep_params( v, sweep_what, &ch );
+    v = get_list_sweep_params( v, sweep_what, measure_what, &ch );
     num_data_points = ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 ) * v->len;
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -2419,12 +2422,13 @@ do_list_sweep( Var_T * v,
 
 static
 void
-get_sweep_params( Var_T        * v,
-                  int            sweep_what,
-                  unsigned int * ch,
-                  double       * start,
-                  double       * end,
-                  int          * num_points )
+get_lin_sweep_params( Var_T        * v,
+                      int            sweep_what,
+                      int            measure_what,
+                      unsigned int * ch,
+                      double       * start,
+                      double       * end,
+                      int          * num_points )
 {
     const char *what = sweep_what == VOLTAGE ? "voltage" : "current";
     long np;
@@ -2475,10 +2479,13 @@ get_sweep_params( Var_T        * v,
         THROW( EXCEPTION );
     }
 
-    if ( np > MAX_SWEEP_POINTS )
+    if ( np >   MAX_SWEEP_RESULT_POINTS
+              / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) )
     {
         print( FATAL, "Number of points in sweep %ld too large, maximum is "
-               "%d.\n", np, MAX_SWEEP_POINTS );
+               "%d.\n", np,
+                 MAX_SWEEP_RESULT_POINTS
+               / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) );
         THROW( EXCEPTION );
     }
 
@@ -2497,6 +2504,7 @@ static
 Var_T *
 get_list_sweep_params( Var_T        * v,
                        int            sweep_what,
+                       int            measure_what,
                        unsigned int * ch )
 {
     const char * what = sweep_what == VOLTAGE ? "voltage" : "current";
@@ -2527,10 +2535,13 @@ get_list_sweep_params( Var_T        * v,
         THROW( EXCEPTION );
     }
 
-    if ( v->len > MAX_SWEEP_POINTS )
+    if ( v->len >   MAX_SWEEP_RESULT_POINTS
+                  / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) )
     {
         print( FATAL, "Number of points of %ld sweep list too large, "
-               "maximum is %d.\n", what, MAX_SWEEP_POINTS );
+               "maximum is %d.\n", what,
+                 MAX_SWEEP_RESULT_POINTS
+               / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) );
         THROW( EXCEPTION );
     }
 

@@ -30,11 +30,13 @@
 #include "keithley2600a_measure.h"
 
 
-/* Define the maximum number of points in a sweep - the value isn't
-   documented, so we have to ick something that's not too small but
-   still looks reasonable */
+/* Define the maximum number of points to be returned from a sweep - the
+   value isn't documented and is derived from the observation that the
+   device stops sending anymore data after havin sent 11220 bytes (11
+   VXI-11 send buffers of 1020 bytes). Now, each point it sends requires
+   up to 14 bytes and the value is the result of dividing 11220 by 14. */
 
-#define MAX_SWEEP_POINTS  10001
+#define MAX_SWEEP_RESULT_POINTS  801
 
 
 /* Check that a model is defined */
