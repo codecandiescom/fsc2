@@ -1110,7 +1110,6 @@ double
 prepare_sweep_list( const Var_T * v )
 {
     ssize_t i;
-    ssize_t last;
     char buf[ 1025 ];
     char *ep;
     double max_val = 0;
@@ -1124,12 +1123,10 @@ prepare_sweep_list( const Var_T * v )
        we split up the list into smaller chunks (of 75 values, transfer
        them and merge it into the table. */
 
-    last = l_min( v->len, 83 );
-
     strcpy( buf, "fsc2_list.list = {" );
     ep = buf + strlen( buf );
 
-    for ( i = 0; i < last; ++i )
+    for ( i = 0; i < v->len && ep - buf <= 1011; ++i )
         if ( v->type == INT_VAR )
         {
             ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
@@ -1146,12 +1143,10 @@ prepare_sweep_list( const Var_T * v )
 
     while ( i < v->len )
     {
-        last = l_min( v->len, last + 78 );
-
         strcpy( buf, "fsc2_list.l={" );
         ep = buf + strlen( buf );
     
-        for ( ; i < last; ++i )
+        for ( ; i < v->len && ep - buf <= 947; ++i )
             if ( v->type == INT_VAR )
             {
                 ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
@@ -1163,8 +1158,8 @@ prepare_sweep_list( const Var_T * v )
                 max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
             }
 
-        strcpy( --ep,
-                "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) fsc2_list.l = nil" );
+        strcpy( --ep, "} fsc2_list.merge(fsc2_list.list, fsc2_list.l) "
+                      "fsc2_list.l = nil" );
         keithley2600a_cmd( buf );
     }
 
