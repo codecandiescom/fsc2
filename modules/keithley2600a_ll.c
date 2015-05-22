@@ -551,7 +551,7 @@ keithley2600a_prep_list_sweeps( void )
     // LUA function for appending array 'y' to array 'x' */
 
     cmd =
-"fsc2_list.merge(a, b)"
+"fsc2_list.merge = function (a, b)"
 "  local sa = table.getn(a)"
 "  local sb = table.getn(b)"
 "  for i = 1, sb do"
