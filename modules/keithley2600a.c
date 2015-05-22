@@ -2538,8 +2538,8 @@ get_list_sweep_params( Var_T        * v,
     if ( v->len >   MAX_SWEEP_RESULT_POINTS
                   / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) )
     {
-        print( FATAL, "Number of points of %ld sweep list too large, "
-               "maximum is %d.\n", what,
+        print( FATAL, "Number of points of %ld in sweep list too large, "
+               "maximum is %d.\n", v->len,
                  MAX_SWEEP_RESULT_POINTS
                / ( measure_what != VOLTAGE_AND_CURRENT ? 1 : 2 ) );
         THROW( EXCEPTION );
