@@ -37,7 +37,7 @@ keithley2600a_get_source_offmode( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.offmode)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     source_offmode = keithley2600a_line_to_int( buf );
     if (    source_offmode != OUTPUT_NORMAL
@@ -83,7 +83,7 @@ keithley2600a_get_source_output( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.output)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].output = keithley2600a_line_to_bool( buf );
 }
@@ -131,7 +131,7 @@ keithley2600a_get_source_highc( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.highc)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].highc = keithley2600a_line_to_bool( buf );
 }
@@ -198,7 +198,7 @@ keithley2600a_get_source_func( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.func)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].func = keithley2600a_line_to_bool( buf );
 }
@@ -249,7 +249,7 @@ keithley2600a_get_source_autorangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.autorangev)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].autorangev = keithley2600a_line_to_bool( buf );
 }
@@ -293,7 +293,7 @@ keithley2600a_get_source_autorangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.autorangei)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].autorangei = keithley2600a_line_to_bool( buf );
 }
@@ -338,7 +338,7 @@ keithley2600a_get_source_rangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.rangev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_rangev( ch, range ) )
@@ -386,7 +386,7 @@ keithley2600a_get_source_rangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.rangei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_rangei( ch, range ) )
@@ -434,7 +434,7 @@ keithley2600a_get_source_lowrangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.lowrangev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     lowrange = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_lowrangev( ch, lowrange ) )
@@ -487,7 +487,7 @@ keithley2600a_get_source_lowrangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.lowrangei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     lowrange = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_lowrangei( ch, lowrange ) )
@@ -539,7 +539,7 @@ keithley2600a_get_source_levelv( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "printnumber(%s.source.levelv)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
 	volts = keithley2600a_line_to_double( buf );
 	if ( ! keithley2600a_check_source_levelv( ch, volts ) )
@@ -587,7 +587,7 @@ keithley2600a_get_source_leveli( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "printnumber(%s.source.leveli)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
 	amps = keithley2600a_line_to_double( buf );
 	if ( ! keithley2600a_check_source_leveli( ch, amps ) )
@@ -635,7 +635,7 @@ keithley2600a_get_source_limitv( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "printnumber(%s.source.limitv)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
 	volts = keithley2600a_line_to_double( buf );
 	if ( ! keithley2600a_check_source_limitv( ch, volts ) )
@@ -678,7 +678,7 @@ keithley2600a_get_source_limiti( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "printnumber(%s.source.limiti)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
 	amps = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_limiti( ch, amps ) )
@@ -722,6 +722,7 @@ keithley2600a_get_compliance( unsigned int ch )
 
     sprintf( buf, "print(%s.source.compliance)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
+
     if ( strcmp( buf, "false\n" ) && strcmp( buf, "true\n" ) )
         keithley2600a_bad_data( );
 
@@ -742,7 +743,7 @@ keithley2600a_get_source_delay( unsigned int ch )
    fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.delay)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
  
     delay = keithley2600a_line_to_double( buf );
     if ( delay < 0 && delay != DELAY_AUTO )
@@ -785,7 +786,7 @@ keithley2600a_get_source_offlimiti( unsigned int ch )
     double limit;
 
     sprintf( buf, "printnumber(%s.source.offlimiti)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     limit = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_offlimiti( ch, limit ) )
@@ -830,7 +831,7 @@ keithley2600a_get_source_sink( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.sink)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].sink = keithley2600a_line_to_bool( buf );
 }
@@ -868,7 +869,7 @@ keithley2600a_get_source_settling( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.source.settling)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     settle = keithley2600a_line_to_int( buf );
     if (    settle != SETTLE_SMOOTH

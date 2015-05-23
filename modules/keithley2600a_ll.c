@@ -303,8 +303,7 @@ keithley2600a_get_model( void )
 {
     static char buf[ 50 ];
 
-    keithley2600a_talk( "print(localnode.model)", buf, sizeof buf,
-                        false );
+    talk( "print(localnode.model)", buf, sizeof buf, false, 6 );
     return buf;
 }
 
@@ -333,7 +332,7 @@ keithley2600a_get_sense( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.sense)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     k26->sense[ ch ] = keithley2600a_line_to_int( buf );
     if (    k26->sense[ ch ] != SENSE_LOCAL
@@ -381,7 +380,7 @@ keithley2600a_get_line_frequency( void )
 {
     char buf[ 50 ] = "printnumber(localnode.linefreq)";
 
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+	talk( buf, buf, sizeof buf, false, 7 );
 
     k26->linefreq = keithley2600a_line_to_double( buf );
 
@@ -845,8 +844,8 @@ keithley2600a_show_errors( void )
     int error_count;
     char * mess = NULL;
 
-    keithley2600a_talk( "printnumber(errorqueue.count)", buf, sizeof buf,
-                        false );
+    talk( "printnumber(errorqueue.count)", buf, sizeof buf, false, 7 );
+
     if ( ( error_count = keithley2600a_line_to_int( buf ) ) < 0 )
         keithley2600a_bad_data( );
     else if ( error_count == 0 )
