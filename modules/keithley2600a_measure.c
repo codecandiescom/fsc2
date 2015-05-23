@@ -1263,7 +1263,7 @@ keithley2600a_get_contact_threshold( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.contact.threshold)", smu[ ch ] );
-    talk( buf, buf, sizeof buf, false, 11 );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->contact[ ch ].threshold = keithley2600a_line_to_double( buf );
 }
