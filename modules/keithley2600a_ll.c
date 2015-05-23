@@ -377,7 +377,7 @@ keithley2600a_get_line_frequency( void )
 
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
-    k26->linefreq = keithley2600a_line_to_int( buf );
+    k26->linefreq = keithley2600a_line_to_double( buf );
 
     if ( k26->linefreq != 50 && k26->linefreq != 60 )
         keithley2600a_bad_data( );
@@ -773,9 +773,11 @@ double
 to_double_simple( const char * data )
 {
     float x;
+    char buf[ 20 ];
 
     memcpy( &x, data, 4 );
-    return x;
+    sprintf( buf, "%.6g", x );
+    return strtod( buf, NULL );
 }
 
 static
@@ -783,9 +785,11 @@ double
 to_double_hard( const char * data )
 {
     float x;
+    char buf[ 20 ];
 
     memcpy( &x, data, 4 );
-    return x;
+    sprintf( buf, "%.6g", x );
+    return strtod( buf, NULL );
 }
 #endif
 
