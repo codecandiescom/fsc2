@@ -1229,7 +1229,7 @@ keithley2600a_contact_check( unsigned int ch )
     if ( strcmp( buf, "true\n" ) && strcmp( buf, "false\n" ) )
         keithley2600a_bad_data( );
 
-    return *buf = 't';
+    return *buf == 't';
 }
 
 
