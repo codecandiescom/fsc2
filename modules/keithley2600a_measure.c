@@ -456,7 +456,12 @@ keithley2600a_measure_iv( unsigned int ch )
         keithley2600a_comm_failure( );
 
     sprintf( buf, "printnumber(%s.measure.iv())", smu[ ch ] );
+#if ! defined BINARY_TRAMSFER
     keithley2600a_talk( buf, buf, sizeof buf, false );
+#else
+    if ( keithley2600a_talk( buf, buf, sizeof buf, false ) != 11 )
+        keithley2600a_bad_data( );
+#endif
 
     /* Reset the read timeout again */
 
@@ -909,8 +914,8 @@ keithley2600a_sweep_and_measure( unsigned int ch,
     double * data = NULL;
     long timeout;
     int cnt = 1;
-    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
-                          * num_points;
+    size_t num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                             * num_points;
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(   (    sweep_what == VOLTAGE
@@ -961,8 +966,16 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
     TRY
     {
+#if ! defined BINARY_TRANSFER
         buf = T_malloc( 14 * num_data_points );
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
+#else
+        buf = T_malloc( 3 + 4 * num_data_points );
+        if ( keithley2600a_talk( cmd, buf, 3 + 4 * num_data_points, true ) !=
+                                                     3 + 4 * num_data_points )
+            keithley2600a_bad_data( );
+#endif
+
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
@@ -1060,14 +1073,23 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
     TRY
     {
+        size_t num_data_points = v->len
+                             * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
+
         cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', %.6g)",
                           smu[ ch ], method[ sweep_what ],
                           method[ measure_what ], max_val );
 
-        double num_data_points = v->len
-                             * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
+#if ! defined BINARY_TRANSFER
         buf = T_malloc( 14 * num_data_points );
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
+#else
+        buf = T_malloc( 3 + 4 * num_data_points );
+        if ( keithley2600a_talk( cmd, buf, 3 + 4 * num_data_points, true ) !=
+                                                      3 + 4 * num_data_points )
+            keithley2600a_bad_data( );
+#endif
+
         cmd = T_free( cmd );
 
         if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
@@ -1213,7 +1235,13 @@ keithley2600a_contact_resistance( unsigned int ch )
                                                  MIN_CONTACT_CURRENT_LIMIT ) );
 
     sprintf( buf, "print(%s.contact.r())", smu[ ch ] );
+
+#if ! defined BINARY_TRANSER
     keithley2600a_talk( buf, buf, sizeof buf, false );
+#else
+    if ( keithley2600a_talk( buf, buf, sizeof buf, false ) != 11 )
+        keithley2600a_bad_data( );
+#endif
 
     return keithley2600a_line_to_doubles( buf, r, 2 );
 }

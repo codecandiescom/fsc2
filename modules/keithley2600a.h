@@ -34,12 +34,17 @@
    value isn't documented and is derived from the observation that the
    device may stop sending anymore data after having sent 10200 bytes (10
    VXI-11 send buffers of 1020 bytes). Now, each point it sends requires
-   up to 14 bytes (including a leading space and a trailing comma) and the
-   value is the result of dividing 10200 by 14. For simultaneous measrements
-   of voltage and current the two data points get sent, which reduces the
-   number of points in a sweep to halve that value. */
+   up to 14 bytes (including a leading space and a trailing comma) when
+   uing ASCII snd 4 when using binaray, and the value is the result of
+   dividing 10200 by 14 (or 10197 by 4). For simultaneous measrements
+   of voltage and current the two data points get sent, which reduces
+   the number of points in a sweep to halve that value. */
 
+#if ! defined BINARY_TRANSFER
 #define MAX_SWEEP_RESULT_POINTS  728
+#else
+#define MAX_SWEEP_RESULT_POINTS  2549
+#endif
 
 
 /* Check that a model is defined */

@@ -24,6 +24,11 @@
 
 static void clear_errors( void );
 
+#if defined BINARY_TRANSFER
+static double to_double_simple( const char * data );
+static double to_double_hard(   const char * data );
+static double ( * to_double )(  const char * data );
+#endif
 
 static const char *smu[ ] = { "smua", "smub" };
 
@@ -117,7 +122,7 @@ keithley2600a_cmd( const char * cmd )
  * appended automatically.
  *--------------------------------------------------------------*/
 
-bool
+size_t
 keithley2600a_talk( const char * cmd,
                     char       * reply,
                     size_t       length,
@@ -131,8 +136,10 @@ keithley2600a_talk( const char * cmd,
     if ( vxi11_read( reply, &length, allow_abort ) != SUCCESS || length < 1 )
         keithley2600a_comm_failure( );
 
+#if ! defined BINARY_TRANSFER
     reply[ length ] = '\0';
-	return OK;
+#endif
+	return length;
 }
 
 
@@ -145,6 +152,10 @@ keithley2600a_get_state( void )
 {
     unsigned int ch;
     const char * model;
+#if defined BINARY_TRANSFER
+    int tst = 0;
+#endif
+
 
     clear_errors( );
 
@@ -152,8 +163,28 @@ keithley2600a_get_state( void )
        6 digits (this may be a bit over the top but for some measurement
        ranges the data sheet claims an accuracy of better than 10^-5) */
 
+#if ! defined BINARY_TRANSFER
     keithley2600a_cmd( "format.data = format.ASCII" );
     keithley2600a_cmd( "format.asciiprecision = 6" );
+#else
+    keithley2600a_cmd( "format.data = format.REAL32" );
+
+    if ( sizeof( float ) == 4 )
+    {
+        to_double = to_double_simple;
+
+        * ( unsigned char * ) &tst = 1;
+        if ( tst == 1 )
+            keithley2600a_cmd( "format.byteorder = format.LITTLEENDIAN" );
+        else
+            keithley2600a_cmd( "format.byteorder = format.BIGENDIAN" );
+    }
+    else
+    {
+        to_double = to_double_hard;
+        keithley2600a_cmd( "format.byteorder = format.BIGENDIAN" );
+    }
+#endif
 
     keithley2600a_get_line_frequency( );
 
@@ -600,6 +631,7 @@ keithley2600a_line_to_bool( const char * line )
 
 int
 keithley2600a_line_to_int( const char * line )
+#if ! defined BINARY_TRANSFER
 {
     double dres;
     int res;
@@ -618,6 +650,14 @@ keithley2600a_line_to_int( const char * line )
 
     return res;
 }
+#else
+{
+    if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
+        keithley2600a_bad_data( );
+
+    return irnd( to_double( line ) );
+}
+#endif
 
 
 /*--------------------------------------------------------------*
@@ -627,6 +667,7 @@ keithley2600a_line_to_int( const char * line )
 
 double
 keithley2600a_line_to_double( const char * line )
+#if ! defined BINARY_TRANSFER
 {
     double res;
     char *ep;
@@ -643,6 +684,14 @@ keithley2600a_line_to_double( const char * line )
 
     return res;
 }
+#else
+{
+    if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
+        keithley2600a_bad_data( );
+
+    return to_double( line );
+}
+#endif
 
 
 /*--------------------------------------------------------------*
@@ -655,6 +704,7 @@ double *
 keithley2600a_line_to_doubles( const char * line,
                                double     * buf,
                                int          cnt )
+#if ! defined BINARY_TRANSFER
 {
     int i = 0;
 
@@ -688,6 +738,48 @@ keithley2600a_line_to_doubles( const char * line,
             line++;
     }
 }
+#else
+{
+    int i;
+
+
+    fsc2_assert( cnt > 0 && buf );
+
+    if ( *line++ != '#' || *line++ != '0' || line[ 4 * cnt ] != '\n' )
+        keithley2600a_bad_data( );
+
+    for ( i = 0; i < cnt; line += 4, i++ )
+        buf[ i ] = to_double( line );
+
+    return buf;
+}
+#endif
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+#if defined BINARY_TRANSFER
+static
+double
+to_double_simple( const char * data )
+{
+    float x;
+
+    memcpy( &x, data, 4 );
+    return x;
+}
+
+static
+double
+to_double_hard( const char * data )
+{
+    float x;
+
+    memcpy( &x, data, 4 );
+    return x;
+}
+#endif
 
 
 /*--------------------------------------------------------------*
