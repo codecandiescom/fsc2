@@ -2282,13 +2282,16 @@ in configuration file for the module.
 
 @paragraphindent 0
 @strong{Note:} The number of points that can be done in measure-sweeps
-is limited to 728 when measuring either voltage, current, power or
-resistance and to 364 when measuring voltage and current
-simultaneously. This isn't due to some documented restriction but the
-result of the observation that reads from the output queue start to
-fail when it contains more than 10200 bytes. Each measured point can
-use up to 14 bytes, and the above maximum numbers are chosen to make
-sure the size of the output queue never exceeds those 10200 bytes.
+is limited to 728 or 2549 when measuring either voltage, current,
+power or resistance and to 364 or 1274 when measuring voltage and
+current simultaneously( the lower numbers are for ASCII data
+transfers, the higher for bianary transfers). This isn't due to some
+documented restriction but the result of the observation that reads
+from the output queue start to fail when it contains more than 10200
+bytes. Each measured point can use up to 14 bytes with ASCII data
+tranfer and take 4 bytes with binary transfers, and the above maximum
+numbers are chosen to make sure the size of the output queue never
+exceeds those 10200 bytes.
 
 @paragraphindent 0
 @strong{Supported functions}:

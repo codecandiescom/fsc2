@@ -9685,8 +9685,9 @@ filter count to @code{0} disables filtering/
 Function for doing a voltage sweep while measuring voltages. The
 function expects, beside the channel number, three arguments, the
 start and end voltage and the number of points of the sweep (between 2
-and 728). It returns an array with as many voltage data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many voltage data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9700,8 +9701,9 @@ before the sweep was started.
 Function for doing a voltage sweep while doing measuring currents. The
 function expects, beside the channel number, three arguments, the
 start and end voltage and the number of points of the sweep (between 2
-and 728). It returns an array with as many current data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many current data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9715,8 +9717,9 @@ before the sweep was started.
 Function for doing a voltage sweep while doing measuring powers. The
 function expects, beside the channel number, three arguments, the
 start and end voltage and the number of points of the sweep (between 2
-and 728). It returns an array with as many power data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many power data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9730,8 +9733,10 @@ before the sweep was started.
 Function for doing a voltage sweep while measuring resistances. The
 function expects, beside the channel number, three arguments, the
 start and end voltage and the number of points of the sweep (between 2
-and 728). It returns an array with as many resistance data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many resistance data points as there where points in the
+sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9745,9 +9750,11 @@ before the sweep was started.
 Function for doing a voltage sweep while simultaneously measuring
 voltages and currents. The function expects, beside the channel
 number, three arguments, the start and end voltage and the number of
-points of the sweep (between 2 and 364). It returns an array with
-twice as many data points as there where points in the sweep, with the
-elements alternately set to the measured voltages and currents.
+points of the sweep (between 2 and 364 when the module has been
+compiled for ASCII data transers and 1274 when compiled for binary
+transfers). It returns an array with twice as many data points as
+there where points in the sweep, with the elements alternately set to
+the measured voltages and currents.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9761,8 +9768,9 @@ before the sweep was started.
 Function for doing a current sweep while measuring voltages. The
 function expects, beside the channel number, three arguments, the
 start and end current and the number of points of the sweep (between 2
-and 728). It returns an array with as many voltage data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many voltage data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9776,8 +9784,9 @@ before the sweep was started.
 Function for doing a current sweep while measuring currents. The
 function expects, beside the channel number, three arguments, the
 start and end current and the number of points of the sweep (between 2
-and 728). It returns an array with as many current data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many current data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9791,8 +9800,9 @@ before the sweep was started.
 Function for doing a current sweep while measuring powers. The
 function expects, beside the channel number, three arguments, the
 start and end current and the number of points of the sweep (between 2
-and 728). It returns an array with as many power data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many power data points as there where points in the sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9806,8 +9816,10 @@ before the sweep was started.
 Function for doing a current sweep while measuring resistances. The
 function expects, beside the channel number, three arguments, the
 start and end current and the number of points of the sweep (between 2
-and 728). It returns an array with as many resistance data points as
-there where points in the sweep.
+and 728 when the module has been compiled for ASCII data transers and
+2 and 2549 when compiled for binary transfers). It returns an array
+with as many resistance data points as there where points in the
+sweep.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9821,9 +9833,11 @@ before the sweep was started.
 Function for doing a current sweep while simultaneously measuring
 voltages and currents. The function expects, beside the channel
 number, three arguments, the start and end voltage and the number of
-points of the sweep (between 2 and 364x). It returns an array with
-twice as many data points as there where points in the sweep, with the
-elements alternatively set to the measured voltages and currents.
+points of the sweep (between 2 and 364 when the module has been
+compiled for ASCII data transers and 2 and 1274 when compiled for
+binary transfers). It returns an array with twice as many data points
+as there where points in the sweep, with the elements alternatively
+set to the measured voltages and currents.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9836,9 +9850,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_voltage_measure_voltage
 Function for doing a voltage list sweep while measuring voltages. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) voltages to be
-set during the sweep. It returns an array with as many measured
-voltages as there were voltages in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) voltages to be set during the sweep. It returns an
+array with as many measured voltages as there were voltages in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9851,9 +9867,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_voltage_measure_current
 Function for doing a voltage list sweep while measuring currents. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) voltages to be
-set during the sweep. It returns an array with as many measured
-currents as there were voltages in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) voltages to be set during the sweep. It returns an
+array with as many measured currents as there were voltages in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9866,9 +9884,10 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_voltage_measure_power
 Function for doing a voltage list sweep while measuring powers. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) voltages to be
-set during the sweep. It returns an array with as many measured powers
-as there were voltages in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) voltages to be set during the sweep. It returns an
+array with as many measured powers as there were voltages in the list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9881,9 +9900,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_voltage_measure_resistance
 Function for doing a voltage list sweep while measuring resistances.
 The function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) voltages to be
-set during the sweep. It returns an array with as many measured
-resistances as there were voltages in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) voltages to be set during the sweep. It returns an
+array with as many measured resistances as there were voltages in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9895,11 +9916,13 @@ before the sweep was started.
 @findex sourcemeter_list_sweep_voltage_measure_voltage_and_current
 @item   sourcemeter_list_sweep_voltage_measure_voltage_and_current
 Function for doing a voltage list sweep while simultaneously measuring
-voltages and currents. The function expects, beside the channel number,
-a 1-dimensional array with the list of (at least 2 and not more than
-364) voltages to be set during the sweep. It returns an array with
-twice as many data points as there where voltages in the list, with
-the elements alternately set to the measured voltages and currents.
+voltages and currents. The function expects, beside the channel
+number, a 1-dimensional array with the list of (at least 2 and not
+more than 364 when the module has been compiled for ASCII data
+transers and 1274 when compiled for binary transfers) voltages to be
+set during the sweep. It returns an array with twice as many data
+points as there where voltages in the list, with the elements
+alternately set to the measured voltages and currents.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9912,9 +9935,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_current_measure_voltage
 Function for doing a current list sweep while measuring voltages. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) currents to be
-set during the sweep. It returns an array with as many measured
-voltages as there were currents in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) currents to be set during the sweep. It returns an
+array with as many measured voltages as there were currents in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9927,9 +9952,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_current_measure_current
 Function for doing a current list sweep while measuring currents. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) currents to be
-set during the sweep. It returns an array with as many measured
-currents as there were currents in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) currents to be set during the sweep. It returns an
+array with as many measured currents as there were currents in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9942,9 +9969,10 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_current_measure_power
 Function for doing a current list sweep while measuring powers. The
 function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) currents to be
-set during the sweep. It returns an array with as many measured powers
-as there were currents in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) currents to be set during the sweep. It returns an
+array with as many measured powers as there were currents in the list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9957,9 +9985,11 @@ before the sweep was started.
 @item   sourcemeter_list_sweep_current_measure_resistance
 Function for doing a current list sweep while measuring resistances.
 The function expects, beside the channel number, a 1-dimensional array
-with the list of (at least 2 and not more than 728) currents to be
-set during the sweep. It returns an array with as many measured
-resistances as there were currents in the list.
+with the list of (at least 2 and not more than 728 when the module has
+been compiled for ASCII data transers and 2549 when compiled for
+binary transfers) currents to be set during the sweep. It returns an
+array with as many measured resistances as there were currents in the
+list.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
@@ -9971,11 +10001,13 @@ before the sweep was started.
 @findex sourcemeter_list_sweep_current_measure_voltage_and_current
 @item   sourcemeter_list_sweep_current_measure_voltage_and_current
 Function for doing a current list sweep while simultaneously measuring
-voltages and currents. The function expects, beside the channel number,
-a 1-dimensional array with the list of (at least 2 and not more than
-364) currents to be set during the sweep. It returns an array with
-twice as many data points as there where currents in the list, with
-the elements alternately set to the measured voltages and currents.
+voltages and currents. The function expects, beside the channel
+number, a 1-dimensional array with the list of (at least 2 and not
+more than 364 when the module has been compiled for ASCII data
+transers and 1274 when compiled for binary transfers) currents to be
+set during the sweep. It returns an array with twice as many data
+points as there where currents in the list, with the elements
+alternately set to the measured voltages and currents.
 
 During the sweep all compliance, delay, integration time and filter
 settings are taken into account. After the end of the sweep the output
