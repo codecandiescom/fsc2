@@ -2158,12 +2158,25 @@ sourcemeter_contact_resistance( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( k26->source[ ch ].leveli < MIN_CONTACT_CURRENT_LIMIT )
+    if (    k26->source[ ch ].output
+         && k26->source[ ch ].leveli < MIN_CONTACT_CURRENT_LIMIT )
     {
         char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
 
         print( FATAL, "Contact resistance measurement not possible while "
-               "current is limited to less than %s.\n", s );
+               "output is on but current is limited to less than %s.\n", s );
+        T_free( s );
+        THROW( EXCEPTION );
+    }
+
+    if (    ! k26->source[ ch ].output
+         && k26->source[ ch ].offlimiti < MIN_CONTACT_CURRENT_LIMIT )
+    {
+        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
+
+        print( FATAL, "Contact resistance measurement not possible while "
+               "output is off and off-current is limited to less than %s.\n",
+               s );
         T_free( s );
         THROW( EXCEPTION );
     }
