@@ -808,7 +808,7 @@ keithley2600a_set_source_offlimiti( unsigned int ch,
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert( keithley2600a_check_source_offlimiti( ch, limit ) );
 
-    sprintf( buf, "%s.source.offlimiti=%.6g)", smu[ ch ], limit );
+    sprintf( buf, "%s.source.offlimiti=%.6g", smu[ ch ], limit );
     keithley2600a_cmd( buf );
 
     /* Better check result, it's not too well documented what the limits
