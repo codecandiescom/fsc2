@@ -134,6 +134,8 @@ keithley2600a_test_hook( void )
         k26->source[ ch ].limitv     = 20.0;
         k26->source[ ch ].limiti     = 0.1;
 
+        k26->source[ ch ].offlimiti  = 1.0e-3;
+
         k26->measure[ ch ].autorangev = SET;
         k26->measure[ ch ].autorangei = SET;
 
