@@ -1239,7 +1239,7 @@ const double *
 keithley2600a_contact_resistance( unsigned int ch )
 {
     char buf[ 50 ];
-    double r[ 2 ];
+    static double r[ 2 ];
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    k26->source[ ch ].output

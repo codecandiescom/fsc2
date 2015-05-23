@@ -766,7 +766,7 @@ keithley2600a_line_to_doubles( const char * line,
         keithley2600a_bad_data( );
 
     for ( i = 0; i < cnt; line += 4, i++ )
-        buf[ i ] = to_double( ( const unsigned char *  ) line );
+        buf[ i ] = to_double( ( const unsigned char * ) line );
 
     return buf;
 }
