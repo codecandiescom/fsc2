@@ -82,7 +82,7 @@ keithley2600a_get_source_output( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.output)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.output)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].output = keithley2600a_line_to_bool( buf );
@@ -130,7 +130,7 @@ keithley2600a_get_source_highc( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.highc)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.highc)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].highc = keithley2600a_line_to_bool( buf );
@@ -197,7 +197,7 @@ keithley2600a_get_source_func( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.func)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.func)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].func = keithley2600a_line_to_bool( buf );
@@ -248,7 +248,7 @@ keithley2600a_get_source_autorangev( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.autorangev)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.autorangev)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].autorangev = keithley2600a_line_to_bool( buf );
@@ -292,7 +292,7 @@ keithley2600a_get_source_autorangei( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.autorangei)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.autorangei)", smu[ ch ] );
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].autorangei = keithley2600a_line_to_bool( buf );
@@ -829,7 +829,7 @@ keithley2600a_get_source_sink( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
 
-    sprintf( buf, "print(%s.source.sink)", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.source.sink)", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
     return k26->source[ ch ].sink = keithley2600a_line_to_bool( buf );
