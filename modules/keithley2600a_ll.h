@@ -54,6 +54,15 @@ double * keithley2600a_line_to_doubles( const char * line,
 void keithley2600a_bad_data( void );
 void keithley2600a_comm_failure( void );
 
+
+#if ! defined BINARY_TRANSFER
+#define talk( a, b,c, d, e )    keithley2600a_talk( a, b, c, d )
+#else
+#define talk( a, b,c, d, e )                  \
+if ( keithley2600a_talk( a, b, c, d ) != e )  \
+    keithley2600a_bad_data( );
+#endif
+
 #endif
 
 

@@ -44,7 +44,7 @@ keithley2600a_get_measure_rangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rangev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_rangev( ch, range ) )
@@ -105,7 +105,7 @@ keithley2600a_get_measure_rangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rangei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_rangei( ch, range ) )
@@ -163,7 +163,7 @@ keithley2600a_get_measure_autorangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.autorangev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].autorangev = keithley2600a_line_to_bool( buf );
 }
@@ -202,7 +202,7 @@ keithley2600a_get_measure_autorangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.autorangei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].autorangei = keithley2600a_line_to_bool( buf );
 }
@@ -242,7 +242,7 @@ keithley2600a_get_measure_lowrangev( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.lowrangev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     lowrange = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_lowrangev( ch, lowrange ) )
@@ -295,7 +295,7 @@ keithley2600a_get_measure_lowrangei( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.lowrangei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     lowrange = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_lowrangei( ch, lowrange ) )
@@ -348,7 +348,7 @@ keithley2600a_get_measure_autozero( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.autozero)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     autozero = keithley2600a_line_to_int( buf );
     if ( autozero < AUTOZERO_OFF || autozero > AUTOZERO_AUTO )
@@ -415,7 +415,7 @@ keithley2600a_measure( unsigned int ch,
         keithley2600a_comm_failure( );
 
     sprintf( buf, "printnumber(%s.measure.%c())", smu[ ch ], method[ what ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     /* Reset the read timeout again */
 
@@ -456,12 +456,7 @@ keithley2600a_measure_iv( unsigned int ch )
         keithley2600a_comm_failure( );
 
     sprintf( buf, "printnumber(%s.measure.iv())", smu[ ch ] );
-#if ! defined BINARY_TRAMSFER
-    keithley2600a_talk( buf, buf, sizeof buf, false );
-#else
-    if ( keithley2600a_talk( buf, buf, sizeof buf, false ) != 11 )
-        keithley2600a_bad_data( );
-#endif
+    talk( buf, buf, sizeof buf, false, 11 );
 
     /* Reset the read timeout again */
 
@@ -486,7 +481,7 @@ keithley2600a_get_measure_time( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.nplc)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     t = keithley2600a_line_to_double( buf ) / k26->linefreq;
     if ( ! keithley2600a_check_measure_time( t ) )
@@ -531,7 +526,7 @@ keithley2600a_get_measure_count( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.count)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     count = keithley2600a_line_to_int( buf );
     if ( count <= 0 )
@@ -573,7 +568,7 @@ keithley2600a_get_measure_rel_levelv( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rel.levelv)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].relv.level = keithley2600a_line_to_double( buf );
 }
@@ -610,7 +605,7 @@ keithley2600a_get_measure_rel_leveli( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rel.leveli)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].reli.level = keithley2600a_line_to_double( buf );
 }
@@ -647,7 +642,7 @@ keithley2600a_get_measure_rel_levelv_enabled( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rel.enablev)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].relv.enabled = keithley2600a_line_to_bool( buf );
 }
@@ -684,7 +679,7 @@ keithley2600a_get_measure_rel_leveli_enabled( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.rel.enablei)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].reli.enabled = keithley2600a_line_to_bool( buf );
 }
@@ -722,7 +717,7 @@ keithley2600a_get_measure_delay( unsigned int ch )
    fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.delay)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false,7 );
  
     delay = keithley2600a_line_to_double( buf );
     if ( delay < 0 && delay != DELAY_AUTO )
@@ -765,7 +760,7 @@ keithley2600a_get_measure_filter_type( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.filter.type)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     type = keithley2600a_line_to_int( buf );
     if (    type != FILTER_MOVING_AVG
@@ -812,7 +807,7 @@ keithley2600a_get_measure_filter_count( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.filter.count)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     count = keithley2600a_line_to_int( buf );
     if ( count < 1 || count > MAX_FILTER_COUNT )
@@ -854,7 +849,7 @@ keithley2600a_get_measure_filter_enabled( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.measure.filter.enable)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     return k26->measure[ ch ].filter.enabled =
                                             keithley2600a_line_to_bool( buf );;
@@ -978,9 +973,8 @@ keithley2600a_sweep_and_measure( unsigned int ch,
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
 #else
         buf = T_malloc( 4 + 4 * num_data_points );
-        if ( keithley2600a_talk( cmd, buf, 4 + 4 * num_data_points, true ) !=
-                                                     3 + 4 * num_data_points )
-            keithley2600a_bad_data( );
+        talk( cmd, buf, 4 + 4 * num_data_points, true,
+              3 + 4 * num_data_points );
 #endif
 
         cmd = T_free( cmd );
@@ -1098,9 +1092,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
 #else
         buf = T_malloc( 4 + 4 * num_data_points );
-        if ( keithley2600a_talk( cmd, buf, 4 + 4 * num_data_points, true ) !=
-                                                      3 + 4 * num_data_points )
-            keithley2600a_bad_data( );
+        talk( cmd, buf, 4 + 4 * num_data_points, true,
+              3 + 4 * num_data_points );
 #endif
 
         cmd = T_free( cmd );
@@ -1252,12 +1245,7 @@ keithley2600a_contact_resistance( unsigned int ch )
 
     sprintf( buf, "printnumber(%s.contact.r())", smu[ ch ] );
 
-#if ! defined BINARY_TRANSER
-    keithley2600a_talk( buf, buf, sizeof buf, false );
-#else
-    if ( keithley2600a_talk( buf, buf, sizeof buf, false ) != 11 )
-        keithley2600a_bad_data( );
-#endif
+    talk( buf, buf, sizeof buf, false, 11 );
 
     return keithley2600a_line_to_doubles( buf, r, 2 );
 }
@@ -1275,7 +1263,7 @@ keithley2600a_get_contact_threshold( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.contact.threshold)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 11 );
 
     return k26->contact[ ch ].threshold = keithley2600a_line_to_double( buf );
 }
@@ -1314,7 +1302,7 @@ keithley2600a_get_contact_speed( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.contact.speed)", smu[ ch ] );
-    keithley2600a_talk( buf, buf, sizeof buf, false );
+    talk( buf, buf, sizeof buf, false, 11 );
 
     speed = keithley2600a_line_to_int( buf );
     if ( speed < CONTACT_FAST || speed > CONTACT_SLOW )
