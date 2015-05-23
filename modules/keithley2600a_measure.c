@@ -1302,7 +1302,7 @@ keithley2600a_get_contact_speed( unsigned int ch )
     fsc2_assert( ch < NUM_CHANNELS );
 
     sprintf( buf, "printnumber(%s.contact.speed)", smu[ ch ] );
-    talk( buf, buf, sizeof buf, false, 11 );
+    talk( buf, buf, sizeof buf, false, 7 );
 
     speed = keithley2600a_line_to_int( buf );
     if ( speed < CONTACT_FAST || speed > CONTACT_SLOW )
