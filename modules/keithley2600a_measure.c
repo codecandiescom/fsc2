@@ -939,19 +939,26 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
-       bit (20%) left to spare */
+       bit (20%) left to spare. Add to that the normal delay times
+       the number of VXI-11 packages (each 1020 bytes) that need to
+       be transfered. */
 
     if (    k26->measure[ ch ].filter.enabled
          && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
         cnt = k26->measure[ ch ].filter.count;
     timeout =   lrnd(   1.2e6
-                      * num_points
+                      * num_data_points
                       * (   ( k26->source[ ch ].delay > 0 ?
                               k26->source[ ch ].delay : 0 )
                           + ( k26->measure[ ch ].delay > 0 ?
                               k26->measure[ ch ].delay : 0 )
-                          + cnt * k26->measure[ ch ].time ) )
-              + READ_TIMEOUT;
+                          + cnt * k26->measure[ ch ].time ) );
+
+#if ! defined BINARY_TRANSFER
+    timeout += ( ( 14 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
+#else
+    timeout += ( ( 4 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
+#endif
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
@@ -1039,6 +1046,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
     long timeout;
     int cnt = 1;
     double max_val;
+    size_t num_data_points =
+                      v->len * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
 
     /* If it hasn't been done yet send a few LUA functions to the device
        needed for doing linear sweeps */
@@ -1054,7 +1063,9 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
  
     /* Doing a sweep can take quite some time and we got to wait for
        it to finish, so raise the read timeout accordingly with a
-       bit (20%) left to spare */
+       bit (20%) left to spare. Add to that the normal delay times
+       the number of VXI-11 packages (each 1020 bytes) that need to
+       be transfered. */
 
     if (    k26->measure[ ch ].filter.enabled
          && k26->measure[ ch ].filter.type == FILTER_REPEAT_AVG )
@@ -1065,17 +1076,19 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
                               k26->source[ ch ].delay : 0 )
                           + ( k26->measure[ ch ].delay > 0 ?
                               k26->measure[ ch ].delay : 0 )
-                          + cnt * k26->measure[ ch ].time ) )
-              + READ_TIMEOUT;
+                          + cnt * k26->measure[ ch ].time ) );
+
+#if ! defined BINARY_TRANSFER
+    timeout += ( ( 14 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
+#else
+    timeout += ( ( 4 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
+#endif
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
 
     TRY
     {
-        size_t num_data_points =
-                      v->len * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
-
         cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', %.6g)",
                           smu[ ch ], method[ sweep_what ],
                           method[ measure_what ], max_val );
