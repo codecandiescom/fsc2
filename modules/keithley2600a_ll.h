@@ -55,10 +55,16 @@ void keithley2600a_bad_data( void );
 void keithley2600a_comm_failure( void );
 
 
+/* If binary transfer is on in most cases we know exactly how many
+   bytes to expect while with ASCII mode it's usually not that simple.
+   To be to check when binary mode is on, but not with ASCII mode we
+   use a macro which we can pass the expected number of bytes but
+   which we simply disregard in ASCII mode. */
+
 #if ! defined BINARY_TRANSFER
-#define talk( a, b,c, d, e )    keithley2600a_talk( a, b, c, d )
+#define TALK( a, b,c, d, e )    keithley2600a_talk( a, b, c, d )
 #else
-#define talk( a, b,c, d, e )                  \
+#define TALK( a, b,c, d, e )                  \
 if ( keithley2600a_talk( a, b, c, d ) != e )  \
     keithley2600a_bad_data( );
 #endif
