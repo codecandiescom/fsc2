@@ -678,7 +678,7 @@ keithley2600a_get_source_limiti( unsigned int ch )
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	sprintf( buf, "printnumber(%s.source.limiti)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof sizeof buf, false );
+	keithley2600a_talk( buf, buf, sizeof buf, false );
 
 	amps = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_limiti( ch, amps ) )
