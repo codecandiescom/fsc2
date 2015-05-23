@@ -152,9 +152,6 @@ keithley2600a_get_state( void )
 {
     unsigned int ch;
     const char * model;
-#if defined BINARY_TRANSFER
-    int tst = 0;
-#endif
 
 
     clear_errors( );
@@ -171,6 +168,8 @@ keithley2600a_get_state( void )
 
     if ( sizeof( float ) == 4 )
     {
+        int tst = 0;
+
         to_double = to_double_simple;
 
         * ( unsigned char * ) &tst = 1;
@@ -378,7 +377,7 @@ keithley2600a_get_line_frequency( void )
 
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
-    k26->linefreq = keithley2600a_line_to_double( buf );
+    k26->linefreq = keithley2600a_line_to_int( buf );
 
     if ( k26->linefreq != 50 && k26->linefreq != 60 )
         keithley2600a_bad_data( );
@@ -610,6 +609,7 @@ keithley2600a_prep_list_sweeps( void )
 
 bool
 keithley2600a_line_to_bool( const char * line )
+#if ! defined BINARY_TRANSFER
 {
     bool res = *line == '1';
 
@@ -623,6 +623,14 @@ keithley2600a_line_to_bool( const char * line )
 
     return res;
 }
+#else
+{
+    if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
+        keithley2600a_bad_data( );
+
+    return to_double( line ) ? true : false;
+}
+#endif
 
 
 /*--------------------------------------------------------------*
