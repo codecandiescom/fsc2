@@ -1247,7 +1247,7 @@ keithley2600a_contact_resistance( unsigned int ch )
                       && k26->source[ ch ].offlimiti >=
                                                  MIN_CONTACT_CURRENT_LIMIT ) );
 
-    sprintf( buf, "print(%s.contact.r())", smu[ ch ] );
+    sprintf( buf, "printnumber(%s.contact.r())", smu[ ch ] );
 
 #if ! defined BINARY_TRANSER
     keithley2600a_talk( buf, buf, sizeof buf, false );
