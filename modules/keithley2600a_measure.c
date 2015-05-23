@@ -970,8 +970,8 @@ keithley2600a_sweep_and_measure( unsigned int ch,
         buf = T_malloc( 14 * num_data_points );
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
 #else
-        buf = T_malloc( 3 + 4 * num_data_points );
-        if ( keithley2600a_talk( cmd, buf, 3 + 4 * num_data_points, true ) !=
+        buf = T_malloc( 4 + 4 * num_data_points );
+        if ( keithley2600a_talk( cmd, buf, 4 + 4 * num_data_points, true ) !=
                                                      3 + 4 * num_data_points )
             keithley2600a_bad_data( );
 #endif
@@ -1073,8 +1073,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
     TRY
     {
-        size_t num_data_points = v->len
-                             * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
+        size_t num_data_points =
+                      v->len * ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 );
 
         cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', %.6g)",
                           smu[ ch ], method[ sweep_what ],
@@ -1084,8 +1084,8 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
         buf = T_malloc( 14 * num_data_points );
         keithley2600a_talk( cmd, buf, 14 * num_data_points, true );
 #else
-        buf = T_malloc( 3 + 4 * num_data_points );
-        if ( keithley2600a_talk( cmd, buf, 3 + 4 * num_data_points, true ) !=
+        buf = T_malloc( 4 + 4 * num_data_points );
+        if ( keithley2600a_talk( cmd, buf, 4 + 4 * num_data_points, true ) !=
                                                       3 + 4 * num_data_points )
             keithley2600a_bad_data( );
 #endif

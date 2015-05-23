@@ -136,9 +136,7 @@ keithley2600a_talk( const char * cmd,
     if ( vxi11_read( reply, &length, allow_abort ) != SUCCESS || length < 1 )
         keithley2600a_comm_failure( );
 
-#if ! defined BINARY_TRANSFER
     reply[ length ] = '\0';
-#endif
 	return length;
 }
 
