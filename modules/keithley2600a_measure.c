@@ -1219,14 +1219,17 @@ keithley2600a_contact_check( unsigned int ch )
 
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    k26->source[ ch ].output
-                 || (    k26->source[ ch ].offmode != OUTPUT_HIGH_Z
-                      && k26->source[ ch ].offlimiti >=
-                                                 MIN_CONTACT_CURRENT_LIMIT ) );
+                    || (    k26->source[ ch ].offmode != OUTPUT_HIGH_Z
+                            && k26->source[ ch ].offlimiti >=
+                            MIN_CONTACT_CURRENT_LIMIT ) );
 
-    sprintf( buf, "printnumber(%s.contact.check())", smu[ ch ] );
+    sprintf( buf, "print(%s.contact.check())", smu[ ch ] );
     keithley2600a_talk( buf, buf, sizeof buf, false );
 
-    return keithley2600a_line_to_bool( buf );
+    if ( strcmp( buf, "true\n" ) && strcmp( buf, "false\n" ) )
+        keithley2600a_bad_data( );
+
+    return *buf = 't';
 }
 
 
