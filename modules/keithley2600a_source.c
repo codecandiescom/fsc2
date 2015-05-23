@@ -638,7 +638,7 @@ keithley2600a_get_source_limitv( unsigned int ch )
 	keithley2600a_talk( buf, buf, sizeof buf, false );
 
 	volts = keithley2600a_line_to_double( buf );
-	if ( keithley2600a_check_source_limitv( ch, volts ) )
+	if ( ! keithley2600a_check_source_limitv( ch, volts ) )
 		keithley2600a_bad_data( );
 
 	return k26->source[ ch ].limitv = volts;
@@ -681,7 +681,7 @@ keithley2600a_get_source_limiti( unsigned int ch )
 	keithley2600a_talk( buf, buf, sizeof sizeof buf, false );
 
 	amps = keithley2600a_line_to_double( buf );
-    if ( keithley2600a_check_source_limiti( ch, amps ) )
+    if ( ! keithley2600a_check_source_limiti( ch, amps ) )
         keithley2600a_bad_data( );
 
 	return k26->source[ ch ].limiti = amps;
