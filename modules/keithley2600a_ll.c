@@ -152,11 +152,16 @@ keithley2600a_get_state( void )
     const char * model;
 
 
+    /* Clear out the error queue */
+
     clear_errors( );
 
-    /* Make sure all data will be sent in ASCII and with a prescision of
-       6 digits (this may be a bit over the top but for some measurement
-       ranges the data sheet claims an accuracy of better than 10^-5) */
+    /* When using ASCII data transfer from the Keithley2600A to the
+       computer make sure all data will be sent in ASCII and with a
+       precision of 6 digits (this may be a bit over the top but for
+       some measurement ranges the data sheet claims an accuracy of
+       better than 10^-5). When using binary transfer pick a function
+       for extracting the data and set up endian-ness as needed. */
 
 #if ! defined BINARY_TRANSFER
     keithley2600a_cmd( "format.data = format.ASCII" );
@@ -763,6 +768,18 @@ keithley2600a_line_to_doubles( const char * line,
 
 
 /*--------------------------------------------------------------*
+ * Functions for converting 32 bit floating point numbers in
+ * IEEE 754 format received from the device. The first one is
+ * for the usual case that the sizeof(float) on the machine
+ * is 4 (endian-ness has alrady been taken care of). The
+ * additonal conversion from ASCII and back looks stupid
+ * but guarantees that numbers are rounded to 6 digits, which
+ * makes a lot of comparisons with limits easier. The second
+ * function is for the rare cases that the machine doesn't
+ * use IEEE 754 format or is strange in some other respect.
+ *
+ * These functions are only needed when the module is compiled
+ * for binary transfers from the Keithley2600A to the computer.
  *--------------------------------------------------------------*/
 
 #if defined BINARY_TRANSFER
@@ -777,6 +794,7 @@ to_double_simple( const unsigned char * data )
     sprintf( buf, "%.6g", x );
     return strtod( buf, NULL );
 }
+
 
 static
 double
