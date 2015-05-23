@@ -906,7 +906,7 @@ sourcemeter_compliance_voltage( Var_T * v )
         char * s3 = ppV( keithley2600a_max_source_limitv( ch ) );
 
         print( FATAL, "Requested compliance voltage %sof %s is out of range, "
-               "must be between %s and %s und current circumstances.\n",
+               "must be between %s and %s under current circumstances.\n",
                ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
@@ -951,7 +951,7 @@ sourcemeter_compliance_current( Var_T * v )
         char * s3 = ppA( keithley2600a_max_source_limiti( ch ) );
 
         print( FATAL, "Requested compliance current %sof %s is out of range, "
-               "must be between %s and %s und current circumstances.\n",
+               "must be between %s and %s under current circumstances.\n",
                ppc( ch, "for" ), s1, s2, s3 );
         T_free( s1 );
         T_free( s2 );
@@ -1631,9 +1631,8 @@ sourcemeter_measure_time( Var_T * v )
         char *s2 = pps( keithley2600a_min_measure_time( ) );
         char *s3 = pps( keithley2600a_max_measure_time( ) );
 
-        print( FATAL, "Requested measure time of %s for channel %snot "
-               "possible, must be between %s and %s.\n",
-               ppc( ch, "" ), s1, s2, s3 );
+        print( FATAL, "Requested measure time of %s %snot possible, must "
+               "be between %s and %s.\n", ppc( ch, "for" ), s1, s2, s3 );
         T_free( s3 );
         T_free( s2 );
         T_free( s1 );
