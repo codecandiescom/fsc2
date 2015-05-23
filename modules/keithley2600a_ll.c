@@ -25,9 +25,9 @@
 static void clear_errors( void );
 
 #if defined BINARY_TRANSFER
-static double to_double_simple( const char * data );
-static double to_double_hard(   const char * data );
-static double ( * to_double )(  const char * data );
+static double to_double_simple( const unsigned char * data );
+static double to_double_hard(   const unsigned char * data );
+static double ( * to_double )(  const unsigned char * data );
 #endif
 
 static const char *smu[ ] = { "smua", "smub" };
@@ -179,7 +179,7 @@ keithley2600a_get_state( void )
     else
     {
         to_double = to_double_hard;
-        keithley2600a_cmd( "format.byteorder = format.BIGENDIAN" );
+        keithley2600a_cmd( "format.byteorder = format.LITTLEENDIAN" );
     }
 #endif
 
@@ -626,7 +626,7 @@ keithley2600a_line_to_bool( const char * line )
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
 
-    return to_double( line ) ? true : false;
+    return to_double( ( const unsigned char *  ) line ) ? true : false;
 }
 #endif
 
@@ -661,7 +661,7 @@ keithley2600a_line_to_int( const char * line )
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
 
-    return irnd( to_double( line ) );
+    return irnd( to_double( ( const unsigned char *  ) line ) );
 }
 #endif
 
@@ -695,7 +695,7 @@ keithley2600a_line_to_double( const char * line )
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
 
-    return to_double( line );
+    return to_double( ( const unsigned char *  ) line );
 }
 #endif
 
@@ -755,7 +755,7 @@ keithley2600a_line_to_doubles( const char * line,
         keithley2600a_bad_data( );
 
     for ( i = 0; i < cnt; line += 4, i++ )
-        buf[ i ] = to_double( line );
+        buf[ i ] = to_double( ( const unsigned char *  ) line );
 
     return buf;
 }
@@ -768,7 +768,7 @@ keithley2600a_line_to_doubles( const char * line,
 #if defined BINARY_TRANSFER
 static
 double
-to_double_simple( const char * data )
+to_double_simple( const unsigned char * data )
 {
     float x;
     char buf[ 20 ];
@@ -780,12 +780,28 @@ to_double_simple( const char * data )
 
 static
 double
-to_double_hard( const char * data )
+to_double_hard( const unsigned char * data )
 {
     float x;
     char buf[ 20 ];
+    double mant;
+    double sign = ( data[ 3 ] & 0x80 ) ? -1.0 : 1.0;
+    unsigned char expo = ( ( ( data[ 3 ] & 0x7F ) << 1 ) | ( data[ 2 ] >> 7 ) );
 
-    memcpy( &x, data, 4 );
+    if ( expo == 0xFF )
+        keithley2600a_bad_data( );
+
+    if ( expo )
+    {
+        mant = ( ( data[ 2 ] | 0x80 ) << 16 ) | ( data[ 1 ] << 8 ) | data[ 0 ];
+        x = sign * ( mant / 0x800000 ) * pow( 2.0, expo - 127 );
+    }
+    else
+    {
+        mant = ( data[ 2 ] << 16 ) | ( data[ 1 ] << 8 ) | data[ 0 ];
+        x = sign * ( mant / 0x800000 ) * pow( 2.0, -126 );
+    }
+
     sprintf( buf, "%.6g", x );
     return strtod( buf, NULL );
 }
