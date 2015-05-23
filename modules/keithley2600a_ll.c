@@ -737,7 +737,10 @@ keithley2600a_line_to_doubles( const char * line,
 
         errno = 0;
         res = strtod( line, &ep );
-        if (    ( *ep && *ep != '\n' && *ep != ' ' && *ep != ',' )
+        if (    (    *ep && *ep != '\n'
+                  && *ep != ' '
+                  && *ep != ','
+                  && *ep != '\t' )
              || (    ( res == HUGE_VAL || res == - HUGE_VAL )
                   && errno == ERANGE ) )
             keithley2600a_bad_data( );
@@ -748,7 +751,7 @@ keithley2600a_line_to_doubles( const char * line,
             return buf;
 
         line = ++ep;
-        while ( *line == ' ' || *line == ',')
+        while ( *line == ' ' || *line == '\t' )
             line++;
     }
 }
