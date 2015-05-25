@@ -79,14 +79,12 @@ Keithley2600A_T * k26 = &keithley2600a;
 int
 keithley2600a_init_hook( void )
 {
-    unsigned int ch;
-
     k26 = &keithley2600a;
 
     k26->is_open = false;
     k26->comm_failed = false;
 
-    for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
         k26->keep_on_at_end[ ch ] = false;
 
     return 1;
@@ -100,8 +98,6 @@ keithley2600a_init_hook( void )
 int
 keithley2600a_test_hook( void )
 {
-    int ch;
-
     keithley2600a_test = keithley2600a;
     k26 = &keithley2600a_test;
 
@@ -110,7 +106,7 @@ keithley2600a_test_hook( void )
 
     k26->linefreq = POWER_LINE_FREQ;
 
-    for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
     {
         k26->sense[ ch ]         = SENSE_LOCAL;
 
@@ -213,25 +209,27 @@ keithley2600a_exp_hook( void )
 int
 keithley2600a_end_of_exp_hook( void )
 {
-    unsigned int ch;
-
     /* If there was no communication failure switch off all channels
        unless the user explicitely asked for them to be left on. On
        communication failures we better don't try any further communication,
        so we have to leave the channels on but warn the user about it */
 
     if ( ! k26->comm_failed )
-        for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    {
+        for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
             if ( k26->source[ ch ].output && ! k26->keep_on_at_end[ ch ] )
                 keithley2600a_set_source_output( ch, OUTPUT_OFF );
+    }
     else
-        for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    {
+        for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
             if ( k26->source[ ch ].output )
             {
                 print( WARN, "Please be careful: can't switch off output of "
                        "device!\n" );
                 break;
             }
+    }
 
     /* Close connection to the device */
 
@@ -284,11 +282,11 @@ Var_T *
 sourcemeter_sense_mode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int sense;
 
     if ( ! v )
         return vars_push( INT_VAR, ( long ) k26->sense[ ch ] );
 
+    long int sense;
     if ( v->type == STR_VAR )
     {
         if (    ! strcasecmp( v->val.sptr, "LOCAL" )
@@ -334,11 +332,11 @@ Var_T *
 sourcemeter_source_offmode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int mode;
 
     if ( ! v )
         return vars_push( INT_VAR, ( long ) k26->source[ ch ].offmode );
 
+    long int mode;
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "NORMAL" ) )
@@ -450,12 +448,12 @@ Var_T *
 sourcemeter_source_mode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool mode;
 
     if ( ! v )
         return vars_push( INT_VAR,
                           k26->source[ ch ].func == OUTPUT_DCAMPS ? 0L : 1L );
 
+    bool mode;
     if ( v->type == STR_VAR )
     {
         if (    ! strcasecmp( v->val.sptr, "CURRENT" )
@@ -532,12 +530,11 @@ Var_T *
 sourcemeter_source_voltage( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double volts;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].levelv );
 
-    volts = get_double( v, NULL );
+    double volts = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_source_levelv( ch, volts ) )
@@ -574,12 +571,11 @@ Var_T *
 sourcemeter_source_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double amps;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].leveli );
 
-    amps = get_double( v, NULL );
+    double amps = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_source_leveli( ch, amps ) )
@@ -619,12 +615,11 @@ Var_T *
 sourcemeter_source_voltage_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
 
-    range = fabs( get_double( v, NULL ) );
+    double range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the next range that can be set under the current circumstances,
@@ -672,12 +667,11 @@ Var_T *
 sourcemeter_source_current_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
 
-    range = fabs( get_double( v, NULL ) );
+    double range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the next range that can be set under the current circumstances,
@@ -723,12 +717,11 @@ Var_T *
 sourcemeter_source_voltage_autoranging( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool on_off;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->source[ ch ].autorangev ? 1L : 0L );
 
-    on_off = get_boolean( v );
+    bool on_off = get_boolean( v );
     too_many_arguments( v );
 
     if ( on_off == k26->source[ ch ].autorangev )
@@ -761,12 +754,11 @@ Var_T *
 sourcemeter_source_current_autoranging( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool on_off;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->source[ ch ].autorangei ? 1L : 0L );
 
-    on_off = get_boolean( v );
+    bool on_off = get_boolean( v );
     too_many_arguments( v );
 
     if ( on_off == k26->source[ ch ].autorangei )
@@ -803,12 +795,11 @@ Var_T *
 sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double lowrange;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangev );
 
-    lowrange = fabs( get_double( v, NULL ) );
+    double lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -848,12 +839,11 @@ Var_T *
 sourcemeter_source_current_autorange_low_limit( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double lowrange;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].lowrangei );
 
-    lowrange = fabs( get_double( v, NULL ) );
+    double lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -888,14 +878,13 @@ Var_T *
 sourcemeter_compliance_voltage( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double limit;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].limitv );
 
     /* Accept negative values, just make 'em positive */
 
-    limit = fabs( get_double( v, NULL ) );
+    double limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
     
     if ( limit == k26->source[ ch ].limitv )
@@ -933,14 +922,13 @@ Var_T *
 sourcemeter_compliance_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double limit;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].limiti );
 
     /* Accept negative values, jut make 'em positive */
 
-    limit = fabs( get_double( v, NULL ) );
+    double limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
     
     if ( limit == k26->source[ ch ].limiti )
@@ -998,12 +986,11 @@ Var_T *
 sourcemeter_source_delay( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double delay;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].delay );
 
-    delay = get_double( v, NULL );
+    double delay = get_double( v, NULL );
 
     if ( delay < 0 )
         delay = DELAY_AUTO;
@@ -1055,12 +1042,11 @@ Var_T *
 sourcemeter_source_sink_mode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool sink;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->source[ ch ].sink ? 1L : 0L );
 
-    sink = get_boolean( v );
+    bool sink = get_boolean( v );
     too_many_arguments( v );
 
     if ( sink == k26->source[ ch ].sink )
@@ -1083,11 +1069,11 @@ Var_T *
 sourcemeter_source_settling_mode( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int settle;
 
     if ( ! v )
         return vars_push( INT_VAR, ( long ) k26->source[ ch ].settling );
 
+    long int settle;
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "SMOOTH" ) )
@@ -1145,12 +1131,11 @@ Var_T *
 sourcemeter_max_off_source_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double limit;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->source[ ch ].offlimiti );
 
-    limit = fabs( get_double( v, NULL ) );
+    double limit = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     if ( limit == k26->source[ ch ].offlimiti )
@@ -1188,9 +1173,10 @@ Var_T *
 sourcemeter_measure_voltage( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double volts;
 
     too_many_arguments( v );
+
+    double volts;
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -1206,8 +1192,8 @@ sourcemeter_measure_voltage( Var_T * v )
                           keithley2600a_best_measure_rangev( ch, TEST_VOLTAGE );
 
         volts =   TEST_VOLTAGE
-                - k26->measure[ ch ].relv.enabled ?
-                  k26->measure[ ch ].relv.level : 0;
+                - ( k26->measure[ ch ].relv.enabled ?
+                    k26->measure[ ch ].relv.level : 0 );
     }
 
     return vars_push( FLOAT_VAR, volts );
@@ -1222,10 +1208,10 @@ Var_T *
 sourcemeter_measure_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double amps;
 
     too_many_arguments( v );
 
+    double amps;
     
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -1241,8 +1227,8 @@ sourcemeter_measure_current( Var_T * v )
                          keithley2600a_best_measure_rangei( ch, TEST_CURRENT );
 
         amps =   TEST_CURRENT
-               - k26->measure[ ch ].reli.enabled ?
-                 k26->measure[ ch ].reli.level : 0;
+               - ( k26->measure[ ch ].reli.enabled ?
+                   k26->measure[ ch ].reli.level : 0 );
     }
 
     return vars_push( FLOAT_VAR, amps );
@@ -1257,7 +1243,6 @@ Var_T *
 sourcemeter_measure_power( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double p;
 
     too_many_arguments( v );
 
@@ -1274,7 +1259,7 @@ sourcemeter_measure_power( Var_T * v )
         return vars_push( FLOAT_VAR, TEST_VOLTAGE * TEST_CURRENT );
     }
 
-    p = keithley2600a_measure( ch, POWER );
+    double p = keithley2600a_measure( ch, POWER );
 
     if ( fabs( p ) >= 9.9e37 )
         print( WARN, "Out of range condition while measuring power.\n" );
@@ -1291,7 +1276,6 @@ Var_T *
 sourcemeter_measure_resistance( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double r;
 
     too_many_arguments( v );
 
@@ -1308,7 +1292,7 @@ sourcemeter_measure_resistance( Var_T * v )
         return vars_push( FLOAT_VAR, TEST_VOLTAGE / TEST_CURRENT );
     }
 
-    r = keithley2600a_measure( ch, RESISTANCE );
+    double r = keithley2600a_measure( ch, RESISTANCE );
 
     if ( fabs( r ) > 9.9e37 )
         print( WARN, "Out of range condition while measuring resistance.\n" );
@@ -1326,8 +1310,6 @@ Var_T *
 sourcemeter_measure_voltage_and_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double *vi;
-    const double *r;
 
     too_many_arguments( v );
 
@@ -1340,14 +1322,15 @@ sourcemeter_measure_voltage_and_current( Var_T * v )
             k26->measure[ ch ].rangei =
                           keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
 
-        vi = T_malloc( 2 * sizeof *vi );
+        double * vi = T_malloc( 2 * sizeof *vi );
         vi[ 0 ] = TEST_VOLTAGE;
         vi[ 1 ] = TEST_CURRENT;
         return vars_push( FLOAT_ARR, vi, 2 );
     }
 
-    r = keithley2600a_measure_iv( ch );
-    vi = T_malloc( 2 * sizeof *vi );
+    const double * r = keithley2600a_measure_iv( ch );
+    double * vi = T_malloc( 2 * sizeof *vi );
+
     vi[ 0 ] = r[ 1 ];
     vi[ 1 ] = r[ 0 ];
 
@@ -1370,7 +1353,6 @@ Var_T *
 sourcemeter_measure_voltage_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range;
 
     if ( ! v )
     {
@@ -1385,7 +1367,7 @@ sourcemeter_measure_voltage_range( Var_T * v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].rangev );
     }
 
-    range = fabs( get_double( v, NULL ) );
+    double range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the range setting that's at last as large as the requested value. */
@@ -1424,7 +1406,6 @@ Var_T *
 sourcemeter_measure_current_range( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double range;
 
     if ( ! v )
     {
@@ -1439,7 +1420,7 @@ sourcemeter_measure_current_range( Var_T * v )
         return vars_push( FLOAT_VAR,  k26->measure[ ch ].rangei );
     }
 
-    range = fabs( get_double( v, NULL ) );
+    double range = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Get the range setting that's at last as large as the requested value. */
@@ -1474,12 +1455,11 @@ Var_T *
 sourcemeter_measure_voltage_autoranging( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool on_off;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->measure[ ch ].autorangev ? 1L : 0L );
 
-    on_off = get_boolean( v );
+    bool on_off = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1499,12 +1479,11 @@ Var_T *
 sourcemeter_measure_current_autoranging( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    bool on_off;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->measure[ ch ].autorangei ? 1L : 0L );
 
-    on_off = get_boolean( v );
+    bool on_off = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1530,12 +1509,11 @@ Var_T *
 sourcemeter_measure_voltage_autorange_low_limit( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double lowrange;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].lowrangev );
 
-    lowrange = fabs( get_double( v, NULL ) );
+    double lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -1576,12 +1554,11 @@ Var_T *
 sourcemeter_measure_current_autorange_low_limit( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double lowrange;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].lowrangei );
 
-    lowrange = fabs( get_double( v, NULL ) );
+    double lowrange = fabs( get_double( v, NULL ) );
     too_many_arguments( v );
 
     /* Find nearest possible range */
@@ -1608,7 +1585,6 @@ sourcemeter_measure_current_autorange_low_limit( Var_T * v )
 }
 
 
-
 /*--------------------------------------------------------------*
  * Returns or sets the integration time for measurements with
  * the given channel (possible range depends on line frequence,
@@ -1619,12 +1595,11 @@ Var_T *
 sourcemeter_measure_time( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double t;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].time );
 
-    t = get_double( v, NULL );
+    double t = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( ! keithley2600a_check_measure_time( t ) )
@@ -1658,13 +1633,12 @@ Var_T *
 sourcemeter_measure_voltage_offset( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double offset;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].relv.enabled ?
                                      k26->measure[ ch ].relv.level : 0.0 );
 
-    offset = get_double( v, NULL );
+    double offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1702,13 +1676,12 @@ Var_T *
 sourcemeter_measure_current_offset( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double offset;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].reli.enabled ?
                                      k26->measure[ ch ].reli.level : 0.0 );
 
-    offset = get_double( v, NULL );
+    double offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1746,12 +1719,11 @@ Var_T *
 sourcemeter_measure_delay( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double delay;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
 
-    delay = get_double( v, NULL );
+    double delay = get_double( v, NULL );
 
     if ( delay < 0 )
         delay = DELAY_AUTO;
@@ -1776,11 +1748,11 @@ Var_T *
 sourcemeter_measure_filter_type( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int type;
 
     if ( ! v )
         return vars_push( INT_VAR, ( long ) k26->measure[ ch ].filter.type );
 
+    long int type;
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "MOVING_AVG" ) )
@@ -1827,13 +1799,12 @@ Var_T *
 sourcemeter_measure_filter_count( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int count;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->measure[ ch ].filter.enabled ?
                           ( long ) k26->measure[ ch ].filter.count : 0L );
 
-    count = get_strict_long( v, "filter count" );
+    long int count = get_strict_long( v, "filter count" );
     too_many_arguments( v );
 
     if ( count < 0 )
@@ -2145,8 +2116,6 @@ Var_T *
 sourcemeter_contact_resistance( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    const double *r;
-    double *r12;
 
     too_many_arguments( v );
 
@@ -2183,15 +2152,16 @@ sourcemeter_contact_resistance( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        r12 = T_malloc( 2 * sizeof *r12 );
+        double * r12 = T_malloc( 2 * sizeof *r12 );
         r12[ 0 ] =  TEST_CONTACT_R_LOW;
         r12[ 1 ] =  TEST_CONTACT_R_HIGH;
 
         return vars_push( FLOAT_ARR, r12, 2 );
     }
 
-    r = keithley2600a_contact_resistance( ch );
-    r12 = T_malloc( 2 * sizeof *r12 );
+    const double * r = keithley2600a_contact_resistance( ch );
+    double * r12 = T_malloc( 2 * sizeof *r12 );
+
     r12[ 0 ] = r[ 1 ];
     r12[ 1 ] = r[ 0 ];
 
@@ -2207,12 +2177,11 @@ Var_T *
 sourcemeter_contact_threshold( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    double threshold;
 
     if ( ! v )
         return vars_push( FLOAT_VAR, k26->contact[ ch ].threshold );
 
-    threshold = get_double( v, NULL );
+    double threshold = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( threshold < 0 )
@@ -2241,13 +2210,11 @@ Var_T *
 sourcemeter_contact_speed( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
-    long int speed;
 
     if ( ! v )
         return vars_push( INT_VAR, k26->contact[ ch ].speed );
 
-    too_many_arguments( v );
-
+    long int speed;
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "FAST" ) )
@@ -2275,6 +2242,8 @@ sourcemeter_contact_speed( Var_T * v )
         }
     }
 
+    too_many_arguments( v );
+
     if ( FSC2_MODE == EXPERIMENT )
         keithley2600a_set_contact_speed( ch, speed );
     else
@@ -2298,13 +2267,13 @@ do_sweep( Var_T * v,
     double start,
            end;
     int num_points;
-    double *data;
-    int num_data_points;
 
     get_lin_sweep_params( v, sweep_what, measure_what, &ch, &start, &end,
                           &num_points );
-    num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
-                      * num_points;
+    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                          * num_points;
+
+    double *data;
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -2314,8 +2283,6 @@ do_sweep( Var_T * v,
     }
     else
     {
-        int i;
-
         data = T_malloc( num_data_points * sizeof *data );
 
         if ( measure_what != VOLTAGE_AND_CURRENT )
@@ -2335,7 +2302,7 @@ do_sweep( Var_T * v,
             else
                 r = TEST_VOLTAGE / TEST_CURRENT;
 
-            for ( i = 0; i < num_points; i++ )
+            for ( int i = 0; i < num_points; i++ )
                 data[ i ] = r;
         }
         else
@@ -2347,7 +2314,7 @@ do_sweep( Var_T * v,
                            - ( k26->measure[ ch ].reli.enabled ?
                                k26->measure[ ch ].reli.level : 0 );
 
-            for ( i = 0; i < num_points; i++ )
+            for ( int i = 0; i < num_points; i++ )
             {
                 data[ 2 * i     ] = volts;
                 data[ 2 * i + 1 ] = amps;
@@ -2370,11 +2337,12 @@ do_list_sweep( Var_T * v,
                int     measure_what )
 {
     unsigned int ch;
-    double *data;
-    int num_data_points;
 
     v = get_list_sweep_params( v, sweep_what, measure_what, &ch );
-    num_data_points = ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 ) * v->len;
+    int num_data_points =   ( measure_what == VOLTAGE_AND_CURRENT ? 2 : 1 )
+                          * v->len;
+
+    double * data;
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -2384,8 +2352,6 @@ do_list_sweep( Var_T * v,
     }
     else
     {
-        int i;
-
         data = T_malloc( num_data_points * sizeof *data );
 
         if ( measure_what != VOLTAGE_AND_CURRENT )
@@ -2404,7 +2370,7 @@ do_list_sweep( Var_T * v,
             else
                 r = TEST_VOLTAGE / TEST_CURRENT;
 
-            for ( i = 0; i < num_data_points; i++ )
+            for ( int i = 0; i < num_data_points; i++ )
                 data[ i ] = r;
         }
         else
@@ -2416,7 +2382,7 @@ do_list_sweep( Var_T * v,
                            - ( k26->measure[ ch ].reli.enabled ?
                                k26->measure[ ch ].reli.level : 0 );
 
-            for ( i = 0; i < num_data_points / 2; i++ )
+            for ( int i = 0; i < num_data_points / 2; i++ )
             {
                 data[ 2 * i     ] = volts;
                 data[ 2 * i + 1 ] = amps;
@@ -2445,7 +2411,6 @@ get_lin_sweep_params( Var_T        * v,
                       int          * num_points )
 {
     const char *what = sweep_what == VOLTAGE ? "voltage" : "current";
-    long np;
 
     *ch = get_channel( &v );
 
@@ -2484,7 +2449,7 @@ get_lin_sweep_params( Var_T        * v,
         THROW( EXCEPTION );
     }
 
-    np = get_strict_long( v, "number of points in sweep" );
+    long int np = get_strict_long( v, "number of points in sweep" );
 
     if ( np < 2 )
     {
@@ -2523,9 +2488,6 @@ get_list_sweep_params( Var_T        * v,
 {
     const char * what = sweep_what == VOLTAGE ? "voltage" : "current";
     const char * What = sweep_what == VOLTAGE ? "Voltage" : "Current";
-    ssize_t i;
-    double max_val = 0;
-        
 
     *ch = get_channel( &v );
 
@@ -2563,7 +2525,8 @@ get_list_sweep_params( Var_T        * v,
         print( WARN, "Too many arguments, discarding superfluous argument%s.\n",
                v->next->next != NULL ? "s" : "" );
 
-    for ( i = 0; i < v->len; i++ )
+    double max_val = 0;
+    for ( ssize_t i = 0; i < v->len; i++ )
         if ( v->type == INT_VAR )
             max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
         else
@@ -2593,9 +2556,7 @@ void
 check_sweep_data( const double * data,
                   int            num_points )
 {
-    int i;
-
-    for ( i = 0; i < num_points; i++ )
+    for ( int i = 0; i < num_points; i++ )
         if ( fabs( data[ i ] ) >= 9.9e37 )
         {
             print( WARN, "One or more data points from sweep out of range.\n" );
@@ -2625,15 +2586,13 @@ get_channel( Var_T ** v  UNUSED_ARG )
 unsigned int
 get_channel( Var_T ** v )
 {
-    long ch;
-
     if ( ! *v )
     {
         print( FATAL, "Missing channel argument.\n" );
         THROW( EXCEPTION );
     }
 
-    ch = get_strict_long( *v, "channel number" );
+    long int ch = get_strict_long( *v, "channel number" );
 
     if ( ch < 1 || ch > NUM_CHANNELS )
     {
@@ -2657,12 +2616,10 @@ static
 void
 correct_for_highc( unsigned int ch )
 {
-    double low;
-
     if ( ! k26->source[ ch ].highc || !  k26->source[ ch ].output )
         return;
 
-    low = keithley2600a_min_source_limiti( ch );
+    double low = keithley2600a_min_source_limiti( ch );
 
     if ( k26->source[ ch ].limiti < low )
         k26->source[ ch ].limiti = low;
@@ -2733,7 +2690,6 @@ ppc( unsigned int   ch,
     return buf;
 #endif
 }
-
 
 
 /*

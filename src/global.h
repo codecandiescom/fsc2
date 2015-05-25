@@ -21,6 +21,7 @@
 #if ! defined FSC2_GLOBAL
 #define FSC2_GLOBAL
 
+#include <stdbool.h>
 #include <sys/socket.h>
 
 
@@ -63,16 +64,6 @@
 
 /* Create a bool type - this is stolen from gcc's stdbool.h ;-)
    When compiling with a C++ compiler this must not be defined! */
-
-#ifndef __cplusplus
-
-typedef enum
-{
-      false = 0,
-      true  = 1
-} bool;
-
-#endif
 
 #define FAIL    false
 #define UNSET   false

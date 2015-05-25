@@ -366,8 +366,7 @@ gentec_maestro_end_of_test_hook( void )
 int
 gentec_maestro_exp_hook( void )
 {
-    bool is_ok;
-
+    bool is_ok = false;
 
     TRY
     {
@@ -426,11 +425,6 @@ powermeter_detector_name( Var_T * v  UNUSED_ARG )
 Var_T *
 powermeter_scale( Var_T * v )
 {
-    double scale;
-    int idx;
-    bool no_fit;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->scale_index_has_been_set )
@@ -442,7 +436,7 @@ powermeter_scale( Var_T * v )
                           gentec_maestro_index_to_scale( gm->scale_index ) );
     }
 
-    scale = get_double( v, "scale" );
+    double scale = get_double( v, "scale" );
     too_many_arguments( v );
 
     if ( scale <= 0 )
@@ -451,7 +445,8 @@ powermeter_scale( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    idx = gentec_maestro_scale_to_index( scale, &no_fit );
+    bool no_fit = true;
+    int idx = gentec_maestro_scale_to_index( scale, &no_fit );
 
     if ( idx > MAX_SCALE )
     {
@@ -502,14 +497,12 @@ powermeter_scale( Var_T * v )
 Var_T *
 powermeter_get_scale_limits( Var_T * v )
 {
-    double * min_max;
-
     too_many_arguments( v );
 
     if ( FSC2_MODE == PREPARATION )
         no_query_possible( );
 
-    min_max = T_malloc( 2 * sizeof *min_max );
+    double * min_max = T_malloc( 2 * sizeof *min_max );
     min_max[ 0 ] = gentec_maestro_index_to_scale( gm->min_scale_index );
     min_max[ 1 ] = gentec_maestro_index_to_scale( gm->max_scale_index );
 
@@ -528,9 +521,6 @@ XXXXXXXXX  interacts with the autoscale setting
 Var_T *
 powermeter_autoscale( Var_T * v )
 {
-    bool as;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->autoscale_has_been_set )
@@ -542,7 +532,7 @@ powermeter_autoscale( Var_T * v )
         return vars_push( INT_VAR, gm->autoscale_is_on ? 1L : 0L );
     }
 
-    as = get_boolean( v );
+    bool as = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -564,9 +554,6 @@ powermeter_autoscale( Var_T * v )
 Var_T *
 powermeter_trigger_level( Var_T * v )
 {
-    double level;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->trigger_level_has_been_set )
@@ -577,7 +564,7 @@ powermeter_trigger_level( Var_T * v )
         return vars_push( FLOAT_VAR, gm->trigger_level );
     }
 
-    level = get_double( v, NULL );
+    double level = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( level < 0 || level > 100 )
@@ -616,10 +603,6 @@ powermeter_trigger_level( Var_T * v )
 Var_T *
 powermeter_wavelength( Var_T * v )
 {
-    long int wl_nm;
-    double wl;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION )
@@ -630,7 +613,7 @@ powermeter_wavelength( Var_T * v )
         return vars_push( FLOAT_VAR, 1.0e-9 * gm->wavelength );
     }
 
-    wl = get_double( v, NULL );
+    double wl = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( wl <= 0 )
@@ -642,7 +625,8 @@ powermeter_wavelength( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT && gentec_maestro.att_is_available )
         gentec_maestro_get_attenuator( );
 
-    wl_nm = lrnd( 1.0e9 * wl );
+    long int wl_nm = lrnd( 1.0e9 * wl );
+
     if ( fabs( wl_nm - 1.0e9 * wl ) > 0.1 )
         print( WARN, "Wavelength has been adjusted to %ld nm.\n", wl_nm );
 
@@ -710,13 +694,10 @@ powermeter_wavelength( Var_T * v )
 Var_T *
 powermeter_get_wavelength_limits( Var_T * v )
 {
-    bool with_att = false;
-    double * wls;
-
-
     if ( FSC2_MODE == PREPARATION )
         no_query_possible( );
 
+    bool with_att = false;
     if ( v )
         with_att = get_boolean( v );
 
@@ -726,9 +707,9 @@ powermeter_get_wavelength_limits( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    wls = T_malloc( 2 * sizeof *wls );
+    double * wls = T_malloc( 2 * sizeof *wls );
 
-    if ( ! with_att || gm->att_is_available )
+    if ( ! with_att || ! gm->att_is_available )
     {
         wls[ 0 ] = 1.0e-9 * gm->min_wavelength;
         wls[ 1 ] = 1.0e-9 * gm->max_wavelength;
@@ -753,8 +734,6 @@ powermeter_get_wavelength_limits( Var_T * v )
 Var_T *
 powermeter_get_reading( Var_T * v )
 {
-    double lf;
-    double mw;
     bool wait_for_new = false;
     long max_wait = 0;
     bool upper_wait_limit = false;
@@ -763,7 +742,8 @@ powermeter_get_reading( Var_T * v )
     {
         wait_for_new = true;
 
-        if ( ( mw = get_double( v, NULL ) ) > 0 )
+        double mw = get_double( v, NULL );
+        if ( mw > 0 )
         {
             max_wait = lrnd( 1000000 * mw );
             upper_wait_limit = true;
@@ -783,7 +763,7 @@ powermeter_get_reading( Var_T * v )
     if ( wait_for_new )
     {
         long delay = 100000;
-        struct timeval before;
+        double lf;
 
         if ( ( lf = gentec_maestro_get_laser_frequency( ) ) != 0 )
             delay = 500000 / lf;      /* half the time between laser shots */
@@ -793,6 +773,7 @@ powermeter_get_reading( Var_T * v )
         if ( upper_wait_limit && max_wait < delay )
             delay = max_wait;
 
+        struct timeval before;
         gettimeofday( &before, NULL );
 
         while ( ! gentec_maestro_check_for_new_value( ) )
@@ -806,7 +787,8 @@ powermeter_get_reading( Var_T * v )
             if ( upper_wait_limit && max_wait <= 0 )
             {
                 print( FATAL, "Device didn't measure a new value within "
-                       "the requested time interval of %.3f s.\n", mw );
+                       "the requested time interval of %.3f ms.\n",
+                       1.0e-3 * max_wait );
                 THROW( EXCEPTION );
             }
 
@@ -827,9 +809,6 @@ powermeter_get_reading( Var_T * v )
 Var_T *
 powermeter_anticipation( Var_T * v )
 {
-    bool ac;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->anticipation_has_been_set )
@@ -840,7 +819,7 @@ powermeter_anticipation( Var_T * v )
         return vars_push( INT_VAR, gm->anticipation_is_on ? 1L : 0L );
     }
 
-    ac = get_boolean( v );
+    bool ac = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -863,10 +842,6 @@ powermeter_anticipation( Var_T * v )
 Var_T *
 powermeter_attenuator( Var_T * v )
 {
-    bool att;
-    long int wl;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->att_has_been_set )
@@ -883,12 +858,14 @@ powermeter_attenuator( Var_T * v )
         return vars_push( INT_VAR, gm->att_is_on ? 1L : 0L );
     }
 
-    att = get_boolean( v );
+    bool att = get_boolean( v );
     too_many_arguments( v );
 
     /* When the experiment is running we definitely know if an attenuator
        is avialable, so first test if it is. We also don't need to bother
        with further tests if it's already in the requested state. */
+
+    long int wl;
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -949,9 +926,6 @@ XXXXXXXXX unset it for photodiodes...
 Var_T *
 powermeter_zero_offset( Var_T * v )
 {
-    bool zo;
-
-
     if ( ! v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->zero_offset_has_been_set )
@@ -963,7 +937,7 @@ powermeter_zero_offset( Var_T * v )
         return vars_push( INT_VAR, gm->zero_offset_is_on ? 1L : 0L );
     }
 
-    zo = get_boolean( v );
+    bool zo = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == PREPARATION && zo )
@@ -998,8 +972,6 @@ XXXXXXXXX  be allowed
 Var_T *
 powermeter_multiplier( Var_T * v )
 {
-    double mul;
-
     if ( !v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->user_multiplier_has_been_set )
@@ -1011,7 +983,7 @@ powermeter_multiplier( Var_T * v )
         return vars_push( FLOAT_VAR, gm->user_multiplier );
     }
 
-    mul = get_double( v, NULL );
+    double mul = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( mul < MIN_USER_MULTIPLIER || mul > MAX_USER_MULTIPLIER )
@@ -1048,8 +1020,6 @@ XXXXXXXXX  tested
 Var_T *
 powermeter_offset( Var_T * v )
 {
-    double offset;
-
     if ( !v )
     {
         if ( FSC2_MODE == PREPARATION && ! gm->user_offset_has_been_set )
@@ -1061,7 +1031,7 @@ powermeter_offset( Var_T * v )
         return vars_push( FLOAT_VAR, gm->user_offset );
     }
 
-    offset = get_double( v, NULL );
+    double offset = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( offset < MIN_USER_OFFSET || offset > MAX_USER_OFFSET )
@@ -1110,15 +1080,13 @@ powermeter_get_laser_repetition_frequency( Var_T * v )
 Var_T *
 powermeter_analog_output( Var_T * v )
 {
-    bool on_off;
-
     if ( ! v )
     {
         print( FATAL, "State of analog output can't be queried.\n" );
         THROW( EXCEPTION );
     }
 
-    on_off = get_boolean( v );
+    bool on_off = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1142,10 +1110,6 @@ bool
 gentec_maestro_init( void )
 {
     Gentec_Maestro * gmt = &gentec_maestro_test;
-    bool set_autoscale,
-         set_scale,
-         set_wavelength,
-         set_att;
 
     /* Try to open a connection to the device (throws exception on failure) */
 
@@ -1320,10 +1284,10 @@ gentec_maestro_init( void )
        autoscale will be switched off (to avoid potential out of scale
        energies), otherwise autoscale is set first, then the scale. */
 
-    set_autoscale =    gm->autoscale_has_been_set
-                    && gm->autoscale_is_on != gmt->autoscale_is_on;
-    set_scale     =    gm->scale_index_has_been_set
-                    && gm->scale_index != gmt->scale_index;
+    bool set_autoscale =    gm->autoscale_has_been_set
+                         && gm->autoscale_is_on != gmt->autoscale_is_on;
+    bool set_scale     =    gm->scale_index_has_been_set
+                         && gm->scale_index != gmt->scale_index;
 
     if ( set_autoscale && ! set_scale )
         gentec_maestro_set_autoscale( false );
@@ -1347,10 +1311,10 @@ gentec_maestro_init( void )
        might be allowed with the current and requested attenuator setting
        we have to make sure we do it in the right sequence. */
 
-    set_wavelength =    gm->wavelength_has_been_set
-                     && gm->wavelength != gmt->wavelength;
-    set_att        =    gm->att_has_been_set
-                     && gm->att_is_on != gmt->att_is_on;
+    bool set_wavelength =    gm->wavelength_has_been_set
+                          && gm->wavelength != gmt->wavelength;
+    bool set_att        =    gm->att_has_been_set
+                          && gm->att_is_on != gmt->att_is_on;
 
     if ( set_wavelength && ! set_att )
         gentec_maestro_set_wavelength( gmt->wavelength );
@@ -1406,11 +1370,10 @@ static
 double
 gentec_maestro_set_scale( int index )
 {
-	char cmd[ 10 ];
-
 	fsc2_assert(    index >= gentec_maestro.min_scale_index
                  && index <= gentec_maestro.max_scale_index );
 
+	char cmd[ 10 ];
 	sprintf( cmd, "*SCS%02d", index );
 	gentec_maestro_command( cmd );
 
@@ -1430,15 +1393,13 @@ double
 gentec_maestro_get_scale( void )
 {
 	char reply[ 20 ];
-	long int index;
-	char *ep;
-
-
 	if (    gentec_maestro_talk( "*GCR", reply, sizeof reply ) < 8
          || strncmp( reply, "Range: ", 7 ) )
 		gentec_maestro_failure( );
 
-	index = strtol( reply + 7, &ep, 10 );
+    char *ep;
+	long int index = strtol( reply + 7, &ep, 10 );
+
 	if (    *ep
          || index < gentec_maestro.min_scale_index
          || index > gentec_maestro.max_scale_index )
@@ -1458,7 +1419,6 @@ bool
 gentec_maestro_set_autoscale( bool on_off )
 {
 	char cmd[ 10 ];
-
 	sprintf( cmd, "*SAS%c", on_off ? '1' : '0' );
 	gentec_maestro_command( cmd );
 
@@ -1495,10 +1455,9 @@ static
 double
 gentec_maestro_set_trigger_level( double level )
 {
-	char cmd[ 100 ];
-
 	fsc2_assert( level >= 0.05 && level < 99.95 );
 
+	char cmd[ 100 ];
 	sprintf( cmd, "*STL%.*f", level >= 9.95 ? 1 : 2, level );
 	gentec_maestro_command( cmd );
 
@@ -1516,14 +1475,13 @@ double
 gentec_maestro_get_trigger_level( void )
 {
 	char reply[ 30 ];
-    double level;
-    char *ep;
-
     if (    gentec_maestro_talk( "*GTL", reply, sizeof reply ) < 16
          || strncmp( reply, "Trigger Level: ", 15 ) )
         gentec_maestro_failure( );
 
-    level = strtod( reply + 15, &ep );
+    char *ep;
+    double level = strtod( reply + 15, &ep );
+
     if (    *ep
          || level < MIN_TRIGGER_LEVEL
          || level > MAX_TRIGGER_LEVEL )
@@ -1543,7 +1501,6 @@ int
 gentec_maestro_get_mode( void )
 {
     char reply[ 10 ];
-
 
     if (    gentec_maestro_talk( "*GMD", reply, sizeof reply ) != 7
          || strncmp( reply, "Mode: ", 6 )
@@ -1580,14 +1537,12 @@ double
 gentec_maestro_get_current_value( void )
 {
     char reply[ 20 ];
-    double val;
-    char *ep;
-
-
     if ( gentec_maestro_talk( "*CVU", reply, sizeof reply ) < 1 )
         gentec_maestro_failure( );
 
-    val = strtod( reply, &ep );
+    char *ep;
+    double val = strtod( reply, &ep );
+
     if (    *ep
          || ( ( val == HUGE_VAL || val == -HUGE_VAL ) && errno == ERANGE ) )
         gentec_maestro_failure( );
@@ -1605,8 +1560,6 @@ bool
 gentec_maestro_check_for_new_value( void )
 {
     char reply[ 30 ];
-
-
     gentec_maestro_talk( "*NVU", reply, sizeof reply );
 
     if ( ! strcmp( reply, "New Data Available" ) )
@@ -1642,13 +1595,12 @@ double
 gentec_maestro_get_laser_frequency( void )
 {
     char reply[ 20 ];
-    double freq;
-    char *ep;
-
     if ( gentec_maestro_talk( "*GRR", reply, sizeof reply ) < 1 )
         gentec_maestro_failure( );
 
-    freq = strtod( reply, &ep );
+    char *ep;
+    double freq = strtod( reply, &ep );
+
     if (    *ep
          || ( ( freq == HUGE_VAL || freq == -HUGE_VAL ) && errno == ERANGE )
          || freq < 0 )
@@ -1668,8 +1620,8 @@ bool
 gentec_maestro_set_joulemeter_binary_mode( bool on_off )
 {
     char cmd[  ] = "*SS1*";
-
     cmd[ 4 ] = on_off ? '1' : '0';
+
     gentec_maestro_command( cmd );
     return on_off;
 }
@@ -1686,7 +1638,6 @@ bool
 gentec_maestro_get_joulemeter_binary_mode( void )
 {
     char reply[ 30 ];
-
 
     if (    gentec_maestro_talk( "*GBM", reply, sizeof reply ) != 24
          || strncmp( reply, "Binary Joulemeter Mode: ", 24 )
@@ -1708,9 +1659,8 @@ bool
 gentec_maestro_set_analog_output( bool on_off )
 {
     char cmd[ ] = "*ANO*";
-
-
     cmd[ 4 ] = on_off ? '1' : '0';
+
     gentec_maestro_command( cmd );
     return on_off;
 }
@@ -1726,8 +1676,6 @@ static
 double
 gentec_maestro_set_wavelength( long int wl )
 {
-    char cmd[ 30 ];
-
     fsc2_assert(    (    ! gentec_maestro.att_is_on
                       && wl >= gentec_maestro.min_wavelength
                       && wl <= gentec_maestro.max_wavelength )
@@ -1735,6 +1683,7 @@ gentec_maestro_set_wavelength( long int wl )
                       && wl >= gentec_maestro.min_wavelength_with_att
                       && wl <= gentec_maestro.max_wavelength_with_att ) );
 
+    char cmd[ 30 ];
     snprintf( cmd, sizeof cmd, "*PWC%05ld", wl );
     gentec_maestro_command( cmd );
 
@@ -1752,14 +1701,14 @@ double
 gentec_maestro_get_wavelength( void )
 {
     char reply[ 20 ];
-    long wl;
-    char *ep;
-
     if (    gentec_maestro_talk( "*GWL", reply, sizeof reply ) < 6
          || strncmp( reply, "PWC: ", 5 ) )
         gentec_maestro_failure( );
 
-    wl = strtol( reply + 5, &ep, 10 );
+
+    char *ep;
+    long int wl = strtol( reply + 5, &ep, 10 );
+
     if (    *ep
          || (    ! gentec_maestro.att_is_on
                && wl < gentec_maestro.min_wavelength
@@ -1783,9 +1732,8 @@ bool
 gentec_maestro_set_anticipation( bool on_off )
 {
     char cmd[ ] = "*ANT*";
-
-
     cmd[ 4 ] = on_off ? '1' : '0';
+
     gentec_maestro_command( cmd );
     return on_off;
 }
@@ -1800,7 +1748,6 @@ bool
 gentec_maestro_get_anticipation( void )
 {
     char reply[ 20 ];
-
 
     if (    gentec_maestro_talk( "*GAN", reply, sizeof reply ) != 15
          || strncmp( reply, "Anticipation: ", 14 )
@@ -1839,7 +1786,6 @@ gentec_maestro_test_zero_offset( void )
 {
     char reply[ 10 ];
 
-
     if (    gentec_maestro_talk( "*GZO", reply, sizeof reply ) != 7
          || strncmp( reply, "Zero: ", 6 )
          || ( reply[ 6 ] != '0' && reply[ 6 ] != '1' )
@@ -1858,13 +1804,12 @@ static
 double
 gentec_maestro_set_user_multiplier( double mul )
 {
-    char cmd[ 13 ] = "*MUL";
-
-
     fsc2_assert( mul >= MIN_USER_MULTIPLIER && mul <= MAX_USER_MULTIPLIER );
 
+    char cmd[ 13 ] = "*MUL";
     strcat( cmd, gentec_maestro_format( mul ) );
     gentec_maestro_command( cmd );
+
     return gentec_maestro.user_multiplier = strtod( cmd + 4, NULL );
 }
 
@@ -1878,15 +1823,12 @@ double
 gentec_maestro_get_user_multiplier( void )
 {
     char reply[ 40 ];
-    double mul;
-    char *ep;
-
-    ;
     if (    gentec_maestro_talk( "*GUM", reply, sizeof reply ) < 18
          || strncmp( reply, "User Multiplier: ", 17 ) )
         gentec_maestro_failure( );
 
-    mul = strtod( reply + 17, &ep );
+    char *ep;
+    double mul = strtod( reply + 17, &ep );
 
     if ( *ep || mul < MIN_USER_MULTIPLIER || mul > MAX_USER_MULTIPLIER )
         gentec_maestro_failure( );
@@ -1903,13 +1845,12 @@ static
 double
 gentec_maestro_set_user_offset( double offset )
 {
-    char cmd[ 13 ] = "*OFF";
-
-
     fsc2_assert( offset >= MIN_USER_OFFSET && offset <= MAX_USER_OFFSET );
 
+    char cmd[ 13 ] = "*OFF";
     strcat( cmd, gentec_maestro_format( offset ) );
     gentec_maestro_command( cmd );
+
     return gentec_maestro.user_offset = strtod( cmd + 4, NULL );
 }
 
@@ -1923,15 +1864,13 @@ double
 gentec_maestro_get_user_offset( void )
 {
     char reply[ 40 ];
-    double offset;
-    char *ep;
-
-    ;
     if (    gentec_maestro_talk( "*GUO", reply, sizeof reply ) < 14
          || strncmp( reply, "User Offset: ", 13 ) )
         gentec_maestro_failure( );
 
-    offset = strtod( reply + 13, &ep );
+    char *ep;
+    double offset = strtod( reply + 13, &ep );
+
     if (    *ep
          || offset < MIN_USER_OFFSET
          || offset > MAX_USER_OFFSET )
@@ -1951,8 +1890,8 @@ bool
 gentec_maestro_set_energy_mode( bool on_off )
 {
     char cmd[ ] = "*SSE*";
-
     cmd[ 4 ] = on_off ? '1' : '0';
+
     gentec_maestro_command( cmd );
     return gentec_maestro.energy_mode_is_on = on_off;
 }
@@ -1967,11 +1906,11 @@ static
 bool
 gentec_maestro_set_attenuator( bool on_off )
 {
-    char cmd[ ] = "*ATT*";
-
     fsc2_assert( gentec_maestro.att_is_available );
 
+    char cmd[ ] = "*ATT*";
     cmd[ 4 ] = on_off ? '1' : '0';
+
     gentec_maestro_command( cmd );
     return gentec_maestro.att_is_on = on_off;
 }
@@ -1985,9 +1924,9 @@ static
 bool
 gentec_maestro_get_attenuator( void )
 {
-    char reply[ 16 ];
-
     fsc2_assert( gentec_maestro.att_is_available );
+
+    char reply[ 16 ];
 
     if (    gentec_maestro_talk( "*GAT", reply, sizeof reply ) != 13
          || strncmp( reply, "Attenuator: ", 12 )
@@ -2008,12 +1947,12 @@ unsigned long
 gentec_maestro_status_entry_to_int( const char * e )
 {
     char str[ 9 ] = "";
-    unsigned long int res;
-    char *ep;
-
     strncpy( str + 4, e + 6, 4 );
     strncpy( str, e + 18, 4 );
-    res = strtoul( str, &ep, 16 );
+
+    char *ep;
+    unsigned long int res = strtoul( str, &ep, 16 );
+
     if ( *ep )
         gentec_maestro_failure( );
 
@@ -2030,37 +1969,32 @@ static
 double
 gentec_maestro_status_entry_to_float( const char * e )
 {
-    double res = 1.0;
     unsigned long int v = 0;
-    int sign;
-    int expo = -127;
-    unsigned char offset_expo;
-    double x = 1.0 / 8388608;         /* 2^-23 */
-	int i;
 
-    for ( i = 18; i > 0; i -= 12 )
-    {
-        int j;
-
-        for ( j = 0; j < 4; j++ )
+    for ( int i = 18; i > 0; i -= 12 )
+        for ( int j = 0; j < 4; j++ )
         {
             unsigned char c = e[ i + j ];
 
             v <<= 4;
             v |= c <= '9' ? ( c - '0' ) : ( c - 'A' + 10 );
         }
-    }
 
-    sign  = v & 0x80000000UL ? -1 : 1;
+    int sign  = v & 0x80000000UL ? -1 : 1;
 
-    offset_expo = ( v & 0x7F800000UL ) >> 23;
+    unsigned char offset_expo = ( v & 0x7F800000UL ) >> 23;
+
     if ( offset_expo == 0xFF )                /* NaN or infinity? */
         gentec_maestro_failure( );
-    expo += offset_expo;
 
-    v    &= 0x7FFFFFUL;
+    int expo = offset_expo - 127;
 
-    for ( i = 0; i < 23; v >>= 1, x *= 2, i++ )
+    v &= 0x7FFFFFUL;
+
+    double res = 1.0;
+    double x = 1.0 / 8388608;         /* 2^-23 */
+
+    for ( int i = 0; i < 23; v >>= 1, x *= 2, i++ )
         res += ( v & 1 ) * x;
 
     return sign * res * pow( 2, expo );
@@ -2076,8 +2010,8 @@ char *
 gentec_maestro_status_entry_to_string( const char * e )
 {
     static char name[ 33 ];      /* maximum possible length is 32 */
-    int i;
 
+    int i;
     for ( i = 0; i < 16; ++i )
     {
         unsigned long v = strtoul( e + 12 * i + 6, NULL, 16 );
@@ -2104,29 +2038,25 @@ static
 void
 gentec_maestro_get_extended_status( void )
 {
-    char reply[ 0x3a * 12 ];
-    char *r;
-    long int v;
-    double d;
-    int i;
-
     gentec_maestro_command( "*ST2" );
 
     /* Read all the lines into our buffer and do basic sanity checks */
 
-    for ( i = 0, r = reply; i <= 0x39; r += 12, i++ )
-    {
-        char b[ 7 ];
-        int j;
+    char reply[ 0x3a * 12 ];
+    char * r = reply;
 
+    for ( int i = 0; i <= 0x39; r += 12, i++ )
+    {
         if ( gentec_maestro_read( r, 12 ) != 12 )
             gentec_maestro_failure( );
 
+        char b[ 7 ];
         sprintf( b, ":0%04X", i );
+
         if ( strncmp( r, b, 6 ) || strncmp( r + 10, "\r\n", 2 ) )
             gentec_maestro_failure( );
 
-        for ( j = 6; j < 10; ++j )
+        for ( int j = 6; j < 10; ++j )
             if ( ! isxdigit( ( int ) r[ j ] ) )
                 gentec_maestro_failure( );
     }
@@ -2139,7 +2069,7 @@ gentec_maestro_get_extended_status( void )
 
     /* Now extract all the relevant values */
 
-    v = gentec_maestro_status_entry_to_int( reply + 0x04 * 12 );
+    long int v = gentec_maestro_status_entry_to_int( reply + 0x04 * 12 );
 
     if (    v != POWER_MODE
          && v != ENERGY_MODE
@@ -2223,8 +2153,8 @@ gentec_maestro_get_extended_status( void )
     /* Note: in the extended status the trigger level gets returned as a
        fraction, not a percentage! */
 
-    d = 0.1 * lrnd( 1000
-                 * gentec_maestro_status_entry_to_float( reply + 0x2e * 12 ) ); 
+    double d =   0.1 * lrnd( 1000
+               * gentec_maestro_status_entry_to_float( reply + 0x2e * 12 ) ); 
    if ( d < 0.1 || d > 99.9 )
         gentec_maestro_failure( );
     gentec_maestro.trigger_level = d;
@@ -2283,9 +2213,8 @@ gentec_maestro_scale_to_index( double   scale,
                                bool   * no_fit )
 {
 	int i;
-
-
     *no_fit = false;
+
 	for ( i = 0; i <= MAX_SCALE; i++ )
 	{
 		double r = gentec_maestro_index_to_scale( i );
@@ -2375,12 +2304,13 @@ const char *
 gentec_maestro_pretty_print_scale( int index )
 {
     static char ret[ 10 ];
+
+    fsc2_assert( index >= 0 && index <= MAX_SCALE );
+    
     char *c = ret;
     const char *units[ ] = { "pJ/pW", "nJ/nW", "uJ/uW", "mJ/mW",
                              "J/W",   "kJ/kW", "MJ/MW" };
 
-    fsc2_assert( index >= 0 && index <= MAX_SCALE );
-    
     *c++ = index & 1 ? '3' : '1';
     if ( index & 6 )
         *c++ = '0';
@@ -2539,7 +2469,7 @@ gentec_maestro_serial_comm( int type,
 
             if ( ( gentec_maestro.tio = fsc2_serial_open( gentec_maestro.handle,
                                                           O_RDWR ) ) == NULL )
-                return FAIL;
+                return false;
 
             /* Use 8-N-1, ignore flow control and modem lines, enable
                reading and set the baud rate. */
@@ -2572,7 +2502,7 @@ gentec_maestro_serial_comm( int type,
             {
                 if ( len == 0 )
                     stop_on_user_request( );
-                return FAIL;
+                return false;
             }
             break;
 
@@ -2591,7 +2521,7 @@ gentec_maestro_serial_comm( int type,
                 if ( *lptr == 0 )
                     stop_on_user_request( );
 
-                return FAIL;
+                return false;
             }
             break;
 
@@ -2601,7 +2531,7 @@ gentec_maestro_serial_comm( int type,
             THROW( EXCEPTION );
     }
 
-    return OK;
+    return true;
 }
 #endif
 

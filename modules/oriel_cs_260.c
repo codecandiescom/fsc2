@@ -143,7 +143,7 @@ int oriel_cs_260_exp_hook( void );
 
 /* EDLfunctions */
 
-Var_T * monochromator_name( Var_T * v  UNUSED_ARG );
+Var_T * monochromator_name( Var_T * v );
 Var_T * monochromator_grating( Var_T * v );
 Var_T * monochromator_wavelength( Var_T * v );
 Var_T * monochromator_wavenumber( Var_T * v );
@@ -210,9 +210,6 @@ static double oriel_cs_260_wn2wl( double wn );
 int
 oriel_cs_260_init_hook( void )
 {
-    int i;
-
-
     /* Set global variable to indicate that GPIB bus is needed */
 
     Need_GPIB = true;
@@ -226,7 +223,7 @@ oriel_cs_260_init_hook( void )
 
     oriel_cs_260.grating = TEST_GRATING_NUMBER;
 
-    for ( i = 0; i < NUM_GRATINGS; i++ )
+    for ( int i = 0; i < NUM_GRATINGS; i++ )
     {
         oriel_cs_260.num_lines[ i ] = 600;
         oriel_cs_260.factor[ i ] = 1;
@@ -314,14 +311,10 @@ monochromator_grating( Var_T * v )
 Var_T *
 monochromator_wavelength( Var_T * v )
 {
-    int grating = oriel_cs_260.grating;
-    double wl;
-
-
     if ( ! v )
         return vars_push( FLOAT_VAR, oriel_cs_260.wavelength );
 
-    wl = get_double( v, "wavelength" );
+    double wl = get_double( v, "wavelength" );
     too_many_arguments( v );
 
     if ( wl == oriel_cs_260.wavelength )
@@ -333,11 +326,12 @@ monochromator_wavelength( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( wl > Max_Wavelengths[ grating ] )
+    int grat = oriel_cs_260.grating;
+    if ( wl > Max_Wavelengths[ grat ] )
     {
         print( FATAL, "Requested Wavelength of %.3f nm too large, maximum "
-               "for grating #%d is %.3f nm.\n", 1.0e9 * wl, grating + 1,
-               1.0e9 * Max_Wavelengths[ grating ] );
+               "for grating #%d is %.3f nm.\n", 1.0e9 * wl, grat + 1,
+               1.0e9 * Max_Wavelengths[ grat ] );
         THROW( EXCEPTION );
     }
 
@@ -355,10 +349,6 @@ monochromator_wavelength( Var_T * v )
 Var_T *
 monochromator_wavenumber( Var_T * v )
 {
-    double wn;
-    double wl;
-    int grating = oriel_cs_260.grating;
-
     if ( ! v )
     {
         return vars_push( FLOAT_VAR, oriel_cs_260.wavelength != 0
@@ -366,7 +356,7 @@ monochromator_wavenumber( Var_T * v )
                           : HUGE_VAL );
     }
 
-    wn = get_double( v, "wavenumber" );
+    double wn = get_double( v, "wavenumber" );
     too_many_arguments( v );
 
     if ( wn < 0 )
@@ -381,14 +371,15 @@ monochromator_wavenumber( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    wl = oriel_cs_260_wn2wl( wn );
+    double wl = oriel_cs_260_wn2wl( wn );
 
-    if ( wl > Max_Wavelengths[ grating ] )
+    int grat = oriel_cs_260.grating;
+    if ( wl > Max_Wavelengths[ grat ] )
     {
         print( FATAL, "Requested Wavenumber of %.5f cm^-1 too small, "
                "mimimum for grating #%d is %.5f cm^-1.\n",
-               wn, grating + 1,
-               oriel_cs_260_wl2wn( Max_Wavelengths[ grating ] ) );
+               wn, grat + 1,
+               oriel_cs_260_wl2wn( Max_Wavelengths[ grat ] ) );
         THROW( EXCEPTION );
     }
 
@@ -406,10 +397,6 @@ monochromator_wavenumber( Var_T * v )
 Var_T *
 monochromator_step( Var_T * v )
 {
-    long step;
-    int grat = oriel_cs_260.grating;
-    bool test_only = false;
-
     /* Witout no arguments return the cirrent stepper motor position */
 
     if ( ! v )
@@ -418,8 +405,9 @@ monochromator_step( Var_T * v )
     /* Get the step size and, if given, a flag that can be used to make
        this just a test if the step would be posible */
 
-    step = get_long( v, "step size" );
+    long int step = get_long( v, "step size" );
 
+    bool test_only = false;
     if ( ( v = vars_pop( v ) ) )
         test_only = get_boolean( v );
 
@@ -438,6 +426,7 @@ monochromator_step( Var_T * v )
     /* Check if making that step is possible - if not return false
        (and, if the test flag isn't set, also emit a warning) */
 
+    int grat = oriel_cs_260.grating;
     if (    oriel_cs_260.position + step < Position_Ranges[ grat ][ 0 ]
          || oriel_cs_260.position + step > Position_Ranges[ grat ][ 1 ] )
     {
@@ -464,8 +453,6 @@ Var_T *
 monochromator_groove_density( Var_T * v )
 {
     long int grating;
-    long int num_lines;
-
 
     if ( ! v )
         grating = oriel_cs_260.grating;
@@ -487,7 +474,8 @@ monochromator_groove_density( Var_T * v )
         return vars_push( FLOAT_VAR,
                           1000.0 * oriel_cs_260.num_lines[ grating ] );
 
-    num_lines = lrnd( 0.001 * get_strict_long( v, "number of lines per m" ) );
+    long int num_lines =
+                  lrnd( 0.001 * get_strict_long( v, "number of lines per m" ) );
     too_many_arguments( v );
 
     if ( num_lines <= 0 )
@@ -513,9 +501,6 @@ monochromator_groove_density( Var_T * v )
 Var_T *
 monochromator_calibrate( Var_T * v )
 {
-    double wl;
-
-
     if ( ! v )
     {
         print( FATAL, "Function requires a single argument, the current "
@@ -523,7 +508,7 @@ monochromator_calibrate( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    wl = get_double( v, "current wavelength" );
+    double wl = get_double( v, "current wavelength" );
 
     if ( wl <= 0 )
     {
@@ -557,15 +542,11 @@ monochromator_calibrate( Var_T * v )
 Var_T *
 monochromator_calibration_factor( Var_T * v )
 {
-    long int grating;
-    double factor;
-
-
     if ( ! v )
         return vars_push( FLOAT_VAR,
                             oriel_cs_260.factor[ oriel_cs_260.grating ] );
 
-    grating = get_strict_long( v, "grating number" ) - 1;
+    long int grating = get_strict_long( v, "grating number" ) - 1;
 
     if ( grating < 1 || grating > NUM_GRATINGS )
     {
@@ -574,12 +555,10 @@ monochromator_calibration_factor( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    v = vars_pop( v );
-
-    if ( ! v )
+    if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, oriel_cs_260.factor[ grating ] );
 
-    factor = get_double( v, "calibration factor" );
+    double factor = get_double( v, "calibration factor" );
 
     if ( factor <= 0 )
     {
@@ -602,15 +581,11 @@ monochromator_calibration_factor( Var_T * v )
 Var_T *
 monochromator_calibration_offset( Var_T * v )
 {
-    long int grating;
-    double offset;
-
-
     if ( ! v )
         return vars_push( FLOAT_VAR,
                             oriel_cs_260.offset[ oriel_cs_260.grating ] );
 
-    grating = get_strict_long( v, "grating number" ) - 1;
+    long int grating = get_strict_long( v, "grating number" ) - 1;
 
     if ( grating < 1 || grating > NUM_GRATINGS )
     {
@@ -619,12 +594,10 @@ monochromator_calibration_offset( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    v = vars_pop( v );
-
-    if ( ! v )
+    if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, oriel_cs_260.offset[ grating ] );
 
-    offset = get_double( v, "calibration offset" );
+    double offset = get_double( v, "calibration offset" );
 
     if ( FSC2_MODE == EXPERIMENT )
         oriel_cs_260_set_calibration_offset( grating, offset );
@@ -641,12 +614,10 @@ monochromator_calibration_offset( Var_T * v )
 Var_T *
 monochromator_shutter( Var_T * v )
 {
-	bool state;
-
     if ( ! v )
 		return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
 
-	state = get_boolean( v );
+	bool state = get_boolean( v );
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -674,9 +645,6 @@ monochromator_filter( Var_T * v  UNUSED_ARG )
 Var_T *
 monochromator_filter( Var_T * v )
 {
-    long int filter;
-
-
     if ( ! oriel_cs_260.has_filter )
     {
         print( FATAL, "During initialization no filter wheen was found.\n" );
@@ -686,7 +654,7 @@ monochromator_filter( Var_T * v )
     if ( v == 0 )
         return vars_push( INT_VAR, oriel_cs_260.filter + 1L );
 
-    filter = get_strict_long( v, "filter number" ) - 1;
+    long int filter = get_strict_long( v, "filter number" ) - 1;
     too_many_arguments( v );
 
     if ( filter < 0 || filter >= NUM_FILTER_WHEEL_POSITIONS )
@@ -716,9 +684,6 @@ monochromator_filter( Var_T * v )
 Var_T *
 monochromator_output_port( Var_T * v )
 {
-    int outport;
-
-
     if ( ! v )
         return vars_push( INT_VAR, oriel_cs_260.outport + 1L );
 
@@ -728,6 +693,8 @@ monochromator_output_port( Var_T * v )
                "or \"LATERAL\".\n" );
         THROW( EXCEPTION );
     }
+
+    int outport;
 
     if ( ! strcasecmp( v->val.sptr, "AXIAL" ) )
         outport = 0;
@@ -758,10 +725,6 @@ monochromator_output_port( Var_T * v )
 Var_T *
 monochromator_grating_zero( Var_T * v )
 {
-    long int grating;
-    double zero;
-
-
     if ( ! v )
     {
         print( FATAL, "At least one argument, the grating number, is "
@@ -769,7 +732,7 @@ monochromator_grating_zero( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    grating = get_strict_long( v, "grating number" ) - 1;
+    long int grating = get_strict_long( v, "grating number" ) - 1;
 
     if ( grating < 1 || grating > NUM_GRATINGS )
     {
@@ -778,12 +741,10 @@ monochromator_grating_zero( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    v = vars_pop( v );
-
-    if ( ! v )
+    if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, oriel_cs_260.zero[ grating ] );
 
-    zero = get_double( v, "grating zero" );
+    double zero = get_double( v, "grating zero" );
 
     if ( zero < 0 )
     {
@@ -812,16 +773,13 @@ monochromator_grating_zero( Var_T * v )
 Var_T *
 monochromator_set_gpib_address( Var_T * v )
 {
-    long int addr;
-
-
     if ( ! v )
     {
         print( FATAL, "Expected argument with new GPIB address.\n" );
         THROW( EXCEPTION );
     }
 
-    addr = get_strict_long( v, "GPIB address" );
+    long int addr = get_strict_long( v, "GPIB address" );
     too_many_arguments( v );
 
     if ( addr < 0 || addr > 30 )
@@ -845,8 +803,6 @@ static
 bool
 oriel_cs_260_init( const char * name )
 {
-    int i;
-
     if ( gpib_init_device( name, &oriel_cs_260.device ) == FAILURE )
         return FAIL;
 
@@ -887,7 +843,7 @@ oriel_cs_260_init( const char * name )
     oriel_cs_260_get_wavelength( );
     oriel_cs_260_get_position( );
 
-    for ( i = 0; i < NUM_GRATINGS; ++i )
+    for ( int i = 0; i < NUM_GRATINGS; ++i )
     {
         oriel_cs_260_get_number_of_lines( i );
         oriel_cs_260_get_calibration_factor( i );
@@ -947,9 +903,6 @@ static
 int
 oriel_cs_260_set_grating( int grating )
 {
-    char cmd[ ] = "GRAT *\n";
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     if ( oriel_cs_260.grating == grating )
@@ -958,7 +911,9 @@ oriel_cs_260_set_grating( int grating )
     if ( ! oriel_cs_260.shutter_state )
         oriel_cs_260_set_shutter( true );
 
+    char cmd[ ] = "GRAT *\n";
     cmd[ 5 ] = '1' + grating;
+
     if ( ! oriel_cs_260_command( cmd, Max_Grating_Switch_Delay ) )
     {
         print( FATAL, "Failed to switch to grating #%d.\n", grating + 1 );
@@ -983,22 +938,22 @@ static
 unsigned int
 oriel_cs_260_get_number_of_lines( int grating )
 {
-    char req[ ] = "GRAT*LINES?\n";
-    char reply[ 100 ];
-    long length = 100;
-    unsigned long val;
-    char * ep;
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
+    char req[ ] = "GRAT*LINES?\n";
     req[ 4 ] = grating + '1';
+
+    char reply[ 100 ];
+    long length = 100;
+
     if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
-    val = strtoul( reply, &ep, 10 );
+    char * ep;
+    unsigned long int val = strtoul( reply, &ep, 10 );
+
     if ( *ep || val == 0 || val == ULONG_MAX )
         oriel_cs_260_failure( );
 
@@ -1017,15 +972,15 @@ unsigned int
 oriel_cs_260_set_number_of_lines( int          grating,
                                   unsigned int num_lines )
 {
-    char cmd[ 100 ];
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
     fsc2_assert( num_lines > 0 );
 
     if ( oriel_cs_260.num_lines[ grating ] == num_lines )
         return num_lines;
 
+    char cmd[ 100 ];
     sprintf( cmd, "GRAT%dLINES %u\n", grating + 1, num_lines );
+
     if ( ! oriel_cs_260_command( cmd, 0 ) )
     {
         print( FATAL, "Failed to set number of lines to $f per m for grating "
@@ -1045,8 +1000,8 @@ void
 oriel_cs_260_calibrate( double wl )
 {
     char cmd[ 100 ];
-
     sprintf( cmd, "CALIBRATE %.3f\n", wl );
+
     if ( ! oriel_cs_260_command( cmd, 0 ) )
     {
         print( FATAL, "Calibrate command failed.\n" );
@@ -1064,22 +1019,22 @@ oriel_cs_260_calibrate( double wl )
 static double
 oriel_cs_260_get_calibration_factor( int grating )
 {
-    char req[ ] = "GRAT*FACTOR?\n";
-    char reply[ 100 ];
-    long length = 100;
-    double val;
-    char * ep;
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
+    char req[ ] = "GRAT*FACTOR?\n";
     req[ 4 ] = grating + '1';
+
+    char reply[ 100 ];
+    long length = 100;
+
     if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
 
-    val = strtod( reply, &ep );
+    char * ep;
+    double val = strtod( reply, &ep );
+
     if ( *ep || val == 0 || val == HUGE_VAL )
         oriel_cs_260_failure( );
 
@@ -1098,14 +1053,13 @@ double
 oriel_cs_260_set_calibration_factor( int    grating,
                                      double factor )
 {
-    char cmd[ 100 ];
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
     fsc2_assert( factor >= 1.0e-6 );
 
     if ( factor == oriel_cs_260.factor[ grating ] )
         return factor;
 
+    char cmd[ 100 ];
     sprintf( cmd, "GRAT%dFACTOR %.6f\n", grating + 1, factor );
     if ( ! oriel_cs_260_command( cmd, 0 ) )
     {
@@ -1127,16 +1081,14 @@ static
 double
 oriel_cs_260_get_calibration_offset( int grating )
 {
-    char req[ ] = "GRAT*OFFSET?\n";
-    char reply[ 100 ];
-    long length = 100;
-    double val;
-    char * ep;
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
+    char req[ ] = "GRAT*OFFSET?\n";
     req[ 4 ] = grating + '1';
+
+    char reply[ 100 ];
+    long length = 100;
+
     if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || (    *reply != '-'
@@ -1144,7 +1096,9 @@ oriel_cs_260_get_calibration_offset( int grating )
               && ! isdigit( ( int ) *reply ) ) )
         oriel_cs_260_failure( );
 
-    val = strtod( reply, &ep );
+    char * ep;
+    double val = strtod( reply, &ep );
+
     if ( *ep || val == - HUGE_VAL || val == HUGE_VAL )
         oriel_cs_260_failure( );
 
@@ -1163,15 +1117,14 @@ double
 oriel_cs_260_set_calibration_offset( int    grating,
                                      double offset )
 {
-    char cmd[ 100 ];
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     if ( offset == oriel_cs_260.offset[ grating ] )
         return offset;
 
+    char cmd[ 100 ];
     sprintf( cmd, "GRAT%dOFFSET %.6f\n", grating + 1, offset );
+
     if ( ! oriel_cs_260_command( cmd, 0 ) )
     {
         print( FATAL, "Failed to sety calibration offset to %f for grating "
@@ -1191,22 +1144,20 @@ static
 double
 oriel_cs_260_get_zero( int    grating )
 {
-    char cmd[ ] = "GRAT*ZERO?\n";
-    char reply[ 100 ];
-    long length = 100;
-    double zero;
-    char *ep;
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
+    char cmd[ ] = "GRAT*ZERO?\n";
     cmd[ 4 ] = grating + '1';
     
+    char reply[ 100 ];
+    long length = 100;
     if (    oriel_cs_260_talk( cmd, reply, &length, false ) != SUCCESS
          || length < 1 )
         oriel_cs_260_failure( );
 
-    zero = strtod( reply, &ep );
+    char *ep;
+    double zero = strtod( reply, &ep );
+
     if ( *ep || zero < 0 || zero == HUGE_VAL )
         oriel_cs_260_failure( );
 
@@ -1223,13 +1174,12 @@ void
 oriel_cs_260_set_zero( int    grating,
                        double zero )
 {
-    char buf[ 100 ];
-
-
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
     fsc2_assert( zero >= 0 );
 
+    char buf[ 100 ];
     sprintf( buf, "GRAT%dZERO %.7f\n", grating + 1, zero );
+
     if ( ! oriel_cs_260_command( buf, 0 ) )
     {
         print( FATAL, "Failed to set grating zero to %f for grating #%d.\n",
@@ -1248,20 +1198,19 @@ oriel_cs_260_set_zero( int    grating,
 static double
 oriel_cs_260_get_wavelength( void )
 {
+    /* Note: the device may return a negative wavelength... */
+
     char reply[ 100 ];
     long length = 100;
-    double val;
-    char *ep;
-
-
-    /* Note: the device may return a negative wavelength... */
 
     if (    oriel_cs_260_talk( "WAVE?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ( ! isdigit( ( int ) *reply ) && *reply != '-' ) )
         oriel_cs_260_failure( );
 
-    val = strtod( reply, &ep );
+    char *ep;
+    double val = strtod( reply, &ep );
+
     if ( *ep || val == -HUGE_VAL || val == HUGE_VAL )
         oriel_cs_260_failure( );
 
@@ -1280,11 +1229,9 @@ static
 double
 oriel_cs_260_set_wavelength( double wl )
 {
-    char cmd[ 100 ];
-
-
     fsc2_assert( wl >= 0 );
 
+    char cmd[ 100 ];
     sprintf( cmd, "GOWAVE %.3f\n", 1.0e9 * wl );
 
     /* Avoid setting a wavelnegth that's already set */
@@ -1321,16 +1268,15 @@ oriel_cs_260_get_position( void )
 {
     char reply[ 100 ];
     long length = 100;
-    long pos;
-    char *ep;
-
 
     if (    oriel_cs_260_talk( "STEP?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
 
-    pos = strtol( reply, &ep, 10 );
+    char *ep;
+    long int pos = strtol( reply, &ep, 10 );
+
     if ( *ep )
         oriel_cs_260_failure( );
 
@@ -1346,13 +1292,12 @@ static
 bool
 oriel_cs_260_do_step( long int step )
 {
-    char cmd[ 100 ];
-
-
     if ( step == 0 )
         return true;
 
+    char cmd[ 100 ];
     sprintf( cmd, "STEP %ld\n", step );
+
     if ( ! oriel_cs_260_command( cmd, Max_Wavelength_Delay ) )
     {
         if ( oriel_cs_260_get_error( ) == 2 )
@@ -1401,10 +1346,6 @@ static
 bool
 oriel_cs_260_set_shutter( bool on_off )
 {
-    char cmd[ ] = "SHUTTER *\n";
-    struct timeval now;
-
-
     if ( on_off == oriel_cs_260.shutter_state )
         return on_off;
 
@@ -1412,7 +1353,9 @@ oriel_cs_260_set_shutter( bool on_off )
        it needs to stay open for at least 0.2 seconds and shouldn't be
        opened and closed with a rate of more than 0.5 Hz */
 
+    struct timeval now;
     gettimeofday( &now, NULL );
+
     if ( on_off )
     {
         double diff =   ( now.tv_sec  + 1.0e-6 * now.tv_usec  )
@@ -1430,7 +1373,9 @@ oriel_cs_260_set_shutter( bool on_off )
             fsc2_usleep( 1.0e6 * ( MIN_SHUTTER_EXPOSURE_TIME - diff ), false );
     }
 
+    char cmd[ ] = "SHUTTER *\n";
     cmd[ 8 ] = on_off ? 'C' : 'O';
+
     if ( ! oriel_cs_260_command( cmd, Max_Shutter_Delay ) )
     {
         print( FATAL, "Failed to %s shutter.\n", on_off ? "close" : "open" );
@@ -1455,15 +1400,15 @@ static
 int
 oriel_cs_260_set_filter( int filter )
 {
-    char cmd[ ] = "FILTER *\n";
-
     fsc2_assert( oriel_cs_260.has_filter );
     fsc2_assert( filter >= 0 && filter < NUM_FILTER_WHEEL_POSITIONS );
 
     if ( filter == oriel_cs_260.filter )
         return filter;
 
+    char cmd[ ] = "FILTER *\n";
     cmd[ 7 ] = filter + '1';
+
     if ( ! oriel_cs_260_command( cmd, Max_Filter_Delay ) )
     {
         print( FATAL, "Failed to switch to filter #%d.\n", filter + 1 );
@@ -1488,7 +1433,6 @@ oriel_cs_260_get_filter( void )
 {
     char reply[ 3 ];
     long length = 3;
-
 
     oriel_cs_260_talk( "FILTER?\n", reply, &length, true );
     if (    length != 1
@@ -1545,11 +1489,11 @@ oriel_cs_260_get_outport( void )
 int
 oriel_cs_260_set_outport( int outport )
 {
-    char cmd[ ] = "OUTPORT *\n";
-
     fsc2_assert( outport == 0 || outport == 1 );
 
+    char cmd[ ] = "OUTPORT *\n";
     cmd[ 8 ] = outport + '1';
+
     if ( ! oriel_cs_260_command( cmd, Max_Outport_Switch_Delay ) )
     {
         print( FATAL, "Failed to switch to %s output port.\n",
@@ -1599,12 +1543,6 @@ bool
 oriel_cs_260_command( const char * cmd,
                       double       wait_for )
 {
-    struct timeval before,
-                   after;
-    char buf[ 3 ];
-    long len = 3;
-
-    
     /* Try to send the command */
 
     if ( gpib_write( oriel_cs_260.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -1617,15 +1555,25 @@ oriel_cs_260_command( const char * cmd,
        the timeout, givem in seconds via 'wait_for', is over before
        giving up. */
 
+    struct timeval before;
     gettimeofday( &before, NULL );
+
+    char buf[ 3 ];
+    long len;
 
     while ( 1 )
     {
         len = 3;
-  
-        if ( gpib_read( oriel_cs_260.device, buf, &len ) == SUCCESS )
-            break;
 
+        if ( gpib_read( oriel_cs_260.device, buf, &len ) == SUCCESS )
+        {
+            if ( len == 3 )
+                break;
+            else
+                oriel_cs_260_failure( );
+        }
+
+        struct timeval after;
         gettimeofday( &after, NULL );
             
         wait_for -=   ( after.tv_sec  + 1.0e-6 * after.tv_usec  )
@@ -1734,16 +1682,15 @@ oriel_cs_260_get_gpib_address( void )
 {
     char reply[ 100 ];
     long length = 100;
-    unsigned long addr;
-    char *ep;
-
 
     if (    oriel_cs_260_talk( "ADDRESS?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
 
-    addr = strtoul( reply, &ep, 10 );
+    char *ep;
+    unsigned long addr = strtoul( reply, &ep, 10 );
+
     if ( *ep || addr > 30 )
         oriel_cs_260_failure( );
 
@@ -1771,15 +1718,14 @@ static
 void
 oriel_cs_260_set_gpib_address( unsigned int addr )
 {
-    char cmd[ 20 ];
-
-
     fsc2_assert( addr <= 30 );
 
     if ( ( int ) addr == oriel_cs_260_get_gpib_address( ) )
         return;
 
+    char cmd[ 20 ];
     sprintf( cmd, "ADDRESS %2u\n", addr );
+
     if ( gpib_write( oriel_cs_260.device, cmd, strlen( cmd ) ) == FAILURE )
         oriel_cs_260_failure( );
 }

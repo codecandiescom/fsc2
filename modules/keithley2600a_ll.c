@@ -106,8 +106,7 @@ keithley2600a_cmd( const char * cmd )
 {
 	size_t len = strlen( cmd );
 
-    
-	if ( vxi11_write( cmd, &len, false ) != SUCCESS )
+    if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		keithley2600a_comm_failure( );
 
 	return OK;
@@ -148,10 +147,6 @@ keithley2600a_talk( const char * cmd,
 void
 keithley2600a_get_state( void )
 {
-    unsigned int ch;
-    const char * model;
-
-
     /* Clear out the error queue */
 
     clear_errors( );
@@ -190,7 +185,7 @@ keithley2600a_get_state( void )
 
     keithley2600a_get_line_frequency( );
 
-    model = keithley2600a_get_model( );
+    const char * model = keithley2600a_get_model( );
 
 #if defined _2601A
     if ( strcmp( model, "2601A\n" ) )
@@ -218,7 +213,7 @@ keithley2600a_get_state( void )
                "a %s.\n", model );
 #endif
 
-    for ( ch = 0; ch < NUM_CHANNELS; ch++ )
+    for ( unsigned char ch = 0; ch < NUM_CHANNELS; ch++ )
     {
         keithley2600a_get_sense( ch );
         
@@ -327,9 +322,9 @@ clear_errors( void )
 int
 keithley2600a_get_sense( unsigned int ch )
 {
-    char buf[ 50 ];
-
     fsc2_assert( ch < NUM_CHANNELS );
+
+    char buf[ 50 ];
 
     sprintf( buf, "printnumber(%s.sense)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
@@ -352,8 +347,6 @@ int
 keithley2600a_set_sense( unsigned int ch,
 						 int          sense )
 {
-    char buf[ 50 ];
-
     fsc2_assert( ch < NUM_CHANNELS );
 	fsc2_assert(    sense == SENSE_LOCAL
 				 || sense == SENSE_REMOTE
@@ -364,6 +357,7 @@ keithley2600a_set_sense( unsigned int ch,
 	fsc2_assert(    sense != SENSE_CALA
 				 || keithley2600a_get_source_output( ch ) == OUTPUT_OFF );
 
+    char buf[ 50 ];
     sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
 	keithley2600a_cmd( buf );
 
@@ -612,9 +606,9 @@ keithley2600a_prep_list_sweeps( void )
  * Converts a line as received from the device to a boolean value
  *--------------------------------------------------------------*/
 
+#if ! defined BINARY_TRANSFER
 bool
 keithley2600a_line_to_bool( const char * line )
-#if ! defined BINARY_TRANSFER
 {
     bool res = *line == '1';
 
@@ -629,6 +623,8 @@ keithley2600a_line_to_bool( const char * line )
     return res;
 }
 #else
+bool
+keithley2600a_line_to_bool( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
@@ -642,28 +638,28 @@ keithley2600a_line_to_bool( const char * line )
  * Converts a line as received from the device to an int
  *--------------------------------------------------------------*/
 
+#if ! defined BINARY_TRANSFER
 int
 keithley2600a_line_to_int( const char * line )
-#if ! defined BINARY_TRANSFER
 {
-    double dres;
-    int res;
-    char *ep;
-
     if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
         keithley2600a_bad_data( );
 
-    dres = strtod( line, &ep );
+    char *ep;
+    double dres = strtod( line, &ep );
+
     if ( *ep != '\n' || *++ep || dres > INT_MAX || dres < INT_MIN )
         keithley2600a_bad_data( );
 
-    res = lrnd( dres );
-    if ( dres - res != 0 )
+    long int res = lrnd( dres );
+    if ( res > INT_MAX || res < INT_MIN || dres - res != 0 )
         keithley2600a_bad_data( );
 
     return res;
 }
 #else
+int
+keithley2600a_line_to_int( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
@@ -678,18 +674,18 @@ keithley2600a_line_to_int( const char * line )
  *--------------------------------------------------------------*/
 
 
+#if ! defined BINARY_TRANSFER
 double
 keithley2600a_line_to_double( const char * line )
-#if ! defined BINARY_TRANSFER
 {
-    double res;
-    char *ep;
-
     if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
         keithley2600a_bad_data( );
 
     errno = 0;
-    res = strtod( line, &ep );
+
+    char *ep;
+    double res = strtod( line, &ep );
+
     if (    *ep != '\n'
          || *++ep
          || ( ( res == HUGE_VAL || res == - HUGE_VAL ) && errno == ERANGE ) )
@@ -698,6 +694,8 @@ keithley2600a_line_to_double( const char * line )
     return res;
 }
 #else
+double
+keithley2600a_line_to_double( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
         keithley2600a_bad_data( );
@@ -713,29 +711,29 @@ keithley2600a_line_to_double( const char * line )
  *--------------------------------------------------------------*/
 
 
+#if ! defined BINARY_TRANSFER
 double *
 keithley2600a_line_to_doubles( const char * line,
                                double     * buf,
                                int          cnt )
-#if ! defined BINARY_TRANSFER
 {
-    int i = 0;
-
     fsc2_assert( cnt > 0 && buf );
 
     /* Keep reading until end of line is reached or as many values
        have been read as requested */
 
+    int i = 0;
+
     while ( 1 )
     {
-        double res;
-        char *ep;
-
         if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
             keithley2600a_bad_data( );
 
         errno = 0;
-        res = strtod( line, &ep );
+
+        char *ep;
+        double res = strtod( line, &ep );
+
         if (    (    *ep && *ep != '\n'
                   && *ep != ' '
                   && *ep != ','
@@ -755,16 +753,17 @@ keithley2600a_line_to_doubles( const char * line,
     }
 }
 #else
+double *
+keithley2600a_line_to_doubles( const char * line,
+                               double     * buf,
+                               int          cnt )
 {
-    int i;
-
-
     fsc2_assert( cnt > 0 && buf );
 
     if ( *line++ != '#' || *line++ != '0' || line[ 4 * cnt ] != '\n' )
         keithley2600a_bad_data( );
 
-    for ( i = 0; i < cnt; line += 4, i++ )
+    for ( int i = 0; i < cnt; line += 4, i++ )
         buf[ i ] = to_double( ( const unsigned char * ) line );
 
     return buf;
@@ -776,7 +775,7 @@ keithley2600a_line_to_doubles( const char * line,
  * Functions for converting 32 bit floating point numbers in
  * IEEE 754 format received from the device. The first one is
  * for the usual case that the sizeof(float) on the machine
- * is 4 (endian-ness has alrady been taken care of). The
+ * is 4 (endian-ness has already been taken care of). The
  * additonal conversion from ASCII and back looks stupid
  * but guarantees that numbers are rounded to 6 digits, which
  * makes a lot of comparisons with limits easier. The second
@@ -806,7 +805,6 @@ double
 to_double_hard( const unsigned char * data )
 {
     float x;
-    char buf[ 20 ];
     double mant;
     double sign = ( data[ 3 ] & 0x80 ) ? -1.0 : 1.0;
     unsigned char expo = ( ( ( data[ 3 ] & 0x7F ) << 1 ) | ( data[ 2 ] >> 7 ) );
@@ -825,7 +823,9 @@ to_double_hard( const unsigned char * data )
         x = sign * ( mant / 0x800000 ) * pow( 2.0, -126 );
     }
 
+    char buf[ 20 ];
     sprintf( buf, "%.6g", x );
+
     return strtod( buf, NULL );
 }
 #endif
@@ -841,17 +841,15 @@ void
 keithley2600a_show_errors( void )
 {
     char buf[ 200 ];
-    int error_count;
-    char * mess = NULL;
-
     TALK( "printnumber(errorqueue.count)", buf, sizeof buf, false, 7 );
 
+    int error_count;
     if ( ( error_count = keithley2600a_line_to_int( buf ) ) < 0 )
         keithley2600a_bad_data( );
     else if ( error_count == 0 )
         return;
 
-    mess = strdup( "Device reports the following errors:\n" );
+    char * mess = T_strdup( "Device reports the following errors:\n" );
 
     TRY
     {
