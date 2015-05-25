@@ -339,7 +339,7 @@ keithley2600a_get_measure_autozero( unsigned int ch )
     int autozero = keithley2600a_line_to_int( buf );
     if (    autozero != AUTOZERO_OFF
          && autozero != AUTOZERO_ONCE
-         && autozero == AUTOZERO_AUTO )
+         && autozero != AUTOZERO_AUTO )
         keithley2600a_bad_data( );
 
     return k26->measure[ ch ].autozero = autozero;
