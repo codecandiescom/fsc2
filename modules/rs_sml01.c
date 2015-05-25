@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -692,19 +692,15 @@ synthesizer_minimum_attenuation( Var_T * v )
 Var_T *
 synthesizer_automatic_level_control( Var_T * v )
 {
-    bool state;
-
-
     if ( v == NULL )
     {
-        if ( FSC2_MODE == TEST )
-            return vars_push( INT_VAR, rs_sml01.alc_state );
-        else
-            return vars_push( rs_sml01.alc_state =
-                                     rs_sml01_get_automatic_level_control( ) );
+        if ( FSC2_MODE != TEST )
+            rs_sml01.alc_state = rs_sml01_get_automatic_level_control( );
+
+        return vars_push( INT_VAR, rs_sml01.alc_state ? 1L : 0L );
     }
 
-    state = get_boolean( v );
+    bool state = get_boolean( v );
 
     too_many_arguments( v );
 
@@ -714,7 +710,7 @@ synthesizer_automatic_level_control( Var_T * v )
     rs_sml01.alc_state = state;
     rs_sml01.alc_state_is_set = SET;
 
-    return vars_push( INT_VAR, state );
+    return vars_push( INT_VAR, state ? 1L : 0L );
 }
 
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -901,10 +901,12 @@ int
 is_iconic( Display * d,
            Window    w )
 {
-    Atom xa_wm_state, actual_type;
-    unsigned char *property = NULL;
+    Atom xa_wm_state,
+         actual_type;
+    long * property = NULL;
     int actual_format;
-    unsigned long nitems, leftover;
+    unsigned long nitems,
+                  leftover;
     int status;
 
     if ( ( xa_wm_state = XInternAtom( d, "WM_STATE", True ) ) == 0 )
@@ -913,7 +915,8 @@ is_iconic( Display * d,
     status = XGetWindowProperty( fl_get_display( ), w, xa_wm_state, 0,
                                  WM_STATE_ELEMENTS, False, xa_wm_state,
                                  &actual_type, &actual_format,
-                                 &nitems, &leftover, &property );
+                                 &nitems, &leftover,
+                                 ( unsigned char ** ) &property );
 
     if (    status != Success
          || property == NULL
@@ -925,7 +928,7 @@ is_iconic( Display * d,
         return -1;
     }
 
-    status = * ( unsigned long * ) property == IconicState;
+    status = *property == IconicState;
     XFree(  property );
     return status;
 }

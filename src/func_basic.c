@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -400,8 +400,10 @@ f_abs( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
-    double *dsrc, *ddest;
+    long * lsrc,
+         * ldest;
+    double * dsrc,
+           * ddest;
 
 
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -421,20 +423,22 @@ f_abs( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( INT_ARR, v );
-            for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
+            lsrc  = v->val.lpnt;
+            ldest = new_var->val.lpnt;
+            for ( i = 0; i < v->len; i++ )
             {
                 if ( *lsrc == LONG_MIN )
                     print( SEVERE, "Integer argument overflow.\n" );
-                *ldest = labs( *lsrc );
+                *ldest++ = labs( *lsrc++ );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = fabs( *dsrc );
+            dsrc  = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = fabs( *dsrc++ );
             break;
 
         case INT_REF :
@@ -2682,9 +2686,12 @@ f_square( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
-    double *dsrc, *ddest;
-    double lmax, dmax;
+    long * lsrc,
+         * ldest;
+    double * dsrc,
+           * ddest;
+    double lmax,
+           dmax;
 
 
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2707,24 +2714,26 @@ f_square( Var_T * v )
         case INT_ARR :
             new_var = vars_make( INT_ARR, v );
             lmax = sqrt( ( double ) LONG_MAX );
-            for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
+            lsrc = v->val.lpnt;
+            ldest = new_var->val.lpnt;
+            for ( i = 0; i < v->len; i++, lsrc++ )
             {
                 if ( labs( *lsrc ) > lmax )
                     print( SEVERE, "Result overflow.\n" );
-                *ldest = *lsrc * *lsrc;
+                *ldest++ = *lsrc * *lsrc;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             dmax = sqrt( HUGE_VAL );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
+            dsrc  = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++, dsrc++ )
             {
                 if ( fabs( *dsrc ) > dmax )
                     print( SEVERE, "Result overflow.\n" );
-                *ddest = *dsrc * *dsrc;
+                *ddest++ = *dsrc * *dsrc;
             }
             break;
 
@@ -2769,7 +2778,7 @@ f_G2T( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -2788,16 +2797,18 @@ f_G2T( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc * 1.0e-4;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ * 1.0e-4;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc * 1.0e-4;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ * 1.0e-4;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -2829,7 +2840,7 @@ f_T2G( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -2848,16 +2859,18 @@ f_T2G( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc * 1.0e4;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ * 1.0e4;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc * 1.0e4;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ * 1.0e4;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -2889,7 +2902,7 @@ f_C2K( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -2909,16 +2922,18 @@ f_C2K( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc + C2K_OFFSET;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ + C2K_OFFSET;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc + C2K_OFFSET;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ + C2K_OFFSET;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -2950,7 +2965,7 @@ f_K2C( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -2970,16 +2985,18 @@ f_K2C( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc - C2K_OFFSET;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ - C2K_OFFSET;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc - C2K_OFFSET;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ - C2K_OFFSET;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -3011,7 +3028,7 @@ f_D2R( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3031,16 +3048,18 @@ f_D2R( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc * D2R_FACTOR;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ * D2R_FACTOR;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc * D2R_FACTOR;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ * D2R_FACTOR;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -3072,7 +3091,7 @@ f_R2D( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3092,16 +3111,18 @@ f_R2D( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = ( double ) *lsrc * R2D_FACTOR;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ * R2D_FACTOR;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc * R2D_FACTOR;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ * R2D_FACTOR;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -3133,7 +3154,7 @@ f_WL2WN( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3162,29 +3183,31 @@ f_WL2WN( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
             {
                 if ( *lsrc == 0 )
                 {
                     print( FATAL, "Can't convert 0 m to a wave number.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest = 0.01 / ( double ) *lsrc;
+                *ddest++ = 0.01 / ( double ) *lsrc++;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
             {
                 if ( *dsrc == 0.0 )
                 {
                     print( FATAL, "Can't convert 0 m to a wave number.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest = 0.01 / *dsrc;
+                *ddest++ = 0.01 / *dsrc++;
             }
             break;
 
@@ -3217,7 +3240,7 @@ f_WN2WL( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3246,29 +3269,31 @@ f_WN2WL( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
             {
                 if ( *lsrc == 0 )
                 {
                     print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest = 0.01 / ( double ) *lsrc;
+                *ddest++ = 0.01 / ( double ) *lsrc++;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
             {
                 if ( *dsrc == 0.0 )
                 {
                     print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest = 0.01 / *dsrc;
+                *ddest++ = 0.01 / *dsrc++;
             }
             break;
 
@@ -3301,7 +3326,7 @@ f_F2WN( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3320,16 +3345,18 @@ f_F2WN( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = *lsrc / WN2F_FACTOR;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = ( double ) *lsrc++ / WN2F_FACTOR;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = *dsrc / WN2F_FACTOR;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = *dsrc++ / WN2F_FACTOR;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -3361,7 +3388,7 @@ f_WN2F( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
-    long *lsrc, *ldest;
+    long *lsrc;
     double *dsrc, *ddest;
 
 
@@ -3380,16 +3407,18 @@ f_WN2F( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, ldest++ )
-                *ddest = WN2F_FACTOR * *lsrc;
+            lsrc = v->val.lpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = WN2F_FACTOR * ( double ) *lsrc++;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, ddest++ )
-                *ddest = WN2F_FACTOR *  *dsrc;
+            dsrc = v->val.dpnt;
+            ddest = new_var->val.dpnt;
+            for ( i = 0; i < v->len; i++ )
+                *ddest++ = WN2F_FACTOR *  *dsrc++;
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -3543,23 +3572,25 @@ f_reverse( Var_T * v )
 
         case INT_ARR :
             new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
-            for ( lsrc = new_var->val.lpnt, ldest = lsrc + new_var->len - 1;
-                  lsrc < ldest; lsrc++, ldest-- )
+            lsrc = new_var->val.lpnt;
+            ldest = lsrc + new_var->len - 1;
+            while ( lsrc < ldest )
             {
-                ltemp = *lsrc;
-                *lsrc = *ldest;
-                *ldest = ltemp;
+                ltemp    = *lsrc;
+                *lsrc++  = *ldest;
+                *ldest-- = ltemp;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
-            for ( dsrc = new_var->val.dpnt, ddest = dsrc + new_var->len - 1;
-                  dsrc < ddest; dsrc++, ddest-- )
+            dsrc = new_var->val.dpnt;
+            ddest = dsrc + new_var->len - 1;
+            while ( dsrc < ddest )
             {
-                dtemp = *dsrc;
-                *dsrc = *ddest;
-                *ddest = dtemp;
+                dtemp    = *dsrc;
+                *dsrc++  = *ddest;
+                *ddest-- = dtemp;
             }
             break;
 

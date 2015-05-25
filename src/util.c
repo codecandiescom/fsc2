@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1552,8 +1552,6 @@ get_decoration_sizes( FL_FORM * form,
                       int     * bottom,
                       int     * left )
 {
-	Atom a;
-
 	if (    ! form
 		 || ! form->window
 		 || form->visible != FL_VISIBLE
@@ -1562,29 +1560,32 @@ get_decoration_sizes( FL_FORM * form,
 
 	*top = *right = *bottom = *left = 0;
 
-    if ( ( a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True ) )
-                                                                       != None )
+	Atom a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True );
+
+    if ( a != None )
 	{
 		Atom actual_type;
 		int actual_format;
 		unsigned long nitems;
 		unsigned long bytes_after;
-		static unsigned char *prop;
+		long * prop = NULL;
 
         XGetWindowProperty( fl_get_display( ), form->window, a, 0,
                             4, False, XA_CARDINAL,
                             &actual_type, &actual_format, &nitems,
-                            &bytes_after, &prop );
+                            &bytes_after, ( unsigned char ** ) &prop );
 
 		if (    actual_type == XA_CARDINAL
 			 && actual_format == 32
 			 && nitems == 4 )
 		{
-			*top    = ( ( long * ) prop )[ 2 ];
-			*right  = ( ( long * ) prop )[ 1 ];
-			*bottom = ( ( long * ) prop )[ 3 ];
-			*left   = ( ( long * ) prop )[ 0 ];
+			*top    = prop[ 2 ];
+			*right  = prop[ 1 ];
+			*bottom = prop[ 3 ];
+			*left   = prop[ 0 ];
 		}
+
+        XFree( prop );
 	}
 	else
 	{
@@ -1600,7 +1601,6 @@ get_decoration_sizes( FL_FORM * form,
 		XWindowAttributes win_attr;
 		XWindowAttributes frame_attr;
 		unsigned int ujunk;
-
 
         /* Get the coordinates and size of the form's window */
 
@@ -1651,7 +1651,7 @@ get_decoration_sizes( FL_FORM * form,
 		*top    = win_attr.y - frame_attr.y;
 		*left   = win_attr.x - frame_attr.x;
 		*bottom = frame_attr.height - win_attr.height - *top;
-		*right  = frame_attr.width - win_attr.width - *left;
+		*right  = frame_attr.width - win_attr.width   - *left;
 	}
 
 	return 0;

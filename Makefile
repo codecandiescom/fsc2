@@ -1,4 +1,4 @@
-#  Copyright (C) 1999-2014 Jens Thoms Toerring
+#  Copyright (C) 1999-2015 Jens Thoms Toerring
 #
 #  This file is part of fsc2.
 #
@@ -499,7 +499,7 @@ ldir             := $(fdir)/FcntlLock
 mchdir           := $(fdir)/machines
 
 
-# Nore defining '_XOPEN_SOURCE' to 700 (or higher) exposes SUSv4 (i.e.,
+# Note: defining '_XOPEN_SOURCE' to 700 (or higher) exposes SUSv4 (i.e.,
 # POSIX.1-2008 base specification plus the XSI extension) definitions
 
 SHELL            := /bin/sh

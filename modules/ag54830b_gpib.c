@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Anton Savitsky / Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -364,17 +364,18 @@ ag54830b_get_curve( int       channel,
 		fsc2_usleep( 1000, UNSET );
 	}
 
-	/* ....and copy them to the final destination (the data are INTEL format
-	   2-byte integers, so the following requires sizeof( short ) == 2 and
-	   only works on a machine with INTEL format - there got to be better ways
-	   to do it...) Also scale data so that we get the real measured
-	   voltage. */
-
-	fsc2_assert( sizeof( short ) == 2 );
+	/* ....and copy them to the final destination. The data are INTEL format
+	   (i.e. little-endian, two's complement) 2-byte integers and also need
+	   to be scaled to get the real measured voltage. */
 
 	for ( i = 0; i < bytes_to_read / 2; i++ )
-		*( *data + i ) =
-					 ( yinc * ( double ) * ( ( short * ) buffer + i ) ) + yorg;
+	{
+		long int x =   256 * * ( ( unsigned char * ) buffer + 2 * i + 1 )
+    			     +       * ( ( unsigned char * ) buffer + 2 * i     );
+		if ( x > 32767 )
+			x = - ( ( ( ~ x ) & 0xFFFF ) + 1 );
+		*( *data + i ) =yinc * x + yorg;
+	}
 
 	T_free( buffer );
 }

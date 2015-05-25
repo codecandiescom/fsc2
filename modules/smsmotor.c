@@ -367,7 +367,7 @@ motor_limits( Var_T * v )
         return vars_push( FLOAT_ARR, limits, 2 );
     }
 
-    if ( v->type & ( INT_ARR || FLOAT_ARR ) )
+    if ( v->type & ( INT_ARR | FLOAT_ARR ) )
     {
         if ( v->dim != 1 )
         {

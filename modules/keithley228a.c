@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  Thanks to Anton Savitsky for re-checking the data for the corrections
  *  and including them into the code.
@@ -789,8 +789,8 @@ keithley228a_goto_current( double new_current )
 
     /* Calculate the size of the current steps */
 
-    del_amps = 0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
-               * ( keithley228a.current > new_current ) ? -1.0 : 1.0;
+    del_amps =   0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
+               * ( keithley228a.current > new_current ? -1.0 : 1.0 );
 
     /* Use as many current steps as necessary to get near to the final current
        and wait 100 ms after each step */
