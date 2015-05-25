@@ -221,13 +221,11 @@ static
 double
 max_source_volts_due_to_compliance( unsigned int ch )
 {
-	size_t i;
-
-	for ( i = 0; i < Num_Limits_I_to_V; i++ )
+	for ( size_t i = 0; i < Num_Limits_I_to_V; i++ )
 		if ( k26->source[ ch ].limiti <= Limits_I_to_V[ i ].range )
 			return Limits_I_to_V[ i ].limit;
 
-	fsc2_assert( 1 == 0 );
+	fsc2_impossible( );
 	return -1;
 }
 
@@ -241,13 +239,11 @@ static
 double
 max_source_amps_due_to_compliance( unsigned int ch )
 {
-	size_t i;
-
-	for ( i = 0; i < Num_Limits_V_to_I; i++ )
+	for ( size_t i = 0; i < Num_Limits_V_to_I; i++ )
 		if ( k26->source[ ch ].limitv <= Limits_V_to_I[ i ].range )
 			return Limits_V_to_I[ i ].limit;
 
-	fsc2_assert( 1 == 0 );
+	fsc2_impossible( );
 	return -1;
 }
 
@@ -261,20 +257,17 @@ static
 double
 max_compliance_volts_limit( unsigned int ch )
 {
-	double amps;
-	size_t i;
-
 	/* If autoranging is on the set current level is what's relevant,
 	   otherwise the range setting */
 
-	amps = k26->source[ ch ].autorangei ?
-		   k26->source[ ch ].leveli : k26->source[ ch ].rangei;
+	double amps = k26->source[ ch ].autorangei ?
+		          k26->source[ ch ].leveli : k26->source[ ch ].rangei;
 
-	for ( i = 0; i < Num_Limits_I_to_V; i++ )
+	for ( size_t i = 0; i < Num_Limits_I_to_V; i++ )
 		if ( amps <= Limits_I_to_V[ i ].range )
 			return Limits_I_to_V[ i ].limit;
 
-	fsc2_assert( 1 == 0 );
+	fsc2_impossible( );
 	return -1;
 }
 
@@ -288,22 +281,19 @@ static
 double
 max_compliance_amps_limit( unsigned int ch )
 {
-	double volts;
-	size_t i;
-
 	fsc2_assert( ch < NUM_CHANNELS );
 
 	/* If autoranging is on the set voltage level is what's relevant,
 	   otherwise the range setting */
 
-	volts = k26->source[ ch ].autorangev ?
-		    k26->source[ ch ].levelv : k26->source[ ch ].rangev;
+	double volts = k26->source[ ch ].autorangev ?
+		           k26->source[ ch ].levelv : k26->source[ ch ].rangev;
 
-	for ( i = 0; i < Num_Limits_V_to_I; i++ )
+	for ( size_t i = 0; i < Num_Limits_V_to_I; i++ )
 		if ( volts <= Limits_V_to_I[ i ].range )
 			return Limits_V_to_I[ i ].limit;
 
-	fsc2_assert( 1 == 0 );
+	fsc2_impossible( );
 	return -1;
 }
 
@@ -317,11 +307,9 @@ double
 keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
                                   double       volts )
 {
-    size_t i;
-
     volts = fabs( volts );
 
-    for ( i = 0; i < Num_Source_Ranges_V; i++ )
+    for ( size_t i = 0; i < Num_Source_Ranges_V; i++ )
         if ( volts <= Source_Ranges_V[ i ] )
             return Source_Ranges_V[ i ];
 
@@ -338,14 +326,12 @@ double
 keithley2600a_best_source_rangei( unsigned int ch,
                                   double       amps )
 {
-    size_t i;
-
     amps = fabs( amps );
 
     /* Find the lowest ramge the value fits in, but keep in mind that there's
        a raised minimum setting when the channel is in high capacity mode */
 
-    for ( i = 0; i < Num_Source_Ranges_I; i++ )
+    for ( size_t i = 0; i < Num_Source_Ranges_I; i++ )
         if ( amps <= Source_Ranges_I[ i ] )
         {
             if ( k26->source[ ch ].highc )
@@ -366,8 +352,6 @@ double
 keithley2600a_max_source_levelv( unsigned int ch )
 {
 	double max_volts = MAX_SOURCE_LEVELV;
-
-	fsc2_assert( ch < NUM_CHANNELS );
 
 	/* If output is off or we're in current sourcing mode any level up to
 	   the highest possible voltage can be set */
@@ -399,8 +383,6 @@ double
 keithley2600a_max_source_leveli( unsigned int ch )
 {
 	double max_amps = MAX_SOURCE_LEVELI;
-
-	fsc2_assert( ch < NUM_CHANNELS );
 
 	/* If output is off or we're in voltage sourcing mode any level up to
 	   the highest possible current can be set */
@@ -481,8 +463,6 @@ keithley2600a_test_source_leveli( unsigned int ch )
 double
 keithley2600a_min_source_rangev( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	/* If output is off or we're in current sourcing mode all ranges
 	   can be set */
 
@@ -507,8 +487,6 @@ keithley2600a_min_source_rangev( unsigned int ch )
 double
 keithley2600a_max_source_rangev( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	/* If output is off or we're in current sourcing mode all ranges
 	   can be set, so return the maximum one */
 
@@ -555,8 +533,6 @@ keithley2600a_min_source_rangei( unsigned int ch )
 double
 keithley2600a_max_source_rangei( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	/* If output is off or we're in voltage sourcing mode all ranges
 	   can be set, so return the maximum one */
 
@@ -579,12 +555,12 @@ bool
 keithley2600a_check_source_rangev( unsigned int ch,
                                    double       range )
 {
-    size_t i;
+    range = fabs( range );
+
     double min_range = keithley2600a_min_source_rangev( ch );
     double max_range = keithley2600a_max_source_rangev( ch );
 
-    range = fabs( range );
-
+    size_t i;
     for ( i = 0; i < Num_Source_Ranges_V; i++ )
         if ( Source_Ranges_V[ i ] == min_range )
             break;
@@ -605,10 +581,10 @@ keithley2600a_check_source_rangev( unsigned int ch,
 bool
 keithley2600a_test_source_rangev( unsigned int ch )
 {
-    double range = k26->source[ ch ].rangev;
-
     if ( k26->source[ ch ].autorangev )
         return OK;
+
+    double range = k26->source[ ch ].rangev;
 
     return    keithley2600a_check_source_rangev( ch, range )
            && 1.01 * range >= fabs( k26->source[ ch ].levelv );
@@ -624,10 +600,10 @@ bool
 keithley2600a_check_source_rangei( unsigned int ch,
                                    double       range )
 {
-    size_t i;
     double min_range = keithley2600a_min_source_rangei( ch );
     double max_range = keithley2600a_max_source_rangei( ch );
 
+    size_t i;
     for ( i = 0; i < Num_Source_Ranges_I; i++ )
         if ( Source_Ranges_I[ i ] == min_range )
             break;
@@ -648,10 +624,10 @@ keithley2600a_check_source_rangei( unsigned int ch,
 bool
 keithley2600a_test_source_rangei( unsigned int ch )
 {
-    double range = k26->source[ ch ].rangei;
-
     if ( k26->source[ ch ].autorangei )
         return OK;
+
+    double range = k26->source[ ch ].rangei;
 
     return    keithley2600a_check_source_rangei( ch, range )
            && 1.01 * range >= fabs( k26->source[ ch ].leveli );
@@ -679,8 +655,6 @@ basic_max_source_limitv( void )
 double
 keithley2600a_max_source_limitv( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	/*  If output is off or we're in current sourcing mode the highest
 		possible value can be set */
 
@@ -715,8 +689,6 @@ basic_max_source_limiti( void )
 double
 keithley2600a_max_source_limiti( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	/*  If output is off or we're in current sourcing mode the highest
 		possible value can be set */
 
@@ -750,8 +722,6 @@ keithley2600a_min_source_limitv( unsigned int ch  UNUSED_ARG )
 double
 keithley2600a_min_source_limiti( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-
 	if (    ! k26->source[ ch ].output
 		 || ! k26->source[ ch ].highc )
 		return MIN_SOURCE_LIMITI;
@@ -912,13 +882,11 @@ bool
 keithley2600a_check_measure_rangev( unsigned int ch  UNUSED_ARG,
                                     double   range )
 {
-    size_t i;
-
-    for ( i = 0; i < Num_Measure_Ranges_V; i++ )
+    for ( size_t i = 0; i < Num_Measure_Ranges_V; i++ )
         if ( range <= Measure_Ranges_V[ i ] )
-            return OK;
+            return true;
 
-    return FAIL;
+    return false;
 }
 
 
@@ -930,13 +898,11 @@ bool
 keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
                                     double       range )
 {
-    size_t i;
-
-    for ( i = 0; i < Num_Measure_Ranges_I; i++ )
+    for ( size_t i = 0; i < Num_Measure_Ranges_I; i++ )
         if ( range <= Measure_Ranges_I[ i ] )
-            return OK;
+            return true;
 
-    return FAIL;
+    return false;
 }
 
 
@@ -947,23 +913,23 @@ keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
 bool
 keithley2600a_test_toggle_source_output( unsigned int ch )
 {
-    bool res;
-
     /* Switching the channel off is always possible */
 
     if ( k26->source[ ch ].output )
         return true;
 
+    /* For check the output must look like it's on */
+
     k26->source[ ch ].output = true;
 
-    res =    (    k26->source[ ch ].output == OUTPUT_DCAMPS
-               && keithley2600a_test_source_leveli( ch )
-               && keithley2600a_test_source_rangei( ch )
-               && keithley2600a_test_source_limitv( ch ) )
-          || (    k26->source[ ch ].output == OUTPUT_DCVOLTS
-               && keithley2600a_test_source_levelv( ch )
-               && keithley2600a_test_source_rangev( ch )
-               && keithley2600a_test_source_limiti( ch ) );
+    bool res =    (    k26->source[ ch ].output == OUTPUT_DCAMPS
+                    && keithley2600a_test_source_leveli( ch )
+                    && keithley2600a_test_source_rangei( ch )
+                    && keithley2600a_test_source_limitv( ch ) )
+               || (    k26->source[ ch ].output == OUTPUT_DCVOLTS
+                    && keithley2600a_test_source_levelv( ch )
+                    && keithley2600a_test_source_rangev( ch )
+                    && keithley2600a_test_source_limiti( ch ) );
 
     k26->source[ ch ].output = false;
 
@@ -979,23 +945,23 @@ keithley2600a_test_toggle_source_output( unsigned int ch )
 bool
 keithley2600a_test_toggle_source_func( unsigned int ch )
 {
-    bool res;
-
     /* As long as output is off there's no possible problem */
 
-    if ( k26->source[ ch ].output )
+    if ( ! k26->source[ ch ].output )
         return true;
+
+    /* For checks the output must look like it's on */
 
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
-    res =    (    k26->source[ ch ].func == OUTPUT_DCAMPS
-               && keithley2600a_test_source_leveli( ch )
-               && keithley2600a_test_source_rangei( ch )
-               && keithley2600a_test_source_limitv( ch ) )
-          || (   k26->source[ ch ].func == OUTPUT_DCVOLTS
-              && keithley2600a_test_source_levelv( ch )
-              && keithley2600a_test_source_rangev( ch )
-              && keithley2600a_test_source_limiti( ch ) );
+    bool res =    (    k26->source[ ch ].func == OUTPUT_DCAMPS
+                    && keithley2600a_test_source_leveli( ch )
+                    && keithley2600a_test_source_rangei( ch )
+                    && keithley2600a_test_source_limitv( ch ) )
+               || (   k26->source[ ch ].func == OUTPUT_DCVOLTS
+                   && keithley2600a_test_source_levelv( ch )
+                   && keithley2600a_test_source_rangev( ch )
+                   && keithley2600a_test_source_limiti( ch ) );
 
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
@@ -1034,11 +1000,9 @@ double
 keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
                                    double       volts )
 {
-    size_t i;
-
     volts = fabs( volts );
 
-    for ( i = 0; i < Num_Measure_Ranges_V; i++ )
+    for ( size_t i = 0; i < Num_Measure_Ranges_V; i++ )
         if ( volts <= Measure_Ranges_V[ i ] )
             return Measure_Ranges_V[ i ];
 
@@ -1055,14 +1019,14 @@ double
 keithley2600a_best_measure_rangei( unsigned int ch,
                                    double       amps )
 {
-    size_t i = 0;
-
     amps = fabs( amps );
 
     /* Find the lowest range the value fits in, but keep in mind that there's
        a raised minimum setting when the channel is in high capacity mode */
 
     
+    size_t i = 0;
+
     if ( k26->source[ ch ].highc )
         for ( ; i < Num_Measure_Ranges_I; ++i )
             if ( Measure_Ranges_I[ i ] >= MIN_MEASURE_LOWRANGEI_HIGHC )

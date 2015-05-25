@@ -2281,7 +2281,7 @@ in configuration file for the module.
 
 
 @paragraphindent 0
-@strong{Note:} The number of points that can be done in measure-sweeps
+@strong{Note}: The number of points that can be done in measure-sweeps
 is limited to 728 or 2549 when measuring either voltage, current,
 power or resistance and to 364 or 1274 when measuring voltage and
 current simultaneously( the lower numbers are for ASCII data

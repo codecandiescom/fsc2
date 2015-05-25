@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -29,7 +29,7 @@
 #include "fsc2.h"
 
 
-static void is_pulser_func( void *       func,
+static void is_pulser_func( void       * func,
                             const char * text );
 static void is_pulser_driver( void );
 
@@ -182,8 +182,8 @@ is_pulser_driver( void )
  *----------------------------------------------------------------------*/
 
 static void
-is_pulser_func( void *       func,
-                            const char * text )
+is_pulser_func( void       * func,
+                const char * text )
 {
     is_pulser_driver( );
 

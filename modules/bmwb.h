@@ -28,12 +28,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <strings.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <sys/un.h>
 #include <sys/stat.h>
 

@@ -43,8 +43,6 @@
 
 /* Different types of variables */
 
-typedef enum Var_Type Var_Type_T;
-
 enum Var_Type {
     UNDEF_VAR       = 0,                /*     0 */
     STR_VAR         = ( 1 <<  0 ),      /*     1 */
@@ -60,6 +58,8 @@ enum Var_Type {
     REF_PTR         = ( 1 << 10 ),      /*  1024 */
     FUNC            = ( 1 << 11 )       /*  2048 */
 };
+
+typedef enum Var_Type Var_Type_T;
 
 
 typedef struct Var Var_T;

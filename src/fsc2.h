@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
 #include <locale.h>
 #include <math.h>
 #include <float.h>
@@ -48,6 +49,7 @@
 #include <sys/param.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/select.h>
 #include <sys/utsname.h>
 #include <fcntl.h>
 #include <forms.h>

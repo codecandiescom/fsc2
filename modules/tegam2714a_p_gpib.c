@@ -104,7 +104,7 @@ tegam2714a_p_init( const char * name )
         for ( i = 0; i < MIN_PULSER_BITS; i++ )
         {
             *ptr++ = 0x0f;
-            *ptr++ = 0xff;
+            *ptr++ = ( char ) 0xff;
         }
     else
         for ( i = 0; i < MIN_PULSER_BITS; i++ )

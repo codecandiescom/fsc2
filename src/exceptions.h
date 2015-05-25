@@ -54,8 +54,6 @@
 #include <setjmp.h>
 
 
-typedef enum Exception_Types Exception_Types_T;
-
 enum Exception_Types {
     EXCEPTION,
     OUT_OF_MEMORY_EXCEPTION,
@@ -69,6 +67,8 @@ enum Exception_Types {
     USER_BREAK_EXCEPTION,
     ABORT_EXCEPTION
 };
+
+typedef enum Exception_Types Exception_Types_T;
 
 
 jmp_buf *push_exception_frame( const char * /* file */,

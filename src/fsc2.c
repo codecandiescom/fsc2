@@ -1166,10 +1166,6 @@ scan_args( int   * argc,
 static void
 final_exit_handler( void )
 {
-    size_t len = sizeof( ( ( struct sockaddr_un * ) NULL )->sun_path );
-    char sock_file[ len ];
-
-
     /* Stop the child process and the HTTP server */
 
     if ( Fsc2_Internals.child_pid > 0 )
@@ -1188,18 +1184,6 @@ final_exit_handler( void )
 
     if ( Delete_old_file && EDL.files->name )
         unlink( EDL.files->name );
-
-    TRY
-    {
-        snprintf( sock_file, len, P_tmpdir "/fsc2_%lu.uds", ( long ) getpid );
-        unlink( sock_file );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-    {
-        fprintf( stderr, "Couldn't delete socket file '" P_tmpdir
-                 "/fsc2_%lu.uds'.\n", ( long ) getpid );
-    }
 
     if ( EDL.files )
     {
