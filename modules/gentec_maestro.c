@@ -258,26 +258,26 @@ gentec_maestro_init_hook( void )
 #if defined USE_SERIAL
     gm->handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
 #else
-    Need_LAN = SET;
+    Need_LAN = true;
     gm->handle = -1;
 #endif
 
     /* Initialize the structure for the device as good as possible */
 
     gm->mode = TEST_MODE;
-    gm->mode_has_been_set = UNSET;
+    gm->mode_has_been_set = false;
 
     gm->scale_index = TEST_SCALE_INDEX;;
     gm->min_scale_index = 0;
     gm->max_scale_index = MAX_SCALE;
 
-    gm->scale_index_has_been_set = UNSET;
+    gm->scale_index_has_been_set = false;
     gm->min_test_scale_index = MAX_SCALE;
     gm->max_test_scale_index = 0;
 
-    gm->att_is_available    = SET;;
-    gm->att_is_on        = UNSET;
-    gm->att_has_been_set = UNSET;
+    gm->att_is_available    = true;;
+    gm->att_is_on        = false;
+    gm->att_has_been_set = false;
 
     gm->wavelength = TEST_WAVELENGTH;
     gm->min_wavelength = 0;
@@ -285,7 +285,7 @@ gentec_maestro_init_hook( void )
     gm->min_wavelength_with_att = 0;
     gm->max_wavelength_with_att = LONG_MAX;
 
-    gm->wavelength_has_been_set = UNSET;
+    gm->wavelength_has_been_set = false;
     gm->min_test_wavelength = LONG_MAX;
     gm->max_test_wavelength = 0;
     gm->min_test_wavelength_with_att = LONG_MAX;
@@ -296,25 +296,25 @@ gentec_maestro_init_hook( void )
     strcpy( gm->head_name, TEST_HEAD_NAME );
 
     gm->trigger_level = TEST_TRIGGER_LEVEL;
-    gm->trigger_level_has_been_set = UNSET;
+    gm->trigger_level_has_been_set = false;
 
-    gm->autoscale_is_on = SET;
-    gm->autoscale_has_been_set = UNSET;
+    gm->autoscale_is_on = true;
+    gm->autoscale_has_been_set = false;
 
-    gm->anticipation_is_on = UNSET;
-    gm->anticipation_has_been_set = UNSET;
+    gm->anticipation_is_on = false;
+    gm->anticipation_has_been_set = false;
 
-    gm->zero_offset_is_on = UNSET;
-    gm->zero_offset_has_been_set = UNSET;
+    gm->zero_offset_is_on = false;
+    gm->zero_offset_has_been_set = false;
 
     gm->user_multiplier = TEST_USER_MULTIPLIER;
-    gm->user_multiplier_has_been_set = UNSET;
+    gm->user_multiplier_has_been_set = false;
 
     gm->user_offset = TEST_USER_OFFSET;
-    gm->user_offset_has_been_set = UNSET;
+    gm->user_offset_has_been_set = false;
 
-    gm->analog_output_is_on = UNSET;
-    gm->analog_output_has_been_set = UNSET;
+    gm->analog_output_is_on = false;
+    gm->analog_output_has_been_set = false;
 
     return 1;
 }
@@ -332,16 +332,16 @@ gentec_maestro_test_hook( void )
 
     gm = &gentec_maestro_test;
 
-    gm->mode_has_been_set = UNSET;
-    gm->scale_index_has_been_set = UNSET;
-    gm->att_has_been_set = UNSET;
-    gm->wavelength_has_been_set = UNSET;
-    gm->trigger_level_has_been_set = UNSET;
-    gm->anticipation_has_been_set = UNSET;
-    gm->zero_offset_has_been_set = UNSET;
-    gm->user_multiplier_has_been_set = UNSET;
-    gm->user_offset_has_been_set = UNSET;
-    gm->analog_output_has_been_set = UNSET;
+    gm->mode_has_been_set = false;
+    gm->scale_index_has_been_set = false;
+    gm->att_has_been_set = false;
+    gm->wavelength_has_been_set = false;
+    gm->trigger_level_has_been_set = false;
+    gm->anticipation_has_been_set = false;
+    gm->zero_offset_has_been_set = false;
+    gm->user_multiplier_has_been_set = false;
+    gm->user_offset_has_been_set = false;
+    gm->analog_output_has_been_set = false;
 
     return 1;
 }
@@ -376,7 +376,7 @@ gentec_maestro_exp_hook( void )
     }
     OTHERWISE
     {
-        is_ok = UNSET;
+        is_ok = false;
         gentec_maestro_close( );
     }
 
@@ -483,7 +483,7 @@ powermeter_scale( Var_T * v )
     else
     {
         gm->scale_index = idx;
-        gm->scale_index_has_been_set = SET;
+        gm->scale_index_has_been_set = true;
 
         gm->min_scale_index = d_min( gm->min_scale_index, idx );
         gm->max_scale_index = d_max( gm->max_scale_index, idx );
@@ -502,13 +502,14 @@ powermeter_scale( Var_T * v )
 Var_T *
 powermeter_get_scale_limits( Var_T * v )
 {
-    double min_max[ 2 ];
+    double * min_max;
 
     too_many_arguments( v );
 
     if ( FSC2_MODE == PREPARATION )
         no_query_possible( );
 
+    min_max = T_malloc( 2 * sizeof *min_max );
     min_max[ 0 ] = gentec_maestro_index_to_scale( gm->min_scale_index );
     min_max[ 1 ] = gentec_maestro_index_to_scale( gm->max_scale_index );
 
@@ -549,7 +550,7 @@ powermeter_autoscale( Var_T * v )
     else  
   {
         gm->autoscale_is_on = as;
-        gm->autoscale_has_been_set = SET;
+        gm->autoscale_has_been_set = true;
     }
 
     return vars_push( INT_VAR, gm->autoscale_is_on ? 1L : 0L );
@@ -597,7 +598,7 @@ powermeter_trigger_level( Var_T * v )
     else
     {
         gm->trigger_level = 0.1 * lrnd( 10 * level );
-        gm->trigger_level_has_been_set = SET;
+        gm->trigger_level_has_been_set = true;
     }
 
     if ( fabs( level - gm->trigger_level ) > 0.01 )
@@ -692,7 +693,7 @@ powermeter_wavelength( Var_T * v )
                               l_max( wl_nm, gm->max_test_wavelength_with_att );
         }
 
-        gm->wavelength_has_been_set = SET;
+        gm->wavelength_has_been_set = true;
     }
 
     return vars_push( FLOAT_VAR, 1.0e-9 * wl_nm );
@@ -709,8 +710,8 @@ powermeter_wavelength( Var_T * v )
 Var_T *
 powermeter_get_wavelength_limits( Var_T * v )
 {
-    bool with_att = UNSET;
-    double wls[ 2 ];
+    bool with_att = false;
+    double * wls;
 
 
     if ( FSC2_MODE == PREPARATION )
@@ -724,6 +725,8 @@ powermeter_get_wavelength_limits( Var_T * v )
         print( FATAL, "No attenuator available.\n" );
         THROW( EXCEPTION );
     }
+
+    wls = T_malloc( 2 * sizeof *wls );
 
     if ( ! with_att || gm->att_is_available )
     {
@@ -752,18 +755,18 @@ powermeter_get_reading( Var_T * v )
 {
     double lf;
     double mw;
-    bool wait_for_new = UNSET;
+    bool wait_for_new = false;
     long max_wait = 0;
-    bool upper_wait_limit = UNSET;
+    bool upper_wait_limit = false;
 
     if ( v )
     {
-        wait_for_new = SET;
+        wait_for_new = true;
 
         if ( ( mw = get_double( v, NULL ) ) > 0 )
         {
             max_wait = lrnd( 1000000 * mw );
-            upper_wait_limit = SET;
+            upper_wait_limit = true;
         }
 
         too_many_arguments( v );
@@ -808,7 +811,7 @@ powermeter_get_reading( Var_T * v )
             }
 
             delay = l_min( delay, max_wait );
-            fsc2_usleep( delay, UNSET );
+            fsc2_usleep( delay, false );
             stop_on_user_request( );
         }
     }
@@ -845,7 +848,7 @@ powermeter_anticipation( Var_T * v )
     else  
   {
         gm->anticipation_is_on = ac;
-        gm->anticipation_has_been_set = SET;
+        gm->anticipation_has_been_set = true;
     }
 
     return vars_push( INT_VAR, gm->anticipation_is_on ? 1L : 0L );
@@ -926,7 +929,7 @@ powermeter_attenuator( Var_T * v )
     else
     {
         gm->att_is_on = att;
-        gm->att_has_been_set = SET;
+        gm->att_has_been_set = true;
     }
 
     return vars_push( INT_VAR, gm->att_is_on ? 1L : 0L );
@@ -975,7 +978,7 @@ powermeter_zero_offset( Var_T * v )
     else
     {
         gm->zero_offset_is_on = zo;
-        gm->zero_offset_has_been_set = SET;
+        gm->zero_offset_has_been_set = true;
     }
 
     return vars_push( INT_VAR, gm->zero_offset_is_on ? 1L : 0L );
@@ -1023,7 +1026,7 @@ powermeter_multiplier( Var_T * v )
     else
     {
         gm->user_multiplier = strtod( gentec_maestro_format( mul ), NULL );
-        gm->user_multiplier_has_been_set = SET;
+        gm->user_multiplier_has_been_set = true;
     }
 
     if ( mul != 0 && fabs( ( mul - gm->user_multiplier ) / mul ) >= 0.01 )
@@ -1073,7 +1076,7 @@ powermeter_offset( Var_T * v )
     else
     {
         gm->user_offset = strtod( gentec_maestro_format( offset ), NULL );
-        gm->user_offset_has_been_set = SET;
+        gm->user_offset_has_been_set = true;
     }
 
     if ( offset != 0 && fabs( ( offset - gm->user_offset ) / offset ) >= 0.01 )
@@ -1123,7 +1126,7 @@ powermeter_analog_output( Var_T * v )
     else
     {
         gm->analog_output_is_on = on_off;
-        gm->analog_output_has_been_set = SET;
+        gm->analog_output_has_been_set = true;
     }
 
     return vars_push( INT_VAR, on_off ? 1L : 0L );
@@ -1166,8 +1169,8 @@ gentec_maestro_init( void )
     /* Disable continupus transmission of data, binary transfers and get the
        currect settings of the device */
     
-    gentec_maestro_continuous_transmission( UNSET );
-    gentec_maestro_set_joulemeter_binary_mode( UNSET );
+    gentec_maestro_continuous_transmission( false );
+    gentec_maestro_set_joulemeter_binary_mode( false );
     gentec_maestro_get_extended_status( );
 
     /* Check if there's a detector head connected at all - without one
@@ -1177,7 +1180,7 @@ gentec_maestro_init( void )
     if ( gm->mode == NO_DETECTOR )
     {
         print( FATAL, "No detector head is connected.\n" );
-        return UNSET;
+        return false;
     }
 
     /* Now check if settings made in the preparation phase were valid.
@@ -1189,7 +1192,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During preparations a scale was requested that "
                "can't be set for the connected head.\n" );
-        return UNSET;
+        return false;
     }
 
     /* Check if the attenuator was set, but there isn't one. */
@@ -1198,7 +1201,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During preparations the attenuator was set, "
                "but there's no attenuator.\n" );
-        return UNSET;
+        return false;
     }   
 
     /* Check if the last set wavelength fits the allowed wavelength range
@@ -1215,7 +1218,7 @@ gentec_maestro_init( void )
             {
                 print( FATAL, "During preparations a wavelength (with "
                        "attenuator on) was set that is out of range.\n" );
-                return UNSET;
+                return false;
             }
         }
         else if (    gmt->wavelength < gm->min_wavelength
@@ -1223,7 +1226,7 @@ gentec_maestro_init( void )
         {
             print( FATAL, "During preparations a wavelength (with "
                    " attenuator off) was set that is out of range.\n" );
-            return UNSET;
+            return false;
         }
     }
 
@@ -1236,7 +1239,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During test a scale was requested that can't be set "
                "for the connected head.\n" );
-        return UNSET;
+        return false;
     }
 
     /* Check for the attenuator having been set despite none available */
@@ -1245,7 +1248,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "Durinf the the attenuator was set, but there's no "
                " attenuator.\n" );
-        return UNSET;
+        return false;
     }   
 
     if (    gmt->max_test_wavelength != 0
@@ -1254,7 +1257,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During tests an out-of-range wavelength was "
                "requested.\n" );
-        return UNSET;
+        return false;
     }
 
     /* Wavelength checks:
@@ -1273,7 +1276,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During tests an out of range wavelength was "
                "requested.\n" );
-        return UNSET;
+        return false;
     }
 
     if (    gmt->max_test_wavelength_with_att != 0
@@ -1284,7 +1287,7 @@ gentec_maestro_init( void )
     {
         print( FATAL, "During tests an out of range wavelength was "
                "requested.\n" );
-        return UNSET;
+        return false;
     }
 
     if ( gmt->max_test_wavelength_unknown != 0 )
@@ -1300,7 +1303,7 @@ gentec_maestro_init( void )
             {
                 print( FATAL, "During tests an out-of-range wavelength was "
                        "requested.\n" );
-                return UNSET;
+                return false;
             }
         }
         else if (    gmt->min_test_wavelength_unknown < gm->min_wavelength
@@ -1308,7 +1311,7 @@ gentec_maestro_init( void )
         {
             print( FATAL, "During tests an out-of-range wavelength was "
                    "requested.\n" );
-            return UNSET;
+            return false;
         }
     }
 
@@ -1323,7 +1326,7 @@ gentec_maestro_init( void )
                     && gm->scale_index != gmt->scale_index;
 
     if ( set_autoscale && ! set_scale )
-        gentec_maestro_set_autoscale( UNSET );
+        gentec_maestro_set_autoscale( false );
     else if ( ! set_autoscale && set_scale )
         gentec_maestro_set_scale( gm->scale_index );
     else if ( set_autoscale && set_scale )
@@ -1331,11 +1334,11 @@ gentec_maestro_init( void )
         if ( gm->autoscale_is_on )
         {
             gentec_maestro_set_scale( gmt->scale_index );
-            gentec_maestro_set_autoscale( UNSET );
+            gentec_maestro_set_autoscale( false );
         }
         else
         {
-            gentec_maestro_set_autoscale( SET );
+            gentec_maestro_set_autoscale( true );
             gentec_maestro_set_scale( gmt->scale_index );
         }
     }
@@ -1391,7 +1394,7 @@ gentec_maestro_init( void )
     if ( gm->analog_output_has_been_set )
         gentec_maestro_set_analog_output( gmt->analog_output_is_on );
 
-    return SET;
+    return true;
 }
 
 
@@ -1413,7 +1416,7 @@ gentec_maestro_set_scale( int index )
 
     /* Note: setting a scale unsets autoscaling */
 
-    gentec_maestro.autoscale_is_on = UNSET;
+    gentec_maestro.autoscale_is_on = false;
 	return gentec_maestro_index_to_scale( gentec_maestro.scale_index = index );
 }
 
@@ -2282,14 +2285,14 @@ gentec_maestro_scale_to_index( double   scale,
 	int i;
 
 
-    *no_fit = UNSET;
+    *no_fit = false;
 	for ( i = 0; i <= MAX_SCALE; i++ )
 	{
 		double r = gentec_maestro_index_to_scale( i );
 
 		if ( scale < 0.9999 * r )
         {
-            *no_fit = SET;
+            *no_fit = true;
 			return i;
         }
 
@@ -2403,7 +2406,7 @@ gentec_maestro_open( void )
 #else
     if ( ( gentec_maestro.handle = fsc2_lan_open( DEVICE_NAME, NETWORK_ADDRESS,
                                                   PORT, OPEN_TIMEOUT,
-                                                  UNSET ) ) == -1 )
+                                                  false ) ) == -1 )
 #endif
     {
         print( FATAL, "ailed to connect to device.\n" );
@@ -2446,7 +2449,7 @@ gentec_maestro_command( const char * cmd )
     long len = strlen( cmd );
 
     if ( fsc2_lan_write( gentec_maestro.handle, cmd, len,
-                         WRITE_TIMEOUT, UNSET ) != len )
+                         WRITE_TIMEOUT, false ) != len )
 #endif
         gentec_maestro_failure( );
 }
@@ -2487,7 +2490,7 @@ gentec_maestro_read( char * reply,
     if (    ! gentec_maestro_serial_comm( SERIAL_READ, reply, &length )
 #else
     if (    ( length = fsc2_lan_read( gentec_maestro.handle, reply, length,
-                                      READ_TIMEOUT, UNSET ) ) < 3
+                                      READ_TIMEOUT, false ) ) < 3
 #endif
          || length < 3
          || strncmp( reply + length - 2, "\r\n", 2 ) )
@@ -2565,7 +2568,7 @@ gentec_maestro_serial_comm( int type,
 
             len = strlen( buf );
             if ( fsc2_serial_write( gentec_maestro.handle, buf, len,
-                                    WRITE_TIMEOUT, SET ) != len )
+                                    WRITE_TIMEOUT, true ) != len )
             {
                 if ( len == 0 )
                     stop_on_user_request( );
@@ -2582,7 +2585,7 @@ gentec_maestro_serial_comm( int type,
             /* Try to read from the device (reads need to stop on "\r\n") */
 
             if ( ( *lptr = fsc2_serial_read( gentec_maestro.handle, buf, *lptr,
-                                             "\r\n", READ_TIMEOUT, UNSET ) )
+                                             "\r\n", READ_TIMEOUT, false ) )
                  <= 0 )
             {
                 if ( *lptr == 0 )

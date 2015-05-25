@@ -215,7 +215,7 @@ oriel_cs_260_init_hook( void )
 
     /* Set global variable to indicate that GPIB bus is needed */
 
-    Need_GPIB = SET;
+    Need_GPIB = true;
 
     /* Reset several variables in the structure describing the device */
 
@@ -408,7 +408,7 @@ monochromator_step( Var_T * v )
 {
     long step;
     int grat = oriel_cs_260.grating;
-    bool test_only = UNSET;
+    bool test_only = false;
 
     /* Witout no arguments return the cirrent stepper motor position */
 
@@ -868,7 +868,7 @@ oriel_cs_260_init( const char * name )
        lot of time are finished) */
 
     if ( ! oriel_cs_260_command( "HANDSHAKE 1\n", 0 ) )
-        return UNSET;
+        return false;
 
     /* Clear a possibly set error byte by reading it */
 
@@ -877,7 +877,7 @@ oriel_cs_260_init( const char * name )
     /* Switch to nanometer units */
 
     if ( ! oriel_cs_260_command( "UNITS NM\n", 0 ) )
-        return UNSET;
+        return false;
 
     /* Determine which grating is in use and all information about both of
        them. Also check if during the test run a wavelength was requested
@@ -927,7 +927,7 @@ oriel_cs_260_get_grating( void )
     long length = 30;
 
 
-    if (    oriel_cs_260_talk( "GRAT?\n", reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( "GRAT?\n", reply, &length, false ) != SUCCESS
          || length < 5
          || ! isdigit( ( int ) *reply )
          || ( *reply - '0' < 1 || *reply - '0' > NUM_GRATINGS )
@@ -956,7 +956,7 @@ oriel_cs_260_set_grating( int grating )
         return grating;
 
     if ( ! oriel_cs_260.shutter_state )
-        oriel_cs_260_set_shutter( SET );
+        oriel_cs_260_set_shutter( true );
 
     cmd[ 5 ] = '1' + grating;
     if ( ! oriel_cs_260_command( cmd, Max_Grating_Switch_Delay ) )
@@ -993,7 +993,7 @@ oriel_cs_260_get_number_of_lines( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
@@ -1074,7 +1074,7 @@ oriel_cs_260_get_calibration_factor( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
@@ -1137,7 +1137,7 @@ oriel_cs_260_get_calibration_offset( int grating )
     fsc2_assert( grating >= 0 && grating < NUM_GRATINGS );
 
     req[ 4 ] = grating + '1';
-    if (    oriel_cs_260_talk( req, reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( req, reply, &length, false ) != SUCCESS
          || length < 1
          || (    *reply != '-'
               && *reply != '+'
@@ -1202,7 +1202,7 @@ oriel_cs_260_get_zero( int    grating )
 
     cmd[ 4 ] = grating + '1';
     
-    if (    oriel_cs_260_talk( cmd, reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( cmd, reply, &length, false ) != SUCCESS
          || length < 1 )
         oriel_cs_260_failure( );
 
@@ -1256,7 +1256,7 @@ oriel_cs_260_get_wavelength( void )
 
     /* Note: the device may return a negative wavelength... */
 
-    if (    oriel_cs_260_talk( "WAVE?\n", reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( "WAVE?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ( ! isdigit( ( int ) *reply ) && *reply != '-' ) )
         oriel_cs_260_failure( );
@@ -1325,7 +1325,7 @@ oriel_cs_260_get_position( void )
     char *ep;
 
 
-    if (    oriel_cs_260_talk( "STEP?\n", reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( "STEP?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
@@ -1350,7 +1350,7 @@ oriel_cs_260_do_step( long int step )
 
 
     if ( step == 0 )
-        return SET;
+        return true;
 
     sprintf( cmd, "STEP %ld\n", step );
     if ( ! oriel_cs_260_command( cmd, Max_Wavelength_Delay ) )
@@ -1359,7 +1359,7 @@ oriel_cs_260_do_step( long int step )
         {
             print( WARN, "Can't change position by %ld, out of range.\n",
                    step );
-            return UNSET;
+            return false;
         }
         else
             print( FATAL, "Failed to change position by %ld.\n", step );
@@ -1368,7 +1368,7 @@ oriel_cs_260_do_step( long int step )
 
     oriel_cs_260.position += step;
     oriel_cs_260_get_wavelength( );
-    return SET;
+    return true;
 }
 
 
@@ -1383,7 +1383,7 @@ oriel_cs_260_get_shutter( void )
     char reply[ 3 ];
     long length = 3;
 
-    if (    oriel_cs_260_talk( "SHUTTER?\n", reply, &length, SET ) != SUCCESS
+    if (    oriel_cs_260_talk( "SHUTTER?\n", reply, &length, true ) != SUCCESS
          || length != 1
          || ( *reply != 'C' && *reply != 'O' ) )
         oriel_cs_260_failure( );
@@ -1419,7 +1419,7 @@ oriel_cs_260_set_shutter( bool on_off )
                       - (   oriel_cs_260.last_shutter_close.tv_sec
                           + 1.0e-6 * oriel_cs_260.last_shutter_close.tv_usec );
         if ( diff < MIN_SHUTTER_REPEAT_TIME )
-            fsc2_usleep( 1.0e6 * ( MIN_SHUTTER_REPEAT_TIME - diff ), UNSET );
+            fsc2_usleep( 1.0e6 * ( MIN_SHUTTER_REPEAT_TIME - diff ), false );
     }
     else
     {
@@ -1427,7 +1427,7 @@ oriel_cs_260_set_shutter( bool on_off )
                       - (   oriel_cs_260.last_shutter_open.tv_sec
                           + 1.0e-6 * oriel_cs_260.last_shutter_open.tv_usec );
         if ( diff < MIN_SHUTTER_EXPOSURE_TIME )
-            fsc2_usleep( 1.0e6 * ( MIN_SHUTTER_EXPOSURE_TIME - diff ), UNSET );
+            fsc2_usleep( 1.0e6 * ( MIN_SHUTTER_EXPOSURE_TIME - diff ), false );
     }
 
     cmd[ 8 ] = on_off ? 'C' : 'O';
@@ -1490,7 +1490,7 @@ oriel_cs_260_get_filter( void )
     long length = 3;
 
 
-    oriel_cs_260_talk( "FILTER?\n", reply, &length, SET );
+    oriel_cs_260_talk( "FILTER?\n", reply, &length, true );
     if (    length != 1
          || ! isdigit( ( int ) *reply ) )
         oriel_cs_260_failure( );
@@ -1533,7 +1533,7 @@ oriel_cs_260_get_outport( void )
     char reply[ 3 ];
     long length = 3;
 
-    if (    oriel_cs_260_talk( "OUTPORT?\n", reply, &length, SET ) != SUCCESS
+    if (    oriel_cs_260_talk( "OUTPORT?\n", reply, &length, true ) != SUCCESS
          || length != 1
          || ( *reply != '1' && *reply != '2' ) )
         oriel_cs_260_failure( );
@@ -1574,7 +1574,7 @@ oriel_cs_260_get_error( void )
     char reply[ 3 ];
     long length = 3;
 
-    if ( oriel_cs_260_talk( "ERROR?\n", reply, &length, UNSET ) != SUCCESS )
+    if ( oriel_cs_260_talk( "ERROR?\n", reply, &length, false ) != SUCCESS )
         oriel_cs_260_failure( );
 
     if ( length == 0 )     /* no error */
@@ -1638,13 +1638,13 @@ oriel_cs_260_command( const char * cmd,
     }
 
     if ( ! strncmp( buf, "0\r\n", 3 ) )
-        return SET;
+        return true;
 
     len = 1;
     if ( gpib_read( oriel_cs_260.device, buf, &len ) == FAILURE )
         oriel_cs_260_failure( );
 
-    return UNSET;
+    return false;
 }
 
 
@@ -1738,7 +1738,7 @@ oriel_cs_260_get_gpib_address( void )
     char *ep;
 
 
-    if (    oriel_cs_260_talk( "ADDRESS?\n", reply, &length, UNSET ) != SUCCESS
+    if (    oriel_cs_260_talk( "ADDRESS?\n", reply, &length, false ) != SUCCESS
          || length < 1
          || ! isdigit( ( int ) reply[ 0 ] ) )
         oriel_cs_260_failure( );
