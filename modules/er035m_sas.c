@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -60,31 +60,19 @@ Var_T * gaussmeter_lower_search_limit( Var_T * v );
 /* internally used functions */
 
 static double er035m_sas_get_field( void );
-
 static int er035m_sas_get_resolution( void );
-
 static void er035m_sas_set_resolution( int res_index );
-
 static long er035m_sas_get_upper_search_limit( void );
-
 static long er035m_sas_get_lower_search_limit( void );
-
 static void er035m_sas_set_upper_search_limit( long ul );
-
 static void er035m_sas_set_lower_search_limit( long ll );
-
 static bool er035m_sas_open( void );
-
 static bool er035m_sas_close( void );
-
 static bool er035m_sas_write( const char * buf );
-
 static bool er035m_sas_read( char *   buf,
                              size_t * len );
-
 static bool er035m_sas_comm( int type,
                              ... );
-
 static void er035m_sas_comm_fail( void );
 
 
@@ -106,7 +94,7 @@ static struct {
     bool is_bad_field;
 } nmr, nmr_stored;
 
-static const char *er035m_sas_eol = "\r\n";
+static const char * er035m_sas_eol = "\r\n";
 
 static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
@@ -668,22 +656,27 @@ gaussmeter_probe_orientation( Var_T * v )
 Var_T *
 gaussmeter_command( Var_T * v )
 {
-    static char *cmd;
-
-
-    cmd = NULL;
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-        if ( er035m_sas_write( cmd ) == FAIL )
-        {
-            T_free( cmd );
-            er035m_sas_comm_fail( );
-        }
+		char * cmd = NULL;
+		CLOBBER_PROTECT( cmd );
 
-        T_free( cmd );
+        TRY
+        {
+			cmd = T_strdup( v->val.sptr );
+			translate_escape_sequences( cmd );
+			if ( er035m_sas_write( cmd ) == FAIL )
+				er035m_sas_comm_fail( );
+			cmd = T_free( cmd );
+			TRY_SUCCESS;
+		}
+        OTHERWISE
+        {
+            cmd = T_free( cmd );
+            RETHROW;
+        }
     }
 
     return vars_push( INT_VAR, 1L );
@@ -696,15 +689,10 @@ gaussmeter_command( Var_T * v )
 Var_T *
 gaussmeter_upper_search_limit( Var_T * v )
 {
-    double val;
-    long ul;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.upper_search_limit );
 
-    val = get_double( v, "upper search limit" );
-    ul = lrnd( ceil( val ) );
+    long ul = lrnd( ceil( get_double( v, "upper search limit" ) ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F1 : nmr.probe_type ] )
@@ -740,15 +728,10 @@ gaussmeter_upper_search_limit( Var_T * v )
 Var_T *
 gaussmeter_lower_search_limit( Var_T * v )
 {
-    double val;
-    long ll;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.lower_search_limit );
 
-    val = get_double( v, "lower search limit" );
-    ll = lrnd( floor( val ) );
+    long ll = lrnd( floor( get_double( v, "lower search limit" ) ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F0 : nmr.probe_type ] )

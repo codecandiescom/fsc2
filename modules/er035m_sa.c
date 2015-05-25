@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -67,25 +67,16 @@ Var_T * gaussmeter_lower_search_limit( Var_T * v );
 /* internally used functions */
 
 static double er035m_sa_get_field( void );
-
 static int er035m_sa_get_resolution( void );
-
 static void er035m_sa_set_resolution( int res_index );
-
 static long er035m_sa_get_upper_search_limit( void );
-
 static long er035m_sa_get_lower_search_limit( void );
-
 static void er035m_sa_set_upper_search_limit( long ul );
-
 static void er035m_sa_set_lower_search_limit( long ll );
-
 static bool er035m_sa_command( const char * cmd );
-
 static bool er035m_sa_talk( const char * cmd,
                             char *       reply,
                             long *       length );
-
 static void er035m_sa_failure( void );
 
 
@@ -631,24 +622,25 @@ gaussmeter_probe_orientation( Var_T * v )
 Var_T *
 gaussmeter_command( Var_T * v )
 {
-    static char *cmd;
 
-
-    cmd = NULL;
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * cmd = NULL;
+        CLOBBER_PROTECT( cmd );
+
         TRY
         {
-            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            cmd = T_strdup( v->val.sptr );
+            translate_escape_sequences( cmd );
             er035m_sa_command( cmd );
-            T_free( cmd );
+            cmd = T_free( cmd );
             TRY_SUCCESS;
         }
         OTHERWISE
         {
-            T_free( cmd );
+            cmd = T_free( cmd );
             RETHROW;
         }
     }
@@ -663,15 +655,10 @@ gaussmeter_command( Var_T * v )
 Var_T *
 gaussmeter_upper_search_limit( Var_T * v )
 {
-    double val;
-    long ul;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.upper_search_limit );
 
-    val = get_double( v, "upper search limit" );
-    ul = lrnd( ceil( val ) );
+    long int ul = lrnd( ceil( get_double( v, "upper search limit" ) ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F1 : nmr.probe_type ] )
@@ -707,15 +694,10 @@ gaussmeter_upper_search_limit( Var_T * v )
 Var_T *
 gaussmeter_lower_search_limit( Var_T * v )
 {
-    double val;
-    long ll;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.lower_search_limit );
 
-    val = get_double( v, "lower search limit" );
-    ll = lrnd( floor( val ) );
+    long ll = lrnd( floor( get_double( v, "lower search limit" ) ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F0 : nmr.probe_type ] )
@@ -832,7 +814,6 @@ er035m_sa_get_resolution( void )
     char buffer[ 20 ];
     long length = sizeof buffer;
 
-
     er035m_sa_talk( "RS\r", buffer, &length );
 
     if ( length >= 3 )
@@ -880,7 +861,6 @@ er035m_sa_get_upper_search_limit( void )
     char buffer[ 20 ];
     long length = sizeof buffer;
 
-
     er035m_sa_talk( "UL\r", buffer, &length );
     return T_atol( buffer );
 }
@@ -909,7 +889,6 @@ er035m_sa_set_upper_search_limit( long ul )
 {
     char cmd[ 40 ];
 
-
     snprintf( cmd, sizeof cmd, "UL%ld\r", ul );
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
         er035m_sa_failure( );
@@ -924,7 +903,6 @@ static void
 er035m_sa_set_lower_search_limit( long ll )
 {
     char cmd[ 40 ];
-
 
     snprintf( cmd, sizeof cmd, "LL%ld\r", ll );
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )

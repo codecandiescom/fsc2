@@ -21,16 +21,16 @@ SV *
 C_fcntl_lock( fd, function, flock_hash, int_err )
     int fd
     int function
-    SV *flock_hash
-    SV *int_err
+    SV * flock_hash
+    SV * int_err
 
     INIT:
         struct flock flock_struct;
-        HV *fs;
-        SV **sv_type,
-           **sv_whence,
-           **sv_start,
-           **sv_len;
+        HV * fs;
+        SV ** sv_type,
+           ** sv_whence,
+           ** sv_start,
+           ** sv_len;
 
         sv_setiv( int_err, 0 );
 
@@ -67,9 +67,9 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
         if ( fcntl( fd, function, &flock_struct ) != 0 )
             XSRETURN_UNDEF;
 
-        /* Now to find out who's holding the lock we now must unpack the
-           structure we got back from fcntl(2) and store it in the hash we
-           got passed. */
+        /* Now, to find out who's holding the lock we must unpack the
+           structure we got back from fcntl(2) and store it in the hash
+            we got passed. */
 
         if ( function == F_GETLK )
         {
@@ -87,4 +87,3 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
         RETVAL = newSVpvn( "0 but true", 10 );
 
     OUTPUT:
-        RETVAL

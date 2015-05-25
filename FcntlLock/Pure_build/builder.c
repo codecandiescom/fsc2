@@ -102,23 +102,23 @@ main( void )
 
     for ( i = 0; i < NUM_ELEMS( params ); ++i )
     {
-		if ( pos != params[ i ].offset )
-			sprintf( packstr + strlen( packstr ), "x%lu",
-					 ( unsigned long )( params[ i ].offset - pos ) );
-		pos = params[ i ].offset;
+        if ( pos != params[ i ].offset )
+            sprintf( packstr + strlen( packstr ), "x%lu",
+                     ( unsigned long )( params[ i ].offset - pos ) );
+        pos = params[ i ].offset;
 
         switch ( params[ i ].size )
         {
             case 1 :
-				strcat( packstr, "c" );
+                strcat( packstr, "c" );
                 break;
 
             case 2 :
-				strcat( packstr, "s" );
+                strcat( packstr, "s" );
                 break;
 
             case 4 :
-				strcat( packstr, "l" );
+                strcat( packstr, "l" );
                 break;
 
             case 8 :
@@ -131,14 +131,14 @@ main( void )
 
                 exit( EXIT_FAILURE );
 #endif
-				strcat( packstr, "q" );
+                strcat( packstr, "q" );
                 break;
 
             default :
                 exit( EXIT_FAILURE );
         }
 
-		pos += params[ i ].size;
+        pos += params[ i ].size;
     }
 
     if ( pos < size )
@@ -154,8 +154,8 @@ main( void )
             "    my $self = shift;\n"
             "    return pack( '%s',\n", packstr );
     for ( i = 0; i < NUM_ELEMS( params ); ++i )
-		printf( "                 $self->{ %s }%s", params[ i ].name,
-				i == NUM_ELEMS( params ) - 1 ? " " : ",\n" );
+        printf( "                 $self->{ %s }%s", params[ i ].name,
+                i == NUM_ELEMS( params ) - 1 ? " " : ",\n" );
 
     printf( ");\n}\n\n\n"
             "###########################################################\n\n"
@@ -165,12 +165,12 @@ main( void )
             "# 'flock_struct'.\n\n"
             "sub unpack_flock {\n"
             "     my ( $self, $data ) = @_;\n"
-			"     ( " );
+            "     ( " );
 
     for ( i = 0; i < NUM_ELEMS( params ); ++i )
         printf( "$self->{ %-8s }%s", params[ i ].name,
-				i == NUM_ELEMS( params ) - 1 ? " " : ",\n       " );
-	printf( ") = unpack( '%s', $data );\n}\n", packstr );
+                i == NUM_ELEMS( params ) - 1 ? " " : ",\n       " );
+    printf( ") = unpack( '%s', $data );\n}\n", packstr );
 
     return 0;
 }

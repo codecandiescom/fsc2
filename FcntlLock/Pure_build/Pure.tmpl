@@ -35,7 +35,7 @@ sub lock {
     my $ret = fcntl( $fh, $action, $buf );
 
     if ( $ret  ) {
-		$self->unpack_flock( $buf );
+        $self->unpack_flock( $buf );
         $self->{ errno } = $self->{ error } = undef;
     } else {
         $self->get_error( $self->{ errno } = $! + 0 );
@@ -45,3 +45,7 @@ sub lock {
 }
 
 
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:

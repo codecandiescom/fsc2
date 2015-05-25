@@ -154,20 +154,24 @@ freq_counter_measure( Var_T * v )
 Var_T *
 freq_counter_resolution( Var_T * v )
 {
-	size_t i;
-	double res[ ] = { 1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6 };
-	double resolution;
-
-
 	if ( v == NULL )
 	{
 		print( FATAL, "Frequency resolution can only be set, not queried.\n" );
 		THROW( EXCEPTION );
 	}
 
-	resolution = get_double( v, "frequency resolution" );
+	double resolution = get_double( v, "frequency resolution" );
 
 	too_many_arguments( v );
+
+	if ( resolution <= 0 )
+	{
+		print( FATAL, "Zeor or negatice resolution not possible.\n" );
+		THROW( EXCEPTION );
+	}
+
+	size_t i;
+	double res[ ] = { 1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6 };
 
 	if ( resolution < 0.99 * res[ 0 ] )
 	{
@@ -213,7 +217,6 @@ Var_T *
 freq_counter_command( Var_T * v )
 {
     char *cmd = NULL;
-
 
     CLOBBER_PROTECT( cmd );
 
@@ -284,12 +287,7 @@ static double
 hp535_tmpl_get_freq( void )
 {
     char buf[ 25 ];
-    long len;
-    double res;
-    char *ep;
-
-
-	len = 24;
+    long len = 24;
     if ( gpib_read( hp535_tmpl.device, buf, &len ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",
@@ -311,7 +309,9 @@ hp535_tmpl_get_freq( void )
 
     buf[ 22 ] = '\0';
     errno = 0;
-    res = strtod( buf, &ep );
+
+    char *ep;
+    double res = strtod( buf, &ep );
 
     if ( *ep || ( res == HUGE_VAL && errno == ERANGE ) || res < 0 )
     {
@@ -334,11 +334,11 @@ hp535_tmpl_get_freq( void )
 static double
 hp535_tmpl_set_resolution( int res )
 {
-	char cmd[ ] = "RESOL,*\r\n";
-
 	fsc2_assert( res >= 0 && res <= 6 );
 
+	char cmd[ ] = "RESOL,*\r\n";
 	cmd[ 6 ] = res + '0';
+
     if ( gpib_write( hp535_tmpl.device, cmd, 9 ) == FAILURE )
     {
         print( FATAL, "Communication with device failed: %s.\n",

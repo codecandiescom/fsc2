@@ -37,12 +37,12 @@ WriteMakefile(
                        DynaLoader => 0,
                        Config     => 0 },
     test          => { TESTS => 't/*.t' },
-	clean         => { FILES => join ' ', qw{ lib/File/FcntlLock/XS.pod
-											  lib/File/FcntlLock/Pure.pm
-											  lib/File/FcntlLock/Inline.pm
-											  lib/File/FcntlLock/Pure.pod
-											  lib/File/FcntlLock/Inline.pod } }
-			 );
+    clean         => { FILES => join ' ', qw{ lib/File/FcntlLock/XS.pod
+                                              lib/File/FcntlLock/Pure.pm
+                                              lib/File/FcntlLock/Inline.pm
+                                              lib/File/FcntlLock/Pure.pod
+                                              lib/File/FcntlLock/Inline.pod } }
+             );
 
 
 ###########################################################
@@ -51,7 +51,7 @@ WriteMakefile(
 # the module
 
 sub check_for_compiler {
-	print "Checking if there's a C compiler\n";
+    print "Checking if there's a C compiler\n";
 
     open my $fh, '>', 'cc_test.c'
         or die "Failed to open a file for writing: $!\n";
@@ -72,7 +72,7 @@ sub check_for_compiler {
 # without it this module makes no sense at all.
 
 sub check_for_fcntl {
-	print "Checking if there's a fcntl(2) system call\n";
+    print "Checking if there's a fcntl(2) system call\n";
 
     open my $fh, '>', 'fcntl_test.c'
         or die "Failed to open a file for writing: $!\n";
@@ -112,7 +112,7 @@ EOF
 # an XS based module and one that attempts to obtain the same kind
 # of information in its BEGIN block.)
 # Note: there seem to be some 32-bit systems, where the flock struct
-#       contails 64-bit off_t members, but there's no 'q' format for
+#       contains 64-bit off_t members, but there's no 'q' format for
 #       Perl's pack() and unpack() function. For these systems I do
 #       not know of any proper way of setting up the flock structure
 #       using pure Perl...
@@ -120,31 +120,31 @@ EOF
 sub assemble_pure {
     use File::Copy;
 
-	my $success = 0;
+    my $success = 0;
 
     return 0 unless chdir 'Pure_build';
 
-	# Compile with the 'NO_Q_FORMAT' macro defined unless Perl supports
-	# the 'q' format for pack() and unpack(). If the system uses a 64-bit
-	# off_t type in its flock struct this will make the program for con-
+    # Compile with the 'NO_Q_FORMAT' macro defined unless Perl supports
+    # the 'q' format for pack() and unpack(). If the system uses a 64-bit
+    # off_t type in its flock struct this will make the program for con-
     # structing the code for assembling and disassembling the flock struct
-	# output nothing and we abandon trying to  build the "pure Perl" modules.
+    # output nothing and we abandon trying to build the "pure Perl" modules.
 
-	my $qflag = eval { pack 'q', 1; };
-	$qflag = $@ ? '-DNO_Q_FORMAT' : '';
+    my $qflag = eval { pack 'q', 1; };
+    $qflag = $@ ? '-DNO_Q_FORMAT' : '';
 
     goto FAIL
         if system "$Config{cc} $Config{ccflags} $qflag -o builder builder.c";
     goto FAIL unless copy 'Pure.tmpl', 'Pure.pm';
     goto FAIL unless open my $out, '>>', 'Pure.pm';
     goto FAIL unless open my $in, "-|", './builder';
-	unless ( my $line = <$in> ) {
-		close $in;
-		close $out;
-		goto FAIL;
-	} else {
-		print $out $line;
-	}
+    unless ( my $line = <$in> ) {
+        close $in;
+        close $out;
+        goto FAIL;
+    } else {
+        print $out $line;
+    }
 
     print $out $_ for <$in>;
     close $in;
@@ -154,18 +154,18 @@ sub assemble_pure {
 
     goto FAIL unless move 'Pure.pm', '../lib/File/FcntlLock';
 
-	link '../lib/File/FcntlLock.pod', '../lib/File/FcntlLock/Pure.pod';
+    link '../lib/File/FcntlLock.pod', '../lib/File/FcntlLock/Pure.pod';
 
-	$success = 1;
+    $success = 1;
 
   FAIL:
-	print   "Warning: Support for modules `File::FcntlLock::Pure' and "
-		  . "`File::FcntlLock::Inline' had to be disabled\n"
-		unless $success;
+    print   "Warning: Support for modules `File::FcntlLock::Pure' and "
+          . "`File::FcntlLock::Inline' had to be disabled\n"
+        unless $success;
     unlink 'builder';
     chdir '..';
 
-	return $success;
+    return $success;
 }
 
 
@@ -177,9 +177,9 @@ sub assemble_pure {
 sub assemble_inline {
     use File::Copy;
 
-	return unless copy 'Inline_build/Inline.pm.in',
-		               'lib/File/FcntlLock/Inline.pm';
-	link 'lib/File/FcntlLock.pod', 'lib/File/FcntlLock/Inline.pod';
+    return unless copy 'Inline_build/Inline.pm.in',
+                       'lib/File/FcntlLock/Inline.pm';
+    link 'lib/File/FcntlLock.pod', 'lib/File/FcntlLock/Inline.pod';
 }
 
 
