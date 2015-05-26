@@ -1,5 +1,9 @@
 # -*-sh-*-
 
+# The IP adfress of the LeCroy WR is 192.168.1.21 on this machine,
+
+sed -i'' -e 's/^^[ \t]*#define[ \t]\+NETWORK_ADDRESS[ \t]\+"[\"]"/#define	NETWORKADDRESS	"192.168.1.21"/' $cdir/lecroy_wr_l.config
+
 # On this machine the ER035M is connected to /dev/ttyS2 instead of
 # /dev/ttyS2. Correct that in the configuration files for both
 # devices that are supposed the ER035M via the serial port.
