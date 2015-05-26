@@ -3811,7 +3811,7 @@ f_get_pos( Var_T * v )
         }
     }
 
-    nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 2 );
+    nv = vars_push( FLOAT_ARR, NULL, ( long ) ( 2 * MAX_CURVES + 2 ) );
 
     /* This function can only be called in the EXPERIMENT section and needs
        a previous graphics initialization */
@@ -5174,9 +5174,9 @@ f_spike_rem( Var_T * v )
     TRY
     {
         if ( v->type == INT_ARR )
-            nv = vars_push( INT_ARR, v->val.lpnt, v->len );
+            nv = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
         else
-            nv = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+            nv = vars_push( FLOAT_ARR, v->val.dpnt, ( long ) v->len );
         TRY_SUCCESS;
     }
     OTHERWISE

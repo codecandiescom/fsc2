@@ -389,11 +389,11 @@ monochromator_name( Var_T * v  UNUSED_ARG )
 Var_T *
 monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
 {
-    double vals[ 2 ] = { UPPER_LIMIT * ( ( double ) GROOVE_DENSITY
-                                         / STANDARD_GROOVE_DENSITY ),
-                         LOWER_LIMIT * ( ( double ) GROOVE_DENSITY
-                                         / STANDARD_GROOVE_DENSITY ) };
-    return vars_push( FLOAT_ARR, vals, 2 );
+    double vals[ ] = { UPPER_LIMIT * (   ( double ) GROOVE_DENSITY
+                                       / STANDARD_GROOVE_DENSITY ),
+                       LOWER_LIMIT * (   ( double ) GROOVE_DENSITY
+                                       / STANDARD_GROOVE_DENSITY ) };
+    return vars_push( FLOAT_ARR, vals, 2L );
 }
 
 
@@ -406,10 +406,10 @@ monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
 Var_T *
 monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
 {
-    double vals[ 2 ] = { 0.01 / LOWER_LIMIT * ( STANDARD_GROOVE_DENSITY /
-                                                ( double ) GROOVE_DENSITY ),
-                         0.01 / UPPER_LIMIT * ( STANDARD_GROOVE_DENSITY /
-                                                ( double ) GROOVE_DENSITY ) };
+    double vals[ ] = { 0.01 / LOWER_LIMIT * (   STANDARD_GROOVE_DENSITY
+                                              / ( double ) GROOVE_DENSITY ),
+                       0.01 / UPPER_LIMIT * (   STANDARD_GROOVE_DENSITY
+                                              / ( double ) GROOVE_DENSITY ) };
     return vars_push( FLOAT_ARR, vals, 2 );
 }
 

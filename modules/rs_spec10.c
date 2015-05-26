@@ -227,7 +227,7 @@ ccd_camera_roi( Var_T * v )
         vroi[ i ] = ( long ) rs_spec10->ccd.roi[ i ] + 1;
 
     if ( v == NULL )
-        return vars_push( INT_ARR, vroi, 4 );
+        return vars_push( INT_ARR, vroi, 4L );
 
     vars_check( v, INT_ARR | FLOAT_ARR | STR_VAR );
 
@@ -309,7 +309,7 @@ ccd_camera_roi( Var_T * v )
         rs_spec10->ccd.roi[ i ] = ( uns16 ) vroi[ i ] - 1;
     rs_spec10->ccd.roi_is_set = SET;
 
-    return vars_push( INT_ARR, vroi, 4 );
+    return vars_push( INT_ARR, vroi, 4L );
 }
 
 
@@ -334,7 +334,7 @@ ccd_camera_binning( Var_T * v )
         vbin[ i ] = ( long ) rs_spec10->ccd.bin[ i ];
 
     if ( v == NULL )
-        return vars_push( INT_ARR, vbin, 2 );
+        return vars_push( INT_ARR, vbin, 2L );
 
     vars_check( v, INT_ARR | FLOAT_ARR | STR_VAR );
 
@@ -391,7 +391,7 @@ ccd_camera_binning( Var_T * v )
         rs_spec10->ccd.bin[ i ] = ( uns16 ) vbin[ i ];
     rs_spec10->ccd.bin_is_set = SET;
 
-    return vars_push( INT_ARR, vbin, 2 );
+    return vars_push( INT_ARR, vbin, 2L );
 }
 
 
@@ -1005,7 +1005,7 @@ ccd_camera_pixel_area( Var_T * v  UNUSED_ARG )
     Var_T *cv;
 
 
-    cv = vars_push( INT_ARR, NULL, 2 );
+    cv = vars_push( INT_ARR, NULL, 2L );
     cv->val.lpnt[ 0 ] = CCD_PIXEL_WIDTH;
     cv->val.lpnt[ 1 ] = CCD_PIXEL_HEIGHT;
 

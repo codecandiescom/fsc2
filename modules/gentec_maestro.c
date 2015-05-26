@@ -502,11 +502,10 @@ powermeter_get_scale_limits( Var_T * v )
     if ( FSC2_MODE == PREPARATION )
         no_query_possible( );
 
-    double * min_max = T_malloc( 2 * sizeof *min_max );
-    min_max[ 0 ] = gentec_maestro_index_to_scale( gm->min_scale_index );
-    min_max[ 1 ] = gentec_maestro_index_to_scale( gm->max_scale_index );
+    double mm[ ] = { gentec_maestro_index_to_scale( gm->min_scale_index ),
+                     gentec_maestro_index_to_scale( gm->max_scale_index ) };
 
-    return vars_push( FLOAT_ARR, min_max, 4 );
+    return vars_push( FLOAT_ARR, mm, 2L );
 }
 
 
@@ -707,7 +706,7 @@ powermeter_get_wavelength_limits( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    double * wls = T_malloc( 2 * sizeof *wls );
+    double wls[ 2 ];
 
     if ( ! with_att || ! gm->att_is_available )
     {
@@ -720,7 +719,7 @@ powermeter_get_wavelength_limits( Var_T * v )
         wls[ 1 ] = 1.0e-9 * gm->max_wavelength_with_att;
     }
 
-    return vars_push( FLOAT_ARR, wls, 2 );
+    return vars_push( FLOAT_ARR, wls, 2L );
 }
 
 

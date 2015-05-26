@@ -105,7 +105,7 @@ f_int( Var_T * v )
             break;
 
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
             new_var->flags = v->flags;
             break;
 
@@ -174,7 +174,7 @@ f_float( Var_T * v )
             break;
 
         case FLOAT_ARR :
-            new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+            new_var = vars_push( FLOAT_ARR, v->val.dpnt, ( long ) v->len );
             new_var->flags = v->flags;
             break;
 
@@ -228,7 +228,7 @@ f_round( Var_T * v )
             break;
 
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
             new_var->flags = v->flags;
             break;
 
@@ -292,7 +292,7 @@ f_floor( Var_T * v )
             break;
 
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
             new_var->flags = v->flags;
             break;
 
@@ -356,7 +356,7 @@ f_ceil( Var_T * v )
             break;
 
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
             new_var->flags = v->flags;
             break;
 
@@ -398,12 +398,12 @@ f_ceil( Var_T * v )
 Var_T *
 f_abs( Var_T * v )
 {
-    Var_T *new_var = NULL;
+    Var_T * new_var = NULL;
     ssize_t i;
-    long * lsrc,
-         * ldest;
-    double * dsrc,
-           * ddest;
+    long * restrict lsrc,
+         * restrict ldest;
+    double * restrict dsrc,
+           * restrict ddest;
 
 
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -1874,7 +1874,7 @@ f_shuffle( Var_T * v )
 
     if ( v->type == INT_ARR )
     {
-        nv = vars_push( INT_ARR, v->val.lpnt, v->len );
+        nv = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
 
         for ( n = v->len - 1; n > 0; n-- )
         {
@@ -1887,7 +1887,7 @@ f_shuffle( Var_T * v )
     }
     else
     {
-        nv = vars_push( FLOAT_ARR, v->val.lpnt, v->len );
+        nv = vars_push( FLOAT_ARR, v->val.lpnt, ( long ) v->len );
 
         for ( n = v->len - 1; n > 0; n-- )
         {
@@ -2260,11 +2260,10 @@ f_dim( Var_T * v )
 Var_T *
 f_size( Var_T * v )
 {
-    Var_T *new_var = NULL;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR |
                    INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+
+    Var_T *new_var = NULL;
 
     switch ( v->type )
     {
@@ -2301,13 +2300,8 @@ f_size( Var_T * v )
 Var_T *
 f_mean( Var_T * v )
 {
-    ssize_t i;
-    long start;
-    ssize_t len;
-    double sum = 0.0;
-    long count = 0;
-    void *gp;
-
+    vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+                   INT_REF | FLOAT_REF );
 
     if ( v == NULL )
     {
@@ -2315,16 +2309,12 @@ f_mean( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-                   INT_REF | FLOAT_REF );
-
-    start = 0;
-    len = v->len;
+    long start = 0;
+    ssize_t len = v->len;
 
     if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) && v->next != NULL )
     {
-        start = get_strict_long( v->next, "start index in array" )
-                - ARRAY_OFFSET;
+        start = get_long( v->next, "start index in array" ) - ARRAY_OFFSET;
 
         if ( start < 0 || start >= v->len )
         {
@@ -2334,7 +2324,7 @@ f_mean( Var_T * v )
 
         if ( v->next->next != NULL )
         {
-            len = get_strict_long( v->next->next, "array slice length" );
+            len = get_long( v->next->next, "array slice length" );
 
             if ( len < 1 )
             {
@@ -2353,6 +2343,11 @@ f_mean( Var_T * v )
         else
             len = v->len - start;
     }
+
+    ssize_t i;
+    double sum = 0.0;
+    long count = 0;
+    void *gp;
 
     switch ( v->type )
     {
@@ -2456,13 +2451,7 @@ f_mean( Var_T * v )
 Var_T *
 f_rms( Var_T * v )
 {
-    ssize_t i;
-    long start;
-    ssize_t len;
-    double sum = 0.0;
-    long count = 0;
-    void *gp;
-
+    vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
     if ( v == NULL )
     {
@@ -2470,10 +2459,8 @@ f_rms( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
-
-    start = 0;
-    len = v->len;
+    long start = 0;
+    ssize_t len = v->len;
 
     if ( len == 0 )
     {
@@ -2483,8 +2470,7 @@ f_rms( Var_T * v )
 
     if ( v->next != NULL )
     {
-        start = get_strict_long( v->next, "start index in array" )
-                - ARRAY_OFFSET;
+        start = get_long( v->next, "start index in array" ) - ARRAY_OFFSET;
 
         if ( start < 0 || start >= v->len )
         {
@@ -2494,7 +2480,7 @@ f_rms( Var_T * v )
 
         if ( v->next->next != NULL )
         {
-            len = get_strict_long( v->next->next, "array slice length" );
+            len = get_long( v->next->next, "array slice length" );
 
             if ( len < 1 )
             {
@@ -2513,6 +2499,11 @@ f_rms( Var_T * v )
         else
             len = v->len - start;
     }
+
+    ssize_t i;
+    double sum = 0.0;
+    long count = 0;
+    void *gp;
 
     switch ( v->type )
     {
@@ -2581,29 +2572,21 @@ f_rms( Var_T * v )
 Var_T *
 f_slice( Var_T * v )
 {
-    long start;
-    ssize_t len;
-    Var_T *new_var = NULL;
-    ssize_t old_len;
-    Var_T **old_vptr;
-
-
     vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
-    start = 0;
-    len = v->len;
-
+    ssize_t len = v->len;
     if ( len == 0 )
     {
         print( FATAL, "Length of array isn't know yet.\n" );
         THROW( EXCEPTION );
     }
 
+    long start = 0;
     if ( v->next != NULL )
     {
         start = get_long( v->next, "array index" ) - ARRAY_OFFSET;
 
-        if ( start < 0 || start >= v->len )
+        if ( start < 0 || start >= len )
         {
             print( FATAL, "Invalid array index (%ld).\n",
                    start + ARRAY_OFFSET );
@@ -2637,14 +2620,21 @@ f_slice( Var_T * v )
             len = v->len - start;
     }
 
+    Var_T * new_var = NULL;
+    ssize_t old_len;
+    Var_T ** old_vptr;
+
+    CLOBBER_PROTECT( old_len );
+    CLOBBER_PROTECT( old_vptr );
+
     switch ( v->type )
     {
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt + start, len );
+            new_var = vars_push( INT_ARR, v->val.lpnt + start, ( long ) len );
             break;
 
         case FLOAT_ARR :
-            new_var = vars_push( FLOAT_ARR, v->val.dpnt + start, len );
+            new_var = vars_push( FLOAT_ARR, v->val.dpnt + start, ( long ) len );
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -2684,18 +2674,11 @@ f_slice( Var_T * v )
 Var_T *
 f_square( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long * lsrc,
-         * ldest;
-    double * dsrc,
-           * ddest;
-    double lmax,
-           dmax;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
 
     switch ( v->type )
     {
@@ -2713,9 +2696,9 @@ f_square( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( INT_ARR, v );
-            lmax = sqrt( ( double ) LONG_MAX );
-            lsrc = v->val.lpnt;
-            ldest = new_var->val.lpnt;
+            long lmax = sqrt( ( double ) LONG_MAX );
+            long * restrict lsrc  = v->val.lpnt;
+            long * restrict ldest = new_var->val.lpnt;
             for ( i = 0; i < v->len; i++, lsrc++ )
             {
                 if ( labs( *lsrc ) > lmax )
@@ -2726,9 +2709,9 @@ f_square( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dmax = sqrt( HUGE_VAL );
-            dsrc  = v->val.dpnt;
-            ddest = new_var->val.dpnt;
+            double dmax = sqrt( HUGE_VAL );
+            double * restrict dsrc  = v->val.dpnt;
+            double * restrict ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++, dsrc++ )
             {
                 if ( fabs( *dsrc ) > dmax )
@@ -2776,14 +2759,12 @@ f_square( Var_T * v )
 Var_T *
 f_G2T( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -2797,15 +2778,15 @@ f_G2T( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
-                *ddest++ = ( double ) *lsrc++ * 1.0e-4;
+                *ddest++ = *lsrc++ * 1.0e-4;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * 1.0e-4;
@@ -2838,14 +2819,13 @@ f_G2T( Var_T * v )
 Var_T *
 f_T2G( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
+
 
     switch ( v->type )
     {
@@ -2859,15 +2839,15 @@ f_T2G( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
-                *ddest++ = ( double ) *lsrc++ * 1.0e4;
+                *ddest++ = *lsrc++ * 1.0e4;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * 1.0e4;
@@ -2900,14 +2880,12 @@ f_T2G( Var_T * v )
 Var_T *
 f_C2K( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T *new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -2922,15 +2900,15 @@ f_C2K( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
-                *ddest++ = ( double ) *lsrc++ + C2K_OFFSET;
+                *ddest++ = *lsrc++ + C2K_OFFSET;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ + C2K_OFFSET;
@@ -2963,14 +2941,12 @@ f_C2K( Var_T * v )
 Var_T *
 f_K2C( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -2985,7 +2961,7 @@ f_K2C( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ - C2K_OFFSET;
@@ -2993,7 +2969,7 @@ f_K2C( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ - C2K_OFFSET;
@@ -3026,14 +3002,12 @@ f_K2C( Var_T * v )
 Var_T *
 f_D2R( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -3048,7 +3022,7 @@ f_D2R( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ * D2R_FACTOR;
@@ -3056,7 +3030,7 @@ f_D2R( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * D2R_FACTOR;
@@ -3089,14 +3063,12 @@ f_D2R( Var_T * v )
 Var_T *
 f_R2D( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -3111,7 +3083,7 @@ f_R2D( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ * R2D_FACTOR;
@@ -3119,7 +3091,7 @@ f_R2D( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * R2D_FACTOR;
@@ -3152,14 +3124,12 @@ f_R2D( Var_T * v )
 Var_T *
 f_WL2WN( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -3169,7 +3139,7 @@ f_WL2WN( Var_T * v )
                 print( FATAL, "Can't convert 0 m to a wave number.\n" );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, 0.01 / ( double ) v->val.lval );
+            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.lval );
             break;
 
         case FLOAT_VAR :
@@ -3183,7 +3153,7 @@ f_WL2WN( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
             {
@@ -3192,13 +3162,13 @@ f_WL2WN( Var_T * v )
                     print( FATAL, "Can't convert 0 m to a wave number.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest++ = 0.01 / ( double ) *lsrc++;
+                *ddest++ = 0.01 / *lsrc++;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
             {
@@ -3238,14 +3208,12 @@ f_WL2WN( Var_T * v )
 Var_T *
 f_WN2WL( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -3255,7 +3223,7 @@ f_WN2WL( Var_T * v )
                 print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, 0.01 / ( double ) v->val.lval );
+            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.lval );
             break;
 
         case FLOAT_VAR :
@@ -3269,7 +3237,7 @@ f_WN2WL( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
             {
@@ -3278,13 +3246,13 @@ f_WN2WL( Var_T * v )
                     print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
                     THROW( EXCEPTION );
                 }
-                *ddest++ = 0.01 / ( double ) *lsrc++;
+                *ddest++ = 0.01 / *lsrc++;
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
             {
@@ -3324,14 +3292,12 @@ f_WN2WL( Var_T * v )
 Var_T *
 f_F2WN( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
 
     switch ( v->type )
     {
@@ -3345,7 +3311,7 @@ f_F2WN( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ / WN2F_FACTOR;
@@ -3353,7 +3319,7 @@ f_F2WN( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ / WN2F_FACTOR;
@@ -3386,14 +3352,13 @@ f_F2WN( Var_T * v )
 Var_T *
 f_WN2F( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
+    double * restrict ddest;
+
 
     switch ( v->type )
     {
@@ -3407,7 +3372,7 @@ f_WN2F( Var_T * v )
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            lsrc = v->val.lpnt;
+            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = WN2F_FACTOR * ( double ) *lsrc++;
@@ -3415,7 +3380,7 @@ f_WN2F( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc = v->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
             for ( i = 0; i < v->len; i++ )
                 *ddest++ = WN2F_FACTOR *  *dsrc++;
@@ -3447,10 +3412,7 @@ f_WN2F( Var_T * v )
 Var_T *
 f_islice( Var_T * v )
 {
-    long size;
-
-
-    size = get_long( v, "array size" );
+    long size = get_long( v, "array size" );
 
     if ( size < 0 )
     {
@@ -3463,7 +3425,7 @@ f_islice( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    return vars_push( INT_ARR, NULL, ( ssize_t ) size );
+    return vars_push( INT_ARR, NULL, size );
 }
 
 
@@ -3473,10 +3435,7 @@ f_islice( Var_T * v )
 Var_T *
 f_fslice( Var_T * v )
 {
-    long size;
-
-
-    size = get_long( v, "array size" );
+    long size = get_long( v, "array size" );
 
     if ( size < 0 )
     {
@@ -3489,7 +3448,7 @@ f_fslice( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    return vars_push( FLOAT_ARR, NULL, ( ssize_t ) size );
+    return vars_push( FLOAT_ARR, NULL, size );
 }
 
 
@@ -3505,7 +3464,7 @@ f_lspace( Var_T * v )
     double end;
     double incr;
     long num;
-    double *d, cv;
+    double * d, cv;
 
 
     start = get_double( v, NULL );
@@ -3535,16 +3494,11 @@ f_lspace( Var_T * v )
 Var_T *
 f_reverse( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc, *ldest, ltemp;
-    double *dsrc, *ddest, dtemp;
-    char *rs, *sp, *ep;
-    char tmp;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR |
                    INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    ssize_t i;
 
     switch ( v->type )
     {
@@ -3558,39 +3512,38 @@ f_reverse( Var_T * v )
 
 
         case STR_VAR :
-            sp = rs = T_strdup( v->val.sptr );
-            ep = sp + strlen( sp ) - 1;
+            new_var = vars_push( STR_VAR, v->val.sptr );
+            char * sp = new_var->val.sptr;
+            char * ep = sp + strlen( sp ) - 1;
             while ( sp < ep )
             {
-                tmp = *sp;
-                *sp++ = *ep;
-                *ep-- = tmp;
+                char tmp = *sp;
+                *sp++    = *ep;
+                *ep--    = tmp;
             }
-            new_var = vars_push( STR_VAR, rs );
-            T_free( rs );
             break;
 
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
-            lsrc = new_var->val.lpnt;
-            ldest = lsrc + new_var->len - 1;
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
+            long * lsrc = new_var->val.lpnt;
+            long * ldest = lsrc + new_var->len - 1;
             while ( lsrc < ldest )
             {
-                ltemp    = *lsrc;
-                *lsrc++  = *ldest;
-                *ldest-- = ltemp;
+                long ltemp = *lsrc;
+                *lsrc++    = *ldest;
+                *ldest--   = ltemp;
             }
             break;
 
         case FLOAT_ARR :
-            new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
-            dsrc = new_var->val.dpnt;
-            ddest = dsrc + new_var->len - 1;
+            new_var = vars_push( FLOAT_ARR, v->val.dpnt, ( long ) v->len );
+            double * dsrc = new_var->val.dpnt;
+            double * ddest = dsrc + new_var->len - 1;
             while ( dsrc < ddest )
             {
-                dtemp    = *dsrc;
-                *dsrc++  = *ddest;
-                *ddest-- = dtemp;
+                double dtemp = *dsrc;
+                *dsrc++      = *ddest;
+                *ddest--     = dtemp;
             }
             break;
 
@@ -3721,13 +3674,13 @@ f_sort( Var_T * v )
     switch ( v->type )
     {
         case INT_ARR :
-            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
             qsort( new_var->val.lpnt, new_var->len, sizeof *new_var->val.lpnt,
                    dir ? sort_long_up : sort_long_down );
             break;
 
         case FLOAT_ARR :
-            new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+            new_var = vars_push( FLOAT_ARR, v->val.dpnt, ( long ) v->len );
             qsort( new_var->val.dpnt, new_var->len, sizeof *new_var->val.dpnt,
                    dir ? sort_double_up : sort_double_down );
             break;

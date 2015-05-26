@@ -481,7 +481,7 @@ boxcar_single_shot( Var_T * v )
         if ( channel_2 == -1 )
             return vars_push( FLOAT_VAR, data[ 0 ] );
         data[ 1 ] = random( ) / ( double ) RAND_MAX;
-        return vars_push( FLOAT_ARR, data, 2 );
+        return vars_push( FLOAT_ARR, data, 2L );
     }
 
     /* Start the acquisition and already set the transfer type to ASCII floats
@@ -550,7 +550,7 @@ boxcar_single_shot( Var_T * v )
 
     data[ 1 ] = T_atod( reply );
 
-    return vars_push( FLOAT_ARR, data, 2 );
+    return vars_push( FLOAT_ARR, data, 2L );
 }
 
 

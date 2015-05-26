@@ -466,7 +466,7 @@ daq_dac_parameter( Var_T * v )
     params[ 1 ] = MAX_VOLTS;
     params[ 2 ] = ( params[ 1 ] - params[ 0 ] ) / 65535.0;
 
-    return vars_push( FLOAT_ARR, params, ( ssize_t ) 3 );
+    return vars_push( FLOAT_ARR, params, 3L );
 }
 
 

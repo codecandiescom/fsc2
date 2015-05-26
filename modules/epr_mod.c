@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -93,7 +93,7 @@ epr_modulation_name( Var_T * v  UNUSED_ARG )
 Var_T *
 epr_modulation_ratio( Var_T * v )
 {
-	Calibration_T *res;
+	Calibration_T * res;
 	double freq;
     double ratio;
     FREQ_ENTRY_T *fe;
@@ -203,7 +203,7 @@ epr_modulation_ratio( Var_T * v )
 Var_T *
 epr_modulation_phase( Var_T * v )
 {
-	Calibration_T *res;
+	Calibration_T * res;
 	double freq;
     double phase;
     FREQ_ENTRY_T *fe;
@@ -262,7 +262,7 @@ epr_modulation_phase( Var_T * v )
 Var_T *
 epr_modulation_has_phase( Var_T * v )
 {
-	Calibration_T *res;
+	Calibration_T * res;
 	double freq;
     FREQ_ENTRY_T *fe;
 
@@ -292,7 +292,7 @@ Var_T *
 epr_modulation_add_calibration( Var_T * v )
 {
 	size_t i;
-	Calibration_T *res = NULL;
+	Calibration_T * res = NULL;
 
 
     CLOBBER_PROTECT( res);
@@ -360,7 +360,7 @@ epr_modulation_add_calibration( Var_T * v )
 Var_T *
 epr_modulation_delete_calibration( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+	Calibration_T * res = epr_mod_find( v );
 	size_t i;
 
 
@@ -597,7 +597,7 @@ epr_modulation_calibration_check_amplitude( Var_T * v )
 Var_T *
 epr_modulation_calibration_frequencies( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+	Calibration_T * res = epr_mod_find( v );
     double *freq = NULL;
     size_t i;
 
@@ -609,7 +609,7 @@ epr_modulation_calibration_frequencies( Var_T * v )
             freq[ i ] = res->fe[ i ].freq;
     }
 
-    return vars_push( FLOAT_ARR, freq, res->count );
+    return vars_push( FLOAT_ARR, freq, ( long ) res->count );
 }
 
 

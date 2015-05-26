@@ -338,7 +338,7 @@ fft_real( Var_T * v )
 
         /* Create a new variable with the output arrays data */
 
-        nv = vars_push( FLOAT_ARR, out, n );
+        nv = vars_push( FLOAT_ARR, out, ( long ) n );
 
         /* Get rid of memory we used */
 
@@ -434,7 +434,7 @@ fft_power_spectrum( Var_T * v )
 
     TRY
     {
-        nv = vars_push( FLOAT_ARR, NULL, v->len / 2 + 1 );
+        nv = vars_push( FLOAT_ARR, NULL, ( long ) ( v->len / 2 + 1 ) );
         TRY_SUCCESS;
     }
     OTHERWISE

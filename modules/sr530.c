@@ -258,7 +258,7 @@ lockin_get_data( Var_T * v )
 
     too_many_arguments( v );
 
-    return vars_push( FLOAT_ARR, val, 2 );
+    return vars_push( FLOAT_ARR, val, 2L );
 }
 
 

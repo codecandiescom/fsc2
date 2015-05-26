@@ -1322,22 +1322,17 @@ sourcemeter_measure_voltage_and_current( Var_T * v )
             k26->measure[ ch ].rangei =
                           keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
 
-        double * vi = T_malloc( 2 * sizeof *vi );
-        vi[ 0 ] = TEST_VOLTAGE;
-        vi[ 1 ] = TEST_CURRENT;
-        return vars_push( FLOAT_ARR, vi, 2 );
+        double vi[ ] = { TEST_VOLTAGE, TEST_CURRENT };
+        return vars_push( FLOAT_ARR, vi, 2L );
     }
 
     const double * r = keithley2600a_measure_iv( ch );
-    double * vi = T_malloc( 2 * sizeof *vi );
-
-    vi[ 0 ] = r[ 1 ];
-    vi[ 1 ] = r[ 0 ];
+    double vi[ ] = { r[ 1 ], r[ 0 ] };
 
     if ( fabs( vi[ 0 ] ) >= 9.9e37 || fabs( vi[ 1 ] ) >= 9.9e37 )
         print( WARN, "Measured voltage or current out of range.\n" );
 
-    return vars_push( FLOAT_ARR, vi, 2 );
+    return vars_push( FLOAT_ARR, vi, 2L );
 }
 
 
@@ -2152,20 +2147,14 @@ sourcemeter_contact_resistance( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        double * r12 = T_malloc( 2 * sizeof *r12 );
-        r12[ 0 ] =  TEST_CONTACT_R_LOW;
-        r12[ 1 ] =  TEST_CONTACT_R_HIGH;
-
-        return vars_push( FLOAT_ARR, r12, 2 );
+        double r12[ ] = { TEST_CONTACT_R_LOW, TEST_CONTACT_R_HIGH };
+        return vars_push( FLOAT_ARR, r12, 2L );
     }
 
     const double * r = keithley2600a_contact_resistance( ch );
-    double * r12 = T_malloc( 2 * sizeof *r12 );
+    double r12[ ] = { r[ 1 ], r[ 0 ] };
 
-    r12[ 0 ] = r[ 1 ];
-    r12[ 1 ] = r[ 0 ];
-
-    return vars_push( FLOAT_ARR, r12, 2 );
+    return vars_push( FLOAT_ARR, r12, 2L );
 }
        
 
@@ -2322,7 +2311,9 @@ do_sweep( Var_T * v,
         }
     }
 
-    return vars_push( FLOAT_ARR, data, num_data_points );
+    v = vars_push( FLOAT_ARR, data, ( long ) num_data_points );
+    T_free( data );
+    return v;
 }
 
 
@@ -2390,9 +2381,10 @@ do_list_sweep( Var_T * v,
         }
     }
 
-    return vars_push( FLOAT_ARR, data, num_data_points );
+    v = vars_push( FLOAT_ARR, data, ( long ) num_data_points );
+    T_free( data );
+    return v;
 }
-
 
 
 /*--------------------------------------------------------------*

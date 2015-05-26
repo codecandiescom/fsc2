@@ -821,7 +821,7 @@ monochromator_wavelength_axis( Var_T * v )
 
     if ( ! spectrapro_300i.use_calib )
     {
-        cv = vars_push( FLOAT_ARR, NULL, 4 );
+        cv = vars_push( FLOAT_ARR, NULL, 4L );
         cv->val.dpnt[ 0 ] = cv->val.dpnt[ 2 ] =
                                         - 0.5 * ( double ) ( num_pixels - 1 );
         cv->val.dpnt[ 1 ] = cv->val.dpnt[ 3 ] = 1;
@@ -844,7 +844,7 @@ monochromator_wavelength_axis( Var_T * v )
     {
         print( SEVERE, "No (complete) calibration for grating #%ld "
                "found.\n", gn + 1 );
-        cv = vars_push( FLOAT_ARR, NULL, 2 );
+        cv = vars_push( FLOAT_ARR, NULL, 2L );
         cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
         cv->val.dpnt[ 1 ] = 1;
         return cv;
@@ -868,7 +868,7 @@ monochromator_wavelength_axis( Var_T * v )
     wl_hi  = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width,
                                    num_pixels );
 
-    cv = vars_push( FLOAT_ARR, NULL, 4 );
+    cv = vars_push( FLOAT_ARR, NULL, 4L );
 
     cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / ( num_pixels - 1 );
     cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
@@ -1004,13 +1004,13 @@ monochromator_calc_wavelength( Var_T * v )
                 return vars_push( FLOAT_VAR, v->val.lval );
 
             case INT_ARR :
-                cv = vars_push( FLOAT_ARR, NULL, v->len );
+                cv = vars_push( FLOAT_ARR, NULL, ( long ) v->len );
                 for ( i = 0; i < v->len; i++ )
                     cv->val.dpnt[ i ] = ( double ) v->val.lpnt[ i ];
                 return cv;
 
             case FLOAT_ARR :
-                return vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+                return vars_push( FLOAT_ARR, v->val.dpnt, ( long ) v->len );
 
             case INT_REF : case FLOAT_REF :
                 return vars_push( FLOAT_REF, v );
@@ -1083,7 +1083,7 @@ monochromator_calc_wavelength( Var_T * v )
                                                 pixel_width, VALUE( v ) ) );
 
     if ( v->type & ( INT_ARR | FLOAT_ARR ) )
-        cv = vars_push( FLOAT_ARR, NULL, v->len );
+        cv = vars_push( FLOAT_ARR, NULL, ( long ) v->len );
     else
         cv = vars_push( FLOAT_REF, v );
 
@@ -1799,7 +1799,7 @@ monochromator_calibrate( Var_T * v )
 
     x[ 0 ] *= 45.0 / atan( 1.0 );
     x[ 2 ] *= 45.0 / atan( 1.0 );
-    cv = vars_push( FLOAT_ARR, x, 3 );
+    cv = vars_push( FLOAT_ARR, x, 3L );
 
     T_free( c.wavelengths );
     T_free( c.center_wavelengths );

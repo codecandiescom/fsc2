@@ -555,41 +555,47 @@ the value.
 
 For arrays @code{vars_push()} the first argument is either
 @code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a
-pointer to the array (i.e.@: its first argument). For creation of an
-array variable also third argument is needed, the length of the array
-(a @code{long} integer). If you want to return an array with two
-integer arguments you would use for example
+pointer to the array (i.e.@: its first argument). When creating
+an @code{INT_ARR} this array must be an array of @code{long int}
+values, for creating a @code{FLOAT_ARR} it has to be an array
+of @code{double} values. (mak sure that this is the case since
+the @code{vars_push()} function can't test for this an neither
+can the compiler!_
+
+For creation of an array variable also third argument is needed, the
+length of the array (which must be a @code{long} integer). If you want
+to return an @code{EDL} variable that is an array of two integer you
+would use for example
 @example
-data[ 0 ] = 1;
-data[ 1 ] = 2;
-return vars_push( INT_ARRAY, data, 2 );
+long int data[ ] = @{ 1, 2 @};
+return vars_push( INT_ARRAY, data, 2L );
 @end example
 @noindent
-assuming that @code{data} is an array of @code{long int}s.
+Keep in mind that @code{vars_push()} always makes a copy of the array
+you passed it - if what you passed it is a pointer to allocated
+memory it's your responsibility to @code{@ref{T_free()}} it.
 
 As a complete example here is a rather simple but working function named
 @code{square()} that returns the square of the value it got passed:
 @example
 Var_T * square( Var_T * var )
 @{
-    long int_square;
-    double float_square;
-    Var_T * ret_val;
-
     vars_check( var, INT_VAR | FLOAT_VAR );   /* is it a number ? */ 
+
+    Var_T * ret_var;
 
     if ( var->type == INT_VAR )
     @{
-        int_square = var->INT * var->INT;
-        ret_val = vars_push( INT_VAR, int_square );
+        long int_square = var->INT * var->INT;
+        ret_var = vars_push( INT_VAR, int_square );
     @}
     else
     @{
-        float_square = var->FLOAT * var->FLOAT;
-        ret_val = vars_push( FLOAT_VAR, float_square );
+        double float_square = var->FLOAT * var->FLOAT;
+        ret_var = vars_push( FLOAT_VAR, float_square );
     @}
 
-    return ret_val;
+    return ret_var;
 @}
 @end example
 @noindent
@@ -3045,11 +3051,17 @@ documentation for the standard C functions @code{setjmp()} and
 @node Functions for memory allocation, The bool type, Error handling with exceptions, Programming Utils
 @subsection Functions for memory allocation
 @cindex memory allocation
+@anchor{T_malloc()}
+@anchor{T_calloc()}
+@anchor{T_realloc()}
+@anchor{T_free()}
+@anchor{T_realloc_or_free()}
+@anchor{T_strdup()}
 @findex T_malloc()
 @findex T_calloc()
 @findex T_realloc()
-@findex T_realloc_or_free()
 @findex T_free()
+@findex T_realloc_or_free()
 @findex T_strdup()
 
 There are special function for @code{fsc2} for allocating memory.

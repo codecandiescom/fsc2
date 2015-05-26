@@ -564,7 +564,7 @@ monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
         for ( i = 0; i < 2; i++ )
             vals[ i ] = spex232.laser_line - vals[ i ];
 
-    return vars_push( FLOAT_ARR, vals, 2 );
+    return vars_push( FLOAT_ARR, vals, 2L );
 }
 
 
@@ -578,7 +578,7 @@ Var_T *
 monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
 {
     double vals[ 2 ] = { spex232.lower_limit, spex232.upper_limit };
-    return vars_push( FLOAT_ARR, vals, 2 );
+    return vars_push( FLOAT_ARR, vals, 2L );
 }
 
 
@@ -785,7 +785,7 @@ monochromator_scan_setup( Var_T * v )
 
         vals[ 1 ] = spex232.scan_step;
 
-        return vars_push( FLOAT_ARR, vals, 2 );
+        return vars_push( FLOAT_ARR, vals, 2L );
     }
 
     if ( v->next == NULL )
@@ -953,7 +953,7 @@ monochromator_scan_setup( Var_T * v )
 
     vals[ 1 ] = spex232.scan_step;
 
-    return vars_push( FLOAT_ARR, vals, 2 );
+    return vars_push( FLOAT_ARR, vals, 2L );
 }
 
 
@@ -1155,7 +1155,7 @@ monochromator_calibrate( Var_T * v )
     {
         field[ 0 ] = spex232.offset;
         field[ 1 ] = spex232.pixel_diff;
-        return vars_push( FLOAT_ARR, field, 2 );
+        return vars_push( FLOAT_ARR, field, 2L );
     }
 
     new_offset = get_double( v, "offset" );
@@ -1196,7 +1196,7 @@ monochromator_calibrate( Var_T * v )
     field[ 0 ] = spex232.offset;
     field[ 1 ] = spex232.pixel_diff;
 
-    return vars_push( FLOAT_ARR, field, 2 );
+    return vars_push( FLOAT_ARR, field, 2L );
 }
 
 
@@ -1313,7 +1313,7 @@ monochromator_wavelength_axis( Var_T * v )
     bin = cv->val.lpnt[ 0 ];
     vars_pop( cv );
 
-    cv = vars_push( FLOAT_ARR, NULL, 4 );
+    cv = vars_push( FLOAT_ARR, NULL, 4L );
 
     cv->val.dpnt[ 0 ] = wl - 0.5 * ( num_pixels - 1 ) * spex232.pixel_diff;
     cv->val.dpnt[ 1 ] = spex232.pixel_diff;

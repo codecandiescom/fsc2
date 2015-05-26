@@ -726,7 +726,7 @@ counter_get_buffered_counts( Var_T * v )
     if ( ! buffered_continuous && buffered_remaining == 0 )
     {
         print( WARN, "All available data have already been fetched.\n" );
-        return vars_push( INT_ARR, NULL, 0 );
+        return vars_push( INT_ARR, NULL, 0L );
     }
 
     if ( ( v = vars_pop( v ) ) == NULL )
@@ -870,7 +870,7 @@ ni6601_get_data( long   to_fetch,
         }
 
         if ( to_fetch == 0 && wait_secs < 0.0 )
-            return vars_push( INT_ARR, NULL, 0 );
+            return vars_push( INT_ARR, NULL, 0L );
     }
 
     buf = T_malloc( to_fetch * sizeof *buf );
@@ -959,7 +959,7 @@ ni6601_get_data( long   to_fetch,
     if ( received == 0 && wait_secs == 0.0 )
     {
         T_free( buf );
-        return vars_push( INT_ARR, NULL, 0 );
+        return vars_push( INT_ARR, NULL, 0L );
     }
 
     TRY

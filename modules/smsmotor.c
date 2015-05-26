@@ -364,7 +364,7 @@ motor_limits( Var_T * v )
     {
         limits[ 0 ] =  smsmotor.lower_limit[ dev ];
         limits[ 1 ] =  smsmotor.upper_limit[ dev ];
-        return vars_push( FLOAT_ARR, limits, 2 );
+        return vars_push( FLOAT_ARR, limits, 2L );
     }
 
     if ( v->type & ( INT_ARR | FLOAT_ARR ) )
@@ -417,7 +417,7 @@ motor_limits( Var_T * v )
 
     smsmotor.lower_limit[ dev ] = limits[ 0 ];
     smsmotor.upper_limit[ dev ] = limits[ 1 ];
-    return vars_push( FLOAT_ARR, limits, 2 );
+    return vars_push( FLOAT_ARR, limits, 2L );
 }
 
 

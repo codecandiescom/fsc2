@@ -268,7 +268,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
         for ( i = 0; i < TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT; i++ )
             array[ i ] = 0.0;
         nv = vars_push( FLOAT_ARR, array,
-                        TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT );
+                        ( long )( TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT ) );
         nv->flags |= IS_DYNAMIC;
         return nv;
     }
@@ -300,7 +300,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 
     T_free( recon->intensity );
   
-    nv = vars_push( FLOAT_ARR, array, len );
+    nv = vars_push( FLOAT_ARR, array, ( long ) len );
     nv->flags |= IS_DYNAMIC;
 
     return nv;
@@ -501,13 +501,13 @@ ccd_camera_pixel_area( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        cv = vars_push( INT_ARR, NULL, 2 );
+        cv = vars_push( INT_ARR, NULL, 2L );
         cv->val.lpnt[ 0 ] = oriel_matrix.pixel_width;
         cv->val.lpnt[ 1 ] = oriel_matrix.pixel_height;
     }
     else
     {
-        cv = vars_push( INT_ARR, NULL, 2 );
+        cv = vars_push( INT_ARR, NULL, 2L );
         cv->val.lpnt[ 0 ] = TEST_PIXEL_WIDTH;
         cv->val.lpnt[ 1 ] = TEST_PIXEL_HEIGHT;
     }

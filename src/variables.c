@@ -559,10 +559,12 @@ Var_T *
 vars_push( Var_Type_T type,
            ... )
 {
-    Var_T *nsv, *stack, *src;
+    Var_T * nsv,
+          * stack,
+          * src;
     va_list ap;
     ssize_t i;
-    const char *str;
+    const char * str;
 
 
     /* Get memory for the new variable to be appended to the stack, set its
@@ -603,7 +605,7 @@ vars_push( Var_Type_T type,
 
         case INT_ARR :
             nsv->val.lpnt = va_arg( ap, long * );
-            nsv->len = va_arg( ap, ssize_t );
+            nsv->len = va_arg( ap, long );
 
             fsc2_assert( nsv->len >= 0 );
 

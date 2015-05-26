@@ -684,7 +684,7 @@ temp_contr_cutbacks( Var_T * v )
             bvt3000.cb[ 1 ] = eurotherm902s_get_cutback_high( );
         }
 
-        return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
+        return vars_push( FLOAT_ARR, bvt3000.cb, 2L );
     }
 
     /* Accept an array with two values or two separate values */
@@ -757,7 +757,7 @@ temp_contr_cutbacks( Var_T * v )
         memcpy( bvt3000.cb, cb, sizeof bvt3000.cb );
     }
     
-    return vars_push( FLOAT_ARR, bvt3000.cb, 2 );
+    return vars_push( FLOAT_ARR, bvt3000.cb, 2L );
 }
 
 

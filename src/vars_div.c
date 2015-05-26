@@ -177,7 +177,7 @@ vars_int_var_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
+                new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
             for ( i = 0; i < v2->len; i++ )
             {
@@ -204,7 +204,8 @@ vars_int_var_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
+                                     ( long ) v2->len );
 
             for ( i = 0; i < v2->len; i++ )
             {
@@ -327,7 +328,7 @@ vars_float_var_div( Var_T * v1,
             break;
 
         case INT_ARR :
-            new_var = vars_push( FLOAT_ARR, NULL, v2->len );
+            new_var = vars_push( FLOAT_ARR, NULL, ( long ) v2->len );
 
             for ( i = 0; i < new_var->len; i++ )
             {
@@ -353,7 +354,8 @@ vars_float_var_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
+                                     ( long ) v2->len );
 
             for ( i = 0; i < new_var->len; i++ )
             {
@@ -472,7 +474,7 @@ vars_int_arr_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
+                new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
             for ( i = 0; i < new_var->len; i++ )
             {
@@ -499,7 +501,8 @@ vars_int_arr_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
+                                     ( long ) v2->len );
 
             for ( i = 0; i < v1->len; i++ )
             {
@@ -530,7 +533,8 @@ vars_int_arr_div( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             for ( i = 0; i < new_var->len; i++ )
-                vars_div_i( vars_push( INT_ARR, v1->val.lpnt, v1->len ),
+                vars_div_i( vars_push( INT_ARR, v1->val.lpnt,
+                                       ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
 
             vars_pop( v1 );
@@ -588,7 +592,8 @@ vars_float_arr_div( Var_T * v1,
             if ( v2->flags & IS_TEMP )
                 new_var = v2;
             else
-                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
+                                     ( long ) v2->len );
 
             for ( i = 0; i < new_var->len; i++ )
             {
@@ -619,7 +624,8 @@ vars_float_arr_div( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             for ( i = 0; i < new_var->len; i++ )
-                vars_div_i( vars_push( FLOAT_ARR, v1->val.dpnt, v1->len ),
+                vars_div_i( vars_push( FLOAT_ARR, v1->val.dpnt,
+                                       ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
 
             vars_pop( v1 );

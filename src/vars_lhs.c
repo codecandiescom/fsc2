@@ -478,7 +478,7 @@ vars_init_list( Var_T * v,
     {
         if ( type == INT_VAR )
         {
-            nv = vars_push( INT_ARR, NULL, count );
+            nv = vars_push( INT_ARR, NULL, ( long ) count );
             nv->flags |= INIT_ONLY;
             nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
             for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
@@ -486,7 +486,7 @@ vars_init_list( Var_T * v,
         }
         else
         {
-            nv = vars_push( FLOAT_ARR, NULL, count );
+            nv = vars_push( FLOAT_ARR, NULL, ( long ) count );
             nv->flags |= INIT_ONLY;
             nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
             for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )

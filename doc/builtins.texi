@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -3005,8 +3005,9 @@ length. I.e.@: for an array defined as
 @code{X[ 4, 2, 5 ]}
 @end example
 @noindent
-@code{size( X )} will return @code{4}, @code{size(X[4])} returns
-@code{2} and @code{size(X[4,2])} returns @code{5}.
+@code{size(X)} will return @code{4} (the size of the first dimension),
+@code{size(X[4])} returns @code{2} and @code{size(X[4,2])} returns
+@code{5}.
 
 For variable sized arrays for which the length is still unknown the
 function returns @code{0}.
