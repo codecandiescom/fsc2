@@ -4,6 +4,10 @@
 
 sed -i'' -e 's/^[ \t]*#define[ \t]\+NETWORK_ADDRESS[ \t]\+"[^\"]\+"/#define	NETWORK_ADDRESS	"192.168.1.21"/' $cdir/lecroy_wr_l.conf
 
+# The model of the LeCroy WR is 104MXi on this machine
+
+sed -i'' -e 's/^[ \t]*#define[ \t]\+\(\(LT[0-9]\+[LM]*\)\|\(_[1246][0-9]\+M\?Xi\)\)/#define	_104MXi/' $cdir/lecroy_wr_l.conf
+
 # On this machine the ER035M is connected to /dev/ttyS2 instead of
 # /dev/ttyS2. Correct that in the configuration files for both
 # devices that are supposed the ER035M via the serial port.
