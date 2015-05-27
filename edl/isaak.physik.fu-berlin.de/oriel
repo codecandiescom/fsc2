@@ -1,0 +1,247 @@
+#!/usr/bin/perl -w
+# -*- cperl -*-
+#
+# Copyright (C) 1999-2015 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# This little program can be used to read and change the most relevant
+# settings of the Rriel Cornerstone 260 monochromator.
+
+use strict;
+use Tk;
+use Tk::Balloon;
+use File::Temp qw/ tempfile /;
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+    if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+
+# Define all state variables and set their values by asking the monochromator
+
+my ( $grating, $wavelength, $shutter, $output_port, $filter, $step );
+read_state();
+
+
+# Create the GUI
+
+my %fp = ( '-side' => 'top',
+           '-fill' => 'x',
+           '-padx' => '2m',
+           '-pady' => '2m' );
+
+my %wp = ( '-side' => 'left',
+           '-fill' => 'x',
+           '-padx' => '3m',
+           '-expand' => 1 );
+
+my $mw = MainWindow->new( );
+$mw->title( "Oriek Cornerstone 260" );
+my $balloon = $mw->Balloon( );
+
+my $f0 = $mw->Frame( );
+my $f0_l = $f0->Label( '-text'           => 'Grating:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f0_m = $f0->Optionmenu( '-options'   => [ ( '1', '2', '3' ) ],
+                            '-width'     => 9,
+                            '-textvariable'  => \$grating );
+$f0->pack( %fp );
+$f0_l->pack( %wp );
+$f0_m->pack( %wp );
+
+
+my $f1 = $mw->Frame( );
+my $f1_l1 = $f1->Label( '-text'           => 'Wavelength:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$wavelength,
+                       '-width'           => '8',
+                       '-validate'        => 'key',
+                       '-validatecommand' => \&is_numeric,
+                       '-relief'          => 'sunken' );
+$balloon->attach( $f1_v, '-balloonmsg'    =>
+                         "Wavelength (up to 2750 nm)" );
+my $f1_l2 = $f1->Label( '-text'           => 'nm',
+                        '-width'          => 1 );
+
+$f1->pack( %fp );
+$f1_l1->pack( %wp );
+$f1_v->pack( %wp );
+$f1_l2->pack( %wp );
+
+
+my $f2 = $mw->Frame( );
+my $f2_l = $f2->Label( '-text'           => 'Shutter:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f2_m = $f2->Optionmenu( '-options'   => [ ( 'open', 'closed' ) ],
+                            '-width'     => 9,
+                            '-textvariable'  => \$shutter );
+$f2->pack( %fp );
+$f2_l->pack( %wp );
+$f2_m->pack( %wp );
+
+
+my $f3 = $mw->Frame( );
+my $f3_l = $f3->Label( '-text'           => 'Output port:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f3_m = $f3->Optionmenu( '-options'   => [ ( 'axial', 'lateral' ) ],
+                            '-width'     => 9,
+                            '-textvariable'  => \$output_port );
+$f3->pack( %fp );
+$f3_l->pack( %wp );
+$f3_m->pack( %wp );
+
+
+my $f4 = $mw->Frame( );
+my $f4_l = $f4->Label( '-text'           => 'Filter:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f4_m = $f4->Optionmenu( '-options'   => [ ( '1', '2', '3', '4', '5', '6' ) ],
+                            '-width'     => 9,
+                            '-textvariable'  => \$filter );
+$f4->pack( %fp );
+$f4_l->pack( %wp );
+$f4_m->pack( %wp );
+
+
+my $f5 = $mw->Frame( );
+my $f5_l1 = $f5->Label( '-text'           => 'Stepper position:',
+                        '-width'          => '20',
+                        '-anchor'         => 'w' );
+my $f5_v = $f5->Entry( '-textvariable'    => \$step,
+                       '-width'           => '8',
+                       '-state'           => 'readonly' );
+
+$f5->pack( %fp );
+$f5_l1->pack( %wp );
+$f5_v->pack( %wp );
+
+
+my $f6 = $mw->Frame( );
+my $f6_r = $f6->Button( '-text' => 'Read',
+                        '-command' => \&read_state );
+my $f6_w = $f6->Button( '-text' => 'Set',
+                        '-command' => \&set_state );
+my $f6_q = $f6->Button( '-text' => 'Quit',
+                        '-command' => sub { $mw->destroy } );
+$f6->pack( '-side' => 'top',
+           '-fill' => 'x',
+           '-padx' => '4m' );
+$f6_r->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+$f6_w->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+$f6_q->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+
+
+# Now interact with the user
+
+MainLoop;
+
+
+#############################################
+
+sub is_numeric {
+    my $new_val = shift;
+    $new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+    $f6_w->configure( -state => ( $new_val ne '' && $new_val <= 2750 ) ?
+                                'active' : 'disabled')
+        if defined $f6_w;
+    return 1;
+}
+
+
+#############################################
+#
+# Creates an EDL script that requests all settings from the monohromator,
+# run fsc2 on it and the reads and interprets what it sent back.
+
+sub read_state {
+    my ( $fh, $edlname ) = tempfile( "fsc2.edl.XXXXXX",
+                                     DIR => $ENV{ TMP } || "/tmp" );
+
+    print $fh <<EOF;
+DEVICES:
+oriel_cs_260;
+EXPERIMENT:
+print( "# # # # # #\\n",monochromator_grating(),
+       monochromator_wavelength() / 1nm,
+       monochromator_shutter(), monochromator_output_port(),
+       monochromator_filter(), monochromator_step());
+EOF
+
+    close $fh;
+
+    open $fh, '-|', "fsc2 --delete -nw $edlname 2>&1"
+        or die "Can't find utility fsc2.\n";
+
+    my $line = <$fh>;
+    close $fh;
+
+    my @vals = split /\s+/, $line;
+    die "Unexpected data from fsc2: '$line'\n"
+        unless @vals == 6
+               && $vals[ 0 ] =~ /^[1-3]$/
+               && $vals[ 1 ] =~ /^-?\d+(\.\d+)$/
+               && $vals[ 2 ] =~ /^[01]$/
+               && $vals[ 3 ] =~ /^[01]$/
+               && $vals[ 4 ] =~ /^[1-6]$/
+               && $vals[ 5 ] =~ /^\d+$/;
+
+    $grating = $vals[ 0 ];
+    $wavelength = $vals[ 1 ];
+    $shutter = $vals[ 2 ] == 0 ? "open" : "closed";
+    $output_port = $vals[ 3 ] == 0 ? "axial" : "lateral";
+    $filter = $vals[ 4 ];
+    $step = $vals[ 5 ];
+}
+
+
+#############################################
+#
+# Creates an EDL script for setting all parameters, sends it to fsc2
+# and then waits for it to finish successfully.
+
+sub set_state {
+    my ( $fh, $edlname ) = tempfile( "fsc2.edl.XXXXXX",
+                                     DIR => $ENV{ TMP } || "/tmp" );
+
+    print $fh <<EOF;
+DEVICES:
+oriel_cs_260;
+EXPERIMENT:
+monochromator_grating( $grating );
+monochromator_wavelength( $wavelength nm );
+monochromator_shutter( "$shutter" );
+monochromator_output_port( "$output_port" );
+monochromator_filter( $filter );
+print( "Done\\n" );
+EOF
+
+    close $fh;
+
+    open $fh, '-|', "fsc2 --delete -nw $edlname 2>&1"
+        or die "Can't find utility fsc2.\n";
+
+    my $line = <$fh>;
+    close $fh;
+
+    die "Unexpected data from fsc2: '$line'\n"
+        unless $line eq "Done\n";
+}

@@ -194,12 +194,6 @@ er035m_sa_test_hook( void )
 int
 er035m_sa_exp_hook( void )
 {
-    char buffer[ 21 ], *bp;
-    long length = sizeof buffer;
-    Var_T *v;
-    int cur_res;
-
-
     nmr = nmr_stored;
 
     if ( ! nmr.is_needed )
@@ -227,7 +221,7 @@ er035m_sa_exp_hook( void )
     /* Find out the curent resolution, and if necessary, change it to the
        value requested by the user */
 
-    cur_res = er035m_sa_get_resolution( );
+    int cur_res = er035m_sa_get_resolution( );
 
     if ( nmr.resolution == UNDEF_RES )
         nmr.resolution = cur_res;
@@ -242,7 +236,8 @@ er035m_sa_exp_hook( void )
 
     stop_on_user_request( );
 
-    length = sizeof buffer;
+    char buffer[ 21 ];
+    long length = sizeof buffer;
     er035m_sa_talk( "PS\r", buffer, &length );
 
     if ( length < 3 || ! strchr( buffer, '\r' ) )
@@ -256,7 +251,7 @@ er035m_sa_exp_hook( void )
        is actively searching to achieve the lock (if it's just in TRANS L-H or
        H-L state check again) */
 
-    bp = buffer + 2;     /* skip first two chars of status byte */
+    char * bp = buffer + 2;     /* skip first two chars of status byte */
 
     do     /* loop through remaining chars in status byte */
     {
@@ -340,7 +335,7 @@ er035m_sa_exp_hook( void )
 
     if ( nmr.state != ER035M_SA_LOCKED )
     {
-        v = measure_field( NULL );
+        Var_T * v = measure_field( NULL );
         nmr.field = v->val.dval;
         vars_pop( v );
     }
@@ -422,11 +417,6 @@ gaussmeter_field( Var_T * v )
 Var_T *
 measure_field( Var_T * v  UNUSED_ARG )
 {
-    char buffer[ 21 ];
-    char *bp;
-    long length;
-
-
     /* We may have been asked not to abort despite failures to find
        the field. In this case and if there already was a failure to
        measure the field return -1. */
@@ -455,7 +445,9 @@ measure_field( Var_T * v  UNUSED_ARG )
 
         /* Get status byte and check if lock was achieved */
 
-        length = sizeof buffer;
+        char buffer[ 21 ];
+        long length = sizeof buffer;
+
         er035m_sa_talk( "PS\r", buffer, &length );
 
         if ( length < 3 || ! strchr( buffer, '\r' ) )
@@ -464,7 +456,7 @@ measure_field( Var_T * v  UNUSED_ARG )
             THROW( EXCEPTION );
         }
 
-        bp = buffer + 2;   /* skip first two chars of status byte */
+        char * bp = buffer + 2;   /* skip first two chars of status byte */
 
         do     /* Loop over the remaining chars in the status byte */
         {
@@ -534,11 +526,6 @@ measure_field( Var_T * v  UNUSED_ARG )
 Var_T *
 gaussmeter_resolution( Var_T * v )
 {
-    double res;
-    int i;
-    int res_index = UNDEF_RES;
-
-
     if ( v == NULL )
     {
         if ( FSC2_MODE == PREPARATION && nmr.resolution == UNDEF_RES )
@@ -550,7 +537,7 @@ gaussmeter_resolution( Var_T * v )
         return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
     }
 
-    res = get_double( v, "resolution" );
+    double res = get_double( v, "resolution" );
 
     too_many_arguments( v );
 
@@ -563,7 +550,8 @@ gaussmeter_resolution( Var_T * v )
     /* Try to match the requested resolution, if necessary use the nearest
        possible value */
 
-    for ( i = 0; i < 2; i++ )
+    int res_index = UNDEF_RES;
+    for ( int i = 0; i < 2; i++ )
         if ( res <= res_list[ i ] && res >= res_list[ i + 1 ] )
         {
             res_index = i +
@@ -622,7 +610,6 @@ gaussmeter_probe_orientation( Var_T * v )
 Var_T *
 gaussmeter_command( Var_T * v )
 {
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -744,18 +731,17 @@ gaussmeter_lower_search_limit( Var_T * v )
  *            the function find_field() instead.
  *------------------------------------------------------------------------*/
 
-static double
+static
+double
 er035m_sa_get_field( void )
 {
-    char buffer[ 21 ];
-    char *state_flag;
-    long length;
-    long tries = ER035M_SA_MAX_RETRIES;
-
-
     /* Repeat asking for field value until it's correct up to LSD -
        it will give up after 'ER035M_SA_MAX_RETRIES' retries to avoid
        getting into an infinite loop when the field is too unstable */
+
+    long tries = ER035M_SA_MAX_RETRIES;
+    char * state_flag;
+    char buffer[ 21 ];
 
     do
     {
@@ -763,7 +749,7 @@ er035m_sa_get_field( void )
 
         /* Ask gaussmeter to send the current field and read result */
 
-        length = sizeof buffer;
+        long length = sizeof buffer;
         er035m_sa_talk( "PF\r", buffer, &length );
 
         /* Disassemble field value and flag showing the state */
@@ -790,6 +776,15 @@ er035m_sa_get_field( void )
 
     if ( tries < 0 )
     {
+        if ( nmr.keep_going_on_bad_field )
+        {
+            nmr.is_bad_field = true;
+            print( SEVERE, "Field is too unstable to be measured with the "
+                   "requested resolution of %0f mG.\n",
+                   1.0e3 * res_list[ nmr.resolution ] );
+            return nmr.field = -1.0;
+        }
+
         print( FATAL, "Field is too unstable to be measured with the "
                "requested resolution of %0f mG.\n",
                1.0e3 * res_list[ nmr.resolution ] );
@@ -808,7 +803,8 @@ er035m_sa_get_field( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static int
+static
+int
 er035m_sa_get_resolution( void )
 {
     char buffer[ 20 ];
@@ -841,11 +837,11 @@ er035m_sa_get_resolution( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void
+static
+void
 er035m_sa_set_resolution( int res_index )
 {
     char buf[ 5 ];
-
 
     sprintf( buf, "RS%1d\r", res_index + 1 );
     er035m_sa_command( buf );
@@ -855,7 +851,8 @@ er035m_sa_set_resolution( int res_index )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long
+static
+long
 er035m_sa_get_upper_search_limit( void )
 {
     char buffer[ 20 ];
@@ -869,12 +866,12 @@ er035m_sa_get_upper_search_limit( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long
+static
+long
 er035m_sa_get_lower_search_limit( void )
 {
     char buffer[ 20 ];
     long length = sizeof buffer;
-
 
     er035m_sa_talk( "LL\r", buffer, &length );
     return T_atol( buffer );
@@ -884,7 +881,8 @@ er035m_sa_get_lower_search_limit( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void
+static
+void
 er035m_sa_set_upper_search_limit( long ul )
 {
     char cmd[ 40 ];
@@ -899,7 +897,8 @@ er035m_sa_set_upper_search_limit( long ul )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void
+static
+void
 er035m_sa_set_lower_search_limit( long ll )
 {
     char cmd[ 40 ];
@@ -914,7 +913,8 @@ er035m_sa_set_lower_search_limit( long ll )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool
+static
+bool
 er035m_sa_command( const char * cmd )
 {
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -928,7 +928,8 @@ er035m_sa_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool
+static
+bool
 er035m_sa_talk( const char * cmd,
                 char *       reply,
                 long *       length )
@@ -950,7 +951,8 @@ er035m_sa_talk( const char * cmd,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static void
+static
+void
 er035m_sa_failure( void )
 {
     print( FATAL, "Can't access the NMR gaussmeter.\n" );

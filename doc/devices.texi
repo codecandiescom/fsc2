@@ -7497,9 +7497,14 @@ This function is only supported for the @strong{Oriel} Cornerstone 260
 monocromators and allows to query or set the state of the built-in
 shuuter. If called with no argument the function returns @code{0} if
 the shuuter is open, otherwise @code{0}. If called with a true boolean
-argument, either the string @code{"OFF"} or the integer @code{0}, the
-shutter is opened, if called with @code{"ON"} or a non-zero integer
-the shutter is closed.
+argument, either the string @code{"OFF"} or the integer @code{0}, or
+one of the strings @code{"OPEN"} or @code{"OPENED"} the shutter is
+opened, if called with @code{"ON"} or a non-zero integer or one of the
+strings @code{"CLOSE"} or @code{"CLOSED"} the shutter is closed.
+
+The function will automatically take care that the shutter isn't
+closed or opened at a higher rate than the specifications allow,
+if necessary introducing short delays.
 
 This function can only be used in the @code{EXPERIMENT} section.
 

@@ -93,7 +93,7 @@ my $f1_v = $f1->Entry( '-textvariable'   => \$end_field,
 					   '-validate'       => 'key',
 					   '-validatecommand'=> \&is_numeric,
 					   '-relief'         => 'sunken' );
-$balloon->attach( $f1_v, '-balloonmsg'   => "Enter the end field (in Gauss)" );
+$balloon->attach( $f1_v, '-balloonmsg'   => "Enter the start field (in G)" );
 my $f1_l2 = $f1->Label( '-text'          => 'G',
 						'-width'         => 1 );
 
@@ -113,7 +113,7 @@ my $f2_v = $f2->Entry( '-textvariable'    => \$field_step,
 					   '-validatecommand' => \&is_numeric,
 					   '-relief'          => 'sunken' );
 $balloon->attach( $f2_v, '-balloonmsg'    =>
-				         "Enter the size of the field steps (in Gauss)" );
+				         "Enter the size of the field steps (in G)" );
 my $f2_l2 = $f2->Label( '-text'           => 'G',
 						'-width'          => 1 );
 
@@ -426,6 +426,7 @@ return if &do_checks( ) != 0;
 local *F;
 my $text;
 
+print "XXXXX $how\n";
 open( F, "|fsc2_" . lc $how )
 	or die "Can't find utility fsc2_" . lc $how . ".\n";
 

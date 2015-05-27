@@ -221,15 +221,19 @@ endif
 	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test        \
-					 $(bindir)/fsc2_load  $(bindir)/fsc2_iconic_start
+	                 $(bindir)/fsc2_nw    $(bindir)/fsc2_load        \
+                     $(bindir)/fsc2_iconic_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_nw
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
 uninstall:
 	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean                  \
 					 $(bindir)/fsc2_connect $(bindir)/fsc2_start          \
+					 $(bindir)/fsc2_connect $(bindir)/fsc2_nw             \
+					 $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start   \
 					 $(bindir)/fsc2_test $(bindir)/fsc2_load
 ifneq ($(GPIB_LIBRARY),none)
 	$(RM) $(RMFLAGS) $(bindir)/gpibd

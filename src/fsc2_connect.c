@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -104,6 +104,8 @@ main( int    argc    UNUSED_ARG,
         av[ ac++ ] = "-T";
     else if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
         av[ ac++ ] = "-I";
+    else if ( ! strcmp( prog_name, "fsc2_nw" ) )
+        av[ ac++ ] = "-nw";
     else if (    strcmp( prog_name, "fsc2_load" )
               && strcmp( prog_name, "fsc2_connect" ) )
     {

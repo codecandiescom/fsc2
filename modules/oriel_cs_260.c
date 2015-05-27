@@ -617,7 +617,27 @@ monochromator_shutter( Var_T * v )
     if ( ! v )
 		return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
 
-	bool state = get_boolean( v );
+    bool state;
+
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "OPEN" )
+             || ! strcasecmp( v->val.sptr, "OPENED" )
+             || ! strcasecmp( v->val.sptr, "OFF" ) )
+            state = false;
+        else if (    ! strcasecmp( v->val.sptr, "CLOSED" )
+                  || ! strcasecmp( v->val.sptr, "CLOSE" )
+                  || ! strcasecmp( v->val.sptr, "OFF" ))
+            state = true;
+        else
+        {
+            print( FATAL, "Invalid argument: '%s'.\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        state = get_boolean( v );
+
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )

@@ -18,7 +18,7 @@
 
 EDL         := $(wildcard *.EDL)
 EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
-SCRIPTS     := $(EDL_SCRIPTS) cw_epr trepr
+SCRIPTS     := $(EDL_SCRIPTS) cw_epr trepr oriel
 
 
 all: $(EDL_SCRIPTS)

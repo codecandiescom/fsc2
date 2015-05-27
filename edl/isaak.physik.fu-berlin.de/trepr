@@ -71,7 +71,7 @@ $mw->title( "Time resolved EPR" );
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -84,7 +84,7 @@ my $f1_l2 = $f1->Label( '-text'           => 'G',
 my $f2 = $mw->Frame( );
 my $f2_l1 = $f2->Label( '-text'           => 'End field:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f2_v = $f2->Entry( '-textvariable'    => \$end_field,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -97,7 +97,7 @@ my $f2_l2 = $f2->Label( '-text'           => 'G',
 my $f3 = $mw->Frame( );
 my $f3_l1 = $f3->Label( '-text'           => 'Field step size:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f3_v = $f3->Entry( '-textvariable'    => \$field_step,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -110,13 +110,13 @@ my $f3_l2 = $f3->Label( '-text'           => 'G',
 my $f4 = $mw->Frame( );
 my $f4_l1 = $f4->Label( '-text'           => 'Maximum field error:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f4_v = $f4->Entry( '-textvariable'    => \$field_error,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief'          => 'sunken',
-					   'state'            => $sweep_method eq 'sweep' ?
+					   '-state'           => $sweep_method eq 'sweep' ?
 					                              'disabled' : 'normal' );
 my $f4_l2 = $f4->Label( '-text'           => 'G',
 						'-width'          => 1 );
@@ -125,7 +125,7 @@ my $f4_l2 = $f4->Label( '-text'           => 'G',
 my $f5 = $mw->Frame( );
 my $f5_l = $f5->Label( '-text'              => 'Sweep method:',
 						'-width'            => '20',
-						'anchor'            => 'w' );
+						'-anchor'           => 'w' );
 my $f5_m = $f5->Optionmenu( '-options'      => [ ( 'sweep', 'set_field' ) ],
 							'-width'        => 9,
 						    '-command'      => \&set_sweep_method,
@@ -135,7 +135,7 @@ my $f5_m = $f5->Optionmenu( '-options'      => [ ( 'sweep', 'set_field' ) ],
 my $f6 = $mw->Frame( );
 my $f6_l1 = $f6->Label( '-text'           => 'Number of runs:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f6_v = $f6->Entry( '-textvariable'    => \$num_runs,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -147,7 +147,7 @@ my $f6_l2 = $f6->Label( '-text'           => ' ',
 my $f7 = $mw->Frame( );
 my $f7_l1 = $f7->Label( '-text'           => 'Laser flashes per trace:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f7_v = $f7->Entry( '-textvariable'    => \$pulses_per_trace,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -160,7 +160,7 @@ my $f7_l2 = $f7->Label( '-text'           => ' ',
 my $f13 = $mw->Frame( );
 my $f13_l1 = $f13->Label( '-text'           => 'Amount of pretrigger:',
 						  '-width'          => '20',
-						  'anchor'          => 'w' );
+						  '-anchor'         => 'w' );
 my $f13_v = $f13->Entry( '-textvariable'    => \$pretrigger,
 						 '-width'           => '8',
 						 '-validate'        => 'key',
@@ -174,7 +174,7 @@ my $f13_l2 = $f13->Label( '-text'           => '%',
 my $f8 = $mw->Frame( );
 my $f8_l1 = $f8->Label( '-text'             => 'Digitizer:',
 						'-width'            => '20',
-						'anchor'            => 'w' );
+						'-anchor'           => 'w' );
 my $f8_m = $f8->Optionmenu( '-options'      => \@digitizers,
 							'-width'        => 9,
 							'-textvariable' => \$digitizer );
@@ -182,7 +182,7 @@ my $f8_m = $f8->Optionmenu( '-options'      => \@digitizers,
 my $f9 = $mw->Frame( );
 my $f9_l1 = $f9->Label( '-text'             => 'Measurement channel:',
 						'-width'            => '20',
-						'anchor'            => 'w' );
+						'-anchor'           => 'w' );
 my $f9_m = $f9->Optionmenu( '-options'      => $channels,
 							'-width'        => 9,
 							'-textvariable' => \$channel );
@@ -190,7 +190,7 @@ my $f9_m = $f9->Optionmenu( '-options'      => $channels,
 my $f10 = $mw->Frame( );
 my $f10_l1 = $f10->Label( '-text'             => 'Trigger channel:',
 						  '-width'            => '20',
-						  'anchor'            => 'w' );
+						  '-anchor'           => 'w' );
 my $f10_m = $f10->Optionmenu( '-options'      => $trig_channels,
 							  '-width'        => 9,
 							  '-textvariable' => \$trig_channel );
@@ -268,10 +268,10 @@ $f12->pack( '-side'   => 'top',
 			'-fill'   => 'x',
 			'-padx'   => '4m' );
 $f12_a->pack( %wp,
-			  'padx'  => '5m',
+			  '-padx' => '5m',
 			  '-pady' => '3m' );
 $f12_q->pack( %wp,
-			  'padx'  => '5m',
+			  '-padx' => '5m',
 			  '-pady' => '3m' );
 
 $channel = "CH2";
@@ -408,11 +408,11 @@ sub do_checks {
 
 sub set_sweep_method {
 	if ( $sweep_method eq 'sweep' ) {
-		$f4_v->configure( 'state' => 'disabled' );
+		$f4_v->configure( '-state' => 'disabled' );
 		$hidden_field_error = $field_error;
 		$field_error = "";
 	} else {
-		$f4_v->configure( 'state' => 'normal' );
+		$f4_v->configure( '-state' => 'normal' );
 		$field_error = $hidden_field_error;
 	}
 }
