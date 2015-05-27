@@ -7318,7 +7318,7 @@ Returns a string with the name of the monochromator being used.
 
 @anchor{monochromator_wavelength()}
 @findex monochromator_wavelength()
-@item monochromator_wavelength()
+@item   monochromator_wavelength()
 If called with no argument the function returns the current center
 wavelength (in m) of the currently used grating. If called with an
 argument the grating is moved to the specified center wavelength
@@ -7335,7 +7335,7 @@ them.
 
 @anchor{monochromator_wavenumber()}
 @findex monochromator_wavenumber()
-@item monochromator_wavenumber()
+@item   monochromator_wavenumber()
 If called with no argument this function returns the current center
 wavenumber in @code{cm^-1} of the current grating, either in absolute
 units or, if setting a laser line position is supported by the device
@@ -7359,7 +7359,7 @@ them.
 
 @anchor{monochromator_laser_line()}
 @findex monochromator_laser_line()
-@item monochromator_laser_line()
+@item   monochromator_laser_line()
 The function is only supported for wavenumber-driven @strong{SPEX}
 monochromators. It allows to set (or query if the function is called
 without an argument) to set a laser line position. If such a laser
@@ -7390,7 +7390,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_scan_setup()}
 @findex monochromator_scan_setup()
-@item monochromator_scan_setup()
+@item   monochromator_scan_setup()
 The function is only supported for @strong{SPEX} monochromators. These
 have a special scan mode, where scans can be done going from low to
 high wavelengths or from high to low wavenumbers (during a scan the
@@ -7416,7 +7416,7 @@ automatically aborts the currently running scan.
 
 @anchor{monochromator_start_scan()}
 @findex monochromator_start_scan()
-@item monochromator_start_scan()
+@item   monochromator_start_scan()
 The function is only supported for @strong{SPEX} monochromators and
 requires that the function @ref{monochromator_scan_setup()} has been
 called previously to define the scan parameters. It slews the
@@ -7435,7 +7435,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_scan_step()}
 @findex monochromator_scan_step()
-@item monochromator_scan_step()
+@item   monochromator_scan_step()
 The function is only supported for @strong{SPEX} monochromators and
 requires that both the function @ref{monochromator_scan_setup()} has
 been called previously to define the scan parameters and that the
@@ -7473,7 +7473,7 @@ monochromators.
 
 @anchor{monochromator_shutter_limits()}
 @findex monochromator_shutter_limits()
-@item monochromator_shutter_limits()
+@item   monochromator_shutter_limits()
 The function is only supported for @strong{SPEX} monochromators when
 driven by the CD2A interface (but not the SPEX232) that have shutters
 to protect the PMT or APD etc.@: from excitation light in a certain
@@ -7492,15 +7492,16 @@ automatically aborts the currently running scan.
 
 @anchor{monochromator_shutter()}
 @findex monochromator_shutter()
-@item monochromator_shutter()
+@item   monochromator_shutter()
 This function is only supported for the @strong{Oriel} Cornerstone 260
 monocromators and allows to query or set the state of the built-in
-shuuter. If called with no argument the function returns @code{0} if
-the shuuter is open, otherwise @code{0}. If called with a true boolean
-argument, either the string @code{"OFF"} or the integer @code{0}, or
-one of the strings @code{"OPEN"} or @code{"OPENED"} the shutter is
-opened, if called with @code{"ON"} or a non-zero integer or one of the
-strings @code{"CLOSE"} or @code{"CLOSED"} the shutter is closed.
+shutter. If called with no argument the function returns @code{0} if
+the shuuter is open and @code{0} when closed. If called with a true
+boolean argument, either the string @code{"OFF"} or the integer
+@code{0}, or one of the strings @code{"OPEN"} or @code{"OPENED"} the
+shutter is opened. If called with @code{"ON"} or a non-zero integer or
+one of the strings @code{"CLOSE"} or @code{"CLOSED"} the shutter is
+closed.
 
 The function will automatically take care that the shutter isn't
 closed or opened at a higher rate than the specifications allow,
@@ -7511,7 +7512,7 @@ This function can only be used in the @code{EXPERIMENT} section.
 
 @anchor{monochromator_groove_density()}
 @findex monochromator_groove_density()
-@item monochromator_groove_density()
+@item   monochromator_groove_density()
 If called with no argument the function returns the number of grooves
 per meter of the currently used grating. If called with an integer
 argument it returns the number of grooves per m of the grating indexed
@@ -7531,7 +7532,7 @@ SpectraPro-275}.
 
 @anchor{monochromator_grating()}
 @findex monochromator_grating()
-@item monochromator_grating()
+@item   monochromator_grating()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} and @ref{oriel_cs_260, Oriel Cornerstone 260}
 monochromators. It queries or sets a new grating. If called with no
@@ -7559,7 +7560,7 @@ SpectraPro-275}.
 
 @anchor{monochromator_turret()}
 @findex monochromator_turret()
-@item monochromator_turret()
+@item   monochromator_turret()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. If called with no argument the
 function returns the number of the currently used turret of the
@@ -7586,7 +7587,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_exit_mirror()}
 @findex monochromator_exit_mirror()
-@item monochromator_exit_mirror()
+@item   monochromator_exit_mirror()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. If called with no argument the
 function returns the position of the exit divertor mirror, where
@@ -7603,7 +7604,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_filter()}
 @findex monochromator_filter()
-@item monochromator_filter()
+@item   monochromator_filter()
 The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators having a wheel with up to 6 filters
 (and if support for the filter wheel is compiled in). Since not all
@@ -7620,7 +7621,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_output_port()}
 @findex monochromator_output_port()
-@item monochromator_boutput_port()
+@item   monochromator_output_port()
 The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators, which have a motorized mirror that
 allows selecting one of two output ports. If called without an
@@ -7636,7 +7637,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_step()}
 @findex monochromator_step()
-@item monochromator_step()
+@item   monochromator_step()
 The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators. It allows to directly query or set
 the position of the stepper motor moving the gratings. If called
@@ -7665,7 +7666,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_wavelength_axis()}
 @findex monochromator_wavelength_axis()
-@item monochromator_wavelength_axis()
+@item   monochromator_wavelength_axis()
 The function requires that the module for a CCD camera is available that
 returns information about the settings of the camera. It returns an
 array with four elements.
@@ -7721,7 +7722,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_wavenumber_axis()}
 @findex monochromator_wavenumber_axis()
-@item monochromator_wavenumber_axis()
+@item   monochromator_wavenumber_axis()
 This function is similar to the function
 @ref{monochromator_wavelength_axis()} but instead of returning values
 to be used for setting a wavelength axis the values are suitable for
@@ -7750,7 +7751,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_calc_wavelength()}
 @findex monochromator_calc_wavelength()
-@item monochromator_calc_wavelength()
+@item   monochromator_calc_wavelength()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. It requires that the module for a CCD
 camera is available that returns information about the number of
@@ -7780,7 +7781,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_load_calibration()}
 @findex monochromator_load_calibration()
-@item monochromator_load_calibration()
+@item   monochromator_load_calibration()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. It tries to load a file with
 calibration data for one or more of the gratings. For each grating
@@ -7821,7 +7822,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_set_calibration()}
 @findex monochromator_set_calibration()
-@item monochromator_set_calibration()
+@item   monochromator_set_calibration()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. It allows to set calibration data for
 a grating directly instead of reading them from a file. It can also
@@ -7841,7 +7842,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_calibration_factor()}
 @findex monochromator_calibration_factor()
-@item monochromator_calibration_factor()
+@item   monochromator_calibration_factor()
 The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators. It allows to query or set a factor
 that is used (in conjunction with an offset value, see
@@ -7861,7 +7862,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_calibration_offset()}a
 @findex monochromator_calibration_offset()
-@item monochromator_calibration_offset()
+@item   monochromator_calibration_offset()
 The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators. It allows to query or set an offset
 that is used (in conjunction with a factor, see
@@ -7882,7 +7883,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_install_grating()}
 @findex monochromator_install_grating()
-@item monochromator_install_grating()
+@item   monochromator_install_grating()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. It can be used to tell the
 monochromator about a new grating. It expects two arguments, the
@@ -7915,7 +7916,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_zero_offset()}
 @findex monochromator_zero_offset()
-@item monochromator_zero_offset()
+@item   monochromator_zero_offset()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. It allows to either query or set the
 zero offset of a grating. The zero offset is basically an angle that
@@ -7945,7 +7946,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_grating_adjust()}
 @findex monochromator_grating_adjust()
-@item monochromator_grating_adjust()
+@item   monochromator_grating_adjust()
 The function is only supported for @ref{spectrapro_300i,
 SpectraPro-300i} monochromators. The value that can be queried or set
 by this function is used to adjust the angle by which the grating is
@@ -7979,7 +7980,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_calibrate()}
 @findex monochromator_calibrate()
-@item monochromator_calibrate()
+@item   monochromator_calibrate()
 The function is takes different arguments for the
 @ref{spectrapro_300i, SpectraPro 300i}, the @strong{SPEX} and the
 @ref{oriel_cs_260, Oriel Cornerstone 260} monochromators. It isn't
@@ -8086,7 +8087,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 @anchor{monochromator_init_motor()}
 @findex monochromator_init_motor()
-@item monochromator_init_motor()
+@item   monochromator_init_motor()
 This function onky exists for @strong{SPEX} monochromators controlled
 via the @ref{spex232, SPEX232} interface and only for those that have
 autocalibration capabiliy. If for these types of monochromators the
@@ -8098,7 +8099,7 @@ long time.
 
 @anchor{monochromator_enforce_wavelength()}
 @findex monochromator_enforce_wavelength()
-@item monochromator_enforce_wavelength()
+@item   monochromator_enforce_wavelength()
 This function only exists for @strong{SPEX} monochromators controlled
 via the @ref{spex232, SPEX232} interface. It allows, when called in
 the @code{PREPARATIONS} section, to set the wavelength the
@@ -8128,7 +8129,7 @@ from the one stored in the state file).
 
 @anchor{monochromator_grating_zero()}
 @findex monochromator_grating_zero()
-@item monochromator_grating_zero()
+@item   monochromator_grating_zero()
 This function only exists for the @strong{Oriel} @ref{oriel_cs_260}
 monochromator. It allows to query or set the gratung zero parameter
 (used internally by the device to calculate the center position of
