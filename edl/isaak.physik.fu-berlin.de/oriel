@@ -35,7 +35,7 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 # Define all state variables and set their values by asking the monochromator
 
 my ( $grating, $wavelength, $shutter, $output_port, $filter, $step );
-read_state();
+read_state( );
 
 
 # Create the GUI
@@ -170,7 +170,7 @@ sub is_numeric {
 #############################################
 #
 # Creates an EDL script that requests all settings from the monohromator,
-# run fsc2 on it and the reads and interprets what it sent back.
+# run fsc2 on it and then reads and interprets what was sent back.
 
 sub read_state {
     my ( $fh, $edlname ) = tempfile( "fsc2.edl.XXXXXX",
@@ -183,7 +183,7 @@ EXPERIMENT:
 print( "# # # # # #\\n",monochromator_grating(),
        monochromator_wavelength() / 1nm,
        monochromator_shutter(), monochromator_output_port(),
-       monochromator_filter(), monochromator_step());
+       monochromator_filter(), monochromator_step() );
 EOF
 
     close $fh;
@@ -191,32 +191,17 @@ EOF
     open $fh, '-|', "fsc2 --delete -nw $edlname 2>&1"
         or die "Can't find utility fsc2.\n";
 
-    my $line = <$fh>;
+    handle_reply( <$fh> );
     close $fh;
-
-    my @vals = split /\s+/, $line;
-    die "Unexpected data from fsc2: '$line'\n"
-        unless @vals == 6
-               && $vals[ 0 ] =~ /^[1-3]$/
-               && $vals[ 1 ] =~ /^-?\d+(\.\d+)$/
-               && $vals[ 2 ] =~ /^[01]$/
-               && $vals[ 3 ] =~ /^[01]$/
-               && $vals[ 4 ] =~ /^[1-6]$/
-               && $vals[ 5 ] =~ /^\d+$/;
-
-    $grating = $vals[ 0 ];
-    $wavelength = $vals[ 1 ];
-    $shutter = $vals[ 2 ] == 0 ? "open" : "closed";
-    $output_port = $vals[ 3 ] == 0 ? "axial" : "lateral";
-    $filter = $vals[ 4 ];
-    $step = $vals[ 5 ];
 }
 
 
 #############################################
 #
-# Creates an EDL script for setting all parameters, sends it to fsc2
-# and then waits for it to finish successfully.
+# Creates an EDL script for setting all parameters and passing the back
+# again, sends it to fsc2 and then  reads and interprets what was sent
+# back. If the grating is changed, the shutter isn't opened to avoid
+# having a detector accidentally exposed to too high levels of energy!
 
 sub set_state {
     my ( $fh, $edlname ) = tempfile( "fsc2.edl.XXXXXX",
@@ -225,13 +210,21 @@ sub set_state {
     print $fh <<EOF;
 DEVICES:
 oriel_cs_260;
+VARIABLES:
+Grating;
 EXPERIMENT:
+Grating = monochromator_grating( );
 monochromator_grating( $grating );
 monochromator_wavelength( $wavelength nm );
-monochromator_shutter( "$shutter" );
+IF Grating == $grating {
+    monochromator_shutter( "$shutter" );
+}
 monochromator_output_port( "$output_port" );
 monochromator_filter( $filter );
-print( "Done\\n" );
+print( "# # # # # #\\n",monochromator_grating(),
+       monochromator_wavelength() / 1nm,
+       monochromator_shutter(), monochromator_output_port(),
+       monochromator_filter(), monochromator_step() );
 EOF
 
     close $fh;
@@ -239,9 +232,38 @@ EOF
     open $fh, '-|', "fsc2 --delete -nw $edlname 2>&1"
         or die "Can't find utility fsc2.\n";
 
-    my $line = <$fh>;
+    handle_reply( <$fh> );
     close $fh;
-
-    die "Unexpected data from fsc2: '$line'\n"
-        unless $line eq "Done\n";
 }
+
+
+#############################################
+#
+# Analyzes the string returned from the EDL script
+
+sub handle_reply {
+    my $line = shift;
+
+    my @vals = split /\s+/, $line;
+    die "Unexpected data from fsc2: '$line'\n"
+        unless    @vals == 6
+               && $vals[ 0 ] =~ /^[1-3]$/
+               && $vals[ 1 ] =~ /^-?\d+(\.\d+)$/
+               && $vals[ 2 ] =~ /^[01]$/
+               && $vals[ 3 ] =~ /^[01]$/
+               && $vals[ 4 ] =~ /^[1-6]$/
+               && $vals[ 5 ] =~ /^\d+$/;
+
+    $grating     = $vals[ 0 ];
+    $wavelength  = $vals[ 1 ];
+    $shutter     = $vals[ 2 ] == 0 ? "open" : "closed";
+    $output_port = $vals[ 3 ] == 0 ? "axial" : "lateral";
+    $filter      = $vals[ 4 ];
+    $step        = $vals[ 5 ];
+}
+
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:
