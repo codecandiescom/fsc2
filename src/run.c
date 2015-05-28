@@ -101,10 +101,6 @@ static bool Graphics_have_been_started = UNSET;
 bool
 run( void )
 {
-    int stored_errno;
-    sigset_t new_mask, old_mask;
-
-
     /* We can't run more than one experiment - so quit if child_pid != 0 */
 
     if ( Fsc2_Internals.child_pid != 0 )
@@ -170,6 +166,9 @@ run( void )
        the signals the child may send are blocked until we can be sure the
        parent has got the child's PID. */
 
+    sigset_t new_mask,
+             old_mask;
+
     sigemptyset( &new_mask );
     sigaddset( &new_mask, SIGCHLD );
     sigaddset( &new_mask, QUITTING );
@@ -185,8 +184,8 @@ run( void )
         run_child( );
     }
 
-    stored_errno = errno;            /* stored for later examination... */
-    close_all_files( );              /* only child is going to write to them */
+    int stored_errno = errno;        // stored for later examination...
+    close_all_files( );              // only child is going to write to them
 
     close( Comm.pd[ READ ] );        /* close unused ends of pipes */
     close( Comm.pd[ 3 ] );
@@ -245,7 +244,7 @@ start_comm_libs( void )
 
     if ( Need_GPIB && gpib_init( ) == FAILURE )
     {
-        eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
+        eprint( FATAL, UNSET, "Failed to initialize GPIB bus: %s\n",
                 gpib_last_error( ) );
         goto gpib_fail;
     }
@@ -827,10 +826,8 @@ check_for_further_errors( Compilation_T * c_old,
     char str1[ 128 ],
          str2[ 128 ];
     const char *mess = "During start of the experiment there where";
-    int i;
 
-
-    for ( i = FATAL; i < NO_ERROR; i++ )
+    for ( int i = FATAL; i < NO_ERROR; i++ )
         diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
     if (    Fsc2_Internals.cmdline_flags & NO_GUI_RUN
@@ -893,9 +890,6 @@ void
 run_stop_button_callback( FL_OBJECT * obj,
                           long        b  UNUSED_ARG )
 {
-    int bn;
-
-
     /* Using the "Stop" button when the child is already dead (or has been
        asked to quit) shouldn't be possible, but to make real sure (in case
        of some real subtle timing problems) we better check */
@@ -911,7 +905,7 @@ run_stop_button_callback( FL_OBJECT * obj,
 
     if ( GUI.stop_button_mask != 0 )
     {
-        bn = fl_get_button_numb( obj );
+        int bn = fl_get_button_numb( obj );
         if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
             return;
     }
@@ -956,15 +950,13 @@ run_stop_button_callback( FL_OBJECT * obj,
 static void
 run_sigchld_handler( int signo )
 {
-    int return_status;
-    int pid;
-    int errno_saved;
-
-
     if ( signo != SIGCHLD )          /* should never happen... */
         return;
 
-    errno_saved = errno;
+    int errno_saved = errno;
+
+    pid_t pid;
+    int return_status;
 
     while ( ( pid = waitpid( -1, &return_status, WNOHANG ) ) > 0 )
     {
@@ -1022,10 +1014,8 @@ void
 run_sigchld_callback( FL_OBJECT * a,
                       long        b )
 {
-    int hours, mins, secs;
-    const char *mess;
+    const char * mess;
     int state = EXIT_SUCCESS;
-
 
     if ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
                                     /* missing notification by the child ? */
@@ -1135,9 +1125,9 @@ run_sigchld_callback( FL_OBJECT * a,
 
     /* Print out for how long the experiment had been running */
 
-    secs  = irnd( experiment_time( ) );
-    hours = secs / 3600;
-    mins  = ( secs / 60 ) % 60;
+    int secs  = irnd( experiment_time( ) );
+    int hours = secs / 3600;
+    int mins  = ( secs / 60 ) % 60;
     secs %= 60;
 
     if ( hours > 0 )
@@ -1313,11 +1303,6 @@ set_buttons_for_run( int run_state )
 static void
 run_child( void )
 {
-#ifndef NDEBUG
-    const char *fcd;
-#endif
-
-
     Fsc2_Internals.I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
@@ -1338,6 +1323,7 @@ run_child( void )
        string will induce the child to stop, making it possible to attach
        with a debugger at this point. */
 
+    const char * fcd;
     if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
     {
         fprintf( stderr, "Child process pid = %d\n", getpid( ) );
@@ -1382,10 +1368,8 @@ setup_child_signals( void )
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
                         SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGCHLD, SIGCONT,
                         SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM };
-    size_t i;
 
-
-    for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
+    for ( size_t i = 0; i < NUM_ELEMS( sig_list ); i++ )
     {
         sact.sa_handler = child_sig_handler;
         sigemptyset( &sact.sa_mask );
@@ -1513,11 +1497,10 @@ static void
 wait_for_confirmation( void )
 {
     struct sigaction sact;
-
-
     sact.sa_handler = child_confirmation_handler;
     sigemptyset( &sact.sa_mask );
     sact.sa_flags = 0;
+
     if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
         _exit( EXIT_FAILURE );
 
@@ -1627,8 +1610,7 @@ do_measurement( void )
 static void
 deal_with_program_tokens( void )
 {
-    Prg_Token_T *cur = EDL.cur_prg_token;
-
+    Prg_Token_T * cur = EDL.cur_prg_token;
 
     switch ( cur->token )
     {
