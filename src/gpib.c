@@ -793,14 +793,17 @@ start_gpibd( void )
        tells us that it's prepared to accept connections. */
 
     close( p[ 1 ] );
+    errno = 0;
     while ( ( ret = read( p[ 0 ], &c, 1 ) ) != 1 )
     {
         /* Daemon may have quit, resulting in a SIGCHLD. Avoid leaving a
            zombie. Errors not related to other signals aren't acceptable. */
 
-        if (    pid == waitpid( pid, NULL, WNOHANG )
-             || ( ret == -1 && errno != EINTR ) )
+        fprintf( stderr, "ret = %d, %s\n", ret, strerror( errno ) );
+
+        if ( kill( pid, 0 ) == -1 || ( ret == -1 && errno != EINTR ) )
         {
+            waitpid( pid, NULL, 0 ); 
             close( p[ 0 ] );
             return FAILED_TO_CONNECT;
         }

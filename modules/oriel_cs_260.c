@@ -128,9 +128,8 @@ static double Max_Outport_Switch_Delay = 10;
 
 /* Values for test run */
 
+#define TEST_GRATING         0
 #define TEST_WAVELENGTH      5.5e-7
-#define TEST_POSITION        27000
-#define TEST_GRATING_NUMBER  0
 #define TEST_SHUTTER_STATE   0
 #define TEST_FILTER          0
 #define TEST_OUTPORT         0
@@ -201,6 +200,10 @@ static int oriel_cs_260_get_gpib_address( void );
 static void oriel_cs_260_set_gpib_address( unsigned int addr );
 static double oriel_cs_260_wl2wn( double wl );
 static double oriel_cs_260_wn2wl( double wn );
+static long oriel_cs_260_wl_to_pos( int    grat,
+                                    double wl );
+static double oriel_cs_260_pos_to_wl( int    grat,
+                                      long   pos );
 
 
 /*------------------------------------*
@@ -218,10 +221,10 @@ oriel_cs_260_init_hook( void )
 
     oriel_cs_260.device        = -1;
 
+    oriel_cs_260.grating = TEST_GRATING;
     oriel_cs_260.wavelength = TEST_WAVELENGTH;
-    oriel_cs_260.position = TEST_POSITION;
-
-    oriel_cs_260.grating = TEST_GRATING_NUMBER;
+    oriel_cs_260.position = oriel_cs_260_wl_to_pos( TEST_GRATING,
+                                                    TEST_WAVELENGTH );
 
     for ( int i = 0; i < NUM_GRATINGS; i++ )
     {
@@ -283,21 +286,33 @@ monochromator_grating( Var_T * v )
 {
     if ( v )
     {
-        long int grating = get_strict_long( v, "grating number" );
+        long int grat = get_strict_long( v, "grating number" ) - 1;
 
-        too_many_arguments( v );
-
-        if ( grating < 1 || grating > NUM_GRATINGS )
+        if ( grat < 0 || grat >= NUM_GRATINGS )
         {
             print( FATAL, "Invalid grating number %ld, must be between 1 and "
-                   "%d.\n", grating + 1, NUM_GRATINGS );
+                   "%d.\n", grat + 1, NUM_GRATINGS );
             THROW( EXCEPTION );
         }
 
+        too_many_arguments( v );
+
+        /* We set te grating even if the currently set grating is already
+           what we're asked to set since this has the side effect of
+           closing the shutter and some users may get into the habit of
+           expecting the shutter to be closed whenever this function is
+           called... */
+
         if ( FSC2_MODE == EXPERIMENT )
-            oriel_cs_260_set_grating( grating - 1 );
+            oriel_cs_260_set_grating( grat);
         else
-            oriel_cs_260.grating = grating - 1;
+        {
+            oriel_cs_260.grating = grat;
+            oriel_cs_260.shutter_state = true;
+            oriel_cs_260.wavelength = TEST_WAVELENGTH;
+            oriel_cs_260.position = oriel_cs_260_wl_to_pos( grat,
+                                                            TEST_WAVELENGTH );
+        }
     }
 
     return vars_push( INT_VAR, oriel_cs_260.grating + 1L );
@@ -315,7 +330,6 @@ monochromator_wavelength( Var_T * v )
         return vars_push( FLOAT_VAR, oriel_cs_260.wavelength );
 
     double wl = get_double( v, "wavelength" );
-    too_many_arguments( v );
 
     if ( wl == oriel_cs_260.wavelength )
         return vars_push( FLOAT_VAR, oriel_cs_260.wavelength );
@@ -335,8 +349,15 @@ monochromator_wavelength( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    too_many_arguments( v );
+
     if ( FSC2_MODE == EXPERIMENT )
         oriel_cs_260_set_wavelength( wl );
+    else
+    {
+        oriel_cs_260.wavelength = wl;
+        oriel_cs_260.position = oriel_cs_260_wl_to_pos( grat, wl );
+    }
 
     return vars_push( FLOAT_VAR, oriel_cs_260.wavelength );
 }
@@ -385,6 +406,11 @@ monochromator_wavenumber( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
         oriel_cs_260_set_wavelength( wl );
+    else
+    {
+        oriel_cs_260.wavelength = wl;
+        oriel_cs_260.position = oriel_cs_260_wl_to_pos( grat, wl );
+    }
 
     return vars_push( FLOAT_VAR,
                       oriel_cs_260_wl2wn( oriel_cs_260.wavelength ) );
@@ -397,7 +423,7 @@ monochromator_wavenumber( Var_T * v )
 Var_T *
 monochromator_step( Var_T * v )
 {
-    /* Witout no arguments return the cirrent stepper motor position */
+    /* Without no arguments return the cirrent stepper motor position */
 
     if ( ! v )
       return vars_push( INT_VAR, oriel_cs_260.position );
@@ -413,20 +439,11 @@ monochromator_step( Var_T * v )
 
     too_many_arguments( v );
 
-    /* In test mode we always succeed since there's no way we could forsee
-       if this will work in real */
-
-    if ( FSC2_MODE == TEST )
-    {
-        if ( ! test_only )
-            oriel_cs_260.position += step;
-        return vars_push( INT_VAR, 1L );
-    }
-
     /* Check if making that step is possible - if not return false
        (and, if the test flag isn't set, also emit a warning) */
 
     int grat = oriel_cs_260.grating;
+
     if (    oriel_cs_260.position + step < Position_Ranges[ grat ][ 0 ]
          || oriel_cs_260.position + step > Position_Ranges[ grat ][ 1 ] )
     {
@@ -436,10 +453,18 @@ monochromator_step( Var_T * v )
         return vars_push( INT_VAR, 0L );
     }
 
-    /* Now try to do the step - it still might fail */
+    /* Now try to do the step - it still might fail in a real experiment! */
 
-    if ( ! test_only && ! oriel_cs_260_do_step( step ) )
-        return vars_push( INT_VAR, 0L );
+    if ( ! test_only )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( INT_VAR,
+                              oriel_cs_260_do_step( step ) ? 1L : 0L );
+
+        oriel_cs_260.position += step;
+        oriel_cs_260.wavelength =
+                        oriel_cs_260_pos_to_wl( grat, oriel_cs_260.position );
+    }
 
     return vars_push( INT_VAR, 1L );
 }
@@ -675,7 +700,6 @@ monochromator_filter( Var_T * v )
         return vars_push( INT_VAR, oriel_cs_260.filter + 1L );
 
     long int filter = get_strict_long( v, "filter number" ) - 1;
-    too_many_arguments( v );
 
     if ( filter < 0 || filter >= NUM_FILTER_WHEEL_POSITIONS )
     {
@@ -683,6 +707,8 @@ monochromator_filter( Var_T * v )
                filter, NUM_FILTER_WHEEL_POSITIONS );
         THROW( EXCEPTION );
     }
+
+    too_many_arguments( v );
 
     if ( filter != oriel_cs_260.filter )
     {
@@ -1774,6 +1800,43 @@ oriel_cs_260_wn2wl( double wn )
 {
     fsc2_assert( wn != 0 );
     return 0.01 / wn;
+}
+
+
+/*-----------------------------------------*
+ * Conversion of wavelength to stepper motor position for test
+ * runs, very simple-mindedly assumin a linear relationship.
+ *-----------------------------------------*/
+
+static
+long
+oriel_cs_260_wl_to_pos( int    grat,
+                        double wl )
+{
+    return lrnd( 0.5 * (   wl / Max_Wavelengths[ grat ]
+                         * (   Position_Ranges[ grat ][ 1 ]
+                             - Position_Ranges[ grat ][ 0 ] )
+                         + (   Position_Ranges[ grat ][ 1 ]
+                             + Position_Ranges[ grat ][ 0 ] ) ) );
+}
+
+
+/*-----------------------------------------*
+ * Conversion of stepper motor position to wavelength for test
+ * runs, very simple-mindedly assumin a linear relationship.
+ *-----------------------------------------*/
+
+static
+double
+oriel_cs_260_pos_to_wl( int    grat,
+                        long   pos )
+{
+    return   Max_Wavelengths[ grat ]
+           * (   (   2.0 * pos
+                   - (   Position_Ranges[ grat ][ 1 ]
+                       + Position_Ranges[ grat ][ 0 ] ) )
+               / (   Position_Ranges[ grat ][ 1 ]
+                   - Position_Ranges[ grat ][ 0 ] ) );
 }
 
 

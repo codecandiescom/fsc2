@@ -19,8 +19,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# This little program can be used to read and change the most relevant
-# settings of the Rriel Cornerstone 260 monochromator.
+# This little program can be used to read and change the settings of
+# the Oriel Cornerstone 260 monochromator. Click on the "Read" button
+# to re-read its settings and on the "Set" button to send new settings
+# over to it. Note that the shuuter will automatically be closed when
+# the grating is changed, no matter what you set for the shutter state.
 
 use strict;
 use Tk;
@@ -55,12 +58,12 @@ $mw->title( "Oriek Cornerstone 260" );
 my $balloon = $mw->Balloon( );
 
 my $f0 = $mw->Frame( );
-my $f0_l = $f0->Label( '-text'           => 'Grating:',
-                        '-width'          => '20',
-                        '-anchor'         => 'w' );
-my $f0_m = $f0->Optionmenu( '-options'   => [ ( '1', '2', '3' ) ],
-                            '-width'     => 9,
-                            '-textvariable'  => \$grating );
+my $f0_l = $f0->Label( '-text'              => 'Grating:',
+                        '-width'            => 20,
+                        '-anchor'           => 'w' );
+my $f0_m = $f0->Optionmenu( '-options'      => [ ( 1, 2, 3 ) ],
+                            '-width'        => 9,
+                            '-textvariable' => \$grating );
 $f0->pack( %fp );
 $f0_l->pack( %wp );
 $f0_m->pack( %wp );
@@ -68,15 +71,14 @@ $f0_m->pack( %wp );
 
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text'           => 'Wavelength:',
-                        '-width'          => '20',
+                        '-width'          => 20,
                         '-anchor'         => 'w' );
 my $f1_v = $f1->Entry( '-textvariable'    => \$wavelength,
                        '-width'           => '8',
                        '-validate'        => 'key',
                        '-validatecommand' => \&is_numeric,
                        '-relief'          => 'sunken' );
-$balloon->attach( $f1_v, '-balloonmsg'    =>
-                         "Wavelength (up to 2750 nm)" );
+$balloon->attach( $f1_v, '-balloonmsg'    => 'Wavelength (up to 2750 nm)' );
 my $f1_l2 = $f1->Label( '-text'           => 'nm',
                         '-width'          => 1 );
 
@@ -87,48 +89,48 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mw->Frame( );
-my $f2_l = $f2->Label( '-text'           => 'Shutter:',
-                        '-width'          => '20',
-                        '-anchor'         => 'w' );
-my $f2_m = $f2->Optionmenu( '-options'   => [ ( 'open', 'closed' ) ],
-                            '-width'     => 9,
-                            '-textvariable'  => \$shutter );
+my $f2_l = $f2->Label( '-text'              => 'Shutter:',
+                        '-width'            => 20,
+                        '-anchor'           => 'w' );
+my $f2_m = $f2->Optionmenu( '-options'      => [ ( 'OPEN', 'CLOSED' ) ],
+                            '-width'        => 9,
+                            '-textvariable' => \$shutter );
 $f2->pack( %fp );
 $f2_l->pack( %wp );
 $f2_m->pack( %wp );
 
 
 my $f3 = $mw->Frame( );
-my $f3_l = $f3->Label( '-text'           => 'Output port:',
-                        '-width'          => '20',
-                        '-anchor'         => 'w' );
-my $f3_m = $f3->Optionmenu( '-options'   => [ ( 'axial', 'lateral' ) ],
-                            '-width'     => 9,
-                            '-textvariable'  => \$output_port );
+my $f3_l = $f3->Label( '-text'              => 'Output port:',
+                        '-width'            => 20,
+                        '-anchor'           => 'w' );
+my $f3_m = $f3->Optionmenu( '-options'      => [ ( 'AXIAL', 'LATERAL' ) ],
+                            '-width'        => 9,
+                            '-textvariable' => \$output_port );
 $f3->pack( %fp );
 $f3_l->pack( %wp );
 $f3_m->pack( %wp );
 
 
 my $f4 = $mw->Frame( );
-my $f4_l = $f4->Label( '-text'           => 'Filter:',
-                        '-width'          => '20',
-                        '-anchor'         => 'w' );
-my $f4_m = $f4->Optionmenu( '-options'   => [ ( '1', '2', '3', '4', '5', '6' ) ],
-                            '-width'     => 9,
-                            '-textvariable'  => \$filter );
+my $f4_l = $f4->Label( '-text'              => 'Filter:',
+                        '-width'            => 20,
+                        '-anchor'           => 'w' );
+my $f4_m = $f4->Optionmenu( '-options'      => [ ( 1, 2, 3, 4, 5, 6 ) ],
+                            '-width'        => 9,
+                            '-textvariable' => \$filter );
 $f4->pack( %fp );
 $f4_l->pack( %wp );
 $f4_m->pack( %wp );
 
 
 my $f5 = $mw->Frame( );
-my $f5_l1 = $f5->Label( '-text'           => 'Stepper position:',
-                        '-width'          => '20',
-                        '-anchor'         => 'w' );
-my $f5_v = $f5->Entry( '-textvariable'    => \$step,
-                       '-width'           => '8',
-                       '-state'           => 'readonly' );
+my $f5_l1 = $f5->Label( '-text'        => 'Stepper position:',
+                        '-width'       => 20,
+                        '-anchor'      => 'w' );
+my $f5_v = $f5->Entry( '-textvariable' => \$step,
+                       '-width'        => 8,
+                       '-state'        => 'readonly' );
 
 $f5->pack( %fp );
 $f5_l1->pack( %wp );
@@ -136,11 +138,11 @@ $f5_v->pack( %wp );
 
 
 my $f6 = $mw->Frame( );
-my $f6_r = $f6->Button( '-text' => 'Read',
+my $f6_r = $f6->Button( '-text'    => 'Read',
                         '-command' => \&read_state );
-my $f6_w = $f6->Button( '-text' => 'Set',
+my $f6_w = $f6->Button( '-text'    => 'Set',
                         '-command' => \&set_state );
-my $f6_q = $f6->Button( '-text' => 'Quit',
+my $f6_q = $f6->Button( '-text'    => 'Quit',
                         '-command' => sub { $mw->destroy } );
 $f6->pack( '-side' => 'top',
            '-fill' => 'x',
@@ -256,8 +258,8 @@ sub handle_reply {
 
     $grating     = $vals[ 0 ];
     $wavelength  = $vals[ 1 ];
-    $shutter     = $vals[ 2 ] == 0 ? "open" : "closed";
-    $output_port = $vals[ 3 ] == 0 ? "axial" : "lateral";
+    $shutter     = $vals[ 2 ] == 0 ? "OPEN" : "CLOSED";
+    $output_port = $vals[ 3 ] == 1 ? "AXIAL" : "LATERAL";
     $filter      = $vals[ 4 ];
     $step        = $vals[ 5 ];
 }
