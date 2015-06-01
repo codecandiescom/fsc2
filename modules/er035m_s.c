@@ -97,20 +97,19 @@ static void er035m_s_comm_fail( void );
 
 
 static struct {
-    bool             is_needed;  /* is the gaussmter needed at all? */
-    int              state;      /* current state of the gaussmeter */
-    double           field;      /* last measured field */
-    int              resolution; /* LOW = 0.01 G, HIGH = 0.001 G */
+    int              state;         // current state of the gaussmeter
+    double           field;         // last measured field
+    int              resolution;    // LOW = 0.01 G, HIGH = 0.001 G
     int              sn;
-    struct termios * tio;        /* serial port terminal interface structure */
-    char             prompt;     /* prompt character send on each reply */
+    struct termios * tio;           // serial port terminal interface structure
+    char             prompt;        // prompt character send on each reply
     int              probe_orientation;
     int              probe_type;
     long             upper_search_limit;
     long             lower_search_limit;
 } nmr, nmr_stored;
 
-static const char *er035m_s_eol = "\r\n";
+static const char * er035m_s_eol = "\r\n";
 
 static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
@@ -210,8 +209,8 @@ er035m_s_init_hook( void )
     /* Claim the serial port (throws exception on failure) */
 
     nmr.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    nmr.tio = NULL;
 
-    nmr.is_needed = SET;
     nmr.state = ER035M_S_UNKNOWN;
     nmr.resolution = UNDEF_RES;
     nmr.prompt = '\0';
@@ -243,13 +242,9 @@ er035m_s_exp_hook( void )
     size_t length = sizeof buffer;
     Var_T *v;
     long retries;
-    int cur_res;
 
 
     nmr = nmr_stored;
-
-    if ( ! nmr.is_needed )
-        return 1;
 
     if ( ! er035m_s_open( ) )
     {
@@ -270,7 +265,7 @@ er035m_s_exp_hook( void )
     /* Find out the curent resolution, and if necessary, change it to the
        value requested by the user */
 
-    cur_res = er035m_s_get_resolution( );
+    int cur_res = er035m_s_get_resolution( );
 
     if ( nmr.resolution == UNDEF_RES )
         nmr.resolution = cur_res;
@@ -421,11 +416,8 @@ er035m_s_exp_hook( void )
 int
 er035m_s_end_of_exp_hook( void )
 {
-    if ( ! nmr.is_needed )
-        return 1;
-
-    er035m_s_close( );
-
+    if ( nmr.tio )
+        er035m_s_close( );
     return 1;
 }
 
@@ -698,7 +690,7 @@ gaussmeter_command( Var_T * v )
 Var_T *
 gaussmeter_wait( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
+    if ( FSC2_MODE == EXPERIMENT )
         fsc2_usleep( ( nmr.resolution == LOW ? 10U : 20U ) * E2_US, UNSET );
 
     return vars_push( INT_VAR, 1L );
@@ -1149,7 +1141,6 @@ er035m_s_read( char *   buf,
 {
     char *ptr;
 
-
     if ( buf == NULL || *len == 0 )
         return OK;
 
@@ -1211,7 +1202,6 @@ er035m_s_comm( int type,
     char *buf;
     ssize_t len;
     size_t *lptr;
-
 
     switch ( type )
     {

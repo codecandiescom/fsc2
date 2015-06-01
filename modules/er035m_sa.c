@@ -83,7 +83,6 @@ static void er035m_sa_failure( void );
 struct NMR {
     int state;
     int device;
-    bool is_needed;
     const char *name;
     double field;
     int resolution;
@@ -161,7 +160,6 @@ int
 er035m_sa_init_hook( void )
 {
     Need_GPIB = true;
-    nmr.is_needed = true;
     nmr.name = DEVICE_NAME;
 
     nmr.state = ER035M_SA_UNKNOWN;
@@ -195,9 +193,6 @@ int
 er035m_sa_exp_hook( void )
 {
     nmr = nmr_stored;
-
-    if ( ! nmr.is_needed )
-        return 1;
 
     fsc2_assert( nmr.device < 0 );
 
@@ -357,7 +352,7 @@ er035m_sa_exp_hook( void )
 int
 er035m_sa_end_of_exp_hook( void )
 {
-    if ( nmr.is_needed && nmr.device >= 0 )
+    if ( nmr.device >= 0 )
         gpib_local( nmr.device );
 
     nmr.device = -1;

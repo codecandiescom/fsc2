@@ -131,7 +131,7 @@
 # experiments you do the file can become rather long. But the file will
 # not grow indefinitely, if you start a new experiment its previous
 # contents gets overwritten. If no file is specified logs will be
-# written to stderr (unless @code{GPIB_LOG_LEVEL} is set to @{OFF}, see
+# written to stderr (unless 'GPIB_LOG_LEVEL' is set to 'OFF', see
 # below).
 
 # GPIB_LOG_FILE      := /tmp/fsc2_gpib.log

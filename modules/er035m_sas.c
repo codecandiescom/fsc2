@@ -77,7 +77,6 @@ static void er035m_sas_comm_fail( void );
 
 
 static struct {
-    bool             is_needed;  /* is the gaussmter needed at all? */
     int              state;      /* current state of the gaussmeter */
     double           field;      /* last measured field */
     int              resolution; /* set to either RES_VERY_LOW = 0.1 G,
@@ -169,8 +168,8 @@ er035m_sas_init_hook( void )
     /* Claim the serial port (throws exception on failure) */
 
     nmr.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+	nmr.tio = NULL;
 
-    nmr.is_needed  = SET;
     nmr.state      = ER035M_SAS_UNKNOWN;
     nmr.resolution = UNDEF_RES;
     nmr.prompt     = '\0';
@@ -201,9 +200,6 @@ int
 er035m_sas_exp_hook( void )
 {
     nmr = nmr_stored;
-
-    if ( ! nmr.is_needed )
-        return 1;
 
     nmr.keep_going_on_bad_field = false;
     nmr.is_bad_field = false;
@@ -373,11 +369,8 @@ er035m_sas_exp_hook( void )
 int
 er035m_sas_end_of_exp_hook( void )
 {
-    if ( ! nmr.is_needed )
-        return 1;
-
-    er035m_sas_close( );
-
+	if ( nmr.tio )
+		er035m_sas_close( );
     return 1;
 }
 

@@ -242,7 +242,7 @@
 #define VICP_DEFAULT_CONNECT_TIMEOUT     10000000    /* 10 s */
 
 
-/* Default timeout for read an write operations */
+/* Default timeout for read and write operations */
 
 #define VICP_DEFAULT_READ_WRITE_TIMEOUT  5000000    /* 5 s */
 
@@ -457,10 +457,9 @@ vicp_lock_out( bool lock_state )
     long          us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
 
-    if ( vicp.handle >= 0 )
+    if ( vicp.handle < 0 )
     {
-        print( FATAL, "Internal error in module, connection already "
-               "exists.\n" );
+        print( FATAL, "Internal error in module, no connection exists.\n" );
         THROW( EXCEPTION );
     }
 

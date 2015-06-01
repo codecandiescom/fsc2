@@ -448,8 +448,8 @@ gpib_handler( void * null  UNUSED_ARG )
         pthread_mutex_unlock( &gpib_mutex );
     }
 
-    /* Now that we're all set up send the client a single ACK character to
-       tell it that we're ready to receive it's requests */
+    /* Now that we're all set up send a single ACK character to the client
+       in order to tell it that we're ready to receive it's requests */
 
     int client_is_listening = swrite( fd, STR_ACK, 1 ) == 1;
 
@@ -491,9 +491,10 @@ gpib_handler( void * null  UNUSED_ARG )
            execution no other thread can access the GPIB bus */
 
         pthread_mutex_lock( &gpib_mutex );
-        gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
 
+        gpib_error_msg = find_thread_data( pthread_self( ) )->err_msg;
         int ret = gpibd_func[ cmd ]( fd, eptr + 1 );
+
         pthread_mutex_unlock( &gpib_mutex );
 
         /* Quit on failed gpib_init() and always on gpib_shutdown() command */
@@ -597,14 +598,6 @@ int
 gpibd_init_device( int    fd,
                    char * line )
 {
-    /* Check if we already have as many devices open as can be connected */
-
-    if ( device_count >= MAX_DEVICES )
-    {
-        sprintf( gpib_error_msg, "Too many devices used concurrently" );
-        return send_nak( fd );
-    }
-
     /* The client should have sent the device name, check that it's not
        already in use. */
 
@@ -623,6 +616,14 @@ gpibd_init_device( int    fd,
 
             return send_nak( fd );
         }
+
+    /* Check if we already have as many devices open as can be connected */
+
+    if ( device_count >= MAX_DEVICES )
+    {
+        sprintf( gpib_error_msg, "Too many devices used concurrently" );
+        return send_nak( fd );
+    }
 
     /* Initialize the device */
 

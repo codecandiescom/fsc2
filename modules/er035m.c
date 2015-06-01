@@ -90,7 +90,6 @@ static void er035m_failure( void );
 struct NMR {
     int state;
     int device;
-    bool is_needed;
     const char *name;
     double field;
     int resolution;
@@ -190,7 +189,6 @@ er035m_init_hook( void )
                "magnet power supply driver.\n" );
 
     Need_GPIB = SET;
-    nmr.is_needed = SET;
     nmr.name = DEVICE_NAME;
     nmr.state = ER035M_UNKNOWN;
     nmr.resolution = UNDEF_RES;
@@ -227,9 +225,6 @@ er035m_exp_hook( void )
 
 
     nmr = nmr_stored;
-
-    if ( ! nmr.is_needed )
-        return 1;
 
     fsc2_assert( nmr.device < 0 );
 
@@ -396,9 +391,6 @@ er035m_exp_hook( void )
 int
 er035m_end_of_exp_hook( void )
 {
-    if ( ! nmr.is_needed )
-        return 1;
-
     if ( nmr.device >= 0 )
         gpib_local( nmr.device );
 
@@ -659,7 +651,7 @@ gaussmeter_command( Var_T * v )
 Var_T *
 gaussmeter_wait( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
+    if ( FSC2_MODE == EXPERIMENT )
         fsc2_usleep( ( nmr.resolution * 10 ) * E2_US, UNSET );
     return vars_push( INT_VAR, 1L );
 }

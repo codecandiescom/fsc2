@@ -296,8 +296,6 @@ check_lock_file( int          fd,
     lower_permissions( );
     return OK;
 }
-    
-
 
 
 /*

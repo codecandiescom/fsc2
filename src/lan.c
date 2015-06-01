@@ -58,7 +58,7 @@ static void wait_alarm_handler( int sig_no  UNUSED_ARG );
 static LAN_List_T * find_lan_entry( int handle );
 
 static void get_ip_address( const char     * address,
-                            struct in_addr * ip_addr);
+                            struct in_addr * ip_addr );
 
 static void fsc2_lan_log_date( FILE * fp );
 
