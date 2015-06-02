@@ -733,25 +733,34 @@ monochromator_output_port( Var_T * v )
     if ( ! v )
         return vars_push( INT_VAR, oriel_cs_260.outport + 1L );
 
-    if ( v->type != STR_VAR )
-    {
-        print( FATAL, "Invalid argument, must be either the string \"AXIAL\" "
-               "or \"LATERAL\".\n" );
-        THROW( EXCEPTION );
-    }
-
     int outport;
 
-    if ( ! strcasecmp( v->val.sptr, "AXIAL" ) )
-        outport = 0;
-    else if ( ! strcasecmp( v->val.sptr, "LATERAL" ) )
-        outport = 1;
+    if ( v->type != STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "AXIAL" ) )
+            outport = 0;
+        else if ( ! strcasecmp( v->val.sptr, "LATERAL" ) )
+            outport = 1;
+        else
+        {
+            print( FATAL, "Invalid argument '%s', must be either \"AXIAL\" "
+                   "or \"LATERAL\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
     else
     {
-        print( FATAL, "Invalid argument, must be either the \"AXIAL\" or "
-               "\"LATERAL\".\n" );
-        THROW( EXCEPTION );
+        outport = get_strict_long( v, "output port" ) - 1;
+
+        if ( outport < 0 || outport > 1 )
+        {
+            print( FATAL, "Invalid argument %d, must be 1 (for axial port) or "
+                "2 (for lateral port).\n", outport + 1 );
+            THROW( EXCEPTION );
+        }
     }
+
+    too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
         oriel_cs_260_set_outport( outport );

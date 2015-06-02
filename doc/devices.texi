@@ -7626,10 +7626,11 @@ The function is only supported for @ref{oriel_cs_260, Oriel
 Cornerstone 260} monochromators, which have a motorized mirror that
 allows selecting one of two output ports. If called without an
 argument the function returns @code{1} if the exit mirror is set for
-the axial port and @code{2} for the lateral port. If called with
-a string argument of @code{"AXIAL"} or @code{"LATERAL"} the mirror
-is set to the corresponding output port (and returns @code{1} or
-@code{2} for te newly set output port).
+the axial port and @code{2} for the lateral port. If called with a
+string argument of @code{"AXIAL"} (or the integer @code{1}) or
+@code{"LATERAL"} (or, alternatively, @code{2}) the mirror is set to
+the corresponding output port (and returns @code{1} or @code{2} for
+the output port that was set).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
