@@ -28,7 +28,7 @@
 #include "oriel_cs_260.conf"
 
 #if NUM_GRATINGS != 2 && NUM_GRATINGS != 3
-#error "Number of gratings in configration must be 2 or 3"
+#error "Number of gratings in configuration must be 2 or 3"
 #endif
 
 
@@ -487,7 +487,7 @@ monochromator_groove_density( Var_T * v )
         v = vars_pop( v );
     }
 
-    if ( grating < 0 && grating > NUM_GRATINGS )
+    if ( grating < 0 || grating >= NUM_GRATINGS )
     {
         print( FATAL, "Invalid grating number %ld, can only be between 1 and "
                "%d.\n", grating + 1, NUM_GRATINGS );
@@ -573,7 +573,7 @@ monochromator_calibration_factor( Var_T * v )
 
     long int grating = get_strict_long( v, "grating number" ) - 1;
 
-    if ( grating < 1 || grating > NUM_GRATINGS )
+    if ( grating < 0 || grating >= NUM_GRATINGS )
     {
         print( FATAL, "Invalid grating number %ld, can only be between 1 and "
                "%d.\n", grating + 1, NUM_GRATINGS );
@@ -612,7 +612,7 @@ monochromator_calibration_offset( Var_T * v )
 
     long int grating = get_strict_long( v, "grating number" ) - 1;
 
-    if ( grating < 1 || grating > NUM_GRATINGS )
+    if ( grating < 0 || grating >= NUM_GRATINGS )
     {
         print( FATAL, "Invalid grating number %ld, can only be between 1 and "
                "%d.\n", grating + 1, NUM_GRATINGS );
@@ -780,7 +780,7 @@ monochromator_grating_zero( Var_T * v )
 
     long int grating = get_strict_long( v, "grating number" ) - 1;
 
-    if ( grating < 1 || grating > NUM_GRATINGS )
+    if ( grating < 0 || grating >= NUM_GRATINGS )
     {
         print( FATAL, "Invalid grating number %ld, can only be between 1 and "
                "%d.\n", grating + 1, NUM_GRATINGS );
