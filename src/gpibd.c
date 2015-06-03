@@ -230,12 +230,13 @@ main( void )
         raise( SIGSTOP );
 #endif
 
-    /* Send parent a single character (via stdout which is connected to a
-       pipe), telling it we're now waiting for connections on the socket. */
+    /* Send parent a single character (via stdout which is normally connected 
+       to a pipe to the process that invoked us), telling it we're now waiting
+       for connections on the socket. */
 
     char c = ACK;
-     write( STDOUT_FILENO, &c, 1 );
-     close( STDOUT_FILENO );
+    write( STDOUT_FILENO, &c, 1 );
+    close( STDOUT_FILENO );
 
     /* Wait for connections and quit when no clients exist anymore (the
        first client will connect more or less immediately since it's our
@@ -433,20 +434,19 @@ gpib_handler( void * null  UNUSED_ARG )
        and then copy the socket file descriptor we're going to communicate
        over to a local variable. */
 
-    int fd;
-    while ( 1 )
+    int fd = -1;
+
+    do
     {
         pthread_mutex_lock( &gpib_mutex );
-
         for ( size_t slot = 0; slot < thread_count; slot++ )
             if ( pthread_equal( thread_data[ slot ].tid, pthread_self( ) ) )
             {
                 fd = thread_data[ slot ].fd;
                 break;
             }
-
         pthread_mutex_unlock( &gpib_mutex );
-    }
+    } while ( fd == -1 );
 
     /* Now that we're all set up send a single ACK character to the client
        in order to tell it that we're ready to receive it's requests */

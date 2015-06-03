@@ -735,7 +735,7 @@ monochromator_output_port( Var_T * v )
 
     int outport;
 
-    if ( v->type != STR_VAR )
+    if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "AXIAL" ) )
             outport = 0;
