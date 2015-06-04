@@ -63,7 +63,7 @@ rs_smb100a_init( const char * name )
 
 	vxi11_device_clear( );
 
-	vxi11_lock_out( SET );
+//	vxi11_lock_out( SET );
 
     /* Set up default settings */
 
