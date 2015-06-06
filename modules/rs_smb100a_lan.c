@@ -758,7 +758,7 @@ rs_smb100a_get_pulse_state( void )
 void
 rs_smb100a_set_double_pulse_mode( bool state )
 {
-    char cmd[ 100 ] = "PULS:DOUB:STAT ";
+    char cmd[ 100 ] = "PULM:DOUB:STAT ";
 
 
     strcat( cmd, state ? "ON\n" : "OFF\n" );
@@ -808,7 +808,7 @@ rs_smb100a_set_pulse_width( double width )
     char cmd[ 100 ];
 
 
-    sprintf( cmd, "PULS:WIDT %s\n", rs_smb100a_pretty_print( width ) );
+    sprintf( cmd, "PULM:DOUB:WIDT %s\n", rs_smb100a_pretty_print( width ) );
     rs_smb100a_command( cmd );
 }
 
@@ -823,7 +823,7 @@ rs_smb100a_get_pulse_width( void )
     size_t length = sizeof buffer;
 
 
-    rs_smb100a_talk( "PULS:WIDT?\n", buffer, &length );
+    rs_smb100a_talk( "PULM:DOUB:WIDT?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
 }
@@ -838,7 +838,7 @@ rs_smb100a_set_pulse_delay( double delay )
     char cmd[ 100 ];
 
 
-    sprintf( cmd, "PULS:DEL %s\n", rs_smb100a_pretty_print( delay ) );
+    sprintf( cmd, "PULM:DEL %s\n", rs_smb100a_pretty_print( delay ) );
     rs_smb100a_command( cmd );
 }
 
@@ -853,7 +853,7 @@ rs_smb100a_get_pulse_delay( void )
     size_t length = sizeof buffer;
 
 
-    rs_smb100a_talk( "PULS:DEL?\n", buffer, &length );
+    rs_smb100a_talk( "PULM:DEL?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
 }
@@ -868,7 +868,7 @@ rs_smb100a_set_double_pulse_delay( double delay )
     char cmd[ 100 ];
 
 
-    sprintf( cmd, "PULS:DOUB:DEL %s\n", rs_smb100a_pretty_print( delay ) );
+    sprintf( cmd, "PULM:DOUB:DEL %s\n", rs_smb100a_pretty_print( delay ) );
     rs_smb100a_command( cmd );
 }
 
@@ -883,7 +883,7 @@ rs_smb100a_get_double_pulse_delay( void )
     size_t length = sizeof buffer;
 
 
-    rs_smb100a_talk( "PULS:DOUB:DEL?\n", buffer, &length );
+    rs_smb100a_talk( "PULM:DOUB:DEL?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
 }
