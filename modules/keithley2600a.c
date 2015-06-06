@@ -465,7 +465,7 @@ sourcemeter_source_mode( Var_T * v )
         else
         {
             print( FATAL, "Invalid source mode argument: \"%s\"\n",
-                   v->val.sptr ) );
+                   v->val.sptr );
             THROW( EXCEPTION );
         }
     }

@@ -23,6 +23,8 @@
 
 static void rs_smb100a_initial_mod_setup( void );
 
+static char ** rs_smb100a_get_options( void );
+
 #if defined WITH_PULSE_MODULATION
 static bool rs_smb100a_get_pulse_state( void );
 
@@ -48,10 +50,6 @@ static bool rs_smb100a_talk( const char * cmd,
 bool
 rs_smb100a_init( const char * name )
 {
-    double att;
-    int i;
-
-
 	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
                      false, false, 100000 ) == FAILURE )
         return false;
@@ -64,6 +62,62 @@ rs_smb100a_init( const char * name )
 	vxi11_device_clear( );
 
 //	vxi11_lock_out( true );
+
+    /* Check if the device reports the same model the module was compiled
+       for and, if the module was compiled with support for pulse modulation,
+       if the corresponding option is present. */
+
+    char ** opts = rs_smb100a_get_options( );
+
+#if defined B101
+    if ( strcmp( opts[ 0 ], "SMB-B101" ) )
+        print( SEVERE, "Module was compiled for model SMB-B101 but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#elif defined B102
+    if ( strcmp( opts[ 0 ], "SMB-B102" ) )
+        print( SEVERE, "Module was compiled for model SMB-B102 but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#elif defined B103
+    if ( strcmp( opts[ 0 ], "SMB-B103" ) )
+        print( SEVERE, "Module was compiled for model SMB-B103 but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#elif defined B106
+    if ( strcmp( opts[ 0 ], "SMB-B106" ) )
+        print( SEVERE, "Module was compiled for model SMB-B106 but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#elif defined B112
+    if ( strcmp( opts[ 0 ], "SMB-B112" ) )
+        print( SEVERE, "Module was compiled for model SMB-B112 but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#elif defined B112L
+    if ( strcmp( opts[ 0 ], "SMB-B112L" ) )
+        print( SEVERE, "Module was compiled for model SMB-B112L but the "
+               "device claims to be of type %s.\n", opts[ 0 ] );
+#endif
+
+#if defined WITH_PULSE_MODULATION
+#if ! defined B112 && ! defined B112L
+    const char * pm = "SMB-K22";
+#else
+    const char * pm = "SMB-K21";
+#endif
+
+    bool found = false;
+    for ( size_t i = 0; opts[ i ]; i++ )
+        if ( ! strcmp( opts[ i ], pm ) )
+        {
+            found = true;
+            break;
+        }
+
+    if ( ! found )
+        print( SEVERE, "Module was compiled with support for pulse "
+               "modulattion, but option %s isn't installed.\n", pm );
+#endif
+
+    for ( size_t i = 0; opts[ i ]; i++ )
+        T_free( opts[ i ] );
+    T_free( opts );
 
     /* Set up default settings */
 
@@ -89,6 +143,7 @@ rs_smb100a_init( const char * name )
 
     /* Set or get the current attenuation */
 
+    double att;
     if ( rs_smb100a.attenuation_is_set )
     {
         if ( rs_smb100a.use_table )
@@ -131,7 +186,7 @@ rs_smb100a_init( const char * name )
 
     /* Set source and amplitude for each modulation type as far as it's set */
 
-    for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
+    for ( size_t i = 0; i < NUM_MOD_TYPES - 1; i++ )
     {
         if ( rs_smb100a.mod_source_is_set[ i ] )
             rs_smb100a_set_mod_source( i, rs_smb100a.mod_source[ i ],
@@ -318,6 +373,40 @@ rs_smb100a_finished( void )
 		vxi11_close( );
 		rs_smb100a.device = -1;
 	}
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+static
+char **
+rs_smb100a_get_options( void )
+{
+    char buf[ 1000 ];
+    size_t length = sizeof buf;
+
+    rs_smb100a_talk( "*OPT?\n", buf, &length );
+
+    if ( ! *buf || *buf == '\n' )
+        rs_smb100a_comm_failure( );
+
+    buf[ length - 1 ] = '\0';
+
+    char *bp = buf;
+    char **res = T_malloc( sizeof *res );
+    *res = NULL;
+    int cnt = 1;
+
+    while ( ( bp = strtok( bp, ", " ) ) )
+    {
+        res = T_realloc( res, ++cnt * sizeof *res );
+        res[ cnt - 2 ] = T_strdup( bp );
+        res[ cnt - 1 ] = NULL;
+        bp = NULL;
+    }
+
+    return res;
 }
 
 
