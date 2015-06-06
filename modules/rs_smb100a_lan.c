@@ -53,8 +53,8 @@ rs_smb100a_init( const char * name )
 
 
 	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
-                     SET, UNSET, 100000 ) == FAILURE )
-        return FAIL;
+                     false, false, 100000 ) == FAILURE )
+        return false;
 
 	rs_smb100a.device = 0;
 
@@ -63,7 +63,7 @@ rs_smb100a_init( const char * name )
 
 	vxi11_device_clear( );
 
-//	vxi11_lock_out( SET );
+//	vxi11_lock_out( true );
 
     /* Set up default settings */
 
@@ -140,7 +140,7 @@ rs_smb100a_init( const char * name )
         {
             rs_smb100a.mod_source[ i ] =
                        rs_smb100a_get_mod_source( i, rs_smb100a.mod_freq + i );
-            rs_smb100a.mod_source_is_set[ i ] = SET;
+            rs_smb100a.mod_source_is_set[ i ] = true;
         }
 
         if ( rs_smb100a.mod_ampl_is_set[ i ] )
@@ -148,7 +148,7 @@ rs_smb100a_init( const char * name )
         else
         {
             rs_smb100a.mod_ampl[ i ] = rs_smb100a_get_mod_ampl( i );
-            rs_smb100a.mod_ampl_is_set[ i ] = SET;
+            rs_smb100a.mod_ampl_is_set[ i ] = true;
         }
     }
 
@@ -163,7 +163,7 @@ rs_smb100a_init( const char * name )
        between both the pulses is going to be larger than the pulse width */
 
     if (    rs_smb100a.double_pulse_mode_is_set
-         && rs_smb100a.double_pulse_mode == SET )
+         && rs_smb100a.double_pulse_mode == true )
     {
         if ( ! rs_smb100a.pulse_width_is_set )
             rs_smb100a.pulse_width = rs_smb100a_get_pulse_width( );
@@ -184,14 +184,14 @@ rs_smb100a_init( const char * name )
     /* Switch off double pulse mode per default and only switch it on again
        later on if it has been explicitely requested */
 
-    rs_smb100a_set_double_pulse_mode( UNSET );
+    rs_smb100a_set_double_pulse_mode( false );
 
     if ( rs_smb100a.pulse_width_is_set )
         rs_smb100a_set_pulse_width( rs_smb100a.pulse_width );
     else
     {
         rs_smb100a.pulse_width = rs_smb100a_get_pulse_width( );
-        rs_smb100a.pulse_width_is_set = SET;
+        rs_smb100a.pulse_width_is_set = true;
     }
 
     if ( rs_smb100a.double_pulse_delay_is_set )
@@ -199,7 +199,7 @@ rs_smb100a_init( const char * name )
     else
     {
         rs_smb100a.double_pulse_delay = rs_smb100a_get_double_pulse_delay( );
-        rs_smb100a.double_pulse_mode_is_set = SET;
+        rs_smb100a.double_pulse_mode_is_set = true;
     }
 
     /* Switch off double pulse mode per default unless it has been explicitely
@@ -209,8 +209,8 @@ rs_smb100a_init( const char * name )
         rs_smb100a_set_double_pulse_mode( rs_smb100a.double_pulse_mode );
     else
     {
-        rs_smb100a.double_pulse_mode = UNSET;
-        rs_smb100a.double_pulse_mode_is_set = UNSET;
+        rs_smb100a.double_pulse_mode = false;
+        rs_smb100a.double_pulse_mode_is_set = false;
     }
 
     if ( rs_smb100a.pulse_delay_is_set )
@@ -262,23 +262,23 @@ rs_smb100a_initial_mod_setup( void )
     switch ( flags )
     {
         case 0 :
-            rs_smb100a.mod_type_is_set = UNSET;
+            rs_smb100a.mod_type_is_set = false;
             rs_smb100a.mod_type = MOD_TYPE_OFF;
             break;
 
         case 1 :
-            rs_smb100a.mod_type_is_set = SET;
+            rs_smb100a.mod_type_is_set = true;
             rs_smb100a.mod_type = MOD_TYPE_FM;
             rs_smb100a_check_mod_ampl( rs_smb100a.freq );
             break;
 
         case 2 :
-            rs_smb100a.mod_type_is_set = SET;
+            rs_smb100a.mod_type_is_set = true;
             rs_smb100a.mod_type = MOD_TYPE_AM;
             break;
 
         case 4 :
-            rs_smb100a.mod_type_is_set = SET;
+            rs_smb100a.mod_type_is_set = true;
             rs_smb100a.mod_type = MOD_TYPE_PM;
             rs_smb100a_check_mod_ampl( rs_smb100a.freq );
             break;
@@ -291,7 +291,7 @@ rs_smb100a_initial_mod_setup( void )
                 sprintf( cmd, "%s:STAT OFF", types[ i ] );
                 rs_smb100a_talk( cmd, buffer, &length );
             }
-            rs_smb100a.mod_type_is_set = UNSET;
+            rs_smb100a.mod_type_is_set = false;
             rs_smb100a.mod_type = MOD_TYPE_OFF;
     }
 
@@ -377,7 +377,7 @@ rs_smb100a_set_frequency( double freq )
     {
         sprintf( cmd, "FREQ:CW %.0f\n", freq );
         rs_smb100a_command( cmd );
-        fsc2_usleep( lrnd( 1.0e6 * rs_smb100a.freq_change_delay ), UNSET );
+        fsc2_usleep( lrnd( 1.0e6 * rs_smb100a.freq_change_delay ), false );
     }
 
     return freq;
@@ -539,7 +539,7 @@ int
 
 int
 rs_smb100a_get_mod_source( int      type,
-                         double * freq )
+                           double * freq )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -584,7 +584,7 @@ rs_smb100a_get_mod_source( int      type,
 
 double
 rs_smb100a_set_mod_ampl( int    type,
-                       double ampl )
+                         double ampl )
 {
     char cmd[ 100 ];
 
@@ -825,10 +825,10 @@ rs_smb100a_command( const char * cmd )
 	size_t len = strlen( cmd );
 
 
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		rs_smb100a_comm_failure( );
 
-//	fsc2_usleep( 4000, UNSET );
+//	fsc2_usleep( 4000, false );
 
 	return OK;
 }
@@ -844,15 +844,13 @@ rs_smb100a_talk( const char * cmd,
 {
 	size_t len = strlen( cmd );
 
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		rs_smb100a_comm_failure( );
 
-	fsc2_usleep( 4000, UNSET );
+	fsc2_usleep( 4000, false );
 
-	if ( vxi11_read( reply, length, UNSET ) != SUCCESS )
+	if ( vxi11_read( reply, length, false ) != SUCCESS )
 		rs_smb100a_comm_failure( );
-
-//	fsc2_usleep( 4000, UNSET );
 
 	return OK;
 }

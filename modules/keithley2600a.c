@@ -464,7 +464,8 @@ sourcemeter_source_mode( Var_T * v )
             mode = OUTPUT_DCVOLTS;
         else
         {
-            print( FATAL, "Invalid argument: \"%s\".\n" );
+            print( FATAL, "Invalid source mode argument: \"%s\"\n",
+                   v->val.sptr ) );
             THROW( EXCEPTION );
         }
     }
@@ -2498,7 +2499,7 @@ get_list_sweep_params( Var_T        * v,
 
     if ( v->len < 2 )
     {
-        print( FATAL, "%s sweep list comtains less than 2 elements.\n",
+        print( FATAL, "%s sweep list contains less than 2 elements.\n",
                What );
         THROW( EXCEPTION );
     }
