@@ -94,11 +94,12 @@ rs_smb100a_init_hook( void )
 
     rs_smb100a.freq_change_delay = 0.0;
 
+    rs_smb100a.input_trig_slope_is_set = UNSET;
+
 #if defined WITH_PULSE_MODULATION
     rs_smb100a.pulse_mode_state_is_set = UNSET;
     rs_smb100a.pulse_mode_state = UNSET;
     rs_smb100a.double_pulse_mode_is_set = UNSET;
-    rs_smb100a.pulse_trig_slope_is_set = UNSET;
     rs_smb100a.pulse_width_is_set = UNSET;
     rs_smb100a.pulse_delay_is_set = UNSET;
     rs_smb100a.double_pulse_delay_is_set = UNSET;
@@ -172,17 +173,17 @@ rs_smb100a_test_hook( void )
         rs_smb100a.mod_ampl_is_set[ rs_smb100a.mod_type ] = SET;
     }
 
+    if ( ! rs_smb100a.input_trig_slope_is_set )
+    {
+        rs_smb100a.input_trig_slope_is_set = RS_SMB100A_TEST_INPUT_TRIG_SLOPE;
+        rs_smb100a.input_trig_slope_is_set = SET;
+    }
+
 #if defined WITH_PULSE_MODULATION
     if ( ! rs_smb100a.pulse_mode_state_is_set )
     {
         rs_smb100a.pulse_mode_state = RS_SMB100A_TEST_PULSE_MODE_STATE;
         rs_smb100a.pulse_mode_state_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.pulse_trig_slope_is_set )
-    {
-        rs_smb100a.pulse_trig_slope_is_set = RS_SMB100A_TEST_PULSE_TRIG_SLOPE;
-        rs_smb100a.pulse_trig_slope_is_set = SET;
     }
 
     if ( ! rs_smb100a.double_pulse_mode_is_set )
@@ -1388,6 +1389,52 @@ synthesizer_mod_ampl( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+Var_T *
+synthesizer_input_trigger_slope( Var_T * v )
+{
+    bool state;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.input_trig_slope_is_set )
+        {
+            print( FATAL, "Pulse trigger slope hasn't been set yet.\n" );
+            THROW( EXCEPTION );
+        }
+
+        return vars_push( INT_VAR, ( int ) rs_smb100a.input_trig_slope );
+    }
+
+    vars_check( v, STR_VAR );
+
+    if (    ! strcasecmp( v->val.sptr, "POS" )
+         || ! strcasecmp( v->val.sptr, "POSITIVE" ) )
+        state = SLOPE_RAISE;
+    else if (    ! strcasecmp( v->val.sptr, "NEG" )
+              || ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
+        state = SLOPE_FALL;
+    else
+    {
+        print( FATAL, "Invalid argument.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_smb100a_set_input_trig_slope( state );
+
+    rs_smb100a.input_trig_slope = state;
+    rs_smb100a.input_trig_slope_is_set = SET;
+
+    return vars_push( INT_VAR, ( int ) rs_smb100a.input_trig_slope );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 #if defined WITH_PULSE_MODULATION
 
 Var_T *
@@ -1418,52 +1465,6 @@ synthesizer_pulse_state( Var_T * v )
     rs_smb100a.pulse_mode_state_is_set = SET;
 
     return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_mode_state );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *
-synthesizer_pulse_trigger_slope( Var_T * v )
-{
-    bool state;
-
-
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.pulse_trig_slope_is_set )
-        {
-            print( FATAL, "Pulse trigger slope hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
-
-        return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_trig_slope );
-    }
-
-    vars_check( v, STR_VAR );
-
-    if (    ! strcasecmp( v->val.sptr, "POS" )
-         || ! strcasecmp( v->val.sptr, "POSITIVE" ) )
-        state = SLOPE_RAISE;
-    else if (    ! strcasecmp( v->val.sptr, "NEG" )
-              || ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
-        state = SLOPE_FALL;
-    else
-    {
-        print( FATAL, "Invalid argument.\n" );
-        THROW( EXCEPTION );
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_pulse_trig_slope( state );
-
-    rs_smb100a.pulse_trig_slope = state;
-    rs_smb100a.pulse_trig_slope_is_set = SET;
-
-    return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_trig_slope );
 }
 
 

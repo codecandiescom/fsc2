@@ -280,6 +280,7 @@ synthesizer_mod_source, -1, ALL;
 synthesizer_mod_ampl, -1, ALL;
 synthesizer_mod_freq, -1, ALL;         // R&S SML01 only
 synthesizer_command, 1, EXP;
+synthesizer_input_trigger_slope, -1, ALL;  // R&S SMB100A only
 
 synthesizer_pulse_state, -1, ALL;          // R&S SML01 with SML-B3 only
 synthesizer_pulse_trigger_slope, -1, ALL;  // R&S SML01 with SML-B3 only

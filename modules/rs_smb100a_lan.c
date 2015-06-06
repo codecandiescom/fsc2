@@ -28,8 +28,6 @@ static char ** rs_smb100a_get_options( void );
 #if defined WITH_PULSE_MODULATION
 static bool rs_smb100a_get_pulse_state( void );
 
-static bool rs_smb100a_get_pulse_trig_slope( void );
-
 static double rs_smb100a_get_pulse_width( void );
 
 static double rs_smb100a_get_pulse_delay( void );
@@ -207,12 +205,12 @@ rs_smb100a_init( const char * name )
         }
     }
 
-#if defined WITH_PULSE_MODULATION
-
-    if ( rs_smb100a.pulse_trig_slope_is_set )
-        rs_smb100a_set_pulse_trig_slope( rs_smb100a.pulse_trig_slope );
+    if ( rs_smb100a.input_trig_slope_is_set )
+        rs_smb100a_set_input_trig_slope( rs_smb100a.input_trig_slope );
     else
-        rs_smb100a.pulse_trig_slope = rs_smb100a_get_pulse_trig_slope( );
+        rs_smb100a.input_trig_slope = rs_smb100a_get_input_trig_slope( );
+
+#if defined WITH_PULSE_MODULATION
 
     /* If double pulse mode is going to be switched on make sure the distance
        between both the pulses is going to be larger than the pulse width */
@@ -772,9 +770,9 @@ rs_smb100a_set_double_pulse_mode( bool state )
  *-------------------------------------------------------------*/
 
 void
-rs_smb100a_set_pulse_trig_slope( bool state )
+rs_smb100a_set_input_trig_slope( bool state )
 {
-    char cmd[ 100 ] = ":TRIG:PULS:SLOP ";
+    char cmd[ 100 ] = "INP:TRIG:SLOP ";
 
 
     if ( state == SLOPE_RAISE )
@@ -789,14 +787,14 @@ rs_smb100a_set_pulse_trig_slope( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static bool
-rs_smb100a_get_pulse_trig_slope( void )
+bool
+rs_smb100a_get_input_trig_slope( void )
 {
     char buffer[ 20 ];
     size_t length = sizeof buffer;
 
 
-    rs_smb100a_talk( ":TRIG:PULS:SLOP?\n", buffer, &length );
+    rs_smb100a_talk( "INP:TRIG:SLOP?\n", buffer, &length );
     return buffer[ 0 ] == 'P' ? SLOPE_RAISE : SLOPE_FALL;
 }
 

@@ -4380,15 +4380,15 @@ pulse modulation mode is switched off.
 @item synthesizer_pulse_trigger_slope()
 This function is only available for the @ref{rs_sml01, Rohde&Schwarz
 SML01} synthesizer with @strong{SML-B3} option. This function can be
-used to query or set if the trigger leading to the creation a RF pulse
-is detected on the raising or falling edge of an external trigger
-input. If called with no argument the function returns @code{1} when
-the trigger is detected on the positive (raising) edge, and @code{0}
-when it's detected on the falling edge. When called with the string
-argument @code{"POSITIVE"} or @code{"POS"} the device is set up to
-detect triggers on the raising edge of the trigger input, when called
-with the argument @code{"NEGATIVE"} or @code{"NEG"} triggers are
-detected on the falling edge.
+used to query or set if the trigger leading to the creation of a RF
+pulse is detected on the raising or falling edge of an external
+trigger input. If called with no argument the function returns
+@code{1} when the trigger is detected on the positive (raising) edge,
+and @code{0} when it's detected on the falling edge. When called with
+the string argument @code{"POSITIVE"} or @code{"POS"} the device is
+set up to detect triggers on the raising edge of the trigger input,
+when called with the argument @code{"NEGATIVE"} or @code{"NEG"}
+triggers are detected on the falling edge.
 
 @anchor{synthesizer_pulse_width()}
 @findex synthesizer_pulse_width()
