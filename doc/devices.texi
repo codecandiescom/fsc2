@@ -4170,13 +4170,13 @@ by changing the definition of @code{DEF_ATT_REF_FREQ}).
 @findex synthesizer_modulation()
 @item synthesizer_modulation()
 Using this function for the @ref{hp8647a, HP8647A}, @ref{hp8648b,
-HP8648B} and @ref{rs_sml01, Rodhe&Schwarz SML01} the type, source and
+HP8648B} and @ref{rs_sml01, Rohde&Schwarz SML01} the type, source and
 amplitude of the modulation can be set, for the @ref{hp8672a, HP8672A}
 both type and amplitude. It can set all of these parameters at once or
 only a subset of them.
 
 For the @ref{hp8647a, HP8647A}, @ref{hp8648b, HP8648B} and
-@ref{rs_sml01, Rodhe&Schwarz SML01} there are four possible types of
+@ref{rs_sml01, Rohde&Schwarz SML01} there are four possible types of
 modulation: FM, AM and phase modulation. The modulation type is
 specified by a string, either @code{"FM"}, @code{"AM"}, @code{"PHASE"}
 or, finally, @code{"OFF"} to switch off modulation. For the
@@ -4262,7 +4262,7 @@ modulation type can be also set via the function
 @ref{synthesizer_mod_type()}. It accepts a string argument, either
 @code{"FM"} for frequency modulation, @code{"AM"} for amplitude
 modulation or @code{"OFF"} to switch off modulation. The @ref{hp8647a,
-HP8647A}, @ref{hp8648b, HP8648B} and @ref{rs_sml01, Rodhe&Sschwarz
+HP8647A}, @ref{hp8648b, HP8648B} and @ref{rs_sml01, Rohde&Sschwarz
 SML01} also allow another argument, @code{"PHASE"} for phase
 modulation.
 

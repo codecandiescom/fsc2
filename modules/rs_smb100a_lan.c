@@ -27,7 +27,9 @@ static char ** rs_smb100a_get_options( void );
 
 #if defined WITH_PULSE_MODULATION
 static bool rs_smb100a_get_pulse_state( void );
+#endif
 
+#if defined WITH_PULSE_GENERATION
 static double rs_smb100a_get_pulse_width( void );
 
 static double rs_smb100a_get_pulse_delay( void );
@@ -40,6 +42,29 @@ static void rs_smb100a_comm_failure( void );
 static bool rs_smb100a_talk( const char * cmd,
                              char *       reply,
                              size_t *     length );
+
+/* Define strings that the device is supposed to return on request for
+   the model and (if available) the pulse modulation option */
+
+#if defined B101
+static const char * model_str = "SMB-B101";
+static const char * pulse_mod_str = "SMB-K22";
+#elif defined B102
+static const char * model_str = "SMB-B102";
+static const char * pulse_mod_str = "SMB-K22";
+#elif defined B103
+static const char * model_str = "SMB-B103";
+static const char * pulse_mod_str = "SMB-K22";
+#elif defined B106
+static const char * model_str = "SMB-B106";
+static const char * pulse_mod_str = "SMB-K22";
+#elif defined B112
+static const char * model_str = "SMB-B112";
+static const char * pulse_mod_str = "SMB-K21";
+#elif defined B112L
+static const char * model_str = "SMB-B112L";
+static const char * pulse_mod_str = "SMB-K21";
+#endif
 
 
 /*-------------------------------------------------------------*
@@ -61,56 +86,45 @@ rs_smb100a_init( const char * name )
 
 //	vxi11_lock_out( true );
 
-    /* Check if the device reports the same model the module was compiled
-       for and, if the module was compiled with support for pulse modulation,
-       if the corresponding option is present. */
+    /* Set the device up to return data in ASCII format */
+
+    rs_smb100a_command( "FORM ASC\n" );
+
+    /* Check if the device reports the same model and options the module was
+       compiled for */
 
     char ** opts = rs_smb100a_get_options( );
 
-#if defined B101
-    if ( strcmp( opts[ 0 ], "SMB-B101" ) )
-        print( SEVERE, "Module was compiled for model SMB-B101 but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#elif defined B102
-    if ( strcmp( opts[ 0 ], "SMB-B102" ) )
-        print( SEVERE, "Module was compiled for model SMB-B102 but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#elif defined B103
-    if ( strcmp( opts[ 0 ], "SMB-B103" ) )
-        print( SEVERE, "Module was compiled for model SMB-B103 but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#elif defined B106
-    if ( strcmp( opts[ 0 ], "SMB-B106" ) )
-        print( SEVERE, "Module was compiled for model SMB-B106 but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#elif defined B112
-    if ( strcmp( opts[ 0 ], "SMB-B112" ) )
-        print( SEVERE, "Module was compiled for model SMB-B112 but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#elif defined B112L
-    if ( strcmp( opts[ 0 ], "SMB-B112L" ) )
-        print( SEVERE, "Module was compiled for model SMB-B112L but the "
-               "device claims to be of type %s.\n", opts[ 0 ] );
-#endif
+    if ( strcmp( opts[ 0 ], model_str ) )
+        print( SEVERE, "The module was compiled for model %s but the "
+               "device reports to be of type %s.\n", model_str, opts[ 0 ] );
 
 #if defined WITH_PULSE_MODULATION
-#if ! defined B112 && ! defined B112L
-    const char * pm = "SMB-K22";
-#else
-    const char * pm = "SMB-K21";
-#endif
-
     bool found = false;
     for ( size_t i = 0; opts[ i ]; i++ )
-        if ( ! strcmp( opts[ i ], pm ) )
+        if ( ! strcmp( opts[ i ], pulse_mod_str ) )
         {
             found = true;
             break;
         }
 
     if ( ! found )
-        print( SEVERE, "Module was compiled with support for pulse "
-               "modulattion, but option %s isn't installed.\n", pm );
+        print( SEVERE, "The module was compiled with support for pulse "
+               "modulattion, but option %s isn't installed.\n", pulse_mod_str );
+#endif
+
+#if defined WITH_PULSE_GENERATION
+    found = false;
+    for ( size_t i = 0; opts[ i ]; i++ )
+        if ( ! strcmp( opts[ i ], "SMB-K23" ) )
+        {
+            found = true;
+            break;
+        }
+
+    if ( ! found )
+        print( SEVERE, "The module was compiled with support for pulse "
+               "generation, but option SMB-K23 isn't installed.\n" );
 #endif
 
     for ( size_t i = 0; opts[ i ]; i++ )
@@ -121,14 +135,17 @@ rs_smb100a_init( const char * name )
 
     rs_smb100a_command( "CORR:STAT OFF\n" );
     rs_smb100a_command( "FREQ:MODE CW\n" );
-    rs_smb100a_command( "FREQ:ERAN OFF\n" );
     rs_smb100a_command( "FREQ:OFFS 0\n" );
     rs_smb100a_command( "POW:MODE CW\n" );
     rs_smb100a_command( "POW:OFFS 0\n" );
     rs_smb100a_command( "POW:ALC ON\n" );
     rs_smb100a_command( "OUTP:AMOD AUTO\n" );
-#if defined WITH_PULSE_MODULATION
+
+#if defined WITH_PULSE_GENERATION
     rs_smb100a_command( "PULM:SOUR INT\n" );
+#endif
+
+#if defined WITH_PULSE_MODULATION
     rs_smb100a_command( "PULM:POL NORM\n" );
 #endif
 
@@ -210,7 +227,7 @@ rs_smb100a_init( const char * name )
     else
         rs_smb100a.input_trig_slope = rs_smb100a_get_input_trig_slope( );
 
-#if defined WITH_PULSE_MODULATION
+#if defined WITH_PULSE_GENERATION
 
     /* If double pulse mode is going to be switched on make sure the distance
        between both the pulses is going to be larger than the pulse width */
@@ -270,12 +287,14 @@ rs_smb100a_init( const char * name )
         rs_smb100a_set_pulse_delay( rs_smb100a.pulse_delay );
     else
         rs_smb100a.pulse_delay = rs_smb100a_get_pulse_delay( );
+#endif // WITH_PULSE_GENERATION
 
+#if defined WITH_PULSE_MODULATION
     if ( rs_smb100a.pulse_mode_state_is_set )
         rs_smb100a_set_pulse_state( rs_smb100a.pulse_mode_state );
     else
         rs_smb100a.pulse_mode_state = rs_smb100a_get_pulse_state( );
-#endif
+#endif // WITH_PULSE_MODULATION
 
     rs_smb100a_set_output_state( rs_smb100a.state );
 
@@ -724,6 +743,74 @@ rs_smb100a_get_mod_ampl( int type )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
+void
+rs_smb100a_set_input_impedance( bool state )
+{
+    char cmd[ 100 ] = "INP:MOD:IMP ";
+
+
+    if ( state == HIGH_IMPEDANCE)
+        strcat( cmd, "HIGH\n" );
+    else
+        strcat( cmd, "G600\n" );
+
+    rs_smb100a_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+bool
+rs_smb100a_get_input_impedance( void )
+{
+    char buffer[ 20 ];
+    size_t length = sizeof buffer;
+
+
+    rs_smb100a_talk( "INP:MODE:IMP?\n", buffer, &length );
+    return buffer[ 0 ] == 'H' ? HIGH_IMPEDANCE : G600_IMPEDANCE;
+}
+
+
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_smb100a_set_input_trig_slope( bool state )
+{
+    char cmd[ 100 ] = "INP:TRIG:SLOP ";
+
+
+    if ( state == SLOPE_RAISE )
+        strcat( cmd, "POS\n" );
+    else
+        strcat( cmd, "NEG\n" );
+
+    rs_smb100a_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+bool
+rs_smb100a_get_input_trig_slope( void )
+{
+    char buffer[ 20 ];
+    size_t length = sizeof buffer;
+
+
+    rs_smb100a_talk( "INP:TRIG:SLOP?\n", buffer, &length );
+    return buffer[ 0 ] == 'P' ? SLOPE_RAISE : SLOPE_FALL;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
 #if defined WITH_PULSE_MODULATION
 
 void
@@ -764,44 +851,13 @@ rs_smb100a_set_double_pulse_mode( bool state )
     strcat( cmd, state ? "ON\n" : "OFF\n" );
     rs_smb100a_command( cmd );
 }
+#endif // WITH_PULSE_MODULATION
 
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void
-rs_smb100a_set_input_trig_slope( bool state )
-{
-    char cmd[ 100 ] = "INP:TRIG:SLOP ";
-
-
-    if ( state == SLOPE_RAISE )
-        strcat( cmd, "POS\n" );
-    else
-        strcat( cmd, "NEG\n" );
-
-    rs_smb100a_command( cmd );
-}
-
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
-
-bool
-rs_smb100a_get_input_trig_slope( void )
-{
-    char buffer[ 20 ];
-    size_t length = sizeof buffer;
-
-
-    rs_smb100a_talk( "INP:TRIG:SLOP?\n", buffer, &length );
-    return buffer[ 0 ] == 'P' ? SLOPE_RAISE : SLOPE_FALL;
-}
-
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
-
+#if defined WITH_PULSE_GENERATION
 void
 rs_smb100a_set_pulse_width( double width )
 {
@@ -889,7 +945,7 @@ rs_smb100a_get_double_pulse_delay( void )
 }
 
 
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 
 
 /*-------------------------------------------------------------*

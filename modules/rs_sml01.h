@@ -204,8 +204,6 @@ Var_T * synthesizer_mod_ampl(                Var_T * /* v */ );
 Var_T * synthesizer_mod_type(                Var_T * /* v */ );
 Var_T * synthesizer_mod_source(              Var_T * /* v */ );
 Var_T * synthesizer_freq_change_delay(       Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_mode(       Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_delay(      Var_T * /* v */ );
 Var_T * synthesizer_command(                 Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
@@ -213,6 +211,8 @@ Var_T * synthesizer_pulse_state(           Var_T * /* v */ );
 Var_T * synthesizer_pulse_trigger_slope(   Var_T * /* v */ );
 Var_T * synthesizer_pulse_width(           Var_T * /* v */ );
 Var_T * synthesizer_pulse_delay(           Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_mode(     Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_delay(    Var_T * /* v */ );
 #endif /* WITH_PULSE_MODULATION */
 
 

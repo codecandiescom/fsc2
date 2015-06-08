@@ -96,14 +96,19 @@ rs_smb100a_init_hook( void )
 
     rs_smb100a.input_trig_slope_is_set = UNSET;
 
+    rs_smb100a.input_imp_is_set = UNSET;
+
 #if defined WITH_PULSE_MODULATION
     rs_smb100a.pulse_mode_state_is_set = UNSET;
     rs_smb100a.pulse_mode_state = UNSET;
+#endif // WITH_PULSE_MODULATION
+
+#if defined WITH_PULSE_GENERATION
     rs_smb100a.double_pulse_mode_is_set = UNSET;
     rs_smb100a.pulse_width_is_set = UNSET;
     rs_smb100a.pulse_delay_is_set = UNSET;
     rs_smb100a.double_pulse_delay_is_set = UNSET;
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 
     return 1;
 }
@@ -175,8 +180,14 @@ rs_smb100a_test_hook( void )
 
     if ( ! rs_smb100a.input_trig_slope_is_set )
     {
-        rs_smb100a.input_trig_slope_is_set = RS_SMB100A_TEST_INPUT_TRIG_SLOPE;
+        rs_smb100a.input_trig_slope = RS_SMB100A_TEST_INPUT_TRIG_SLOPE;
         rs_smb100a.input_trig_slope_is_set = SET;
+    }
+
+    if ( ! rs_smb100a.input_imp_is_set )
+    {
+        rs_smb100a.input_imp = RS_SMB100A_TEST_INPUT_IMPEDANCE;
+        rs_smb100a.input_imp_is_set = SET;
     }
 
 #if defined WITH_PULSE_MODULATION
@@ -185,7 +196,9 @@ rs_smb100a_test_hook( void )
         rs_smb100a.pulse_mode_state = RS_SMB100A_TEST_PULSE_MODE_STATE;
         rs_smb100a.pulse_mode_state_is_set = SET;
     }
+#endif // WITH_PULSE_MODULATION
 
+#if defined WITH_PULSE_GENERATION
     if ( ! rs_smb100a.double_pulse_mode_is_set )
     {
         rs_smb100a.double_pulse_mode = RS_SMB100A_TEST_DOUBLE_PULSE_MODE;
@@ -210,7 +223,7 @@ rs_smb100a_test_hook( void )
         rs_smb100a.pulse_delay = RS_SMB100A_TEST_PULSE_DELAY;
         rs_smb100a.pulse_delay_is_set = SET;
     }
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 
     return 1;
 }
@@ -1399,7 +1412,7 @@ synthesizer_input_trigger_slope( Var_T * v )
     {
         if ( FSC2_MODE == PREPARATION && ! rs_smb100a.input_trig_slope_is_set )
         {
-            print( FATAL, "Pulse trigger slope hasn't been set yet.\n" );
+            print( FATAL, "Imput trigger slope hasn't been set yet.\n" );
             THROW( EXCEPTION );
         }
 
@@ -1429,6 +1442,50 @@ synthesizer_input_trigger_slope( Var_T * v )
     rs_smb100a.input_trig_slope_is_set = SET;
 
     return vars_push( INT_VAR, ( int ) rs_smb100a.input_trig_slope );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_input_impedance( Var_T * v )
+{
+    bool state;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.input_imp_is_set )
+        {
+            print( FATAL, "Input impedance hasn't been set yet.\n" );
+            THROW( EXCEPTION );
+        }
+
+        return vars_push( INT_VAR, ( int ) rs_smb100a.input_imp );
+    }
+
+    vars_check( v, STR_VAR );
+
+    if ( ! strcasecmp( v->val.sptr, "HIGH" ) )
+        state = HIGH_IMPEDANCE;
+    else if ( strcasecmp( v->val.sptr, "G600" ) )
+        state = G600_IMPEDANCE;
+    else
+    {
+        print( FATAL, "Invalid argument \"%s\".\n", v->val.sptr );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_smb100a_set_input_impedance( state );
+
+    rs_smb100a.input_imp = state;
+    rs_smb100a.input_imp_is_set = true;
+
+    return vars_push( INT_VAR, ( int ) rs_smb100a.input_imp );
 }
 
 
@@ -1466,18 +1523,17 @@ synthesizer_pulse_state( Var_T * v )
 
     return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_mode_state );
 }
+#endif // WITH_PULSE_MODULATION
 
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+#if defined WITH_PULSE_GENERATION
+
 Var_T *
 synthesizer_pulse_width( Var_T * v )
 {
-    double width;
-    long ticks;
-
-
     if ( v == NULL )
     {
         if ( FSC2_MODE == PREPARATION && ! rs_smb100a.pulse_width_is_set )
@@ -1489,7 +1545,7 @@ synthesizer_pulse_width( Var_T * v )
         return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_width );
     }
 
-    width = get_double( v, "pulse width" );
+    double width = get_double( v, "pulse width" );
 
     if ( width < 0.0 )
     {
@@ -1497,7 +1553,7 @@ synthesizer_pulse_width( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    ticks = lrnd( width / MIN_PULSE_WIDTH );
+    long ticks = lrnd( width / MIN_PULSE_WIDTH );
 
     if ( ticks == 0 || ticks > lrnd( MAX_PULSE_WIDTH / MIN_PULSE_WIDTH ) )
     {
@@ -1596,9 +1652,6 @@ synthesizer_pulse_delay( Var_T * v )
 Var_T *
 synthesizer_double_pulse_mode( Var_T * v )
 {
-    bool state;
-
-
     if ( v == NULL )
     {
         if ( FSC2_MODE == PREPARATION && ! rs_smb100a.double_pulse_mode_is_set )
@@ -1610,7 +1663,7 @@ synthesizer_double_pulse_mode( Var_T * v )
         return vars_push( INT_VAR, ( long ) rs_smb100a.double_pulse_mode );
     }
 
-    state = get_boolean( v );
+    bool state = get_boolean( v );
 
     too_many_arguments( v );
 
@@ -1678,7 +1731,7 @@ synthesizer_double_pulse_delay( Var_T * v )
     return vars_push( FLOAT_VAR, delay );
 }
 
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 
 
 /*----------------------------------------------------*

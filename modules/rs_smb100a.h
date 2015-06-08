@@ -81,11 +81,15 @@
 #define RS_SMB100A_TEST_MOD_FREQ            1.0e5            /* 100 kHz */
 #define RS_SMB100A_TEST_MOD_AMPL            2.5e4            /* 25 kHz */
 #define RS_SMB100A_TEST_INPUT_TRIG_SLOPE    SLOPE_RAISE
+#define RS_SMB100A_TEST_INPUT_IMPEDANCE     HIGH_IMPEDANCE
+
+#define SLOPE_FALL      false
+#define SLOPE_RAISE     true
+
+#define G600_IMPEDANCE  false
+#define HIGH_IMPEDANCE  true
 
 #if defined WITH_PULSE_MODULATION
-
-#define SLOPE_FALL      UNSET
-#define SLOPE_RAISE     SET
 
 #define MIN_PULSE_WIDTH                     2.0e-8           /* 20 ns */
 #define MAX_PULSE_WIDTH                     1.3              /* 1.3 s */
@@ -165,6 +169,9 @@ struct RS_SMB100A {
     bool input_trig_slope;
     bool input_trig_slope_is_set;
 
+    bool input_imp;
+    bool input_imp_is_set;
+
 #if defined WITH_PULSE_MODULATION
     bool pulse_mode_state;            /* pulse mode on/off */
     bool pulse_mode_state_is_set;
@@ -209,16 +216,20 @@ Var_T * synthesizer_mod_ampl(            Var_T * /* v */ );
 Var_T * synthesizer_mod_type(            Var_T * /* v */ );
 Var_T * synthesizer_mod_source(          Var_T * /* v */ );
 Var_T * synthesizer_freq_change_delay(   Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_mode(   Var_T * /* v */ );
-Var_T * synthesizer_double_pulse_delay(  Var_T * /* v */ );
 Var_T * synthesizer_command(             Var_T * /* v */ );
 Var_T * synthesizer_input_trigger_slope( Var_T * /* v */ );
+Var_T * synthesizer_input_impedance(     Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
 Var_T * synthesizer_pulse_state(         Var_T * /* v */ );
+#endif // WITH_PULSE_MODULATION
+
+#if defined WITH_PULSE_GENERATION
 Var_T * synthesizer_pulse_width(         Var_T * /* v */ );
 Var_T * synthesizer_pulse_delay(         Var_T * /* v */ );
-#endif /* WITH_PULSE_MODULATION */
+Var_T * synthesizer_double_pulse_mode(   Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_delay(  Var_T * /* v */ );
+#endif // WITH_PULSE_GENERATION
 
 
 /* functions defined in "rs_smb100a_util.c" */
@@ -285,6 +296,10 @@ bool rs_smb100a_command( const char * /* cmd */ );
 void rs_smb100a_set_input_trig_slope( bool /* state */ );
 
 bool rs_smb100a_get_input_trig_slope( void );
+
+void rs_smb100a_set_input_impedance( bool /* state */ );
+
+bool rs_smb100a_get_input_impedance( void );
 
 #if defined WITH_PULSE_MODULATION
 void rs_smb100a_set_pulse_state( bool /* state */ );

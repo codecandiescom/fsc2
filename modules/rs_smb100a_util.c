@@ -385,7 +385,7 @@ rs_smb100a_check_mod_ampl( double freq )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-#if defined WITH_PULSE_MODULATION
+#if defined WITH_PULSE_GENERATIONxsxsxs
 
 char *
 rs_smb100a_pretty_print( double t )
