@@ -90,7 +90,10 @@
 #define HIGH_IMPEDANCE  true
 
 #if defined WITH_PULSE_MODULATION
+#define RS_SMB100A_TEST_PULSE_MODE_STATE    UNSET
+#endif // WITH_PULSE_MODULATION
 
+#if defined WITH_PULSE_GENERATION
 #define MIN_PULSE_WIDTH                     2.0e-8           /* 20 ns */
 #define MAX_PULSE_WIDTH                     1.3              /* 1.3 s */
 #define MIN_PULSE_DELAY                     2.0e-8           /* 20 ns */
@@ -99,14 +102,13 @@
 #define MIN_DOUBLE_PULSE_DELAY              6.0e-8           /* 60 ns */
 #define MAX_DOUBLE_PULSE_DELAY              1.3              /* 1.3 s */
 
-#define RS_SMB100A_TEST_PULSE_MODE_STATE    UNSET
 #define RS_SMB100A_TEST_PULSE_WIDTH         1.0e-6           /* 1 us */
 #define RS_SMB100A_TEST_PULSE_DELAY         2.0e-8           /* 20 ns */
 
 #define RS_SMB100A_TEST_DOUBLE_PULSE_MODE   UNSET
 #define RS_SMB100A_TEST_DOUBLE_PULSE_DELAY  1.0e-5           /* 10 us */
 
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 
 struct MOD_RANGES {
     double upper_limit_freq;
@@ -175,6 +177,9 @@ struct RS_SMB100A {
 #if defined WITH_PULSE_MODULATION
     bool pulse_mode_state;            /* pulse mode on/off */
     bool pulse_mode_state_is_set;
+#endif // WITH_PULSE_MODULATION
+
+#if defined WITH_PULSE_GENERATION
     bool double_pulse_mode;
     bool double_pulse_mode_is_set;
     double pulse_width;
@@ -183,7 +188,7 @@ struct RS_SMB100A {
     bool pulse_delay_is_set;
     double double_pulse_delay;
     bool double_pulse_delay_is_set;
-#endif /* WITH_PULSE_MODULATION */
+#endif // WITH_PULSE_GENERATION
 };
 
 
@@ -221,14 +226,18 @@ Var_T * synthesizer_input_trigger_slope( Var_T * /* v */ );
 Var_T * synthesizer_input_impedance(     Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
+
 Var_T * synthesizer_pulse_state(         Var_T * /* v */ );
+
 #endif // WITH_PULSE_MODULATION
 
 #if defined WITH_PULSE_GENERATION
+
 Var_T * synthesizer_pulse_width(         Var_T * /* v */ );
 Var_T * synthesizer_pulse_delay(         Var_T * /* v */ );
 Var_T * synthesizer_double_pulse_mode(   Var_T * /* v */ );
 Var_T * synthesizer_double_pulse_delay(  Var_T * /* v */ );
+
 #endif // WITH_PULSE_GENERATION
 
 
@@ -302,7 +311,12 @@ void rs_smb100a_set_input_impedance( bool /* state */ );
 bool rs_smb100a_get_input_impedance( void );
 
 #if defined WITH_PULSE_MODULATION
+
 void rs_smb100a_set_pulse_state( bool /* state */ );
+
+#endif .. WITH_PULSE_MODULATION
+
+#if defined WITH_PULSE_GENERATION
 
 void rs_smb100a_set_pulse_width( double /* width */ );
 
@@ -311,7 +325,9 @@ void rs_smb100a_set_pulse_delay( double /* delay */ );
 void rs_smb100a_set_double_pulse_mode( bool /* state */ );
 
 void rs_smb100a_set_double_pulse_delay( double /* delay */ );
-#endif /* WITH_PULSE_MODULATION */
+
+
+#endif // WITH_PULSE_GENERATION
 
 
 /*

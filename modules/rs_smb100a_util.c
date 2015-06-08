@@ -385,7 +385,7 @@ rs_smb100a_check_mod_ampl( double freq )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-#if defined WITH_PULSE_GENERATIONxsxsxs
+#if defined WITH_PULSE_GENERATION
 
 char *
 rs_smb100a_pretty_print( double t )
@@ -404,7 +404,7 @@ rs_smb100a_pretty_print( double t )
     return ts;
 }
 
-#endif
+#endif // WITH_PULSE_GENERATION
 
 
 /*

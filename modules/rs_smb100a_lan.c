@@ -26,16 +26,20 @@ static void rs_smb100a_initial_mod_setup( void );
 static char ** rs_smb100a_get_options( void );
 
 #if defined WITH_PULSE_MODULATION
+
 static bool rs_smb100a_get_pulse_state( void );
-#endif
+
+#endif // WITH_PULSE_MODULATION
 
 #if defined WITH_PULSE_GENERATION
+
 static double rs_smb100a_get_pulse_width( void );
 
 static double rs_smb100a_get_pulse_delay( void );
 
 static double rs_smb100a_get_double_pulse_delay( void );
-#endif
+
+#endif //  WITH_PULSE_GENERATION
 
 static void rs_smb100a_comm_failure( void );
 
@@ -838,9 +842,13 @@ rs_smb100a_get_pulse_state( void )
     return buffer[ 0 ] == '1';
 }
 
+#endif // WITH_PULSE_MODULATION
+
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
+
+#if defined WITH_PULSE_GENERATION
 
 void
 rs_smb100a_set_double_pulse_mode( bool state )
@@ -851,13 +859,14 @@ rs_smb100a_set_double_pulse_mode( bool state )
     strcat( cmd, state ? "ON\n" : "OFF\n" );
     rs_smb100a_command( cmd );
 }
-#endif // WITH_PULSE_MODULATION
 
+#endif // WITH_PULSE_MODULATION
 
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-#if defined WITH_PULSE_GENERATION
+#if defined PULSE_GENERATION
+
 void
 rs_smb100a_set_pulse_width( double width )
 {
