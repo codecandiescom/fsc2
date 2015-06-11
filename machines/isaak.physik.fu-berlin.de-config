@@ -8,16 +8,8 @@ sed -i'' -e 's/^[ \t]*#define[ \t]\+NETWORK_ADDRESS[ \t]\+"[^\"]\+"/#define	NETW
 
 sed -i'' -e 's/^[ \t]*#define[ \t]\+\(\(LT[0-9]\+[LM]*\)\|\(_[1246][0-9]\+M\?Xi\)\)/#define	_104MXi/' $cdir/lecroy_wr_l.conf
 
-# On this machine the ER035M is connected to /dev/ttyS2 instead of
-# /dev/ttyS2. Correct that in the configuration files for both
-# devices that are supposed the ER035M via the serial port.
-
-sed -i'' -e 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[013-9].*"/#define SERIAL_PORT     "\/dev\/ttyS2"/' $cdir/er035m_sas.conf
-
-sed -i'' -e 's/^[ \t]*#define[ \t]\+SERIAL_PORT[ \t]\+"\/dev\/ttyS[013-9].*"/#define SERIAL_PORT     "\/dev\/ttyS2"/' $cdir/er035m_s.conf
-
 # The ER035M has what looks like a hardware problem - it reports that
-# field probe F0 is connected even though it's reallu F1 (F0 is never
+# field probe F0 is connected even though it's really F1 (F0 is never
 # going to be used). Apply the necessary patch to the files for the
 # stand-alone modules that are meant to control the ER035M
 

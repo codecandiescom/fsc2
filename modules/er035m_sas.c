@@ -264,13 +264,9 @@ er035m_sas_exp_hook( void )
 
 	char * bp = buffer;
 
-    while ( 1 )    /* Loop through the chars of the status "byte" */
-    {
-        switch ( *bp++ )
+	for ( char * bp = buffer; *bp; bp++ )
+        switch ( *bp )
         {
-			case '\0' :   /* end of status "byte" reached */
-				break;
-
             case '0' :     /* F0 (S-band) probe is connected */
                 nmr.probe_type = PROBE_TYPE_F0;
                 break;
@@ -340,7 +336,6 @@ er035m_sas_exp_hook( void )
                 print( FATAL, "Undocumented data received.\n" );
                 THROW( EXCEPTION );
         }
-    }
 
     /* If the gaussmeter is already locked just get the field value, other-
        wise try to achieve locked state */
@@ -874,7 +869,7 @@ er035m_sas_get_resolution( void )
        stuff has been stripped) and that character should tell us about us the
        current resolution setting */
 
-    if ( length != 1 )
+    if ( length == 1 )
         switch ( *buffer )
         {
             case '1' :
