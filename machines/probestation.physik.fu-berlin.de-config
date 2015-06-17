@@ -1,0 +1,52 @@
+# -*-sh-*-
+
+# The IP address of the LeCroy WR is 192.168.1.21 on this machine,
+
+sed -i'' -e 's/^[ \t]*#define[ \t]\+NETWORK_ADDRESS[ \t]\+"[^\"]\+"/#define	NETWORK_ADDRESS	"192.168.1.21"/' $cdir/lecroy_wr_l.conf
+
+# The model of the LeCroy WR is 104MXi on this machine
+
+sed -i'' -e 's/^[ \t]*#define[ \t]\+\(\(LT[0-9]\+[LM]*\)\|\(_[1246][0-9]\+M\?Xi\)\)/#define	_104MXi/' $cdir/lecroy_wr_l.conf
+
+# The ER035M has what looks like a hardware problem - it reports that
+# field probe F0 is connected even though it's reallu F1 (F0 is never
+# going to be used). Apply the necessary patch to the files for the
+# stand-alone modules that are meant to control the ER035M
+
+sed -i'' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1; \/* this is a workaround for a device error!!! *\//' $mdir/er035m_sa.c
+
+sed -i'' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1; \/* this is a workaround for a device error!!! *\//' $mdir/er035m_sas.c
+
+# Add entry for the OPTA OPO device in the device database if it doesn't
+# already exist
+
+if [ -z "`grep '^[ \t]*opo[ \t]*;' $cdir/Devices`" ]; then
+	echo "
+
+// OPTA opo (FU Berlin, AG Bittl)
+
+opo;" >> $cdir/Devices;
+fi
+
+# Also add entries for all OPO EDL functions into the function database (at
+# least if they don't exist yet)
+
+if [ -z "`grep '^[ \t]*opo_' $cdir/Functions`"]; then
+	echo "
+
+/* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */
+
+opo_name, 0, ALL;
+opo_initializeDevice, 0, EXP;
+opo_goTo, 2, EXP;
+opo_scan, 6, EXP;
+opo_setStepperFrequency, 1, EXP;
+opo_originSearch, 0, EXP;
+opo_status, 0, EXP;
+opo_stop, 0, EXP;
+opo_idlerFromSignal, 1, ALL;
+opo_signalFromIdler, 1, ALL;
+opo_calibration, 3, EXP;
+opo_setOffset, 1, EXP;
+opo_goToInteractive, 1, EXP;" >> $cdir/Functions
+fi
