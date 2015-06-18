@@ -712,7 +712,7 @@ keithley2600a_set_measure_delay( unsigned int ch,
     fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
 
     char buf[ 50 ];
-    printf( buf, "%s.measure.delay=%.6g", smu[ ch ], delay );
+    sprintf( buf, "%s.measure.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
     return k26->measure[ ch ].delay = delay;

@@ -314,7 +314,7 @@ bool rs_smb100a_get_input_impedance( void );
 
 void rs_smb100a_set_pulse_state( bool /* state */ );
 
-#endif .. WITH_PULSE_MODULATION
+#endif // WITH_PULSE_MODULATION
 
 #if defined WITH_PULSE_GENERATION
 

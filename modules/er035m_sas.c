@@ -262,8 +262,6 @@ er035m_sas_exp_hook( void )
        is actively searching to achieve the lock (if it's just in TRANS L-H or
        H-L state check again) */
 
-	char * bp = buffer;
-
 	for ( char * bp = buffer; *bp; bp++ )
         switch ( *bp )
         {
