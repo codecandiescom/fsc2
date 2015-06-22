@@ -44,7 +44,7 @@ keithley2600a_get_measure_rangev( unsigned int ch )
     sprintf( buf, "printnumber(%s.measure.rangev)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
-    range = keithley2600a_line_to_double( buf );
+    double range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_rangev( ch, range ) )
         keithley2600a_bad_data( );
 
