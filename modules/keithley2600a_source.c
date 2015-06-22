@@ -104,7 +104,7 @@ keithley2600a_set_source_output( unsigned int ch,
 	keithley2600a_cmd( buf );
 
     /* Despite all our testing an attempt to switch output on may fail if the
-       settings still aren't acceptable. So we'd always check if the output
+       settings still aren't acceptable. So we always check if the output
        was in fact switched on. */
 
     if ( ! keithley2600a_get_source_output( ch ) != source_output )

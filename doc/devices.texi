@@ -9037,8 +9037,8 @@ called this can be overruled. If called with no arguments all channels
 are left on. Otherwise it may be called with a channel number for the
 channel to be left on.
 
-This function can be called in the @code{PREPARATIONS} as well as
-in the @code{EXPERIMENT} section of an @code{EDL} script.
+This function can only be called in the @code{PREPARATIONS} section of
+an @code{EDL} script.
 
 
 @anchor{sourcemeter_sense_mode()}

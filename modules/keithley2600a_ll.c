@@ -213,7 +213,7 @@ keithley2600a_get_state( void )
                "a %s.\n", model );
 #endif
 
-    for ( unsigned char ch = 0; ch < NUM_CHANNELS; ch++ )
+    for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
     {
         keithley2600a_get_sense( ch );
         

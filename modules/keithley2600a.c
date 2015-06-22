@@ -212,7 +212,7 @@ keithley2600a_end_of_exp_hook( void )
     /* If there was no communication failure switch off all channels
        unless the user explicitely asked for them to be left on. On
        communication failures we better don't try any further communication,
-       so we have to leave the channels on but warn the user about it */
+       so we have to leave the channels on but we warn the user about it */
 
     if ( ! k26->comm_failed )
     {
@@ -270,7 +270,6 @@ sourcemeter_keep_on_at_end( Var_T * v )
 
     return vars_push( INT_VAR, 1L );
 }
-
 
 
 /*--------------------------------------------------------------*
