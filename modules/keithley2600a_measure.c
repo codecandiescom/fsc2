@@ -44,11 +44,11 @@ keithley2600a_get_measure_rangev( unsigned int ch )
     sprintf( buf, "printnumber(%s.measure.rangev)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
-    double range = keithley2600a_line_to_double( buf );
+    range = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_measure_rangev( ch, range ) )
         keithley2600a_bad_data( );
 
-    return range;
+    return k26->measure[ ch ].rangev = range;
 }
 
 
@@ -99,7 +99,7 @@ keithley2600a_get_measure_rangei( unsigned int ch )
     if ( ! keithley2600a_check_measure_rangei( ch, range ) )
         keithley2600a_bad_data( );
 
-    return range;
+    return k26->measure[ ch ].rangei = range;
 }
 
 
