@@ -9516,17 +9516,21 @@ once the channel is switched to voltage sourcing mode.
 If called with no arguments (beside the channel number) the function
 returns the measurement voltage range. This is either the one that has
 been previously set, or the range currently selected due to
-autoranging (if switched on) or, if the device channel is in voltage
-sourcing mode, the source voltage range (which then takes precedence
-over any other settings). If called with another argument the
-measurement voltage range is set to the nearest range not less than
-that value (unless the value is larger than the largest possible range
-setting, in which case the largest one is set). This also
+autoranging (if switched on), or, if the device channel is in voltage
+sourcing mode, the current source voltage range (which then takes
+precedence over all other settings). If called with another argument
+the measurement voltage range is set to the nearest range not less
+than that value (unless the value is larger than the largest possible
+range setting, in which case the largest one is set). This also
 automatically disables measurement voltage autoranging. If the channel
 is currently in voltage sourcing mode the new setting only becomes
 effective after switching to current sourcing mode - in voltage
 sourcing mode the voltage measurement range is kept at the source
 voltage range by the device.
+
+Please note: when autoranging is on the range setting must be queried
+only after a measurement has been done since the range is adjusted
+to the voltage measured only during the measurement.
 
 
 @anchor{sourcemeter_measure_current_range()}
@@ -9547,8 +9551,12 @@ effective after switching to voltage sourcing mode - in current
 sourcing mode the measurement range is kept at the current source
 range by the device.
 
-Note that when the channel is set to high-capacitance mode the lowest
-measurement current range that can be selected is @w{1 uA}.
+Please note: when autoranging is on the range setting must be queried
+only after a measurement has been done since the range is adjusted
+to the current measured only during the measurement.
+
+Note also that when the channel is set to high-capacitance mode the
+lowest measurement current range that can be selected is @w{1 uA}.
 
 
 @anchor{sourcemeter_measure_voltage_autorange_low_limit()}
