@@ -9524,7 +9524,9 @@ that value (unless the value is larger than the largest possible range
 setting, in which case the largest one is set). This also
 automatically disables measurement voltage autoranging. If the channel
 is currently in voltage sourcing mode the new setting only becomes
-effective after switching to current sourcing mode.
+effective after switching to current sourcing mode - in voltage
+sourcing mode the voltage measurement range is kept at the source
+voltage range by the device.
 
 
 @anchor{sourcemeter_measure_current_range()}
@@ -9541,7 +9543,9 @@ that value (unless the value is larger than the largest possible range
 setting, in which case the largest one is set). This also
 automatically disables measurement current autoranging. If the channel
 is currently in current sourcing mode the new setting only becomes
-effective after switching to voltage sourcing mode.
+effective after switching to voltage sourcing mode - in current
+sourcing mode the measurement range is kept at the current source
+range by the device.
 
 Note that when the channel is set to high-capacitance mode the lowest
 measurement current range that can be selected is @w{1 uA}.

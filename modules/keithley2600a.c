@@ -112,11 +112,11 @@ keithley2600a_test_hook( void )
 
         k26->source[ ch ].output  = OUTPUT_OFF;
         k26->source[ ch ].offmode = OUTPUT_NORMAL;
-        k26->source[ ch ].highc   = UNSET;
+        k26->source[ ch ].highc   = false;
         k26->source[ ch ].func    = OUTPUT_DCVOLTS;
 
-        k26->source[ ch ].autorangev = UNSET;
-        k26->source[ ch ].autorangei = UNSET;
+        k26->source[ ch ].autorangev = false;
+        k26->source[ ch ].autorangei = false;
 
         k26->source[ ch ].rangev     = 0.2;
         k26->source[ ch ].rangei     = 1.0e-7;
@@ -132,8 +132,8 @@ keithley2600a_test_hook( void )
 
         k26->source[ ch ].offlimiti  = 1.0e-3;
 
-        k26->measure[ ch ].autorangev = SET;
-        k26->measure[ ch ].autorangei = SET;
+        k26->measure[ ch ].autorangev = true;
+        k26->measure[ ch ].autorangei = true;
 
         k26->measure[ ch ].rangev     = 0.2;
         k26->measure[ ch ].rangei     = 0.1;
@@ -1382,6 +1382,9 @@ sourcemeter_measure_voltage_range( Var_T * v )
         k26->measure[ ch ].autorangev = false;
     }
 
+    /* If the device is in voltage sourcing mode it keeps the measure
+       range identical to the source range! */
+
     if ( k26->source[ ch ].func == OUTPUT_DCVOLTS )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
 
@@ -1431,9 +1434,12 @@ sourcemeter_measure_current_range( Var_T * v )
         keithley2600a_set_measure_rangei( ch, range );
     else
     {
-        k26->measure[ ch ].rangev = range;
-        k26->measure[ ch ].autorangev = false;
+        k26->measure[ ch ].rangei = range;
+        k26->measure[ ch ].autorangei = false;
     }
+
+    /* If the device is in current sourcing mode it keeps the measure
+       range identical to the source range! */
 
     if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
         return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
