@@ -295,6 +295,15 @@ synthesizer_triggered_sweep_state, -1, EXP;
 
 synthesizer_freq_change_delay, -1, ALL;
 
+synthesizer_output_impedance, 0, EXP;      // R&S SMB100A
+synthesizer_protection_tripped, 0, EXP;	   // R&S SMB100A
+synthesizer_reset_protection, 0, EXP;	   // R&S SMB100A
+synthesizer_rf_mode, 1, ALL;			   // R&S SMB100A
+synthesizer_rf_off_mode, 1, ALL;		   // R&S SMB100A
+synthesizer_min_attenuation, -1, ALL;;	   // R&S SMB100A
+synthesizer_max_attenuation, -1, ALL;      // R&S SMB100A
+
+
 /* Functions exported by the boxcar (EGG4402) */
 
 boxcar_name, 0, ALL;
