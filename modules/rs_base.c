@@ -318,7 +318,7 @@ query_imp( char const * cmd )
         return IMPEDANCE_G600;
     else if ( ! strcmp( reply, "G1K" ) )
         return IMPEDANCE_G1K;
-    else if (  strcmp( reply, "G10K" ) )
+    else if ( ! strcmp( reply, "G10K" ) )
         return IMPEDANCE_G10K;
     else if ( ! strcmp( reply, "HIGH" ) )
         return IMPEDANCE_HIGH;
