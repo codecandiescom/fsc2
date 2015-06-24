@@ -54,17 +54,9 @@ rs_smb100a_exp_hook( void )
 
 	rs_init( &rs_exp );
 
-	/* Make sure that not more than a single modulation is on (or switch
-	   off all */
+	// Ascertain that not more than one modulation is on (or switch off all)
 
-	int mod_cnt = 0;
-
-	mod_cnt += am_state( );
-	mod_cnt += fm_state( );
-	mod_cnt += pm_state( );
-	mod_cnt += pulm_state( );
-
-	if ( mod_cnt > 1 )
+	if ( am_state( ) + fm_state( ) + pm_state( ) + pulm_state( ) > 1 )
 	{
 		am_set_state( false );
 		fm_set_state( false );

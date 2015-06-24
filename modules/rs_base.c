@@ -132,7 +132,7 @@ query_bool( char const * cmd )
 	if ( strlen( reply ) == 1 )
 	{
 		if ( reply[ 0 ] == '0' )
-			return true;
+			return false;
 		else if ( reply[ 0 ] == '1' )
 			return true;
 	}
