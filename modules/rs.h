@@ -75,13 +75,27 @@ enum Polarity
 	POLARITY_INVERTED
 };
 
+enum Mod_Type
+{
+	MOD_TYPE_AM,
+	MOD_TYPE_FM,
+	MOD_TYPE_PM,
+	MOD_TYPE_PULM
+};
+
+enum Mod_Source
+{
+	MOD_SOURCE_EXT_AC,
+	MOD_SOURCE_EXT_DC,
+	MOD_SOURCE_INT
+};
 
 typedef struct
 {
 	bool           state;
 	bool           state_has_been_set;
 	enum Impedance imp;
-} Outp;
+} Outp_T;
 
 typedef struct
 {
@@ -94,7 +108,7 @@ typedef struct
 	bool            mode_has_been_set;
     enum Off_Mode   off_mode;
 	bool            off_mode_has_been_set;
-} Pow;
+} Pow_T;
 
 typedef struct
 {
@@ -104,86 +118,127 @@ typedef struct
 	double freq_resolution;
 	double min_freq;
 	double max_freq;
-} Freq;
+} Freq_T;
 
 typedef struct
 {
 	bool          state;
 	bool          state_has_been_set;
 	double        depth;
+	bool          depth_has_been_set;
 	double        depth_resolution;
     enum Coupling ext_coup;
+	bool          ext_coup_has_been_set;
     enum Source   source;
-} AM;
+	bool          source_has_been_set;
+} AM_T;
 
 typedef struct
 {
 	bool          state;
-	bool          state_has_been_set;
 	double        dev;
+	bool          dev_has_been_set;
 	enum Coupling ext_coup;
+	bool          ext_coup_has_been_set;
 	enum Source   source;
+	bool          source_has_been_set;
 	enum Mod_Mode mode;
-} FM;
+	bool          mode_has_been_set;
+} FM_T;
 
 typedef struct
 {
 	bool          state;
-	bool          state_has_been_set;
 	double        dev;
+	bool          dev_has_been_set;
 	enum Coupling ext_coup;
+	bool          ext_coup_has_been_set;
 	enum Source   source;
+	bool          source_has_been_set;
 	enum Mod_Mode mode;
-} PM;
+	bool          mode_has_been_set;
+} PM_T;
 
 typedef struct
 {
 	double         freq;
+	bool           freq_has_been_set;
     double         freq_resolution;
     double         min_freq;
     double         max_freq;
 	double         volts;
+	bool           volts_has_been_set;
     double         volt_resolution;
     double         max_volts;
 	enum Impedance imp;
-} LFO;
+	bool           imp_has_been_set;
+} LFO_T;
 
 typedef struct
 {
 	enum Slope     slope;
 	enum Impedance imp;
-} Inp;
+} Inp_T;
 
 typedef struct
 {
 	char const * default_name;
 	char       * name;
 	bool         processing_list;
-} List;
+} List_T;
 
 typedef struct
 {
 	bool           has_pulse_mod;
 	bool           state;
-	bool           state_has_been_set;
 	enum Polarity  pol;
+	bool           pol_has_been_set;
 	enum Impedance imp;
-} PulM;
+	bool           imp_has_been_set;
+} PulM_T;
+
+typedef struct
+{
+	bool           ( * get_state )( void );
+	bool           ( * set_state )( bool );
+	double         ( * get_amplitude )( void );
+	double         ( * set_amplitude )( double );
+	enum Coupling  ( * get_coupling )( void );
+	enum Coupling  ( * set_coupling )( enum Coupling );
+	enum Source    ( * get_source )( void );
+	enum Source    ( * set_source )( enum Source );
+	enum Mod_Mode  ( * get_mode )( void );
+	enum Mod_Mode  ( * set_mode )( enum Mod_Mode );
+	enum Impedance ( * get_impedance )( void );
+	enum Impedance ( * set_impedance )( enum Impedance );
+	enum Polarity  ( * get_polarity )( void );
+	enum Polarity  ( * set_polarity )( enum Polarity );
+} Mod_Funcs;
+
+typedef struct
+{
+	enum Mod_Type   type;
+	bool            type_has_been_set;
+	bool            state[ 4 ];
+	bool            state_has_been_set[ 4 ];
+	Mod_Funcs     * funcs;
+} Mod_T;
 
 typedef struct
 {
 	bool is_connected;
 
-	Outp outp;
-	Pow  pow;
-	Freq freq;
-	AM   am;
-	FM   fm;
-	PM   pm;
-	LFO  lfo;
-	Inp  inp;
-	List list;
-	PulM pulm;
+	Outp_T outp;
+	Pow_T  pow;
+	Freq_T freq;
+	AM_T   am;
+	FM_T   fm;
+	PM_T   pm;
+	LFO_T  lfo;
+	Inp_T  inp;
+	List_T list;
+	PulM_T pulm;
+	Mod_T  mod;
 } rs_smb100a_T;
 
 
@@ -212,6 +267,13 @@ Var_T * synthesizer_protection_tripped( Var_T * v );
 Var_T * synthesizer_reset_protection( Var_T * v );
 Var_T * synthesizer_rf_mode( Var_T * v );
 Var_T * synthesizer_rf_off_mode( Var_T * v );
+Var_T * synthesizer_mod_freq( Var_T * v );
+Var_T * synthesizer_mod_output_impedance( Var_T * v );
+Var_T * synthesizer_mod_output_voltage( Var_T * v );
+Var_T * synthesizer_mod_type( Var_T * v );
+Var_T * synthesizer_mod_state( Var_T * v );
+Var_T * synthesizer_mod_amp( Var_T * v );
+Var_T * synthesizer_mod_source( Var_T * v );
 
 
 // Function of the OUTP sub-system
@@ -256,7 +318,6 @@ bool am_state( void );
 bool am_set_state( bool state );
 double am_depth( void );
 double am_set_depth( double depth );
-double am_sensitivity( void );
 enum Coupling am_coupling( void );
 enum Coupling am_set_coupling( enum Coupling coup );
 enum Source am_source( void );
@@ -270,7 +331,6 @@ bool fm_state( void );
 bool fm_set_state( bool state );
 double fm_deviation( void );
 double fm_set_deviation( double dev );
-double fm_sensitivity( void );
 enum Coupling fm_coupling( void );
 enum Coupling fm_set_coupling( enum Coupling coup );
 enum Source fm_source( void );
@@ -290,7 +350,6 @@ bool pm_state( void );
 bool pm_set_state( bool state );
 double pm_deviation( void );
 double pm_set_deviation( double dev );
-double pm_sensitivity( void );
 enum Coupling pm_coupling( void );
 enum Coupling pm_set_coupling( enum Coupling coup );
 enum Source pm_source( void );
@@ -380,6 +439,29 @@ enum Slope query_slope( char const * cmd );
 enum Polarity query_pol( char const * cmd );
 int bad_data( void );
 long impedance_to_int( enum Impedance imp );
+enum Impedance int_to_impedance( long imp );
+char const * impedance_to_name( enum Impedance imp );
+
+
+// Functions for dealing with modulation
+
+void mod_init( void );
+enum Mod_Type mod_type( void );
+enum Mod_Type mod_set_type( enum Mod_Type type );
+bool mod_state( void );
+bool mod_set_state( bool state );
+double mod_amplitude( void );
+double mod_set_amplitude( double amp );
+enum Coupling mod_coupling( void );
+enum Coupling mod_set_coupling( enum Coupling coup );
+enum Source mod_source( void );
+enum Source mod_set_source( enum Source source );
+enum Mod_Mode mod_mode( void );
+enum Mod_Mode mod_set_mode( enum Mod_Mode mode );
+enum Impedance mod_impedance( void );
+enum Impedance mod_set_impedance( enum Impedance imp );
+enum Polarity mod_polarity( void );
+enum Polarity mod_set_polarity( enum Polarity pol );
 
 
 #endif

@@ -1,10 +1,15 @@
 #include "rs.h"
 
 
-/* List of maximum frequencu modulation deviations for different frequency
-   ranges, with the first value being the upper limit of the frequency range
+static void pm_prep_init( void );
+static void pm_test_init( void );
+static void pm_exp_init( void );
+
+
+/* List of maximum phase modulation deviations for different RF frequency
+   ranges, with the first value being the upper limit of the RF frequency range
    (included in the range), while the following array contains the maximum
-   modulation frequencies for low noise, normal and high deviation mode.*/
+   modulation phases for low noise, normal and high deviation mode.*/
 
 typedef struct
 {
@@ -32,43 +37,136 @@ void
 pm_init( void )
 {
 	if ( FSC2_MODE == PREPARATION )
+		pm_prep_init( );
+	else if ( FSC2_MODE == TEST )
+		pm_test_init( );
+	else
+		pm_exp_init( );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+pm_prep_init( void )
+{
+	rs->pm.state = false;
+
+	rs->pm.dev_has_been_set      = false;
+	rs->pm.ext_coup_has_been_set = false;
+	rs->pm.source_has_been_set   = false;
+	rs->pm.mode_has_been_set     = false;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+pm_test_init( void )
+{
+	if ( ! rs->pm.dev_has_been_set )
 	{
-		rs->pm.state_has_been_set = false;
-		return;
+		rs->pm.dev = 10e3;
+		rs->pm.dev_has_been_set = true;
 	}
 
-	if ( FSC2_MODE != EXPERIMENT )
+	if ( ! rs->pm.ext_coup_has_been_set )
 	{
-		if ( ! rs->pm.state_has_been_set )
-			rs->pm.state    = false;
-
-		rs->pm.dev      = 0.2;
 		rs->pm.ext_coup = COUPLING_AC;
-		rs->pm.source   = SOURCE_INT;
-		rs->pm.mode     = MOD_MODE_NORMAL;
-
-		return;
+		rs->pm.ext_coup_has_been_set = true;
 	}
 
-	if ( rs->pm.state_has_been_set )
+	if ( ! rs->pm.source_has_been_set )
 	{
-		rs->pm.state = ! rs->pm.state;
-		pm_set_state( ! rs->pm.state );
+		rs->pm.source = SOURCE_INT;
+		rs->pm.source_has_been_set = true;
+	}
+
+	if ( ! rs->pm.mode_has_been_set )
+	{
+		rs->pm.mode = MOD_MODE_NORMAL;
+		rs->pm.mode_has_been_set = true;
+	}
+}
+		
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+pm_exp_init( void )
+{
+	rs->pm.state    = query_bool( "PM:STAT?" );
+
+	if ( rs->pm.ext_coup_has_been_set )
+	{
+		rs->pm.ext_coup_has_been_set = false;
+		pm_set_coupling( rs->pm.ext_coup );
 	}
 	else
-		rs->pm.state    = query_bool( "PM:STAT?" );
+	{
+		rs->pm.ext_coup = query_coupling( "PM:EXT:COUP?" );
+		rs->pm.ext_coup_has_been_set = true;
+	}
 
-    rs->pm.dev      = query_double( "PM?" );
-    rs->pm.ext_coup = query_coupling( "PM:EXT:COUP?" );
-    rs->pm.source   = query_source( "PM:SOUR?" );
-    rs->pm.mode     = query_mod_mode( "PM:MODE?" );
+	if ( rs->pm.source_has_been_set )
+	{
+		rs->pm.source_has_been_set = false;
+		pm_set_source( rs->pm.source );
+	}
+	else
+	{
+		rs->pm.source   = query_source( "PM:SOUR?" );
+		if ( rs->pm.source == SOURCE_INT_EXT )
+			pm_set_source( SOURCE_INT );
+		else
+			rs->pm.source_has_been_set = true;
+	}
+
+	if ( rs->pm.mode_has_been_set )
+	{
+		rs->pm.mode_has_been_set = false;
+		pm_set_mode( rs->pm.mode );
+	}
+	else
+	{
+		rs->pm.mode = query_mod_mode( "PM:MODE?" );
+		rs->pm.mode_has_been_set = true;
+	}
 
     /* If modulation deviation is larger than possible reduce it to the
        maximum value */
 
-    double max_dev = pm_max_deviation( freq_frequency( ), rs->pm.mode );
-    if ( rs->pm.dev > max_dev )
-        pm_set_deviation( max_dev );
+    double max_dev = pm_max_deviation( freq_frequency( ), pm_mode( ) );
+
+	if ( rs->pm.dev_has_been_set )
+	{
+		if ( rs->pm.dev > max_dev )
+		{
+			print( WARN, "Adjusting PM deviation from %.1f Hz to %.1f Hz.\n",
+				   rs->pm.dev, max_dev );
+			rs->pm.dev = max_dev;
+		}
+
+		rs->pm.dev_has_been_set = false;
+		pm_set_deviation( rs->pm.dev );
+	}
+	else
+	{
+		if ( ( rs->pm.dev = query_double( "PM?" ) ) > max_dev )
+		{
+			print( WARN, "Adjusting PM deviation from %.1f Hz to %.1f Hz.\n",
+				   rs->pm.dev, max_dev );
+			pm_set_deviation( max_dev );
+		}
+		else
+			rs->pm.dev_has_been_set = true;
+	}
 }
 
 
@@ -79,12 +177,6 @@ pm_init( void )
 bool
 pm_state( void )
 {
-	if ( FSC2_MODE == PREPARATION && ! rs->pm.state_has_been_set )
-	{
-		print( FATAL, "PM state hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
-
 	return rs->pm.state;
 }
 
@@ -99,22 +191,8 @@ pm_set_state( bool state )
     if ( state == rs->pm.state )
         return rs->pm.state;
 
-	/* Only allow one type of modulation, so if PM is switched on
-	   disable AM, FM and PULM */
-
-    if ( state )
-	{
-		am_set_state( false );
-		fm_set_state( false );
-		if ( pulm_available( ) )
-			pulm_set_state( false );
-	}
-
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->pm.state_has_been_set = true;
 		return rs->pm.state = state;
-	}
 
 	char cmd[ ] = "PM:STATE x";
     cmd[ 9 ] = state ? '1' : '0';
@@ -129,6 +207,12 @@ pm_set_state( bool state )
 double
 pm_deviation( void )
 {
+	if ( ! rs->pm.dev_has_been_set )
+	{
+		print( FATAL, "Phase modulation deviation hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->pm.dev;
 }
 
@@ -139,9 +223,13 @@ pm_deviation( void )
 double
 pm_set_deviation( double dev )
 {
-    if ( ( dev = pm_check_deviation( dev, freq_frequency(), rs->pm.mode ) )
-		                                                        == rs->pm.dev )
+    if ( rs->pm.mode_has_been_set && rs->freq.freq_has_been_set )
+		dev = pm_check_deviation( dev, freq_frequency( ), pm_mode( ) );
+
+    if ( rs->pm.dev == dev )
         return rs->pm.dev;
+
+	rs->pm.dev_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return rs->pm.dev = dev;
@@ -157,22 +245,16 @@ pm_set_deviation( double dev )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-double
-pm_sensitivity( void )
-{
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->pm.dev * ( rs->pm.source != SOURCE_INT_EXT ? 1 : 0.5 );
-	return query_double( "PM:SENS?" );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
 enum Coupling
 pm_coupling( void )
 {
-	return rs->fm.ext_coup;
+	if ( ! rs->pm.ext_coup_has_been_set )
+	{
+		print( FATAL, "Phase modulation coupling hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return rs->pm.ext_coup;
 }
 
 
@@ -182,7 +264,7 @@ pm_coupling( void )
 enum Coupling
 pm_set_coupling( enum Coupling coup )
 {
-    if ( rs->pm.ext_coup == coup )
+    if ( rs->pm.ext_coup_has_been_set && rs->pm.ext_coup == coup )
         return rs->pm.ext_coup;
 
 	if ( coup != COUPLING_AC && coup != COUPLING_DC )
@@ -192,11 +274,14 @@ pm_set_coupling( enum Coupling coup )
 		THROW( EXCEPTION );
 	}
 
+	rs->pm.ext_coup_has_been_set = true;
+
 	if ( FSC2_MODE != EXPERIMENT )
         return rs->pm.ext_coup = coup;
 
     char cmd[ ] = "PM:EXT:COUP *C";
     cmd[ 12 ] = coup == COUPLING_AC ? 'A' : 'D';
+
     rs_write( cmd );
     return rs->pm.ext_coup = coup;
 }
@@ -208,6 +293,12 @@ pm_set_coupling( enum Coupling coup )
 enum Source
 pm_source( void )
 {
+	if ( ! rs->pm.source_has_been_set )
+	{
+		print( FATAL, "Phase modulation source hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->pm.source;
 }
 
@@ -218,17 +309,17 @@ pm_source( void )
 enum Source
 pm_set_source( enum Source source )
 {
-    if ( rs->pm.source == source )
+    if ( rs->pm.source_has_been_set && rs->pm.source == source )
         return rs->pm.source;
 
-	if (    source != SOURCE_INT
-		 && source != SOURCE_EXT
-		 && source != SOURCE_INT_EXT )
+	if ( source != SOURCE_INT && source != SOURCE_EXT )
 	{
 		print( FATAL, "Invalid modulation source %d requested, use either "
-			   "\"INT\", \"EXT\" or \"INT_EXT\".\n", source );
+			   "\"INTERN\" or \"EXTERN\".\n", source );
 		THROW( EXCEPTION );
 	}
+
+	rs->pm.source_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return rs->pm.source = source;
@@ -245,8 +336,7 @@ pm_set_source( enum Source source )
             break;
 
         case SOURCE_INT_EXT :
-            strcat( cmd, "INT,EXT" );
-            break;
+			fsc2_impossible( );					\
     }
 
     rs_write( cmd );
@@ -260,6 +350,12 @@ pm_set_source( enum Source source )
 enum Mod_Mode
 pm_mode( void )
 {
+	if ( ! rs->pm.mode_has_been_set )
+	{
+		print( FATAL, "Phase modulation mode hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->pm.mode;
 }
 
@@ -270,7 +366,7 @@ pm_mode( void )
 enum Mod_Mode
 pm_set_mode( enum Mod_Mode mode )
 {
-    if ( rs->pm.mode == mode )
+    if ( rs->pm.mode_has_been_set && rs->pm.mode == mode )
         return rs->pm.mode;
 
 	if (    mode != MOD_MODE_NORMAL
@@ -283,15 +379,21 @@ pm_set_mode( enum Mod_Mode mode )
 	}
 
     /* If with the new mode being set the modulation deviation would become
-       too karge reduce it to the maximum possible value */
+       too large reduce it to the maximum possible value */
 
-    double max_dev = pm_max_deviation( freq_frequency( ), mode );
-    if ( rs->pm.dev > max_dev )
+    if ( rs->freq.freq_has_been_set )
 	{
-		print( WARN, "Adjusting PM deviation from %.2f Hz to  %.2f Hz.\n",
-			   rs->pm.dev, max_dev );
-        pm_set_deviation( max_dev );
+		double max_dev = pm_max_deviation( freq_frequency( ), mode );
+
+		if ( max_dev > rs->pm.dev )
+		{
+			print( WARN, "Adjusting PM deviation from %.1f Hz to %.1f Hz.\n",
+				   rs->pm.dev, max_dev );
+			pm_set_deviation( max_dev );
+		}
 	}
+
+	rs->pm.mode_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
         return rs->pm.mode = mode;
@@ -367,8 +469,8 @@ pm_check_deviation( double        dev,
 
     if ( dev > max_dev )
 	{
-		print( FATAL, "Requested PM deviation of %f rad out of range, can't "
-			   "be larger than %f rad.\n", dev, max_dev );
+		print( FATAL, "Requested PM deviation of %f Hz out of range, can't "
+			   "be larger than %f Hz.\n", dev, max_dev );
 		THROW( EXCEPTION );
 	}
 

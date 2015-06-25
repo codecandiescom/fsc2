@@ -1,45 +1,118 @@
 #include "rs.h"
 
 
+static void am_prep_init( void );
+static void am_test_init( void );
+static void am_exp_init( void );
+
+
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
 void
 am_init( void )
 {
+	if ( FSC2_MODE == PREPARATION )
+		am_prep_init( );
+	else if ( FSC2_MODE == TEST )
+		am_test_init( );
+	else
+		am_exp_init( );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+am_prep_init( void )
+{
 	rs->am.depth_resolution = 0.1;
 
-	if ( FSC2_MODE != EXPERIMENT )
+	rs->am.state = false;
+
+	rs->am.depth_has_been_set    = false;
+	rs->am.ext_coup_has_been_set = false;
+	rs->am.source_has_been_set   = false;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+am_test_init( void )
+{
+	rs->am.state    = false;
+
+	if ( ! rs->am.depth_has_been_set )
 	{
-		rs->am.state_has_been_set = false;
-		return;
+		rs->am.depth = 20;
+		rs->am.depth_has_been_set = true;
 	}
 
-	if ( FSC2_MODE == TEST )
+	if ( ! rs->am.ext_coup_has_been_set )
 	{
-		if ( ! rs->am.state_has_been_set )
-			rs->am.state    = false;
-
-		rs->am.depth    = 20;
 		rs->am.ext_coup = COUPLING_AC;
-		rs->am.source   = SOURCE_INT;
-
-		return;
+		rs->am.ext_coup_has_been_set = true;
 	}
 
+	if ( rs->am.source_has_been_set )
+	{
+		rs->am.source = SOURCE_INT;
+		rs->am.source_has_been_set = true;
+	}
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+am_exp_init( void )
+{
     rs_write( "AM:TYPE LIN" );
 
-	if ( rs->am.state_has_been_set )
+	rs->am.state = query_bool( "AM:STAT?" );
+
+	if ( rs->am.depth_has_been_set )
 	{
-		rs->am.state = ! rs->am.state;
-		am_set_state( ! rs->am.state );
+		rs->am.depth_has_been_set = false;
+		am_set_depth( rs->am.depth );
 	}
 	else
-		rs->am.state    = query_bool( "AM:STAT?" );
+	{
+		rs->am.depth = query_double( "AM?" );
+		rs->am.depth_has_been_set = true;
+	}
 
-    rs->am.depth    = query_double( "AM?" );
-    rs->am.ext_coup = query_coupling( "AM:EXT:COUP?" );
-    rs->am.source   = query_source( "AM:SOUR?" );
+	if ( rs->am.ext_coup_has_been_set )
+	{
+		rs->am.ext_coup_has_been_set = false;
+		am_set_coupling( rs->am.ext_coup );
+	}
+	else
+	{
+		rs->am.ext_coup = query_coupling( "AM:EXT:COUP?" );
+		rs->am.ext_coup_has_been_set = true;
+	}
+
+	if ( rs->am.source_has_been_set )
+	{
+		rs->am.source_has_been_set = false;
+		am_set_source( rs->am.source );
+	}
+	else
+	{
+		rs->am.source   = query_source( "AM:SOUR?" );
+		if ( rs->am.source == SOURCE_INT_EXT )
+			am_set_source( SOURCE_INT );
+		else
+			rs->am.source_has_been_set = true;
+	}
 }
 
 
@@ -49,12 +122,6 @@ am_init( void )
 bool
 am_state( void )
 {
-	if ( FSC2_MODE == PREPARATION && ! rs->am.state_has_been_set )
-	{
-		print( FATAL, "AM state hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
-
 	return rs->am.state;
 }
 
@@ -68,22 +135,8 @@ am_set_state( bool state )
     if ( state == rs->am.state )
         return rs->am.state;
 
-	/* Only allow one type of modulation, so if AM is switched on
-	   disable FM, PM and PULM */
-
-	if ( state )
-	{
-		fm_set_state( false );
-		pm_set_state( false );
-		if ( pulm_available( ) )
-			pulm_set_state( false );
-	}	
-
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->am.state_has_been_set = true;
 		return rs->am.state = state;
-	}
 
 	char cmd[ 11 ] = "AM:STATE ";
 	cmd[ 10 ] = state ? '1' : '0';
@@ -98,6 +151,12 @@ am_set_state( bool state )
 double
 am_depth( void )
 {
+	if ( ! rs->am.depth_has_been_set )
+	{
+		print( FATAL, "Amplitude modulation depth hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->am.depth;
 }
 
@@ -109,8 +168,11 @@ am_depth( void )
 double
 am_set_depth( double depth )
 {
-    if ( ( depth = am_check_depth( depth ) ) == rs->am.depth )
+    if (    rs->am.depth_has_been_set
+		 && ( depth = am_check_depth( depth ) ) == rs->am.depth )
         return rs->am.depth;
+
+	rs->am.depth_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return rs->am.depth = depth;
@@ -126,21 +188,15 @@ am_set_depth( double depth )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-double
-am_sensitivity( void )
-{
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->am.depth * ( rs->am.source != SOURCE_INT_EXT ? 1 : 0.5 );
-	return query_double( "AM:SENS?" );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
 enum Coupling
 am_coupling( void )
 {
+	if ( ! rs->am.ext_coup_has_been_set )
+	{
+		print( FATAL, "Amplitude modulation coupling hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->am.ext_coup;
 }
 
@@ -151,7 +207,7 @@ am_coupling( void )
 enum Coupling
 am_set_coupling( enum Coupling coup )
 {
-    if ( rs->am.ext_coup == coup )
+    if ( rs->am.ext_coup_has_been_set && rs->am.ext_coup == coup )
         return rs->am.ext_coup;
 
 	if ( coup != COUPLING_AC && coup != COUPLING_DC )
@@ -160,6 +216,8 @@ am_set_coupling( enum Coupling coup )
 			   "\"DC\".\n", coup );
 		THROW( EXCEPTION );
 	}
+
+	rs->am.ext_coup_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return rs->am.ext_coup = coup;
@@ -177,6 +235,12 @@ am_set_coupling( enum Coupling coup )
 enum Source
 am_source( void )
 {
+	if ( ! rs->am.source_has_been_set )
+	{
+		print( FATAL, "Amplitude modulation source hasn't been set yet.\n" );
+		THROW( EXCEPTION );
+	}
+
 	return rs->am.source;
 }
 
@@ -187,17 +251,17 @@ am_source( void )
 enum Source
 am_set_source( enum Source source )
 {
-    if ( rs->am.source == source )
+    if ( rs->am.source_has_been_set && rs->am.source == source )
         return rs->am.source;
 
-	if (    source != SOURCE_INT
-		 && source != SOURCE_EXT
-		 && source != SOURCE_INT_EXT )
+	if ( source != SOURCE_INT && source != SOURCE_EXT )
 	{
 		print( FATAL, "Invalid modulation source %d requested, use either "
-			   "\"INT\", \"EXT\" or \"INT_EXT\".\n", source );
+			   "\"INTERN\" or \"EXTERN\".\n", source );
 		THROW( EXCEPTION );
 	}
+
+	rs->am.source_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return rs->am.source = source;
@@ -214,8 +278,7 @@ am_set_source( enum Source source )
             break;
 
         case SOURCE_INT_EXT :
-            strcat( cmd, "INT,EXT" );
-            break;
+			fsc2_impossible( );
     }
 
     rs_write( cmd );

@@ -27,6 +27,7 @@ rs_init( rs_smb100a_T * rs_cur )
     inp_init( );
     list_init( );
     pulm_init( );
+	mod_init( );
 }
 
 
@@ -527,6 +528,72 @@ impedance_to_int( enum Impedance imp )
 	fsc2_impossible( );
 	return -1;
 }
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+enum Impedance
+int_to_impedance( long imp )
+{
+	switch ( imp )
+	{
+		case 10 :
+			return IMPEDANCE_LOW;
+
+		case 50 :
+			return IMPEDANCE_G50;
+
+		case 600 :
+			return IMPEDANCE_G600;
+
+		case 1000 :
+			return IMPEDANCE_G1K;
+
+		case 10000 :
+			return IMPEDANCE_G10K;
+
+		case 200000 :
+			return IMPEDANCE_HIGH;
+	}
+
+	print( FATAL, "Invalid impedance value of %ld Ohm.\n", imp );
+	THROW( EXCEPTION );
+	return -1;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+char const *
+impedance_to_name( enum Impedance imp )
+{
+	switch ( imp )
+	{
+		case IMPEDANCE_LOW :
+			return "LOW";
+
+		case IMPEDANCE_G50 :
+			return "G50";
+
+		case IMPEDANCE_G600 :
+			return "G600";
+
+		case IMPEDANCE_G1K :
+			return "G1000";
+
+		case IMPEDANCE_G10K :
+			return "G10000";
+
+		case IMPEDANCE_HIGH :
+			return "HIGH";
+	}
+
+	fsc2_impossible( );
+	return "";
+}
+
 
 
 /*
