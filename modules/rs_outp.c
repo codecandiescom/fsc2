@@ -84,15 +84,15 @@ outp_set_state( bool state )
     if ( ! state )
         list_stop( false );
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		char cmd[ ] = "OUTP:STATE x";
-		cmd[ 11 ] = state ? '1' : '0';
-
-		rs_write( cmd );
-	}
-
     rs->outp.state_has_been_set = true;
+
+	if ( FSC2_MODE != EXPERIMENT )
+        return rs->outp.state = state;
+
+    char cmd[ ] = "OUTP:STATE x";
+    cmd[ 11 ] = state ? '1' : '0';
+    rs_write( cmd );
+\
 	return rs->outp.state = state;
 }
 
