@@ -197,6 +197,7 @@ fm_set_state( bool state )
 	char cmd[ ] = "FM:STATE x";
     cmd[ 9 ] = state ? '1' : '0';
     rs_write( cmd );
+
     return rs->fm.state = state;
 }
     
@@ -226,7 +227,7 @@ fm_set_deviation( double dev )
     if ( rs->fm.mode_has_been_set && rs->freq.freq_has_been_set )
 		dev = fm_check_deviation( dev, freq_frequency( ), fm_mode( ) );
 
-    if ( rs->fm.dev == dev )
+    if ( rs->fm.dev_has_been_set && rs->fm.dev == dev )
         return rs->fm.dev;
 
 	rs->fm.dev_has_been_set = true;
@@ -236,8 +237,8 @@ fm_set_deviation( double dev )
 
     char cmd[ 100 ];
     sprintf( cmd, "FM %.1f", dev );
-
 	rs_write( cmd );
+
     return rs->fm.dev = dev;
 }
 
@@ -281,8 +282,8 @@ fm_set_coupling( enum Coupling coup )
 
     char cmd[ ] = "FM:EXT:COUP *C";
     cmd[ 12 ] = coup == COUPLING_AC ? 'A' : 'D';
-
     rs_write( cmd );
+
     return rs->fm.ext_coup = coup;
 }
 
@@ -338,8 +339,8 @@ fm_set_source( enum Source source )
         case SOURCE_INT_EXT :
 			fsc2_impossible( );					\
     }
-
     rs_write( cmd );
+
     return rs->fm.source = source;
 }
 
@@ -413,8 +414,8 @@ fm_set_mode( enum Mod_Mode mode )
             strcat( cmd, "HDEV" );
             break;
     }
-
     rs_write( cmd );
+
     return rs->fm.mode = mode;
 }
 

@@ -141,6 +141,7 @@ am_set_state( bool state )
 	char cmd[ 11 ] = "AM:STATE ";
 	cmd[ 10 ] = state ? '1' : '0';
     rs_write( cmd );
+
     return rs->am.state = state;
 }
     
@@ -168,8 +169,9 @@ am_depth( void )
 double
 am_set_depth( double depth )
 {
-    if (    rs->am.depth_has_been_set
-		 && ( depth = am_check_depth( depth ) ) == rs->am.depth )
+	depth = am_check_depth( depth );
+
+    if ( rs->am.depth_has_been_set && depth == rs->am.depth )
         return rs->am.depth;
 
 	rs->am.depth_has_been_set = true;
@@ -179,8 +181,8 @@ am_set_depth( double depth )
 
     char cmd[ 100 ];
     sprintf( cmd, "AM %.1f", depth );
-
     rs_write( cmd );
+
     return rs->am.depth = depth;
 }
 
@@ -225,6 +227,7 @@ am_set_coupling( enum Coupling coup )
 	char cmd[ ] = "AM:EXT:COUP *C";
 	cmd[ 12 ] = coup == COUPLING_AC ? 'A' : 'D';
     rs_write( cmd );
+
     return rs->am.ext_coup = coup;
 }
 
@@ -280,8 +283,8 @@ am_set_source( enum Source source )
         case SOURCE_INT_EXT :
 			fsc2_impossible( );
     }
-
     rs_write( cmd );
+
     return rs->am.source = source;
 }
 

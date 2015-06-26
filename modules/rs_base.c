@@ -3,6 +3,8 @@
 #include "vxi11_user.h"
 
 
+static void rs_connect( void );
+static void rs_disconnect( void );
 static void check_model_and_options( void );
 static char ** get_options( void );
 static void comm_failure( void );
@@ -16,7 +18,8 @@ rs_init( rs_smb100a_T * rs_cur )
 {
 	rs = rs_cur;
 
-	base_init( );
+	rs_connect( );
+
 	outp_init( );
 	freq_init( );
 	pow_init( );
@@ -38,15 +41,16 @@ void
 rs_cleanup( void )
 {
 	list_cleanup( );
-	base_cleanup( );
+	rs_disconnect( );
 }
 
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+static
 void
-base_init( void )
+rs_connect( void )
 {
 	rs->is_connected = false;
 
@@ -78,10 +82,11 @@ base_init( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+static
 void
-base_cleanup( void )
+rs_disconnect( void )
 {
-	if ( ! rs->is_connected )
+	if ( FSC2_MODE != EXPERIMENT || ! rs->is_connected )
 		return;
 
 	vxi11_device_clear( );
@@ -154,11 +159,12 @@ query_int( char const * cmd )
     errno = 0;
     char * ep;
     long res = strtol( reply, &ep, 10 );
+
     if (    ep == reply
          || *ep
          || errno == ERANGE
          || res > INT_MAX
-			|| res < INT_MIN )
+		 || res < INT_MIN )
 		bad_data( );
 
     return res;
@@ -177,6 +183,7 @@ query_double( const char * cmd )
     errno = 0;
     char * ep;
     double res = strtod( reply, &ep );
+
     if (    ep == reply
          || *ep
          || errno == ERANGE )

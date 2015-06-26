@@ -35,7 +35,11 @@ freq_init( void )
 	if ( FSC2_MODE == TEST )
 	{
 		if ( ! rs->freq.freq_has_been_set )
+		{
 			rs->freq.freq = 14.0e6;
+			rs->freq.freq_has_been_set = true;
+		}
+
 		return;
 	}
 
@@ -49,12 +53,14 @@ freq_init( void )
 
 	if ( rs->freq.freq_has_been_set )
 	{
-		double freq = rs->freq.freq;
-		rs->freq.freq = -1;
-		freq_set_frequency( freq );
+		rs->freq.freq_has_been_set = false;
+		freq_set_frequency( rs->freq.freq );
 	}
 	else
+	{
 		rs->freq.freq = query_double( "FREQ?" );
+		rs->freq.freq_has_been_set = true;
+	}
 }
 
 
@@ -65,7 +71,7 @@ freq_init( void )
 double
 freq_frequency( void )
 {
-    if ( FSC2_MODE == PREPARATION && ! rs->freq.freq_has_been_set )
+    if ( ! rs->freq.freq_has_been_set )
     {
         print( FATAL, "Frequency hasn't been set yet.\n" );
         THROW( EXCEPTION );
@@ -81,10 +87,13 @@ freq_frequency( void )
 double
 freq_set_frequency( double freq )
 {
-    freq = freq_check_frequency( freq );
+	freq = freq_check_frequency( freq );
 
-    /* If with the frequency to be set the FM or PM modulation amplitude
-       would become too large reduce them to the new maximum value */
+    if ( rs->freq.freq_has_been_set && freq == rs->freq.freq )
+		return rs->freq.freq;
+
+    /* If with the frequency to be set the FM or the PM amplitude
+       would become too large reduce it to its new maximum value */
 
     double max_fm_dev = fm_max_deviation( freq, fm_mode( ) );
     if ( fm_deviation( ) > max_fm_dev )
@@ -94,16 +103,15 @@ freq_set_frequency( double freq )
     if ( pm_deviation( ) > max_pm_dev )
         pm_set_deviation( max_pm_dev );
 
+	rs->freq.freq_has_been_set = true;
+
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->freq.freq_has_been_set = true;
 		return rs->freq.freq = freq;
-	}
 
     char cmd[ 100 ];
     sprintf( cmd, "FREQ %.2f", freq );
-
 	rs_write( cmd );
+
     return rs->freq.freq = freq;
 }
 

@@ -66,27 +66,18 @@ mod_init( void )
 	if ( ! rs->mod.type_has_been_set )
 	{
 		/* If no modulation type had been set check if just one modulation
-		   sub-system is on and pick that, otherwise switch off all. */
+		   sub-system is on leave as it is, otherwise switch all off. */
 
 		int cnt = 0;
-		enum Mod_Type type;
 		for ( enum Mod_Type i = MOD_TYPE_AM; i <= MOD_TYPE_PULM; i++ )
 		{
 			if ( ( rs->mod.state[ i ] = rs->mod.funcs[ i ].get_state( ) ) )
-			{
-				type = i;
 				cnt++;
-			}
 
 			rs->mod.state_has_been_set[ i ] = true;
 		}
 
-		if ( cnt == 1 )
-		{
-			rs->mod.type = type;
-			rs->mod.type_has_been_set = true;
-		}
-		else if ( cnt > 1 )
+		if ( cnt > 1 )
 		{
 			for ( enum Mod_Type i = MOD_TYPE_AM; i <= MOD_TYPE_PULM; i++ )
 				if ( rs->mod.state[ i ] )
@@ -145,7 +136,7 @@ mod_set_type( enum Mod_Type type )
 	if ( rs->mod.type_has_been_set && type == rs->mod.type )
 		return rs->mod.type;
 
-	// Check teh argument
+	// Check the argument
 
 	bool found = false;
 	for ( enum Mod_Type i = MOD_TYPE_AM; i <= MOD_TYPE_PULM; i++ )

@@ -4,6 +4,7 @@
 static void pulm_prep_init( void );
 static void pulm_test_init( void );
 static void pulm_exp_init( void );
+static void check_has_pulse_mod( void );
 
 
 /*----------------------------------------------------*
@@ -124,7 +125,7 @@ pulm_state( void )
 bool
 pulm_set_state( bool state )
 {
-    pulm_check_has_mod( );
+    check_has_pulse_mod( );
 
     if ( state == rs->pulm.state )
         return rs->pulm.state;
@@ -134,8 +135,8 @@ pulm_set_state( bool state )
 
 	char cmd[ ] = "PULM:STAT *";
 	cmd[ 10 ] = state ? '1' : '0';
-
 	rs_write( cmd );
+
     return rs->pulm.state = state;
 }
 
@@ -146,7 +147,7 @@ pulm_set_state( bool state )
 enum Polarity
 pulm_polarity( void )
 {
-    pulm_check_has_mod( );
+    check_has_pulse_mod( );
 
 	if ( ! rs->pulm.pol_has_been_set )
 	{
@@ -167,10 +168,16 @@ pulm_polarity( void )
 enum Polarity
 pulm_set_polarity( enum Polarity pol )
 {
-    pulm_check_has_mod( );
+    check_has_pulse_mod( );
 
     if ( rs->pulm.pol_has_been_set && pol == rs->pulm.pol )
         return rs->pulm.pol;
+
+    if ( pol != POLARITY_NORMAL && pol != POLARITY_INVERTED )
+    {
+        print( FATAL, "Invalid polarity value %d.\n", pol );
+        THROW( EXCEPTION );
+    }
 
     rs->pulm.pol_has_been_set = true;
 
@@ -179,8 +186,8 @@ pulm_set_polarity( enum Polarity pol )
 
 	char cmd[ 13 ] = "PULM:POL ";
     strcat( cmd, pol == POLARITY_NORMAL ? "NORM" : "INV" );
-
     rs_write( cmd );
+
     return rs->pulm.pol = pol;
 }
 
@@ -191,7 +198,7 @@ pulm_set_polarity( enum Polarity pol )
 enum Impedance
 pulm_impedance( void )
 {
-    pulm_check_has_mod( );
+    check_has_pulse_mod( );
 
 	if ( ! rs->pulm.pol_has_been_set )
 	{
@@ -210,7 +217,7 @@ pulm_impedance( void )
 enum Impedance
 pulm_set_impedance( enum Impedance imp )
 {
-    pulm_check_has_mod( );
+    check_has_pulse_mod( );
 
     if ( rs->pulm.imp_has_been_set && imp == rs->pulm.imp )
         return rs->pulm.imp;
@@ -229,8 +236,8 @@ pulm_set_impedance( enum Impedance imp )
 
 	char cmd[ 23 ] = "PULM:TRIG:EXT:IMP ";
     strcat( cmd, imp == IMPEDANCE_G50 ? "G50" : "G10K" );
-
     rs_write( cmd );
+
     return rs->pulm.imp = imp;
 }
 
@@ -238,8 +245,9 @@ pulm_set_impedance( enum Impedance imp )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+static
 void
-pulm_check_has_mod( void )
+check_has_pulse_mod( void )
 {
     if ( ! rs->pulm.has_pulse_mod )
 	{

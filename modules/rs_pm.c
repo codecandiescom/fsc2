@@ -197,6 +197,7 @@ pm_set_state( bool state )
 	char cmd[ ] = "PM:STATE x";
     cmd[ 9 ] = state ? '1' : '0';
     rs_write( cmd );
+
     return rs->pm.state = state;
 }
     
@@ -226,7 +227,7 @@ pm_set_deviation( double dev )
     if ( rs->pm.mode_has_been_set && rs->freq.freq_has_been_set )
 		dev = pm_check_deviation( dev, freq_frequency( ), pm_mode( ) );
 
-    if ( rs->pm.dev == dev )
+    if ( rs->pm.dev_has_been_set && rs->pm.dev == dev )
         return rs->pm.dev;
 
 	rs->pm.dev_has_been_set = true;
@@ -236,8 +237,8 @@ pm_set_deviation( double dev )
 
     char cmd[ 100 ];
     sprintf( cmd, "PM %.1f", dev );
-
 	rs_write( cmd );
+
     return rs->pm.dev = dev;
 }
 
@@ -281,8 +282,8 @@ pm_set_coupling( enum Coupling coup )
 
     char cmd[ ] = "PM:EXT:COUP *C";
     cmd[ 12 ] = coup == COUPLING_AC ? 'A' : 'D';
-
     rs_write( cmd );
+
     return rs->pm.ext_coup = coup;
 }
 
@@ -338,8 +339,8 @@ pm_set_source( enum Source source )
         case SOURCE_INT_EXT :
 			fsc2_impossible( );					\
     }
-
     rs_write( cmd );
+
     return rs->pm.source = source;
 }
 
@@ -413,8 +414,8 @@ pm_set_mode( enum Mod_Mode mode )
             strcat( cmd, "HDEV" );
             break;
     }
-
     rs_write( cmd );
+
     return rs->pm.mode = mode;
 }
 

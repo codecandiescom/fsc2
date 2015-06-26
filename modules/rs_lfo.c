@@ -15,22 +15,31 @@ lfo_init( void )
 
 	if ( FSC2_MODE == PREPARATION )
 	{
-		rs->lfo.freq_has_been_set = false;
+		rs->lfo.freq_has_been_set  = false;
 		rs->lfo.volts_has_been_set = false;
-		rs->lfo.imp_has_been_set = false;
+		rs->lfo.imp_has_been_set   = false;
 		return;
 	}
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
 		if ( ! rs->lfo.freq_has_been_set )
-			rs->lfo.freq  = 10.0e3;
+		{
+			rs->lfo.freq = 10.0e3;
+			rs->lfo.freq_has_been_set = true;
+		}
 		
 		if ( ! rs->lfo.volts_has_been_set )
+		{
 			rs->lfo.volts = 1;
+			rs->lfo.volts_has_been_set = true;
+		}
 
 		if ( ! rs->lfo.imp_has_been_set )
-			rs->lfo.imp   = IMPEDANCE_LOW;
+		{
+			rs->lfo.imp = IMPEDANCE_LOW;
+			rs->lfo.imp_has_been_set = true;
+		}
 
 		return;
 	}
@@ -41,13 +50,13 @@ lfo_init( void )
 
 	if ( rs->lfo.freq_has_been_set )
 	{
-		double freq = rs->lfo.freq;
-		rs->lfo.freq = -1;
-		lfo_set_frequency( freq );
+		rs->lfo.freq_has_been_set = false;
+		lfo_set_frequency( rs->lfo.freq );
 	}
 	else
 	{
 		rs->lfo.freq  = query_double( "LFO:FREQ?" );
+		rs->lfo.freq_has_been_set = true;
 
 		if (    rs->lfo.freq < rs->lfo.min_freq
 			 || rs->lfo.freq > rs->lfo.max_freq )
@@ -56,13 +65,13 @@ lfo_init( void )
 
 	if ( rs->lfo.volts_has_been_set )
 	{
-		double volts = rs->lfo.volts;
-		rs->lfo.volts = -10000;
-		lfo_set_voltage( volts );
+		rs->lfo.volts_has_been_set = false;
+		lfo_set_voltage( rs->lfo.volts );
 	}
 	else
 	{
 		rs->lfo.volts = query_double( "LFO:VOLT?" );
+		rs->lfo.volts_has_been_set = true;
 
 		if ( rs->lfo.volts < 0 || rs->lfo.volts > rs->lfo.max_volts )
 			bad_data( );
@@ -70,13 +79,13 @@ lfo_init( void )
 
 	if ( rs->lfo.imp_has_been_set )
 	{
-		enum Impedance imp = rs->lfo.imp;
-		rs->lfo.imp = -1;
-		lfo_set_impedance( imp );
+		rs->lfo.imp_has_been_set = false;
+		lfo_set_impedance( rs->lfo.imp );
 	}
 	else
 	{
 		rs->lfo.imp = query_imp( "LFO:SIMP?" );
+		rs->lfo.imp_has_been_set = true;
 
 		if ( rs->lfo.imp != IMPEDANCE_LOW && rs->lfo.imp != IMPEDANCE_G600 )
 			bad_data( );
@@ -90,7 +99,7 @@ lfo_init( void )
 double
 lfo_frequency( void )
 {
-    if ( FSC2_MODE == PREPARATION && ! rs->lfo.freq_has_been_set )
+    if ( ! rs->lfo.freq_has_been_set )
     {
         print( FATAL, "Modulation frequency hasn't been set yet.\n" );
         THROW( EXCEPTION );
@@ -106,7 +115,9 @@ lfo_frequency( void )
 double
 lfo_set_frequency( double freq )
 {
-    if ( freq == rs->lfo.freq )
+    freq = rs->lfo.freq_resolution * lrnd( freq / rs->lfo.freq_resolution );
+
+    if ( rs->lfo.freq_has_been_set && freq == rs->lfo.freq )
         return rs->lfo.freq;
 
     if (    freq <  rs->lfo.min_freq - 0.5 * rs->lfo.freq_resolution
@@ -118,13 +129,10 @@ lfo_set_frequency( double freq )
 		THROW( EXCEPTION );
 	}
 
-    freq = rs->lfo.freq_resolution * lrnd( freq / rs->lfo.freq_resolution );
+	rs->lfo.freq_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->lfo.freq_has_been_set = true;
 		return rs->lfo.freq = freq;
-	}
 
     char cmd[ 100 ];
     sprintf( cmd, "LFO:FREQ %.1f", freq );
@@ -140,7 +148,7 @@ lfo_set_frequency( double freq )
 double
 lfo_voltage( void )
 {
-    if ( FSC2_MODE == PREPARATION && ! rs->lfo.volts_has_been_set )
+    if ( ! rs->lfo.volts_has_been_set )
     {
         print( FATAL, "Modulation output voltage hasn't been set yet.\n" );
         THROW( EXCEPTION );
@@ -156,7 +164,9 @@ lfo_voltage( void )
 double
 lfo_set_voltage( double volts )
 {
-    if ( volts == rs->lfo.volts )
+    volts = rs->lfo.volt_resolution * lrnd( volts / rs->lfo.volt_resolution );
+
+    if ( rs->lfo.volts_has_been_set && volts == rs->lfo.volts )
         return rs->lfo.volts;
 
     if (    volts < 0
@@ -168,13 +178,10 @@ lfo_set_voltage( double volts )
 		THROW( EXCEPTION );
 	}
 
-    volts = rs->lfo.volt_resolution * lrnd( volts / rs->lfo.volt_resolution );
+	rs->lfo.volts_has_been_set = true;
 
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->lfo.volts_has_been_set = true;
 		return rs->lfo.volts = volts;
-	}
 
 	char cmd[ 100 ];
     sprintf( cmd, "LFO:VOLT %.3f", volts );
@@ -190,7 +197,7 @@ lfo_set_voltage( double volts )
 enum Impedance
 lfo_impedance( void )
 {
-    if ( FSC2_MODE == PREPARATION && ! rs->lfo.imp_has_been_set )
+    if ( ! rs->lfo.imp_has_been_set )
     {
         print( FATAL, "Modulation output impedance hasn't been set yet.\n" );
         THROW( EXCEPTION );
@@ -206,7 +213,7 @@ lfo_impedance( void )
 enum Impedance
 lfo_set_impedance( enum Impedance imp )
 {
-    if ( imp == rs->lfo.imp )
+    if ( rs->lfo.imp_has_been_set && imp == rs->lfo.imp )
         return rs->lfo.imp;
 
     if ( imp != IMPEDANCE_LOW && imp != IMPEDANCE_G600 )
@@ -216,11 +223,10 @@ lfo_set_impedance( enum Impedance imp )
 		THROW( EXCEPTION );
 	}
 			   
+	rs->lfo.imp_has_been_set = true;
+
 	if ( FSC2_MODE != EXPERIMENT )
-	{
-		rs->lfo.imp_has_been_set = true;
 		return rs->lfo.imp = imp;
-	}
 
     char cmd[ 14 ] = "LFO:SIMP ";
     strcat( cmd, imp == IMPEDANCE_LOW ? "LOW" : "G600" );

@@ -7,9 +7,18 @@
 void
 list_init( void )
 {
-	rs->list.default_name = "fsc2";
-	rs->list.name = NULL;
 	rs->list.processing_list = false;
+
+	if ( FSC2_MODE == PREPARATION )
+	{
+		rs->list.default_name = "fsc2";
+		rs->list.name = NULL;
+	}
+	else if ( FSC2_MODE == TEST )
+	{
+		if ( rs->list.name )
+			rs->list.name = T_strdup( rs->list.name );
+	}
 }
 
 

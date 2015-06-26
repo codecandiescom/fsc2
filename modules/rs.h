@@ -114,7 +114,6 @@ typedef struct
 {
 	double freq;
 	bool   freq_has_been_set;
-
 	double freq_resolution;
 	double min_freq;
 	double max_freq;
@@ -177,7 +176,9 @@ typedef struct
 typedef struct
 {
 	enum Slope     slope;
+	bool           slope_has_been_set;
 	enum Impedance imp;
+	bool           imp_has_been_set;
 } Inp_T;
 
 typedef struct
@@ -253,6 +254,7 @@ int rs_smb100a_end_of_test_hook( void );
 int rs_smb100a_exp_hook( void );
 int rs_smb100a_end_of_exp_hook( void );
 
+
 // EDL functions
 
 Var_T * synthesizer_name( Var_T * v  UNUSED_ARG );
@@ -274,6 +276,8 @@ Var_T * synthesizer_mod_type( Var_T * v );
 Var_T * synthesizer_mod_state( Var_T * v );
 Var_T * synthesizer_mod_amp( Var_T * v );
 Var_T * synthesizer_mod_source( Var_T * v );
+Var_T * synthesizer_setup_list( Var_T * v );
+Var_T * synthesizer_select_list( Var_T * v );
 
 
 // Function of the OUTP sub-system
@@ -284,6 +288,7 @@ bool outp_set_state( bool state );
 enum Impedance outp_impedance( void );
 bool outp_protection_is_tripped( void );
 bool outp_reset_protection( void );
+
 
 // Function of the POW sub-system
 
@@ -311,6 +316,7 @@ double freq_max_frequency( void );
 double freq_check_frequency( double freq );
 bool freq_list_mode( bool on_off );
 
+
 // Function of the AM sub-system
 
 void am_init( void );
@@ -323,6 +329,7 @@ enum Coupling am_set_coupling( enum Coupling coup );
 enum Source am_source( void );
 enum Source am_set_source( enum Source source );
 double am_check_depth( double depth );
+
 
 // Function of the FM sub-system
 
@@ -343,6 +350,7 @@ double fm_check_deviation( double        dev,
 						   double        freq,
 						   enum Mod_Mode mode );
 
+
 // Function of the PM sub-system
 
 void pm_init( void );
@@ -362,6 +370,7 @@ double pm_check_deviation( double        dev,
 						   double        freq,
 						   enum Mod_Mode mode );
 
+
 // Function of the LFO sub-system
 
 void lfo_init( void );
@@ -371,6 +380,7 @@ double lfo_voltage( void );
 double lfo_set_voltage( double volts );
 enum Impedance lfo_impedance( void );
 enum Impedance lfo_set_impedance( enum Impedance imp );
+
 
 // Function of the INP sub-system
 
@@ -403,6 +413,7 @@ int list_index( void );
 void list_delete_list( char const * name );
 void list_check_list_name( char const * name );
 
+
 // Function of the PULM sub-system
 
 void pulm_init( void );
@@ -412,15 +423,13 @@ enum Polarity pulm_polarity( void );
 enum Polarity pulm_set_polarity( enum Polarity pol );
 enum Impedance pulm_impedance( void );
 enum Impedance pulm_set_impedance( enum Impedance imp );
-void pulm_check_has_mod( void );
 bool pulm_available( void );
+
 
 // Utility functions
 
 void rs_init( rs_smb100a_T * rs_cur );
 void rs_cleanup( void );
-void base_init( void );
-void base_cleanup( void );
 void rs_write( char const * data );
 void rs_talk( char const * cmd,
 			  char       * reply,

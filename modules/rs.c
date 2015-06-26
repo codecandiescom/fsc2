@@ -2,9 +2,9 @@
 
 
 rs_smb100a_T * rs;
-rs_smb100a_T   rs_prep,
-               rs_test,
-               rs_exp;
+static rs_smb100a_T rs_prep,
+                    rs_test,
+                    rs_exp;
 
 
 /*----------------------------------------------------*
@@ -27,8 +27,8 @@ int
 rs_smb100a_test_hook( void )
 {
 	rs_test = rs_prep;
-
 	rs_init( &rs_test );
+
 	return 1;
 }
 
@@ -51,19 +51,7 @@ int
 rs_smb100a_exp_hook( void )
 {
 	rs_exp = rs_prep;
-
 	rs_init( &rs_exp );
-
-	// Ascertain that not more than one modulation is on (or switch off all)
-
-	if ( am_state( ) + fm_state( ) + pm_state( ) + pulm_state( ) > 1 )
-	{
-		am_set_state( false );
-		fm_set_state( false );
-		pm_set_state( false );
-		if ( pulm_available( ) )
-			pulm_set_state( false );
-	}
 
 	return 1;
 }
@@ -524,6 +512,140 @@ synthesizer_mod_source( Var_T * v )
 	return vars_push( INT_VAR, ms );
 }
 
+
+/*----------------------------------------------------*
+ * The function to set up a list be called with different
+ * types of arguments. The first (and only required) argument
+ * is a 1D array of (at least 2) frequencies. This might be
+ * followed by
+ * 1) a string for the list name
+ * 2) a number for the attenuation
+ * 3) a number for the attenuation and a string for the list name
+ * 4) a second 1D array (with as many elements as the first) with
+ *    the attenuations
+ * 5) a second 1D array (with as many elements as the first) with
+ *    the attenuations and a string for the list name
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_setup_list( Var_T * v )
+{
+	if ( ! v )
+	{
+		print( FATAL, "A 1D array with frequencies is required.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v->type != INT_ARR && v->type != FLOAT_ARR ) || v->len < 2 )
+	{
+		print( FATAL, "First argument must be a 1-dimensional array of at"
+			   "lest 2 frequencies.\n" );
+		THROW( EXCEPTION );
+	}
+
+	double * freqs = NULL;
+	double * pows = NULL;
+
+	CLOBBER_PROTECT( freqs );
+	CLOBBER_PROTECT( pows );
+
+	TRY
+	{
+		ssize_t flen = v->len;
+
+		freqs = T_malloc( flen * sizeof *freqs );
+
+		if ( v->type == FLOAT_ARR )
+			memcpy( freqs, v->val.dpnt, flen * sizeof *freqs );
+		else
+			for ( ssize_t i = 0; i < flen; i++ )
+				freqs[ i ] = v->val.lpnt[ i ];
+
+		if ( ! ( v = vars_pop( v ) ) )
+			list_setup_C( freqs, flen, NULL );
+		else if ( v->type == STR_VAR )
+		{
+			list_setup_C( freqs, flen, v->val.sptr );
+			too_many_arguments( v );
+		}
+		else if ( v->type == INT_VAR || v->type == FLOAT_VAR )
+		{
+			double p = v->type == INT_VAR ? v->val.lval : v->val.dval;
+
+			if ( ! ( v = vars_pop( v ) ) )
+				list_setup_B( freqs, p, flen, NULL );
+			else if ( v->type == STR_VAR )
+			{
+				list_setup_B( freqs, p, flen, v->val.sptr );
+				too_many_arguments( v );
+			}
+			else
+			{
+				print( FATAL, "Third argument isn't a string.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+		else if ( v->type == INT_ARR || v->type == FLOAT_ARR )
+		{
+			if ( v->len != flen )
+			{
+				print( FATAL, "Arrays for frequencies and attenuations "
+					   "must have same length.\n" );
+				THROW( EXCEPTION );
+			}
+
+			pows = T_malloc( flen * sizeof  *pows );
+
+			if ( v->type == FLOAT_ARR )
+				memcpy( pows, v->val.dpnt, flen * sizeof *pows );
+			else
+				for ( ssize_t i = 0; i < flen; i++ )
+					pows[ i ] = v->val.lpnt[ i ];
+
+			if ( ! ( v = vars_pop( v ) ) )
+				list_setup_A( freqs, pows, flen, NULL );
+			else if ( v->type == STR_VAR )
+			{
+				list_setup_A( freqs, pows, flen, v->val.sptr );
+				too_many_arguments( v );
+			}
+			else
+			{
+				print( FATAL, "Third argument isn't a string.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+		else
+		{
+			print( FATAL, "Second argument is neither a string, a number "
+				   "nor a 1-dimensional array.\n" );
+			THROW( EXCEPTION );
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( pows );
+		T_free( freqs );
+
+		RETHROW;
+	}
+
+	T_free( pows );
+	T_free( freqs );
+
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_select_list( Var_T * v )
+{
+}
 
 /*
  * Local variables:
