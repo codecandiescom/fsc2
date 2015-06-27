@@ -381,10 +381,12 @@ keithley2600a_measure( unsigned int ch,
                                      + ( k26->measure[ ch ].delay > 0 ?
                                          k26->measure[ ch ].delay : 0 )
                                      + cnt * k26->measure[ ch ].time ) )
-                   + READ_TIMEOUT;
+                   + READ_TIMEOUT
+                   + k26->measure[ ch ].extra_delay;
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
+    k26->measure[ ch ].extra_delay = 0;
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.measure.%c())", smu[ ch ], method[ what ] );
@@ -422,10 +424,12 @@ keithley2600a_measure_iv( unsigned int ch )
                                      + ( k26->measure[ ch ].delay > 0 ?
                                          k26->measure[ ch ].delay : 0 )
                                      + cnt * k26->measure[ ch ].time ) )
-                   + READ_TIMEOUT;
+                   + READ_TIMEOUT
+                   + k26->measure[ ch ].extra_delay;
     
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
+    k26->measure[ ch ].extra_delay = 0;
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.measure.iv())", smu[ ch ] );
@@ -478,13 +482,13 @@ keithley2600a_set_measure_time( unsigned int ch,
     sprintf( buf, "%s.measure.nplc=%.6g", smu[ ch ], t * k26->linefreq );
     keithley2600a_cmd( buf );
 
-    /* Make sure there's some extra time for measurements to finish (on
-       top of the default read timeout) we're prepared to wait for the reply
-       from the device. */
+    /* Empirically it was found that after changing the measurement time
+       the next measurement takes an additional time of twice the new
+       measurement time just set. This needs to be added to the timeout
+       (but only on the first measurement after changing the measurement
+       time). */
 
-    long timeout = 1000000 * t + READ_TIMEOUT;
-    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
-        keithley2600a_comm_failure( );
+    k26->measure[ ch ].extra_delay = ceil( 2.0e6 * t );
 
     return keithley2600a_get_measure_time( ch );
 }
@@ -907,9 +911,12 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 #else
     timeout += ( ( 4 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
 #endif
-    
+
+    timeout += k26->measure[ ch ].extra_delay;
+
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
+    k26->measure[ ch ].extra_delay = 0;
 
     /* Create the LUA command to run the linear sweep, uing functions
        previously sent to the device */
@@ -1031,9 +1038,12 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 #else
     timeout += ( ( 4 * num_data_points ) / 1024 + 1 ) * READ_TIMEOUT;
 #endif
-    
+
+    timeout += k26->measure[ ch ].extra_delay;
+
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
+    k26->measure[ ch ].extra_delay = 0;
 
     char * cmd = get_string( "fsc2_list.sweep_and_measure(%s, '%s', '%s', "
                              "%.6g)", smu[ ch ], method[ sweep_what ],

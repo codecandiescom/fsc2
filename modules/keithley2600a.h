@@ -217,6 +217,9 @@ typedef struct
     Rel_T  reli;
 
     Filter_T filter;
+
+    long extra_delay;            /* Number of  us to aditionally wait (once)
+                                    after changing measure time */
 } Measure_T;
     
 

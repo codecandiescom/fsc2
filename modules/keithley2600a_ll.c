@@ -375,7 +375,7 @@ keithley2600a_get_line_frequency( void )
     char buf[ 50 ] = "printnumber(localnode.linefreq)";
 
     /* Determining the line frequency can take a lot of time, so raise
-       the read timeout considerably */
+       the read timeout considerably (to 5 s to be on the safe side) */
 
     if ( vxi11_set_timeout( VXI11_READ, 5000000 ) != SUCCESS )
         keithley2600a_comm_failure( );
