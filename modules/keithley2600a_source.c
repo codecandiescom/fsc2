@@ -514,9 +514,16 @@ keithley2600a_get_source_levelv( unsigned int ch )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
+    long timeout = READ_TIMEOUT + 1.0e5 * k26->source[ ch ].delay;
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+        keithley2600a_comm_failure( );
+
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.levelv)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
+
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        keithley2600a_comm_failure( );
 
     double volts = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_levelv( ch, volts ) )
@@ -559,9 +566,16 @@ keithley2600a_get_source_leveli( unsigned int ch )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
+    long timeout = READ_TIMEOUT + 1.0e5 * k26->source[ ch ].delay;
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+        keithley2600a_comm_failure( );
+
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.leveli)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
+
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        keithley2600a_comm_failure( );
 
     double amps = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_leveli( ch, amps ) )
