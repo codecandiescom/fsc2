@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -11,7 +31,7 @@ list_init( void )
 
 	if ( FSC2_MODE == PREPARATION )
 	{
-		rs->list.default_name = "fsc2";
+		rs->list.default_name = "fsc2_def_list";
 		rs->list.name = NULL;
 	}
 	else if ( FSC2_MODE == TEST )
@@ -40,7 +60,7 @@ list_select( char const * name )
 {
 	list_check_list_name( name );
 
-	char *n = T_strdup( ( name && *name ) ? name : rs->list.default_name );
+	char * n = T_strdup( ( name && *name ) ? name : rs->list.default_name );
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
@@ -368,7 +388,10 @@ void
 list_check_list_name( char const * name )
 {
     if ( ! name || ! *name )
-        return;
+	{
+		print( FATAL, "Invalid empty list name.\n" );
+		THROW( EXCEPTION );
+	}
 
 	for ( size_t i = 0; i < strlen( name ); i++ )
 		if ( ! isalnum( ( int ) name[ i ] ) && name[ i ] != '_' )

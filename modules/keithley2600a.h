@@ -270,7 +270,7 @@ Var_T * sourcemeter_compliance_voltage( Var_T * v );
 Var_T * sourcemeter_compliance_current( Var_T * v );
 Var_T * sourcemeter_test_compliance( Var_T * v );
 Var_T * sourcemeter_source_delay( Var_T * v );
-Var_T * sourcemeter_max_off_source_current( Var_T * v );
+Var_T * sourcemeter_source_max_off_current( Var_T * v );
 Var_T * sourcemeter_source_high_capacity( Var_T * v );
 Var_T * sourcemeter_source_sink_mode( Var_T * v );
 Var_T * sourcemeter_source_settling_mode( Var_T * v );

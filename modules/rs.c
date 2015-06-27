@@ -1,3 +1,43 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -123,6 +163,22 @@ synthesizer_attenuation( Var_T * v )
 	too_many_arguments( v );
 
 	return vars_push( FLOAT_VAR, pow_set_power( pow ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_minimum_attenuation( Var_T * v )
+{
+	if ( ! v )
+		vars_push( FLOAT_VAR, pow_min_att( ) );
+
+	double min_att = get_double( v, NULL );
+	too_many_arguments( v );
+
+	return vars_push( FLOAT_VAR, pow_set_min_att( min_att ) );
 }
 
 
@@ -645,7 +701,57 @@ synthesizer_setup_list( Var_T * v )
 Var_T *
 synthesizer_select_list( Var_T * v )
 {
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Expect list name as argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	list_select( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
 }
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_start_list( Var_T * v  UNUSED_ARG )
+{
+	if ( rs->list.processing_list )
+	{
+		print( WARN, "List processing already started.\n" );
+		return vars_push( INT_VAR, 0L );
+	}
+
+	list_start( );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_stop_list( Var_T * v )
+{
+	if ( ! rs->list.processing_list )
+	{
+		print( WARN, "No list is currently being processed.\n" );
+		return vars_push( INT_VAR, 0L );
+	}
+
+	bool keep_rf_on = false;
+	if ( v )
+	{
+		keep_rf_on = get_boolean( v );
+		too_many_arguments( v );
+	}
+
+	list_stop( keep_rf_on );
+	return vars_push( INT_VAR, 1L );
+}
+
 
 /*
  * Local variables:

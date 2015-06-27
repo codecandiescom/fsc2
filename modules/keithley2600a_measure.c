@@ -454,13 +454,8 @@ keithley2600a_get_measure_time( unsigned int ch )
     sprintf( buf, "printnumber(%s.measure.nplc)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
-    double t = keithley2600a_line_to_double( buf ) / k26->linefreq;
-    if ( ! keithley2600a_check_measure_time( t ) )
-        keithley2600a_bad_data( );
-
     return k26->measure[ ch ].time = t;
 }
-
 
 
 /*---------------------------------------------------------------*
@@ -478,6 +473,14 @@ keithley2600a_set_measure_time( unsigned int ch,
     char buf[ 50 ];
     sprintf( buf, "%s.measure.nplc=%.6g", smu[ ch ], t * k26->linefreq );
     keithley2600a_cmd( buf );
+
+    /* Make sure there's some extra time for measurements to finish (on
+       top of the default read timeout) we're prepared to wait for the reply
+       from the device. */
+
+    long timeout = 1000000 * t + READ_TIMEOUT;
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+        keithley2600a_comm_failure( );
 
     return keithley2600a_get_measure_time( ch );
 }

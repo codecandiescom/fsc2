@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -77,22 +97,13 @@ pulm_exp_init( void )
 
     rs->pulm.state = query_bool( "PULM:STAT?" );
 
-    if ( rs->pulm.pol_has_been_set )
-    {
-        rs->pulm.pol_has_been_set = false;
+    if ( ! ( rs->pulm.pol_has_been_set ^= 1 ) )
         pulm_set_polarity( rs->pulm.pol );
-    }
     else
-    {
         rs->pulm.pol = query_pol( "PULM:POL?" );
-        rs->pulm.pol_has_been_set = true;
-    }
 
-    if ( rs->pulm.imp_has_been_set )
-    {
-        rs->pulm.imp_has_been_set = false;
+    if ( ! ( rs->pulm.imp_has_been_set ^= 1 ) )
         pulm_set_impedance( rs->pulm.imp );
-    }
     else
     {
         rs->pulm.imp  = query_imp( "PULM:TRIG:EXT:IMP?" );
@@ -100,8 +111,6 @@ pulm_exp_init( void )
         if (    rs->pulm.imp != IMPEDANCE_G50
              && rs->pulm.imp != IMPEDANCE_G10K )
             bad_data( );
-
-        rs->pulm.imp_has_been_set -= true;
     }
 }
 

@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -78,41 +98,20 @@ am_exp_init( void )
 
 	rs->am.state = query_bool( "AM:STAT?" );
 
-	if ( rs->am.depth_has_been_set )
-	{
-		rs->am.depth_has_been_set = false;
+	if ( ! ( rs->am.depth_has_been_set ^= 1 ) )
 		am_set_depth( rs->am.depth );
-	}
 	else
-	{
 		rs->am.depth = query_double( "AM?" );
-		rs->am.depth_has_been_set = true;
-	}
 
-	if ( rs->am.ext_coup_has_been_set )
-	{
-		rs->am.ext_coup_has_been_set = false;
+	if ( ! ( rs->am.ext_coup_has_been_set ^= 1 ) )
 		am_set_coupling( rs->am.ext_coup );
-	}
-	else
-	{
+    else
 		rs->am.ext_coup = query_coupling( "AM:EXT:COUP?" );
-		rs->am.ext_coup_has_been_set = true;
-	}
 
-	if ( rs->am.source_has_been_set )
-	{
-		rs->am.source_has_been_set = false;
+	if ( ! ( rs->am.source_has_been_set ^= 1 ) )
 		am_set_source( rs->am.source );
-	}
-	else
-	{
-		rs->am.source   = query_source( "AM:SOUR?" );
-		if ( rs->am.source == SOURCE_INT_EXT )
-			am_set_source( SOURCE_INT );
-		else
-			rs->am.source_has_been_set = true;
-	}
+	else if ( ( rs->am.source = query_source( "AM:SOUR?" ) ) == SOURCE_INT_EXT )
+        am_set_source( SOURCE_INT );
 }
 
 

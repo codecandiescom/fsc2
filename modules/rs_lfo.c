@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -48,44 +68,32 @@ lfo_init( void )
     rs_write( "LFO:SHAP SINE" );
     rs_write( "LFO:STATE ON" );
 
-	if ( rs->lfo.freq_has_been_set )
-	{
-		rs->lfo.freq_has_been_set = false;
+	if ( ! ( rs->lfo.freq_has_been_set ^= 1 ) )
 		lfo_set_frequency( rs->lfo.freq );
-	}
 	else
 	{
-		rs->lfo.freq  = query_double( "LFO:FREQ?" );
-		rs->lfo.freq_has_been_set = true;
+		rs->lfo.freq = query_double( "LFO:FREQ?" );
 
 		if (    rs->lfo.freq < rs->lfo.min_freq
 			 || rs->lfo.freq > rs->lfo.max_freq )
 			bad_data( );
 	}
 
-	if ( rs->lfo.volts_has_been_set )
-	{
-		rs->lfo.volts_has_been_set = false;
+	if ( ! ( rs->lfo.volts_has_been_set ^= 1 ) )
 		lfo_set_voltage( rs->lfo.volts );
-	}
 	else
-	{
+    {
 		rs->lfo.volts = query_double( "LFO:VOLT?" );
-		rs->lfo.volts_has_been_set = true;
 
 		if ( rs->lfo.volts < 0 || rs->lfo.volts > rs->lfo.max_volts )
 			bad_data( );
 	}
 
-	if ( rs->lfo.imp_has_been_set )
-	{
-		rs->lfo.imp_has_been_set = false;
+    if ( ! ( rs->lfo.imp_has_been_set ^= 1 ) )
 		lfo_set_impedance( rs->lfo.imp );
-	}
 	else
 	{
 		rs->lfo.imp = query_imp( "LFO:SIMP?" );
-		rs->lfo.imp_has_been_set = true;
 
 		if ( rs->lfo.imp != IMPEDANCE_LOW && rs->lfo.imp != IMPEDANCE_G600 )
 			bad_data( );

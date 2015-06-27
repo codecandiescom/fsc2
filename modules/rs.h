@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #if ! defined rs_smb100a_h_
 #define rs_smb100a_h_
 
@@ -108,6 +128,7 @@ typedef struct
 	bool            mode_has_been_set;
     enum Off_Mode   off_mode;
 	bool            off_mode_has_been_set;
+	double          min_att;
 } Pow_T;
 
 typedef struct
@@ -225,6 +246,26 @@ typedef struct
 	Mod_Funcs     * funcs;
 } Mod_T;
 
+typedef struct {
+    double freq;
+    double att;
+} Table_Entry_T;
+
+typedef struct
+{
+    char          * file;               /* name of attenuation table file */
+    bool            use_table;
+    Table_Entry_T * att_table;
+    long            len;
+    double          min_freq;
+    double          max_freq;
+    double          ref_freq;
+    double          att_at_ref_freq;
+    double          real_attenuation;    /* might differ from attenuation due to
+                                            use of table */
+} Table_T;
+
+
 typedef struct
 {
 	bool is_connected;
@@ -261,6 +302,7 @@ Var_T * synthesizer_name( Var_T * v  UNUSED_ARG );
 Var_T * synthesizer_state( Var_T * v );
 Var_T * synthesizer_frequency( Var_T * v );
 Var_T * synthesizer_attenuation( Var_T * v );
+Var_T * synthesizer_minimum_attenuation( Var_T * v );
 Var_T * synthesizer_min_attenuation( Var_T * v );
 Var_T * synthesizer_max_attenuation( Var_T * v );
 Var_T * synthesizer_automatic_level_control( Var_T * v );
@@ -278,6 +320,8 @@ Var_T * synthesizer_mod_amp( Var_T * v );
 Var_T * synthesizer_mod_source( Var_T * v );
 Var_T * synthesizer_setup_list( Var_T * v );
 Var_T * synthesizer_select_list( Var_T * v );
+Var_T * synthesizer_start_list( Var_T * v );
+Var_T * synthesizer_stop_list( Var_T * v );
 
 
 // Function of the OUTP sub-system
@@ -303,6 +347,8 @@ enum Power_Mode pow_mode( void );
 enum Power_Mode pow_set_mode( enum Power_Mode mode );
 enum Off_Mode pow_off_mode( void );
 enum Off_Mode pow_set_off_mode( enum Off_Mode mode );
+double pow_min_att( void );
+double pow_set_min_att( double min_att );
 double pow_check_power( double pow,
 						double freq );
 

@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -103,48 +123,27 @@ pm_exp_init( void )
 {
 	rs->pm.state    = query_bool( "PM:STAT?" );
 
-	if ( rs->pm.ext_coup_has_been_set )
-	{
-		rs->pm.ext_coup_has_been_set = false;
+	if ( ! ( rs->pm.ext_coup_has_been_set ^= 1 ) )
 		pm_set_coupling( rs->pm.ext_coup );
-	}
 	else
-	{
 		rs->pm.ext_coup = query_coupling( "PM:EXT:COUP?" );
-		rs->pm.ext_coup_has_been_set = true;
-	}
 
-	if ( rs->pm.source_has_been_set )
-	{
-		rs->pm.source_has_been_set = false;
+	if ( ! ( rs->pm.source_has_been_set ^= 1 ) )
 		pm_set_source( rs->pm.source );
-	}
-	else
-	{
-		rs->pm.source   = query_source( "PM:SOUR?" );
-		if ( rs->pm.source == SOURCE_INT_EXT )
-			pm_set_source( SOURCE_INT );
-		else
-			rs->pm.source_has_been_set = true;
-	}
+	else if ( ( rs->pm.source = query_source( "PM:SOUR?" ) ) == SOURCE_INT_EXT )
+        pm_set_source( SOURCE_INT );
 
-	if ( rs->pm.mode_has_been_set )
-	{
-		rs->pm.mode_has_been_set = false;
+	if ( ! ( rs->pm.mode_has_been_set ^= 1 ) )
 		pm_set_mode( rs->pm.mode );
-	}
 	else
-	{
 		rs->pm.mode = query_mod_mode( "PM:MODE?" );
-		rs->pm.mode_has_been_set = true;
-	}
 
     /* If modulation deviation is larger than possible reduce it to the
        maximum value */
 
     double max_dev = pm_max_deviation( freq_frequency( ), pm_mode( ) );
 
-	if ( rs->pm.dev_has_been_set )
+	if ( ! ( rs->pm.dev_has_been_set ^= 1 ) )
 	{
 		if ( rs->pm.dev > max_dev )
 		{
@@ -153,20 +152,14 @@ pm_exp_init( void )
 			rs->pm.dev = max_dev;
 		}
 
-		rs->pm.dev_has_been_set = false;
 		pm_set_deviation( rs->pm.dev );
 	}
-	else
-	{
-		if ( ( rs->pm.dev = query_double( "PM?" ) ) > max_dev )
-		{
-			print( WARN, "Adjusting PM deviation from %.1f Hz to %.1f Hz.\n",
-				   rs->pm.dev, max_dev );
-			pm_set_deviation( max_dev );
-		}
-		else
-			rs->pm.dev_has_been_set = true;
-	}
+	else if ( ( rs->pm.dev = query_double( "PM?" ) ) > max_dev )
+    {
+        print( WARN, "Adjusting PM deviation from %.1f Hz to %.1f Hz.\n",
+               rs->pm.dev, max_dev );
+        pm_set_deviation( max_dev );
+    }
 }
 
 

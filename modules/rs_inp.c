@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -14,6 +34,7 @@ inp_init( void )
 
 		return;
 	}
+
 	if ( FSC2_MODE == TEST )
 	{
 		if ( rs->inp.slope_has_been_set )
@@ -31,26 +52,16 @@ inp_init( void )
 		return;
 	}
 
-	if ( rs->inp.slope_has_been_set )
-	{
-		rs->inp.slope_has_been_set = false;
+	if ( ! ( rs->inp.slope_has_been_set ^= 1 ) )
 		inp_set_slope( rs->inp.slope );
-	}
 	else
-	{
 		rs->inp.slope = query_slope( "INP:TRIG:SLOPE?" );
-		rs->inp.slope_has_been_set = true;
-	}
 
-	if ( rs->inp.imp_has_been_set )
-	{
-		rs->inp.imp_has_been_set = false;
+	if ( ! ( rs->inp.imp_has_been_set ^= 1 ) )
 		inp_set_impedance( rs->inp.imp );
-	}
 	else
 	{
-		rs->inp.imp   = query_imp( "INP:MOD:IMP?" );
-		rs->inp.imp_has_been_set = true;
+		rs->inp.imp = query_imp( "INP:MOD:IMP?" );
 
 		if (    rs->inp.imp != IMPEDANCE_G600
 			 && rs->inp.imp != IMPEDANCE_HIGH )

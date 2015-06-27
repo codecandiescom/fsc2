@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -103,48 +123,27 @@ fm_exp_init( void )
 {
 	rs->fm.state = query_bool( "FM:STAT?" );
 
-	if ( rs->fm.ext_coup_has_been_set )
-	{
-		rs->fm.ext_coup_has_been_set = false;
+	if ( ! ( rs->fm.ext_coup_has_been_set ^= 1 ) )
 		fm_set_coupling( rs->fm.ext_coup );
-	}
 	else
-	{
 		rs->fm.ext_coup = query_coupling( "FM:EXT:COUP?" );
-		rs->fm.ext_coup_has_been_set = true;
-	}
 
-	if ( rs->fm.source_has_been_set )
-	{
-		rs->fm.source_has_been_set = false;
+	if ( ! ( rs->fm.source_has_been_set ^= 1 ) )
 		fm_set_source( rs->fm.source );
-	}
-	else
-	{
-		rs->fm.source   = query_source( "FM:SOUR?" );
-		if ( rs->fm.source == SOURCE_INT_EXT )
-			fm_set_source( SOURCE_INT );
-		else
-			rs->fm.source_has_been_set = true;
-	}
+	else if ( ( rs->fm.source = query_source( "FM:SOUR?" ) ) == SOURCE_INT_EXT )
+        fm_set_source( SOURCE_INT );
 
-	if ( rs->fm.mode_has_been_set )
-	{
-		rs->fm.mode_has_been_set = false;
+	if ( ! ( rs->fm.mode_has_been_set != 1 ) )
 		fm_set_mode( rs->fm.mode );
-	}
 	else
-	{
 		rs->fm.mode = query_mod_mode( "FM:MODE?" );
-		rs->fm.mode_has_been_set = true;
-	}
 
     /* If modulation deviation is larger than possible reduce it to the
        maximum value */
 
     double max_dev = fm_max_deviation( freq_frequency( ), fm_mode( ) );
 
-	if ( rs->fm.dev_has_been_set )
+	if ( ! ( rs->fm.dev_has_been_set ^= 1 ) )
 	{
 		if ( rs->fm.dev > max_dev )
 		{
@@ -153,20 +152,14 @@ fm_exp_init( void )
 			rs->fm.dev = max_dev;
 		}
 
-		rs->fm.dev_has_been_set = false;
 		fm_set_deviation( rs->fm.dev );
 	}
-	else
-	{
-		if ( ( rs->fm.dev = query_double( "FM?" ) ) > max_dev )
-		{
-			print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
-				   rs->fm.dev, max_dev );
-			fm_set_deviation( max_dev );
-		}
-		else
-			rs->fm.dev_has_been_set = true;
-	}
+	else if ( ( rs->fm.dev = query_double( "FM?" ) ) > max_dev )
+    {
+        print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
+               rs->fm.dev, max_dev );
+        fm_set_deviation( max_dev );
+    }
 }
 
 

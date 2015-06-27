@@ -1128,7 +1128,7 @@ sourcemeter_source_settling_mode( Var_T * v )
  *--------------------------------------------------------------*/
 
 Var_T *
-sourcemeter_max_off_source_current( Var_T * v )
+sourcemeter_source_max_off_current( Var_T * v )
 {
     unsigned int ch = get_channel( &v );
 

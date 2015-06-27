@@ -1,4 +1,25 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
+#include <float.h>
 
 
 typedef struct
@@ -38,6 +59,7 @@ pow_init( void )
        they differ between models */
 
     rs->pow.pow_resolution = 0.01;
+    rs->pow.min_att        = DBL_MAX;
 
     if ( FSC2_MODE == PREPARATION )
     {
@@ -82,49 +104,25 @@ pow_init( void )
 
     rs_write( "POW:OFFS 0" );
 
-    if ( rs->pow.pow_has_been_set )
-    {
-        rs->pow.pow_has_been_set = false;
+    if ( ! ( rs->pow.pow_has_been_set ^= 1 ) )
         pow_set_power( rs->pow.pow );
-    }
     else
-    {
-        rs->pow.pow = query_double( "POW?" );
-        rs->pow.pow_has_been_set = true;
-    }
+       rs->pow.pow = query_double( "POW?" );
 
-    if ( rs->pow.alc_state_has_been_set )
-    {
-        rs->pow.alc_state_has_been_set = false;
+    if ( ! ( rs->pow.alc_state_has_been_set ^= 1 ) )
         pow_set_alc_state( rs->pow.alc_state );
-    }
     else
-    {
         rs->pow.alc_state = query_alc_state( "POW:ALC?" );
-        rs->pow.alc_state_has_been_set = true;
-    }
-
-    if ( rs->pow.mode_has_been_set )
-    {
-        rs->pow.mode_has_been_set = false;
+ 
+    if ( ! ( rs->pow.mode_has_been_set ^= 1 ) )
         pow_set_mode( rs->pow.mode );
-    }
     else
-    {
         rs->pow.mode = query_pow_mode( "POW:LMODE?" );
-                rs->pow.mode_has_been_set = true;
-    }
 
-    if ( rs->pow.off_mode_has_been_set )
-    {
-        rs->pow.off_mode_has_been_set = false;
+    if ( ! ( rs->pow.off_mode_has_been_set ^= 1 ) )
         pow_set_off_mode( rs->pow.off_mode );
-    }
     else
-    {
         rs->pow.off_mode = query_off_mode( "POW:ATT:RFOF:MODE?" );
-        rs->pow.off_mode_has_been_set = true;
-    }
 }
 
 
@@ -362,6 +360,33 @@ pow_set_off_mode( enum Off_Mode mode )
 
 
 /*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+pow_min_att( void )
+{
+    return d_min( pow_max_power( freq_frequency( ) ), rs->pow.min_att );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+pow_set_min_att( double min_att )
+{
+    if ( min_att < pow_min_power( ) )
+    {
+        print( FATAL, "Invalid minimum attenuation of %f dBm, can't be "
+               "set lower than %f dBm.\n", min_att, pow_min_power( ) );
+        THROW( EXCEPTION );
+    }
+
+    return rs->pow.min_att = min_att;
+}
+
+
+/*----------------------------------------------------*
  * Checks if the given power can be set for a certain
  * frequency (for negative frequencies the currently
  * set frequency is used) and returns it rounded to
@@ -372,7 +397,7 @@ double
 pow_check_power( double pow,
                  double freq )
 {
-    double pmax = pow_max_power( freq );
+    double pmax = d_min( pow_max_power( freq ), rs->pow.min_att );
     double pmin = pow_min_power( );
 
     if (    pow >= pmax + 0.5 * rs->pow.pow_resolution

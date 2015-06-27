@@ -2314,7 +2314,7 @@ exceeds those 10200 bytes.
 @item @ref{sourcemeter_compliance_current()}
 @item @ref{sourcemeter_test_compliance()}
 @item @ref{sourcemeter_source_delay()}
-@item @ref{sourcemeter_max_off_source_current()}
+@item @ref{sourcemeter_source_max_off_current()}
 @item @ref{sourcemeter_source_high_capacity()}
 @item @ref{sourcemeter_source_sink_mode()}
 @item @ref{sourcemeter_source_settling_mode()}

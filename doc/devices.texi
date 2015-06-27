@@ -8964,7 +8964,7 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @item @ref{sourcemeter_compliance_current()}
 @item @ref{sourcemeter_test_compliance()}
 @item @ref{sourcemeter_source_delay()}
-@item @ref{sourcemeter_max_off_source_current()}
+@item @ref{sourcemeter_source_max_off_current()}
 @item @ref{sourcemeter_source_high_capacity()}
 @item @ref{sourcemeter_source_sink_mode()}
 @item @ref{sourcemeter_source_settling_mode()}
@@ -9301,9 +9301,9 @@ greater than @code{0} will be used as the additional settling time (in
 seconds).
 
 
-@anchor{sourcemeter_max_off_source_current()}
-@findex sourcemeter_max_off_source_current()
-@item   sourcemeter_max_off_source_current()
+@anchor{sourcemeter_source_max_off_current()}
+@findex sourcemeter_source_max_off_current()
+@item   sourcemeter_source_max_off_current()
 When a channel is switched off and it's in "normal" off-state it will
 output @w{0 V} but may still source (or sink) small currents. This
 current's size can be controlled via this function.
@@ -9660,7 +9660,7 @@ of the device.
 @anchor{sourcemeter_measure_filter_type()}
 @findex sourcemeter_measure_filter_type()
 @item   sourcemeter_measure_filter_type()
-he device allows to set a digital measurement filter. There are three
+The device allows to set a digital measurement filter. There are three
 types of filters
 
 @table @code

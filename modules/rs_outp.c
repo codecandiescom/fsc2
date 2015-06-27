@@ -1,3 +1,23 @@
+/* -*-C-*-
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "rs.h"
 
 
@@ -34,19 +54,12 @@ outp_init( void )
 
     rs_write( "OUTP:ALC:SEAR:MODE MIN" );
 
-    if ( rs->outp.state_has_been_set )
-    {
-        rs->outp.state_has_been_set = false;
+    if ( ! ( rs->outp.state_has_been_set ^= 1 ) )
         outp_set_state( rs->outp.state );
-    }
     else
-    {
         rs->outp.state = query_bool( "OUTP:STATE?" );
-        rs->outp.state_has_been_set = true;
-    }
 
     rs->outp.imp   = query_imp( "OUTP:IMP?" );
-
     if (    rs->outp.imp != IMPEDANCE_G50
          && rs->outp.imp != IMPEDANCE_G1K
          && rs->outp.imp != IMPEDANCE_G10K )  
