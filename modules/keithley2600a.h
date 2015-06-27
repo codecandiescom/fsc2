@@ -55,6 +55,14 @@
 #error "No supported model defined in configuration file."
 #endif
 
+
+/* Some undocumented limits that were found via trial-and-error using
+   50 Hz line frequency (and thus might not be 100% correct!) */
+
+#define MAX_SOURCE_DELAY   0.496       // just a bit below half a second
+
+
+
 /* Sense modes */
 
 #define SENSE_LOCAL     0      /* 2-wire      */

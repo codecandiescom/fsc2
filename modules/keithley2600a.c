@@ -998,6 +998,16 @@ sourcemeter_source_delay( Var_T * v )
     if ( delay == k26->source[ ch ].delay )
         vars_push( FLOAT_VAR, k26->source[ ch ].delay );
 
+    /* There seems to be an (undocumented) limit on the maximum source delay
+       that, when exceeded, results in the device becoming unresponsive */
+
+    if ( delay > MAX_SOURCE_DELAY )
+    {
+        print( FATAL, "Source delay of %.3f s too long, must be less than "
+               "%.3f s.\n", delay, MAX_SOURCE_DELAY );
+        THROW( EXCEPTION );
+    }
+
     if ( FSC2_MODE == EXPERIMENT )
         keithley2600a_set_source_delay( ch, delay );
     else
@@ -1610,7 +1620,7 @@ sourcemeter_measure_time( Var_T * v )
         char *s3 = pps( keithley2600a_max_measure_time( ) );
 
         print( FATAL, "Requested measure time of %s %snot possible, must "
-               "be between %s and %s.\n", ppc( ch, "for" ), s1, s2, s3 );
+               "be between %s and %s.\n", s1, ppc( ch, "for" ), s2, s3 );
         T_free( s3 );
         T_free( s2 );
         T_free( s1 );

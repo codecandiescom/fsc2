@@ -9293,7 +9293,8 @@ If called with no arguments (except the channel number) the function
 returns either @code{0} if no additional settling time is used (this
 is the default), @code{-1} when a rang dependent settling time is
 added automatically by the device, or the value of a user-set
-additional settling time (in seconds). If called with another argument
+additional settling time (in seconds, the undicumented upper
+limit seems to be @w{0.496 s}). If called with another argument
 the additional settling time can be set. If the argument is @code{0}
 no additional settling time will be used. If it is negative the device
 will automatically add a range dependent settling time. Any argument

@@ -19,6 +19,7 @@
 
 
 #include "keithley2600a.h"
+#include "vxi11_user.h"
 
 
 static const char *smu[ ] = { "smua", "smub" };

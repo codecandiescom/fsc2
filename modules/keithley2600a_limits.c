@@ -367,7 +367,7 @@ keithley2600a_max_source_levelv( unsigned int ch )
 	/* And if autranging is off we also could be further limited by the
 	   currently set range. */
 
-	if ( k26->source[ ch ].autorangev )
+	if ( ! k26->source[ ch ].autorangev )
 		max_volts = d_min( max_volts, 1.01 * k26->source[ ch ].rangev );
 
     return max_volts;
@@ -398,7 +398,7 @@ keithley2600a_max_source_leveli( unsigned int ch )
 	/* And if autranging is off we also could be further limited by the
 	   currently set range. */
 
-	if ( k26->source[ ch ].autorangei )
+	if ( ! k26->source[ ch ].autorangei )
 		max_amps = d_min( max_amps, 1.01 * k26->source[ ch ].rangei );
 
     return max_amps;

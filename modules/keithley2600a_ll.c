@@ -222,14 +222,14 @@ keithley2600a_get_state( void )
         keithley2600a_get_source_offmode( ch );
         keithley2600a_get_source_func( ch );
 
+        keithley2600a_get_source_autorangev( ch );
+        keithley2600a_get_source_autorangei( ch );
+
         keithley2600a_get_source_levelv( ch );
         keithley2600a_get_source_leveli( ch );
 
         keithley2600a_get_source_rangev( ch );
         keithley2600a_get_source_rangei( ch );
-
-        keithley2600a_get_source_autorangev( ch );
-        keithley2600a_get_source_autorangei( ch );
 
         keithley2600a_get_source_lowrangev( ch );
         keithley2600a_get_source_lowrangei( ch );
