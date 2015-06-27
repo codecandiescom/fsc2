@@ -515,7 +515,7 @@ keithley2600a_get_source_levelv( unsigned int ch )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
-    long timeout = READ_TIMEOUT + 1.0e5 * k26->source[ ch ].delay;
+    long timeout = READ_TIMEOUT + 1.0e6 * k26->source[ ch ].delay;
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
 
@@ -567,7 +567,7 @@ keithley2600a_get_source_leveli( unsigned int ch )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
-    long timeout = READ_TIMEOUT + 1.0e5 * k26->source[ ch ].delay;
+    long timeout = READ_TIMEOUT + 1.0e6 * k26->source[ ch ].delay;
     if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
         keithley2600a_comm_failure( );
 
