@@ -454,6 +454,10 @@ keithley2600a_get_measure_time( unsigned int ch )
     sprintf( buf, "printnumber(%s.measure.nplc)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
+    double t = keithley2600a_line_to_double( buf ) / k26->linefreq;
+    if ( ! keithley2600a_check_measure_time( t ) )
+        keithley2600a_bad_data( );
+
     return k26->measure[ ch ].time = t;
 }
 
