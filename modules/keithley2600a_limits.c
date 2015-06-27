@@ -353,11 +353,11 @@ keithley2600a_max_source_levelv( unsigned int ch )
 {
 	double max_volts = MAX_SOURCE_LEVELV;
 
-	/* If output is off or we're in current sourcing mode any level up to
+	/* If output is off or we're in voltage sourcing mode any level up to
 	   the highest possible voltage can be set */
 
 	if (    ! k26->source[ ch ].output
-		 || k26->source[ ch ].func == OUTPUT_DCAMPS )
+		 || k26->source[ ch ].func == OUTPUT_DCVOLTS )
 		return max_volts;
 
 	/* Otherwise we're limitated due to a current compliance value */
@@ -384,11 +384,11 @@ keithley2600a_max_source_leveli( unsigned int ch )
 {
 	double max_amps = MAX_SOURCE_LEVELI;
 
-	/* If output is off or we're in voltage sourcing mode any level up to
+	/* If output is off or we're in current sourcing mode any level up to
 	   the highest possible current can be set */
 
 	if (    ! k26->source[ ch ].output
-		 || k26->source[ ch ].func == OUTPUT_DCVOLTS )
+		 || k26->source[ ch ].func == OUTPUT_DCAMPS )
 		return max_amps;
 
 	/* Otherwise we are limitated due to a voltage compliance value */
