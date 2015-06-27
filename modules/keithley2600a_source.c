@@ -35,7 +35,7 @@ keithley2600a_get_source_offmode( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.offmode)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
     int source_offmode = keithley2600a_line_to_int( buf );
     if (    source_offmode != OUTPUT_NORMAL
@@ -53,7 +53,7 @@ keithley2600a_get_source_offmode( unsigned int ch )
 
 int
 keithley2600a_set_source_offmode( unsigned int ch,
-								  int          source_offmode )
+                                  int          source_offmode )
 {
     fsc2_assert( ch < NUM_CHANNELS );
     fsc2_assert(    source_offmode == OUTPUT_NORMAL
@@ -62,7 +62,7 @@ keithley2600a_set_source_offmode( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.offmode=%d", smu[ ch ], source_offmode );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     return k26->source[ ch ].offmode = source_offmode;
 }
@@ -101,7 +101,7 @@ keithley2600a_set_source_output( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.output=%d", smu[ ch ], ( int ) source_output );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     /* Despite all our testing an attempt to switch output on may fail if the
        settings still aren't acceptable. So we always check if the output
@@ -125,7 +125,7 @@ keithley2600a_get_source_highc( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.highc)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].highc = keithley2600a_line_to_bool( buf );
 }
@@ -144,7 +144,7 @@ keithley2600a_set_source_highc( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.highc=%d", smu[ ch ], ( int ) source_highc );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     /* Switching to high-capacity mode may also changes a few other settings */
     /* ZZZZZZZZ We should test if these new settings don't conflict with
@@ -190,7 +190,7 @@ keithley2600a_get_source_func( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.func)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].func = keithley2600a_line_to_bool( buf );
 }
@@ -210,7 +210,7 @@ keithley2600a_set_source_func( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     /* Switching the sourcing mode may have an effect on the reported measure
        range of the function we're switching from */
@@ -239,7 +239,7 @@ keithley2600a_get_source_autorangev( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.autorangev)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].autorangev = keithley2600a_line_to_bool( buf );
 }
@@ -258,7 +258,7 @@ keithley2600a_set_source_autorangev( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.autorangev=%d", smu[ ch ], ( int ) autorange );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     /* Switching autorange on can result in a change of the range setting */
 
@@ -281,7 +281,7 @@ keithley2600a_get_source_autorangei( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "printnumber(%s.source.autorangei)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
     return k26->source[ ch ].autorangei = keithley2600a_line_to_bool( buf );
 }
@@ -300,7 +300,7 @@ keithley2600a_set_source_autorangei( unsigned int ch,
 
     char buf[ 50 ];
     sprintf( buf, "%s.source.autorangei=%d", smu[ ch ], ( int ) autorange );
-	keithley2600a_cmd( buf );
+    keithley2600a_cmd( buf );
 
     /* Switching autorange on can result in a change of the range setting */
 
@@ -386,7 +386,7 @@ keithley2600a_get_source_rangei( unsigned int ch )
 
 double
 keithley2600a_set_source_rangei( unsigned int ch,
-								 double       range )
+                                 double       range )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -432,7 +432,7 @@ keithley2600a_get_source_lowrangev( unsigned int ch )
 
 double
 keithley2600a_set_source_lowrangev( unsigned int ch,
-									double       lowrange )
+                                    double       lowrange )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -512,17 +512,17 @@ keithley2600a_set_source_lowrangei( unsigned int ch,
 double
 keithley2600a_get_source_levelv( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( ch < NUM_CHANNELS );
 
-	char buf[ 50 ];
-	sprintf( buf, "printnumber(%s.source.levelv)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    char buf[ 50 ];
+    sprintf( buf, "printnumber(%s.source.levelv)", smu[ ch ] );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
-	double volts = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_source_levelv( ch, volts ) )
-		keithley2600a_bad_data( );
+    double volts = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_source_levelv( ch, volts ) )
+        keithley2600a_bad_data( );
 
-	return k26->source[ ch ].levelv = volts;
+    return k26->source[ ch ].levelv = volts;
 }
 
 
@@ -532,21 +532,21 @@ keithley2600a_get_source_levelv( unsigned int ch )
 
 double
 keithley2600a_set_source_levelv( unsigned int ch,
-								 double       volts )
+                                 double       volts )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_source_levelv( ch, volts ) );
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_source_levelv( ch, volts ) );
 
-	char buf[ 50 ];
-	sprintf( buf, "%s.source.levelv=%.6g", smu[ ch ], volts );
-	keithley2600a_cmd( buf );
+    char buf[ 50 ];
+    sprintf( buf, "%s.source.levelv=%.6g", smu[ ch ], volts );
+    keithley2600a_cmd( buf );
 
     /* If autoranging is on setting a new level could nodify the range */
 
     if ( k26->source[ ch ].autorangev )
         keithley2600a_get_source_rangev( ch );
 
-	return keithley2600a_get_source_levelv( ch );
+    return keithley2600a_get_source_levelv( ch );
 }
 
 
@@ -557,22 +557,22 @@ keithley2600a_set_source_levelv( unsigned int ch,
 double
 keithley2600a_get_source_leveli( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( ch < NUM_CHANNELS );
 
-	char buf[ 50 ];
-	sprintf( buf, "printnumber(%s.source.leveli)", smu[ ch ] );
+    char buf[ 50 ];
+    sprintf( buf, "printnumber(%s.source.leveli)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
-	double amps = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_source_leveli( ch, amps ) )
-		keithley2600a_bad_data( );
+    double amps = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_source_leveli( ch, amps ) )
+        keithley2600a_bad_data( );
 
     /* If autoranging is on setting a new level could modify the range */
 
     if ( k26->source[ ch ].autorangei )
         keithley2600a_get_source_rangei( ch );
 
-	return k26->source[ ch ].leveli = amps;
+    return k26->source[ ch ].leveli = amps;
 }
 
 
@@ -582,16 +582,16 @@ keithley2600a_get_source_leveli( unsigned int ch )
 
 double
 keithley2600a_set_source_leveli( unsigned int ch,
-								 double       amps )
+                                 double       amps )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_source_leveli( ch, amps ) );
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_source_leveli( ch, amps ) );
 
-	char buf[ 50 ];
-	sprintf( buf, "%s.source.leveli=%.6g", smu[ ch ], amps );
-	keithley2600a_cmd( buf );
+    char buf[ 50 ];
+    sprintf( buf, "%s.source.leveli=%.6g", smu[ ch ], amps );
+    keithley2600a_cmd( buf );
 
-	return keithley2600a_get_source_leveli( ch );
+    return keithley2600a_get_source_leveli( ch );
 }
 
 
@@ -602,17 +602,17 @@ keithley2600a_set_source_leveli( unsigned int ch,
 double
 keithley2600a_get_source_limitv( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( ch < NUM_CHANNELS );
 
-	char buf[ 50 ];
-	sprintf( buf, "printnumber(%s.source.limitv)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    char buf[ 50 ];
+    sprintf( buf, "printnumber(%s.source.limitv)", smu[ ch ] );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
-	double volts = keithley2600a_line_to_double( buf );
-	if ( ! keithley2600a_check_source_limitv( ch, volts ) )
-		keithley2600a_bad_data( );
+    double volts = keithley2600a_line_to_double( buf );
+    if ( ! keithley2600a_check_source_limitv( ch, volts ) )
+        keithley2600a_bad_data( );
 
-	return k26->source[ ch ].limitv = volts;
+    return k26->source[ ch ].limitv = volts;
 }
 
 
@@ -622,16 +622,16 @@ keithley2600a_get_source_limitv( unsigned int ch )
 
 double
 keithley2600a_set_source_limitv( unsigned int ch,
-								 double       volts )
+                                 double       volts )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_source_limitv( ch, volts ) );
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_source_limitv( ch, volts ) );
 
-	char buf[ 50 ];
-	sprintf( buf, "%s.source.limitv=%.6g", smu[ ch ], volts );
-	keithley2600a_cmd( buf );
+    char buf[ 50 ];
+    sprintf( buf, "%s.source.limitv=%.6g", smu[ ch ], volts );
+    keithley2600a_cmd( buf );
 
-	return keithley2600a_get_source_limitv( ch );
+    return keithley2600a_get_source_limitv( ch );
 }
 
 
@@ -642,17 +642,17 @@ keithley2600a_set_source_limitv( unsigned int ch,
 double
 keithley2600a_get_source_limiti( unsigned int ch )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( ch < NUM_CHANNELS );
 
-	char buf[ 50 ];
-	sprintf( buf, "printnumber(%s.source.limiti)", smu[ ch ] );
-	TALK( buf, buf, sizeof buf, false, 7 );
+    char buf[ 50 ];
+    sprintf( buf, "printnumber(%s.source.limiti)", smu[ ch ] );
+    TALK( buf, buf, sizeof buf, false, 7 );
 
-	double amps = keithley2600a_line_to_double( buf );
+    double amps = keithley2600a_line_to_double( buf );
     if ( ! keithley2600a_check_source_limiti( ch, amps ) )
         keithley2600a_bad_data( );
 
-	return k26->source[ ch ].limiti = amps;
+    return k26->source[ ch ].limiti = amps;
 }
 
 
@@ -662,16 +662,16 @@ keithley2600a_get_source_limiti( unsigned int ch )
 
 double
 keithley2600a_set_source_limiti( unsigned int ch,
-								 double       amps )
+                                 double       amps )
 {
-	fsc2_assert( ch < NUM_CHANNELS );
-	fsc2_assert( keithley2600a_check_source_limiti( ch, amps ) );
+    fsc2_assert( ch < NUM_CHANNELS );
+    fsc2_assert( keithley2600a_check_source_limiti( ch, amps ) );
 
-	char buf[ 50 ];
-	sprintf( buf, "%s.source.limiti=%.6g", smu[ ch ], amps );
-	keithley2600a_cmd( buf );
+    char buf[ 50 ];
+    sprintf( buf, "%s.source.limiti=%.6g", smu[ ch ], amps );
+    keithley2600a_cmd( buf );
 
-	return keithley2600a_get_source_limiti( ch );
+    return keithley2600a_get_source_limiti( ch );
 }
 
 
@@ -687,7 +687,7 @@ keithley2600a_get_compliance( unsigned int ch )
 
     char buf[ 50 ];
     sprintf( buf, "print(%s.source.compliance)", smu[ ch ] );
-	keithley2600a_talk( buf, buf, sizeof buf, false );
+    keithley2600a_talk( buf, buf, sizeof buf, false );
 
     if ( strcmp( buf, "false\n" ) && strcmp( buf, "true\n" ) )
         keithley2600a_bad_data( );
@@ -729,7 +729,7 @@ keithley2600a_set_source_delay( unsigned int ch,
     fsc2_assert( delay >= 0 || delay == DELAY_AUTO );
 
     char buf[ 50 ];
-    printf( buf, "%s.source.delay=%.6g", smu[ ch ], delay );
+    sprintf( buf, "%s.source.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
     return k26->source[ ch ].delay = delay;
