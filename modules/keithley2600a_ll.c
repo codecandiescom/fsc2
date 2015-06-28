@@ -229,14 +229,14 @@ keithley2600a_get_state( void )
         keithley2600a_get_source_limitv( ch );
         keithley2600a_get_source_limiti( ch );
 
-        keithley2600a_get_source_levelv( ch );
-        keithley2600a_get_source_leveli( ch );
-
         keithley2600a_get_source_rangev( ch );
         keithley2600a_get_source_rangei( ch );
 
         keithley2600a_get_source_lowrangev( ch );
         keithley2600a_get_source_lowrangei( ch );
+
+        keithley2600a_get_source_levelv( ch );
+        keithley2600a_get_source_leveli( ch );
 
         keithley2600a_get_source_offlimiti( ch );
 
