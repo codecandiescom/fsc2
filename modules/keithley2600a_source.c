@@ -747,7 +747,7 @@ keithley2600a_set_source_delay( unsigned int ch,
     sprintf( buf, "%s.source.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
-    return k26->source[ ch ].delay = delay;
+    return keithley2600a_get_source_delay( ch );
 }
 
 

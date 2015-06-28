@@ -159,10 +159,10 @@ keithley2600a_get_state( void )
        for extracting the data and set up endian-ness as needed. */
 
 #if ! defined BINARY_TRANSFER
-    keithley2600a_cmd( "format.data = format.ASCII" );
-    keithley2600a_cmd( "format.asciiprecision = 6" );
+    keithley2600a_cmd( "format.data=format.ASCII" );
+    keithley2600a_cmd( "format.asciiprecision=6" );
 #else
-    keithley2600a_cmd( "format.data = format.REAL32" );
+    keithley2600a_cmd( "format.data=format.REAL32" );
 
     if ( sizeof( float ) == 4 )
     {
@@ -174,12 +174,12 @@ keithley2600a_get_state( void )
         if ( tst == 1 )
             keithley2600a_cmd( "format.byteorder = format.LITTLEENDIAN" );
         else
-            keithley2600a_cmd( "format.byteorder = format.BIGENDIAN" );
+            keithley2600a_cmd( "format.byteorder=format.BIGENDIAN" );
     }
     else
     {
         to_double = to_double_hard;
-        keithley2600a_cmd( "format.byteorder = format.LITTLEENDIAN" );
+        keithley2600a_cmd( "format.byteorder=format.LITTLEENDIAN" );
     }
 #endif
 

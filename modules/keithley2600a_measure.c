@@ -163,7 +163,7 @@ keithley2600a_set_measure_autorangev( unsigned int ch,
     sprintf( buf, "%s.measure.autorangev=%d", smu[ ch ], ( int ) autorange );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].autorangev = autorange;
+    return keithley2600a_get_measure_autorangev( ch );
 }
 
 
@@ -200,7 +200,7 @@ keithley2600a_set_measure_autorangei( unsigned int ch,
     sprintf( buf, "%s.measure.autorangei=%d", smu[ ch ], ( int ) autorange );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].autorangei = autorange;
+    return keithley2600a_get_measure_autorangei( ch );
 }
 
 
@@ -348,7 +348,7 @@ keithley2600a_set_measure_autozero( unsigned int ch,
     sprintf( buf, "%s.measure.autozero=%d", smu[ ch ], autozero );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].autozero = autozero;
+    return keithley2600a_get_measure_autozero( ch );
 }
 
 
@@ -530,7 +530,7 @@ keithley2600a_set_measure_count( unsigned int ch,
     sprintf( buf, "%s.measure.count=%d", smu[ ch ], count );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].count = count;
+    return keithley2600a_get_measure_count( ch );
 }
 
 
@@ -565,7 +565,7 @@ keithley2600a_set_measure_rel_levelv( unsigned int ch,
     sprintf( buf, "%s.measure.rel.levelv=%.6g)", smu[ ch ], offset );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].relv.level = offset;
+    return keithley2600a_get_measure_rel_levelv ch );
 }
 
 
@@ -600,7 +600,7 @@ keithley2600a_set_measure_rel_leveli( unsigned int ch,
     sprintf( buf, "%s.measure.rel.leveli=%.6g)", smu[ ch ], offset );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].reli.level = offset;
+    return keithley2600a_get_measure_rel_leveli( ch );
 }
 
 
@@ -635,7 +635,7 @@ keithley2600a_set_measure_rel_levelv_enabled( unsigned int ch,
     sprintf( buf, "%s.measure.rel.enablev=%d", smu[ ch ], on_off );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].relv.enabled = on_off;
+    return keithley2600a_get_measure_rel_levelv_enabled( ch );
 }
 
 
@@ -670,7 +670,7 @@ keithley2600a_set_measure_rel_leveli_enabled( unsigned int ch,
     sprintf( buf, "%s.measure.rel.enablei=%d", smu[ ch ], on_off );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].reli.enabled = on_off;
+    return keithley2600a_get_measure_rel_leveli_enabled( ch );
 }
 
 
@@ -710,7 +710,7 @@ keithley2600a_set_measure_delay( unsigned int ch,
     sprintf( buf, "%s.measure.delay=%.6g", smu[ ch ], delay );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].delay = delay;
+    return keithley2600a_get_measure_delay( ch );
 }
 
 
@@ -754,7 +754,7 @@ keithley2600a_set_measure_filter_type( unsigned int ch,
     sprintf( buf, "%s.measure.filter.type=%d", smu[ ch ], type );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].filter.type = type;
+    return keithley2600a_get_measure_filter_type( ch );
 }
 
 
@@ -794,7 +794,7 @@ keithley2600a_set_measure_filter_count( unsigned int ch,
     sprintf( buf, "%s.measure.filter.count=%d", smu[ ch ], count );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].filter.count = count;
+    return keithley2600a_get_measure_filter_count( ch );
 }
 
 
@@ -830,7 +830,7 @@ keithley2600a_set_measure_filter_enabled( unsigned int ch,
     sprintf( buf, "%s.measure.filter.enable=%d", smu[ ch ], on_off ? 1 : 0 );
     keithley2600a_cmd( buf );
 
-    return k26->measure[ ch ].filter.enabled = on_off;
+    return keithley2600a_get_measure_filter_enabled( ch );
 }
 
 
