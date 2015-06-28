@@ -406,7 +406,7 @@ sourcemeter_output_state( Var_T * v )
             s2 = ppA( k26->source[ ch ].rangei );
             s3 = ppV( k26->source[ ch ].levelv );
 
-            print( FATAL, "Can't switch on %sas current source, "
+            print( FATAL, "Can't switch on %sas a current source, "
                    "combination of current level (%s), range (%s) and "
                    "compliance voltage (%s) is not possible.\n",
                    ppc( ch, "" ), s1, s2, s3 );
@@ -417,7 +417,7 @@ sourcemeter_output_state( Var_T * v )
             s2 = ppV( k26->source[ ch ].rangev );
             s3 = ppA( k26->source[ ch ].leveli );
 
-            print( FATAL, "Can't switch on %sas voltage source, "
+            print( FATAL, "Can't switch on %sas a voltage source, "
                    "combination of voltage level (%s), range (%s) and "
                    "compliance current (%s) is not possible.\n",
                    ppc( ch, "" ), s1, s2, s3 );
