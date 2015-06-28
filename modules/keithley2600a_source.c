@@ -210,7 +210,7 @@ keithley2600a_set_source_func( unsigned int ch,
                  || keithley2600a_test_toggle_source_func( ch ) );
 
     char buf[ 50 ];
-    sprintf( buf, "%s.source.fun=%d", smu[ ch ], source_func );
+    sprintf( buf, "%s.source.func=%d", smu[ ch ], source_func );
     keithley2600a_cmd( buf );
 
     /* Switching the sourcing mode may have an effect on the reported measure

@@ -565,7 +565,7 @@ keithley2600a_set_measure_rel_levelv( unsigned int ch,
     sprintf( buf, "%s.measure.rel.levelv=%.6g)", smu[ ch ], offset );
     keithley2600a_cmd( buf );
 
-    return keithley2600a_get_measure_rel_levelv ch );
+    return keithley2600a_get_measure_rel_levelv( ch );
 }
 
 
