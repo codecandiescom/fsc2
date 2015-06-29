@@ -29,19 +29,19 @@
 #include "rs.h"
 
 
-#define IS_FREQ 1
-#define IS_ATT  2
+#define IS_FREQ     1
+#define IS_ATT      2
 #define TABLE_INIT -1
 #define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
 
 static int rs_get_unit( void );
-
 static void rs_new_table_entry( int    type,
                                         double val );
-
+static void finalize_table( bool is_freq,
+                            bool is_att );
 static int rs_comp( const void * a,
-                            const void * b );
+                    const void * b );
 
 static long rs_Lc,
             rs_Comm_Lc;
@@ -164,15 +164,15 @@ DU       {IU}|{FU}
  *-------------------------------------------------------------*/
 
 void
-rs_read_table( FILE * fp )
+rs_read_table( FILE       * fp )
 {
-    static bool is_restart = UNSET;
+    static bool is_restart = false;
     int type;
 
 
     if ( ( rs_in = fp ) == NULL )
     {
-        print( FATAL, "Internal error while reading attenuation table.\n" );
+        print( FATAL, "Internal error while reading table file '%s'.\n" );
         THROW( EXCEPTION );
     }
 
@@ -181,35 +181,36 @@ rs_read_table( FILE * fp )
     if ( is_restart )
         rs_restart( rs_in );
     else
-        is_restart = SET;
+        is_restart = true;
 
     rs_Lc = 1;
 
     TRY
     {
+
         rs_new_table_entry( TABLE_INIT, 0.0 );
         while( ( type = rs_lex( ) ) != 0 )
-            rs_new_table_entry( type,
-                                        T_atod( rs_text ) * unit_fac );
+            rs_new_table_entry( type, T_atod( rs_text ) * unit_fac );
+
         rs_new_table_entry( TABLE_END, 0.0 );
         TRY_SUCCESS;
     }
     CATCH( EOF_IN_COMMENT_EXCEPTION )
     {
         print( FATAL, "Unexpected end of table file '%s' in comment starting "
-               "at line %ld.\n", rs->table.table_file, rs_Comm_Lc );
+               "at line %ld.\n", rs->table.name, rs_Comm_Lc );
         THROW( EXCEPTION );
     }
     CATCH( DANGLING_END_OF_COMMENT )
     {
         print( FATAL, "End of comment found in table file '%s' at line %ld.\n",
-               rs->table.table_file, rs_Lc );
+               rs->table.name, rs_Lc );
         THROW( EXCEPTION );
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
         print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
-               rs->table.table_file, rs_Lc );
+               rs->table.name, rs_Lc );
         THROW( EXCEPTION );
     }
     OTHERWISE
@@ -223,12 +224,10 @@ rs_read_table( FILE * fp )
 static int
 rs_get_unit( void )
 {
-    char *cp;
-    bool done = UNSET;
+    bool done = false;
     int type = 0;
 
-
-    for ( cp = rs_text; ! done && *cp; cp++ )
+    for ( char * cp = rs_text; ! done && *cp; cp++ )
     {
         switch ( *cp )
         {
@@ -240,28 +239,28 @@ rs_get_unit( void )
                   *cp = '\0';
                   unit_fac = 1.0e3;
                   type = IS_FREQ;
-                  done = SET;
+                  done = true;
                   break;
 
              case 'M' :
                   *cp = '\0';
                   type = IS_FREQ;
                   unit_fac = 1.0e6;
-                  done = SET;
+                  done = true;
                   break;
 
              case 'G' :
                   *cp = '\0';
                   type = IS_FREQ;
                   unit_fac = 1.0e9;
-                  done = SET;
+                  done = true;
                   break;
 
              case 'd' :
                   *cp = '\0';
                   type = IS_ATT;
                   unit_fac = 1.0;
-                  done = SET;
+                  done = true;
                   break;
         }
     }
@@ -275,19 +274,18 @@ rs_get_unit( void )
 
 static void
 rs_new_table_entry( int    type,
-                            double val )
+                    double val )
 {
-    static bool is_freq = UNSET,
-                is_att = UNSET;
-
+    static bool is_freq = false,
+                is_att = false;
 
     /* Initialize everything when type is -1 */
 
     if ( type == TABLE_INIT )
     {
-        is_freq = is_att = UNSET;
-        rs->table.att_table = T_malloc( TABLE_CHUNK_SIZE
-                                       * sizeof *rs->table.att_table );
+        is_freq = is_att = false;
+        rs->table.table = T_malloc(   TABLE_CHUNK_SIZE
+                                    * sizeof *rs->table.table );
         cur_table_len = TABLE_CHUNK_SIZE;
         return;
     }
@@ -296,39 +294,7 @@ rs_new_table_entry( int    type,
 
     if ( type == TABLE_END )
     {
-        /* Check that we're not expecting another attenuation or frequency
-           while the end of the file is already reached */
-
-        if ( is_freq ^ is_att )                /* one of them is still set ? */
-        {
-            print( FATAL, "Missing final %s in table file '%s'.\n",
-                   is_freq ? "attenuation" : "frequency",
-                   rs->table.table_file );
-            THROW( EXCEPTION );
-        }
-
-        /* Check that there are at least two entries in the table */
-
-        if ( rs->table.att_table_len < 2 )
-        {
-            print( FATAL, "Table file '%s' contains less than 2 entries.\n",
-                   rs->table.table_file );
-            THROW( EXCEPTION );
-        }
-
-        /* Cut back table size to the amount of memory really needed and sort
-           the table in ascending order with respect to the frequencies, then
-           set lowest and highest frequency in structure for synthesizer */
-
-        rs->table.att_table =T_realloc( rs->table.att_table,
-                                         rs->table.att_table_len
-                                       * sizeof *rs->table.att_table );
-        cur_table_len = rs->table.att_table_len;
-        qsort( rs->table.att_table, rs->table.att_table_len,
-               sizeof ( Att_Table_Entry_T ), rs_comp );
-        rs->table.min_table_freq = rs->table.att_table[ 0 ].freq;
-        rs->table.max_table_freq =
-                     rs->table.att_table[ rs->table.att_table_len - 1 ].freq;
+        finalize_table( is_freq, is_att );
         return;
     }
 
@@ -338,22 +304,20 @@ rs_new_table_entry( int    type,
     if ( type == IS_ATT && is_att )
     {
         print( FATAL, "Error while reading table file '%s': Two attenuation "
-               "values in a row at line %ld.\n",
-               rs->table.table_file, rs_Lc );
+               "values in a row at line %ld.\n", rs->table.name, rs_Lc );
         THROW( EXCEPTION );
     }
 
     if ( type == IS_FREQ && is_freq )
     {
         print( FATAL, "Error while reading table file '%s': Two frequency "
-               "values in a row at line %ld.\n",
-               rs->table.table_file, rs_Lc );
+               "values in a row at line %ld.\n", rs->table.name, rs_Lc );
         THROW( EXCEPTION );
     }
 
     /* If the type is indetermined either set it to the not yet set type
        or to frequency if none has been set yet - thus the default, when no
-       units are given is frequency first, then the attenuation */
+       units are given, is frequency first and then the attenuation */
 
     if ( type == ( IS_FREQ | IS_ATT ) )
     {
@@ -365,44 +329,27 @@ rs_new_table_entry( int    type,
 
     /* If necessary extend the length of the table */
 
-    if ( cur_table_len <= rs->table.att_table_len )
+    if ( cur_table_len <= rs->table.len )
     {
         cur_table_len += TABLE_CHUNK_SIZE;
-        rs->table.att_table = T_realloc( rs->table.att_table,
-                                          cur_table_len
-                                        * sizeof *rs->table.att_table );
+        rs->table.table = T_realloc( rs->table.table,
+                                     cur_table_len * sizeof *rs->table.table );
     }
 
     if ( type == IS_FREQ )
     {
-        if ( val < 0 )
-        {
-            print( FATAL, "Invalid negative RF frequency found in the table "
-                   "file '%s' at line %ld.\n",
-                   rs->table.table_file, rs_Lc );
-            THROW( EXCEPTION );
-        }
-
-        if ( val > MAX_FREQ || val < MIN_FREQ )
+        if ( val > rs->freq.max_freq || val < rs->freq.min_freq )
             print( WARN, "Frequency of %g MHz in table file '%s', line %ld, "
-                   "is not within range of synthesizer (%f kHz - %f MHz).\n",
-                   val * 1.0e-6, rs->table.table_file, rs_Lc,
-                   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-        rs->table.att_table[ rs->table.att_table_len ].freq = val;
-        is_freq = SET;
+                   "is not within range of synthesizer (%f kHz - %f GHz).\n",
+                   val * 1.0e-6, rs->table.name, rs_Lc,
+                   rs->freq.min_freq * 1.0e-3, rs->freq.max_freq * 1.0e-9 );
+        rs->table.table[ rs->table.len ].freq = val;
+        is_freq = true;
     }
     else                /* IS_ATT */
     {
-        if ( val > rs->table.min_attenuation - MAX_ATTEN )
-        {
-            print( FATAL, "Attenuation of %.1f dB in table file '%s', line "
-                   "%ld, can't be achieved, maximum dynamic range is "
-                   "%.1f dB.\n", val, rs->table.table_file, rs_Lc,
-                   rs->table.min_attenuation - MAX_ATTEN );
-            THROW( EXCEPTION );
-        }
-        rs->table.att_table[ rs->table.att_table_len ].att = val;
-        is_att = SET;
+        rs->table.table[ rs->table.len ].att = val;
+        is_att = true;
     }
 
     /* If both frequency and attenuation have been set increment entry count
@@ -410,9 +357,50 @@ rs_new_table_entry( int    type,
 
     if ( is_freq && is_att )
     {
-        rs->table.att_table_len++;
-        is_freq = is_att = UNSET;
+        rs->table.len++;
+        is_freq = is_att = false;
     }
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+static
+void
+finalize_table( bool is_freq,
+                bool is_att )
+{
+    /* Check that we're not expecting another attenuation or frequency
+       while the end of the file is already reached */
+
+    if ( is_freq ^ is_att )                /* one of them is still set ? */
+    {
+        print( FATAL, "Missing final %s in table file '%s'.\n",
+               is_freq ? "attenuation" : "frequency", rs->table.name );
+        THROW( EXCEPTION );
+    }
+
+    /* Check that there are at least two entries in the table */
+
+    if ( rs->table.len < 2 )
+    {
+        print( FATAL, "Table file '%s' contains less than 2 entries.\n",
+               rs->table.name );
+        THROW( EXCEPTION );
+    }
+
+    /* Cut back table size to the amount of memory really needed and sort
+       the table in ascending order with respect to the frequencies, then
+       set lowest and highest frequency. */
+
+    rs->table.table = T_realloc( rs->table.table,
+                                 rs->table.len * sizeof *rs->table.table );
+
+    qsort( rs->table.table, rs->table.len, sizeof *rs->table.table, rs_comp );
+
+    rs->table.min_freq = rs->table.table[ 0 ].freq;
+    rs->table.max_freq = rs->table.table[ rs->table.len - 1 ].freq;
 }
 
 
@@ -425,14 +413,14 @@ static int
 rs_comp( void const * a,
          void const * b )
 {
-    Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
-                      *B = ( Att_Table_Entry_T * ) b;
+    Table_Entry_T * A = ( Table_Entry_T * ) a,
+                  * B = ( Table_Entry_T * ) b;
 
 
     if ( A->freq == B->freq )
     {
         print( FATAL, "Frequency of %lf MHz appears twice in table file "
-               "'%s'\n", 1.0e-6 * A->freq, rs->table.table_file );
+               "'%s'\n", 1.0e-6 * A->freq, rs->table.name );
         THROW( EXCEPTION );
     }
 

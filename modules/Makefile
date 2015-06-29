@@ -102,7 +102,7 @@ ag54830b_l      := ag54830b_l.c ag54830b_net.c $(vxi11_list) vxi11_user.c
 #				   rs_smb100a_lexer.c $(vxi11_list) vxi11_user.c
 rs_smb100a      := rs.c rs_base.c rs_outp.c rs_freq.c rs_pow.c rs_am.c \
 				   rs_fm.c rs_pm.c rs_lfo.c rs_inp.c rs_list.c rs_pulm.c \
-				   rs_mod.c $(vxi11_list) vxi11_user.c
+				   rs_lexer.c rs_table.c rs_mod.c $(vxi11_list) vxi11_user.c
 keithley2600a   := keithley2600a.c keithley2600a_limits.c keithley2600a_ll.c \
                    keithley2600a_source.c keithley2600a_measure.c \
 				   $(vxi11_list) vxi11_user.c

@@ -253,9 +253,10 @@ typedef struct {
 
 typedef struct
 {
-    char          * file;               /* name of attenuation table file */
-    bool            use_table;
-    Table_Entry_T * att_table;
+    char          * name;
+    bool            is_loaded;
+    bool            enabled;
+    Table_Entry_T * table;
     long            len;
     double          min_freq;
     double          max_freq;
@@ -270,17 +271,18 @@ typedef struct
 {
 	bool is_connected;
 
-	Outp_T outp;
-	Pow_T  pow;
-	Freq_T freq;
-	AM_T   am;
-	FM_T   fm;
-	PM_T   pm;
-	LFO_T  lfo;
-	Inp_T  inp;
-	List_T list;
-	PulM_T pulm;
-	Mod_T  mod;
+	Outp_T  outp;
+	Pow_T   pow;
+	Freq_T  freq;
+	AM_T    am;
+	FM_T    fm;
+	PM_T    pm;
+	LFO_T   lfo;
+	Inp_T   inp;
+	List_T  list;
+	PulM_T  pulm;
+	Mod_T   mod;
+    Table_T table;
 } rs_smb100a_T;
 
 
@@ -322,6 +324,8 @@ Var_T * synthesizer_setup_list( Var_T * v );
 Var_T * synthesizer_select_list( Var_T * v );
 Var_T * synthesizer_start_list( Var_T * v );
 Var_T * synthesizer_stop_list( Var_T * v );
+Var_T * synthesizer_use_table( Var_T * v );
+Var_T * synthesizer_att_ref_freq( Var_T * v );
 
 
 // Function of the OUTP sub-system
@@ -517,6 +521,17 @@ enum Impedance mod_impedance( void );
 enum Impedance mod_set_impedance( enum Impedance imp );
 enum Polarity mod_polarity( void );
 enum Polarity mod_set_polarity( enum Polarity pol );
+
+
+// Functions from the table sub-sytem
+
+void table_init( void );
+void table_cleanup( void );
+void table_load_file( Var_T * v );
+double table_ref_freq( void );
+double table_set_ref_freq( double freq );
+double table_att_offset( double freq );
+void rs_read_table( FILE       * fp );
 
 
 #endif

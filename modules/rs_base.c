@@ -51,6 +51,7 @@ rs_init( rs_smb100a_T * rs_cur )
     list_init( );
     pulm_init( );
 	mod_init( );
+    table_init( );
 }
 
 
@@ -60,6 +61,7 @@ rs_init( rs_smb100a_T * rs_cur )
 void
 rs_cleanup( void )
 {
+    table_cleanup( );
 	list_cleanup( );
 	rs_disconnect( );
 }

@@ -157,9 +157,9 @@ Var_T *
 synthesizer_attenuation( Var_T * v )
 {
 	if ( ! v )
-		return vars_push( FLOAT_VAR, pow_power( ) );
+		return vars_push( FLOAT_VAR, - pow_power( ) );
 
-	double pow = get_double( v, NULL );
+	double pow = - get_double( v, NULL );
 	too_many_arguments( v );
 
 	return vars_push( FLOAT_VAR, pow_set_power( pow ) );
@@ -173,12 +173,12 @@ Var_T *
 synthesizer_minimum_attenuation( Var_T * v )
 {
 	if ( ! v )
-		vars_push( FLOAT_VAR, pow_min_att( ) );
+		vars_push( FLOAT_VAR, - pow_min_att( ) );
 
-	double min_att = get_double( v, NULL );
+	double min_pow = - get_double( v, NULL );
 	too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, pow_set_min_att( min_att ) );
+	return vars_push( FLOAT_VAR, pow_set_min_att( min_pow ) );
 }
 
 
@@ -189,12 +189,12 @@ Var_T *
 synthesizer_min_attenuation( Var_T * v )
 {
 	if ( ! v )
-		return vars_push( FLOAT_VAR, pow_max_power( freq_frequency( ) ) );
+		return vars_push( FLOAT_VAR, - pow_max_power( freq_frequency( ) ) );
 
 	double freq = get_double( v, NULL );
 	too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, pow_max_power( freq ) );
+	return vars_push( FLOAT_VAR, - pow_max_power( freq ) );
 }
 
 
@@ -750,6 +750,34 @@ synthesizer_stop_list( Var_T * v )
 
 	list_stop( keep_rf_on );
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_use_table( Var_T * v )
+{
+    table_load_file( v );
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_att_ref_freq( Var_T * v )
+{
+    if ( ! v )
+        return vars_push( FLOAT_VAR, table_ref_freq( ) );
+
+    double ref_freq = get_double( v, NULL );
+    too_many_arguments( v );
+
+    return vars_push( INT_VAR, table_set_ref_freq( ref_freq ) );
 }
 
 
