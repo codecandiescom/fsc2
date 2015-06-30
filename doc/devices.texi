@@ -8948,6 +8948,8 @@ be called within the @code{EXPERIMENT} section of an @code{EDL} script.
 @table @samp
 @item @ref{sourcemeter_name()}
 @item @ref{sourcemeter_keep_on_at_end()}
+@item @ref{sourcemeter_reset_on_start()}
+@item @ref{sourcemeter_reset()}
 @item @ref{sourcemeter_sense_mode()}
 @item @ref{sourcemeter_source_offmode()}
 @item @ref{sourcemeter_output_state()}
@@ -9039,6 +9041,24 @@ channel to be left on.
 
 This function can only be called in the @code{PREPARATIONS} section of
 an @code{EDL} script.
+
+
+@anchor{sourcemeter_reset_on_start()}
+@findex sourcemeter_reset_on_start()
+@item   sourcemeter_reset_on_start()
+Requests that the device gets sent a reset command at the very start
+of the experiment, resetting it to (mostly) its factory default
+settings.
+
+This function can only be called in the @code{PREPARATIONS} section of
+an @code{EDL} script.
+
+
+@anchor{sourcemeter_reset()}
+@findex sourcemeter_reset()
+@item   sourcemeter_reset()
+Sends a reset command to the device, resetting it to (mostly)
+its factory default settogs
 
 
 @anchor{sourcemeter_sense_mode()}

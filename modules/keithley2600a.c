@@ -49,6 +49,7 @@ static char * pretty_print( double       v,
                             const char * unit );
 static const char * ppc( unsigned int   ch,
                          const char   * prefix );
+static void default_settings( void );
 
 #define ppA( x ) pretty_print( x, "A" )
 #define ppV( x ) pretty_print( x, "V" )
@@ -105,71 +106,8 @@ keithley2600a_test_hook( void )
        settings */
 
     k26->linefreq = POWER_LINE_FREQ;
-
-    for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
-    {
-        k26->sense[ ch ]         = SENSE_LOCAL;
-
-        k26->source[ ch ].output  = OUTPUT_OFF;
-        k26->source[ ch ].offmode = OUTPUT_NORMAL;
-        k26->source[ ch ].highc   = false;
-        k26->source[ ch ].func    = OUTPUT_DCVOLTS;
-
-        k26->source[ ch ].autorangev = false;
-        k26->source[ ch ].autorangei = false;
-
-        k26->source[ ch ].rangev     = 0.2;
-        k26->source[ ch ].rangei     = 1.0e-7;
-
-        k26->source[ ch ].lowrangev  = 0.2;
-        k26->source[ ch ].lowrangei  = 1.0e-7;
-
-        k26->source[ ch ].levelv     = 0;
-        k26->source[ ch ].leveli     = 0;
-
-        k26->source[ ch ].limitv     = 20.0;
-        k26->source[ ch ].limiti     = 0.1;
-
-        k26->source[ ch ].offlimiti  = 1.0e-3;
-
-        k26->measure[ ch ].autorangev = true;
-        k26->measure[ ch ].autorangei = true;
-
-        k26->measure[ ch ].rangev     = 0.2;
-        k26->measure[ ch ].rangei     = 0.1;
-
-        k26->measure[ ch ].lowrangev  = 0.2;
-        k26->measure[ ch ].lowrangei  = 1.0e-7;
-
-        k26->measure[ ch ].autozero   = AUTOZERO_AUTO;
-
-#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
-        k26->measure[ ch ].delay      = DELAY_OFF;
-#else                                  /* 2635A and 2636A */
-        k26->measure[ ch ].delay      = DELAY_AUTO;
-#endif
-
-        k26->measure[ ch ].time = 1.0 / POWER_LINE_FREQ;
-        k26->measure[ ch ].count = 1;
-
-        k26->measure[ ch ].relv.level = 0.0;
-        k26->measure[ ch ].relv.enabled = false;
-
-        k26->measure[ ch ].reli.level = 0.0;
-        k26->measure[ ch ].reli.enabled = false;
-
-#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
-        k26->measure[ ch ].filter.type = 0;
-#else
-        k26->measure[ ch ].filter.type = 1;
-#endif
-
-        k26->measure[ ch ].filter.count = 1;
-        k26->measure[ ch ].filter.enabled = false;
-
-        k26->contact[ ch ].threshold = 50;
-        k26->contact[ ch ].speed = CONTACT_FAST;
-    }
+    k26->reset_on_start = false;
+    default_settings( );
  
     return true;
 }
@@ -189,7 +127,10 @@ keithley2600a_exp_hook( void )
 
     TRY
     {
-        keithley2600a_get_state( );
+        if ( k26->reset_on_start )
+            keithley2600a_reset( );
+        else
+            keithley2600a_get_state( );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -269,6 +210,39 @@ sourcemeter_keep_on_at_end( Var_T * v )
             k26->keep_on_at_end[ ch ] = true;
 
     return vars_push( INT_VAR, 1L );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_reset( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE == TEST )
+        default_settings( );
+    else if ( FSC2_MODE == EXPERIMENT )
+        keithley2600a_reset( );
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+Var_T *
+sourcemeter_reset_on_start( Var_T * v )
+{
+    k26->reset_on_start = true;
+
+    if ( v )
+    {
+        k26->reset_on_start = get_boolean( v );
+        too_many_arguments( v );
+    }
+
+    return vars_push( INT_VAR, k26->reset_on_start ? 1L: 0L );
 }
 
 
@@ -2697,6 +2671,97 @@ ppc( unsigned int   ch,
     snprintf( buf, 49, "%s channel %u ", prefix, ch + 1 );
     return buf;
 #endif
+}
+
+
+/*---------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
+
+static
+void
+default_settings( void )
+{
+    for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
+    {
+        k26->sense[ ch ] = SENSE_LOCAL;
+
+        k26->source[ ch ].output = false;
+        k26->source[ ch ].highc = false;
+        k26->source[ ch ].offmode = OUTPUT_NORMAL;
+        k26->source[ ch ].func = OUTPUT_DCVOLTS;
+        k26->source[ ch ].delay = 0;
+
+        k26->source[ ch ].autorangev = true;
+        k26->source[ ch ].autorangei = true;
+
+#if defined _2601A || defined _2602A
+        k26->source[ ch ].limitv = 1;
+        k26->source[ ch ].limiti = 40;
+#else
+        k26->source[ ch ].limitv = 100.0e-3;
+        k26->source[ ch ].limiti = 20;
+#endif
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->source[ ch ].rangev = 100.0e-3;
+        k26->source[ ch ].rangei = 100.0e-9;
+#else
+        k26->source[ ch ].rangev = 200.0e-3;
+        k26->source[ ch ].rangei = 100.0e-9;
+#endif
+
+#if defined _2601A || defined _2602A
+        k26->source[ ch ].lowrangev = 100.0e-3;
+#else
+        k26->source[ ch ].lowrangev = 200.0e-3;
+#endif
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->source[ ch ].lowrangei = 100.0e-9;
+#else
+        k26->source[ ch ].lowrangei = 1.0e-9;
+#endif
+
+        k26->source[ ch ].levelv = 0;
+        k26->source[ ch ].leveli = 0;
+
+        k26->source[ ch ].offlimiti = 1.0e-3;
+
+        k26->source[ ch ].settling = SETTLE_SMOOTH;
+
+        k26->source[ ch ].sink = false;
+
+        k26->measure[ ch ].autorangev = true;
+        k26->measure[ ch ].autorangei = true;
+
+        k26->measure[ ch ].autozero = AUTOZERO_AUTO;
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->measure[ ch ].filter.type = FILTER_MOVING_AVG;
+#else
+        k26->measure[ ch ].filter.type = FILTER_REPEAT_AVG;
+#endif
+
+        k26->measure[ ch ].filter.enabled = false;
+        k26->measure[ ch ].filter.count = false;
+
+        k26->measure[ ch ].time = 1.0 / k26->linefreq;
+
+#if defined _2601A || defined _2602A || defined _2611A || defined _2612A
+        k26->measure[ ch ].delay = DELAY_OFF;
+#else
+        k26->measure[ ch ].delay = DELAY_AUTO;
+#endif
+
+        k26->measure[ ch ].relv.level = 0;
+        k26->measure[ ch ].relv.enabled = false;
+
+        k26->measure[ ch ].reli.level = 0;
+        k26->measure[ ch ].reli.enabled = false;
+
+        k26->contact[ ch ].speed = CONTACT_FAST;
+        k26->contact[ ch ].threshold = 50;
+    }
 }
 
 

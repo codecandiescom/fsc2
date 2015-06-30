@@ -277,7 +277,7 @@ keithley2600a_get_state( void )
 
 
 /*---------------------------------------------------------------*
- * Resets the device
+ * Resets the device and rereads all relevant settings
  *---------------------------------------------------------------*/
 
 void

@@ -593,6 +593,8 @@ powermeter_analog_output, -1, ALL;
 
 sourcemeter_name, 0, ALL;
 sourcemeter_keep_on_at_end, -1, PREP;
+sourcemeter_reset_on_state, -1, PREP;
+sourcemeter_reset, 0, EXP;
 sourcemeter_sense_mode, -1, EXP;
 sourcemeter_source_offmode, -1, EXP;
 sourcemeter_output_state, -1, EXP;

@@ -2298,6 +2298,8 @@ exceeds those 10200 bytes.
 @table @samp
 @item @ref{sourcemeter_name()}
 @item @ref{sourcemeter_keep_on_at_end()}
+@item @ref{sourcemeter_reset_on_start()}
+@item @ref{sourcemeter_reset()}
 @item @ref{sourcemeter_sense_mode()}
 @item @ref{sourcemeter_source_offmode()}
 @item @ref{sourcemeter_output_state()}

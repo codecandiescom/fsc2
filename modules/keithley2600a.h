@@ -236,6 +236,7 @@ typedef struct
     bool      is_open;
     bool      comm_failed;
     bool      keep_on_at_end[ NUM_CHANNELS ];
+    bool      reset_on_start;
 
     int       sense[ NUM_CHANNELS ];
 
@@ -265,6 +266,8 @@ int keithley2600a_end_of_exp_hook( void );
 
 Var_T * sourcemeter_name( Var_T * v );
 Var_T * sourcemeter_keep_on_at_end( Var_T * v );
+Var_T * sourcemeter_reset_on_start( Var_T * v );
+Var_T * sourcemeter_reset( Var_T * v );
 Var_T * sourcemeter_sense_mode( Var_T * v );
 Var_T * sourcemeter_source_offmode( Var_T * v );
 Var_T * sourcemeter_output_state( Var_T * v );
