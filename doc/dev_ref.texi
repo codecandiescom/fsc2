@@ -88,6 +88,7 @@ List of devices, sorted by module name:
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
 @c * q_bmwb::          Bruker ER 051 QG Q-Band Bridge
+* rs_smb100a::      Rohde & Schwarz SMB100A Signal Generator
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rb8509::          Rulbus 12-bit ADC Card
@@ -187,6 +188,7 @@ List of devices, sorted by module name:
 @item @ref{pci_mio_16e_1}   National Instruments PCI-MIO-16E-1 DAQ card
 @item @ref{pt2025}          Metrolab NMR Teslameter PT2025
 @c @item @ref{q_bmwb}          Bruker ER 051 QG Q-Band Bridge
+@item @ref{rs_smb100a}      Rohde & Schwarz SMB100A Signal Generator
 @item @ref{rs_sml01}        Rohde & Schwarz SML01 Signal Generator
 @item @ref{rs_spec10}       Roper Scientific Spec-10 CCD Camera
 @item @ref{rb8509}          Rulbus 12-bit ADC Card
@@ -3602,7 +3604,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, rs_sml01, pci_mio_16e_1, Device Reference
+@node pt2025, rs_smb100a, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -3642,7 +3644,7 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 @c #############################################################
 
-@c @node q_bmwb, rs_sml01, pt2025, Device Reference
+@c @node q_bmwb, rs_smb100a, pt2025, Device Reference
 @c @iftex
 @c @subheading Bruker ER 051 QG Q-Band Bridge
 @c @end iftex
@@ -3684,9 +3686,69 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 @c @end table
 
 
+
 @c #############################################################
 
-@node rs_sml01, rs_spec10, pt2025, Device Reference
+@node rs_smb100a, rs_sml01, pt2025, Device Reference
+@iftex
+@subheading Rohde & Schwarz SMB100A Signal Generator 
+@end iftex
+@ifnottex
+@section Rohde & Schwarz SMB100A Signal Generator
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rs_smb100a}
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.rsd.de/,Rohde & Schwarz} SMB100A
+family of Signal Generator (SMB-B101, SMB-B102, SMB-B103, SMB-B106,
+SMB-B112 and SMB-B112L) with support for output level normalization via
+frequency/amplitude table files.
+
+@paragraphindent 0
+@strong{Controlled via}: LAN (VXI-11 protocol)
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{synthesizer_name()}
+@item @ref{synthesizer_state()}
+@item @ref{synthesizer_frequency()}
+@item @ref{synthesizer_attenuation()}
+@item @ref{synthesizer_automatic_level_control()}
+@item @ref{synthesizer_minimum_attenuation()}
+@item @ref{synthesizer_use_table()}
+@item @ref{synthesizer_att_ref_freq()}
+@item @ref{synthesizer_mod_state()}
+@item @ref{synthesizer_mod_type()}
+@item @ref{synthesizer_mod_source()}
+@item @ref{synthesizer_mod_freq()}
+@item @ref{synthesizer_mod_ampl()}
+@item @ref{synthesizer_mod_mode()}
+@item @ref{synthesizer_setup_list()}
+@item @ref{synthesizer_select_list()}
+@item @ref{synthesizer_start_list()}
+@item @ref{synthesizer_stop_list()}
+@item @ref{synthesizer_attenuation_offset()}
+@item @ref{synthesizer_min_attenuation()}
+@item @ref{synthesizer_max_attenuation()}
+@item @ref{synthesizer_output_impedance()}
+@item @ref{synthesizer_protection_tripped()}
+@item @ref{synthesizer_reset_protection()}
+@item @ref{synthesizer_rf_mode()}
+@item @ref{synthesizer_rf_off_mode()}
+@item @ref{synthesizer_mod_output_impedance()}
+@item @ref{synthesizer_mod_output_voltage()}
+@end table
+
+
+@c #############################################################
+
+@node rs_sml01, rs_spec10, rs_smb100a, Device Reference
 @iftex
 @subheading Rohde & Schwarz SML01 Signal Generator 
 @end iftex

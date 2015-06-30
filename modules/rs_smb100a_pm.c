@@ -18,7 +18,7 @@
  */
 
 
-#include "rs.h"
+#include "rs_smb100a.h"
 
 
 static void pm_prep_init( void );

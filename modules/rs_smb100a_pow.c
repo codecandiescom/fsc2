@@ -18,8 +18,7 @@
  */
 
 
-#include "rs.h"
-#include <float.h>
+#include "rs_smb100a.h"
 
 
 typedef struct
@@ -59,7 +58,6 @@ pow_init( void )
        they differ between models */
 
     rs->pow.pow_resolution = 0.01;
-    rs->pow.min_att        = DBL_MAX;
 
     if ( FSC2_MODE == PREPARATION )
     {
@@ -67,7 +65,7 @@ pow_init( void )
         rs->pow.alc_state_has_been_set = false;
         rs->pow.mode_has_been_set      = false;
         rs->pow.off_mode_has_been_set  = false;
-
+        rs->pow.user_max_pow_limit   = max_pow[ 4 ].pow;
         return;
     }
 
@@ -363,9 +361,10 @@ pow_set_off_mode( enum Off_Mode mode )
  *----------------------------------------------------*/
 
 double
-pow_min_att( void )
+pow_maximum_power( void )
 {
-    return d_min( pow_max_power( freq_frequency( ) ), rs->pow.min_att );
+    return d_min( pow_max_power( freq_frequency( ) ),
+                  rs->pow.user_max_pow_limit );
 }
 
 
@@ -373,16 +372,16 @@ pow_min_att( void )
  *----------------------------------------------------*/
 
 double
-pow_set_min_att( double min_att )
+pow_set_maximum_power( double user_max_pow )
 {
-    if ( min_att < pow_min_power( ) )
+    if ( user_max_pow < pow_min_power( ) )
     {
-        print( FATAL, "Invalid minimum attenuation of %f dBm, can't be "
-               "set lower than %f dBm.\n", min_att, pow_min_power( ) );
+        print( FATAL, "Invalid minimum attenuation of %f dB, can't be "
+               "set lower than %f dB.\n", - min_pow, - pow_min_power( ) );
         THROW( EXCEPTION );
     }
 
-    return rs->pow.min_att = min_att;
+    return rs->pow.user_max_pow_limit = user_max_pow;
 }
 
 
@@ -397,14 +396,14 @@ double
 pow_check_power( double pow,
                  double freq )
 {
-    double pmax = d_min( pow_max_power( freq ), rs->pow.min_att );
+    double pmax = d_min( pow_max_power( freq ), rs->pow.user_max_pow_limit );
     double pmin = pow_min_power( );
 
     if (    pow >= pmax + 0.5 * rs->pow.pow_resolution
          || pow <  pmin - 0.5 * rs->pow.pow_resolution )
     {
-        print( FATAL, "Requested attenuation of %.2f dBm out of range, "
-               "must be between %f and %f dBm.\n", pow, pmin, pmax);
+        print( FATAL, "Requested attenuation of %.2f dB out of range, "
+               "must be between %f and %f dB.\n", - pow, - pmin, - pmax);
         THROW( EXCEPTION );
     }
 

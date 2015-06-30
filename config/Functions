@@ -305,6 +305,7 @@ synthesizer_max_attenuation, -1, ALL;              // R&S SMB100A
 synthesizer_modulation_output_impedance, -1, ALL;  // R&S SMB100A
 synthesizer_modulation_output_voltage, -1, ALL;    // R&S SMB100A
 synthesizer_mod_state, -1, ALL;                    // R&S SMB100A
+synthesizer_mod_mode, -1, ALL;                     // R&S SMB100A
 synthesizer_setup_list, -1, ALL;                   // R&S SMB100A
 synthesizer_select_list, -1, ALL;				   // R&S SMB100A
 synthesizer_start_list, 0, EXP;					   // R&S SMB100A

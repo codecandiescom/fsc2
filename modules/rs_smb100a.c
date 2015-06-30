@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -21,262 +21,70 @@
 #include "rs_smb100a.h"
 
 
-/*--------------------------------*/
-/* Global variables of the module */
-/*--------------------------------*/
-
-const char device_name[ ]  = DEVICE_NAME;
-const char generic_type[ ] = DEVICE_TYPE;
-
-RS_SMB100A_T rs_smb100a;
-
-static const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
+rs_smb100a_T * rs;
+static rs_smb100a_T rs_prep,
+                    rs_test,
+                    rs_exp;
 
 
-struct MOD_RANGES fm_mod_ranges[ ] = { { 7.600000e6, 1.00e6 },
-                                       { 1.513125e8, 1.25e5 },
-                                       { 3.026250e8, 2.50e6 },
-                                       { 6.052500e8, 5.00e6 },
-                                       { 1.100000e9, 1.00e6 } };
-
-struct MOD_RANGES pm_mod_ranges[ ] = { { 7.600000e6, 10.0 },
-                                       { 1.513125e8, 1.25 },
-                                       { 3.026250e8, 2.50 },
-                                       { 6.052500e8, 5.00 },
-                                       { 1.100000e9, 10.0 } };
-
-size_t num_fm_mod_ranges = NUM_ELEMS( fm_mod_ranges );
-size_t num_pm_mod_ranges = NUM_ELEMS( pm_mod_ranges );
-
-static RS_SMB100A_T rs_smb100a_backup;
-
-
-/*------------------------------------*
- * Init hook function for the module.
- *------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int
 rs_smb100a_init_hook( void )
 {
-    int i;
+	Need_LAN = true;
 
-
-    /* Set global variable to indicate that LAN is needed */
-
-	Need_LAN = SET;
-
-	rs_smb100a.device = -1;
-
-    rs_smb100a.state = UNSET;
-
-    rs_smb100a.freq_is_set = UNSET;
-    rs_smb100a.step_freq_is_set = UNSET;
-    rs_smb100a.start_freq_is_set = UNSET;
-    rs_smb100a.attenuation_is_set = UNSET;
-    rs_smb100a.min_attenuation = MIN_ATTEN;
-
-    rs_smb100a.table_file = NULL;
-    rs_smb100a.use_table = UNSET;
-    rs_smb100a.att_table = NULL;
-    rs_smb100a.att_table_len = 0;
-    rs_smb100a.real_attenuation = MAX_ATTEN - 100.0;  /* invalid value ! */
-
-    rs_smb100a.att_ref_freq = DEF_ATT_REF_FREQ;
-
-    rs_smb100a.mod_type = UNDEFINED;
-    rs_smb100a.mod_type_is_set = UNSET;
-    for ( i = 0; i < NUM_MOD_TYPES; i++ )
-    {
-        rs_smb100a.mod_source_is_set[ i ] = UNSET;
-        rs_smb100a.mod_freq_is_set[ i ] = UNSET;
-        rs_smb100a.mod_ampl_is_set[ i ] = UNSET;
-    }
-
-    rs_smb100a.freq_change_delay = 0.0;
-
-    rs_smb100a.input_trig_slope_is_set = UNSET;
-
-    rs_smb100a.input_imp_is_set = UNSET;
-
-#if defined WITH_PULSE_MODULATION
-    rs_smb100a.pulse_mode_state_is_set = UNSET;
-    rs_smb100a.pulse_mode_state = UNSET;
-#endif // WITH_PULSE_MODULATION
-
-#if defined WITH_PULSE_GENERATION
-    rs_smb100a.double_pulse_mode_is_set = UNSET;
-    rs_smb100a.pulse_width_is_set = UNSET;
-    rs_smb100a.pulse_delay_is_set = UNSET;
-    rs_smb100a.double_pulse_delay_is_set = UNSET;
-#endif // WITH_PULSE_GENERATION
-
-    return 1;
+	rs_init( &rs_prep );
+	return 1;
 }
 
 
-/*------------------------------------*
- * Test hook function for the module.
- *------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int
 rs_smb100a_test_hook( void )
 {
-    /* If a table has been set check that at the frequency the attenuations
-       refer to the table is defined and if it is get the attenuation at the
-       reference frequency */
+	rs_test = rs_prep;
+	rs_init( &rs_test );
 
-    if ( rs_smb100a.use_table )
-    {
-        if (    rs_smb100a.att_ref_freq < rs_smb100a.min_table_freq
-             || rs_smb100a.att_ref_freq > rs_smb100a.max_table_freq )
-        {
-            print( FATAL, "Reference frequency for attenuation settings of "
-                   "%g MHz is not covered by the table.\n",
-                   rs_smb100a.att_ref_freq );
-            THROW( EXCEPTION );
-        }
-
-        rs_smb100a.att_at_ref_freq =
-                      rs_smb100a_get_att_from_table( rs_smb100a.att_ref_freq );
-    }
-
-    /* Save the current state of the device structure which always has to be
-       reset to this state at the start of the experiment */
-
-    rs_smb100a_backup = rs_smb100a;
-
-    /* Set up a few default values */
-
-    if ( ! rs_smb100a.freq_is_set )
-    {
-        rs_smb100a.freq = RS_SMB100A_TEST_RF_FREQ;
-        rs_smb100a.freq_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.mod_type_is_set )
-    {
-        rs_smb100a.mod_type = RS_SMB100A_TEST_MOD_TYPE;
-        rs_smb100a.mod_type_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] )
-    {
-        rs_smb100a.mod_source[ rs_smb100a.mod_type ] =
-                                                    RS_SMB100A_TEST_MOD_SOURCE;
-        rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] = SET;
-    }
-
-    if ( ! rs_smb100a.mod_freq_is_set[ rs_smb100a.mod_type ] )
-    {
-        rs_smb100a.mod_freq[ rs_smb100a.mod_type ] = RS_SMB100A_TEST_MOD_FREQ;
-        rs_smb100a.mod_freq_is_set[ rs_smb100a.mod_type ] = SET;
-    }
-
-    if ( ! rs_smb100a.mod_ampl_is_set[ rs_smb100a.mod_type ] )
-    {
-        rs_smb100a.mod_ampl[ rs_smb100a.mod_type ] = RS_SMB100A_TEST_MOD_AMPL;
-        rs_smb100a.mod_ampl_is_set[ rs_smb100a.mod_type ] = SET;
-    }
-
-    if ( ! rs_smb100a.input_trig_slope_is_set )
-    {
-        rs_smb100a.input_trig_slope = RS_SMB100A_TEST_INPUT_TRIG_SLOPE;
-        rs_smb100a.input_trig_slope_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.input_imp_is_set )
-    {
-        rs_smb100a.input_imp = RS_SMB100A_TEST_INPUT_IMPEDANCE;
-        rs_smb100a.input_imp_is_set = SET;
-    }
-
-#if defined WITH_PULSE_MODULATION
-    if ( ! rs_smb100a.pulse_mode_state_is_set )
-    {
-        rs_smb100a.pulse_mode_state = RS_SMB100A_TEST_PULSE_MODE_STATE;
-        rs_smb100a.pulse_mode_state_is_set = SET;
-    }
-#endif // WITH_PULSE_MODULATION
-
-#if defined WITH_PULSE_GENERATION
-    if ( ! rs_smb100a.double_pulse_mode_is_set )
-    {
-        rs_smb100a.double_pulse_mode = RS_SMB100A_TEST_DOUBLE_PULSE_MODE;
-        rs_smb100a.double_pulse_mode_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.double_pulse_delay_is_set )
-    {
-        rs_smb100a.double_pulse_delay = RS_SMB100A_TEST_DOUBLE_PULSE_DELAY;
-        if ( rs_smb100a.pulse_width_is_set )
-            rs_smb100a.double_pulse_delay += rs_smb100a.pulse_width;
-        rs_smb100a.double_pulse_delay_is_set = SET;
-    }
-    if ( ! rs_smb100a.pulse_width_is_set )
-    {
-        rs_smb100a.pulse_width = RS_SMB100A_TEST_PULSE_WIDTH;
-        rs_smb100a.pulse_width_is_set = SET;
-    }
-
-    if ( ! rs_smb100a.pulse_delay_is_set )
-    {
-        rs_smb100a.pulse_delay = RS_SMB100A_TEST_PULSE_DELAY;
-        rs_smb100a.pulse_delay_is_set = SET;
-    }
-#endif // WITH_PULSE_GENERATION
-
-    return 1;
+	return 1;
 }
 
 
-/*--------------------------------------------------*
- * Start of experiment hook function for the module
- *--------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+int
+rs_smb100a_end_of_test_hook( void )
+{
+	rs_cleanup( );
+	return 1;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int
 rs_smb100a_exp_hook( void )
 {
-    /* Restore device structure to the state at the start of the test run */
+	rs_exp = rs_prep;
+	rs_init( &rs_exp );
 
-    rs_smb100a = rs_smb100a_backup;
-
-    if ( ! rs_smb100a_init( DEVICE_NAME ) )
-    {
-        print( FATAL, "Initialization of device %s failed.\n", DEVICE_NAME );
-        THROW( EXCEPTION );
-    }
-
-    return 1;
+	return 1;
 }
 
 
-/*------------------------------------------------*
- * End of experiment hook function for the module
- *------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 int
 rs_smb100a_end_of_exp_hook( void )
 {
-    rs_smb100a_finished( );
-
-    rs_smb100a = rs_smb100a_backup;
-
-    return 1;
-}
-
-
-/*------------------------------------------*
- * For final work before module is unloaded
- *------------------------------------------*/
-
-void
-rs_smb100a_exit_hook( void )
-{
-    if ( rs_smb100a.table_file != NULL )
-        rs_smb100a.table_file = T_free( rs_smb100a.table_file );
-
-    if ( rs_smb100a.use_table && rs_smb100a.att_table != NULL )
-        rs_smb100a.att_table = T_free( rs_smb100a.att_table );
+	rs_cleanup( );
+	return 1;
 }
 
 
@@ -286,1116 +94,255 @@ rs_smb100a_exit_hook( void )
 Var_T *
 synthesizer_name( Var_T * v  UNUSED_ARG )
 {
-    return vars_push( STR_VAR, DEVICE_NAME );
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
-/*---------------------------------------------------------------*
- * Switches RF output on or off, or, if called with no argument,
- * returns 0 or 1, indicating that RF output is off or on.
- *---------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
 synthesizer_state( Var_T * v )
 {
-    bool state;
+	if ( ! v )
+		return vars_push( INT_VAR, outp_state( ) ? 1L : 0L );
 
+	bool state = get_boolean( v );
+	too_many_arguments( v );
 
-    if ( v == NULL )              /* i.e. return the current state */
-        switch( FSC2_MODE )
-        {
-            case PREPARATION :
-                no_query_possible( );
-
-            case TEST :
-                return vars_push( INT_VAR, ( long ) rs_smb100a.state );
-
-            case EXPERIMENT :
-                return vars_push( INT_VAR,
-                                  ( long ) ( rs_smb100a.state =
-                                            rs_smb100a_get_output_state( ) ) );
-        }
-
-    state = get_boolean( v );
-    too_many_arguments( v );
-
-    rs_smb100a.state = state;
-
-    if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( INT_VAR, ( long ) state );
-
-    return vars_push( INT_VAR, ( long ) rs_smb100a_set_output_state( state ) );
+	return vars_push( INT_VAR, outp_set_state( state ) ? 1L : 0L );
 }
+		
 
-
-/*---------------------------------------------------------------------*
- * Function sets or returns (if called with no argument) the frequency
- * of the synthesizer. If called for setting the frequency before the
- * experiment is started the frequency value is stored and set in the
- * setup phase of the experiment. The frequency set the first time the
- * function is called is also set as the start frequency to be used in
- * calls of 'synthesizer_reset_frequency'. The function can only be
- * called once in the PREPARATIONS section, further calls just result
- * in a warning and the new value isn't accepted.
- *---------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
 synthesizer_frequency( Var_T * v )
 {
-    double freq;
-    double att;
+	if ( ! v )
+		return vars_push( FLOAT_VAR, freq_frequency( ) );
 
+	double freq = get_double( v, NULL );
+	too_many_arguments( v );
 
-    if ( v == NULL )              /* i.e. return the current frequency */
-    {
-        if ( FSC2_MODE != EXPERIMENT )
-        {
-            if ( ! rs_smb100a.freq_is_set )
-            {
-                print( FATAL, "RF frequency hasn't been set yet.\n" );
-                THROW( EXCEPTION );
-            }
-            else
-                return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        }
+    double pow = rs->pow.req_pow + table_att_offset( freq );
+    if ( pow != rs->pow.pow )
+        pow_set_power( pow );
 
-        rs_smb100a.freq = rs_smb100a_get_frequency( );
-        return vars_push( FLOAT_VAR, rs_smb100a.freq );
-    }
-
-    freq = get_double( v, "RF frequency" );
-
-    if ( freq < 0 )
-    {
-        print( FATAL, "Invalid negative RF frequency.\n" );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        else
-            THROW( EXCEPTION );
-    }
-
-    too_many_arguments( v );
-
-    /* In test run stop program if value is out of range while in real run
-       just keep the current value on errors */
-
-    if ( freq < MIN_FREQ || freq > MAX_FREQ )
-    {
-        print( FATAL, "RF frequency (%f MHz) not within synthesizers range "
-               "(%.3f kHz - %g Mhz).\n", 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
-               1.0e-6 * MAX_FREQ );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        else
-            THROW( EXCEPTION );
-    }
-
-    rs_smb100a_check_mod_ampl( freq );
-
-    switch ( FSC2_MODE )
-    {
-        case PREPARATION :
-            rs_smb100a.freq = rs_smb100a.start_freq = freq;
-            rs_smb100a.freq_is_set = SET;
-            rs_smb100a.start_freq_is_set = SET;
-            break;
-
-        case TEST :
-            rs_smb100a.freq = freq;
-            rs_smb100a.freq_is_set = SET;
-            if ( ! rs_smb100a.start_freq_is_set )
-            {
-                rs_smb100a.start_freq = freq;
-                rs_smb100a.start_freq_is_set = SET;
-            }
-
-            /* Calculate the attenuation needed to level out the non-flatness
-               of the RF field in the resonator if a table has been set - in
-               the test run we only do this to check that we stay within all
-               the limits */
-
-            if ( rs_smb100a.use_table )
-                rs_smb100a.real_attenuation = rs_smb100a_get_att( freq );
-            break;
-
-        case EXPERIMENT :
-            if ( ! rs_smb100a.start_freq_is_set )
-            {
-                rs_smb100a.start_freq = freq;
-                rs_smb100a.start_freq_is_set = SET;
-            }
-
-            /* Take care of setting the correct attenuation to level out the
-               non-flatness of the RF field in the resonator if a table has
-               been set */
-
-            if ( rs_smb100a.use_table )
-            {
-                att = rs_smb100a_get_att( freq );
-                if ( att != rs_smb100a.real_attenuation )
-                {
-                    rs_smb100a_set_attenuation( att );
-                    rs_smb100a.real_attenuation = att;
-                }
-            }
-
-            /* Finally set the frequency */
-
-            rs_smb100a.freq = rs_smb100a_set_frequency( freq );
-    }
-
-    return vars_push( FLOAT_VAR, freq );
+	return vars_push( FLOAT_VAR, freq_set_frequency( freq ) );
 }
 
 
-/*-----------------------------------------------------------------------*
- * Function sets or returns (if called with no argument) the attenuation
- * of the synthesizer. If called for setting the attenuation before the
- * experiment is started the attenuation value is stored and set in the
- * setup phase of the attenuation. The function can only be called once
- * in the PREPARATIONS section, further calls just result in a warning
- * and the new value isn't accepted.
- *-----------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
 synthesizer_attenuation( Var_T * v )
 {
-    double att;
+	if ( ! v )
+		return vars_push( FLOAT_VAR, - pow_power( ) );
 
+	double pow = - get_double( v, NULL );
+	too_many_arguments( v );
 
-    if ( v == NULL )              /* i.e. return the current attenuation */
-    {
-        if ( FSC2_MODE != EXPERIMENT )
-        {
-            if ( ! rs_smb100a.attenuation_is_set )
-            {
-                if ( FSC2_MODE == TEST )
-                    return vars_push( FLOAT_VAR, MAX_ATTEN );
-                else
-                {
-                    print( FATAL, "RF attenuation has not been set yet.\n" );
-                    THROW( EXCEPTION );
-                }
-            }
-            else
-                return vars_push( FLOAT_VAR, rs_smb100a.attenuation );
-        }
-
-        return vars_push( FLOAT_VAR, rs_smb100a_get_attenuation( ) );
-    }
-
-    att = get_double( v, "RF attenuation" );
-
-    too_many_arguments( v );
-
-    /* Check that attenuation is within valid range, if not throw exception
-       in test run, but in real run just don't change the attenuation */
-
-    if ( att > rs_smb100a.min_attenuation || att < MAX_ATTEN )
-    {
-        print( FATAL, "RF attenuation (%g dBm) not within valid range (%g dBm "
-               "to %g dBm).\n", att, MAX_ATTEN, rs_smb100a.min_attenuation );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.attenuation );
-        else
-            THROW( EXCEPTION );
-    }
-
-    switch ( FSC2_MODE )
-    {
-        case PREPARATION :
-            if ( rs_smb100a.attenuation_is_set )
-            {
-                print( SEVERE, "RF attenuation has already been set to %g "
-                       "dBm, keeping old value.\n", rs_smb100a.attenuation );
-                return vars_push( FLOAT_VAR, rs_smb100a.attenuation );
-            }
-
-            rs_smb100a.attenuation = att;
-            rs_smb100a.attenuation_is_set = SET;
-            break;
-
-        case TEST :
-            rs_smb100a.attenuation = rs_smb100a.real_attenuation = att;
-            rs_smb100a.attenuation_is_set = SET;
-            break;
-
-        case EXPERIMENT :
-            rs_smb100a.attenuation = rs_smb100a.real_attenuation =
-                                             rs_smb100a_set_attenuation( att );
-            break;
-    }
-
-    return vars_push( FLOAT_VAR, att );
+	return vars_push( FLOAT_VAR, - ( rs->pow.req_pow = pow_set_power( pow ) ) );
 }
 
 
-/*-------------------------------------------------------------*
- * Sets (or returns) the minimum attentuation that can be set.
- *-------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
 synthesizer_minimum_attenuation( Var_T * v )
 {
-    double min_atten;
+	if ( ! v )
+		vars_push( FLOAT_VAR, - pow_maximum_power( ) );
 
+	double max_pow = - get_double( v, NULL );
+	too_many_arguments( v );
 
-    if ( v == NULL )          /* i.e. return the current minimum attenuation */
-        return vars_push( FLOAT_VAR, rs_smb100a.min_attenuation );
-
-
-    min_atten = get_double( v, "minimum RF attenuation" );
-
-    too_many_arguments( v );
-
-    if ( min_atten > MIN_MIN_ATTEN )
-    {
-        print( FATAL, "Minimum attenuation must be below %g dBm.\n",
-               MIN_MIN_ATTEN );
-        THROW( EXCEPTION );
-    }
-
-    if ( min_atten < MAX_ATTEN )
-    {
-        print( FATAL, "Minimum attenuation must be more than %g dBm.\n",
-               MAX_ATTEN );
-        THROW( EXCEPTION );
-    }
-
-    rs_smb100a.min_attenuation = min_atten;
-
-    return vars_push( FLOAT_VAR, rs_smb100a.min_attenuation );
-}
-
-/*-----------------------------------------------------------*
- * Function sets or returns (if called with no argument) the
- * step frequency for RF sweeps.
- *-----------------------------------------------------------*/
-
-Var_T *
-synthesizer_step_frequency( Var_T * v )
-{
-    if ( v != NULL )
-    {
-        /* Allow setting of the step frequency in the PREPARATIONS section
-           only once */
-
-        if ( FSC2_MODE == PREPARATION && rs_smb100a.step_freq_is_set )
-        {
-            print( SEVERE, "RF step frequency has already been set to %f MHz, "
-                   "keeping old value.\n", 1.0e-6 * rs_smb100a.step_freq );
-            return vars_push( FLOAT_VAR, rs_smb100a.step_freq );
-        }
-
-        rs_smb100a.step_freq = get_double( v, "RF step frequency" );
-        rs_smb100a.step_freq_is_set = SET;
-
-        too_many_arguments( v );
-    }
-    else if ( ! rs_smb100a.step_freq_is_set )
-    {
-        print( FATAL, "RF step frequency has not been set yet.\n" );
-        THROW( EXCEPTION );
-    }
-
-    return vars_push( FLOAT_VAR, rs_smb100a.step_freq );
-}
-
-
-/*---------------------------------------------------------------------*
- * Function increments the frequency by a single sweep-step-sized step
- *---------------------------------------------------------------------*/
-
-Var_T *
-synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
-{
-    double att;
-
-
-    if ( ! rs_smb100a.step_freq_is_set )
-    {
-        print( FATAL, "RF step frequency hasn't been set.\n" );
-        THROW( EXCEPTION );
-    }
-
-    rs_smb100a.freq += rs_smb100a.step_freq;
-
-    /* Check that frequency stays within the synthesizers range */
-
-    if ( rs_smb100a.freq < MIN_FREQ )
-    {
-        print( FATAL, "RF frequency dropping below lower limit of %f kHz.\n",
-               1.0e-3 * MIN_FREQ );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        else
-            THROW( EXCEPTION );
-    }
-
-    if ( rs_smb100a.freq > MAX_FREQ )
-    {
-        print( FATAL, "RF frequency increased above upper limit of %f MHz.\n",
-               1.0e-6 * MAX_FREQ );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        else
-            THROW( EXCEPTION );
-    }
-
-    /* Check that the modulation amplitude isn't too high for the new
-       frequency */
-
-    rs_smb100a_check_mod_ampl( rs_smb100a.freq );
-
-    if ( FSC2_MODE == TEST )
-        rs_smb100a.real_attenuation = rs_smb100a_get_att( rs_smb100a.freq );
-    else
-    {
-        att = rs_smb100a_get_att( rs_smb100a.freq );
-        if ( att != rs_smb100a.real_attenuation )
-        {
-            rs_smb100a.real_attenuation = att;
-            rs_smb100a_set_attenuation( att );
-        }
-
-        rs_smb100a_set_frequency( rs_smb100a.freq );
-    }
-
-    return vars_push( FLOAT_VAR, rs_smb100a.freq );
-}
-
-
-/*---------------------------------------------------------------------*
- * Function decrements the frequency by a single sweep-step-sized step
- *---------------------------------------------------------------------*/
-
-Var_T *
-synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
-{
-    Var_T *nv;
-
-
-    rs_smb100a.step_freq *= -1.0;
-    nv = synthesizer_sweep_up( NULL );
-    rs_smb100a.step_freq *= -1.0;
-    return nv;
+	return vars_push( FLOAT_VAR, pow_set_maximum_power( max_pow ) );
 }
 
 
 /*----------------------------------------------------*
- * Function resets the frequency to the initial value
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
+synthesizer_min_attenuation( Var_T * v )
 {
-    if ( ! rs_smb100a.start_freq_is_set )
-    {
-        print( FATAL, "No RF frequency has been set yet, so can't do a "
-               "frequency reset.\n" );
-        THROW( EXCEPTION );
-    }
+	if ( ! v )
+		return vars_push( FLOAT_VAR, - pow_max_power( freq_frequency( ) ) );
 
-    /* Check that the modulation amplitude isn't too high for the new
-       frequency */
+	double freq = get_double( v, NULL );
+	too_many_arguments( v );
 
-    rs_smb100a_check_mod_ampl( rs_smb100a.start_freq );
-
-    if ( FSC2_MODE == TEST )
-        rs_smb100a.freq = rs_smb100a.start_freq;
-    else
-        rs_smb100a.freq = rs_smb100a_set_frequency( rs_smb100a.start_freq );
-
-    return vars_push( FLOAT_VAR, rs_smb100a.freq );
+	return vars_push( FLOAT_VAR, - pow_max_power( freq ) );
 }
 
 
-/*---------------------------------------------------------------------------*
- * Function for reading in a table file of  frequency-dependend attenuations
- *---------------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
-synthesizer_use_table( Var_T * v )
+synthesizer_max_attenuation( Var_T * v )
 {
-    FILE *tfp = NULL;
-    char *tfname;
+	too_many_arguments( v );
 
-
-    CLOBBER_PROTECT( tfp );
-
-    /* Try to figure out the name of the table file - if no argument is given
-       use the default table file, otherwise use the user supplied file name */
-
-    if ( v == NULL )
-    {
-        if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
-            rs_smb100a.table_file = T_strdup( DEFAULT_TABLE_FILE );
-        else
-            rs_smb100a.table_file = get_string( "%s%s%s", libdir,
-                                               slash( libdir ),
-                                               DEFAULT_TABLE_FILE );
-
-        if ( ( tfp = rs_smb100a_open_table( rs_smb100a.table_file ) ) == NULL )
-        {
-            print( FATAL, "Default table file '%s' not found.\n",
-                   rs_smb100a.table_file );
-            rs_smb100a.table_file = T_free( rs_smb100a.table_file );
-            THROW( EXCEPTION );
-        }
-    }
-    else
-    {
-        vars_check( v, STR_VAR );
-
-        tfname = T_strdup( v->val.sptr );
-
-        too_many_arguments( v );
-
-        TRY
-        {
-            tfp = rs_smb100a_find_table( &tfname );
-            rs_smb100a.table_file = tfname;
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            T_free( tfname );
-            RETHROW;
-        }
-    }
-
-    /* Now try to read in the table file */
-
-    TRY
-    {
-        rs_smb100a_read_table( tfp );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-    {
-        fclose( tfp );
-        rs_smb100a.table_file = T_free( rs_smb100a.table_file );
-        RETHROW;
-    }
-
-    fclose( tfp );
-    rs_smb100a.table_file = T_free( rs_smb100a.table_file );
-    rs_smb100a.use_table = SET;
-
-    return vars_push( INT_VAR, 1L );
+	return vars_push( FLOAT_VAR, pow_min_power( ) );
 }
 
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+		
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
-synthesizer_att_ref_freq( Var_T * v )
+synthesizer_automatic_level_control( Var_T * v )
 {
-    double freq;
+	if ( ! v )
+		return vars_push( INT_VAR, ( long ) pow_alc_state( ) );
 
+	long alc_state;
 
-    /* Without an argument just return the reference frequency setting */
+	if ( v->type == STR_VAR )
+	{
+		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+			alc_state = ALC_STATE_OFF;
+		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+			alc_state = ALC_STATE_ON;
+		else if ( ! strcasecmp( v->val.sptr, "AUTO" ) )
+			alc_state = ALC_STATE_AUTO;
+		else
+		{
+			print( FATAL, "Invalid ALC state \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		alc_state = get_strict_long( v, NULL );
 
-    if ( v == NULL )
-        return vars_push( FLOAT_VAR, rs_smb100a.att_ref_freq );
+	too_many_arguments( v );
 
-    /* Otherwise check the supplied variable */
-
-    freq = get_double( v, "RF attenuation reference frequency" );
-
-    /* Check that the frequency is within the synthesizers range */
-
-    if ( freq > MAX_FREQ || freq < MIN_FREQ )
-    {
-        print( FATAL, "Reference frequency for attenuation settings of %g MHz "
-               "is out of synthesizer range (%f kHz - %f MHz).\n",
-               rs_smb100a.att_ref_freq * 1.0e-6,
-               MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-        if ( FSC2_MODE == EXPERIMENT )
-            return vars_push( FLOAT_VAR, rs_smb100a.freq );
-        else
-            THROW( EXCEPTION );
-    }
-
-    too_many_arguments( v );
-
-    rs_smb100a.att_ref_freq = freq;
-
-    /* If a table has already been loaded calculate the attenuation at the
-       reference frequency */
-
-    if ( rs_smb100a.use_table )
-    {
-        if (    rs_smb100a.att_ref_freq < rs_smb100a.min_table_freq
-             || rs_smb100a.att_ref_freq > rs_smb100a.max_table_freq )
-        {
-            print( FATAL, "Reference frequency for attenuation settings of "
-                   "%g MHz is not covered by the table.\n",
-                   rs_smb100a.att_ref_freq );
-            THROW( EXCEPTION );
-        }
-
-        rs_smb100a.att_at_ref_freq = rs_smb100a_get_att_from_table( freq );
-    }
-
-    return vars_push( FLOAT_VAR, freq );
+	return vars_push( INT_VAR, ( long ) pow_set_alc_state( alc_state ) );
 }
 
-
-/*-----------------------------------------------------------------*
- * Function for setting some or all modulation parameters at once.
- * The sequence the parameters are set in don't matter. If the
- * function succeeds 1 (as variable) is returned, otherwise an
- * exception is thrown.
- *-----------------------------------------------------------------*/
+		
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
-synthesizer_modulation( Var_T * v )
+synthesizer_output_impedance( Var_T * v  UNUSED_ARG )
 {
-    unsigned int set = 0;
-    int res;
-    const char *str[ ] = { "amplitude", "type", "source" };
-    const char *mod_source[ ] = { "EXT AC", "EXT DC", "INT" };
-    double val;
-    double ampl = 0.0;
-    double freq = 0.0;
-    int what;
-    int type = UNDEFINED,
-        source = UNDEFINED;
-    bool ampl_is_set = UNSET;
-    Var_T *func_ptr;
-    int acc;
-
-
-    if ( v == NULL )
-    {
-        print( FATAL, "Use the functions "
-               "'synthesizer_mod_(type|source|freq|ampl)' to determine "
-               "modulation settings.\n" );
-        THROW( EXCEPTION );
-    }
-
-    while ( v )
-    {
-        if ( ( 1 << ( res = rs_smb100a_get_mod_param( &v, &val, &what ) ) )
-             & set )
-            print( SEVERE, "Parameter for modulation %s set more than once in "
-                   "call of 'synthesizer_modulation'.\n", str[ res ] );
-        else
-        {
-            switch ( res )
-            {
-                case 0 :                /* setting modulation amplitude */
-                    ampl_is_set = SET;
-                    ampl = val;
-                    break;
-
-                case 1 :                /* setting modulation type */
-                    type = what;
-                    break;
-
-                case 2 :                /* setting modulation source */
-                    source = what;
-                    freq = val;
-                    break;
-
-                default :                 /* this definitely can't happen... */
-                    fsc2_impossible( );
-            }
-        }
-        set |= ( 1 << res );
-        v = vars_pop( v );
-    }
-
-    if ( type != UNDEFINED )
-    {
-        func_ptr = func_get( "synthesizer_mod_type", &acc );
-        vars_push( INT_VAR, ( long ) type );
-        vars_pop( func_call( func_ptr ) );
-    }
-
-    if ( ampl_is_set )
-    {
-        func_ptr = func_get( "synthesizer_mod_ampl", &acc );
-        vars_push( FLOAT_VAR, ampl );
-        vars_pop( func_call( func_ptr ) );
-    }
-
-    if ( source != UNDEFINED )
-    {
-        func_ptr = func_get( "synthesizer_mod_source", &acc );
-        vars_push( STR_VAR, mod_source[ source ] );
-        if ( source == MOD_SOURCE_INT )
-            vars_push( FLOAT_VAR, freq );
-        vars_pop( func_call( func_ptr ) );
-    }
-
-    return vars_push( INT_VAR, 1L );
+	return vars_push( INT_VAR, impedance_to_int( outp_impedance( ) ) );
 }
 
 
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
-synthesizer_mod_type( Var_T * v )
+synthesizer_protection_tripped( Var_T * v  UNUSED_ARG )
 {
-    int res;
-
-
-    if ( v == NULL )
-    {
-        switch ( FSC2_MODE )
-        {
-            case PREPARATION :
-                if ( ! rs_smb100a.mod_type_is_set )
-                {
-                    print( FATAL, "Modulation type hasn't been set yet.\n" );
-                    THROW( EXCEPTION );
-                }
-                break;
-
-            case TEST :
-                if ( ! rs_smb100a.mod_type_is_set )
-                {
-                    rs_smb100a.mod_type = MOD_TYPE_FM;
-                    rs_smb100a.mod_type_is_set = SET;
-                }
-                break;
-
-            case EXPERIMENT :
-                rs_smb100a.mod_type = rs_smb100a_get_mod_type( );
-        }
-
-        return vars_push( INT_VAR, rs_smb100a.mod_type != UNDEFINED ?
-                                                  rs_smb100a.mod_type : - 1L );
-    }
-
-    vars_check( v, STR_VAR | INT_VAR );
-
-    if ( v->type == INT_VAR )
-    {
-        res = ( int ) v->val.lval;
-
-        if ( res < 0 || res >= NUM_MOD_TYPES )
-        {
-            print( FATAL, "Invalid modulation type %d.\n", res );
-            THROW( EXCEPTION );
-        }
-    }
-    else
-    {
-        if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
-        {
-            print( FATAL, "Invalid modulation type '%s'.\n", v->val.sptr );
-            THROW( EXCEPTION );
-        }
-    }
-
-    too_many_arguments( v );
-
-    rs_smb100a.mod_type = res;
-    rs_smb100a.mod_type_is_set = SET;
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_mod_type( res );
-
-    return vars_push( INT_VAR, ( long ) res );
+	return vars_push( INT_VAR, outp_protection_is_tripped( ) ? 1L : 0L );
 }
 
 
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
-synthesizer_mod_source( Var_T * v )
+synthesizer_reset_protection( Var_T * v  UNUSED_ARG )
 {
-    int source = 0;
-    const char *sources[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };
-    double freq = 0.0;
-
-
-    if ( v == NULL )
-    {
-        if ( ! rs_smb100a.mod_type_is_set )
-        {
-            print( FATAL, "Can't determine modulation source as long as "
-                   "modulation type isn't set.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-        {
-            print( FATAL, "Can't determine modulation source when modulation "
-                   "is off.\n" );
-            THROW( EXCEPTION );
-        }
-
-        switch ( FSC2_MODE )
-        {
-            case PREPARATION :
-                if ( ! rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] )
-                {
-                    print( FATAL, "Modulation source for %s modulation "
-                           "hasn't been set yet.\n",
-                           mod_types[ rs_smb100a.mod_type ] );
-                    THROW( EXCEPTION );
-                }
-                break;
-
-            case TEST :
-                if ( ! rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] )
-                {
-                    rs_smb100a.mod_source[ rs_smb100a.mod_type ] =
-                                                                 MOD_SOURCE_AC;
-                    rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] = SET;
-                }
-                break;
-
-            case EXPERIMENT :
-                rs_smb100a.mod_source[ rs_smb100a.mod_type ] =
-                           rs_smb100a_get_mod_source( rs_smb100a.mod_type, &freq );
-                break;
-        }
-
-        return vars_push( INT_VAR,
-                          rs_smb100a.mod_source[ rs_smb100a.mod_type ] );
-    }
-
-    if ( ! rs_smb100a.mod_type_is_set )
-    {
-        print( FATAL, "Can't set modulation source as long as modulation type "
-               "isn't set.\n" );
-        THROW( EXCEPTION );
-    }
-
-    if ( v->type & ( INT_VAR | FLOAT_VAR ))
-    {
-        if ( v->type == INT_VAR )
-            print( WARN, "Integer value used as internal modulation "
-                   "frequency.\n" );
-        freq = get_double( v, "modulation frequency" );
-        source = MOD_SOURCE_INT;
-    }
-    else
-    {
-        switch ( is_in( v->val.sptr, sources, NUM_ELEMS( sources ) ) )
-        {
-            case 0 : case 1 :
-                source = MOD_SOURCE_AC;
-                break;
-
-            case 2 : case 3 :
-                source = MOD_SOURCE_DC;
-                break;
-
-            case 4 :
-                source = MOD_SOURCE_INT;
-                break;
-
-            default :
-                print( FATAL, "Invalid modulation source '%s'.\n",
-                       v->val.sptr );
-                THROW( EXCEPTION );
-        }
-    }
-
-    if ( source == MOD_SOURCE_INT )
-    {
-        if (    ( v = vars_pop( v ) ) == NULL
-             || ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
-        {
-            print( FATAL, "Argument setting to internal modulation must "
-                   "be immediately followed by the modulation frequency.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( v->type == INT_VAR )
-            print( WARN, "Integer value used as internal modulation "
-                   "frequency.\n" );
-
-        freq = get_double( v, "modulation frequency" );
-
-        if ( freq < MIN_INT_MOD_FREQ )
-        {
-            if ( 0.9999 * MIN_INT_MOD_FREQ - freq > 0.0 )
-                freq = MIN_INT_MOD_FREQ;
-            else
-            {
-                print( FATAL, "Internal modulation frequency of %f Hz is too "
-                       "low, minimum is %f Hz.\n", freq, MIN_INT_MOD_FREQ );
-                THROW( EXCEPTION );
-            }
-        }
-
-        if ( freq > MAX_INT_MOD_FREQ )
-        {
-            if ( 1.0001 * MIN_INT_MOD_FREQ - freq > 0.0 )
-                freq = MAX_INT_MOD_FREQ;
-            else
-            {
-                print( FATAL, "Internal modulation frequency of %f kHz is too "
-                       "high, maximum is %f kHz.\n", freq * 1.0e-3,
-                       MIN_INT_MOD_FREQ * 1.0e-3 );
-                THROW( EXCEPTION );
-            }
-        }
-    }
-
-    too_many_arguments( v );
-
-    if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-    {
-        print( FATAL, "Can't set modulation source while modulation is "
-               "off.\n" );
-        THROW( EXCEPTION );
-    }
-
-    if ( FSC2_MODE != EXPERIMENT )
-        rs_smb100a_set_mod_source( rs_smb100a.mod_type, source, freq );
-
-    rs_smb100a.mod_source[ rs_smb100a.mod_type ] = source;
-    rs_smb100a.mod_source_is_set[ rs_smb100a.mod_type ] = SET;
-
-    if ( source == MOD_SOURCE_INT )
-    {
-        rs_smb100a.mod_freq[ rs_smb100a.mod_type ] = freq;
-        rs_smb100a.mod_freq_is_set[ rs_smb100a.mod_type ] = SET;
-    }
-
-    return vars_push( INT_VAR, rs_smb100a.mod_source );
+	outp_reset_protection( );
+	return vars_push( INT_VAR, 1L );
 }
 
 
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_rf_mode( Var_T * v )
+{
+	if ( ! v )
+		return vars_push( INT_VAR, ( long ) pow_mode( ) );
+
+	long mode;
+
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "NORMAL" )
+			 || ! strcasecmp( v->val.sptr, "NORM" ) )
+			mode = POWER_MODE_NORMAL;
+		else if (    ! strcasecmp( v->val.sptr, "LOW_NOISE")
+				  || ! strcasecmp( v->val.sptr, "LOWN" ) )
+			mode = POWER_MODE_LOW_NOISE;
+		else if (    ! strcasecmp( v->val.sptr, "LOW_DISTORTION")
+				  || ! strcasecmp( v->val.sptr, "LOWD" ) )
+			mode = POWER_MODE_LOW_DISTORTION;
+		else
+		{
+			print( FATAL, "Invalid RD mode \"%s\".\n" );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		mode = get_strict_long( v, NULL );
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, ( long ) pow_set_mode( mode ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_rf_off_mode( Var_T * v )
+{
+	if ( ! v )
+		return vars_push( INT_VAR, ( long ) pow_off_mode( ) );
+
+	long mode;
+
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "UNCHANGED" )
+			 || ! strcasecmp( v->val.sptr, "UNCH" ) )
+			mode = OFF_MODE_UNCHANGED;
+		else if (    ! strcasecmp( v->val.sptr, "FULL_ATTENUATION")
+				  || ! strcasecmp( v->val.sptr, "FATT" ) )
+			mode = OFF_MODE_FATT;
+		else
+		{
+			print( FATAL, "Invalid RF OFF mode \"%s\".\n" );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		mode = get_strict_long( v, NULL );
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, ( long ) pow_set_off_mode( mode ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
 Var_T *
 synthesizer_mod_freq( Var_T * v )
 {
-    double freq;
+	if ( ! v )
+		return vars_push( FLOAT_VAR, lfo_frequency( ) );
 
+	double freq = get_double( v, "modulation frequency" );
+	too_many_arguments( v );
 
-    if ( v == NULL )
-    {
-        if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-        {
-            print( FATAL, "Can't determine modulation frequency, modulation "
-                   "is off.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( rs_smb100a.mod_source[ rs_smb100a.mod_type ] != MOD_SOURCE_INT )
-        {
-            print( FATAL, "Can't determine modulation frequency, "
-                   "synthesizer uses external modulation.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if (    FSC2_MODE == PREPARATION
-             && ! rs_smb100a.mod_freq_is_set[ rs_smb100a.mod_type ] )
-            print( FATAL, "Can't determine modulation frequency, it has "
-                   "not been set yet.\n" );
-
-        return vars_push( FLOAT_VAR,
-                          rs_smb100a.mod_freq[ rs_smb100a.mod_type ] );
-    }
-
-    if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-    {
-        print( SEVERE, "Can't set modulation frequency, modulation "
-               "is off.\n" );
-        return vars_push( FLOAT_VAR, 0.0 );
-    }
-
-    if ( rs_smb100a.mod_source[ rs_smb100a.mod_type ] != MOD_SOURCE_INT )
-    {
-        print( SEVERE, "Can't set modulation frequency, synthesizer uses "
-               "external modulation.\n" );
-        return vars_push( FLOAT_VAR, 0.0 );
-    }
-
-    freq = get_double( v, "modulation frequency" );
-
-    if ( freq < MIN_INT_MOD_FREQ )
-    {
-        if ( 0.9999 * MIN_INT_MOD_FREQ - freq > 0.0 )
-            freq = MIN_INT_MOD_FREQ;
-        else
-        {
-            print( FATAL, "Internal modulation frequency of %f Hz is too "
-                   "low, minimum is %f Hz.\n", freq, MIN_INT_MOD_FREQ );
-            THROW( EXCEPTION );
-        }
-    }
-
-    if ( freq > MAX_INT_MOD_FREQ )
-    {
-        if ( 1.0001 * MIN_INT_MOD_FREQ - freq > 0.0 )
-            freq = MAX_INT_MOD_FREQ;
-        else
-        {
-            print( FATAL, "Internal modulation frequency of %f kHz is too "
-                   "high, maximum is %f kHz.\n", freq * 1.0e-3,
-                   MIN_INT_MOD_FREQ * 1.0e-3 );
-            THROW( EXCEPTION );
-        }
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE != EXPERIMENT )
-        rs_smb100a_set_mod_source( rs_smb100a.mod_type, MOD_SOURCE_INT, freq );
-
-    rs_smb100a.mod_freq[ rs_smb100a.mod_type ] = freq;
-    rs_smb100a.mod_freq_is_set[ rs_smb100a.mod_type ] = SET;
-
-    return vars_push( FLOAT_VAR, freq );
-}
-
-
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
-
-Var_T *
-synthesizer_mod_ampl( Var_T * v )
-{
-    double ampl;
-    size_t i;
-
-
-    if ( v == NULL )
-    {
-        if ( ! rs_smb100a.mod_type_is_set )
-        {
-            print( FATAL, "Can't determine modulation amplitude as long as "
-                   "modulation type isn't set.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-        {
-            print( FATAL, "Can't determine modulation amplitude when "
-                   "modulation is off.\n" );
-            THROW( EXCEPTION );
-        }
-
-        switch ( FSC2_MODE )
-        {
-            case PREPARATION :
-                if ( ! rs_smb100a.mod_ampl_is_set[ rs_smb100a.mod_type ] )
-                {
-                    print( FATAL, "Modulation amplitude for %s modulation "
-                           "hasn't been set yet.\n",
-                           mod_types[ rs_smb100a.mod_type ] );
-                    THROW( EXCEPTION );
-                }
-                break;
-
-            case EXPERIMENT :
-                rs_smb100a.mod_ampl[ rs_smb100a.mod_type ] =
-                                rs_smb100a_get_mod_ampl( rs_smb100a.mod_type );
-                break;
-        }
-
-        return vars_push( FLOAT_VAR,
-                          rs_smb100a.mod_ampl[ rs_smb100a.mod_type ] );
-    }
-
-    if ( ! rs_smb100a.mod_type_is_set )
-    {
-        print( FATAL, "Can't set modulation amplitude as long as modulation "
-               "type isn't set.\n" );
-        THROW( EXCEPTION );
-    }
-
-    if ( rs_smb100a.mod_type == MOD_TYPE_OFF )
-    {
-        print( FATAL, "Can't set modulation amplitude while modulation is "
-               "off.\n" );
-        THROW( EXCEPTION );
-    }
-
-    if ( rs_smb100a.mod_type != MOD_TYPE_AM && ! rs_smb100a.freq_is_set )
-    {
-        print( FATAL, "Can't set modulation amplitued while RF frequency "
-               "hasn't been set.\n" );
-        THROW( EXCEPTION );
-    }
-
-    ampl = get_double( v, "modulation amplitude" );
-
-    too_many_arguments( v );
-
-    if ( ampl < 0.0 )
-    {
-        print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
-               mod_types[ rs_smb100a.mod_type ],
-               rs_smb100a.mod_type == MOD_TYPE_FM ? "kHz" :
-                       ( rs_smb100a.mod_type == MOD_TYPE_AM ? "%%" : "rad" ) );
-        THROW( EXCEPTION );
-    }
-
-    switch ( rs_smb100a.mod_type )
-    {
-        case MOD_TYPE_FM :
-            for ( i = 0; i < num_fm_mod_ranges; i++ )
-                if ( rs_smb100a.freq <= fm_mod_ranges[ i ].upper_limit_freq )
-                    break;
-
-            fsc2_assert( i < num_fm_mod_ranges );
-
-            if ( ampl > fm_mod_ranges[ i ].upper_limit )
-            {
-                print( FATAL, "FM modulation amplitude of %.1f kHz is too "
-                       "large, valid range is 0 - %.1f kHz for the current "
-                       "RF frequency of %.4f MHz.\n",
-                       ampl * 1.0e-3, fm_mod_ranges[ i ].upper_limit * 1.0e-3,
-                       rs_smb100a.freq * 1.0e-6 );
-                THROW( EXCEPTION );
-            }
-            break;
-
-        case MOD_TYPE_AM :
-            if ( ampl > MAX_AM_AMPL )
-            {
-                print( FATAL, "AM modulation amplitude of %.1f %% is too "
-                       "large, valid range is 0 - %.2f %%.\n",
-                       ampl, ( double ) MAX_AM_AMPL );
-                THROW( EXCEPTION );
-            }
-            break;
-
-        case MOD_TYPE_PM :
-            for ( i = 0; i < num_pm_mod_ranges; i++ )
-                if ( rs_smb100a.freq <= pm_mod_ranges[ i ].upper_limit_freq )
-                    break;
-
-            fsc2_assert( i < num_pm_mod_ranges );
-
-            if ( ampl > pm_mod_ranges[ i ].upper_limit )
-            {
-                print( FATAL, "PM modulation amplitude of %.2f rad is too "
-                       "large, valid range is 0 - %.2f rad for the current "
-                       "RF frequency of %.4f MHz.\n",
-                       ampl, pm_mod_ranges[ i ].upper_limit,
-                       rs_smb100a.freq * 1.0e-6 );
-                THROW( EXCEPTION );
-            }
-            break;
-
-        default :                         /* this can never happen... */
-            fsc2_impossible( );
-    }
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_mod_ampl( rs_smb100a.mod_type, ampl );
-
-    rs_smb100a.mod_ampl[ rs_smb100a.mod_type ] = ampl;
-    rs_smb100a.mod_ampl_is_set[ rs_smb100a.mod_type ] = SET;
-
-    return vars_push( FLOAT_VAR, ampl );
+	return vars_push( FLOAT_VAR, lfo_set_frequency( freq ) );
 }
 
 
@@ -1403,45 +350,42 @@ synthesizer_mod_ampl( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_input_trigger_slope( Var_T * v )
+synthesizer_mod_output_impedance( Var_T * v )
 {
-    bool state;
+	if ( ! v )
+		return vars_push( INT_VAR, impedance_to_int( lfo_impedance( ) ) );
 
+	long imp;
 
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.input_trig_slope_is_set )
-        {
-            print( FATAL, "Imput trigger slope hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "LOW" )
+			 || ! strcasecmp( v->val.sptr, "10" ) )
+			imp = IMPEDANCE_LOW;
+		else if (    ! strcasecmp( v->val.sptr, "G50" )
+			      || ! strcasecmp( v->val.sptr, "50" ) )
+			imp = IMPEDANCE_G50;
+		else
+		{
+			print( FATAL, "Invalid modulation output impedance \"%s\", use "
+				   "either \"LOW\" or \"G50\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		imp = int_to_impedance( get_long( v, "modulation output impedance" ) );
 
-        return vars_push( INT_VAR, ( int ) rs_smb100a.input_trig_slope );
-    }
+		if ( imp != IMPEDANCE_LOW && imp != IMPEDANCE_G50 )
+		{
+			print( FATAL, "Can't use impedance of %d Ohm, must be either "
+				   "\"LOW\" (10 Ohm) or \"G50\" (50 Ohm).\n",
+				   impedance_to_int( imp ) );
+			THROW( EXCEPTION );
+		}
+	}
 
-    vars_check( v, STR_VAR );
-
-    if (    ! strcasecmp( v->val.sptr, "POS" )
-         || ! strcasecmp( v->val.sptr, "POSITIVE" ) )
-        state = SLOPE_RAISE;
-    else if (    ! strcasecmp( v->val.sptr, "NEG" )
-              || ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
-        state = SLOPE_FALL;
-    else
-    {
-        print( FATAL, "Invalid argument.\n" );
-        THROW( EXCEPTION );
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_input_trig_slope( state );
-
-    rs_smb100a.input_trig_slope = state;
-    rs_smb100a.input_trig_slope_is_set = SET;
-
-    return vars_push( INT_VAR, ( int ) rs_smb100a.input_trig_slope );
+	return vars_push( INT_VAR, lfo_set_impedance( imp ) );
 }
 
 
@@ -1449,139 +393,15 @@ synthesizer_input_trigger_slope( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_input_impedance( Var_T * v )
+synthesizer_mod_output_voltage( Var_T * v )
 {
-    bool state;
+	if ( ! v )
+		return vars_push( FLOAT_VAR, lfo_voltage( ) );
 
+	double volts = get_double( v, "modulation output voltage" );
+	too_many_arguments( v );
 
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.input_imp_is_set )
-        {
-            print( FATAL, "Input impedance hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
-
-        return vars_push( INT_VAR, ( int ) rs_smb100a.input_imp );
-    }
-
-    vars_check( v, STR_VAR );
-
-    if ( ! strcasecmp( v->val.sptr, "HIGH" ) )
-        state = HIGH_IMPEDANCE;
-    else if ( strcasecmp( v->val.sptr, "G600" ) )
-        state = G600_IMPEDANCE;
-    else
-    {
-        print( FATAL, "Invalid argument \"%s\".\n", v->val.sptr );
-        THROW( EXCEPTION );
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_input_impedance( state );
-
-    rs_smb100a.input_imp = state;
-    rs_smb100a.input_imp_is_set = true;
-
-    return vars_push( INT_VAR, ( int ) rs_smb100a.input_imp );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-#if defined WITH_PULSE_MODULATION
-
-Var_T *
-synthesizer_pulse_state( Var_T * v )
-{
-    bool state;
-
-
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.pulse_mode_state_is_set )
-        {
-            print( FATAL, "Pulse mode state hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
-
-        return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_mode_state );
-    }
-
-    state = get_boolean( v );
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_pulse_state( state );
-
-    rs_smb100a.pulse_mode_state = state;
-    rs_smb100a.pulse_mode_state_is_set = SET;
-
-    return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_mode_state );
-}
-#endif // WITH_PULSE_MODULATION
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-#if defined WITH_PULSE_GENERATION
-
-Var_T *
-synthesizer_pulse_width( Var_T * v )
-{
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.pulse_width_is_set )
-        {
-            print( FATAL, "Pulse width hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
-
-        return vars_push( INT_VAR, ( int ) rs_smb100a.pulse_width );
-    }
-
-    double width = get_double( v, "pulse width" );
-
-    if ( width < 0.0 )
-    {
-        print( FATAL, "Invalid negative pulse width.\n" );
-        THROW( EXCEPTION );
-    }
-
-    long ticks = lrnd( width / MIN_PULSE_WIDTH );
-
-    if ( ticks == 0 || ticks > lrnd( MAX_PULSE_WIDTH / MIN_PULSE_WIDTH ) )
-    {
-        print( FATAL, "Invalid pulse width of %s, allowed range is %ld ns "
-               "to %.1f s\n", rs_smb100a_pretty_print( width ),
-               lrnd( MIN_PULSE_WIDTH * 1.0e9 ), MAX_PULSE_WIDTH );
-        THROW( EXCEPTION );
-    }
-
-    if ( fabs( ticks * MIN_PULSE_WIDTH - width ) > 0.01 * MIN_PULSE_WIDTH )
-    {
-        char *t = T_strdup( rs_smb100a_pretty_print( width ) );
-        print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
-               rs_smb100a_pretty_print( ticks * MIN_PULSE_WIDTH ) );
-        T_free( t );
-        width = ticks * MIN_PULSE_WIDTH;
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_pulse_width( width );
-
-    rs_smb100a.pulse_width = width;
-    rs_smb100a.pulse_width_is_set = SET;
-
-    return vars_push( FLOAT_VAR, width );
+	return vars_push( FLOAT_VAR, lfo_set_voltage( volts ) );
 }
 
 
@@ -1589,60 +409,39 @@ synthesizer_pulse_width( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_pulse_delay( Var_T * v )
+synthesizer_mod_type( Var_T * v )
 {
-    double delay;
-    long ticks;
+	if ( ! v )
+		return vars_push( INT_VAR, ( long ) mod_type( ) );
 
+	long type;
 
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.pulse_delay_is_set )
-        {
-            print( FATAL, "Pulse delay hasn't been set yet.\n" );
-            THROW( EXCEPTION );
-        }
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "AM" )
+			 || ! strcasecmp( v->val.sptr, "AMPLITUDE" ) )
+			type = MOD_TYPE_AM;
+		else if (    ! strcasecmp( v->val.sptr, "FM" )
+				  || ! strcasecmp( v->val.sptr, "FREQUENCY" ) )
+			type = MOD_TYPE_FM;
+		else if (    ! strcasecmp( v->val.sptr, "PM" )
+				  || ! strcasecmp( v->val.sptr, "PHASE" ) )
+			type = MOD_TYPE_PM;
+		else if (    ! strcasecmp( v->val.sptr, "PULM" )
+				  || ! strcasecmp( v->val.sptr, "PULSE" ) )
+			type = MOD_TYPE_PULM;
+		else
+		{
+			print( FATAL, "Invalid modulation type \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		type = get_strict_long( v, "modulattion type" );
 
-        return vars_push( FLOAT_VAR, rs_smb100a.pulse_delay );
-    }
+	too_many_arguments( v );
 
-    delay = get_double( v, "pulse delay" );
-
-    if ( delay < 0.0 )
-    {
-        print( FATAL, "Invalid negative pulse delay.\n" );
-        THROW( EXCEPTION );
-    }
-
-    ticks = lrnd( delay / MIN_PULSE_DELAY );
-
-    if ( ticks == 0 || ticks > lrnd( MAX_PULSE_DELAY / MIN_PULSE_DELAY ) )
-    {
-        print( FATAL, "Invalid pulse delay of %s, allowed range is %d ns "
-               "to %.1f s\n", rs_smb100a_pretty_print( delay ),
-               irnd( MIN_PULSE_DELAY * 1.0e9 ), MIN_PULSE_DELAY );
-        THROW( EXCEPTION );
-    }
-
-    if ( fabs( ticks * MIN_PULSE_DELAY - delay ) > 0.01 * MIN_PULSE_DELAY )
-    {
-        char *t = T_strdup( rs_smb100a_pretty_print( delay ) );
-        print( SEVERE, "Pulse delay of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_DELAY * 1.0e9 ),
-               rs_smb100a_pretty_print( ticks * MIN_PULSE_DELAY ) );
-        T_free( t );
-        delay = ticks * MIN_PULSE_DELAY;
-    }
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_pulse_delay( delay );
-
-    rs_smb100a.pulse_delay = delay;
-    rs_smb100a.pulse_delay_is_set = SET;
-
-    return vars_push( FLOAT_VAR, delay );
+	return vars_push( INT_VAR, ( long ) mod_set_type( type ) );
 }
 
 
@@ -1650,30 +449,15 @@ synthesizer_pulse_delay( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_double_pulse_mode( Var_T * v )
+synthesizer_mod_state( Var_T * v )
 {
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == PREPARATION && ! rs_smb100a.double_pulse_mode_is_set )
-        {
-            print( FATAL, "Double pulse mode hasn't been set.\n" );
-            THROW( EXCEPTION );
-        }
+	if ( ! v )
+		return vars_push( INT_VAR, mod_state( ) ? 1L : 0L );
 
-        return vars_push( INT_VAR, ( long ) rs_smb100a.double_pulse_mode );
-    }
+	bool state = get_boolean( v );
+	too_many_arguments( v );
 
-    bool state = get_boolean( v );
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        rs_smb100a_set_double_pulse_mode( state );
-
-    rs_smb100a.double_pulse_mode = state;
-    rs_smb100a.double_pulse_mode_is_set = SET;
-
-    return vars_push( INT_VAR, ( long ) state );
+	return vars_push( INT_VAR, mod_set_state( state ) ? 1L : 0L );
 }
 
 
@@ -1681,81 +465,15 @@ synthesizer_double_pulse_mode( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_double_pulse_delay( Var_T * v )
+synthesizer_mod_amp( Var_T * v )
 {
-    double delay;
-    long ticks;
+	if ( ! v )
+		return vars_push( FLOAT_VAR, mod_amplitude( ) );
 
+	double amp = get_double( v, "modulation amplitude" );
+	too_many_arguments( v );
 
-    if ( v == NULL )
-    {
-        if (    FSC2_MODE == PREPARATION
-             && ! rs_smb100a.double_pulse_delay_is_set )
-        {
-            print( FATAL, "Double pulse delay hasn't been set.\n" );
-            THROW( EXCEPTION );
-        }
-
-        return vars_push( FLOAT_VAR, rs_smb100a.double_pulse_delay );
-    }
-
-    delay = get_double( v, "double pulse delay" );
-
-    ticks = lrnd( delay / MIN_PULSE_WIDTH );
-
-    if (    ticks < lrnd( MIN_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH )
-         || ticks > lrnd( MAX_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH ) )
-    {
-        print( FATAL, "Invalid double pulse delay of %s, allowed range is "
-               "%ld ns to %.1f s\n", rs_smb100a_pretty_print( delay ),
-               lrnd( MIN_DOUBLE_PULSE_DELAY * 1.0e9 ), MAX_DOUBLE_PULSE_DELAY );
-        THROW( EXCEPTION );
-    }
-
-    if ( fabs( ticks * MIN_PULSE_WIDTH - delay ) > 0.01 * MIN_PULSE_WIDTH )
-    {
-        char *t = T_strdup( rs_smb100a_pretty_print( delay ) );
-        print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
-               rs_smb100a_pretty_print( ticks * MIN_PULSE_WIDTH ) );
-        T_free( t );
-        delay = ticks * MIN_PULSE_WIDTH;
-    }
-
-    rs_smb100a.double_pulse_delay = delay;
-    rs_smb100a.double_pulse_delay_is_set = SET;
-
-    if ( FSC2_MODE == EXPERIMENT )
-      rs_smb100a_set_double_pulse_delay( delay );
-
-    return vars_push( FLOAT_VAR, delay );
-}
-
-#endif // WITH_PULSE_GENERATION
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *
-synthesizer_freq_change_delay( Var_T * v )
-{
-    double delay;
-
-
-    if ( v )
-    {
-        delay = get_double( v, "frequency change delay" );
-
-        too_many_arguments( v );
-
-        if ( delay < 1.0e-3 )
-            rs_smb100a.freq_change_delay = 0.0;
-        else
-            rs_smb100a.freq_change_delay = delay;
-    }
-
-    return vars_push( FLOAT_VAR, rs_smb100a.freq_change_delay );
+	return vars_push( FLOAT_VAR, mod_set_amplitude( amp ) );
 }
 
 
@@ -1763,38 +481,346 @@ synthesizer_freq_change_delay( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_command( Var_T * v )
+synthesizer_mod_source( Var_T * v )
 {
-    char *cmd = NULL;
+	if ( ! v )
+	{
+		if ( mod_type( ) == MOD_TYPE_PULM )
+			return vars_push( INT_VAR, ( long ) MOD_SOURCE_EXT_DC );
+
+		enum Source source  = mod_source( );
+
+		if ( source == SOURCE_INT )
+			return vars_push( INT_VAR, ( long ) MOD_SOURCE_INT );
+
+		vars_push( INT_VAR,
+				   ( long ) ( mod_coupling( ) == COUPLING_AC ?
+							  MOD_SOURCE_EXT_AC : MOD_SOURCE_EXT_DC ) );
+	}
+
+	if ( mod_type( ) == MOD_TYPE_PULM )
+	{
+		print( FATAL, "Can't set modulation source for pulse modulation, "
+			   "it's always EXT.\n" );
+		THROW( EXCEPTION );
+	}
+
+	long ms;
+
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "AC" )
+			 || ! strcasecmp( v->val.sptr, "EXT_AC" ) )
+			ms = MOD_SOURCE_EXT_AC;
+		else if (    ! strcasecmp( v->val.sptr, "DC" )
+			      || ! strcasecmp( v->val.sptr, "EXT_DC" ) )
+			ms = MOD_SOURCE_EXT_DC;
+		else if (    ! strcasecmp( v->val.sptr, "INT" ) )
+			ms = MOD_SOURCE_INT;
+		else
+		{
+			print( FATAL, "Invalid modulation source \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		ms = get_strict_long( v, "modulation source" );
+		if (    ms != MOD_SOURCE_EXT_AC
+			 && ms != MOD_SOURCE_EXT_DC
+			 && ms != MOD_SOURCE_INT )
+		{
+			print( FATAL, "Invalid modulation source %s.\n", mod_source );
+			THROW( EXCEPTION );
+		}	
+	}				
+
+	if ( ms == MOD_SOURCE_INT && ( v = vars_pop( v ) ) )
+		lfo_set_frequency( get_double( v, "modulation frequency" ) );
+
+	too_many_arguments( v );
+
+	if ( ms == MOD_SOURCE_INT )
+		mod_set_source( SOURCE_INT );
+	else
+	{
+		mod_set_source( SOURCE_EXT );
+		mod_set_coupling( ms == MOD_SOURCE_EXT_AC ?
+						  COUPLING_AC : COUPLING_DC );
+	}
+
+	return vars_push( INT_VAR, ms );
+}
 
 
-    CLOBBER_PROTECT( cmd );
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
-    vars_check( v, STR_VAR );
+Var_T *
+synthesizer_mod_mode( Var_T * v )
+{
+	if ( ! v )
+		return vars_push( INT_VAR, ( long ) mod_mode( ) );
 
-    if ( FSC2_MODE == EXPERIMENT )
-    {
-        TRY
-        {
-            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            rs_smb100a_command( cmd );
-            T_free( cmd );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            T_free( cmd );
-            RETHROW;
-        }
-    }
+	long mode;
+
+	if ( v->type == STR_VAR )
+	{
+		if (    ! strcasecmp( v->val.sptr, "NORM" )
+			 || ! strcasecmp( v->val.sptr, "NORMAL" ) )
+			mode = MOD_MODE_NORMAL;
+		else if (    ! strcasecmp( v->val.sptr, "LOWN" )
+				  || ! strcasecmp( v->val.sptr, "LOW_MOISE" ) )
+			mode = MOD_MODE_LOW_NOISE;
+		else if (    ! strcasecmp( v->val.sptr, "HIGH_DEVIATION" )
+				  || ! strcasecmp( v->val.sptr, "GDEV" ) )
+			mode = MOD_MODE_HIGH_DEVIATION;
+		else
+		{
+			print( FATAL, "Invalid modulation mode \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		mode = get_strict_long( v, "modulattion mode" );
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, ( long ) mod_set_mode( mode ) );
+}
+
+
+/*----------------------------------------------------*
+ * The function to set up a list be called with different
+ * types of arguments. The first (and only required) argument
+ * is a 1D array of (at least 2) frequencies. This might be
+ * followed by
+ * 1) a string for the list name
+ * 2) a number for the attenuation
+ * 3) a number for the attenuation and a string for the list name
+ * 4) a second 1D array (with as many elements as the first) with
+ *    the attenuations
+ * 5) a second 1D array (with as many elements as the first) with
+ *    the attenuations and a string for the list name
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_setup_list( Var_T * v )
+{
+	if ( ! v )
+	{
+		print( FATAL, "A 1D array with frequencies is required.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v->type != INT_ARR && v->type != FLOAT_ARR ) || v->len < 2 )
+	{
+		print( FATAL, "First argument must be a 1-dimensional array of at"
+			   "lest 2 frequencies.\n" );
+		THROW( EXCEPTION );
+	}
+
+	double * freqs = NULL;
+	double * pows  = NULL;
+
+	CLOBBER_PROTECT( freqs );
+	CLOBBER_PROTECT( pows );
+
+	TRY
+	{
+		ssize_t flen = v->len;
+
+		freqs = T_malloc( flen * sizeof *freqs );
+
+		if ( v->type == FLOAT_ARR )
+			memcpy( freqs, v->val.dpnt, flen * sizeof *freqs );
+		else
+			for ( ssize_t i = 0; i < flen; i++ )
+				freqs[ i ] = v->val.lpnt[ i ];
+
+		if ( ! ( v = vars_pop( v ) ) )
+			list_setup_C( freqs, flen, NULL );
+		else if ( v->type == STR_VAR )
+		{
+			list_setup_C( freqs, flen, v->val.sptr );
+			too_many_arguments( v );
+		}
+		else if ( v->type == INT_VAR || v->type == FLOAT_VAR )
+		{
+			double p = v->type == INT_VAR ? v->val.lval : v->val.dval;
+
+			if ( ! ( v = vars_pop( v ) ) )
+				list_setup_B( freqs, p, flen, NULL );
+			else if ( v->type == STR_VAR )
+			{
+				list_setup_B( freqs, p, flen, v->val.sptr );
+				too_many_arguments( v );
+			}
+			else
+			{
+				print( FATAL, "Third argument isn't a string.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+		else if ( v->type == INT_ARR || v->type == FLOAT_ARR )
+		{
+			if ( v->len != flen )
+			{
+				print( FATAL, "Arrays for frequencies and attenuations "
+					   "must have same length.\n" );
+				THROW( EXCEPTION );
+			}
+
+			pows = T_malloc( flen * sizeof  *pows );
+
+			if ( v->type == FLOAT_ARR )
+				memcpy( pows, v->val.dpnt, flen * sizeof *pows );
+			else
+				for ( ssize_t i = 0; i < flen; i++ )
+					pows[ i ] = v->val.lpnt[ i ];
+
+			if ( ! ( v = vars_pop( v ) ) )
+				list_setup_A( freqs, pows, flen, NULL );
+			else if ( v->type == STR_VAR )
+			{
+				list_setup_A( freqs, pows, flen, v->val.sptr );
+				too_many_arguments( v );
+			}
+			else
+			{
+				print( FATAL, "Third argument isn't a string.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+		else
+		{
+			print( FATAL, "Second argument is neither a string, a number "
+				   "nor a 1-dimensional array.\n" );
+			THROW( EXCEPTION );
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( pows );
+		T_free( freqs );
+
+		RETHROW;
+	}
+
+	T_free( pows );
+	T_free( freqs );
+
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_select_list( Var_T * v )
+{
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Expect list name as argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	list_select( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_start_list( Var_T * v  UNUSED_ARG )
+{
+	if ( rs->list.processing_list )
+	{
+		print( WARN, "List processing already started.\n" );
+		return vars_push( INT_VAR, 0L );
+	}
+
+	list_start( );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_stop_list( Var_T * v )
+{
+	if ( ! rs->list.processing_list )
+	{
+		print( WARN, "No list is currently being processed.\n" );
+		return vars_push( INT_VAR, 0L );
+	}
+
+	bool keep_rf_on = false;
+	if ( v )
+	{
+		keep_rf_on = get_boolean( v );
+		too_many_arguments( v );
+	}
+
+	list_stop( keep_rf_on );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_use_table( Var_T * v )
+{
+    table_load_file( v );
 
     return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_att_ref_freq( Var_T * v )
+{
+    if ( ! v )
+        return vars_push( FLOAT_VAR, table_ref_freq( ) );
+
+    double ref_freq = get_double( v, NULL );
+    too_many_arguments( v );
+
+    return vars_push( INT_VAR, table_set_ref_freq( ref_freq ) );
+}
+
+
+/*----------------------------------------------------*
+ * Returns the attenuation offset (i.e. the amount of
+ * attenuation in dB added automatically at the given
+ * frequency, according to the current settings (i.e.
+ * a table must have been loaded and a reference
+ * frequency must have been specified) - otherwise
+ * the function always returns 0.
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_attenuation_offset( Var_T * v )
+{
+    double freq = freq_check_frequency( get_double( v, NULL ) );
+    return vars_push( FLOAT_VAR, table_att_offset( freq ) );
 }
 
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
  * tab-width: 4
  * indent-tabs-mode: nil
  * End:

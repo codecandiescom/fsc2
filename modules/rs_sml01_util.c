@@ -243,7 +243,7 @@ rs_sml01_get_mod_param( Var_T ** v,
                *source[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };
 
 
-    /* If the variable is an integer of floating value this means an
+    /* If the variable is an integer or floating value this means an
        amplitude setting */
 
     if ( (*v)->type & ( INT_VAR | FLOAT_VAR ) )
@@ -303,7 +303,7 @@ rs_sml01_get_mod_param( Var_T ** v,
             return 2;
     }
 
-    print( FATAL, "Invalid parameter \"%s\".\n", (*v)->val.sptr );
+    print( FATAL, "Invalid parameter \"%s\".\n", ( *v )->val.sptr );
     THROW( EXCEPTION );
 
     return 4;               /* we're never going to get here... */

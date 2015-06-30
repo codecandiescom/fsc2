@@ -3875,6 +3875,10 @@ Hewlett-Packard HP8672A
 
 @item @ref{rs_sml01}
 Rohde&Schwarz SML01
+
+@item @ref{rs_smb100a}
+Rohde&Schwarz SMB100A (models SMB-B101, SMB-B102, SMB-B103, SMB-B105,
+SMB-B112 and SMB-B112L)
 @end table
 @noindent
 To use a module in an experiment put its name into the @code{DEVICES}
@@ -3899,16 +3903,32 @@ section of the @code{EDL} script.
 @item @ref{synthesizer_use_table()}
 @item @ref{synthesizer_att_ref_freq()}
 @item @ref{synthesizer_modulation()}
+@item @ref{synthesizer_mod_state()}
 @item @ref{synthesizer_mod_type()}
 @item @ref{synthesizer_mod_source()}
 @item @ref{synthesizer_mod_freq()}
 @item @ref{synthesizer_mod_ampl()}
+@item @ref{synthesizer_mod_mode()}
 @item @ref{synthesizer_pulse_state()}
 @item @ref{synthesizer_pulse_trigger_slope()}
 @item @ref{synthesizer_pulse_width()}
 @item @ref{synthesizer_pulse_delay()}
 @item @ref{synthesizer_double_pulse_mode()}
 @item @ref{synthesizer_double_pulse_delay()}
+@item @ref{synthesizer_setup_list()}
+@item @ref{synthesizer_select_list()}
+@item @ref{synthesizer_start_list()}
+@item @ref{synthesizer_stop_list()}
+@item @ref{synthesizer_attenuation_offset()}
+@item @ref{synthesizer_min_attenuation()}
+@item @ref{synthesizer_max_attenuation()}
+@item @ref{synthesizer_output_impedance()}
+@item @ref{synthesizer_protection_tripped()}
+@item @ref{synthesizer_reset_protection()}
+@item @ref{synthesizer_rf_mode()}
+@item @ref{synthesizer_rf_off_mode()}
+@item @ref{synthesizer_mod_output_impedance()}
+@item @ref{synthesizer_mod_output_voltage()}
 @end table
 
 @noindent
@@ -4254,30 +4274,58 @@ will also restore the settings of external AC coupled source and
 @w{50%} amplitude.
 
 
+@anchor{synthesizer_mod_state()}
+@findex synthesizer_mod_state()
+@item   synthesizer_mod_state()
+This function exists only for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It allows to query or set if the selected type of modulation
+(via a call of @code{@ref{synthesizer_mod_type()}} is switched on or
+off. If called without an argument it returns @code{1} or @code{0},
+indicating if modulation is on or off. If called with a boolean
+argument (either the string @code{"ON"} or a non-zero integer or the
+string @code{"OFF"} or @code{0}) nodulation switched on or off. This
+requires the a modulation type has been selected before.
+
+
 @anchor{synthesizer_mod_type()}
 @findex synthesizer_mod_type()
 @item synthesizer_mod_type()
-As an alternative to the function @ref{synthesizer_modulation()} the
-modulation type can be also set via the function
-@ref{synthesizer_mod_type()}. It accepts a string argument, either
-@code{"FM"} for frequency modulation, @code{"AM"} for amplitude
-modulation or @code{"OFF"} to switch off modulation. The @ref{hp8647a,
-HP8647A}, @ref{hp8648b, HP8648B} and @ref{rs_sml01, Rohde&Sschwarz
-SML01} also allow another argument, @code{"PHASE"} for phase
-modulation.
+For all except the @ref{rs_smb100a, Rohde&Schwarz SMB100A} this
+function can be used as an alternative to set the type of modulation
+via @code{@ref{synthesizer_modulation()}}. For these yt accepts a
+string argument, either @code{"FM"} for frequency modulation,
+@code{"AM"} for amplitude modulation or @code{"OFF"} to switch off
+modulation. The @ref{hp8647a, HP8647A}, @ref{hp8648b, HP8648B} and
+@ref{rs_sml01, Rohde&Sschwarz SML01} also allow another argument,
+@code{"PHASE"} for phase modulation.
 
+For the @ref{rs_smb100a, Rohde&Schwarz SMB100A} a call of this
+function is required before modulation parameters can be set and
+modulation can be switched on. It accepts teh string arguments
+@code{"AM"} or @code{"AMPLITUDE"} for amplitude modulation,
+@code{"FM"} or @code{"FREQUENCY"} for frequency modulation,
+@code{"PM"} or @code{"PHASE"} for phase modulation and @code{"PULM"} or
+@code{"PULSE"} for pulse modulation. There's no argument for
+"modulation off", use the function
+@code{@ref{synthesizer_mod_state()}} for enabling or disabling the
+selected type of modulation. If called with no argument it returns
+@code{0} for AM, @code{1} for FM, @code{2} for phase modulation and
+@code{4} for pulse modulation. If no modulation type has been selected
+it throws an exception, ending the script.
 
 @anchor{synthesizer_mod_source()}
 @findex synthesizer_mod_source()
 @item synthesizer_mod_source()
-This function is only available for the @ref{hp8647a}, @ref{hp8648b}
-and the @ref{rs_sml01}. If the modulation type has been set before the
-modulation source can be set directly via this function.
+This function is only available for the @ref{hp8647a, HP 8647A},
+@ref{hp8648b, HP 8648B}, @ref{rs_sml01, Rohde&Schwarz SML01} and the
+@ref{rs_smb100a, Rohde&Schwarz SMB100A}. If the modulation type has
+been set before the modulation source can be set via this function.
 
-The function accepts the strings @code{"OFF"} to switch off modulation,
-@code{"EXT AC} (or just simply @code{"AC"}) to use an external AC
-coupled modulation source and @code{"EXT DC} (or @code{"DC"}) for an
-external DC coupled modulation source.
+For the frist three type of synthesizers the function accepts the
+strings @code{"OFF"} to switch off modulation, @code{"EXT AC} (or just
+simply @code{"AC"}) to use an external AC coupled modulation source
+and @code{"EXT DC} (or @code{"DC"}) for an external DC coupled
+modulation source.
 
 For both the @ref{hp8647a} and the @ref{hp8648b} it also accepts one
 of the following strings for the internal modulation settings that are
@@ -4305,38 +4353,53 @@ You can neither set nor obtain the modulation source as long as the
 modulation is switched off, trying to do so will result in aborting the
 program.
 
+For the @ref{rs_smb100a, Rohde&Schwarz SB100A} the type of modulation
+has to be selected before a call of this function. It can't be called
+with an argument if pulse modulation is selected since only an
+external (DC) source is supported in this case. For the three other
+types of modulation @code{"AC"} or @code{"EXT_AC"} (or @code{0}) for
+an external, AC coupled source, @code{"DC"} or @code{"EXT_DC"} (or
+@code{1}) for an external, DC coupled source or @code{"INT"} (or
+@code{2}) for the internal source can be used. If called without an
+argument (and the source has already been determined) the number
+associated with the modulation source is returned.
+
 
 @anchor{synthesizer_mod_freq()}
 @findex synthesizer_mod_freq()
 @item synthesizer_mod_freq()
 This function only exists for the @ref{rs_sml01, Rohde&Schwarz SML01}
-synthesizer. It can be used to change the modulation frequency if
-modulation is switched on and the synthesizer has been set up to use
-the internal oszillator as the modulation source (otherwise the
-function will print out a warning message and do nothing else). It
-expects a single argument, the modulation frequency, which must be
-between @w{0.1 Hz} and @w{1 MHz}.
+and the @ref{rs_smb100a, Rohde&Schwarz SMB100A} synthesizer. For the
+@ref{rs_sml01, Rohde&Schwarz SML01} its can be used to change the
+modulation frequency if modulation is switched on and the synthesizer
+has been set up to use the internal oszillator as the modulation
+source (otherwise the function will print out a warning message and do
+nothing else). It expects a single argument, the modulation frequency,
+which must be between @w{0.1 Hz} and @w{1 MHz}.
 
-If called without an argument the function returns the currently used
-modulation frequency - this only works when the device is set up to use
-internal modulation, if this isn't the case the function will print an
-error message and abort the experiment.
+If called without an argument the function returns the currently set
+modulation frequency - for the @ref{rs_sml01, Rohde&Schwarz SML01}
+this only works when the device is set up to use internal modulation,
+if this isn't the case the function will print an error message and
+abort the experiment.
 
-You can neither set nor obtain the modulation frequency as long as the
-modulation is switched off, trying to do so will result in aborting the
-program.
-
+Note that the @ref{rs_smb100a, Rohde&Schwarz SMB100A} has only a
+single internal modulation source. Changing its frequency effects
+all modulation types that allow use of internal modulation (AM, FM
+and phase modulation).
 
 @anchor{synthesizer_mod_ampl()}
 @findex synthesizer_mod_ampl()
 @item synthesizer_mod_ampl()
+This function is for querying or setting the amplidtude of the
+(internal) modulation.
 
 If the modulation type has been set this function can be used to set
-the modulation amplitude. For the @ref{hp8647a, HP8647A} and
-@ref{hp8648b, HP8648B} the allowed range of FM frequencies is from
-@w{0 Hz} to @w{100 kHz}, for AM amplitudes between @w{0%} and @w{100%}
-are acceptable and for phase modulation values between @w{0 degree}
-and @w{10 degree} are valid.
+the modulation for the @ref{hp8647a, HP 8647A} and @ref{hp8648b, HP
+8648B} the allowed range of FM frequencies is from @w{0 Hz} to @w{100
+kHz}, for AM amplitudes between @w{0%} and @w{100%} are acceptable and
+for phase modulation values between @w{0 degree} and @w{10 degree} are
+valid.
 
 For the @ref{hp8672a, HP8672A} FM modulation can be set to either
 @w{30 kHz}, @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10
@@ -4355,10 +4418,39 @@ the upper limits are @w{250 MHz} and @w{2.5 rad}. Finally, between
 @w{302.625 MHz} and @w{605.25 MHz} the upper limits for FM and phase
 modulation are @w{500 kHz} and @w{5 rad}.
 
+For the @ref{rs_smb100a, Rohde&Schwarz SMB100A} for amplitude
+modulation values between @w{-100%} and @w{100%} are possible. For FM
+and phase modulation the ranges depend on the modulation frequency as
+well as on the modulation mode (set via the function
+@code{@ref{synthesizer_mod_mode()}}. Please see the data sheet of the
+device for the possible ranges. For pulse modulation no modulation
+amplitude can be set.
+
 If called with no argument, the function will return the amplitude
 setting for the currently active modulation type. You can neither set
 nor obtain the modulation amplitude as long as the modulation is
 switched off, trying to do so will result in aborting the program.
+
+
+@anchor{synthesizer_mod_mode()}
+@findex synthesizer_mod_mode()
+@item   synthesizer_mod_mode()
+This function exists only for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. This device allows three different "quality" settings for
+the internally generated FM and phase modulation, which can be queried
+or set via this function. Please note that the range of possible
+modulation amplitides is influenced by this setting.
+
+The available settings are @code{"NORMAL"} (or @code{"NORM"} or
+@code{0}), @code{"LOW_NOISE"} (or @code{"LOWN"} or @code{1}) or,
+finally, @code{"HIGH_DEVIATION"} (or @code{"HDEV"} or @code{2}).
+To set the mode call the function (after either FM or phase
+modulation has been selected via a call of
+@code{@ref{synthesizer_mod_type()}}) with on of these arguments.
+If the modulation type has been selected and the modulation tyoe
+has been determined the function can also be called without an
+argument in which case the modulation mode is returned as one
+of the above listed integer values.
 
 
 @anchor{synthesizer_pulse_state()}
@@ -4444,6 +4536,64 @@ an argument the delay between the starts of the two pulses will be
 set. The delay must be at least @w{60 ns} and must be at least @w{20
 ns} larger then the widths of the pulses (i.e.@: the pulses must be at
 least @w{20 ns} apart).
+
+
+@anchor{synthesizer_min_attenuation()}
+@findex synthesizer_min_attenuation()
+@item   synthesizer_min_attenuation()
+
+@anchor{synthesizer_max_attenuation()}
+@findex synthesizer_max_attenuation()
+@item   synthesizer_max_attenuation()
+
+@anchor{synthesizer_output_impedance()}
+@findex synthesizer_output_impedance()
+@item   synthesizer_output_impedance()
+
+@anchor{synthesizer_protection_tripped()}
+@findex synthesizer_protection_tripped()
+@item   synthesizer_protection_tripped()
+
+@anchor{synthesizer_reset_protection()}
+@findex synthesizer_reset_protection()
+@item   synthesizer_reset_protection()
+
+@anchor{synthesizer_rf_mode()}
+@findex synthesizer_rf_mode()
+@item   synthesizer_rf_mode()
+
+@anchor{synthesizer_rf_off_mode()}
+@findex synthesizer_rf_off_mode()
+@item   synthesizer_rf_off_mode()
+
+@anchor{synthesizer_mod_output_impedance()}
+@findex synthesizer_mod_output_impedance()
+@item   synthesizer_mod_output_impedance()
+
+@anchor{synthesizer_mod_output_voltage()}
+@findex synthesizer_mod_output_voltage()
+@item   synthesizer_mod_output_voltage()
+
+@anchor{synthesizer_setup_list()}
+@findex synthesizer_setup_list()
+@item   synthesizer_setup_list()
+
+@anchor{synthesizer_select_list()}
+@findex synthesizer_select_list()
+@item   synthesizer_select_list()
+
+@anchor{synthesizer_start_list()}
+@findex synthesizer_start_list()
+@item   synthesizer_start_list()
+
+@anchor{synthesizer_stop_list()}
+@findex synthesizer_stop_list()
+@item   synthesizer_stop_list()
+
+@anchor{synthesizer_attenuation_offset()}
+@findex synthesizer_attenuation_offset()
+@item   synthesizer_attenuation_offset()
+
 
 @end table
 
@@ -9048,7 +9198,9 @@ an @code{EDL} script.
 @item   sourcemeter_reset_on_start()
 Requests that the device gets sent a reset command at the very start
 of the experiment, resetting it to (mostly) its factory default
-settings.
+settings. It accepts an optional boolean argument - calling it with
+a false argument has the same effect as not calling the function
+at all.
 
 This function can only be called in the @code{PREPARATIONS} section of
 an @code{EDL} script.
@@ -9057,8 +9209,8 @@ an @code{EDL} script.
 @anchor{sourcemeter_reset()}
 @findex sourcemeter_reset()
 @item   sourcemeter_reset()
-Sends a reset command to the device, resetting it to (mostly)
-its factory default settogs
+Sends a reset command to the device which resets it to (mostly)
+its factory default settings
 
 
 @anchor{sourcemeter_sense_mode()}

@@ -18,7 +18,7 @@
  */
 
 
-#include "rs.h"
+#include "rs_smb100a.h"
 
 
 /*----------------------------------------------------*
@@ -161,8 +161,8 @@ freq_check_frequency( double freq )
     if (    freq <  rs->freq.min_freq - 0.5 * rs->freq.freq_resolution
          || freq >= rs->freq.max_freq + 0.5 * rs->freq.freq_resolution )
 	{
-		print( FATAL, "Requested frequency of %.2 Hz out of range, "
-			   "must be between %.2f and %.2f Hz.\n", freq,
+		print( FATAL, "RF frequency of %.2 Hz out of range, must be between "
+               "%.2f and %.2f Hz.\n", freq,
 			   rs->freq.min_freq, rs->freq.max_freq );
 		THROW( EXCEPTION );
 	}

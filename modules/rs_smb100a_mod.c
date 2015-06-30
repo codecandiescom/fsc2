@@ -18,7 +18,7 @@
  */
 
 
-#include "rs.h"
+#include "rs_smb100a.h"
 
 
 static char const * mod_names[ ] = { "amplitude", "frequency",
@@ -416,6 +416,15 @@ mod_set_mode( enum Mod_Mode mode )
 			   mod_names[ rs->mod.type ] );
 		THROW( EXCEPTION );
 	}
+
+    if (    mode != MOD_MODE_NORMAL
+         && mode != MOD_MODE_LOW_NOISE
+         && mode != MOD_MODE_HIGH_DEVIATION )
+    {
+        print( FATAL, "Invalid modulation mode %d, use either \"NORMAL\", "
+               "\"LOW_NOISE\" or \"HIGH_DEVIATION\".\n", mode );
+        THROW( EXCEPTION );
+    }
 
 	return rs->mod.funcs[ rs->mod.type ].set_mode( mode );
 }

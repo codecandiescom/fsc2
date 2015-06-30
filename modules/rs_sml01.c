@@ -1139,8 +1139,8 @@ synthesizer_modulation( Var_T * v )
     {
         if ( ( 1 << ( res = rs_sml01_get_mod_param( &v, &val, &what ) ) )
              & set )
-            print( SEVERE, "Parameter for modulation %s set more than once in "
-                   "call of 'synthesizer_modulation'.\n", str[ res ] );
+            print( SEVERE, "Parameter for modulation %s set more than once.\n",
+                   str[ res ] );
         else
         {
             switch ( res )

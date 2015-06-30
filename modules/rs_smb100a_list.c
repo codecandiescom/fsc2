@@ -18,7 +18,7 @@
  */
 
 
-#include "rs.h"
+#include "rs_smb100a.h"
 
 
 /*----------------------------------------------------*
@@ -69,7 +69,7 @@ list_select( char const * name )
 		return;
 	}	
 
-	char *cmd = NULL;
+	char * cmd = NULL;
 	CLOBBER_PROTECT( cmd );
 
 	TRY
@@ -158,7 +158,8 @@ list_setup_A( double const * freqs,
 		for ( size_t i = 0; i < len; i++ )
 		{
 			freq_list[ i ] = freq_check_frequency( freqs[ i ] );
-			pow_list[ i ]  = pow_check_power( pows[ i ], freq_list[ i ] );
+            double p = pows[ i ] + table_att_offset( freq_list[ i ] );
+			pow_list[ i ]  = pow_check_power( p, freq_list[ i ] );
 		}
 
 		T_free( rs->list.name );
@@ -265,7 +266,7 @@ list_setup_C( double const * freqs,
 			  size_t         len,
 			  char   const * name )
 {
-	list_setup_B( freqs, pow_power( ), len, name );
+	list_setup_B( freqs, rs->pow.req_pow, len, name );
 }
 
 
