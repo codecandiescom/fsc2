@@ -3896,12 +3896,15 @@ section of the @code{EDL} script.
 @item @ref{synthesizer_automatic_level_control()}
 @item @ref{synthesizer_user_level_correction()}
 @item @ref{synthesizer_minimum_attenuation()}
+@item @ref{synthesizer_min_attenuation()}
+@item @ref{synthesizer_max_attenuation()}
 @item @ref{synthesizer_step_frequency()}
 @item @ref{synthesizer_sweep_up()}
 @item @ref{synthesizer_sweep_down()}
 @item @ref{synthesizer_reset_frequency()}
 @item @ref{synthesizer_use_table()}
 @item @ref{synthesizer_att_ref_freq()}
+@item @ref{synthesizer_attenuation_offset()}
 @item @ref{synthesizer_modulation()}
 @item @ref{synthesizer_mod_state()}
 @item @ref{synthesizer_mod_type()}
@@ -3919,9 +3922,9 @@ section of the @code{EDL} script.
 @item @ref{synthesizer_select_list()}
 @item @ref{synthesizer_start_list()}
 @item @ref{synthesizer_stop_list()}
-@item @ref{synthesizer_attenuation_offset()}
-@item @ref{synthesizer_min_attenuation()}
-@item @ref{synthesizer_max_attenuation()}
+@item @ref{synthesizer_delete_list()}
+@item @ref{synthesizer_list_length()}
+@item @ref{synthesizer_list_index()}
 @item @ref{synthesizer_output_impedance()}
 @item @ref{synthesizer_protection_tripped()}
 @item @ref{synthesizer_reset_protection()}
@@ -3951,12 +3954,12 @@ Returns a string with the name of the synthesizer being used.
 @findex synthesizer_state()
 @item synthesizer_state()
 The function queries or sets the output state of the synthesizer,
-i.e.@: if output of RF is on or off or for switching it on or off. If
-called with no arguments it returns @code{0} or @code{1}, depending on
-the output being switched off or on. If called with a boolean argument
-output is switched on or off: if called with @code{0} or the string
-@code{"OFF"} output is switched off and if called with a non-zero
-value or the string @code{"ON"} output is switched on.
+i.e.@: if output of RF is on or off. If called with no arguments it
+returns @code{0} or @code{1}, depending on the output being switched
+off or on. If called with a boolean argument output is switched on or
+off: if called with @code{0} or the string @code{"OFF"} output is
+switched off and if called with a non-zero value or the string
+@code{"ON"} output is switched on.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the state has already
@@ -3972,7 +3975,9 @@ the frequency it accepts a frequency as the only argument. For the
 @w{250 kHz} and @w{1000 MHz}, for the @ref{hp8648b, HP8648B} between
 @w{10 kHz} and @w{2 GHz} and for the @ref{hp8672a, HP8672A} between
 @w{2 GHz} and @w{18 GHz}. For the @ref{rs_sml01, Rohde&Schwarz SML01}
-the frequency range is @w{9 KHz} to @w{1.1 GHz}.
+the frequency range is @w{9 KHz} to @w{1.1 GHz}. For the
+@ref{rs_smb100a, Rohde&Schwarz SMB100A} the frequency range depends on
+the model, see the data shhet.
 
 If an attenuation table is used (@ref{synthesizer_use_table()} then on
 setting a frequency also the attenuation is corrected according to the
@@ -4022,6 +4027,12 @@ for the @ref{hp8648b, HP8648B} between @w{+14.5 dB} and @w{-136 dB}
 For the @ref{rs_sml01, Rohde&Schwarz SML01} the range of attenuations
 is from @w{+13 dBm} to @w{- 140 dBm} with a resolution of @w{0.1 dBm}.
 
+For the @ref{rs_smb100a, Rohde&Schwarz SMB100A} the range of
+attenuations is depends on both the current RF frequency and the
+model. Use the functions @code{@ref{synthesizer_min_attenuation()}}
+and @code{@ref{synthesizer_max_attenuation()}} to find out the
+limits.
+
 Currently for the @ref{hp8647a, HP8647A} the minimum attenuation that
 can be set from an @code{EDL} script is limited to @w{-5 dB}, should
 you need lower attenuations change the definition of @code{MIN_ATTEN}
@@ -4037,28 +4048,56 @@ when the attenuation has been set previously.
 @anchor{synthesizer_minimum_attenuation()}
 @findex synthesizer_minimum_attenuation()
 @item synthesizer_minimum_attenuation()
-The function can be used to restrict the minimum output attenuation to
-avoid inadvertently setting too high an output power level. It can be
-called to query the current setting (if called with no arguments) and
-to set a new minimum output attenuation. If called to set the
-attenuation it accepts one argument, the attenuation within the
-allowed range of attenuations of the device. Calling the function
-disables setting the attenuation by further calls of
+The function can be used to frther restrict the minimum output
+attenuation to avoid inadvertently setting too high an output power
+level. It can be called to query the current setting (if called with
+no arguments) and to set a new minimum output attenuation. If called
+to set the attenuation it accepts one argument, the attenuation within
+the allowed range of attenuations of the device. Calling the function
+disables setting the attenuation by calls of
 @ref{synthesizer_attenuation()} to ranges below the value set by this
 function.
+
+
+@anchor{synthesizer_min_attenuation()}
+@findex synthesizer_min_attenuation()
+@item   synthesizer_min_attenuation()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A} where the minimum attenuation depends on the currently set RF
+frequency and the model. If called with no argument it returns the
+minimum possible attenuation (not limited by the software limit set by
+@code{@ref{synthesizer_minimum_attenuation()}}) the device allows for
+the currently set RF frequency. If called with an frequency argument
+it returns the minimum attenuation for that frequency.
+
+
+@anchor{synthesizer_max_attenuation()}
+@findex synthesizer_max_attenuation()
+@item   synthesizer_max_attenuation()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A} and returns the maximum possible RF attenuation (which, in
+contrast to the minimum attenuation, does not depend on the RF
+frequency but still on the mode).
 
 
 @anchor{synthesizer_automatic_level_control()}
 @findex synthesizer_automatic_level_control()
 @item synthesizer_automatic_level_control()
 The function is currently only implemented for the @ref{rs_sml01,
-Rohde&Schwarz SML01}. It allows to query or set if automatic control
-of the RF power level is used. If called without an argument @code{1}
-is returned when automatic level control is switched on, otherwise
-@code{0}. If called with a boolean argument, either the string
-@code{"OFF"} or the integer @code{0}, automatic level control is
-switched off, if called with @code{"ON"} or a non-zero value it's
-switched on.
+Rohde&Schwarz SML01} and the @ref{rs_smb100a, Rohde&Schwarz SMB100A}.
+
+For the @ref{rs_sml01, Rohde&Schwarz SML01} It allows to query or set
+if automatic control of the RF power level is used. If called without
+an argument @code{1} is returned when automatic level control is
+switched on, otherwise @code{0}. If called with a boolean argument,
+either the string @code{"OFF"} or the integer @code{0}, automatic
+level control is switched off, if called with @code{"ON"} or a
+non-zero value it's switched on.
+
+The @ref{rs_smb100a, Rohde&Schwarz SMB100A} has three possible
+settings: @code{"OFF"} or @code{0} (in which case sample&hold level
+adjustment is done), @code{"ON"} or @code{1}, and @code{"AUTO"} or
+@code{2}.
 
 Before the the function has been called with an argument the query
 form of the function (i.e.@: calling it without an argument) can't be
@@ -4098,6 +4137,9 @@ Before the step frequency has been set by calling the function with an
 argument the query form of the function (i.e.@: calling it without an
 argument) can't be used in the PREPARATIONS section.
 
+This function does not exist for the @ref{rs_smb100a, Rhode&Schwarz
+SMB100A}.
+
 
 @anchor{synthesizer_sweep_up()}
 @findex synthesizer_sweep_up()
@@ -4106,6 +4148,9 @@ If both a frequency and a step frequency has been set the function
 increments the synthesizers frequency by the previously set step
 frequency. It returns the newly set frequency. The function can only
 be called in the @code{EXPERIMENT} section.
+
+This function does not exist for the @ref{rs_smb100a, Rhode&Schwarz
+SMB100A}.
 
 
 @anchor{synthesizer_sweep_down()}
@@ -4116,6 +4161,9 @@ decrements the synthesizers frequency by the previously set step
 frequency. It returns the newly set frequency. The function can only
 be called in the @code{EXPERIMENT} section.
 
+This function does not exist for the @ref{rs_smb100a, Rhode&Schwarz
+SMB100A}.
+
 
 @anchor{synthesizer_reset_frequency()}
 @findex synthesizer_reset_frequency()
@@ -4125,20 +4173,24 @@ frequency it was set to since the currently run @code{EDL} script was
 started (if none was set it has no effect). The function can only be
 called in the @code{EXPERIMENT} section.
 
+This function does not exist for the @ref{rs_smb100a, Rhode&Schwarz
+SMB100A}.
+
 
 @anchor{synthesizer_use_table()}
 @findex synthesizer_use_table()
 @item synthesizer_use_table()
-This function tells the program to adjust the attenuator when a new
-frequency is set. To find out which attenuation has to be set for a
-new frequency a table file is used. The name of this table file can be
-passed to the function as a (string) argument. If no argument is given
-a default table file is used (typically this is
+This function tells the program how to adjust the attenuator when a
+new frequency is set. To find out which attenuation has to be set for
+a new frequency a table file is used. The name of this table file can
+be passed to the function as a (string) argument. If no argument is
+given a default table file is used (typically this is
 @file{/usr/local/lib/fsc2/hp8647a.table} for the @ref{hp8647a},
 @file{/usr/local/lib/fsc2/hp8648b.table} for the @ref{hp8648b},
-@file{/usr/local/lib/fsc2/hp8672a.table} for the @ref{hp8672a} and
-@file{/usr/local/lib/fsc2/rs_sml01.table} for the @ref{rs_sml01}, but
-this may depend on the installation of @code{fsc2}).
+@file{/usr/local/lib/fsc2/hp8672a.table} for the @ref{hp8672a},
+@file{/usr/local/lib/fsc2/rs_sml01.table} for the @ref{rs_sml01} and
+@file{/usr/local/lib/fsc2/rs_smb100a.table} for the @ref{rs_smb100a},
+but this may depend on the configuration of the module).
 
 The table file must consist of pairs of entries, a frequency and a
 corresponding attenuation in db. The attenuation is being added to the
@@ -4166,24 +4218,42 @@ be valid:
 As you see also empty lines don't matter. Finally, all lines starting
 with a hash character, `@code{#}', are treated as comments.
 
-If a frequency is used that isn't in the table the attenuation to be used
-is extrapolated from the next neighboring frequencies. If the frequency
-isn't within the range of frequencies covered by the table a warning is
-printed and the attenuation for the nearest frequency is used.
+If a frequency is used that isn't in the table the attenuation to be
+used is linearely interpolated from the neighboring frequencies. If
+the frequency isn't within the range of frequencies covered by the
+table a warning is printed and the attenuation for the nearest
+frequency is used.
 
 
 @anchor{synthesizer_att_ref_freq()}
 @findex synthesizer_att_ref_freq()
 @item synthesizer_att_ref_freq()
 When a table file is used there remains the question for which
-frequency to use the attenuation has been set e.g.@: by
-@ref{synthesizer_attenuation()}. To set this reference frequency the
-function @ref{synthesizer_att_ref_freq()} can be used. If the function
-isn't called a frequency of @w{14 MHz} is used for the @ref{hp8647a,
-HP8647A}, @ref{hp8648b, HP8648B} and @ref{rs_sml01, R&S SML01} and
-@w{2 GHz} for the @ref{hp8672a, HP8672A} (but this is a compile time
-constant that can be adjusted in the configuration file for the device
-by changing the definition of @code{DEF_ATT_REF_FREQ}).
+frequency to use exactly the attenuation that been set by a call of
+@ref{synthesizer_attenuation()}. To set this reference frequency this
+function is to be used. If the function isn't called a frequency of
+@w{14 MHz} is used for the @ref{hp8647a, HP8647A}, @ref{hp8648b,
+HP8648B}, @ref{rs_sml01, R&S SML01} and @ref{rs_smb100a, R&S SMB100A},
+and @w{2 GHz} for the @ref{hp8672a, HP8672A} (but this is a compile
+time constant that can be adjusted in the configuration file for the
+device by changing the definition of @code{DEF_ATT_REF_FREQ}).
+
+For the @ref{rs_smb100a, R&S SMB100A} this function can also be used
+to switch off the use of a loaded table. For this call the function
+with a zero or negative argument. If later called again with a
+frequency within the range of the synthesizer, use of the table is
+re-enabled.
+
+
+@anchor{synthesizer_attenuation_offset()}
+@findex synthesizer_attenuation_offset()
+@item   synthesizer_attenuation_offset()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It allows to determine tha additional attenuation added when
+setting a new frequency while using a table is enabled. It takes a
+single argument, the RF frequency and returns the additional
+attenuation applied for this frequency. If no table has been loaded or
+its use is disabled the function returns 0.
 
 
 @anchor{synthesizer_modulation()}
@@ -4317,7 +4387,7 @@ it throws an exception, ending the script.
 @findex synthesizer_mod_source()
 @item synthesizer_mod_source()
 This function is only available for the @ref{hp8647a, HP 8647A},
-@ref{hp8648b, HP 8648B}, @ref{rs_sml01, Rohde&Schwarz SML01} and the
+@ref{hp8648b, HP 8648B}, @ref{rs_sml01, Rohde&Schwarz SML01} and
 @ref{rs_smb100a, Rohde&Schwarz SMB100A}. If the modulation type has
 been set before the modulation source can be set via this function.
 
@@ -4360,9 +4430,9 @@ external (DC) source is supported in this case. For the three other
 types of modulation @code{"AC"} or @code{"EXT_AC"} (or @code{0}) for
 an external, AC coupled source, @code{"DC"} or @code{"EXT_DC"} (or
 @code{1}) for an external, DC coupled source or @code{"INT"} (or
-@code{2}) for the internal source can be used. If called without an
-argument (and the source has already been determined) the number
-associated with the modulation source is returned.
+@code{2}) for the internal source. If called without an argument (and
+the source has already been determined) the number associated with the
+modulation source is returned.
 
 
 @anchor{synthesizer_mod_freq()}
@@ -4538,61 +4608,205 @@ ns} larger then the widths of the pulses (i.e.@: the pulses must be at
 least @w{20 ns} apart).
 
 
-@anchor{synthesizer_min_attenuation()}
-@findex synthesizer_min_attenuation()
-@item   synthesizer_min_attenuation()
-
-@anchor{synthesizer_max_attenuation()}
-@findex synthesizer_max_attenuation()
-@item   synthesizer_max_attenuation()
-
 @anchor{synthesizer_output_impedance()}
 @findex synthesizer_output_impedance()
 @item   synthesizer_output_impedance()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A} and allows to query its RF output impedance. It returns
+the impedance in Ohm, either @code{50}, @code{1000} or @code{10000}.
+The function can only be called in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
 
 @anchor{synthesizer_protection_tripped()}
 @findex synthesizer_protection_tripped()
 @item   synthesizer_protection_tripped()
 
+
+
 @anchor{synthesizer_reset_protection()}
 @findex synthesizer_reset_protection()
 @item   synthesizer_reset_protection()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. Models SMB-B101, SMB-B102, SMB-B103 and SMB-B106 as well as
+SMB-B112 and SMB-112L with option SMB-B30 installed are equiped with a
+reverse power protection, which disconnects the RF output when too
+large an external signal is applied to it. This function, which takes
+no argument, can be used to test if this has happened. For devices
+without reverse power protection the function always returns @code{0}.
+
+The function can only be used in the @code{EXPERIMENT} section
+of an @code{EDL} script.
+
 
 @anchor{synthesizer_rf_mode()}
 @findex synthesizer_rf_mode()
 @item   synthesizer_rf_mode()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It takes no arguments and allows to reconnect the RF output
+if it was disconnected because the reverse power protection circuitry
+was tripped. For devices without reverse power protection the function
+has no effect.
+
+The function can only be used in the @code{EXPERIMENT} section
+of an @code{EDL} script.
+
 
 @anchor{synthesizer_rf_off_mode()}
 @findex synthesizer_rf_off_mode()
 @item   synthesizer_rf_off_mode()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. When switching RF off the attenuator can be either left in
+its current state (for better VSWR) or swichted to full attenuation
+(for high level of noise suppression). The function can be used to
+switch between the two alternatives by calling if with either
+@code{"UNCHANGED"}, @code{"UNCH"} or @code{0} for leaving the
+attenuator unchanged, or with @code{"FULL_ATTENUATION"}, @code{"FATT"}
+or @code{1} for full attenuation on switching RF off. If called with
+no argument @code{0} or @code{1} is returned, indicating if switching
+to full attenuation is off or on.
+
 
 @anchor{synthesizer_mod_output_impedance()}
 @findex synthesizer_mod_output_impedance()
 @item   synthesizer_mod_output_impedance()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It allows to query or set the impedance of the internal
+modulation source monitoring output, which can be set to either
+@w{@code{50} Ohm} (@code{"G50"}) or , nominally, @w{@code{10} Ohm}
+(@code{"LOW}). Use on off these number or strings as the argument
+to the function to set the impedance. If called without an argument
+the impedance in Ohm is returned.
 
 @anchor{synthesizer_mod_output_voltage()}
 @findex synthesizer_mod_output_voltage()
 @item   synthesizer_mod_output_voltage()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It allows to query or set the maximum voltage at the
+internal modulation source monitoring output. If called with no
+argument the current setting is returned, if called with an argument
+of up to @w{4 V} the voltage is set accordingly.
+
 
 @anchor{synthesizer_setup_list()}
 @findex synthesizer_setup_list()
 @item   synthesizer_setup_list()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. The device allows processing of lists of frequencies and
+associated attenuations, with a new frequency and attenuation selected
+from the list on each external trigger input. This function allows to
+set up such a list for subsequent execution.
+
+If called with only a single argument, an array of at least two
+frequencies, a list will be created with these frequencies, all at
+attenuations given by the last call of
+@code{@ref{synthesizer_attenuation()}} - if the use of a table is
+enabled, adjusted with the attenuation offsets from the table.
+The name of the list (under which it will be stored on the
+internal persistent memory of the device is a default name, that
+can be set in configuration file for the device (the typical
+setting is @file{fsc2_def_list}).
+
+As another, optional argument either an attenuation or an array of
+attenuations can be passed to the function. If it's not an array
+this is the attenuation used for all frequencies (again modulated
+with the settings from the attenuation table if enabled). If it's an
+array it must have the exact same length as the array of frequencies
+and then is tekenb to contain the attenation for each of the
+corrsponding frequencies in the frequency array (also adjusted with
+the attenuation offsets from the table).
+
+A further, also optional argument, is the name to be used for the
+table. It is supposed to consist only of letters, numbers and under-\
+scores ('@code{_}'), with the first character being a letter or an
+underscore, but not a number. This name is used to store the list in
+the persistent memory of the device and can then be used in later runs
+of other scripts using the @code{@ref{synthesizer_select_list()}}
+function.
+
 
 @anchor{synthesizer_select_list()}
 @findex synthesizer_select_list()
 @item   synthesizer_select_list()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It can be used to select a list of frequencies and
+attenuations previously stored in the persistent memory of the device
+by use of the @code{@ref{synthesizer_setup_list()}} command. If called
+without an argument (or an empty string) the function will attempt to
+use the list with the default name, otherwise the list with the name
+given by the (only) argument.
+
+If a list of the given name does not exist the @code{EDL} script
+will be aborted.
+
 
 @anchor{synthesizer_start_list()}
 @findex synthesizer_start_list()
 @item   synthesizer_start_list()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It switches the synthesizer to list processing mode. In this
+mode on each external trigger a new pair of frequencies and
+attenuations from a previously created or selected list (with the
+functions @code{@ref{synthesizer_setup_list()}} or
+@code{@ref{synthesizer_select_list()}}) is set.
+
+Since list mode on;y can be switched on when the RF output is on
+this function internally also calls
+@code{@ref{synthesizer_state()}} with a true argument.
+
+Note that during list processing most functions may not have the
+expected effects, e.g. @code{@ref{synthesizer_frequency()}} or
+@code{@ref{synthesizer_attenuation()}} neither report nor set the
+frequency or attenuation. It's recommended not to use any
+synthesizer-related function before
+@code{@ref{synthesizer_stop_list()}} has been called - the only
+exception being the @code{@ref{synthesizer_list_index()}} function.
+
+If called with no list having been created or selected via a call of
+@code{@ref{synthesizer_setup_list()}} or
+@code{@ref{synthesizer_select_list()}} the @code{EDL} script will be
+aborted.
+
 
 @anchor{synthesizer_stop_list()}
 @findex synthesizer_stop_list()
-@item   synthesizer_stop_list()
+@item   synthesizer_start_list()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. The function switches the synthesizer back from list
+processing to "normal" mode.
 
-@anchor{synthesizer_attenuation_offset()}
-@findex synthesizer_attenuation_offset()
-@item   synthesizer_attenuation_offset()
+As @code{@ref{synthesizer_start_list()}} swichted on the RF
+automatically, this function per default switches it off again.
+If the RF output is to be left on when switching back to "normal" mode
+call it with a single true boolean argument (i.e. either the string
+@code{"ON"} or a non-zero positie number).
+
+
+@anchor{synthesizer_delete_list()}
+@findex synthesizer_delete_list()
+@item   synthesizer_delete_list()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It can be used to delete a specific or all lists from the
+devices persistent memory. If called with no argument (or the empty
+string) all lists stored are deleted. If called with the name of an
+existing list only that list gets deleted.
+
+@anchor{synthesizer_list_length()}
+@findex synthesizer_list_length()
+@item   synthesizer_list_length()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It accepts no arguments and returns the length of the
+currently selected list, or @code{0} if no list is selected.
+
+
+@anchor{synthesizer_list_index()}
+@findex synthesizer_list_index()
+@item   synthesizer_list_index()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It accepts no argument and returns the current position
+in the list during list processing (or @code{0} if no list is
+currently being processed). This is the only function that can
+be safely called during list processing.
 
 
 @end table

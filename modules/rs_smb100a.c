@@ -722,13 +722,13 @@ synthesizer_setup_list( Var_T * v )
 Var_T *
 synthesizer_select_list( Var_T * v )
 {
-	if ( v->type != STR_VAR )
+	if ( v && v->type != STR_VAR )
 	{
 		print( FATAL, "Expect list name as argument.\n" );
 		THROW( EXCEPTION );
 	}
 
-	list_select( v->val.sptr );
+	list_select( v ? v->val.sptr : NULL );
 	return vars_push( INT_VAR, 1L );
 }
 
@@ -771,6 +771,43 @@ synthesizer_stop_list( Var_T * v )
 
 	list_stop( keep_rf_on );
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_delete_list( Var_T * v )
+{
+	if ( v && v->type != STR_VAR )
+	{
+		print( FATAL, "Expect list name as the argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	list_delete( v ? v->val.sptr : NULL );
+	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_list_length( Var_T * v  UNUSED_ARG)
+{
+    return vars_push( INT_VAR, rs->list.name ? rs->list.len : 0L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_list_index( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( INT_VAR, list_index( ) + 1 );
 }
 
 

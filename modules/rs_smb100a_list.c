@@ -34,11 +34,6 @@ list_init( void )
 		rs->list.default_name = "fsc2_def_list";
 		rs->list.name = NULL;
 	}
-	else if ( FSC2_MODE == TEST )
-	{
-		if ( rs->list.name )
-			rs->list.name = T_strdup( rs->list.name );
-	}
 }
 
 
@@ -58,51 +53,49 @@ list_cleanup( void )
 void
 list_select( char const * name )
 {
-	list_check_list_name( name );
+    if ( name && *name )
+        list_check_list_name( name );
+    else
+        name = rs->list.default_name;
 
-	char * n = T_strdup( ( name && *name ) ? name : rs->list.default_name );
+    // In test mode we simply have to accept the name
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
-		T_free( rs->list.name );
-		rs->list.name = n;
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        rs->list.len = 101;
+        T_free( rs->list.name );
+        rs->list.name = T_strdup( name );
 		return;
-	}	
+    }
+
+    // Check if the list exists and has any points, otherwise give up
 
 	char * cmd = NULL;
 	CLOBBER_PROTECT( cmd );
 
 	TRY
 	{
-		size_t l = strlen( n );
-		if ( rs->list.name )
-			l = s_max( l, strlen( rs->list.name ) );
-
-		T_malloc( 12 + l );
-		strcat( strcat( strcpy( cmd, "LIST:SEL \"" ), n ), "\"" );
+		cmd = T_malloc( 12 + strlen( name ) );
+		sprintf( cmd, "LIST:SEL \"%s\"", name );
 		rs_write( cmd );
 
 		char reply[ 50 ];
 		rs_talk( "LIST:FREQ:POIN?", reply, 50 );
 
-		if ( query_int( reply ) < 1 )
+        int list_len = query_int( reply );
+		if ( list_len < 1 )
 		{
-			strcat( strcat( strcpy( cmd, "LIST:DEL \"" ) , n ), "\"" );
+            sprintf( cmd, "LIST:DEL \"%s\"", name );
 			rs_write( cmd );
 
-			if ( rs->list.name )
-			{
-				strcat( strcat( strcpy( cmd, "LIST:SEL \"") , rs->list.name ),
-						"\"" );
-				rs_write( cmd );
-			}
-			
-			print( FATAL, "List \"%s\" does not exist.\n", name );
+            rs->list.len = 0;
+			print( FATAL, "List '%s' does not exist or is empty.\n", name );
 			THROW( EXCEPTION );
 		}
 
-		T_free( rs->list.name );
-		rs->list.name = n;
+        rs->list.len = list_len;
+		rs->list.name = T_free( rs->list.name );
+		rs->list.name = T_strdup( name );
 
 		T_free( cmd );
 
@@ -111,11 +104,54 @@ list_select( char const * name )
 	OTHERWISE
 	{
 		T_free( cmd );
-		T_free( n );
 		RETHROW;
 	}
 }
     
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+void
+list_delete( char const * name )
+{
+    if ( name && *name )
+        list_check_list_name( name );
+
+    if ( FSC2_MODE == TEST )
+    {
+        if (    ! name || ! *name
+             || ( rs->list.name && ! strcmp( name, rs->list.name ) ) )
+            rs->list.name = T_free( rs->list.name );
+        return;
+    }
+
+    char * cmd = NULL;
+    CLOBBER_PROTECT( cmd );
+
+    TRY
+    {
+        if ( name && *name )
+            cmd = get_string( "LIST:DEL \"%s\"", name );
+        else
+            cmd = get_string( "LIST:DEL:ALL" );
+
+        rs_write( cmd );
+
+        if (    ! name || ! *name
+             || ( rs->list.name && ! strcmp( name, rs->list.name ) ) )
+            rs->list.name = T_free( rs->list.name );
+
+        T_free( cmd );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW;
+    }
+}
+
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
@@ -128,9 +164,12 @@ list_setup_A( double const * freqs,
 {
     // Check arguments
 
-	list_check_list_name( name );
+    if ( name && *name )
+        list_check_list_name( name );
+    else
+        name = rs->list.default_name;
 
-    if ( ! len )\
+    if ( ! len )
 	{
 		print( FATAL, "Empty list of frequencies.\n" );
 		THROW( EXCEPTION );
@@ -162,9 +201,9 @@ list_setup_A( double const * freqs,
 			pow_list[ i ]  = pow_check_power( p, freq_list[ i ] );
 		}
 
+        rs->list.len = len;
 		T_free( rs->list.name );
-		rs->list.name = T_strdup( ( name && *name ) ?
-								  name : rs->list.default_name );
+		rs->list.name = T_strdup( name );
 
 		TRY_SUCCESS;
 	}
@@ -177,6 +216,7 @@ list_setup_A( double const * freqs,
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
+        rs->list.len = len;
 		T_free( pow_list );
 		T_free( freq_list );
 		return;
@@ -187,9 +227,11 @@ list_setup_A( double const * freqs,
 
 	TRY
 	{
-		cmd = T_malloc( 12 + sizeof( rs->list.name ) );
-		strcat( strcat( strcpy( cmd, "LIST:SEL \"" ), rs->list.name ), "\"" );
-		rs_write( cmd );
+        if ( rs->list.name && strcmp( rs->list.name, name ) )
+        {
+            cmd = get_string( cmd, "LIST:SEL \"%s\"", rs->list.name );
+            rs_write( cmd );
+        }
 
 		cmd = T_realloc( cmd, 12 + 14 * len );
 		strcpy( cmd, "LIST:FREQ " );
@@ -203,7 +245,6 @@ list_setup_A( double const * freqs,
 		rs_write( cmd );
 
 		strcpy( cmd, "LIST:POW " );
-
 		np = cmd + strlen( cmd );
 
 		for ( size_t i = 0; i < len; i++ )
@@ -330,6 +371,9 @@ list_stop( bool keep_rf_on )
 int
 list_index( void )
 {
+    if ( ! rs->list.processing_list )
+        return -1;
+
 	if ( FSC2_MODE != EXPERIMENT )
 		return 0;
 

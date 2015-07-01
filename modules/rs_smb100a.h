@@ -29,7 +29,7 @@
 #if    ! defined B101 && ! defined B102   \
     && ! defined B103 && ! defined B106   \
     && ! defined B112 && ! defined B112L
-#error "Hardware option of device not defined in configuration file"
+#error "Model of device not defined in configuration file"
 #endif
 
 
@@ -207,6 +207,7 @@ typedef struct
 {
 	char const * default_name;
 	char       * name;
+    size_t       len;
 	bool         processing_list;
 } List_T;
 
@@ -271,6 +272,7 @@ typedef struct
 typedef struct
 {
 	bool is_connected;
+    bool has_reverse_power_protection;
 
 	Outp_T  outp;
 	Pow_T   pow;
@@ -326,6 +328,9 @@ Var_T * synthesizer_setup_list( Var_T * v );
 Var_T * synthesizer_select_list( Var_T * v );
 Var_T * synthesizer_start_list( Var_T * v );
 Var_T * synthesizer_stop_list( Var_T * v );
+Var_T * synthesizer_delete_list( Var_T * v );
+Var_T * synthesizer_list_length( Var_T * v );
+Var_T * synthesizer_list_index( Var_T * v );
 Var_T * synthesizer_use_table( Var_T * v );
 Var_T * synthesizer_att_ref_freq( Var_T * v );
 Var_T * synthesizer_attenuation_offset( Var_T * v );
@@ -449,6 +454,7 @@ enum Impedance inp_set_impedance( enum Impedance imp );
 void list_init( void );
 void list_cleanup( void );
 void list_select( char const * name );
+void list_delete( char const * name );
 void list_setup_A( double const * freqs,
 				   double const * pows,
 				   size_t         len,

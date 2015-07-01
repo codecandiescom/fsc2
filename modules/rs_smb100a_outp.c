@@ -126,7 +126,7 @@ outp_impedance( void )
 bool
 outp_protection_is_tripped( void )
 {
-	if ( FSC2_MODE != EXPERIMENT )
+	if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
 		return false;
 
     return query_bool( "OUTP:PROT:TRIP?" );
@@ -139,7 +139,7 @@ outp_protection_is_tripped( void )
 bool
 outp_reset_protection( void )
 {
-	if ( FSC2_MODE != EXPERIMENT )
+	if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
 		return rs->outp.state;
 
     rs_write( "OUTP:PROT:CLE" );

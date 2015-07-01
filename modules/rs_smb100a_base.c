@@ -465,6 +465,17 @@ check_model_and_options( void )
 	}
 #endif
 
+    rs->has_reverse_power_protection = true;
+#if defined B112 || defined B112L
+    rs->has_reverse_power_protection = false;
+    for ( size_t i = 0; opts[ i ]; i++ )
+        if ( ! strcmp( opts[ i ], "SMB-B30" ) )
+        {
+            rs->has_reverse_power_protection = true;
+            break;
+        }
+#endif
+
     for ( size_t i = 0; opts[ i ]; i++ )
         T_free( opts[ i ] );
     T_free( opts );
