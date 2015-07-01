@@ -197,7 +197,7 @@ list_setup_A( double const * freqs,
 		for ( size_t i = 0; i < len; i++ )
 		{
 			freq_list[ i ] = freq_check_frequency( freqs[ i ] );
-            double p = pows[ i ] + table_att_offset( freq_list[ i ] );
+            double p = pows[ i ] - table_att_offset( freq_list[ i ] );
 			pow_list[ i ]  = pow_check_power( p, freq_list[ i ] );
 		}
 

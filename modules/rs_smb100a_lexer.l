@@ -79,7 +79,7 @@ WLWS     ^[\t ,;:]*\n
 WS       [\t ,;:]+
 TWS      [\t ,;:]+\n
 
-INT      [0-9]+
+INT      [+-]?[0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 D        {INT}|{FLOAT}

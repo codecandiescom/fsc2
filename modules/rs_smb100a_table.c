@@ -49,7 +49,8 @@ table_init( void )
 void
 table_cleanup( void )
 {
-    rs->table.table = T_free( rs->table.table );
+    if ( FSC2_MODE != TEST )
+        rs->table.table = T_free( rs->table.table );
 }
 
 
