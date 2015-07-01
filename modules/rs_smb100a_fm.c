@@ -133,7 +133,7 @@ fm_exp_init( void )
 	else if ( ( rs->fm.source = query_source( "FM:SOUR?" ) ) == SOURCE_INT_EXT )
         fm_set_source( SOURCE_INT );
 
-	if ( ! ( rs->fm.mode_has_been_set != 1 ) )
+	if ( ! ( rs->fm.mode_has_been_set ^= 1 ) )
 		fm_set_mode( rs->fm.mode );
 	else
 		rs->fm.mode = query_mod_mode( "FM:MODE?" );
