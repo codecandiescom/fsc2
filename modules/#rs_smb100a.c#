@@ -658,7 +658,7 @@ synthesizer_setup_list( Var_T * v )
 			}
 			else
 			{
-				print( FATAL, "Third argument isn't a string.\n" );
+				print( FATAL, "Last argument isn't a string.\n" );
 				THROW( EXCEPTION );
 			}
 		}

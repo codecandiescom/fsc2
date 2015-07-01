@@ -202,8 +202,6 @@ list_setup_A( double const * freqs,
 		}
 
         rs->list.len = len;
-		T_free( rs->list.name );
-		rs->list.name = T_strdup( name );
 
 		TRY_SUCCESS;
 	}
@@ -229,9 +227,12 @@ list_setup_A( double const * freqs,
 	{
         if ( rs->list.name && strcmp( rs->list.name, name ) )
         {
-            cmd = get_string( cmd, "LIST:SEL \"%s\"", rs->list.name );
+            cmd = get_string( cmd, "LIST:SEL \"%s\"", name );
             rs_write( cmd );
         }
+
+		rs->list.name = T_free( rs->list.name );
+		rs->list.name = T_strdup( name );
 
 		cmd = T_realloc( cmd, 12 + 14 * len );
 		strcpy( cmd, "LIST:FREQ " );

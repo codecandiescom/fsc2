@@ -201,7 +201,7 @@ pow_power( void )
 double
 pow_set_power( double pow )
 {
-    pow = pow_check_power( pow, pow_mode( ) );
+    pow = pow_check_power( pow, freq_frequency( ) );
 
     if ( rs->pow.pow_has_been_set && pow == rs->pow.pow )
         return rs->pow.pow;
