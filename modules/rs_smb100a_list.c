@@ -227,7 +227,7 @@ list_setup_A( double const * freqs,
 	{
         if ( ! rs->list.name || strcmp( rs->list.name, name ) )
         {
-            cmd = get_string( cmd, "LIST:SEL \"%s\"", name );
+            cmd = get_string( "LIST:SEL \"%s\"", name );
             rs_write( cmd );
         }
 
