@@ -28,6 +28,8 @@ void
 list_init( void )
 {
 	rs->list.processing_list = false;
+    rs->list.len             = 0;
+    rs->list.max_len         = 2000;
 
 	if ( FSC2_MODE == PREPARATION )
 	{
@@ -93,7 +95,7 @@ list_select( char const * name )
 			THROW( EXCEPTION );
 		}
 
-        rs->list.len = list_len;
+        rs->list.len  = list_len;
 		rs->list.name = T_free( rs->list.name );
 		rs->list.name = T_strdup( name );
 
@@ -159,7 +161,7 @@ list_delete( char const * name )
 void
 list_setup_A( double const * freqs,
 			  double const * pows,
-			  size_t         len,
+			  long           len,
 			  char   const * name )
 {
     // Check arguments
@@ -175,9 +177,10 @@ list_setup_A( double const * freqs,
 		THROW( EXCEPTION );
 	}
 
-	if ( len > INT_MAX )
+	if ( len > rs->list.max_len )
 	{
-		print( FATAL, "List is too long.\n" );
+		print( FATAL, "List is too long, maximum number of points in list "
+               "is %d.\n", rs->list.max_len );
 		THROW( EXCEPTION );
 	}
 
@@ -194,7 +197,7 @@ list_setup_A( double const * freqs,
 		freq_list = T_malloc( len * sizeof *freq_list );
 		pow_list  = T_malloc( len * sizeof *pow_list );
 
-		for ( size_t i = 0; i < len; i++ )
+		for ( long i = 0; i < len; i++ )
 		{
 			freq_list[ i ] = freq_check_frequency( freqs[ i ] );
             double p = pows[ i ] - table_att_offset( freq_list[ i ] );
@@ -239,8 +242,8 @@ list_setup_A( double const * freqs,
 
 		char *np = cmd + strlen( cmd );
 
-		for ( size_t i = 0; i < len; i++ )
-			np += sprintf( np, "%.2f,", freq_list[ i ] );
+		for ( long i = 0; i < len; i++ )
+			np += sprintf( np, "%.2g,", freq_list[ i ] );
 		*--np = '\0';
 
 		rs_write( cmd );
@@ -248,8 +251,8 @@ list_setup_A( double const * freqs,
 		strcpy( cmd, "LIST:POW " );
 		np = cmd + strlen( cmd );
 
-		for ( size_t i = 0; i < len; i++ )
-			np += sprintf( np, "%.2f,", pow_list[ i ] );
+		for ( long i = 0; i < len; i++ )
+			np += sprintf( np, "%.2g,", pow_list[ i ] );
 		*--np = '\0';
 
 		rs_write( cmd );
@@ -273,16 +276,26 @@ list_setup_A( double const * freqs,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+int
+list_length( void )
+{
+    return rs->list.len;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 void
 list_setup_B( double const * freqs,
 			  double         pow,
-			  size_t         len,
+			  long           len,
 			  char   const * name )
 {
 	double * pows = T_malloc( len * sizeof *pows );
 	CLOBBER_PROTECT( pows );
 
-	for ( size_t i = 0; i < len; ++i )
+	for ( long i = 0; i < len; i++ )
 		pows[ i ] = pow;
 
 	TRY
@@ -305,7 +318,7 @@ list_setup_B( double const * freqs,
 
 void
 list_setup_C( double const * freqs,
-			  size_t         len,
+			  long           len,
 			  char   const * name )
 {
 	list_setup_B( freqs, rs->pow.req_pow, len, name );
@@ -334,11 +347,12 @@ list_start( void )
 		return;
 	}
 
-    rs_write( "LIST:LEAR" );
+    // Before anyhing can be done with the list output must be on
 
     if ( ! outp_state( ) )
         outp_set_state( true );
 
+    rs_write( "LIST:LEAR" );
     rs_write( "LIST:MODE STEP" );
 	rs_write( "LIST:TRIG:SOUR EXT" );
     freq_list_mode( true );

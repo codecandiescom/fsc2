@@ -658,7 +658,7 @@ synthesizer_setup_list( Var_T * v )
 			}
 			else
 			{
-				print( FATAL, "Third argument isn't a string.\n" );
+				print( FATAL, "Last argument isn't a string.\n" );
 				THROW( EXCEPTION );
 			}
 		}
@@ -797,7 +797,7 @@ synthesizer_delete_list( Var_T * v )
 Var_T *
 synthesizer_list_length( Var_T * v  UNUSED_ARG)
 {
-    return vars_push( INT_VAR, rs->list.name ? rs->list.len : 0L );
+    return vars_push( INT_VAR, ( long ) list_length( ) );
 }
 
 

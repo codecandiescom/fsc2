@@ -207,8 +207,9 @@ typedef struct
 {
 	char const * default_name;
 	char       * name;
-    size_t       len;
+    int          len;
 	bool         processing_list;
+    int          max_len;
 } List_T;
 
 typedef struct
@@ -457,17 +458,18 @@ void list_select( char const * name );
 void list_delete( char const * name );
 void list_setup_A( double const * freqs,
 				   double const * pows,
-				   size_t         len,
+				   long           len,
 				   char   const * name );
 void list_setup_B( double const * freqs,
 				   double         pows,
-				   size_t         len,
+				   long           len,
 				   char   const * name );
 void list_setup_C( double const * freqs,
-				   size_t         len,
+				   long           len,
 				   char   const * name );
 void list_start( void );
 void list_stop( bool keep_rf_on );
+int list_length( void );
 int list_index( void );
 void list_delete_list( char const * name );
 void list_check_list_name( char const * name );

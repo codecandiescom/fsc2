@@ -28,18 +28,18 @@ void
 freq_init( void )
 {
 #if defined B101
-	rs->freq.min_freq = 9.0e3;
+	rs->freq.min_freq = 8.0e3;
 	rs->freq.max_freq = 1.1e9;
 #elif defined B102
-\	rs->freq.min_freq = 9.0e3;
+\	rs->freq.min_freq = 8.0e3;
 	rs->freq.max_freq = 2.2e9;
 #elif defined B103 
-	rs->freq.min_freq = 9.0e3;
+	rs->freq.min_freq = 8.0e3;
 	rs->freq.max_freq = 3.2e9;
 #elif defined B106
-	rs->freq.min_freq = 9.0e3;
+	rs->freq.min_freq = 8.0e3;
 	rs->freq.max_freq = 6.0e9;
-#else
+#else                               // SMB112 and SMB112L
 	rs->freq.min_freq = 100.0e3;
 	rs->freq.max_freq = 12.75e9;
 #endif

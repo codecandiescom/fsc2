@@ -20,16 +20,20 @@
 
 #include "rs_smb100a.h"
 
+static void pow_init_prep( void );
+static void pow_init_test( void );
+static void pow_init_exp( void );
+
 
 typedef struct
 {
-    double low_freq;
+    double  freq_limit;
     double  pow;
 } Pow_Range;
 
 #if defined B101 || defined B102 || defined B103 || defined B106
 static double min_pow = -145;
-static Pow_Range max_pow[ ] = { {   9.0e3,  8.0 },
+static Pow_Range max_pow[ ] = { {   8.0e3,  8.0 },
                                 { 100.0e3, 13.0 },
                                 { 300.0e3, 18.0 },
                                 {   1.0e6, 30.0 } };
@@ -54,50 +58,72 @@ static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
 void
 pow_init( void )
 {
-    /* Set the minimun power and the (frequency-dependent) maximum powees -
-       they differ between models */
+    if ( FSC2_MODE == PREPARATION )
+        pow_init_prep( );
+    else if ( FSC2_MODE == TEST )
+        pow_init_test( );
+    else\
+        pow_init_exp( );
+}
 
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+pow_init_prep( void )
+{
     rs->pow.pow_resolution = 0.01;
 
-    if ( FSC2_MODE == PREPARATION )
+    rs->pow.pow_has_been_set       = false;
+    rs->pow.alc_state_has_been_set = false;
+    rs->pow.mode_has_been_set      = false;
+    rs->pow.off_mode_has_been_set  = false;
+    rs->pow.user_max_pow_limit     = max_pow[ 4 ].pow;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+pow_init_test( void )
+{
+    if ( ! rs->pow.pow_has_been_set )
     {
-        rs->pow.pow_has_been_set       = false;
-        rs->pow.alc_state_has_been_set = false;
-        rs->pow.mode_has_been_set      = false;
-        rs->pow.off_mode_has_been_set  = false;
-        rs->pow.user_max_pow_limit   = max_pow[ 4 ].pow;
-        return;
+        rs->pow.pow              = -10;
+        rs->pow.pow_has_been_set = true;
     }
 
-    if ( FSC2_MODE == TEST )
+    if ( ! rs->pow.alc_state_has_been_set )
     {
-        if ( ! rs->pow.pow_has_been_set )
-        {
-            rs->pow.pow = -10;
-            rs->pow.pow_has_been_set = true;
-        }
+        rs->pow.alc_state              = ALC_STATE_AUTO;
+        rs->pow.alc_state_has_been_set = true;
+    }
 
-        if ( ! rs->pow.alc_state_has_been_set )
-        {
-            rs->pow.alc_state = ALC_STATE_AUTO;
-            rs->pow.alc_state_has_been_set = true;
-        }
+    if ( ! rs->pow.mode_has_been_set )
+    {
+        rs->pow.mode              = POWER_MODE_NORMAL;
+        rs->pow.mode_has_been_set = true;
+    }
 
-        if ( ! rs->pow.mode_has_been_set )
-        {
-            rs->pow.mode = POWER_MODE_NORMAL;
-            rs->pow.mode_has_been_set = true;
-        }
+    if ( ! rs->pow.off_mode_has_been_set )
+    {
+        rs->pow.off_mode              = OFF_MODE_FATT;
+        rs->pow.off_mode_has_been_set = true;
+    }
+}
 
-        if ( ! rs->pow.off_mode_has_been_set )
-        {
-            rs->pow.off_mode  = OFF_MODE_FATT;
-            rs->pow.off_mode_has_been_set = true;
-        }
 
-        return;
-    }       
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
+static
+void
+pow_init_exp( void )
+{
     // Switch off power offset and set RF-off mode to unchanged
 
     rs_write( "POW:OFFS 0" );
@@ -244,7 +270,7 @@ pow_max_power( double freq )
     freq = freq_check_frequency( freq );
 
     for ( int i = 3; i >= 0; i-- )
-        if ( freq >= max_pow[ i ].low_freq )
+        if ( freq >= max_pow[ i ].freq_limit )
             return max_pow[ i ].pow;
 
     fsc2_impossible( );

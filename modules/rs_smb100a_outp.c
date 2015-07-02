@@ -99,6 +99,11 @@ outp_set_state( bool state )
 
     rs->outp.state_has_been_set = true;
 
+    // Switching output off stops list processing mode!
+
+    if ( ! state )
+        rs->list.processing_list = false;
+
 	if ( FSC2_MODE != EXPERIMENT )
         return rs->outp.state = state;
 
