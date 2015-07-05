@@ -243,7 +243,7 @@ list_setup_A( double const * freqs,
 		char *np = cmd + strlen( cmd );
 
 		for ( long i = 0; i < len; i++ )
-			np += sprintf( np, "%.2g,", freq_list[ i ] );
+			np += sprintf( np, "%.2f,", freq_list[ i ] );
 		*--np = '\0';
 
 		rs_write( cmd );
@@ -252,7 +252,7 @@ list_setup_A( double const * freqs,
 		np = cmd + strlen( cmd );
 
 		for ( long i = 0; i < len; i++ )
-			np += sprintf( np, "%.2g,", pow_list[ i ] );
+			np += sprintf( np, "%.2f,", pow_list[ i ] );
 		*--np = '\0';
 
 		rs_write( cmd );
@@ -392,7 +392,7 @@ list_index( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return 0;
 
-    return query_int( "LIST::INDEX?" );
+    return query_int( "LIST:INDEX?" );
 }
 
 
