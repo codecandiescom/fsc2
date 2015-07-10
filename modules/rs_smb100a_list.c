@@ -369,11 +369,12 @@ list_stop( bool keep_rf_on )
     if ( ! rs->list.processing_list )
         return;
 
+    rs->list.processing_list = false;
+
     if ( ! keep_rf_on )
         outp_set_state( false );
 
     freq_list_mode( false );
-    rs->list.processing_list = false;
 
 	if ( FSC2_MODE == EXPERIMENT )
 		rs_write( "LIST:RES" );
