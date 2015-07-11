@@ -3923,6 +3923,7 @@ section of the @code{EDL} script.
 @item @ref{synthesizer_start_list()}
 @item @ref{synthesizer_stop_list()}
 @item @ref{synthesizer_delete_list()}
+@item @ref{synthesizer_show_lists()}
 @item @ref{synthesizer_list_length()}
 @item @ref{synthesizer_list_index()}
 @item @ref{synthesizer_output_impedance()}
@@ -4800,7 +4801,19 @@ This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
 SMB100A}. It can be used to delete a specific or all lists from the
 devices persistent memory. If called with no argument (or the empty
 string) all lists stored are deleted. If called with the name of an
-existing list only that list gets deleted.
+existing list only that list gets deleted. The function returns
+@code{1} if the requested list could be deleted, otherwise @code{0}.
+
+
+@anchor{synthesizer_show_lists()}
+@findex synthesizer_show_lists()
+@item   synthesizer_show_lists()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It takes no arguments and returns a comma separated list
+of the names of all lists stored on the synthesizer. If that list
+contains more than 10000 characters it is truncated to that length
+and a warning is printed out.
+
 
 @anchor{synthesizer_list_length()}
 @findex synthesizer_list_length()

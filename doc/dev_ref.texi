@@ -3734,6 +3734,7 @@ frequency/amplitude table files.
 @item @ref{synthesizer_start_list()}
 @item @ref{synthesizer_stop_list()}
 @item @ref{synthesizer_delete_list()}
+@item @ref{synthesizer_show_lists()}
 @item @ref{synthesizer_list_length()}
 @item @ref{synthesizer_list_index()}
 @item @ref{synthesizer_attenuation_offset()}

@@ -714,7 +714,6 @@ vxi11_write( const char * buffer,
     struct timeval before,
                    now;
 
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */

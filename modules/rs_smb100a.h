@@ -274,6 +274,7 @@ typedef struct
 {
 	bool is_connected;
     bool has_reverse_power_protection;
+    bool use_binary;
 
 	Outp_T  outp;
 	Pow_T   pow;
@@ -330,6 +331,7 @@ Var_T * synthesizer_select_list( Var_T * v );
 Var_T * synthesizer_start_list( Var_T * v );
 Var_T * synthesizer_stop_list( Var_T * v );
 Var_T * synthesizer_delete_list( Var_T * v );
+Var_T * synthesizer_show_lists( Var_T * v );
 Var_T * synthesizer_list_length( Var_T * v );
 Var_T * synthesizer_list_index( Var_T * v );
 Var_T * synthesizer_use_table( Var_T * v );
@@ -455,7 +457,6 @@ enum Impedance inp_set_impedance( enum Impedance imp );
 void list_init( void );
 void list_cleanup( void );
 void list_select( char const * name );
-void list_delete( char const * name );
 void list_setup_A( double const * freqs,
 				   double const * pows,
 				   long           len,
@@ -471,7 +472,8 @@ void list_start( bool relearn_list );
 void list_stop( bool keep_rf_on );
 int list_length( void );
 int list_index( void );
-void list_delete_list( char const * name );
+bool list_delete_list( char const * name );
+char * list_get_all( void );
 void list_check_list_name( char const * name );
 
 
@@ -492,9 +494,10 @@ bool pulm_available( void );
 void rs_init( rs_smb100a_T * rs_cur );
 void rs_cleanup( void );
 void rs_write( char const * data );
-void rs_talk( char const * cmd,
-			  char       * reply,
-			  size_t       length );
+void rs_write_n( char const * data, size_t length );
+size_t rs_talk( char const * cmd,
+                char       * reply,
+                size_t       length );
 void wait_opc( double max_timeout );
 bool query_bool( char const * cmd );
 int query_int( char const * cmd );

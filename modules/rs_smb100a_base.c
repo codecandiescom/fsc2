@@ -77,7 +77,10 @@ rs_connect( void )
 	rs->is_connected = false;
 
 	if ( FSC2_MODE != EXPERIMENT )
+    {
+        rs->use_binary = false;
 		return;
+    }
 
 	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
                      false, false, 100000 ) == FAILURE )
@@ -95,7 +98,30 @@ rs_connect( void )
 
 //	vxi11_lock_out( true );
 
+    // Tell the device to send all data in ASCII
+
     rs_write( "FORM ASC" );
+
+    // If BINARY_TRANSFER is defined and we're (hopefully) on a machine
+    // that uses IEEE 754 set the endianess the device expects data in
+    // to our endianess.
+
+#if defined BINARY_TRANSFER
+    if ( sizeof( double ) != 8 )
+        rs->use_binary = false;
+    else
+    {
+        rs->use_binary = true;
+
+        int tst = 1;
+        if ( * ( unsigned char * ) &tst  == 1 )
+            rs_write( "FORM:BORD NORM" );
+        else
+            rs_write( "FORM:BORD SWAP" );
+    }
+#else
+    rs->use_binary = false;
+#endif
 
     check_model_and_options( );
 };
@@ -134,6 +160,18 @@ rs_write( char const * data )
  *----------------------------------------------------*/
 
 void
+rs_write_n( char const * data,
+            size_t       length )
+{
+	if ( vxi11_write( data, &length, false ) != SUCCESS )
+		comm_failure( );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+size_t
 rs_talk( char const * cmd,
 		 char       * reply,
 		 size_t       length )
@@ -144,7 +182,9 @@ rs_talk( char const * cmd,
 		comm_failure( );
 	
 	if ( reply[ length - 1 ] == '\n' )
-		reply[ length - 1 ] = '\0';
+		reply[ --length ] = '\0';
+
+    return length;
 }
 
 
@@ -168,9 +208,8 @@ bool
 query_bool( char const * cmd )
 {
 	char reply[ 10 ];
-    rs_talk( cmd, reply, sizeof reply );
 
-	if ( strlen( reply ) == 1 )
+	if ( rs_talk( cmd, reply, sizeof reply ) == 1 )
 	{
 		if ( reply[ 0 ] == '0' )
 			return false;

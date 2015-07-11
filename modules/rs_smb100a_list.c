@@ -19,6 +19,12 @@
 
 
 #include "rs_smb100a.h"
+#include "vxi11_user.h"
+
+
+static void list_send( char const   * type,
+                       double const * data,
+                       long           length );
 
 
 /*----------------------------------------------------*
@@ -115,50 +121,6 @@ list_select( char const * name )
  *----------------------------------------------------*/
 
 void
-list_delete( char const * name )
-{
-    if ( name && *name )
-        list_check_list_name( name );
-
-    if ( FSC2_MODE == TEST )
-    {
-        if (    ! name || ! *name
-             || ( rs->list.name && ! strcmp( name, rs->list.name ) ) )
-            rs->list.name = T_free( rs->list.name );
-        return;
-    }
-
-    char * cmd = NULL;
-    CLOBBER_PROTECT( cmd );
-
-    TRY
-    {
-        if ( name && *name )
-            cmd = get_string( "LIST:DEL \"%s\"", name );
-        else
-            cmd = get_string( "LIST:DEL:ALL" );
-
-        rs_write( cmd );
-
-        if (    ! name || ! *name
-             || ( rs->list.name && ! strcmp( name, rs->list.name ) ) )
-            rs->list.name = T_free( rs->list.name );
-
-        T_free( cmd );
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-    {
-        T_free( cmd );
-        RETHROW;
-    }
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-void
 list_setup_A( double const * freqs,
 			  double const * pows,
 			  long           len,
@@ -228,34 +190,19 @@ list_setup_A( double const * freqs,
 
 	TRY
 	{
+        // If necessary sselect new list name
+
         if ( ! rs->list.name || strcmp( rs->list.name, name ) )
         {
             cmd = get_string( "LIST:SEL \"%s\"", name );
             rs_write( cmd );
         }
 
-		rs->list.name = T_free( rs->list.name );
-		rs->list.name = T_strdup( name );
+        rs->list.name = T_free( rs->list.name );
+        rs->list.name = T_strdup( name );
 
-		cmd = T_realloc( cmd, 12 + 14 * len );
-		strcpy( cmd, "LIST:FREQ " );
-
-		char *np = cmd + strlen( cmd );
-
-		for ( long i = 0; i < len; i++ )
-			np += sprintf( np, "%.2f,", freq_list[ i ] );
-		*--np = '\0';
-
-		rs_write( cmd );
-
-		strcpy( cmd, "LIST:POW " );
-		np = cmd + strlen( cmd );
-
-		for ( long i = 0; i < len; i++ )
-			np += sprintf( np, "%.2f,", pow_list[ i ] );
-		*--np = '\0';
-
-		rs_write( cmd );
+        list_send( "FREQ", freq_list, len );
+        list_send( "POW", pow_list, len );
 
 		TRY_SUCCESS;
 	}
@@ -270,6 +217,54 @@ list_setup_A( double const * freqs,
 	T_free( cmd );
 	T_free( freq_list );
 	T_free( pow_list );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+list_send( char const   * type,
+           double const * data,
+           long           length )
+{
+    char * cmd = 0;
+    CLOBBER_PROTECT( cmd );
+
+    TRY
+    {
+        if ( rs->use_binary )
+        {
+            int cnt = floor( log10( 8 * length ) ) + 1;
+            size_t total = 5 + strlen( type ) + 3 + cnt + 8 * length;
+
+            cmd = T_malloc( total );
+            memcpy( cmd + sprintf( cmd, "LIST:%s #%d%ld", type,
+                                   cnt, 8 * length ), data, 8 * length );
+            rs_write_n( cmd, total );
+        }
+        else
+        {
+            cmd = T_malloc( 6 + strlen( type ) + 14 * length );
+            char * np = cmd + sprintf( cmd, "LIST:%s ", type );
+
+            for ( long i = 0; i < length; i++ )
+                np += sprintf( np, "%.2f,", data[ i ] );
+            *--np = '\0';
+
+            rs_write( cmd );
+        }
+
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW;
+    }
+
+    T_free( cmd );
 }
 
 
@@ -410,26 +405,33 @@ list_index( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void
+bool
 list_delete_list( char const * name )
 {
-	char * n;
+	char const * n;
 
     if ( ! name || ! *name )
     {
         if ( ! rs->list.name )
-            return;
+            return false;
         else
             n = rs->list.name;
     }
     else
 	{
         list_check_list_name( name );
-		n = ( char * ) name;
+		n = name;
 	}
 
-	char *cmd = T_malloc( 12 + strlen( n ) );
-	strcat( strcat( strcpy( cmd, "LIST:DEL \"" ), n ), "\"" );
+    if ( FSC2_MODE == TEST )
+    {
+        if ( ! strcmp( n, rs->list.name ) )
+            rs->list.name = T_free( rs->list.name );
+        return true;
+    }
+
+	char * cmd = get_string( "LIST:DEL \"%s\"", n );
+    CLOBBER_PROTECT( cmd );
 
 	TRY
 	{
@@ -446,6 +448,45 @@ list_delete_list( char const * name )
 
     if ( ! strcmp( n, rs->list.name ) )
         rs->list.name = T_free( rs->list.name );
+
+    return true;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+char*
+list_get_all( void )
+{
+    if ( FSC2_MODE == TEST )
+        return T_strdup( "test_list1,test_list2,test_list3" );
+
+    size_t length = 10000;
+    char * reply = T_malloc( length );
+    CLOBBER_PROTECT( reply );
+    char * r;
+
+    TRY
+    {
+        size_t l = rs_talk( "LIST:CAT?", reply, length );
+        if ( l == length )
+        {
+            reply [ l - 1 ] = '\0';
+            print( WARN, "List of lists too long, truncated.\n" );
+            r = reply;
+        }
+        else
+            r = T_realloc( reply, l + 1 );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( reply );
+        RETHROW;
+    }
+
+    return r;
 }
 
 

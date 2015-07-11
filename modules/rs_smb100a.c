@@ -793,8 +793,18 @@ synthesizer_delete_list( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	list_delete( v ? v->val.sptr : NULL );
-	return vars_push( INT_VAR, 1L );
+	return vars_push( INT_VAR,
+                      list_delete_list( v ? v->val.sptr : NULL ) ? 1L : 0L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_show_lists( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( STR_VAR, list_get_all( ) );
 }
 
 

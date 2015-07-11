@@ -311,6 +311,7 @@ synthesizer_select_list, -1, EXP;				   // R&S SMB100A
 synthesizer_start_list, -1, EXP;				   // R&S SMB100A
 synthesizer_stop_list, 1, EXP;                     // R&S SMB100A
 synthesizer_delete_list, -1, EXP;                  // R&S SMB100A
+synthesizer_show_lists, -1, EXP;                   // R&S SMB100A
 synthesizer_list_length, 0, EXP;                   // R&S SMB100A
 synthesizer_list_index, 0, EXP;                    // R&S SMB100A
 
