@@ -4750,12 +4750,23 @@ attenuations from a previously created or selected list (with the
 functions @code{@ref{synthesizer_setup_list()}} or
 @code{@ref{synthesizer_select_list()}}) is set.
 
-Since list mode on;y can be switched on when the RF output is on
+Since list mode only can be switched on when the RF output is on
 this function internally also calls
 @code{@ref{synthesizer_state()}} with a true argument.
 
-Note that during list processing most functions may not have the
-expected effects, e.g. @code{@ref{synthesizer_frequency()}} or
+PLease note that when using a newly created list the list must be
+"learned" by the device: it determines the hardware settings for all
+points of the list. This can take up to about 7 seconds with lists of
+the maximum length and is done automatically. The determined settings
+are stored with the list in the device's internal memory, so the next
+time the list is used the learning step can be omitted. When
+environmental conditions change greatly these settings may become
+inaccurate. For that case you can pass a boolean argument to the
+function that if it is true (@code{"ON"} or a non-zero integer)
+forces the device to re-evaluate the list.
+
+Note also that during list processing most functions may not have
+the expected effect, e.g. @code{@ref{synthesizer_frequency()}} or
 @code{@ref{synthesizer_attenuation()}} neither report nor set the
 frequency or attenuation. It's recommended not to use any
 synthesizer-related function before

@@ -467,7 +467,7 @@ void list_setup_B( double const * freqs,
 void list_setup_C( double const * freqs,
 				   long           len,
 				   char   const * name );
-void list_start( void );
+void list_start( bool relearn_list );
 void list_stop( bool keep_rf_on );
 int list_length( void );
 int list_index( void );
@@ -495,6 +495,7 @@ void rs_write( char const * data );
 void rs_talk( char const * cmd,
 			  char       * reply,
 			  size_t       length );
+void wait_opc( double max_timeout );
 bool query_bool( char const * cmd );
 int query_int( char const * cmd );
 double query_double( const char * cmd );

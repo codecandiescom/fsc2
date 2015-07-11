@@ -329,7 +329,7 @@ list_setup_C( double const * freqs,
  *----------------------------------------------------*/
 
 void
-list_start( void )
+list_start( bool relearn_list )
 {
     if ( ! rs->list.name )
 	{
@@ -352,10 +352,20 @@ list_start( void )
     if ( ! outp_state( ) )
         outp_set_state( true );
 
-    rs_write( "LIST:LEAR" );
     rs_write( "LIST:MODE STEP" );
 	rs_write( "LIST:TRIG:SOUR EXT" );
+
+    if ( relearn_list )
+    {
+        rs_write( "LIST:LEAR" );
+        wait_opc( 10 );
+    }
+
     freq_list_mode( true );
+
+    if ( ! relearn_list )
+        wait_opc( 10 );
+
     rs->list.processing_list = true;
 }
 

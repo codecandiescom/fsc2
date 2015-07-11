@@ -737,7 +737,7 @@ synthesizer_select_list( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_start_list( Var_T * v  UNUSED_ARG )
+synthesizer_start_list( Var_T * v )
 {
 	if ( rs->list.processing_list )
 	{
@@ -745,7 +745,14 @@ synthesizer_start_list( Var_T * v  UNUSED_ARG )
 		return vars_push( INT_VAR, 0L );
 	}
 
-	list_start( );
+    bool relearn_list = false;
+    if ( v )
+    {
+        relearn_list = get_boolean( v );
+        too_many_arguments( v );
+    }
+
+	list_start( relearn_list );
 	return vars_push( INT_VAR, 1L );
 }
 

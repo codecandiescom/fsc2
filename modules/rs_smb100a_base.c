@@ -151,6 +151,19 @@ rs_talk( char const * cmd,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+void
+wait_opc( double max_timeout )
+{
+	vxi11_set_timeout( READ, lrnd( 1000000 * max_timeout ) );
+    if ( ! query_bool( "*OPC?" ) )
+        bad_data( );
+    vxi11_set_timeout( READ, READ_TIMEOUT );
+}    
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 bool
 query_bool( char const * cmd )
 {
