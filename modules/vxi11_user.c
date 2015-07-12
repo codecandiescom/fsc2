@@ -984,7 +984,7 @@ vxi11_read( char   * buffer,
 
     /* Transfer should be over because either all data requested were read
        (and the device also sees it that way) or because the device didn't
-       ha any data to send anymore */
+       hasany data to send anymore */
 
     fsc2_assert(    (    to_read - *length == 0
                       && read_resp->reason & VXI11_REQCNT_REASON )

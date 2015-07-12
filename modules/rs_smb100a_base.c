@@ -207,7 +207,7 @@ rs_talk_bin( char const * cmd,
 	if ( vxi11_read( reply, &rec, false ) != SUCCESS )
 		comm_failure( );
 
-    return length;
+    return rec;
 }
 
 
@@ -502,7 +502,7 @@ query_list( char const * cmd,
             {
                 if ( ! isdigit( ( int ) reply[ 2 + i ] ) )
                     bad_data( );
-                total = total * 10 + reply[ 2 + i ] - '0';
+                total = 10 * total + reply[ 2 + i ] - '0';
             }
 
             if (    3 + cnt + total != len
