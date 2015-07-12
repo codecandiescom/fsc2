@@ -429,7 +429,7 @@ pow_check_power( double pow,
          || pow <  pmin - 0.5 * rs->pow.pow_resolution )
     {
         print( FATAL, "Requested attenuation of %.2f dB out of range, "
-               "must be between %f and %f dB.\n", - pow, - pmin, - pmax);
+               "must be between %.2f and %.2f dB.\n", - pow, - pmin, - pmax);
         THROW( EXCEPTION );
     }
 

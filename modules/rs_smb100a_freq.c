@@ -161,8 +161,8 @@ freq_check_frequency( double freq )
     if (    freq <  rs->freq.min_freq - 0.5 * rs->freq.freq_resolution
          || freq >= rs->freq.max_freq + 0.5 * rs->freq.freq_resolution )
 	{
-		print( FATAL, "RF frequency of %f MHz out of range, must be between "
-               "%.2f kHzand %.5f GHz.\n", 1.0e-3 * freq,
+		print( FATAL, "RF frequency of %.8f MHz out of range, must be between "
+               "%.2f kHzand %.5f GHz.\n", 1.0e-6 * freq,
 			   1.0e-3 * rs->freq.min_freq, 1.0e-9 * rs->freq.max_freq );
 		THROW( EXCEPTION );
 	}
