@@ -307,8 +307,8 @@ synthesizer_modulation_output_voltage, -1, ALL;    // R&S SMB100A
 synthesizer_mod_state, -1, ALL;                    // R&S SMB100A
 synthesizer_mod_mode, -1, ALL;                     // R&S SMB100A
 synthesizer_setup_list, -1, EXP;                   // R&S SMB100A
-synthesizer_selected_list, -1, EXP;				   // R&S SMB100A
-synthesizer_start_list, -1, EXP;				   // R&S SMB100A
+synthesizer_selected_list, -1, EXP;                // R&S SMB100A
+synthesizer_start_list, -1, EXP;                   // R&S SMB100A
 synthesizer_stop_list, 1, EXP;                     // R&S SMB100A
 synthesizer_delete_list, -1, EXP;                  // R&S SMB100A
 synthesizer_show_lists, -1, EXP;                   // R&S SMB100A

@@ -367,7 +367,7 @@ enum Off_Mode pow_set_off_mode( enum Off_Mode mode );
 double pow_maximum_power( void );
 double pow_set_maximum_power( double max_pow );
 double pow_check_power( double pow,
-						double freq );
+                        double freq );
 
 // Function of the FREQ sub-system
 
@@ -408,10 +408,10 @@ enum Source fm_set_source( enum Source source );
 enum Mod_Mode fm_mode( void );
 enum Mod_Mode fm_set_mode( enum Mod_Mode mode );
 double fm_max_deviation( double        freq,
-						 enum Mod_Mode mode );
+                         enum Mod_Mode mode );
 double fm_check_deviation( double        dev,
-						   double        freq,
-						   enum Mod_Mode mode );
+                           double        freq,
+                           enum Mod_Mode mode );
 
 
 // Function of the PM sub-system
@@ -428,10 +428,10 @@ enum Source pm_set_source( enum Source source );
 enum Mod_Mode pm_mode( void );
 enum Mod_Mode pm_set_mode( enum Mod_Mode mode );
 double pm_max_deviation( double        freq,
-						 enum Mod_Mode mode );
+                         enum Mod_Mode mode );
 double pm_check_deviation( double        dev,
-						   double        freq,
-						   enum Mod_Mode mode );
+                           double        freq,
+                           enum Mod_Mode mode );
 
 
 // Function of the LFO sub-system
@@ -460,16 +460,16 @@ void list_init( void );
 void list_cleanup( void );
 void list_select( char const * name );
 void list_setup_A( double const * freqs,
-				   double const * pows,
-				   long           len,
-				   char   const * name );
+                   double const * pows,
+                   long           len,
+                   char   const * name );
 void list_setup_B( double const * freqs,
-				   double         pows,
-				   long           len,
-				   char   const * name );
+                   double         pows,
+                   long           len,
+                   char   const * name );
 void list_setup_C( double const * freqs,
-				   long           len,
-				   char   const * name );
+                   long           len,
+                   char   const * name );
 void list_start( bool relearn_list );
 void list_stop( bool keep_rf_on );
 int list_length( void );

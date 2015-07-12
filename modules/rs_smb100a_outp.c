@@ -33,22 +33,22 @@ outp_init( void )
         return;
     }
 
-	if ( FSC2_MODE == TEST )
-	{
+    if ( FSC2_MODE == TEST )
+    {
         if ( ! rs->outp.state_has_been_set )
         {
             rs->outp.state = false;
             rs->outp.state_has_been_set = true;
         }
 
-		rs->outp.imp = IMPEDANCE_G50;
-		return;
-	}
+        rs->outp.imp = IMPEDANCE_G50;
+        return;
+    }
 
     /* Switch to auto-attenuator mode to be able to use the full attenuator
        range */
 
-	rs_write( "OUTP:AMOD AUTO" );
+    rs_write( "OUTP:AMOD AUTO" );
 
     /* Switch RF power off (or to minimum level) during ALC searches */
 
@@ -79,7 +79,7 @@ outp_state( void )
         THROW( EXCEPTION );
     }
 
-	return rs->outp.state;
+    return rs->outp.state;
 }
 
 
@@ -104,14 +104,14 @@ outp_set_state( bool state )
     if ( ! state )
         rs->list.processing_list = false;
 
-	if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE != EXPERIMENT )
         return rs->outp.state = state;
 
     char cmd[ ] = "OUTP:STATE x";
     cmd[ 11 ] = state ? '1' : '0';
     rs_write( cmd );
 \
-	return rs->outp.state = state;
+    return rs->outp.state = state;
 }
 
 
@@ -121,7 +121,7 @@ outp_set_state( bool state )
 enum Impedance
 outp_impedance( void )
 {
-	return rs->outp.imp;
+    return rs->outp.imp;
 }
 
 
@@ -131,8 +131,8 @@ outp_impedance( void )
 bool
 outp_protection_is_tripped( void )
 {
-	if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
-		return false;
+    if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
+        return false;
 
     return query_bool( "OUTP:PROT:TRIP?" );
 }
@@ -144,8 +144,8 @@ outp_protection_is_tripped( void )
 bool
 outp_reset_protection( void )
 {
-	if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
-		return rs->outp.state;
+    if ( FSC2_MODE != EXPERIMENT || ! rs->has_reverse_power_protection )
+        return rs->outp.state;
 
     rs_write( "OUTP:PROT:CLE" );
     return rs->outp.state = query_bool( "OUTP:STATE?" );

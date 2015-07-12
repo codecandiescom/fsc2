@@ -28,40 +28,40 @@ void
 freq_init( void )
 {
 #if defined B101
-	rs->freq.min_freq = 8.0e3;
-	rs->freq.max_freq = 1.1e9;
+    rs->freq.min_freq = 8.0e3;
+    rs->freq.max_freq = 1.1e9;
 #elif defined B102
-\	rs->freq.min_freq = 8.0e3;
-	rs->freq.max_freq = 2.2e9;
+\   rs->freq.min_freq = 8.0e3;
+    rs->freq.max_freq = 2.2e9;
 #elif defined B103 
-	rs->freq.min_freq = 8.0e3;
-	rs->freq.max_freq = 3.2e9;
+    rs->freq.min_freq = 8.0e3;
+    rs->freq.max_freq = 3.2e9;
 #elif defined B106
-	rs->freq.min_freq = 8.0e3;
-	rs->freq.max_freq = 6.0e9;
+    rs->freq.min_freq = 8.0e3;
+    rs->freq.max_freq = 6.0e9;
 #else                               // SMB112 and SMB112L
-	rs->freq.min_freq = 100.0e3;
-	rs->freq.max_freq = 12.75e9;
+    rs->freq.min_freq = 100.0e3;
+    rs->freq.max_freq = 12.75e9;
 #endif
 
-	rs->freq.freq_resolution = 0.01;
+    rs->freq.freq_resolution = 0.01;
 
-	if ( FSC2_MODE == PREPARATION )
-	{
-		rs->freq.freq_has_been_set = false;
-		return;
-	}
+    if ( FSC2_MODE == PREPARATION )
+    {
+        rs->freq.freq_has_been_set = false;
+        return;
+    }
 
-	if ( FSC2_MODE == TEST )
-	{
-		if ( ! rs->freq.freq_has_been_set )
-		{
-			rs->freq.freq = 14.0e6;
-			rs->freq.freq_has_been_set = true;
-		}
+    if ( FSC2_MODE == TEST )
+    {
+        if ( ! rs->freq.freq_has_been_set )
+        {
+            rs->freq.freq = 14.0e6;
+            rs->freq.freq_has_been_set = true;
+        }
 
-		return;
-	}
+        return;
+    }
 
     // Set fixed CW frequency mode and switch off any multiplier or offset
 
@@ -71,15 +71,15 @@ freq_init( void )
 
     // Set or determine the RF frequency
 
-	if ( ! ( rs->freq.freq_has_been_set ^= 1 ) )
-		freq_set_frequency( rs->freq.freq );
-	else
-		rs->freq.freq = query_double( "FREQ?" );
+    if ( ! ( rs->freq.freq_has_been_set ^= 1 ) )
+        freq_set_frequency( rs->freq.freq );
+    else
+        rs->freq.freq = query_double( "FREQ?" );
 }
 
 
 /*----------------------------------------------------*
- * Assembles and sends the command for setting a RF frequency
+ * Returns the currently set RF frequency
  *----------------------------------------------------*/
 
 double
@@ -91,20 +91,23 @@ freq_frequency( void )
         THROW( EXCEPTION );
     }
 
-	return rs->freq.freq;
+    return rs->freq.freq;
 }
 
 
 /*----------------------------------------------------*
+ * Sets a new RF freqiency and reduces FM and PM modulation
+ * deviation if the currently set deviation is too large for
+ * the frequency to be set.
  *----------------------------------------------------*/
 
 double
 freq_set_frequency( double freq )
 {
-	freq = freq_check_frequency( freq );
+    freq = freq_check_frequency( freq );
 
     if ( rs->freq.freq_has_been_set && freq == rs->freq.freq )
-		return rs->freq.freq;
+        return rs->freq.freq;
 
     /* If with the frequency to be set the FM or the PM amplitude
        would become too large reduce it to its new maximum value */
@@ -117,42 +120,45 @@ freq_set_frequency( double freq )
     if ( pm_deviation( ) > max_pm_dev )
         pm_set_deviation( max_pm_dev );
 
-	rs->freq.freq_has_been_set = true;
+    rs->freq.freq_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->freq.freq = freq;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->freq.freq = freq;
 
     char cmd[ 100 ];
     sprintf( cmd, "FREQ %.2f", freq );
-	rs_write( cmd );
+    rs_write( cmd );
 
     return rs->freq.freq = freq;
 }
 
 
 /*----------------------------------------------------*
+ * Returns the minimum RF frequency the device can produce
  *----------------------------------------------------*/
+
 double
 freq_min_frequency( void )
 {
-	return rs->freq.min_freq;
+    return rs->freq.min_freq;
 }
 
 
 /*----------------------------------------------------*
+ * Returns the maximum RF frequency the device can produce
  *----------------------------------------------------*/
 
 double
 freq_max_frequency( void )
 {
-	return rs->freq.max_freq;
+    return rs->freq.max_freq;
 }
 
 
 /*----------------------------------------------------*
  * Checks if a frequency is within the range the device
  * can produce and returns the value rounded to the
- * frequency reso;ution of the device.
+ * frequency resolution of the device.
  *----------------------------------------------------*/
 
 double
@@ -160,12 +166,12 @@ freq_check_frequency( double freq )
 {
     if (    freq <  rs->freq.min_freq - 0.5 * rs->freq.freq_resolution
          || freq >= rs->freq.max_freq + 0.5 * rs->freq.freq_resolution )
-	{
-		print( FATAL, "RF frequency of %.8f MHz out of range, must be between "
+    {
+        print( FATAL, "RF frequency of %.8f MHz out of range, must be between "
                "%.2f kHzand %.5f GHz.\n", 1.0e-6 * freq,
-			   1.0e-3 * rs->freq.min_freq, 1.0e-9 * rs->freq.max_freq );
-		THROW( EXCEPTION );
-	}
+               1.0e-3 * rs->freq.min_freq, 1.0e-9 * rs->freq.max_freq );
+        THROW( EXCEPTION );
+    }
 
     return rs->freq.freq_resolution * lrnd( freq / rs->freq.freq_resolution );
 }
@@ -179,11 +185,11 @@ freq_check_frequency( double freq )
 bool
 freq_list_mode( bool on_off )
 {
-	if ( FSC2_MODE != EXPERIMENT )
-		return on_off;
+    if ( FSC2_MODE != EXPERIMENT )
+        return on_off;
 
-	char cmd[ 15 ] = "FREQ:MODE ";
-	strcat( cmd, on_off ? "LIST" : "CW" );
+    char cmd[ 15 ] = "FREQ:MODE ";
+    strcat( cmd, on_off ? "LIST" : "CW" );
     rs_write( cmd );
     return on_off;
 }

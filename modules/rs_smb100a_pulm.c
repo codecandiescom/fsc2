@@ -34,9 +34,9 @@ void
 pulm_init( void )
 {
     if ( ! rs->pulm.has_pulse_mod )
-		return;
+        return;
 
-	if ( FSC2_MODE == PREPARATION )
+    if ( FSC2_MODE == PREPARATION )
         pulm_prep_init( );
     else if ( FSC2_MODE == TEST )
         pulm_test_init( );
@@ -53,12 +53,12 @@ void
 pulm_prep_init( void )
 {
 #if defined WITH_PULSE_MODULATION
-	rs->pulm.has_pulse_mod = true;
+    rs->pulm.has_pulse_mod = true;
 #else
-	rs->pulm.has_pulse_mod = false;
+    rs->pulm.has_pulse_mod = false;
 #endif
 
-	rs->pulm.state = false;
+    rs->pulm.state = false;
 
     rs->pulm.pol_has_been_set = false;
     rs->pulm.imp_has_been_set = false;
@@ -74,13 +74,13 @@ pulm_test_init( void )
 {
     if ( rs->pulm.pol_has_been_set )
     {
-		rs->pulm.pol = POLARITY_NORMAL;
+        rs->pulm.pol = POLARITY_NORMAL;
         rs->pulm.pol_has_been_set = true;
     }
 
     if ( rs->pulm.imp_has_been_set )
     {
-		rs->pulm.imp = IMPEDANCE_G50;
+        rs->pulm.imp = IMPEDANCE_G50;
         rs->pulm.imp_has_been_set = true;
     }
 }
@@ -93,7 +93,7 @@ static
 void
 pulm_exp_init( void )
 {
-	rs_write( "PULM:SOUR EXT" );
+    rs_write( "PULM:SOUR EXT" );
 
     rs->pulm.state = query_bool( "PULM:STAT?" );
 
@@ -121,10 +121,10 @@ pulm_exp_init( void )
 bool
 pulm_state( void )
 {
-	if ( ! rs->pulm.has_pulse_mod )
-		return false;
+    if ( ! rs->pulm.has_pulse_mod )
+        return false;
 
-	return rs->pulm.state;
+    return rs->pulm.state;
 }
 
 
@@ -139,12 +139,12 @@ pulm_set_state( bool state )
     if ( state == rs->pulm.state )
         return rs->pulm.state;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->pulm.state = state;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->pulm.state = state;
 
-	char cmd[ ] = "PULM:STAT *";
-	cmd[ 10 ] = state ? '1' : '0';
-	rs_write( cmd );
+    char cmd[ ] = "PULM:STAT *";
+    cmd[ 10 ] = state ? '1' : '0';
+    rs_write( cmd );
 
     return rs->pulm.state = state;
 }
@@ -158,13 +158,13 @@ pulm_polarity( void )
 {
     check_has_pulse_mod( );
 
-	if ( ! rs->pulm.pol_has_been_set )
-	{
-		print( FATAL, "Pulse modulation polarity hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! rs->pulm.pol_has_been_set )
+    {
+        print( FATAL, "Pulse modulation polarity hasn't been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return rs->pulm.pol;
+    return rs->pulm.pol;
 }
 
 
@@ -190,10 +190,10 @@ pulm_set_polarity( enum Polarity pol )
 
     rs->pulm.pol_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->pulm.pol = pol;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->pulm.pol = pol;
 
-	char cmd[ 13 ] = "PULM:POL ";
+    char cmd[ 13 ] = "PULM:POL ";
     strcat( cmd, pol == POLARITY_NORMAL ? "NORM" : "INV" );
     rs_write( cmd );
 
@@ -209,14 +209,14 @@ pulm_impedance( void )
 {
     check_has_pulse_mod( );
 
-	if ( ! rs->pulm.pol_has_been_set )
-	{
-		print( FATAL, "Pulse modulation input impedance hasn't been set "
+    if ( ! rs->pulm.pol_has_been_set )
+    {
+        print( FATAL, "Pulse modulation input impedance hasn't been set "
                "yet.\n" );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
-	return rs->pulm.imp;
+    return rs->pulm.imp;
 }
 
 
@@ -232,18 +232,18 @@ pulm_set_impedance( enum Impedance imp )
         return rs->pulm.imp;
 
     if ( imp != IMPEDANCE_G50 && imp != IMPEDANCE_G10K )
-	{
-		print( FATAL, "Invalid pulse modulatiuon input impedance %d requested, "
-			   "use either \"G50\" or \"G10K\".\n", imp );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Invalid pulse modulatiuon input impedance %d requested, "
+               "use either \"G50\" or \"G10K\".\n", imp );
+        THROW( EXCEPTION );
+    }
 
     rs->pulm.imp_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->pulm.imp = imp;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->pulm.imp = imp;
 
-	char cmd[ 23 ] = "PULM:TRIG:EXT:IMP ";
+    char cmd[ 23 ] = "PULM:TRIG:EXT:IMP ";
     strcat( cmd, imp == IMPEDANCE_G50 ? "G50" : "G10K" );
     rs_write( cmd );
 
@@ -259,11 +259,11 @@ void
 check_has_pulse_mod( void )
 {
     if ( ! rs->pulm.has_pulse_mod )
-	{
-		print( FATAL, "Function can't be used, module was not compiled "
-			   "with support for pulse modulation.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Function can't be used, module was not compiled "
+               "with support for pulse modulation.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -273,7 +273,7 @@ check_has_pulse_mod( void )
 bool
 pulm_available( void )
 {
-	return rs->pulm.has_pulse_mod;
+    return rs->pulm.has_pulse_mod;
 }
 
 

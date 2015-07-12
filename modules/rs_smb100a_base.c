@@ -36,21 +36,21 @@ static void comm_failure( void );
 void
 rs_init( rs_smb100a_T * rs_cur )
 {
-	rs = rs_cur;
+    rs = rs_cur;
 
-	rs_connect( );
+    rs_connect( );
 
-	outp_init( );
-	freq_init( );
-	pow_init( );
+    outp_init( );
+    freq_init( );
+    pow_init( );
     am_init( );
     fm_init( );
-	pm_init( );
+    pm_init( );
     lfo_init( );
     inp_init( );
     list_init( );
     pulm_init( );
-	mod_init( );
+    mod_init( );
     table_init( );
 }
 
@@ -62,8 +62,8 @@ void
 rs_cleanup( void )
 {
     table_cleanup( );
-	list_cleanup( );
-	rs_disconnect( );
+    list_cleanup( );
+    rs_disconnect( );
 }
 
 
@@ -74,29 +74,29 @@ static
 void
 rs_connect( void )
 {
-	rs->is_connected = false;
+    rs->is_connected = false;
 
-	if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE != EXPERIMENT )
     {
         rs->use_binary = false;
-		return;
+        return;
     }
 
-	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
+    if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
                      false, false, 100000 ) == FAILURE )
-	{
-		print( FATAL, "Failed to connect to device.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Failed to connect to device.\n" );
+        THROW( EXCEPTION );
+    }
 
-	rs->is_connected = true;
+    rs->is_connected = true;
 
-	vxi11_set_timeout( READ, READ_TIMEOUT );
-	vxi11_set_timeout( WRITE, WRITE_TIMEOUT );
+    vxi11_set_timeout( READ, READ_TIMEOUT );
+    vxi11_set_timeout( WRITE, WRITE_TIMEOUT );
 
-	vxi11_device_clear( );
+    vxi11_device_clear( );
 
-//	vxi11_lock_out( true );
+//  vxi11_lock_out( true );
 
     // Tell the device to send all data in ASCII
 
@@ -139,12 +139,12 @@ static
 void
 rs_disconnect( void )
 {
-	if ( FSC2_MODE != EXPERIMENT || ! rs->is_connected )
-		return;
+    if ( FSC2_MODE != EXPERIMENT || ! rs->is_connected )
+        return;
 
-	vxi11_device_clear( );
-	vxi11_close( );
-	rs->is_connected = false;
+    vxi11_device_clear( );
+    vxi11_close( );
+    rs->is_connected = false;
 }
 
 
@@ -154,10 +154,10 @@ rs_disconnect( void )
 void
 rs_write( char const * data )
 {
-	size_t len = strlen( data );
+    size_t len = strlen( data );
 
-	if ( vxi11_write( data, &len, false ) != SUCCESS )
-		comm_failure( );
+    if ( vxi11_write( data, &len, false ) != SUCCESS )
+        comm_failure( );
 }
 
 
@@ -168,8 +168,8 @@ void
 rs_write_n( char const * data,
             size_t       length )
 {
-	if ( vxi11_write( data, &length, false ) != SUCCESS )
-		comm_failure( );
+    if ( vxi11_write( data, &length, false ) != SUCCESS )
+        comm_failure( );
 }
 
 
@@ -178,16 +178,16 @@ rs_write_n( char const * data,
 
 size_t
 rs_talk( char const * cmd,
-		 char       * reply,
-		 size_t       length )
+         char       * reply,
+         size_t       length )
 {
-	rs_write( cmd );
+    rs_write( cmd );
 
-	if ( vxi11_read( reply, &length, false ) != SUCCESS )
-		comm_failure( );
+    if ( vxi11_read( reply, &length, false ) != SUCCESS )
+        comm_failure( );
 
-	if ( reply[ length - 1 ] == '\n' )
-		reply[ --length ] = '\0';
+    if ( reply[ length - 1 ] == '\n' )
+        reply[ --length ] = '\0';
 
     return length;
 }
@@ -201,11 +201,11 @@ rs_talk_bin( char const * cmd,
              char       * reply,
              size_t       length )
 {
-	rs_write( cmd );
+    rs_write( cmd );
 
     size_t rec = length;
-	if ( vxi11_read( reply, &rec, false ) != SUCCESS )
-		comm_failure( );
+    if ( vxi11_read( reply, &rec, false ) != SUCCESS )
+        comm_failure( );
 
     return rec;
 }
@@ -217,7 +217,7 @@ rs_talk_bin( char const * cmd,
 void
 wait_opc( double max_timeout )
 {
-	vxi11_set_timeout( READ, lrnd( 1000000 * max_timeout ) );
+    vxi11_set_timeout( READ, lrnd( 1000000 * max_timeout ) );
     if ( ! query_bool( "*OPC?" ) )
         bad_data( );
     vxi11_set_timeout( READ, READ_TIMEOUT );
@@ -230,17 +230,17 @@ wait_opc( double max_timeout )
 bool
 query_bool( char const * cmd )
 {
-	char reply[ 10 ];
+    char reply[ 10 ];
 
-	if ( rs_talk( cmd, reply, sizeof reply ) == 1 )
-	{
-		if ( reply[ 0 ] == '0' )
-			return false;
-		else if ( reply[ 0 ] == '1' )
-			return true;
-	}
+    if ( rs_talk( cmd, reply, sizeof reply ) == 1 )
+    {
+        if ( reply[ 0 ] == '0' )
+            return false;
+        else if ( reply[ 0 ] == '1' )
+            return true;
+    }
 
-	return bad_data( );
+    return bad_data( );
 }
 
 
@@ -250,8 +250,8 @@ query_bool( char const * cmd )
 int
 query_int( char const * cmd )
 {
-	char reply[ 20 ];
-	rs_talk( cmd, reply, sizeof reply );
+    char reply[ 20 ];
+    rs_talk( cmd, reply, sizeof reply );
 
     errno = 0;
     char * ep;
@@ -261,8 +261,8 @@ query_int( char const * cmd )
          || *ep
          || errno == ERANGE
          || res > INT_MAX
-		 || res < INT_MIN )
-		bad_data( );
+         || res < INT_MIN )
+        bad_data( );
 
     return res;
 }
@@ -274,7 +274,7 @@ query_int( char const * cmd )
 double
 query_double( const char * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     errno = 0;
@@ -284,7 +284,7 @@ query_double( const char * cmd )
     if (    ep == reply
          || *ep
          || errno == ERANGE )
-		 bad_data( );
+         bad_data( );
 
     return res;
 }
@@ -296,7 +296,7 @@ query_double( const char * cmd )
 enum ALC_State
 query_alc_state( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "0" ) )
@@ -316,13 +316,13 @@ query_alc_state( char const * cmd )
 enum Coupling
 query_coupling( char const * cmd )
 {
-	char reply[ 20 ];
-	rs_talk( cmd, reply, sizeof reply );
+    char reply[ 20 ];
+    rs_talk( cmd, reply, sizeof reply );
 
-	if ( ! strcmp( reply, "AC" ) )
+    if ( ! strcmp( reply, "AC" ) )
         return COUPLING_AC;
-	else if ( ! strcmp( reply, "DC" ) )
-		return COUPLING_DC;
+    else if ( ! strcmp( reply, "DC" ) )
+        return COUPLING_DC;
 
     return bad_data( );
 }
@@ -334,8 +334,8 @@ query_coupling( char const * cmd )
 enum Source
 query_source( char const * cmd )
 {
-	char reply[ 20 ];
-	rs_talk( cmd, reply, sizeof reply );
+    char reply[ 20 ];
+    rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "INT" ) )
         return SOURCE_INT;
@@ -354,7 +354,7 @@ query_source( char const * cmd )
 enum Power_Mode
 query_pow_mode( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "NORM" ) )
@@ -374,7 +374,7 @@ query_pow_mode( char const * cmd )
 enum Off_Mode
 query_off_mode( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "UNCH" ) )
@@ -392,7 +392,7 @@ query_off_mode( char const * cmd )
 enum Mod_Mode
 query_mod_mode( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "NORM" ) )
@@ -412,7 +412,7 @@ query_mod_mode( char const * cmd )
 enum Impedance
 query_imp( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( !strcmp( reply, "LOW" ) )
@@ -438,7 +438,7 @@ query_imp( char const * cmd )
 enum Slope
 query_slope( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "POS" ) )
@@ -456,7 +456,7 @@ query_slope( char const * cmd )
 enum Polarity
 query_pol( char const * cmd )
 {
-	char reply[ 20 ];
+    char reply[ 20 ];
     rs_talk( cmd, reply, sizeof reply );
 
     if ( ! strcmp( reply, "NORM" ) )
@@ -572,33 +572,33 @@ void
 check_model_and_options( void )
 {
 #if defined B101
-	char const * model_str = "SMB-B101";
-	char const * pulse_mod_str = "SMB-K22";
+    char const * model_str = "SMB-B101";
+    char const * pulse_mod_str = "SMB-K22";
 #elif defined B102
-	char const * model_str = "SMB-B102";
-	char const * pulse_mod_str = "SMB-K22";
+    char const * model_str = "SMB-B102";
+    char const * pulse_mod_str = "SMB-K22";
 #elif defined B103
-	char const * model_str = "SMB-B103";
-	char const * pulse_mod_str = "SMB-K22";
+    char const * model_str = "SMB-B103";
+    char const * pulse_mod_str = "SMB-K22";
 #elif defined B106
-	char const * model_str = "SMB-B106";
-	char const * pulse_mod_str = "SMB-K22";
+    char const * model_str = "SMB-B106";
+    char const * pulse_mod_str = "SMB-K22";
 #elif defined B112
-	char const * model_str = "SMB-B112";
-	char const * pulse_mod_str = "SMB-K21";
+    char const * model_str = "SMB-B112";
+    char const * pulse_mod_str = "SMB-K21";
 #elif defined B112L
-	char const * model_str = "SMB-B112L";
-	char const * pulse_mod_str = "SMB-K21";
+    char const * model_str = "SMB-B112L";
+    char const * pulse_mod_str = "SMB-K21";
 #endif
 
-	char ** opts = get_options( );
+    char ** opts = get_options( );
 
     if ( strcmp( opts[ 0 ], model_str ) )
-	{
+    {
         print( FATAL, "The module was compiled for model %s but the "
                "device reports to be of type %s.\n", model_str, opts[ 0 ] );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
 #if defined WITH_PULSE_MODULATION
     bool found = false;
@@ -610,11 +610,11 @@ check_model_and_options( void )
         }
 
     if ( ! found )
-	{
+    {
         print( FATAL, "The module was compiled with support for pulse "
                "modulattion, but option %s isn't installed.\n", pulse_mod_str );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 #endif
 
 #if defined WITH_PULSE_GENERATION
@@ -627,11 +627,11 @@ check_model_and_options( void )
         }
 
     if ( ! found )
-	{
+    {
         print( FATAL, "The module was compiled with support for pulse "
                "generation, but option SMB-K23 isn't installed.\n" );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 #endif
 
     rs->has_reverse_power_protection = true;
@@ -689,8 +689,8 @@ static
 void
 comm_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
@@ -700,10 +700,10 @@ comm_failure( void )
 int
 bad_data( void )
 {
-	print( FATAL, "Invalid data received from device.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Invalid data received from device.\n" );
+    THROW( EXCEPTION );
 
-	return 0;
+    return 0;
 }
 
 
@@ -713,29 +713,29 @@ bad_data( void )
 long
 impedance_to_int( enum Impedance imp )
 {
-	switch ( imp )
-	{
-		case IMPEDANCE_LOW :
-			return 10;
+    switch ( imp )
+    {
+        case IMPEDANCE_LOW :
+            return 10;
 
-		case IMPEDANCE_G50 :
-			return 50;
+        case IMPEDANCE_G50 :
+            return 50;
 
-		case IMPEDANCE_G600 :
-			return 600;
+        case IMPEDANCE_G600 :
+            return 600;
 
-		case IMPEDANCE_G1K :
-			return 1000;
+        case IMPEDANCE_G1K :
+            return 1000;
 
-		case IMPEDANCE_G10K :
-			return 10000;
+        case IMPEDANCE_G10K :
+            return 10000;
 
-		case IMPEDANCE_HIGH :
-			return 200000;
-	}
+        case IMPEDANCE_HIGH :
+            return 200000;
+    }
 
-	fsc2_impossible( );
-	return -1;
+    fsc2_impossible( );
+    return -1;
 }
 
 
@@ -745,30 +745,30 @@ impedance_to_int( enum Impedance imp )
 enum Impedance
 int_to_impedance( long imp )
 {
-	switch ( imp )
-	{
-		case 10 :
-			return IMPEDANCE_LOW;
+    switch ( imp )
+    {
+        case 10 :
+            return IMPEDANCE_LOW;
 
-		case 50 :
-			return IMPEDANCE_G50;
+        case 50 :
+            return IMPEDANCE_G50;
 
-		case 600 :
-			return IMPEDANCE_G600;
+        case 600 :
+            return IMPEDANCE_G600;
 
-		case 1000 :
-			return IMPEDANCE_G1K;
+        case 1000 :
+            return IMPEDANCE_G1K;
 
-		case 10000 :
-			return IMPEDANCE_G10K;
+        case 10000 :
+            return IMPEDANCE_G10K;
 
-		case 200000 :
-			return IMPEDANCE_HIGH;
-	}
+        case 200000 :
+            return IMPEDANCE_HIGH;
+    }
 
-	print( FATAL, "Invalid impedance value of %ld Ohm.\n", imp );
-	THROW( EXCEPTION );
-	return -1;
+    print( FATAL, "Invalid impedance value of %ld Ohm.\n", imp );
+    THROW( EXCEPTION );
+    return -1;
 }
 
 
@@ -778,29 +778,29 @@ int_to_impedance( long imp )
 char const *
 impedance_to_name( enum Impedance imp )
 {
-	switch ( imp )
-	{
-		case IMPEDANCE_LOW :
-			return "LOW";
+    switch ( imp )
+    {
+        case IMPEDANCE_LOW :
+            return "LOW";
 
-		case IMPEDANCE_G50 :
-			return "G50";
+        case IMPEDANCE_G50 :
+            return "G50";
 
-		case IMPEDANCE_G600 :
-			return "G600";
+        case IMPEDANCE_G600 :
+            return "G600";
 
-		case IMPEDANCE_G1K :
-			return "G1000";
+        case IMPEDANCE_G1K :
+            return "G1000";
 
-		case IMPEDANCE_G10K :
-			return "G10000";
+        case IMPEDANCE_G10K :
+            return "G10000";
 
-		case IMPEDANCE_HIGH :
-			return "HIGH";
-	}
+        case IMPEDANCE_HIGH :
+            return "HIGH";
+    }
 
-	fsc2_impossible( );
-	return "";
+    fsc2_impossible( );
+    return "";
 }
 
 

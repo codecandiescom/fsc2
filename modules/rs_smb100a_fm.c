@@ -33,8 +33,8 @@ static void fm_exp_init( void );
 
 typedef struct
 {
-	double upper_freq;
-	double devs[ 3 ];
+    double upper_freq;
+    double devs[ 3 ];
 } Mod_Range;
 
 static Mod_Range mod_ranges[ ] = 
@@ -56,12 +56,12 @@ static Mod_Range mod_ranges[ ] =
 void
 fm_init( void )
 {
-	if ( FSC2_MODE == PREPARATION )
-		fm_prep_init( );
-	else if ( FSC2_MODE == TEST )
-		fm_test_init( );
-	else
-		fm_exp_init( );
+    if ( FSC2_MODE == PREPARATION )
+        fm_prep_init( );
+    else if ( FSC2_MODE == TEST )
+        fm_test_init( );
+    else
+        fm_exp_init( );
 }
 
 
@@ -72,12 +72,12 @@ static
 void
 fm_prep_init( void )
 {
-	rs->fm.state = false;
+    rs->fm.state = false;
 
-	rs->fm.dev_has_been_set      = false;
-	rs->fm.ext_coup_has_been_set = false;
-	rs->fm.source_has_been_set   = false;
-	rs->fm.mode_has_been_set     = false;
+    rs->fm.dev_has_been_set      = false;
+    rs->fm.ext_coup_has_been_set = false;
+    rs->fm.source_has_been_set   = false;
+    rs->fm.mode_has_been_set     = false;
 }
 
 
@@ -88,31 +88,31 @@ static
 void
 fm_test_init( void )
 {
-	if ( ! rs->fm.dev_has_been_set )
-	{
-		rs->fm.dev = 10e3;
-		rs->fm.dev_has_been_set = true;
-	}
+    if ( ! rs->fm.dev_has_been_set )
+    {
+        rs->fm.dev = 10e3;
+        rs->fm.dev_has_been_set = true;
+    }
 
-	if ( ! rs->fm.ext_coup_has_been_set )
-	{
-		rs->fm.ext_coup = COUPLING_AC;
-		rs->fm.ext_coup_has_been_set = true;
-	}
+    if ( ! rs->fm.ext_coup_has_been_set )
+    {
+        rs->fm.ext_coup = COUPLING_AC;
+        rs->fm.ext_coup_has_been_set = true;
+    }
 
-	if ( ! rs->fm.source_has_been_set )
-	{
-		rs->fm.source = SOURCE_INT;
-		rs->fm.source_has_been_set = true;
-	}
+    if ( ! rs->fm.source_has_been_set )
+    {
+        rs->fm.source = SOURCE_INT;
+        rs->fm.source_has_been_set = true;
+    }
 
-	if ( ! rs->fm.mode_has_been_set )
-	{
-		rs->fm.mode = MOD_MODE_NORMAL;
-		rs->fm.mode_has_been_set = true;
-	}
+    if ( ! rs->fm.mode_has_been_set )
+    {
+        rs->fm.mode = MOD_MODE_NORMAL;
+        rs->fm.mode_has_been_set = true;
+    }
 }
-		
+        
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
@@ -121,40 +121,40 @@ static
 void
 fm_exp_init( void )
 {
-	rs->fm.state = query_bool( "FM:STAT?" );
+    rs->fm.state = query_bool( "FM:STAT?" );
 
-	if ( ! ( rs->fm.ext_coup_has_been_set ^= 1 ) )
-		fm_set_coupling( rs->fm.ext_coup );
-	else
-		rs->fm.ext_coup = query_coupling( "FM:EXT:COUP?" );
+    if ( ! ( rs->fm.ext_coup_has_been_set ^= 1 ) )
+        fm_set_coupling( rs->fm.ext_coup );
+    else
+        rs->fm.ext_coup = query_coupling( "FM:EXT:COUP?" );
 
-	if ( ! ( rs->fm.source_has_been_set ^= 1 ) )
-		fm_set_source( rs->fm.source );
-	else if ( ( rs->fm.source = query_source( "FM:SOUR?" ) ) == SOURCE_INT_EXT )
+    if ( ! ( rs->fm.source_has_been_set ^= 1 ) )
+        fm_set_source( rs->fm.source );
+    else if ( ( rs->fm.source = query_source( "FM:SOUR?" ) ) == SOURCE_INT_EXT )
         fm_set_source( SOURCE_INT );
 
-	if ( ! ( rs->fm.mode_has_been_set ^= 1 ) )
-		fm_set_mode( rs->fm.mode );
-	else
-		rs->fm.mode = query_mod_mode( "FM:MODE?" );
+    if ( ! ( rs->fm.mode_has_been_set ^= 1 ) )
+        fm_set_mode( rs->fm.mode );
+    else
+        rs->fm.mode = query_mod_mode( "FM:MODE?" );
 
     /* If modulation deviation is larger than possible reduce it to the
        maximum value */
 
     double max_dev = fm_max_deviation( freq_frequency( ), fm_mode( ) );
 
-	if ( ! ( rs->fm.dev_has_been_set ^= 1 ) )
-	{
-		if ( rs->fm.dev > max_dev )
-		{
-			print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
-				   rs->fm.dev, max_dev );
-			rs->fm.dev = max_dev;
-		}
+    if ( ! ( rs->fm.dev_has_been_set ^= 1 ) )
+    {
+        if ( rs->fm.dev > max_dev )
+        {
+            print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
+                   rs->fm.dev, max_dev );
+            rs->fm.dev = max_dev;
+        }
 
-		fm_set_deviation( rs->fm.dev );
-	}
-	else if ( ( rs->fm.dev = query_double( "FM?" ) ) > max_dev )
+        fm_set_deviation( rs->fm.dev );
+    }
+    else if ( ( rs->fm.dev = query_double( "FM?" ) ) > max_dev )
     {
         print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
                rs->fm.dev, max_dev );
@@ -170,7 +170,7 @@ fm_exp_init( void )
 bool
 fm_state( void )
 {
-	return rs->fm.state;
+    return rs->fm.state;
 }
 
 
@@ -184,10 +184,10 @@ fm_set_state( bool state )
     if ( state == rs->fm.state )
         return rs->fm.state;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->fm.state = state;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->fm.state = state;
 
-	char cmd[ ] = "FM:STATE x";
+    char cmd[ ] = "FM:STATE x";
     cmd[ 9 ] = state ? '1' : '0';
     rs_write( cmd );
 
@@ -201,13 +201,13 @@ fm_set_state( bool state )
 double
 fm_deviation( void )
 {
-	if ( ! rs->fm.dev_has_been_set )
-	{
-		print( FATAL, "Frequency modulation deviation hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! rs->fm.dev_has_been_set )
+    {
+        print( FATAL, "Frequency modulation deviation hasn't been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return rs->fm.dev;
+    return rs->fm.dev;
 }
 
 
@@ -218,19 +218,19 @@ double
 fm_set_deviation( double dev )
 {
     if ( rs->fm.mode_has_been_set && rs->freq.freq_has_been_set )
-		dev = fm_check_deviation( dev, freq_frequency( ), fm_mode( ) );
+        dev = fm_check_deviation( dev, freq_frequency( ), fm_mode( ) );
 
     if ( rs->fm.dev_has_been_set && rs->fm.dev == dev )
         return rs->fm.dev;
 
-	rs->fm.dev_has_been_set = true;
+    rs->fm.dev_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->fm.dev = dev;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->fm.dev = dev;
 
     char cmd[ 100 ];
     sprintf( cmd, "FM %.1f", dev );
-	rs_write( cmd );
+    rs_write( cmd );
 
     return rs->fm.dev = dev;
 }
@@ -242,13 +242,13 @@ fm_set_deviation( double dev )
 enum Coupling
 fm_coupling( void )
 {
-	if ( ! rs->fm.ext_coup_has_been_set )
-	{
-		print( FATAL, "Frequency modulation coupling hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! rs->fm.ext_coup_has_been_set )
+    {
+        print( FATAL, "Frequency modulation coupling hasn't been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return rs->fm.ext_coup;
+    return rs->fm.ext_coup;
 }
 
 
@@ -261,16 +261,16 @@ fm_set_coupling( enum Coupling coup )
     if ( rs->fm.ext_coup_has_been_set && rs->fm.ext_coup == coup )
         return rs->fm.ext_coup;
 
-	if ( coup != COUPLING_AC && coup != COUPLING_DC )
-	{
-		print( FATAL, "Invalid coupling %d requested, use either \"AC\" or "
-			   "\"DC\".\n", coup );
-		THROW( EXCEPTION );
-	}
+    if ( coup != COUPLING_AC && coup != COUPLING_DC )
+    {
+        print( FATAL, "Invalid coupling %d requested, use either \"AC\" or "
+               "\"DC\".\n", coup );
+        THROW( EXCEPTION );
+    }
 
-	rs->fm.ext_coup_has_been_set = true;
+    rs->fm.ext_coup_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE != EXPERIMENT )
         return rs->fm.ext_coup = coup;
 
     char cmd[ ] = "FM:EXT:COUP *C";
@@ -287,13 +287,13 @@ fm_set_coupling( enum Coupling coup )
 enum Source
 fm_source( void )
 {
-	if ( ! rs->fm.source_has_been_set )
-	{
-		print( FATAL, "Frequency modulation source hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! rs->fm.source_has_been_set )
+    {
+        print( FATAL, "Frequency modulation source hasn't been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return rs->fm.source;
+    return rs->fm.source;
 }
 
 
@@ -306,17 +306,17 @@ fm_set_source( enum Source source )
     if ( rs->fm.source_has_been_set && rs->fm.source == source )
         return rs->fm.source;
 
-	if ( source != SOURCE_INT && source != SOURCE_EXT )
-	{
-		print( FATAL, "Invalid modulation source %d requested, use either "
-			   "\"INTERN\" or \"EXTERN\".\n", source );
-		THROW( EXCEPTION );
-	}
+    if ( source != SOURCE_INT && source != SOURCE_EXT )
+    {
+        print( FATAL, "Invalid modulation source %d requested, use either "
+               "\"INTERN\" or \"EXTERN\".\n", source );
+        THROW( EXCEPTION );
+    }
 
-	rs->fm.source_has_been_set = true;
+    rs->fm.source_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return rs->fm.source = source;
+    if ( FSC2_MODE != EXPERIMENT )
+        return rs->fm.source = source;
 
     char cmd[ 16 ] = "FM:SOUR ";
     switch ( source )
@@ -330,7 +330,7 @@ fm_set_source( enum Source source )
             break;
 
         case SOURCE_INT_EXT :
-			fsc2_impossible( );					\
+            fsc2_impossible( );                 \
     }
     rs_write( cmd );
 
@@ -344,13 +344,13 @@ fm_set_source( enum Source source )
 enum Mod_Mode
 fm_mode( void )
 {
-	if ( ! rs->fm.mode_has_been_set )
-	{
-		print( FATAL, "Frequency modulation mode hasn't been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! rs->fm.mode_has_been_set )
+    {
+        print( FATAL, "Frequency modulation mode hasn't been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return rs->fm.mode;
+    return rs->fm.mode;
 }
 
 
@@ -363,33 +363,33 @@ fm_set_mode( enum Mod_Mode mode )
     if ( rs->fm.mode_has_been_set && rs->fm.mode == mode )
         return rs->fm.mode;
 
-	if (    mode != MOD_MODE_NORMAL
-		 && mode != MOD_MODE_LOW_NOISE
-		 && mode != MOD_MODE_HIGH_DEVIATION )
-	{
-		print( FATAL, "Invalid modulation mode %d requested, use either "
-			   "\"NORMAL\", \"LOW_NOISE\" or \"HIGH_DEVIATION\".\n", mode );
-		THROW( EXCEPTION );
-	}
+    if (    mode != MOD_MODE_NORMAL
+         && mode != MOD_MODE_LOW_NOISE
+         && mode != MOD_MODE_HIGH_DEVIATION )
+    {
+        print( FATAL, "Invalid modulation mode %d requested, use either "
+               "\"NORMAL\", \"LOW_NOISE\" or \"HIGH_DEVIATION\".\n", mode );
+        THROW( EXCEPTION );
+    }
 
     /* If with the new mode being set the modulation deviation would become
        too large reduce it to the maximum possible value */
 
     if ( rs->freq.freq_has_been_set )
-	{
-		double max_dev = fm_max_deviation( freq_frequency( ), mode );
+    {
+        double max_dev = fm_max_deviation( freq_frequency( ), mode );
 
-		if ( max_dev > rs->fm.dev )
-		{
-			print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
-				   rs->fm.dev, max_dev );
-			fm_set_deviation( max_dev );
-		}
-	}
+        if ( max_dev > rs->fm.dev )
+        {
+            print( WARN, "Adjusting FM deviation from %.1f Hz to %.1f Hz.\n",
+                   rs->fm.dev, max_dev );
+            fm_set_deviation( max_dev );
+        }
+    }
 
-	rs->fm.mode_has_been_set = true;
+    rs->fm.mode_has_been_set = true;
 
-	if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE != EXPERIMENT )
         return rs->fm.mode = mode;
 
     char cmd[ 13 ] = "FM:MODE ";
@@ -418,12 +418,12 @@ fm_set_mode( enum Mod_Mode mode )
 
 double
 fm_max_deviation( double        freq,
-				  enum Mod_Mode mode )
+                  enum Mod_Mode mode )
 {
     if ( freq < 0 )
         freq = freq_frequency( );
-	else
-		freq = freq_check_frequency( freq );
+    else
+        freq = freq_check_frequency( freq );
 
     size_t ind;
 
@@ -446,8 +446,8 @@ fm_max_deviation( double        freq,
         if ( freq <= mod_ranges[ i ].upper_freq )
             return mod_ranges[ i ].devs[ ind ];
 
-	fsc2_impossible( );
-	return -1;
+    fsc2_impossible( );
+    return -1;
 }
 
 
@@ -456,17 +456,17 @@ fm_max_deviation( double        freq,
 
 double
 fm_check_deviation( double        dev,
-					double        freq,
-					enum Mod_Mode mode )
+                    double        freq,
+                    enum Mod_Mode mode )
 {
-	double max_dev = fm_max_deviation( freq, mode );
+    double max_dev = fm_max_deviation( freq, mode );
 
     if ( dev > max_dev )
-	{
-		print( FATAL, "Requested FM deviation of %f Hz out of range, can't "
-			   "be larger than %f Hz.\n", dev, max_dev );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Requested FM deviation of %f Hz out of range, can't "
+               "be larger than %f Hz.\n", dev, max_dev );
+        THROW( EXCEPTION );
+    }
 
     return lrnd( dev );
 }

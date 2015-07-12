@@ -33,10 +33,10 @@ static rs_smb100a_T rs_prep,
 int
 rs_smb100a_init_hook( void )
 {
-	Need_LAN = true;
+    Need_LAN = true;
 
-	rs_init( &rs_prep );
-	return 1;
+    rs_init( &rs_prep );
+    return 1;
 }
 
 
@@ -46,10 +46,10 @@ rs_smb100a_init_hook( void )
 int
 rs_smb100a_test_hook( void )
 {
-	rs_test = rs_prep;
-	rs_init( &rs_test );
+    rs_test = rs_prep;
+    rs_init( &rs_test );
 
-	return 1;
+    return 1;
 }
 
 
@@ -59,8 +59,8 @@ rs_smb100a_test_hook( void )
 int
 rs_smb100a_end_of_test_hook( void )
 {
-	rs_cleanup( );
-	return 1;
+    rs_cleanup( );
+    return 1;
 }
 
 
@@ -70,10 +70,10 @@ rs_smb100a_end_of_test_hook( void )
 int
 rs_smb100a_exp_hook( void )
 {
-	rs_exp = rs_prep;
-	rs_init( &rs_exp );
+    rs_exp = rs_prep;
+    rs_init( &rs_exp );
 
-	return 1;
+    return 1;
 }
 
 
@@ -83,8 +83,8 @@ rs_smb100a_exp_hook( void )
 int
 rs_smb100a_end_of_exp_hook( void )
 {
-	rs_cleanup( );
-	return 1;
+    rs_cleanup( );
+    return 1;
 }
 
 
@@ -94,7 +94,7 @@ rs_smb100a_end_of_exp_hook( void )
 Var_T *
 synthesizer_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -104,15 +104,15 @@ synthesizer_name( Var_T * v  UNUSED_ARG )
 Var_T *
 synthesizer_state( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, outp_state( ) ? 1L : 0L );
+    if ( ! v )
+        return vars_push( INT_VAR, outp_state( ) ? 1L : 0L );
 
-	bool state = get_boolean( v );
-	too_many_arguments( v );
+    bool state = get_boolean( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, outp_set_state( state ) ? 1L : 0L );
+    return vars_push( INT_VAR, outp_set_state( state ) ? 1L : 0L );
 }
-		
+        
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
@@ -120,17 +120,17 @@ synthesizer_state( Var_T * v )
 Var_T *
 synthesizer_frequency( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, freq_frequency( ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, freq_frequency( ) );
 
-	double freq = get_double( v, NULL );
-	too_many_arguments( v );
+    double freq = get_double( v, NULL );
+    too_many_arguments( v );
 
     double pow = rs->pow.req_pow + table_att_offset( freq );
     if ( pow != rs->pow.pow )
         pow_set_power( pow );
 
-	return vars_push( FLOAT_VAR, freq_set_frequency( freq ) );
+    return vars_push( FLOAT_VAR, freq_set_frequency( freq ) );
 }
 
 
@@ -140,13 +140,13 @@ synthesizer_frequency( Var_T * v )
 Var_T *
 synthesizer_attenuation( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, - pow_power( ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, - pow_power( ) );
 
-	double pow = - get_double( v, NULL );
-	too_many_arguments( v );
+    double pow = - get_double( v, NULL );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, - ( rs->pow.req_pow = pow_set_power( pow ) ) );
+    return vars_push( FLOAT_VAR, - ( rs->pow.req_pow = pow_set_power( pow ) ) );
 }
 
 
@@ -156,13 +156,13 @@ synthesizer_attenuation( Var_T * v )
 Var_T *
 synthesizer_minimum_attenuation( Var_T * v )
 {
-	if ( ! v )
-		vars_push( FLOAT_VAR, - pow_maximum_power( ) );
+    if ( ! v )
+        vars_push( FLOAT_VAR, - pow_maximum_power( ) );
 
-	double max_pow = - get_double( v, NULL );
-	too_many_arguments( v );
+    double max_pow = - get_double( v, NULL );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, pow_set_maximum_power( max_pow ) );
+    return vars_push( FLOAT_VAR, pow_set_maximum_power( max_pow ) );
 }
 
 
@@ -172,13 +172,13 @@ synthesizer_minimum_attenuation( Var_T * v )
 Var_T *
 synthesizer_min_attenuation( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, - pow_max_power( freq_frequency( ) ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, - pow_max_power( freq_frequency( ) ) );
 
-	double freq = get_double( v, NULL );
-	too_many_arguments( v );
+    double freq = get_double( v, NULL );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, - pow_max_power( freq ) );
+    return vars_push( FLOAT_VAR, - pow_max_power( freq ) );
 }
 
 
@@ -188,53 +188,53 @@ synthesizer_min_attenuation( Var_T * v )
 Var_T *
 synthesizer_max_attenuation( Var_T * v )
 {
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, pow_min_power( ) );
+    return vars_push( FLOAT_VAR, pow_min_power( ) );
 }
 
-		
+        
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
 Var_T *
 synthesizer_automatic_level_control( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, ( long ) pow_alc_state( ) );
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) pow_alc_state( ) );
 
-	long alc_state;
+    long alc_state;
 
-	if ( v->type == STR_VAR )
-	{
-		if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-			alc_state = ALC_STATE_OFF;
-		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-			alc_state = ALC_STATE_ON;
-		else if ( ! strcasecmp( v->val.sptr, "AUTO" ) )
-			alc_state = ALC_STATE_AUTO;
-		else
-		{
-			print( FATAL, "Invalid ALC state \"%s\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		alc_state = get_strict_long( v, NULL );
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "OFF" ) )
+            alc_state = ALC_STATE_OFF;
+        else if ( ! strcasecmp( v->val.sptr, "ON" ) )
+            alc_state = ALC_STATE_ON;
+        else if ( ! strcasecmp( v->val.sptr, "AUTO" ) )
+            alc_state = ALC_STATE_AUTO;
+        else
+        {
+            print( FATAL, "Invalid ALC state \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        alc_state = get_strict_long( v, NULL );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, ( long ) pow_set_alc_state( alc_state ) );
+    return vars_push( INT_VAR, ( long ) pow_set_alc_state( alc_state ) );
 }
 
-		
+        
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
 Var_T *
 synthesizer_output_impedance( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( INT_VAR, impedance_to_int( outp_impedance( ) ) );
+    return vars_push( INT_VAR, impedance_to_int( outp_impedance( ) ) );
 }
 
 
@@ -244,7 +244,7 @@ synthesizer_output_impedance( Var_T * v  UNUSED_ARG )
 Var_T *
 synthesizer_protection_tripped( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( INT_VAR, outp_protection_is_tripped( ) ? 1L : 0L );
+    return vars_push( INT_VAR, outp_protection_is_tripped( ) ? 1L : 0L );
 }
 
 
@@ -254,8 +254,8 @@ synthesizer_protection_tripped( Var_T * v  UNUSED_ARG )
 Var_T *
 synthesizer_reset_protection( Var_T * v  UNUSED_ARG )
 {
-	outp_reset_protection( );
-	return vars_push( INT_VAR, 1L );
+    outp_reset_protection( );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -265,34 +265,34 @@ synthesizer_reset_protection( Var_T * v  UNUSED_ARG )
 Var_T *
 synthesizer_rf_mode( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, ( long ) pow_mode( ) );
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) pow_mode( ) );
 
-	long mode;
+    long mode;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "NORMAL" )
-			 || ! strcasecmp( v->val.sptr, "NORM" ) )
-			mode = POWER_MODE_NORMAL;
-		else if (    ! strcasecmp( v->val.sptr, "LOW_NOISE")
-				  || ! strcasecmp( v->val.sptr, "LOWN" ) )
-			mode = POWER_MODE_LOW_NOISE;
-		else if (    ! strcasecmp( v->val.sptr, "LOW_DISTORTION")
-				  || ! strcasecmp( v->val.sptr, "LOWD" ) )
-			mode = POWER_MODE_LOW_DISTORTION;
-		else
-		{
-			print( FATAL, "Invalid RD mode \"%s\".\n" );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		mode = get_strict_long( v, NULL );
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "NORMAL" )
+             || ! strcasecmp( v->val.sptr, "NORM" ) )
+            mode = POWER_MODE_NORMAL;
+        else if (    ! strcasecmp( v->val.sptr, "LOW_NOISE")
+                  || ! strcasecmp( v->val.sptr, "LOWN" ) )
+            mode = POWER_MODE_LOW_NOISE;
+        else if (    ! strcasecmp( v->val.sptr, "LOW_DISTORTION")
+                  || ! strcasecmp( v->val.sptr, "LOWD" ) )
+            mode = POWER_MODE_LOW_DISTORTION;
+        else
+        {
+            print( FATAL, "Invalid RD mode \"%s\".\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        mode = get_strict_long( v, NULL );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, ( long ) pow_set_mode( mode ) );
+    return vars_push( INT_VAR, ( long ) pow_set_mode( mode ) );
 }
 
 
@@ -302,31 +302,31 @@ synthesizer_rf_mode( Var_T * v )
 Var_T *
 synthesizer_rf_off_mode( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, ( long ) pow_off_mode( ) );
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) pow_off_mode( ) );
 
-	long mode;
+    long mode;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "UNCHANGED" )
-			 || ! strcasecmp( v->val.sptr, "UNCH" ) )
-			mode = OFF_MODE_UNCHANGED;
-		else if (    ! strcasecmp( v->val.sptr, "FULL_ATTENUATION")
-				  || ! strcasecmp( v->val.sptr, "FATT" ) )
-			mode = OFF_MODE_FATT;
-		else
-		{
-			print( FATAL, "Invalid RF OFF mode \"%s\".\n" );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		mode = get_strict_long( v, NULL );
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "UNCHANGED" )
+             || ! strcasecmp( v->val.sptr, "UNCH" ) )
+            mode = OFF_MODE_UNCHANGED;
+        else if (    ! strcasecmp( v->val.sptr, "FULL_ATTENUATION")
+                  || ! strcasecmp( v->val.sptr, "FATT" ) )
+            mode = OFF_MODE_FATT;
+        else
+        {
+            print( FATAL, "Invalid RF OFF mode \"%s\".\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        mode = get_strict_long( v, NULL );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, ( long ) pow_set_off_mode( mode ) );
+    return vars_push( INT_VAR, ( long ) pow_set_off_mode( mode ) );
 }
 
 
@@ -336,13 +336,13 @@ synthesizer_rf_off_mode( Var_T * v )
 Var_T *
 synthesizer_mod_freq( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, lfo_frequency( ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, lfo_frequency( ) );
 
-	double freq = get_double( v, "modulation frequency" );
-	too_many_arguments( v );
+    double freq = get_double( v, "modulation frequency" );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, lfo_set_frequency( freq ) );
+    return vars_push( FLOAT_VAR, lfo_set_frequency( freq ) );
 }
 
 
@@ -352,40 +352,40 @@ synthesizer_mod_freq( Var_T * v )
 Var_T *
 synthesizer_mod_output_impedance( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, impedance_to_int( lfo_impedance( ) ) );
+    if ( ! v )
+        return vars_push( INT_VAR, impedance_to_int( lfo_impedance( ) ) );
 
-	long imp;
+    long imp;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "LOW" )
-			 || ! strcasecmp( v->val.sptr, "10" ) )
-			imp = IMPEDANCE_LOW;
-		else if (    ! strcasecmp( v->val.sptr, "G50" )
-			      || ! strcasecmp( v->val.sptr, "50" ) )
-			imp = IMPEDANCE_G50;
-		else
-		{
-			print( FATAL, "Invalid modulation output impedance \"%s\", use "
-				   "either \"LOW\" or \"G50\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		imp = int_to_impedance( get_long( v, "modulation output impedance" ) );
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "LOW" )
+             || ! strcasecmp( v->val.sptr, "10" ) )
+            imp = IMPEDANCE_LOW;
+        else if (    ! strcasecmp( v->val.sptr, "G50" )
+                  || ! strcasecmp( v->val.sptr, "50" ) )
+            imp = IMPEDANCE_G50;
+        else
+        {
+            print( FATAL, "Invalid modulation output impedance \"%s\", use "
+                   "either \"LOW\" or \"G50\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        imp = int_to_impedance( get_long( v, "modulation output impedance" ) );
 
-		if ( imp != IMPEDANCE_LOW && imp != IMPEDANCE_G50 )
-		{
-			print( FATAL, "Can't use impedance of %d Ohm, must be either "
-				   "\"LOW\" (10 Ohm) or \"G50\" (50 Ohm).\n",
-				   impedance_to_int( imp ) );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( imp != IMPEDANCE_LOW && imp != IMPEDANCE_G50 )
+        {
+            print( FATAL, "Can't use impedance of %d Ohm, must be either "
+                   "\"LOW\" (10 Ohm) or \"G50\" (50 Ohm).\n",
+                   impedance_to_int( imp ) );
+            THROW( EXCEPTION );
+        }
+    }
 
-	return vars_push( INT_VAR, lfo_set_impedance( imp ) );
+    return vars_push( INT_VAR, lfo_set_impedance( imp ) );
 }
 
 
@@ -395,13 +395,13 @@ synthesizer_mod_output_impedance( Var_T * v )
 Var_T *
 synthesizer_mod_output_voltage( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, lfo_voltage( ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, lfo_voltage( ) );
 
-	double volts = get_double( v, "modulation output voltage" );
-	too_many_arguments( v );
+    double volts = get_double( v, "modulation output voltage" );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, lfo_set_voltage( volts ) );
+    return vars_push( FLOAT_VAR, lfo_set_voltage( volts ) );
 }
 
 
@@ -411,37 +411,37 @@ synthesizer_mod_output_voltage( Var_T * v )
 Var_T *
 synthesizer_mod_type( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, ( long ) mod_type( ) );
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) mod_type( ) );
 
-	long type;
+    long type;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "AM" )
-			 || ! strcasecmp( v->val.sptr, "AMPLITUDE" ) )
-			type = MOD_TYPE_AM;
-		else if (    ! strcasecmp( v->val.sptr, "FM" )
-				  || ! strcasecmp( v->val.sptr, "FREQUENCY" ) )
-			type = MOD_TYPE_FM;
-		else if (    ! strcasecmp( v->val.sptr, "PM" )
-				  || ! strcasecmp( v->val.sptr, "PHASE" ) )
-			type = MOD_TYPE_PM;
-		else if (    ! strcasecmp( v->val.sptr, "PULM" )
-				  || ! strcasecmp( v->val.sptr, "PULSE" ) )
-			type = MOD_TYPE_PULM;
-		else
-		{
-			print( FATAL, "Invalid modulation type \"%s\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		type = get_strict_long( v, "modulattion type" );
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "AM" )
+             || ! strcasecmp( v->val.sptr, "AMPLITUDE" ) )
+            type = MOD_TYPE_AM;
+        else if (    ! strcasecmp( v->val.sptr, "FM" )
+                  || ! strcasecmp( v->val.sptr, "FREQUENCY" ) )
+            type = MOD_TYPE_FM;
+        else if (    ! strcasecmp( v->val.sptr, "PM" )
+                  || ! strcasecmp( v->val.sptr, "PHASE" ) )
+            type = MOD_TYPE_PM;
+        else if (    ! strcasecmp( v->val.sptr, "PULM" )
+                  || ! strcasecmp( v->val.sptr, "PULSE" ) )
+            type = MOD_TYPE_PULM;
+        else
+        {
+            print( FATAL, "Invalid modulation type \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        type = get_strict_long( v, "modulattion type" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, ( long ) mod_set_type( type ) );
+    return vars_push( INT_VAR, ( long ) mod_set_type( type ) );
 }
 
 
@@ -451,13 +451,13 @@ synthesizer_mod_type( Var_T * v )
 Var_T *
 synthesizer_mod_state( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, mod_state( ) ? 1L : 0L );
+    if ( ! v )
+        return vars_push( INT_VAR, mod_state( ) ? 1L : 0L );
 
-	bool state = get_boolean( v );
-	too_many_arguments( v );
+    bool state = get_boolean( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, mod_set_state( state ) ? 1L : 0L );
+    return vars_push( INT_VAR, mod_set_state( state ) ? 1L : 0L );
 }
 
 
@@ -467,13 +467,13 @@ synthesizer_mod_state( Var_T * v )
 Var_T *
 synthesizer_mod_amp( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( FLOAT_VAR, mod_amplitude( ) );
+    if ( ! v )
+        return vars_push( FLOAT_VAR, mod_amplitude( ) );
 
-	double amp = get_double( v, "modulation amplitude" );
-	too_many_arguments( v );
+    double amp = get_double( v, "modulation amplitude" );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_VAR, mod_set_amplitude( amp ) );
+    return vars_push( FLOAT_VAR, mod_set_amplitude( amp ) );
 }
 
 
@@ -483,73 +483,73 @@ synthesizer_mod_amp( Var_T * v )
 Var_T *
 synthesizer_mod_source( Var_T * v )
 {
-	if ( ! v )
-	{
-		if ( mod_type( ) == MOD_TYPE_PULM )
-			return vars_push( INT_VAR, ( long ) MOD_SOURCE_EXT_DC );
+    if ( ! v )
+    {
+        if ( mod_type( ) == MOD_TYPE_PULM )
+            return vars_push( INT_VAR, ( long ) MOD_SOURCE_EXT_DC );
 
-		enum Source source  = mod_source( );
+        enum Source source  = mod_source( );
 
-		if ( source == SOURCE_INT )
-			return vars_push( INT_VAR, ( long ) MOD_SOURCE_INT );
+        if ( source == SOURCE_INT )
+            return vars_push( INT_VAR, ( long ) MOD_SOURCE_INT );
 
-		vars_push( INT_VAR,
-				   ( long ) ( mod_coupling( ) == COUPLING_AC ?
-							  MOD_SOURCE_EXT_AC : MOD_SOURCE_EXT_DC ) );
-	}
+        vars_push( INT_VAR,
+                   ( long ) ( mod_coupling( ) == COUPLING_AC ?
+                              MOD_SOURCE_EXT_AC : MOD_SOURCE_EXT_DC ) );
+    }
 
-	if ( mod_type( ) == MOD_TYPE_PULM )
-	{
-		print( FATAL, "Can't set modulation source for pulse modulation, "
-			   "it's always EXT.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( mod_type( ) == MOD_TYPE_PULM )
+    {
+        print( FATAL, "Can't set modulation source for pulse modulation, "
+               "it's always EXT.\n" );
+        THROW( EXCEPTION );
+    }
 
-	long ms;
+    long ms;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "AC" )
-			 || ! strcasecmp( v->val.sptr, "EXT_AC" ) )
-			ms = MOD_SOURCE_EXT_AC;
-		else if (    ! strcasecmp( v->val.sptr, "DC" )
-			      || ! strcasecmp( v->val.sptr, "EXT_DC" ) )
-			ms = MOD_SOURCE_EXT_DC;
-		else if (    ! strcasecmp( v->val.sptr, "INT" ) )
-			ms = MOD_SOURCE_INT;
-		else
-		{
-			print( FATAL, "Invalid modulation source \"%s\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		ms = get_strict_long( v, "modulation source" );
-		if (    ms != MOD_SOURCE_EXT_AC
-			 && ms != MOD_SOURCE_EXT_DC
-			 && ms != MOD_SOURCE_INT )
-		{
-			print( FATAL, "Invalid modulation source %s.\n", mod_source );
-			THROW( EXCEPTION );
-		}	
-	}				
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "AC" )
+             || ! strcasecmp( v->val.sptr, "EXT_AC" ) )
+            ms = MOD_SOURCE_EXT_AC;
+        else if (    ! strcasecmp( v->val.sptr, "DC" )
+                  || ! strcasecmp( v->val.sptr, "EXT_DC" ) )
+            ms = MOD_SOURCE_EXT_DC;
+        else if (    ! strcasecmp( v->val.sptr, "INT" ) )
+            ms = MOD_SOURCE_INT;
+        else
+        {
+            print( FATAL, "Invalid modulation source \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        ms = get_strict_long( v, "modulation source" );
+        if (    ms != MOD_SOURCE_EXT_AC
+             && ms != MOD_SOURCE_EXT_DC
+             && ms != MOD_SOURCE_INT )
+        {
+            print( FATAL, "Invalid modulation source %s.\n", mod_source );
+            THROW( EXCEPTION );
+        }   
+    }               
 
-	if ( ms == MOD_SOURCE_INT && ( v = vars_pop( v ) ) )
-		lfo_set_frequency( get_double( v, "modulation frequency" ) );
+    if ( ms == MOD_SOURCE_INT && ( v = vars_pop( v ) ) )
+        lfo_set_frequency( get_double( v, "modulation frequency" ) );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( ms == MOD_SOURCE_INT )
-		mod_set_source( SOURCE_INT );
-	else
-	{
-		mod_set_source( SOURCE_EXT );
-		mod_set_coupling( ms == MOD_SOURCE_EXT_AC ?
-						  COUPLING_AC : COUPLING_DC );
-	}
+    if ( ms == MOD_SOURCE_INT )
+        mod_set_source( SOURCE_INT );
+    else
+    {
+        mod_set_source( SOURCE_EXT );
+        mod_set_coupling( ms == MOD_SOURCE_EXT_AC ?
+                          COUPLING_AC : COUPLING_DC );
+    }
 
-	return vars_push( INT_VAR, ms );
+    return vars_push( INT_VAR, ms );
 }
 
 
@@ -559,34 +559,34 @@ synthesizer_mod_source( Var_T * v )
 Var_T *
 synthesizer_mod_mode( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, ( long ) mod_mode( ) );
+    if ( ! v )
+        return vars_push( INT_VAR, ( long ) mod_mode( ) );
 
-	long mode;
+    long mode;
 
-	if ( v->type == STR_VAR )
-	{
-		if (    ! strcasecmp( v->val.sptr, "NORM" )
-			 || ! strcasecmp( v->val.sptr, "NORMAL" ) )
-			mode = MOD_MODE_NORMAL;
-		else if (    ! strcasecmp( v->val.sptr, "LOWN" )
-				  || ! strcasecmp( v->val.sptr, "LOW_MOISE" ) )
-			mode = MOD_MODE_LOW_NOISE;
-		else if (    ! strcasecmp( v->val.sptr, "HIGH_DEVIATION" )
-				  || ! strcasecmp( v->val.sptr, "GDEV" ) )
-			mode = MOD_MODE_HIGH_DEVIATION;
-		else
-		{
-			print( FATAL, "Invalid modulation mode \"%s\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		mode = get_strict_long( v, "modulattion mode" );
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "NORM" )
+             || ! strcasecmp( v->val.sptr, "NORMAL" ) )
+            mode = MOD_MODE_NORMAL;
+        else if (    ! strcasecmp( v->val.sptr, "LOWN" )
+                  || ! strcasecmp( v->val.sptr, "LOW_MOISE" ) )
+            mode = MOD_MODE_LOW_NOISE;
+        else if (    ! strcasecmp( v->val.sptr, "HIGH_DEVIATION" )
+                  || ! strcasecmp( v->val.sptr, "GDEV" ) )
+            mode = MOD_MODE_HIGH_DEVIATION;
+        else
+        {
+            print( FATAL, "Invalid modulation mode \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        mode = get_strict_long( v, "modulattion mode" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, ( long ) mod_set_mode( mode ) );
+    return vars_push( INT_VAR, ( long ) mod_set_mode( mode ) );
 }
 
 
@@ -607,112 +607,112 @@ synthesizer_mod_mode( Var_T * v )
 Var_T *
 synthesizer_setup_list( Var_T * v )
 {
-	if ( ! v )
-	{
-		print( FATAL, "A 1D array with frequencies is required.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! v )
+    {
+        print( FATAL, "A 1D array with frequencies is required.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( v->type != INT_ARR && v->type != FLOAT_ARR ) || v->len < 2 )
-	{
-		print( FATAL, "First argument must be a 1-dimensional array of at"
-			   "lest 2 frequencies.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( v->type != INT_ARR && v->type != FLOAT_ARR ) || v->len < 2 )
+    {
+        print( FATAL, "First argument must be a 1-dimensional array of at"
+               "lest 2 frequencies.\n" );
+        THROW( EXCEPTION );
+    }
 
-	double * freqs = NULL;
-	double * pows  = NULL;
+    double * freqs = NULL;
+    double * pows  = NULL;
 
-	CLOBBER_PROTECT( freqs );
-	CLOBBER_PROTECT( pows );
+    CLOBBER_PROTECT( freqs );
+    CLOBBER_PROTECT( pows );
 
-	TRY
-	{
-		ssize_t flen = v->len;
+    TRY
+    {
+        ssize_t flen = v->len;
 
-		freqs = T_malloc( flen * sizeof *freqs );
+        freqs = T_malloc( flen * sizeof *freqs );
 
-		if ( v->type == FLOAT_ARR )
-			memcpy( freqs, v->val.dpnt, flen * sizeof *freqs );
-		else
-			for ( ssize_t i = 0; i < flen; i++ )
-				freqs[ i ] = v->val.lpnt[ i ];
+        if ( v->type == FLOAT_ARR )
+            memcpy( freqs, v->val.dpnt, flen * sizeof *freqs );
+        else
+            for ( ssize_t i = 0; i < flen; i++ )
+                freqs[ i ] = v->val.lpnt[ i ];
 
-		if ( ! ( v = vars_pop( v ) ) )
-			list_setup_C( freqs, flen, NULL );
-		else if ( v->type == STR_VAR )
-		{
-			list_setup_C( freqs, flen, v->val.sptr );
-			too_many_arguments( v );
-		}
-		else if ( v->type == INT_VAR || v->type == FLOAT_VAR )
-		{
-			double p = get_double( v, NULL );
+        if ( ! ( v = vars_pop( v ) ) )
+            list_setup_C( freqs, flen, NULL );
+        else if ( v->type == STR_VAR )
+        {
+            list_setup_C( freqs, flen, v->val.sptr );
+            too_many_arguments( v );
+        }
+        else if ( v->type == INT_VAR || v->type == FLOAT_VAR )
+        {
+            double p = get_double( v, NULL );
 
-			if ( ! ( v = vars_pop( v ) ) )
-				list_setup_B( freqs, p, flen, NULL );
-			else if ( v->type == STR_VAR )
-			{
-				list_setup_B( freqs, p, flen, v->val.sptr );
-				too_many_arguments( v );
-			}
-			else
-			{
-				print( FATAL, "Last argument isn't a string.\n" );
-				THROW( EXCEPTION );
-			}
-		}
-		else if ( v->type == INT_ARR || v->type == FLOAT_ARR )
-		{
-			if ( v->len != flen )
-			{
-				print( FATAL, "Arrays for frequencies and attenuations "
-					   "must have same length.\n" );
-				THROW( EXCEPTION );
-			}
+            if ( ! ( v = vars_pop( v ) ) )
+                list_setup_B( freqs, p, flen, NULL );
+            else if ( v->type == STR_VAR )
+            {
+                list_setup_B( freqs, p, flen, v->val.sptr );
+                too_many_arguments( v );
+            }
+            else
+            {
+                print( FATAL, "Last argument isn't a string.\n" );
+                THROW( EXCEPTION );
+            }
+        }
+        else if ( v->type == INT_ARR || v->type == FLOAT_ARR )
+        {
+            if ( v->len != flen )
+            {
+                print( FATAL, "Arrays for frequencies and attenuations "
+                       "must have same length.\n" );
+                THROW( EXCEPTION );
+            }
 
-			pows = T_malloc( flen * sizeof  *pows );
+            pows = T_malloc( flen * sizeof  *pows );
 
-			if ( v->type == FLOAT_ARR )
-				memcpy( pows, v->val.dpnt, flen * sizeof *pows );
-			else
-				for ( ssize_t i = 0; i < flen; i++ )
-					pows[ i ] = v->val.lpnt[ i ];
+            if ( v->type == FLOAT_ARR )
+                memcpy( pows, v->val.dpnt, flen * sizeof *pows );
+            else
+                for ( ssize_t i = 0; i < flen; i++ )
+                    pows[ i ] = v->val.lpnt[ i ];
 
-			if ( ! ( v = vars_pop( v ) ) )
-				list_setup_A( freqs, pows, flen, NULL );
-			else if ( v->type == STR_VAR )
-			{
-				list_setup_A( freqs, pows, flen, v->val.sptr );
-				too_many_arguments( v );
-			}
-			else
-			{
-				print( FATAL, "Third argument isn't a string.\n" );
-				THROW( EXCEPTION );
-			}
-		}
-		else
-		{
-			print( FATAL, "Second argument is neither a string, a number "
-				   "nor a 1-dimensional array.\n" );
-			THROW( EXCEPTION );
-		}
+            if ( ! ( v = vars_pop( v ) ) )
+                list_setup_A( freqs, pows, flen, NULL );
+            else if ( v->type == STR_VAR )
+            {
+                list_setup_A( freqs, pows, flen, v->val.sptr );
+                too_many_arguments( v );
+            }
+            else
+            {
+                print( FATAL, "Third argument isn't a string.\n" );
+                THROW( EXCEPTION );
+            }
+        }
+        else
+        {
+            print( FATAL, "Second argument is neither a string, a number "
+                   "nor a 1-dimensional array.\n" );
+            THROW( EXCEPTION );
+        }
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( pows );
-		T_free( freqs );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( pows );
+        T_free( freqs );
 
-		RETHROW;
-	}
+        RETHROW;
+    }
 
-	T_free( pows );
-	T_free( freqs );
+    T_free( pows );
+    T_free( freqs );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -725,16 +725,16 @@ synthesizer_selected_list( Var_T * v )
     if ( ! v )
         return vars_push( STR_VAR, ! rs->list.name ? rs->list.name : "" );
 
-	if ( v && v->type != STR_VAR )
-	{
-		print( FATAL, "Expect list name as argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v && v->type != STR_VAR )
+    {
+        print( FATAL, "Expect list name as argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	list_select( v ? v->val.sptr : "" );
+    list_select( v ? v->val.sptr : "" );
     too_many_arguments( v );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -744,11 +744,11 @@ synthesizer_selected_list( Var_T * v )
 Var_T *
 synthesizer_start_list( Var_T * v )
 {
-	if ( rs->list.processing_list )
-	{
-		print( WARN, "List processing already started.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( rs->list.processing_list )
+    {
+        print( WARN, "List processing already started.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
     bool relearn_list = false;
     if ( v )
@@ -757,8 +757,8 @@ synthesizer_start_list( Var_T * v )
         too_many_arguments( v );
     }
 
-	list_start( relearn_list );
-	return vars_push( INT_VAR, 1L );
+    list_start( relearn_list );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -768,21 +768,21 @@ synthesizer_start_list( Var_T * v )
 Var_T *
 synthesizer_stop_list( Var_T * v )
 {
-	if ( ! rs->list.processing_list )
-	{
-		print( WARN, "No list is currently being processed.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( ! rs->list.processing_list )
+    {
+        print( WARN, "No list is currently being processed.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	bool keep_rf_on = false;
-	if ( v )
-	{
-		keep_rf_on = get_boolean( v );
-		too_many_arguments( v );
-	}
+    bool keep_rf_on = false;
+    if ( v )
+    {
+        keep_rf_on = get_boolean( v );
+        too_many_arguments( v );
+    }
 
-	list_stop( keep_rf_on );
-	return vars_push( INT_VAR, 1L );
+    list_stop( keep_rf_on );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -792,13 +792,13 @@ synthesizer_stop_list( Var_T * v )
 Var_T *
 synthesizer_delete_list( Var_T * v )
 {
-	if ( v && v->type != STR_VAR )
-	{
-		print( FATAL, "Expect list name as the argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v && v->type != STR_VAR )
+    {
+        print( FATAL, "Expect list name as the argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return vars_push( INT_VAR,
+    return vars_push( INT_VAR,
                       list_delete_list( v ? v->val.sptr : NULL ) ? 1L : 0L );
 }
 

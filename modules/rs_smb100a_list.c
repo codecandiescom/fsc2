@@ -33,15 +33,15 @@ static void list_send( char const   * type,
 void
 list_init( void )
 {
-	rs->list.processing_list = false;
+    rs->list.processing_list = false;
     rs->list.len             = 0;
     rs->list.max_len         = 2000;
 
-	if ( FSC2_MODE == PREPARATION )
-	{
-		rs->list.default_name = "fsc2_def_list";
-		rs->list.name = NULL;
-	}
+    if ( FSC2_MODE == PREPARATION )
+    {
+        rs->list.default_name = "fsc2_def_list";
+        rs->list.name = NULL;
+    }
 }
 
 
@@ -51,7 +51,7 @@ list_init( void )
 void
 list_cleanup( void )
 {
-	rs->list.name = T_free( rs->list.name );
+    rs->list.name = T_free( rs->list.name );
 }
 
 
@@ -73,41 +73,41 @@ list_select( char const * name )
         rs->list.len = 2;
         T_free( rs->list.name );
         rs->list.name = T_strdup( name );
-		return;
+        return;
     }
 
     // Check if the list exists and has any points, otherwise give up
 
-	char * cmd = NULL;
-	CLOBBER_PROTECT( cmd );
+    char * cmd = NULL;
+    CLOBBER_PROTECT( cmd );
 
-	TRY
-	{
-		cmd = T_malloc( 12 + strlen( name ) );
-		sprintf( cmd, "LIST:SEL \"%s\"", name );
-		rs_write( cmd );
+    TRY
+    {
+        cmd = T_malloc( 12 + strlen( name ) );
+        sprintf( cmd, "LIST:SEL \"%s\"", name );
+        rs_write( cmd );
 
         int list_len = query_int( "LIST:FREQ:POIN?" );
-		if ( list_len < 1 )
-		{
+        if ( list_len < 1 )
+        {
             rs->list.len = 0;
-			print( FATAL, "List '%s' does not exist or is empty.\n", name );
-			THROW( EXCEPTION );
-		}
+            print( FATAL, "List '%s' does not exist or is empty.\n", name );
+            THROW( EXCEPTION );
+        }
 
         rs->list.len  = list_len;
-		rs->list.name = T_free( rs->list.name );
-		rs->list.name = T_strdup( name );
+        rs->list.name = T_free( rs->list.name );
+        rs->list.name = T_strdup( name );
 
-		T_free( cmd );
+        T_free( cmd );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( cmd );
-		RETHROW;
-	}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW;
+    }
 }
     
 
@@ -116,9 +116,9 @@ list_select( char const * name )
 
 void
 list_setup_A( double const * freqs,
-			  double const * pows,
-			  long           len,
-			  char   const * name )
+              double const * pows,
+              long           len,
+              char   const * name )
 {
     // Check arguments
 
@@ -128,62 +128,62 @@ list_setup_A( double const * freqs,
         name = rs->list.default_name;
 
     if ( ! len )
-	{
-		print( FATAL, "Empty list of frequencies.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Empty list of frequencies.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( len > rs->list.max_len )
-	{
-		print( FATAL, "List is too long, maximum number of points in list "
+    if ( len > rs->list.max_len )
+    {
+        print( FATAL, "List is too long, maximum number of points in list "
                "is %d.\n", rs->list.max_len );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
     // Check all frequencies and powers and store them
 
-	double * freq_list = NULL;
-	double * pow_list  = NULL;
+    double * freq_list = NULL;
+    double * pow_list  = NULL;
 
-	CLOBBER_PROTECT( freq_list );
-	CLOBBER_PROTECT( pow_list );
+    CLOBBER_PROTECT( freq_list );
+    CLOBBER_PROTECT( pow_list );
 
-	TRY
-	{
-		freq_list = T_malloc( len * sizeof *freq_list );
-		pow_list  = T_malloc( len * sizeof *pow_list );
+    TRY
+    {
+        freq_list = T_malloc( len * sizeof *freq_list );
+        pow_list  = T_malloc( len * sizeof *pow_list );
 
-		for ( long i = 0; i < len; i++ )
-		{
-			freq_list[ i ] = freq_check_frequency( freqs[ i ] );
+        for ( long i = 0; i < len; i++ )
+        {
+            freq_list[ i ] = freq_check_frequency( freqs[ i ] );
             double p = pows[ i ] - table_att_offset( freq_list[ i ] );
-			pow_list[ i ]  = pow_check_power( p, freq_list[ i ] );
-		}
+            pow_list[ i ]  = pow_check_power( p, freq_list[ i ] );
+        }
 
         rs->list.len = len;
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( pow_list );
-		T_free( freq_list );
-		RETHROW;
-	}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( pow_list );
+        T_free( freq_list );
+        RETHROW;
+    }
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
+    if ( FSC2_MODE != EXPERIMENT )
+    {
         rs->list.len = len;
-		T_free( pow_list );
-		T_free( freq_list );
-		return;
-	}
+        T_free( pow_list );
+        T_free( freq_list );
+        return;
+    }
 
-	char * cmd = NULL;
-	CLOBBER_PROTECT( cmd );
+    char * cmd = NULL;
+    CLOBBER_PROTECT( cmd );
 
-	TRY
-	{
+    TRY
+    {
         // If necessary sselect new list name
 
         if ( ! rs->list.name || strcmp( rs->list.name, name ) )
@@ -198,19 +198,19 @@ list_setup_A( double const * freqs,
         list_send( "FREQ", freq_list, len );
         list_send( "POW", pow_list, len );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( cmd );
-		T_free( freq_list );
-		T_free( pow_list );
-		RETHROW;
-	}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        T_free( freq_list );
+        T_free( pow_list );
+        RETHROW;
+    }
 
-	T_free( cmd );
-	T_free( freq_list );
-	T_free( pow_list );
+    T_free( cmd );
+    T_free( freq_list );
+    T_free( pow_list );
 }
 
 
@@ -219,28 +219,28 @@ list_setup_A( double const * freqs,
 
 void
 list_setup_B( double const * freqs,
-			  double         pow,
-			  long           len,
-			  char   const * name )
+              double         pow,
+              long           len,
+              char   const * name )
 {
-	double * pows = T_malloc( len * sizeof *pows );
-	CLOBBER_PROTECT( pows );
+    double * pows = T_malloc( len * sizeof *pows );
+    CLOBBER_PROTECT( pows );
 
-	for ( long i = 0; i < len; i++ )
-		pows[ i ] = pow;
+    for ( long i = 0; i < len; i++ )
+        pows[ i ] = pow;
 
-	TRY
-	{
-		list_setup_A( freqs, pows, len, name );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( pows );
-		RETHROW;
-	}
-	
-	T_free( pows );
+    TRY
+    {
+        list_setup_A( freqs, pows, len, name );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( pows );
+        RETHROW;
+    }
+    
+    T_free( pows );
 }
 
 
@@ -249,10 +249,10 @@ list_setup_B( double const * freqs,
 
 void
 list_setup_C( double const * freqs,
-			  long           len,
-			  char   const * name )
+              long           len,
+              char   const * name )
 {
-	list_setup_B( freqs, rs->pow.req_pow, len, name );
+    list_setup_B( freqs, rs->pow.req_pow, len, name );
 }
 
 
@@ -321,20 +321,20 @@ void
 list_start( bool relearn_list )
 {
     if ( ! rs->list.name )
-	{
-		print( FATAL, "No list has been selected.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "No list has been selected.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( rs->list.processing_list )
         return;
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
-		if ( ! outp_state( ) )
-			outp_set_state( true );
-		return;
-	}
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( ! outp_state( ) )
+            outp_set_state( true );
+        return;
+    }
 
     // Before anyhing can be done with the list output must be on
 
@@ -342,7 +342,7 @@ list_start( bool relearn_list )
         outp_set_state( true );
 
     rs_write( "LIST:MODE STEP" );
-	rs_write( "LIST:TRIG:SOUR EXT" );
+    rs_write( "LIST:TRIG:SOUR EXT" );
 
     if ( relearn_list )
     {
@@ -375,8 +375,8 @@ list_stop( bool keep_rf_on )
 
     freq_list_mode( false );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		rs_write( "LIST:RES" );
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_write( "LIST:RES" );
 }
 
 
@@ -389,8 +389,8 @@ list_index( void )
     if ( ! rs->list.processing_list )
         return -1;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return 0;
+    if ( FSC2_MODE != EXPERIMENT )
+        return 0;
 
     return query_int( "LIST:INDEX?" );
 }
@@ -402,7 +402,7 @@ list_index( void )
 bool
 list_delete_list( char const * name )
 {
-	char const * n;
+    char const * n;
 
     if ( ! name || ! *name )
     {
@@ -412,10 +412,10 @@ list_delete_list( char const * name )
             n = rs->list.name;
     }
     else
-	{
+    {
         list_check_list_name( name );
-		n = name;
-	}
+        n = name;
+    }
 
     if ( FSC2_MODE == TEST )
     {
@@ -424,21 +424,21 @@ list_delete_list( char const * name )
         return true;
     }
 
-	char * cmd = get_string( "LIST:DEL \"%s\"", n );
+    char * cmd = get_string( "LIST:DEL \"%s\"", n );
     CLOBBER_PROTECT( cmd );
 
-	TRY
-	{
-		rs_write( cmd );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( cmd );
-		RETHROW;
-	}
+    TRY
+    {
+        rs_write( cmd );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW;
+    }
 
-	T_free( cmd );
+    T_free( cmd );
 
     if ( ! strcmp( n, rs->list.name ) )
         rs->list.name = T_free( rs->list.name );
@@ -491,10 +491,10 @@ double *
 list_frequencies( void )
 {
     if ( ! rs->list.name )
-	{
-		print( FATAL, "No list has been selected.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "No list has been selected.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( FSC2_MODE == TEST )
     {
@@ -516,10 +516,10 @@ double *
 list_powers( void )
 {
     if ( ! rs->list.name )
-	{
-		print( FATAL, "No list has been selected.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "No list has been selected.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( FSC2_MODE == TEST )
     {
@@ -543,24 +543,24 @@ void
 list_check_list_name( char const * name )
 {
     if ( ! name || ! *name )
-	{
-		print( FATAL, "Invalid empty list name.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        print( FATAL, "Invalid empty list name.\n" );
+        THROW( EXCEPTION );
+    }
 
-	for ( size_t i = 0; i < strlen( name ); i++ )
-		if ( ! isalnum( ( int ) name[ i ] ) && name[ i ] != '_' )
-		{
-			print( FATAL, "Invalid list name \"%s\", may only contain "
-				   "letters, numbers and underscores.\n", name );
-			THROW( EXCEPTION );
-		}
+    for ( size_t i = 0; i < strlen( name ); i++ )
+        if ( ! isalnum( ( int ) name[ i ] ) && name[ i ] != '_' )
+        {
+            print( FATAL, "Invalid list name \"%s\", may only contain "
+                   "letters, numbers and underscores.\n", name );
+            THROW( EXCEPTION );
+        }
 
-	if ( ! isalpha( ( int ) name[ 0 ] ) )
-	{
-		print( FATAL, "Invalid list name \"%s\", must start with a letter.\n",
-			   name );
-	}
+    if ( ! isalpha( ( int ) name[ 0 ] ) )
+    {
+        print( FATAL, "Invalid list name \"%s\", must start with a letter.\n",
+               name );
+    }
 }
 
 
