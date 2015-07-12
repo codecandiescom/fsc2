@@ -70,7 +70,7 @@ list_select( char const * name )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        rs->list.len = 101;
+        rs->list.len = 2;
         T_free( rs->list.name );
         rs->list.name = T_strdup( name );
 		return;
