@@ -485,7 +485,7 @@ query_list( char const * cmd,
         {
             size_t len = 8 * list_length;
             reply = T_malloc( 7 + len );
-            len = rs_talk_bin( cmd, reply, len );
+            len = rs_talk_bin( cmd, reply, 7 + len );
 
             if (    len < 2
                  || reply[ 0 ] != '#'
