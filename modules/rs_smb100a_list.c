@@ -87,15 +87,9 @@ list_select( char const * name )
 		sprintf( cmd, "LIST:SEL \"%s\"", name );
 		rs_write( cmd );
 
-		char reply[ 50 ];
-		rs_talk( "LIST:FREQ:POIN?", reply, 50 );
-
-        int list_len = query_int( reply );
+        int list_len = query_int( "LIST:FREQ:POIN?" );
 		if ( list_len < 1 )
 		{
-            sprintf( cmd, "LIST:DEL \"%s\"", name );
-			rs_write( cmd );
-
             rs->list.len = 0;
 			print( FATAL, "List '%s' does not exist or is empty.\n", name );
 			THROW( EXCEPTION );

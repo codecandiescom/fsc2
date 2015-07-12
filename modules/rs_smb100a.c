@@ -730,9 +730,10 @@ synthesizer_selected_list( Var_T * v )
 		print( FATAL, "Expect list name as argument.\n" );
 		THROW( EXCEPTION );
 	}
+
+	list_select( v ? v->val.sptr : "" );
     too_many_arguments( v );
 
-	list_select( v ? v->val.sptr : NULL );
 	return vars_push( INT_VAR, 1L );
 }
 
