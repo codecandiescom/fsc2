@@ -327,13 +327,15 @@ Var_T * synthesizer_mod_amp( Var_T * v );
 Var_T * synthesizer_mod_source( Var_T * v );
 Var_T * synthesizer_mod_mode( Var_T * v );
 Var_T * synthesizer_setup_list( Var_T * v );
-Var_T * synthesizer_select_list( Var_T * v );
+Var_T * synthesizer_selected_list( Var_T * v );
 Var_T * synthesizer_start_list( Var_T * v );
 Var_T * synthesizer_stop_list( Var_T * v );
 Var_T * synthesizer_delete_list( Var_T * v );
 Var_T * synthesizer_show_lists( Var_T * v );
 Var_T * synthesizer_list_length( Var_T * v );
 Var_T * synthesizer_list_index( Var_T * v );
+Var_T * synthesizer_list_frequencies( Var_T * v );
+Var_T * synthesizer_list_powers( Var_T * v );
 Var_T * synthesizer_use_table( Var_T * v );
 Var_T * synthesizer_att_ref_freq( Var_T * v );
 Var_T * synthesizer_attenuation_offset( Var_T * v );
@@ -474,7 +476,10 @@ int list_length( void );
 int list_index( void );
 bool list_delete_list( char const * name );
 char * list_get_all( void );
+double * list_frequencies( void );
+double * list_powers( void );
 void list_check_list_name( char const * name );
+
 
 
 // Function of the PULM sub-system
@@ -498,6 +503,9 @@ void rs_write_n( char const * data, size_t length );
 size_t rs_talk( char const * cmd,
                 char       * reply,
                 size_t       length );
+size_t rs_talk_bin( char const * cmd,
+                    char       * reply,
+                    size_t       length );
 void wait_opc( double max_timeout );
 bool query_bool( char const * cmd );
 int query_int( char const * cmd );
@@ -511,6 +519,8 @@ enum Mod_Mode query_mod_mode( char const * cmd );
 enum Impedance query_imp( char const * cmd );
 enum Slope query_slope( char const * cmd );
 enum Polarity query_pol( char const * cmd );
+double * query_list( char const * cmd,
+                     int          list_length  );
 int bad_data( void );
 long impedance_to_int( enum Impedance imp );
 enum Impedance int_to_impedance( long imp );

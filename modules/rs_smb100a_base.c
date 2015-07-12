@@ -100,7 +100,6 @@ rs_connect( void )
 
     // Tell the device to send all data in ASCII
 
-    rs_write( "FORM ASC" );
 
     // If BINARY_TRANSFER is defined and we're (hopefully) on a machine
     // that uses IEEE 754 set the endianess the device expects data in
@@ -108,10 +107,15 @@ rs_connect( void )
 
 #if defined BINARY_TRANSFER
     if ( sizeof( double ) != 8 )
+    {
         rs->use_binary = false;
+        rs_write( "FORM ASC" );
+    }
     else
     {
         rs->use_binary = true;
+
+        rs_write( "FORM PACK" );
 
         int tst = 1;
         if ( * ( unsigned char * ) &tst  == 1 )
@@ -121,6 +125,7 @@ rs_connect( void )
     }
 #else
     rs->use_binary = false;
+        rs_write( "FORM ASC" );
 #endif
 
     check_model_and_options( );
@@ -180,9 +185,27 @@ rs_talk( char const * cmd,
 
 	if ( vxi11_read( reply, &length, false ) != SUCCESS )
 		comm_failure( );
-	
+
 	if ( reply[ length - 1 ] == '\n' )
 		reply[ --length ] = '\0';
+
+    return length;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+size_t
+rs_talk_bin( char const * cmd,
+             char       * reply,
+             size_t       length )
+{
+	rs_write( cmd );
+
+    size_t rec = length;
+	if ( vxi11_read( reply, &rec, false ) != SUCCESS )
+		comm_failure( );
 
     return length;
 }
@@ -443,7 +466,101 @@ query_pol( char const * cmd )
 
     return bad_data( );
 }
-    
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double *
+query_list( char const * cmd,
+            int          list_length  )
+{
+    char * reply = NULL;
+    double * res = NULL;
+    CLOBBER_PROTECT( reply );
+
+    if ( rs->use_binary )
+    {
+        TRY
+        {
+            size_t len = 8 * list_length;
+            reply = T_malloc( 7 + len );
+            len = rs_talk_bin( cmd, reply, len );
+
+            if (    len < 2
+                 || reply[ 0 ] != '#'
+                 || ! isdigit( ( int ) reply[ 1 ] ) )
+                bad_data( );
+
+            size_t cnt = reply[ 1 ] - '0';
+
+            if ( len < 2 + cnt )
+                bad_data( );
+
+            int total = 0;
+            for ( size_t i = 0; i < cnt; i++ )
+            {
+                if ( ! isdigit( ( int ) reply[ 2 + i ] ) )
+                    bad_data( );
+                total = total * 10 + reply[ 2 + i ] - '0';
+            }
+
+            if (    2 + cnt + total != len
+                 || total != 8 * list_length )
+                bad_data( );
+
+            res = T_malloc( total );
+            memcpy( res, reply + 2 + cnt, total );
+
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( reply );
+            RETHROW;
+        }
+
+        T_free( reply );
+        return res;
+    }
+
+    reply = T_malloc( 15 * list_length );
+
+    TRY
+    {
+        rs_talk( cmd, reply, 15 * list_length );
+
+        res = T_malloc( list_length * sizeof *res );
+        char * p = reply;
+        int cnt = 0;
+
+        while ( ( p = strtok( p, "," ) ) )
+        {
+            char * ep;
+            double r = strtod( p, &ep );
+            if ( ep == p || *ep || errno == ERANGE )
+                bad_data( );
+
+            res[ cnt++ ] = r;
+            p = NULL;
+        }
+
+        if ( cnt != list_length )
+            bad_data( );
+
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( res );
+        T_free( reply );
+        RETHROW;
+    }
+
+    T_free( reply );
+    return res;
+}
+
 
 /*----------------------------------------------------*
  * Method for finding out which model we're talking to

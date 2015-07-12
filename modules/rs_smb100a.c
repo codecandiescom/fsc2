@@ -720,13 +720,17 @@ synthesizer_setup_list( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_select_list( Var_T * v )
+synthesizer_selected_list( Var_T * v )
 {
+    if ( ! v )
+        return vars_push( STR_VAR, ! rs->list.name ? rs->list.name : "" );
+
 	if ( v && v->type != STR_VAR )
 	{
 		print( FATAL, "Expect list name as argument.\n" );
 		THROW( EXCEPTION );
 	}
+    too_many_arguments( v );
 
 	list_select( v ? v->val.sptr : NULL );
 	return vars_push( INT_VAR, 1L );
@@ -825,6 +829,26 @@ Var_T *
 synthesizer_list_index( Var_T * v  UNUSED_ARG )
 {
     return vars_push( INT_VAR, list_index( ) + 1 );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_list_frequencies( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( FLOAT_ARR, list_frequencies( ), rs->list.len );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_list_powers( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( FLOAT_ARR, list_powers( ), rs->list.len );
 }
 
 

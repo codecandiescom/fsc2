@@ -3919,13 +3919,15 @@ section of the @code{EDL} script.
 @item @ref{synthesizer_double_pulse_mode()}
 @item @ref{synthesizer_double_pulse_delay()}
 @item @ref{synthesizer_setup_list()}
-@item @ref{synthesizer_select_list()}
+@item @ref{synthesizer_selected_list()}
 @item @ref{synthesizer_start_list()}
 @item @ref{synthesizer_stop_list()}
 @item @ref{synthesizer_delete_list()}
 @item @ref{synthesizer_show_lists()}
 @item @ref{synthesizer_list_length()}
 @item @ref{synthesizer_list_index()}
+@item @ref{synthesizer_list_frequencies()}
+@item @ref{synthesizer_list_powers()}
 @item @ref{synthesizer_output_impedance()}
 @item @ref{synthesizer_protection_tripped()}
 @item @ref{synthesizer_reset_protection()}
@@ -4722,23 +4724,23 @@ table. It is supposed to consist only of letters, numbers and under-\
 scores ('@code{_}'), with the first character being a letter or an
 underscore, but not a number. This name is used to store the list in
 the persistent memory of the device and can then be used in later runs
-of other scripts using the @code{@ref{synthesizer_select_list()}}
+of other scripts using the @code{@ref{synthesizer_selected_list()}}
 function.
 
 
-@anchor{synthesizer_select_list()}
-@findex synthesizer_select_list()
-@item   synthesizer_select_list()
+@anchor{synthesizer_selected_list()}
+@findex synthesizer_selected_list()
+@item   synthesizer_selected_list()
 This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
-SMB100A}. It can be used to select a list of frequencies and
-attenuations previously stored in the persistent memory of the device
-by use of the @code{@ref{synthesizer_setup_list()}} command. If called
-without an argument (or an empty string) the function will attempt to
-use the list with the default name, otherwise the list with the name
-given by the (only) argument.
+SMB100A}. It can be used to query (if called without an arument) or to
+set the name of the select list of frequencies and attenuations
+(previously stored in the persistent memory of the device by use of
+the @code{@ref{synthesizer_setup_list()}} command). If with an empty
+string the function will attempt to use the list with the default name
+(if it exists), otherwise the list with the name given.
 
-If a list of the given name does not exist the @code{EDL} script
-will be aborted.
+If a list to be selected does not exist the @code{EDL} script will be
+aborted.
 
 
 @anchor{synthesizer_start_list()}
@@ -4749,7 +4751,7 @@ SMB100A}. It switches the synthesizer to list processing mode. In this
 mode on each external trigger a new pair of frequencies and
 attenuations from a previously created or selected list (with the
 functions @code{@ref{synthesizer_setup_list()}} or
-@code{@ref{synthesizer_select_list()}}) is set.
+@code{@ref{synthesizer_selected_list()}}) is set.
 
 Since list mode only can be switched on when the RF output is on
 this function internally also calls
@@ -4776,7 +4778,7 @@ exception being the @code{@ref{synthesizer_list_index()}} function.
 
 If called with no list having been created or selected via a call of
 @code{@ref{synthesizer_setup_list()}} or
-@code{@ref{synthesizer_select_list()}} the @code{EDL} script will be
+@code{@ref{synthesizer_selected_list()}} the @code{EDL} script will be
 aborted.
 
 
@@ -4831,6 +4833,24 @@ SMB100A}. It accepts no argument and returns the current position
 in the list during list processing (or @code{0} if no list is
 currently being processed). This is the only function that can
 be safely called during list processing.
+
+
+@anchor{synthesizer_list_frequencies()}
+@findex synthesizer_list_frequencies()
+@item   synthesizer_list_frequencies()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It accepts no argument and returns an array with the
+frequencies of the currently selected list. If called with no list
+being selected the @code{EDL} script will be aborted.
+
+
+@anchor{synthesizer_list_powers()}
+@findex synthesizer_list_powers()
+@item   synthesizer_list_powers()
+This function only exists for the @ref{rs_smb100a, Rohde&Schwarz
+SMB100A}. It accepts no argument and returns an array with the powers
+of the currently selected list. If called with no list being selected
+the @code{EDL} script will be aborted.
 
 
 @end table

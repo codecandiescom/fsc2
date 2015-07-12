@@ -223,64 +223,6 @@ list_setup_A( double const * freqs,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static
-void
-list_send( char const   * type,
-           double const * data,
-           long           length )
-{
-    char * cmd = 0;
-    CLOBBER_PROTECT( cmd );
-
-    TRY
-    {
-        if ( rs->use_binary )
-        {
-            int cnt = floor( log10( 8 * length ) ) + 1;
-            size_t total = 5 + strlen( type ) + 3 + cnt + 8 * length;
-
-            cmd = T_malloc( total );
-            memcpy( cmd + sprintf( cmd, "LIST:%s #%d%ld", type,
-                                   cnt, 8 * length ), data, 8 * length );
-            rs_write_n( cmd, total );
-        }
-        else
-        {
-            cmd = T_malloc( 6 + strlen( type ) + 14 * length );
-            char * np = cmd + sprintf( cmd, "LIST:%s ", type );
-
-            for ( long i = 0; i < length; i++ )
-                np += sprintf( np, "%.2f,", data[ i ] );
-            *--np = '\0';
-
-            rs_write( cmd );
-        }
-
-        TRY_SUCCESS;
-    }
-    OTHERWISE
-    {
-        T_free( cmd );
-        RETHROW;
-    }
-
-    T_free( cmd );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-int
-list_length( void )
-{
-    return rs->list.len;
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
 void
 list_setup_B( double const * freqs,
 			  double         pow,
@@ -323,12 +265,70 @@ list_setup_C( double const * freqs,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+static
+void
+list_send( char const   * type,
+           double const * data,
+           long           length )
+{
+    char * cmd = 0;
+    CLOBBER_PROTECT( cmd );
+
+    TRY
+    {
+        if ( rs->use_binary )
+        {
+            int cnt = floor( log10( 8 * length ) ) + 1;
+            size_t total = 8 + strlen( type ) + cnt + 8 * length;
+
+            cmd = T_malloc( total );
+            memcpy( cmd + sprintf( cmd, "LIST:%s #%d%ld", type,
+                                   cnt, 8 * length ), data, 8 * length );
+            rs_write_n( cmd, total );
+        }
+        else
+        {
+            cmd = T_malloc( 7 + strlen( type ) + 15 * length );
+            char * np = cmd + sprintf( cmd, "LIST:%s ", type );
+
+            for ( long i = 0; i < length; i++ )
+                np += sprintf( np, "%.2f,", data[ i ] );
+            *--np = '\0';
+
+            rs_write( cmd );
+        }
+
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW;
+    }
+
+    T_free( cmd );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+int
+list_length( void )
+{
+    return rs->list.len;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 void
 list_start( bool relearn_list )
 {
     if ( ! rs->list.name )
 	{
-		print( FATAL, "No list has been set up or selected.\n" );
+		print( FATAL, "No list has been selected.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -487,6 +487,55 @@ list_get_all( void )
     }
 
     return r;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double *
+list_frequencies( void )
+{
+    if ( ! rs->list.name )
+	{
+		print( FATAL, "No list has been selected.\n" );
+		THROW( EXCEPTION );
+	}
+
+    if ( FSC2_MODE == TEST )
+    {
+        double * f = T_malloc( rs->list.len * sizeof *f );
+        f[ 0 ] = 1.0e6;
+        for ( int i = 1; i < rs->list.len; i++ )
+            f[ i ] = f[ i - 1 ] + 1.0e3;
+        return f;
+    }
+
+    return query_list( "LIST:FREQ?", rs->list.len );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double *
+list_powers( void )
+{
+    if ( ! rs->list.name )
+	{
+		print( FATAL, "No list has been selected.\n" );
+		THROW( EXCEPTION );
+	}
+
+    if ( FSC2_MODE == TEST )
+    {
+        double * p = T_malloc( rs->list.len * sizeof *p );
+        for ( int i = 0; i < rs->list.len; i++ )
+            p[ i ] = 0;
+        return p;
+    }
+
+    return query_list( "LIST:POW?", rs->list.len );
 }
 
 

@@ -3730,13 +3730,15 @@ frequency/amplitude table files.
 @item @ref{synthesizer_mod_ampl()}
 @item @ref{synthesizer_mod_mode()}
 @item @ref{synthesizer_setup_list()}
-@item @ref{synthesizer_select_list()}
+@item @ref{synthesizer_selected_list()}
 @item @ref{synthesizer_start_list()}
 @item @ref{synthesizer_stop_list()}
 @item @ref{synthesizer_delete_list()}
 @item @ref{synthesizer_show_lists()}
 @item @ref{synthesizer_list_length()}
 @item @ref{synthesizer_list_index()}
+@item @ref{synthesizer_list_frequencies()}
+@item @ref{synthesizer_list_powers()}
 @item @ref{synthesizer_attenuation_offset()}
 @item @ref{synthesizer_min_attenuation()}
 @item @ref{synthesizer_max_attenuation()}
