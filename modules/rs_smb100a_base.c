@@ -484,8 +484,8 @@ query_list( char const * cmd,
         TRY
         {
             size_t len = 8 * list_length;
-            reply = T_malloc( 7 + len );
-            len = rs_talk_bin( cmd, reply, 7 + len );
+            reply = T_malloc( 8 + len );
+            len = rs_talk_bin( cmd, reply, 8 + len );
 
             if (    len < 2
                  || reply[ 0 ] != '#'
@@ -505,7 +505,7 @@ query_list( char const * cmd,
                 total = total * 10 + reply[ 2 + i ] - '0';
             }
 
-            if (    2 + cnt + total != len
+            if (    3 + cnt + total != len
                  || total != 8 * list_length )
                 bad_data( );
 
