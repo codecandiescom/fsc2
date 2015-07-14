@@ -589,6 +589,18 @@ check_model_and_options( void )
 #elif defined B112L
     char const * model_str = "SMB-B112L";
     char const * pulse_mod_str = "SMB-K21";
+#elif defined B120
+    char const * model_str = "SMB-B120";
+    char const * pulse_mod_str = "SMB-K21";
+#elif defined B120L
+    char const * model_str = "SMB-B120L";
+    char const * pulse_mod_str = "SMB-K21";
+#elif defined B140
+    char const * model_str = "SMB-B140";
+    char const * pulse_mod_str = "SMB-K21";
+#elif defined B140L
+    char const * model_str = "SMB-B140L";
+    char const * pulse_mod_str = "SMB-K21";
 #endif
 
     char ** opts = get_options( );
@@ -600,7 +612,7 @@ check_model_and_options( void )
         THROW( EXCEPTION );
     }
 
-#if defined WITH_PULSE_MODULATION
+#if defined K22 || defined K22
     bool found = false;
     for ( size_t i = 0; opts[ i ]; i++ )
         if ( ! strcmp( opts[ i ], pulse_mod_str ) )

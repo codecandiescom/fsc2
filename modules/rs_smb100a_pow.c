@@ -32,23 +32,84 @@ typedef struct
 } Pow_Range;
 
 #if defined B101 || defined B102 || defined B103 || defined B106
-static double min_pow = -145;
-static Pow_Range max_pow[ ] = { {   8.0e3,  8.0 },
-                                { 100.0e3, 13.0 },
-                                { 300.0e3, 18.0 },
-                                {   1.0e6, 30.0 } };
-#elif defined B112
-static double min_pow = -145;
-static Pow_Range max_pow[ ] = { { 100.0e3,  3.0 },
-                                { 200.0e3, 11.0 },
-                                { 300.0e3, 18.0 },
-                                {   1.0e6, 30.0 } };
+static double min_pow = -120;
+static Pow_Range max_pow[ ] = { {   8.0e3,  5.0 },
+                                { 200.0e3, 13.0 },
+                                {   1.0e6, 18.0 } };
+#endif
+
+#if defined B112
+static double m_min_pow = -120;
+#if ! defined B30
+static Pow_Range m_max_pow[ ] = { { 100.0e3,  6.0 },
+                                  {   1.0e6, 18.0 } };
 #else
-static double min_pow = -20;
+static Pow_Range _max_pow[ ] = { { 100.0e3,  5.0 },
+                                 {   1.0e6, 15.0 } };
+#endif
+#endif
+
+#if defined B112L
+static double min_pow = -5;
+#if ! defined B30
+static Pow_Range max_pow[ ] = { { 100.0e3, 10.0 },
+                                {   1.0e6, 18.0 } };
+#else
+static Pow_Range max_pow[ ] = { { 100.0e3,  9.0 },
+                                {   1.0e6, 15.0 } };
+#endif
+#endif
+
+#if defined B120
+static double min_pow = -120;
+#if ! defined B31
 static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
-                                { 200.0e3, 10.0 },
-                                { 300.0e3, 13.0 },
-                                {   1.0e6, 30.0 } };
+                                {  10.0e6, 10.0 },
+                                {  50.0e6, 11.0 } };
+#else
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6, 10.0 },
+                                {  50.0e6, 16.0 } };
+#endif
+#endif
+
+#if defined B120L
+static double min_pow = 0;
+#if ! defined B31
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6, 10.0 },
+                                {  50.0e6, 14.0 } };
+#else
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6, 10.0 },
+                                {  50.0e6, 16.0 },
+                                { 100.0e6, 19.0 } };
+#endif
+#endif
+
+#if defined B140
+static double min_pow = -120;
+#if ! defined B31
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6,  8.0 } };
+#else
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6, 10.0 },
+                                {  50.0e6, 13.0 } };
+#endif
+#endif
+
+#if defined B140L
+static double min_pow = 0;
+#if ! defined B31
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6,  9.0 },
+                                {  50.0e6, 11.0 } };
+#else
+static Pow_Range max_pow[ ] = { { 100.0e3,  5.0 },
+                                {  10.0e6,  9.0 },
+                                {  50.0e6, 16.0 } };
+#endif
 #endif
 
 
@@ -80,7 +141,8 @@ pow_init_prep( void )
     rs->pow.alc_state_has_been_set = false;
     rs->pow.mode_has_been_set      = false;
     rs->pow.off_mode_has_been_set  = false;
-    rs->pow.user_max_pow_limit     = max_pow[ 4 ].pow;
+    rs->pow.user_max_pow_limit     =
+                          max_pow[ sizeof max_pow / sizeof *max_pow - 1 ].pow;
 }
 
 
@@ -269,9 +331,12 @@ pow_max_power( double freq )
 
     freq = freq_check_frequency( freq );
 
-    for ( int i = 3; i >= 0; i-- )
-        if ( freq >= max_pow[ i ].freq_limit )
+    for ( int i = sizeof max_pow / sizeof *max_pow - 1; i >= 0; i-- )
+        if ( freq > max_pow[ i ].freq_limit )
             return max_pow[ i ].pow;
+
+    if ( freq == max_pow[ 0 ].freq_limit )
+        return max_pow[ 0 ].pow;
 
     fsc2_impossible( );
     return 0;

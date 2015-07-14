@@ -52,7 +52,7 @@ static
 void
 pulm_prep_init( void )
 {
-#if defined WITH_PULSE_MODULATION
+#if defined B21 || defined B22    // pulse modulation option present?
     rs->pulm.has_pulse_mod = true;
 #else
     rs->pulm.has_pulse_mod = false;

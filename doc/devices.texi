@@ -3877,8 +3877,8 @@ Hewlett-Packard HP8672A
 Rohde&Schwarz SML01
 
 @item @ref{rs_smb100a}
-Rohde&Schwarz SMB100A (models SMB-B101, SMB-B102, SMB-B103, SMB-B105,
-SMB-B112 and SMB-B112L)
+Rohde&Schwarz SMB100A (models SMB-B101, SMB-B102, SMB-B103, SMB-B106,
+SMB-B112, SMB-B112L, SMB-B120, SMB-B120L, SMB-B140 and SMB-B140K)
 @end table
 @noindent
 To use a module in an experiment put its name into the @code{DEVICES}

@@ -29,6 +29,8 @@
 #if    ! defined B101 && ! defined B102   \
     && ! defined B103 && ! defined B106   \
     && ! defined B112 && ! defined B112L
+    && ! defined B120 && ! defined B120L
+    && ! defined B140 && ! defined B140L
 #error "Model of device not defined in configuration file"
 #endif
 

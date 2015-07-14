@@ -39,9 +39,15 @@ freq_init( void )
 #elif defined B106
     rs->freq.min_freq = 8.0e3;
     rs->freq.max_freq = 6.0e9;
-#else                               // SMB112 and SMB112L
+#elif defined B112 || defined B112L
     rs->freq.min_freq = 100.0e3;
     rs->freq.max_freq = 12.75e9;
+#elif defined B120 || defined B120L
+    rs->freq.min_freq = 100.0e3;
+    rs->freq.max_freq = 20.e9;
+#elif defined B140 || defined B140L
+    rs->freq.min_freq = 100.0e3;
+    rs->freq.max_freq = 40.e9;
 #endif
 
     rs->freq.freq_resolution = 0.01;
