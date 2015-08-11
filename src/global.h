@@ -408,6 +408,7 @@ enum {
     CHANNEL_Z2,
     CHANNEL_Z3,
     CHANNEL_Z4,
+    CHANNEL_MATH4,
     NUM_CHANNEL_NAMES
 };
 

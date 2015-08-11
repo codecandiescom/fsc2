@@ -109,7 +109,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
-CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3]?)|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(TRACE_[A-D])|(M[1-4])|(F[1-8])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
+CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-4]?)|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(TRACE_[A-D])|(M[1-4])|(F[1-8])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
 
 DIO         DIO_?{INT}
 
