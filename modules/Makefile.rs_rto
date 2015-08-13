@@ -19,17 +19,29 @@
 
 
 INCLUDES   += -I$(mdir)/rs_rto
-LIBS       += -lrs_rto_c
+LIBS       += -L$(mdir)/rs_rto
 
 export        # export all symbols to the sub-makefiles
 
 .SUFFIXES:
-.PHONY: all install clean
+.PHONY: all install uninstall clean
 
 all: rs_rto.fsc2_so
 
 rs_rto.fsc2_so: rs_rto.c
 	$(MAKE) -C rs_rto
-	$(CC) $(CFLAGS) $(LFLAGS) -o $(^:.c=.o) $^ $(INCLUDES)
-	$(CC) $(CFLAGS) $(LFLAGS) $(^:.c=.o) -o $@ -L$(mdir)/rs_rto $(LIBS)
+	$(CC) $(CFLAGS) $(LFLAGS) -Wl,-rpath=$(ldir) -Wl,-rpath=$(mdir)/rs_rto \
+	$(INCLUDES) $^ -o $@ $(LIBS) -lrs_rto_c
+
+
+install:
+	$(MAKE) -C rs_rto install
+
+
+uninstall:
+	$(MAKE) -C rs_rto uninstall
+
+
+clean:
+	$(MAKE) -C rs_rto clean
 

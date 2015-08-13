@@ -36,6 +36,10 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 simp_modules    := User_Functions gg_chopper x_bmwb q_bmwb
 
+# List of modules that get build using their own Makefile (called
+# 'Makefiile.module_name')
+
+make_list       := rs_rto
 
 # For each of the "complicated" modules a list of all source files they are
 # to be created from is needed
@@ -249,7 +253,9 @@ list_comp:
 
 modules:
 	$(MAKE) $(vxi11_list) vxi11.h
-	$(MAKE) -f Makefile.rs_rto
+	@for n in $(make_list); do                                      \
+		$(MAKE) -f Makefile.$$n;                                    \
+    done
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \
@@ -399,6 +405,9 @@ $(vxi11_list) vxi11.h: vxi11.x
 
 install:
 	$(INSTALL) -d $(libdir)
+	@for n in $(make_list); do                                    \
+		$(MAKE) -f Makefile.$$n install;                          \
+    done
 	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
 		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
@@ -424,6 +433,9 @@ endif
 # How to uninstall the modules
 
 uninstall:
+	@for n in $(make_list); do                         \
+		$(MAKE) -f Makefile.$$n uninstall;             \
+    done
 	-for f in *.fsc2_so; do                            \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                \
 	done
@@ -439,6 +451,9 @@ uninstall:
 # How to clean up the mess we created
 
 cleanup:
+	@for n in $(make_list); do                                  \
+		$(MAKE) -f Makefile.$$n clean;                          \
+    done
 	$(RM) $(RMFLAGS) *.o *_lexer.c me_dio_*.c cscope.out *.make \
 		  xvi11_clnt.c vxi11_svc.c vxi11_xdr.c vxi11.h *~
 

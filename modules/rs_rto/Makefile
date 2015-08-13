@@ -33,7 +33,7 @@ VXI11_SOURCES := vxi11_clnt.c vxi11_xdr.c
 OBJECTS       := $(SOURCES:.cpp=.o) $(VXI11_SOURCES:.c=.o)
 
 .SUFFIXES:
-.PHONY: all install clean
+.PHONY: all install uninstall clean
 
 all: librs_rto_c.so
 
@@ -45,17 +45,22 @@ $(VXI11_SOURCES) vxi11.h: vxi11.x
 %.o: %.c vxi11.h
 	$(CC) $(CFLAGS) $(LFLAGS) -c -o $@ $<
 
+
 %.o: %.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(LFLAGS) -c -o $@ $<
+
 
 librs_rto_c.so: rs_rto_c.o $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LFLAGS) -o $@ $^
 
 
 install:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_c.so $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_c.so $(ldir)
+
+
+uninstall:
+	$(RM) -f $(ldir)/librs_rto_c.so
 
 
 clean:
-	$(RM) $(VXI11_SOURCES) vxi11_svc.c vxi11.h *~ *.o \
-	makelog librs_rto_c.so
+	$(RM) -f $(VXI11_SOURCES) vxi11_svc.c vxi11.h *~ *.o librs_rto_c.so

@@ -2,9 +2,15 @@ DEVICES:
 
 rs_rto;
 
+VARIABLES:
+
+W1;
+
 PREPARATIONS:
 
 digitizer_timebase( 1e-7 );
+W1 = digitizer_define_window( -2e-7, 4e-7 );
 
 EXPERIMENT:
 
+digitizer_change_window( W1, -1e-7, 2e-7 );

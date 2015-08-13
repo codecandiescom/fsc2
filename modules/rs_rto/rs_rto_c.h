@@ -182,7 +182,8 @@ enum
 
 rs_rto_t *
 rs_rto_open( char   const  * ip,
-			 int             log_level );
+			 int             log_level,
+             char         ** error_str );
 
 int
 rs_rto_close(  rs_rto_t * rs );

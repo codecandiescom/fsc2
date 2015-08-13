@@ -243,6 +243,27 @@ digitizer_memory_size, -1, ALL;         // LeCroy WR2/WaveSurfer only
 digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
 
 
+/* The following function are onluy supported for the Rhode&Schwarz
+   RTO series of digitizers */
+
+digitizer_display_enable, -1, EXP;
+digitizer_stop, 0, EXP;
+digitizer_timebase_limits, 0, EXP;
+digitizer_timebase_const_resolution_limits, 0, EXP;
+digitizer_time_per_point_limits, 0, EXP;
+digitizer_record_length_limits, 0, EXP;
+digitizer_acquisition_mode, -1, ALL;
+digitizer_max_num_averages, 0, EXP;
+digitizer_num_segments, -1, ALL;
+digitizer_max_num_segments, 0, EXP;
+digitizer_channel_state, -1, ALL;
+digitizer_channel_position, -1, ALL;
+digitizer_ext_channel_filter, -1, ALL;
+digitizer_check_window, 1, EXP;
+digitizer_window_limits, 0, EXP;
+digitizer_math_function, -1, ALL;
+
+
 /* The following functions will only remain here until I got some time to
    have a close look at the Agilent 54830B module, I guess most of them are
    not really useful or could be replaced by one of the functions that already

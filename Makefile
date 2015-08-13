@@ -463,7 +463,7 @@ VERSION          := 2.4.0
 
 # Set the optimization level
 
-OPTIMIZATION     := -O0
+OPTIMIZATION     := -O2
 
 
 # Define this in order to use mpatrol

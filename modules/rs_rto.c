@@ -136,7 +136,7 @@ typedef struct
 
     RS_RTO_ACQ acq;
 
-    RS_RTO_CHAN chans[ 5 ];
+    RS_RTO_CHAN chans[ Channel_Math4 + 1 ];
 
     RS_RTO_TRIG trig;
 
@@ -171,7 +171,6 @@ Var_T * digitizer_max_num_averages( Var_T * v );
 Var_T * digitizer_num_segments( Var_T * v );
 Var_T * digitizer_max_num_segments( Var_T * v );
 Var_T * digitizer_start_acquisition( Var_T * v );
-Var_T * digitizer_is_running( Var_T * v );
 Var_T * digitizer_channel_state( Var_T * v );
 Var_T * digitizer_sensitivity( Var_T * v );
 Var_T * digitizer_offset( Var_T * v );
@@ -230,8 +229,8 @@ static void init_exp_acq( void );
 static void init_exp_trig( void );
 static void init_exp_chans( void );
 static
-void copy_windows( RS_RTO_WIN ** dst,
-                   RS_RTO_WIN  * src );
+void copy_windows( RS_RTO_WIN       ** dst,
+                   RS_RTO_WIN const  * volatile src );
 static void delete_windows( RS_RTO_WIN ** wp );
 
 
@@ -240,7 +239,7 @@ static void delete_windows( RS_RTO_WIN ** wp );
 static  RS_RTO rs_rto_exp, rs_rto_test;
 static RS_RTO * rs;
 
-RS_RTO_WIN * prep_wins;
+static RS_RTO_WIN * prep_wins;
 static char const * err_prefix = "";
 
 
@@ -250,6 +249,8 @@ static char const * err_prefix = "";
 int
 rs_rto_init_hook( void )
 {
+    rs = &rs_rto_exp;
+
     rs->dev = NULL;
 
     rs->num_channels = 4;
@@ -273,6 +274,10 @@ rs_rto_init_hook( void )
 int
 rs_rto_test_hool( void )
 {
+    // Make a copy of the windows that may have been created during the
+    // preparations section - they will have to be copied over to rs_rto_exp
+    // each time a new experiment is started.
+
     copy_windows( &prep_wins, rs_rto_exp.w );
     delete_windows( &rs_rto_exp.w );
 
@@ -290,7 +295,7 @@ rs_rto_test_hool( void )
             rs_rto_test.chans[ i ].function = T_strdup( "" );
     }
 
-    // Make real copies of the windows set during preparations
+    // Make a copy of the windows created during preparations
 
     copy_windows( &rs_rto_test.w, prep_wins );
 
@@ -306,6 +311,9 @@ rs_rto_test_hool( void )
 int
 rs_rto_end_of_test_hool( void )
 {
+
+    // Delete all math function strings and all windows from the test run,
+    // they will never be used again
 
     for ( int i = Channel_Math1; i <= Channel_Math4; ++i )
         rs->chans[ i ].function = T_free( rs->chans[ i ].function );
@@ -323,12 +331,17 @@ rs_rto_end_of_test_hool( void )
 int
 rs_rto_exp_hook( void )
 {
-    if ( ! ( rs->dev = rs_rto_open( NETWORK_ADDRESS, LAN_LOG_LEVEL ) ) )
+    char *err;
+
+    if ( ! ( rs->dev = rs_rto_open( NETWORK_ADDRESS, LAN_LOG_LEVEL, &err ) ) )
     {
-        print( FATAL, "Failed to connect to device %s, see log file for "
-               "details.\n", DEVICE_NAME );
+        print( FATAL, "%s", err );
+        free( err );
         THROW( EXCEPTION );
     }
+
+    // Check that neither during the preparations nor the test phase
+    // any non-existing channels were used
 
     check( rs_rto_num_channels( rs->dev, &rs->num_channels ) );
 
@@ -346,7 +359,13 @@ rs_rto_exp_hook( void )
         }
     }
 
+    // Get a copy of the windows created during the preparations section
+
     copy_windows( &rs_rto_exp.w, prep_wins );
+
+    // Now set up the device the way it was requested during the preparations
+    // phase - extend the error message a bit to make clear that errors
+    // encountered are from this phase.
 
     err_prefix = "Durings device initialization: ";
 
@@ -366,7 +385,11 @@ rs_rto_exp_hook( void )
 int
 rs_rto_end_of_exp_hook( void )
 {
+    // Delete all windows used during the experiment
+
     delete_windows( &rs_rto_exp.w );
+
+    // Disconnect from the device
 
     if ( rs->dev )
     {
@@ -384,6 +407,17 @@ rs_rto_end_of_exp_hook( void )
 void
 rs_rto_exit_hook( void )
 {
+    // Make sure we're disconnected (in case the end-of-experiment hook
+    // never was run)
+
+    if ( rs->dev )
+    {
+               rs_rto_close( rs->dev )  ;
+        rs->dev = NULL;
+    }
+
+    // Delete all windows
+
     delete_windows( &rs_rto_test.w );
     delete_windows( &rs_rto_exp.w );
     delete_windows( &prep_wins );
@@ -503,7 +537,7 @@ digitizer_timebase( Var_T * v )
 {
     double timebase;
 
-    if ( v == NULL )
+    if ( ! v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
@@ -1099,18 +1133,6 @@ digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
     check( rs_rto_acq_run_single( rs->dev ) );
     return vars_push( INT_VAR, 1L );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *
-digitizer_is_running( Var_T * v  UNUSED_ARG )
-{
-    bool is_running;
-    check( rs_rto_acq_is_running( rs->dev, &is_running ) );
-    return vars_push( INT_VAR, is_running ? 1L : 0L );
 }
 
 
@@ -2222,7 +2244,7 @@ digitizer_trigger_delay( Var_T * v )
 Var_T *
 digitizer_define_window( Var_T * v )
 {
-    if ( v == NULL || v->next == NULL )
+    if ( ! v || ! v->next )
     {
         print( FATAL, "Missing argument(s), absolute window position "
                "(relative to trigger) and window width must be specified.\n" );
@@ -2246,7 +2268,7 @@ digitizer_define_window( Var_T * v )
 
     RS_RTO_WIN * w;
 
-    if ( rs->w == NULL )
+    if ( ! rs->w )
     {
         rs->w = w = T_malloc( sizeof *w );
     }
@@ -2274,7 +2296,7 @@ digitizer_define_window( Var_T * v )
 Var_T *
 digitizer_window_position( Var_T * v )
 {
-    if ( rs->w == NULL )
+    if ( ! rs->w )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -2304,7 +2326,7 @@ digitizer_window_position( Var_T * v )
 Var_T *
 digitizer_window_width( Var_T * v )
 {
-    if ( rs->w == NULL )
+    if ( ! rs->w )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -2342,7 +2364,7 @@ digitizer_window_width( Var_T * v )
 Var_T *
 digitizer_change_window( Var_T * v )
 {
-    if ( rs->w == NULL )
+    if ( ! rs->w )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -2350,7 +2372,7 @@ digitizer_change_window( Var_T * v )
 
     if ( ! v || ! v->next || ! v->next->next )
     {
-        print( FATAL, "Missing arguments.\n" );
+        print( FATAL, "Missing argument(s).\n" );
         THROW( EXCEPTION );
     }
 
@@ -3131,7 +3153,7 @@ static
 void
 init_prep_chans( void )
 {
-    for ( int i = 0; i < 9; i++ )
+    for ( int i = 0; i <= Channel_Math4; i++ )
     {
         RS_RTO_CHAN * ch = rs->chans + i;
 
@@ -3253,7 +3275,7 @@ static
 void
 init_exp_chans( void )
 {
-    for ( int i = 0; i < 9; i++ )
+    for ( int i = 0; i <= Channel_Math4; i++ )
     {
         RS_RTO_CHAN * ch = rs->chans + i;
 
@@ -3318,38 +3340,41 @@ init_exp_chans( void )
 
 static
 void
-copy_windows( RS_RTO_WIN ** dst,
-              RS_RTO_WIN  * src )
+copy_windows( RS_RTO_WIN       ** dst,
+              RS_RTO_WIN const  * volatile src )
 {
     if ( ! src )
         return;
 
     RS_RTO_WIN ** orig_dst = dst;
-    RS_RTO_WIN * cur;
+    CLOBBER_PROTECT( orig_dst );
 
-    while ( src )
+    TRY
     {
-        TRY
+        RS_RTO_WIN * cur;
+
+        while ( src )
         {
             cur = T_malloc( sizeof *cur );
-            TRY_SUCCESS;
+
+            if ( dst == orig_dst )
+                *dst = cur;
+            else
+                ( *dst )->next = cur;
+
+            *cur = *src;
+            cur->next = NULL;
+
+            dst = &cur->next;
+            src = src->next;
         }
-        OTHERWISE
-        {
-            delete_windows( orig_dst );
-            RETHROW;
-        }
 
-        if ( dst == orig_dst )
-            *dst = cur;
-        else
-            ( *dst )->next = cur;
-
-        *cur = *src;
-        cur->next = NULL;
-
-        dst = &cur->next;
-        src = src->next;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        delete_windows( orig_dst );
+        RETHROW;
     }
 }
 

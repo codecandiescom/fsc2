@@ -241,14 +241,17 @@ check_p( void const * p )
 
 rs_rto_t *
 rs_rto_open( char   const  * ip,
-			 int             log_level )
+			 int             log_level,
+             char         ** error_str )
 {
     try
     {
         return new RS_RTO_no_namespace( ip, log_level );
     }
-    catch ( std::exception )
+    catch ( std::exception const & e )
     {
+        if ( error_str )
+            *error_str = strdup( e.what( ) );
         return nullptr;
     }
 }
