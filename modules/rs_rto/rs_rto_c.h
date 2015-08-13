@@ -348,20 +348,20 @@ rs_rto_trigger_set_out_pulse_length( rs_rto_t * rs,
                                      double   * len );
 
 int
-rs_rto_out_pulse_delay( rs_rto_t * rs,
-                        double   * delay );
+rs_rto_trigger_out_pulse_delay( rs_rto_t * rs,
+                                double   * delay );
 
 int
-rs_rto_set_out_pulse_delay( rs_rto_t * rs,
-                            double   * delay );
+rs_rto_trigger_set_out_pulse_delay( rs_rto_t * rs,
+                                    double   * delay );
 
 int
-rs_rto_min_out_pulse_delay( rs_rto_t * rs,
-                            double   * min_delay );
+rs_rto_trigger_min_out_pulse_delay( rs_rto_t * rs,
+                                    double   * min_delay );
 
 int
-rs_rto_max_out_pulse_delay( rs_rto_t * rs,
-                            double   * max_delay );
+rs_rto_trigger_max_out_pulse_delay( rs_rto_t * rs,
+                                    double   * max_delay );
 
 int
 rs_rto_trigger_raise( rs_rto_t * rs );

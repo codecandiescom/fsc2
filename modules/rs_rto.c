@@ -72,6 +72,18 @@ typedef struct
 
     double position;
     double is_position;
+
+    bool out_pulse_state;
+    bool is_out_pulse_state;
+
+    double out_pulse_length;
+    bool is_out_pulse_length;
+
+    int out_pulse_polarity;
+    bool is_out_pulse_polarity;
+
+    double out_pulse_delay;
+    bool is_out_pulse_delay;
 } RS_RTO_TRIG;
 
 typedef struct
@@ -193,6 +205,11 @@ Var_T * digitizer_change_window( Var_T * v );
 Var_T * digitizer_check_window( Var_T * v );
 Var_T * digitizer_window_limits( Var_T * );
 Var_T * digitizer_math_function( Var_T * v );
+Var_T * digitizer_trigger_out_pulse_state( Var_T * v );
+Var_T * digitizer_trigger_out_pulse_length( Var_T * v );
+Var_T * digitizer_trigger_out_pulse_polarity( Var_T * v );
+Var_T * digitizer_trigger_out_pulse_delay( Var_T * v );
+Var_T * digitizer_trigger_out_pulse_delay_limits( Var_T * v );
 
 
 static char * pp( double t );
@@ -2520,6 +2537,302 @@ digitizer_math_function( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+Var_T *
+digitizer_trigger_out_pulse_state( Var_T * v )
+{
+    bool state;
+
+    if ( ! v )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! rs->trig.is_out_pulse_state )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( INT_VAR, rs->trig.out_pulse_state ? 1L : 0L );
+
+            case EXPERIMENT :
+                check( rs_rto_trigger_out_pulse_state( rs->dev, &state ) );
+                return vars_push( INT_VAR, state );
+        }
+
+    state = get_boolean( v );
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_out_pulse_state )
+        {
+            print( SEVERE, "Trigger out pulse state has already been set in "
+                   "propartions section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->trig.out_pulse_state ? 1L : 0L );
+        }
+
+        rs->trig.out_pulse_state = state;
+        rs->trig.is_out_pulse_state = true;
+    }
+    else
+          check( rs_rto_trigger_out_pulse_state( rs->dev, &state ) );
+
+    return vars_push( INT_VAR, state ? 1L : 0L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_out_pulse_length( Var_T * v )
+{
+    double len;
+
+    if ( ! v )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! rs->trig.is_out_pulse_length )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( FLOAT_VAR, rs->trig.out_pulse_length );
+
+            case EXPERIMENT :
+                check( rs_rto_trigger_out_pulse_length( rs->dev, &len ) );
+                return vars_push( FLOAT_VAR, len );
+        }
+
+    double req_len = get_double( v, "trigger out pulse length" );
+    too_many_arguments( v );
+
+    if ( req_len < 2e-9 || req_len >= 1.000002e-3 )
+    {
+        char *s1 = pp( req_len );
+
+        print( FATAL, "Requested trigger out pulse length of %ss is out of "
+               "range, absolute limits are 4 ns to 1 ms.\n", s1 );
+        T_free( s1 );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_out_pulse_length )
+        {
+            print( SEVERE, "Trigger out pulse length has already been set in "
+                   "propartions section, discarding new value.\n" );
+            return vars_push( FLOAT_VAR, rs->trig.out_pulse_length );
+        }
+        
+        rs->trig.out_pulse_length = req_len;
+        rs->trig.is_out_pulse_length = true;
+            return vars_push( FLOAT_VAR, req_len );
+    }
+
+    len = req_len;
+    check( rs_rto_trigger_set_out_pulse_length( rs->dev, &len ) );
+
+    if ( fabs( req_len - len ) / req_len > 0.01 )
+    {
+        char * s1 = pp( req_len );
+        char * s2 = pp( len );
+
+        print( WARN, "Trigger out pulse length had to be adjusted from %ss "
+               "to %ss.\n", s1, s2 );
+
+        T_free( s2 );
+        T_free( s1 );
+    }
+
+    return vars_push( FLOAT_VAR, len );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_out_pulse_polarity( Var_T * v )
+{
+    int pol;
+
+    if ( ! v )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! rs->trig.is_out_pulse_polarity )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( INT_VAR, rs->trig.out_pulse_polarity );
+
+            case EXPERIMENT :
+                check( rs_rto_trigger_out_pulse_polarity( rs->dev, &pol ) );
+                return vars_push( INT_VAR, pol );
+        }
+
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "POSITIVE" )
+             || ! strcasecmp( v->val.sptr, "POS" ) )
+            pol = Polarity_Positive;
+        else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
+                  || ! strcasecmp( v->val.sptr, "NEG" ) )
+            pol = Polarity_Negative;
+        else
+        {
+            print( FATAL, "Invalid trigger out pulse polarity: '%s'.\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        long req_pol = get_strict_long( v, "trigger out pulse polarity" );
+        if ( req_pol == 0 )
+            pol = Polarity_Negative;
+        else if ( req_pol == 1 )
+            pol = Polarity_Positive;
+        else
+        {
+            print( FATAL, "Invalid trigger out pulse polarity: %ld.\n",
+                   req_pol );
+            THROW( EXCEPTION );
+        }
+    }
+            
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_out_pulse_polarity )
+        {
+            print( SEVERE, "Trigger out pulse polarity has already been set in "
+                   "propartions section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->trig.out_pulse_polarity );
+        }
+        
+        rs->trig.out_pulse_polarity = pol;
+        rs->trig.is_out_pulse_polarity = true;
+        return vars_push( INT_VAR, ( long ) pol );
+    }
+
+    check( rs_rto_trigger_set_out_pulse_polarity( rs->dev, &pol ) );
+    return vars_push( INT_VAR, ( long ) pol );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_out_pulse_delay( Var_T * v )
+{
+    double delay;
+
+    if ( ! v )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! rs->trig.is_out_pulse_delay )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( FLOAT_VAR, rs->trig.out_pulse_delay );
+
+            case EXPERIMENT :
+                check( rs_rto_trigger_out_pulse_delay( rs->dev, &delay ) );
+                return vars_push( FLOAT_VAR, delay );
+        }
+
+    double req_delay = get_double( v, "trigger out pulse delay" );
+    too_many_arguments( v );
+
+    if ( req_delay <= 0 )
+    {
+        print( FATAL, "Invalid zero or negative trigger out pulse delay.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_out_pulse_delay )
+        {
+            print( SEVERE, "Trigger out pulse delay has already been set in "
+                   "propartions section, discarding new value.\n" );
+            return vars_push( FLOAT_VAR, rs->trig.out_pulse_delay );
+        }
+        
+        rs->trig.out_pulse_delay = req_delay;
+        rs->trig.is_out_pulse_delay = true;
+            return vars_push( FLOAT_VAR, req_delay );
+    }
+
+    delay = req_delay;
+    int ret = rs_rto_trigger_set_out_pulse_delay( rs->dev, &delay );
+    if ( ret != FSC3_SUCCESS )
+    {
+        if ( ret != FSC3_INVALID_ARG )
+            check( ret );
+
+        double min_delay, max_delay;
+
+        check( rs_rto_trigger_min_out_pulse_delay( rs->dev, &min_delay ) );
+        check( rs_rto_trigger_max_out_pulse_delay( rs->dev, &max_delay ) );
+
+        char * s1 = pp( req_delay );
+        char * s2 = pp( min_delay );
+        char * s3 = pp( max_delay );
+
+        print( FATAL, "Requested trigger out pulse delay of %ss is out of "
+               "range, must be between %ss and %ss.\n", s1, s2, s3 );
+
+        T_free( s3 );
+        T_free( s2 );
+        T_free( s1 );
+
+        THROW( EXCEPTION );
+    }
+
+    if ( fabs( req_delay - delay ) / req_delay > 0.01 )
+    {
+        char * s1 = pp( req_delay );
+        char * s2 = pp( delay );
+
+        print( WARN, "Trigger out pulse delay had to be adjusted from %ss "
+               "to %ss.\n", s1, s2 );
+
+        T_free( s2 );
+        T_free( s1 );
+    }
+
+    return vars_push( FLOAT_VAR, delay );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_out_pulse_delay_limits( Var_T * v  UNUSED_ARG )
+{
+    double limits[ 2 ] = { 8e-7, 1 };
+
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        check( rs_rto_trigger_min_out_pulse_delay( rs->dev, limits ) );
+        check( rs_rto_trigger_max_out_pulse_delay( rs->dev, limits + 1 ) );
+    }
+
+    return vars_push( FLOAT_ARR, limits, 2 );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 static
 char *
 pp( double t )
@@ -3143,6 +3456,18 @@ init_prep_trig( void )
 
     rs->trig.position = 5.0e-8;
     rs->trig.is_position = false;
+
+    rs->trig.out_pulse_state = false;
+    rs->trig.is_out_pulse_state = false;
+
+    rs->trig.out_pulse_length = 1e-7;
+    rs->trig.is_out_pulse_length = false;
+
+    rs->trig.out_pulse_polarity = Polarity_Positive;
+    rs->trig.is_out_pulse_polarity = false;
+
+    rs->trig.out_pulse_delay = 8e-7;
+    rs->trig.is_out_pulse_delay = false;
 }
 
 
@@ -3264,6 +3589,30 @@ init_exp_trig( void )
     {
         double pos = rs->trig.position;
         check( rs_rto_trigger_set_position( rs->dev, &pos ) );
+    }
+
+    if ( rs->trig.is_out_pulse_state )
+    {
+        bool state = rs->trig.out_pulse_state;
+        check( rs_rto_trigger_set_out_pulse_state( rs->dev, &state ) );
+    }
+
+    if ( rs->trig.is_out_pulse_length )
+    {
+        double len = rs->trig.out_pulse_length;
+        check( rs_rto_trigger_set_out_pulse_length( rs->dev, &len ) );
+    }
+
+    if ( rs->trig.is_out_pulse_polarity )
+    {
+        int pol = rs->trig.out_pulse_polarity;
+        check( rs_rto_trigger_set_out_pulse_polarity( rs->dev, &pol ) );
+    }
+
+    if ( rs->trig.is_out_pulse_delay )
+    {
+        double delay = rs->trig.out_pulse_delay;
+        check( rs_rto_trigger_set_out_pulse_delay( rs->dev, &delay ) );
     }
 }
 

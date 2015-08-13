@@ -262,6 +262,11 @@ digitizer_ext_channel_filter, -1, ALL;
 digitizer_check_window, 1, EXP;
 digitizer_window_limits, 0, EXP;
 digitizer_math_function, -1, ALL;
+digitizer_trigger_out_pulse_state, -1, ALL;
+digitizer_trigger_out_pulse_length, -1, ALL;
+digitizer_trigger_out_pulse_polarity, -1, ALL;
+digitizer_trigger_out_pulse_delay, -1, ALL;
+digitizer_trigger_out_pulse_delay_limits, 0, EXP;
 
 
 /* The following functions will only remain here until I got some time to
