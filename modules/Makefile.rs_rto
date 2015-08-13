@@ -1,0 +1,35 @@
+# 
+#  Copyright (C) 1999-2015 Jens Thoms Toerring
+# 
+#  This file is part of fsc2.
+# 
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3, or (at your option)
+#  any later version.
+# 
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+# 
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+
+
+INCLUDES   += -I$(mdir)/rs_rto
+LIBS       += -lrs_rto_c
+
+export        # export all symbols to the sub-makefiles
+
+.SUFFIXES:
+.PHONY: all install clean
+
+all: rs_rto.fsc2_so
+
+rs_rto.fsc2_so: rs_rto.c
+	$(MAKE) -C rs_rto
+	$(CC) $(CFLAGS) $(LFLAGS) -o $(^:.c=.o) $^ $(INCLUDES)
+	$(CC) $(CFLAGS) $(LFLAGS) $(^:.c=.o) -o $@ -L$(mdir)/rs_rto $(LIBS)
+

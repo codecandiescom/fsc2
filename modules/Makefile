@@ -239,7 +239,7 @@ all:
 	$(MAKE) -C .. modules
 
 bmwb: $(bmwb_src) bmwb.h bmwb_rsc.h
-	$(CC) -ggdb $(CFLAGS) -o $@ $(bmwb_src) $(INCLUDES) $(LIBS) -pthread
+	$(CC) $(CFLAGS) -o $@ $(bmwb_src) $(INCLUDES) $(LIBS) -pthread
 
 list_simp:
 	@echo $(simp_modules)
@@ -249,6 +249,7 @@ list_comp:
 
 modules:
 	$(MAKE) $(vxi11_list) vxi11.h
+	$(MAKE) -f Makefile.rs_rto
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \

@@ -795,7 +795,7 @@ vars_make( Var_Type_T type,
  * Note that sub-matrices do not go onto the stack but into the variables
  * list (but without a name attached to them and with the IS_TEMP flag
  * being set) - this is needed to keep the convention working that an EDL
- * functions gets one variable one the stack for each of its arguments.
+ * functions gets one variable on the stack for each of its arguments.
  *------------------------------------------------------------------------*/
 
 static void

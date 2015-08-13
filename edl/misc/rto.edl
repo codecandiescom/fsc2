@@ -1,0 +1,10 @@
+DEVICES:
+
+rs_rto;
+
+PREPARATIONS:
+
+digitizer_timebase( 1e-7 );
+
+EXPERIMENT:
+

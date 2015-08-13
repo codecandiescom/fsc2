@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -19,64 +19,22 @@
 
 
 #include "fsc2_module.h"
+#include "rs_rto_c.h"
+#include "lan.h"
 #include "rs_rto.conf"
-#include "rs_rto/rs_rto.h"
 
 
-int rs_rto_init_hook( void );
-int rs_rto_test_hool( void );
-int rs_rto_end_of_test_hool( void );
-
-Var_T * digitizer_name( Var_T * v );
-Var_T * digitizer_lock_keyboard( Var_T * v );
-Var_T * digitizer_display_enable( Var_T * v );
-Var_T * digitizer_run( Var_T * v );
-Var_T * digitizer_stop( Var_T * v );
-Var_T * digitizer_timebase( Var_T * v );
-Var_T * digitizer_timebase_limits( Var_T * v );
-Var_T * digitizer_timebase_const_resolution_limits( Var_T * v );
-Var_T * digitizer_time_per_point( Var_T * v );
-Var_T * digitizer_time_per_point_limits( Var_T * v );
-Var_T * digitizer_record_length( Var_T * v );
-Var_T * digitizer_record_length_limits( Var_T * v );
-Var_T * digitizer_acquisition_mode( Var_T * v );
-Var_T * digitizer_num_averages( Var_T * v );
-Var_T * digitizer_max_num_averages( Var_T * v );
-Var_T * digitizer_num_segments( Var_T * v );
-Var_T * digitizer_max_num_segments( Var_T * v );
-Var_T * digitizer_start_acquisition( Car_T * v );
-Var_T * digitizer_is_running( Var_T * v );
-Var_T * digitizer_channel_state( Var_T * v );
-Var_T * digitizer_sensitivity( Var_T * v )
-Var_T * digitizer_offset( Var_T * v );
-Var_T * digitizer_get_curve( Var_T * v );
-Var_T * digitizer_channel_position( Var_T * v );
-Var_T * digitizer_coupling( Var_T * v );
-Var_T * digitizer_bandwidth_limiter( Var_T * v );
-Var_T * digitizer_ext_channel_filter( Var_T * v );
-Var_T * digitizer_trigger_channel( Var_T * v );
-Var_T * digitizer_trigger_level( Var_T * v );
-Var_T * digitizer_trigger_slope( Var_T * v );
-Var_T * digitizer_trigger_mode( Var_T * v );
-Var_T * digitizer_trigger_delay( Var_T * v );
-Var_T * digitizer_define_window( Var_T * v );
-Var_T * digitizer_window_position( Var_T * v );
-Var_T * digitizer_window_width( Var_T * v );
-Var_T * digitizer_window_width( Var_T * v );
-Var_T * digitizer_check_window( Var_T * v );
-Var_T * digitizer_window_limits( Var_T * );
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
 
 
-static char * pp( double t );
-static int fsc2_ch_2_rto_ch( long ch );
-static long rto_ch_2_fsc2_ch( int ch );
-static void check( int err_code );
-static long to_ext_filter( int ft,
-						   int fco );
-static void from_ext_filter( long   e,
-							 int  * ft,
-							 int  * fco );
-static RS_RTO_WIN * get_window( Var_T * v );
+
+// Some estimates for the overhead for downloading a data set
+// or a segment and the data transfer rate.
+
+#define CURVE_DELAY   0.03     // 30 ms
+#define SEGMENT_DELAY 0.08     // 80 ms
+#define TRANSFER_RATE 10e6     // 10 MB/s
 
 
 enum Ext_Filter
@@ -90,33 +48,33 @@ enum Ext_Filter
 	Ext_Filter_High_Pass_50MHz
 };
 
-struct RS_RTO_WIN
+typedef struct RS_RTO_WIN
 {
     double start;
     double end;
     long num;
     struct RS_RTO_WIN * next;
-};
+}  RS_RTO_WIN;
 
-struct RS_RTO_TRIG
+typedef struct
 {
     int source;
     bool is_source;
 
     double level[ 5 ];
-    double is_level[ 5 ];
+    bool is_level[ 5 ];
 
     int slope[ 5 ];
-    bool slope[ 5 ];
+    bool is_slope[ 5 ];
 
     int mode;
     bool is_mode;
 
     double position;
     double is_position;
-};
+} RS_RTO_TRIG;
 
-struct RS_RTO_CHAN
+typedef struct
 {
     bool in_use;
 
@@ -137,9 +95,14 @@ struct RS_RTO_CHAN
 
     int bandwidth;
     bool is_bandwidth;
-};
 
-struct RS_RTO_ACQ
+    int ext_filter;
+    bool is_ext_filter;
+
+    char * function;
+} RS_RTO_CHAN;
+
+typedef struct
 {
     double timebase;
     bool is_timebase;
@@ -150,22 +113,26 @@ struct RS_RTO_ACQ
     long record_length;
     bool is_record_length;
 
-    int acq_mode;
-    bool is_acq_mode;
+    int mode;
+    bool is_mode;
 
     long num_averages;
     bool is_num_averages;
 
     long num_segments;
     bool is_num_segments;
-}
+}  RS_RTO_ACQ;
 
 
-struct RS_RTO
+typedef struct
 {
-    rs_rto_t dev;
+    rs_rto_t * dev;
 
-    int num_chans;
+    int num_channels;
+
+    bool keyboard_locked;
+
+    bool display_enabled;
 
     RS_RTO_ACQ acq;
 
@@ -176,10 +143,105 @@ struct RS_RTO
     RS_RTO_WIN * w;
     long num_windows;
 
-} rs_rto_exp, rs_rto_test;
+}  RS_RTO;
 
 
+int rs_rto_init_hook( void );
+int rs_rto_test_hool( void );
+int rs_rto_end_of_test_hool( void );
+int rs_rto_exp_hook( void );
+int rs_rto_end_of_exp_hook( void );
+void rs_rto_exit_hook( void );
+
+Var_T * digitizer_name( Var_T * v );
+Var_T * digitizer_lock_keyboard( Var_T * v );
+Var_T * digitizer_display_enable( Var_T * v );
+Var_T * digitizer_run( Var_T * v );
+Var_T * digitizer_stop( Var_T * v );
+Var_T * digitizer_timebase( Var_T * v );
+Var_T * digitizer_timebase_limits( Var_T * v );
+Var_T * digitizer_timebase_const_resolution_limits( Var_T * v );
+Var_T * digitizer_time_per_point( Var_T * v );
+Var_T * digitizer_time_per_point_limits( Var_T * v );
+Var_T * digitizer_record_length( Var_T * v );
+Var_T * digitizer_record_length_limits( Var_T * v );
+Var_T * digitizer_acquisition_mode( Var_T * v );
+Var_T * digitizer_num_averages( Var_T * v );
+Var_T * digitizer_max_num_averages( Var_T * v );
+Var_T * digitizer_num_segments( Var_T * v );
+Var_T * digitizer_max_num_segments( Var_T * v );
+Var_T * digitizer_start_acquisition( Var_T * v );
+Var_T * digitizer_is_running( Var_T * v );
+Var_T * digitizer_channel_state( Var_T * v );
+Var_T * digitizer_sensitivity( Var_T * v );
+Var_T * digitizer_offset( Var_T * v );
+Var_T * digitizer_get_curve( Var_T * v );
+Var_T * digitizer_channel_position( Var_T * v );
+Var_T * digitizer_coupling( Var_T * v );
+Var_T * digitizer_bandwidth_limiter( Var_T * v );
+Var_T * digitizer_ext_channel_filter( Var_T * v );
+Var_T * digitizer_get_area( Var_T * v );
+Var_T * digitizer_get_amplitude( Var_T * v );
+Var_T * digitizer_trigger_channel( Var_T * v );
+Var_T * digitizer_trigger_level( Var_T * v );
+Var_T * digitizer_trigger_slope( Var_T * v );
+Var_T * digitizer_trigger_mode( Var_T * v );
+Var_T * digitizer_trigger_delay( Var_T * v );
+Var_T * digitizer_define_window( Var_T * v );
+Var_T * digitizer_window_position( Var_T * v );
+Var_T * digitizer_window_width( Var_T * v );
+Var_T * digitizer_change_window( Var_T * v );
+Var_T * digitizer_check_window( Var_T * v );
+Var_T * digitizer_window_limits( Var_T * );
+Var_T * digitizer_math_function( Var_T * v );
+
+
+static char * pp( double t );
+static int fsc2_ch_2_rto_ch( long ch );
+static long rto_ch_2_fsc2_ch( int ch );
+static void check( int err_code );
+static long to_ext_filter( int ft,
+						   int fco );
+static void from_ext_filter( long   e,
+							 int  * ft,
+							 int  * fco );
+static RS_RTO_WIN * get_window( Var_T * v );
+static RS_RTO_WIN * get_window_from_long( long wid );
+static void get_waveform( int           rch,
+                          RS_RTO_WIN  * w,
+                          double     ** data,
+                          size_t      * length );
+static Var_T * get_calculated_curve_data( Var_T  * v,
+                                          double   ( handler )( double *,
+                                                                size_t ) );
+static Var_T * get_subcurve_data( int rch,
+                                  RS_RTO_WIN ** wins,
+                                  long          win_count,
+                                  double        ( *handler )( double *,
+                                                              size_t ) );
+static double area( double * data,
+                    size_t   length );
+static double amplitude( double * data,
+                         size_t   length );
+static void init_prep_acq( void );
+static void init_prep_trig( void );
+static void init_prep_chans( void );
+static void init_exp_acq( void );
+static void init_exp_trig( void );
+static void init_exp_chans( void );
+static
+void copy_windows( RS_RTO_WIN ** dst,
+                   RS_RTO_WIN  * src );
+static void delete_windows( RS_RTO_WIN ** wp );
+
+
+
+
+static  RS_RTO rs_rto_exp, rs_rto_test;
 static RS_RTO * rs;
+
+RS_RTO_WIN * prep_wins;
+static char const * err_prefix = "";
 
 
 /*----------------------------------------------------*
@@ -190,45 +252,16 @@ rs_rto_init_hook( void )
 {
     rs->dev = NULL;
 
-    rs->num_chans = 4;
+    rs->num_channels = 4;
 
-    rs = rs_rto_exp;
-
-    rs->acq.is_timebase = false;
-    rs->acq.timebase = 1e-7;
-
-    rs->acq.is_resolution = false;
-    rs->acq.resolution = 1e-10;
-
-    rs->acq.is_record_length = false;
-    rs->acq.record_length = 10000;
-
-    rs->acq.is_acq_mode = false;
-    rs->acq.acq_mode = Acq_Mode_Normal;
-
-    rs->acq.is_num_averages = false;
-    rs->acq.num_averages = 10;
-
-    rs->acq.is_num_segments = false;
-    rs->acq.num_segments = 10;
-
-    for ( int i = 0; i < 9; i++ )
-    {
-        RS_RTO_CHAN * ch = rs->chans + i;
-
-        ch->in_use = false;
-
-        ch->state = false;
-        ch->is_state = false;
-
-        ->scale = 1;
-        ->is_scale = false;
-    }
-
-    rs->chans[ 1 ].state = true;
+    rs = &rs_rto_exp;
 
     rs->w = NULL;
     rs->num_windows = 0;
+
+    init_prep_acq( );
+    init_prep_trig( );
+    init_prep_chans( );
 
     return 1;
 }
@@ -240,44 +273,28 @@ rs_rto_init_hook( void )
 int
 rs_rto_test_hool( void )
 {
+    copy_windows( &prep_wins, rs_rto_exp.w );
+    delete_windows( &rs_rto_exp.w );
+
     rs_rto_test = rs_rto_exp;
 
-    if ( rs->w )
+    // Make sure the strings in the test structure are real copies of
+    // the strings in the other
+
+    for ( int i = Channel_Math1; i < Channel_Math4; i++ )
     {
-        rs_rto_test.w = NULL;
-
-        TRY
-        {
-            rs_rto_test.w = T_malloc( rs->num_windows * sizeof *rs->w );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            RS_RTO_WIN * w = rs->w;
-            RS_RTO_WIN * nw;
-            while ( rs->w )
-            {
-                nw = rs->w->next;
-                T_free( rs->w );
-                rs->w = nw;
-            }
-
-            RETHROW;
-        }
-
-        RS_RTO_WIN * w  = rs->w;
-        RS_REO_WIN * wt = rs_rto_test.w;
-        while ( w )
-        {
-            *wt = *w;
-            if ( w-next )
-                wt->next = wt + 1;
-            w = w->next;
-            wt = wt->next;
-        }
+        if ( rs_rto_test.chans[ i ].function )
+            rs_rto_test.chans[ i ].function =
+                                T_strdup( rs_rto_test.chans[ i ].function );
+        else
+            rs_rto_test.chans[ i ].function = T_strdup( "" );
     }
 
-    rs = rs_rto_test;
+    // Make real copies of the windows set during preparations
+
+    copy_windows( &rs_rto_test.w, prep_wins );
+
+    rs = &rs_rto_test;
 
     return 1;
 }
@@ -289,10 +306,88 @@ rs_rto_test_hool( void )
 int
 rs_rto_end_of_test_hool( void )
 {
-    rs = rs_rto_exp;
+
+    for ( int i = Channel_Math1; i <= Channel_Math4; ++i )
+        rs->chans[ i ].function = T_free( rs->chans[ i ].function );
+
+    delete_windows( &rs_rto_test.w );
+
+    rs = &rs_rto_exp;
     return 1;
 }
     
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+int
+rs_rto_exp_hook( void )
+{
+    if ( ! ( rs->dev = rs_rto_open( NETWORK_ADDRESS, LAN_LOG_LEVEL ) ) )
+    {
+        print( FATAL, "Failed to connect to device %s, see log file for "
+               "details.\n", DEVICE_NAME );
+        THROW( EXCEPTION );
+    }
+
+    check( rs_rto_num_channels( rs->dev, &rs->num_channels ) );
+
+    if ( rs->num_channels != 4 )
+    {
+        if (    rs->chans[ Channel_Ch3 ].in_use
+             || rs_rto_test.chans[ Channel_Ch3 ].in_use
+             || rs->chans[ Channel_Ch4 ].in_use
+             || rs_rto_test.chans[ Channel_Ch4 ].in_use )
+        {
+            print( FATAL, "EDL script uses measirement channels 3 or 4, but "
+                   "the device has only 2.\n" );
+            
+            THROW( EXCEPTION );
+        }
+    }
+
+    copy_windows( &rs_rto_exp.w, prep_wins );
+
+    err_prefix = "Durings device initialization: ";
+
+    init_exp_acq( );
+    init_exp_trig( );
+    init_exp_chans( );
+
+    err_prefix = "";
+
+    return 1;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+int
+rs_rto_end_of_exp_hook( void )
+{
+    delete_windows( &rs_rto_exp.w );
+
+    if ( rs->dev )
+    {
+        check( rs_rto_close( rs->dev ) );
+        rs->dev = NULL;
+    }
+
+    return 1;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+void
+rs_rto_exit_hook( void )
+{
+    delete_windows( &rs_rto_test.w );
+    delete_windows( &rs_rto_exp.w );
+    delete_windows( &prep_wins );
+}
 
 
 /*----------------------------------------------------*
@@ -303,7 +398,6 @@ digitizer_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
-
 
 
 /*----------------------------------------------------*
@@ -317,7 +411,7 @@ digitizer_lock_keyboard( Var_T * v )
     if ( ! v )
     {
         if ( FSC2_MODE == TEST )
-            return vars_push( INT_VAR, rs->keybard_locked );
+            return vars_push( INT_VAR, rs->keyboard_locked ? 1L : 0L );
         else
         {
             check( rs_rto_keyboard_locked( rs->dev, &locked ) );
@@ -325,7 +419,7 @@ digitizer_lock_keyboard( Var_T * v )
         }
     }
 
-    locked = get_booled( v );
+    locked = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == TEST )
@@ -350,12 +444,12 @@ digitizer_display_enable( Var_T * v )
             return vars_push( INT_VAR, rs->display_enabled );
         else
         {
-            check( rs_rto_dsisplay_enabled( rs->dev, &enabled ) );
+            check( rs_rto_display_enabled( rs->dev, &enabled ) );
             return vars_push( INT_VAR, enabled ? 1L : 0L );
         }
     }
 
-    enabled = get_booled( v );
+    enabled = get_boolean( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE == TEST )
@@ -421,7 +515,7 @@ digitizer_timebase( Var_T * v )
                 return vars_push( FLOAT_VAR, rs->acq.timebase );
 
             case EXPERIMENT :
-                check( rs_rto_acq_get_timebase( rs_rto.dev, &timebase ) );
+                check( rs_rto_acq_timebase( rs->dev, &timebase ) );
                 return vars_push( FLOAT_VAR, timebase );
         }
 
@@ -430,16 +524,22 @@ digitizer_timebase( Var_T * v )
 
     if ( timebase <= 0 )
     {
-        print( FATAL, "Invalid zero or negative time base: %s.\n",
-               lecroy_wr_ptime( timebase ) );
+        print( FATAL, "Invalid zero or negative time base: %s.\n" );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->acq.is_timebase )
+        {
+            print( SEVERE, "Time base has already been set in preparations "
+                   "section, discarding new value.\n" );
+            return vars_push( FLOAT_VAR, rs->acq.timebase );
+        }
+
         rs->acq.timebase = timebase;
         rs->acq.is_timebase = true;
-        return vars_push( FLOAT_VAR, rs->timebase = timebase );
+        return vars_push( FLOAT_VAR, rs->acq.timebase = timebase );
     }
 
     double req_timebase = timebase;
@@ -452,15 +552,15 @@ digitizer_timebase( Var_T * v )
         double min_tb;
         double max_tb;
 
-        check( rs_rto_get_min_timebase( rs->dev, &min_tb ) );
-        check( rs_rto_get_max_timebase( rs->dev, &max_tb ) );
+        check( rs_rto_acq_shortest_timebase( rs->dev, &min_tb ) );
+        check( rs_rto_acq_longest_timebase( rs->dev, &max_tb ) );
 
         char * s1 = pp( req_timebase ); 
         char * s2 = pp( min_tb ); 
         char * s3 = pp( max_tb ); 
 
         print( FATAL, "Timebase of %ss out of range, must be between %ss and "
-               "%ss.\n", );
+               "%ss.\n", s1, s2, s3 );
 
         T_free( s3 );
         T_free( s2 );
@@ -469,7 +569,7 @@ digitizer_timebase( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( timebase - req_timebase ) ? req_timebase > 0.01 )
+    if ( fabs( timebase - req_timebase ) / req_timebase > 0.01 )
     {
         char * s1 = pp( req_timebase ); 
         char * s2 = pp( timebase ); 
@@ -495,11 +595,11 @@ digitizer_timebase_limits( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        check( rs_rto_acq_shortest_timebase( rs_rto.dev, limits ) );
-        check( rs_rto_acq_longest_timebase( rs_rto.dev, limits + 1 ) );
+        check( rs_rto_acq_shortest_timebase( rs->dev, limits ) );
+        check( rs_rto_acq_longest_timebase( rs->dev, limits + 1 ) );
     }
 
-    return vars_push( FLOAT_ARRAY, limits, 2 );
+    return vars_push( FLOAT_ARR, limits, 2 );
 }
 
 
@@ -513,13 +613,13 @@ digitizer_timebase_const_resolution_limits( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        check( rs_rto_acq_shortest_timebase_const_resolution( rs_rto.dev,
+        check( rs_rto_acq_shortest_timebase_const_resolution( rs->dev,
                                                               limits ) );
-        check( rs_rto_acq_longest_timebase_const_resolution( rs_rto.dev,
+        check( rs_rto_acq_longest_timebase_const_resolution( rs->dev,
                                                              limits + 1 ) );
     }
 
-    return vars_push( FLOAT_ARRAY, limits, 2 );
+    return vars_push( FLOAT_ARR, limits, 2 );
 }
 
 
@@ -543,7 +643,7 @@ digitizer_time_per_point( Var_T * v )
                 return vars_push( FLOAT_VAR, rs->acq.resolution );
 
             default :
-                check( rs_rto_acq_resoluton( rs->dev, &resolution ) );
+                check( rs_rto_acq_resolution( rs->dev, &resolution ) );
                 return vars_push( FLOAT_VAR, resolution );
         }
 
@@ -587,15 +687,15 @@ digitizer_time_per_point( Var_T * v )
         double min_res;
         double max_res;
 
-        check( rs_rto_get_lowest_resolution( rs->dev, &min_res ) );
-        check( rs_rto_get_highets_resolution( rs->dev, &max_res ) );
+        check( rs_rto_acq_lowest_resolution( rs->dev, &min_res ) );
+        check( rs_rto_acq_highest_resolution( rs->dev, &max_res ) );
 
         char * s1 = pp( req_resolution ); 
         char * s2 = pp( min_res ); 
         char * s3 = pp( max_res ); 
 
         print( FATAL, "Time per point of %ss out of range, must be between "
-               "%ss and %ss.\n", );
+               "%ss and %ss.\n", s1, s2, s3 );
 
         T_free( s3 );
         T_free( s2 );
@@ -604,7 +704,7 @@ digitizer_time_per_point( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( resolution - req_resolution ) ? req_timebase > 0.01 )
+    if ( fabs( resolution - req_resolution ) / req_resolution > 0.01 )
     {
         char * s1 = pp( req_resolution ); 
         char * s2 = pp( resolution ); 
@@ -615,8 +715,6 @@ digitizer_time_per_point( Var_T * v )
         T_free( s2 );
         T_free( s1 );
     }
-
-    rs->resolution = resolution;
 
     return vars_push( FLOAT_VAR, resolution );
 }
@@ -632,11 +730,11 @@ digitizer_time_per_point_limits( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        check( rs_rto_acq_lowest_resolutio( rs_rto.dev, limits ) );
-        check( rs_rto_acq_highest_resolution( rs_rto.dev, limits + 1 ) );
+        check( rs_rto_acq_lowest_resolution( rs->dev, limits ) );
+        check( rs_rto_acq_highest_resolution( rs->dev, limits + 1 ) );
     }
 
-    return vars_push( FLOAT_ARRAY, limits, 2 );
+    return vars_push( FLOAT_ARR, limits, 2 );
 }
 
 
@@ -686,6 +784,13 @@ digitizer_record_length( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->acq.is_record_length )
+        {
+            print( SEVERE, "Record length has already been set in "
+                   "preparations section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->acq.record_length );
+        }
+
         rs->acq.record_length = record_length;
         rs->acq.is_record_length = true;
         return vars_push( FLOAT_VAR, record_length );
@@ -697,11 +802,11 @@ digitizer_record_length( Var_T * v )
         if ( ret != FSC3_INVALID_ARG )
             check( ret );
 
-        double min_rec_len;
-        double max_rec_len;
+        unsigned long min_rec_len;
+        unsigned long max_rec_len;
 
-        check( rs_rto_get_min_record_length( rs->dev, &min_rec_len ) );
-        check( rs_rto_get_max_record_length( rs->dev, &max_re_len ) );
+        check( rs_rto_acq_min_record_length( rs->dev, &min_rec_len ) );
+        check( rs_rto_acq_max_record_length( rs->dev, &max_rec_len ) );
 
         print( FATAL, "Requested record length of %ld out of range, must "
                "be between %lu and %lu.\n",
@@ -713,9 +818,7 @@ digitizer_record_length( Var_T * v )
         print( WARN, "Record length had to be adjusted fron %ld to %lu.\n",
                record_length, rec_len );
 
-    rs->record_length = rec_len;
-
-    return vars_push( INT_VAR, rs->record_length );
+    return vars_push( INT_VAR, rec_len );
 }
     
 
@@ -725,15 +828,15 @@ digitizer_record_length( Var_T * v )
 Var_T *
 digitizer_record_length_limits( Var_T * v  UNUSED_ARG )
 {
-    double long[ 2 ] = { 1000, 100000000 };
+    unsigned long limits[ 2 ] = { 1000, 100000000 };
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        check( rs_rto_acq_min_record_length( rs_rto.dev, limits ) );
-        check( rs_rto_acq_max_record_length( rs_rto.dev, limits + 1 ) );
+        check( rs_rto_acq_min_record_length( rs->dev, limits ) );
+        check( rs_rto_acq_max_record_length( rs->dev, limits + 1 ) );
     }
 
-    return vars_push( FLOAT_ARRAY, limits, 2 );
+    return vars_push( INT_ARR, limits, 2 );
 }
 
 
@@ -756,7 +859,7 @@ digitizer_acquisition_mode( Var_T * v )
                 return vars_push( INT_VAR, rs->acq.mode );
 
             default :
-                check( rs_rto_acq_node( rs->dev, &mode ) );
+                check( rs_rto_acq_mode( rs->dev, &mode ) );
                 return vars_push( FLOAT_VAR, ( long ) mode );
         }
 
@@ -854,13 +957,20 @@ digitizer_num_averages( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->acq.is_num_averages )
+        {
+            print( SEVERE, "Number of averages has alredy been set "
+                   "in preparations section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->acq.num_averages );
+        }
+
         rs->acq.num_averages = num_averages;
         rs->acq.is_num_averages = true;
         return vars_push( INT_VAR, num_averages );
     }
 
     n_avg = num_averages;
-    int ret = rs_rto_acq_set_sverage_count( rs->dev, &n_avg );
+    int ret = rs_rto_acq_set_average_count( rs->dev, &n_avg );
     if ( ret != FSC3_SUCCESS )
     {
         if ( ret != FSC3_INVALID_ARG )
@@ -869,7 +979,7 @@ digitizer_num_averages( Var_T * v )
         unsigned long max_avg;
         check( rs_rto_acq_max_average_count( rs->dev, &max_avg ) );
         print( FATAL, "Requested number of averagess %ld out of range, must "
-               "be between 1 and %lu.\n", num_averagess max_avg );
+               "be between 1 and %lu.\n", num_averages, max_avg );
         THROW( EXCEPTION );
     }
 
@@ -954,7 +1064,7 @@ digitizer_num_segments( Var_T * v )
         unsigned long max_seg;
         check( rs_rto_acq_max_segment_count( rs->dev, &max_seg ) );
         print( FATAL, "Requested number of segments %ld out of range, must "
-               "be between 1 and %lu.\n", num_segments max_seg );
+               "be between 1 and %lu.\n", num_segments, max_seg );
         THROW( EXCEPTION );
     }
 
@@ -987,7 +1097,7 @@ digitizer_max_num_segments( Var_T * v  UNUSED_ARG )
 Var_T *
 digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
-    check( rs_rto_run_single( rs->dev ) );
+    check( rs_rto_acq_run_single( rs->dev ) );
     return vars_push( INT_VAR, 1L );
 }
 
@@ -999,7 +1109,7 @@ Var_T *
 digitizer_is_running( Var_T * v  UNUSED_ARG )
 {
     bool is_running;
-    check( rs_rto_is_running( rs->dev, &is_running ) );
+    check( rs_rto_acq_is_running( rs->dev, &is_running ) );
     return vars_push( INT_VAR, is_running ? 1L : 0L );
 }
 
@@ -1029,7 +1139,6 @@ digitizer_channel_state( Var_T * v )
     }
 
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     bool state;
 
@@ -1080,7 +1189,6 @@ digitizer_sensitivity( Var_T * v )
     v = vars_pop( v );
 
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch == Channel_Ext || rch >= Channel_Math1 )
     {
@@ -1118,6 +1226,14 @@ digitizer_sensitivity( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->chans[ rch ].is_scale )
+        {
+            print( SEVERE, "Sensitivity of channel %s has alredy been set "
+                   "in preparations section, discarding new value.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( FLOAT_VAR, rs->chans[ rch ].scale );
+        }
+
         rs->chans[ rch ].scale = scale;
         rs->chans[ rch ].is_scale = true;
         return vars_push( FLOAT_VAR, scale );
@@ -1125,12 +1241,12 @@ digitizer_sensitivity( Var_T * v )
 
     double req_scale = scale;
     int ret = rs_rto_channel_set_scale( rs->dev, rch, &scale );
-    if ( ret != FSC3_SUCCESS );
+    if ( ret != FSC3_SUCCESS )
     {
         if ( ret != FSC3_INVALID_ARG )
             check( ret );
 
-        doube min_scale, max_scale;
+        double min_scale, max_scale;
         check( rs_rto_channel_min_scale( rs->dev, rch, &min_scale ) );
         check( rs_rto_channel_min_scale( rs->dev, rch, &max_scale ) );
 
@@ -1179,7 +1295,6 @@ digitizer_offset( Var_T * v )
     v = vars_pop( v );
 
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch == Channel_Ext || rch >= Channel_Math1 )
     {
@@ -1218,12 +1333,12 @@ digitizer_offset( Var_T * v )
 
     double req_offset = offset;
     int ret = rs_rto_channel_set_offset( rs->dev, rch, &offset );
-    if ( ret != FSC3_SUCCESS );
+    if ( ret != FSC3_SUCCESS )
     {
         if ( ret != FSC3_INVALID_ARG )
             check( ret );
 
-        doube min_offset, max_offset;
+        double min_offset, max_offset;
         check( rs_rto_channel_min_offset( rs->dev, rch, &min_offset ) );
         check( rs_rto_channel_min_offset( rs->dev, rch, &max_offset ) );
 
@@ -1272,7 +1387,6 @@ digitizer_channel_position( Var_T * v )
     v = vars_pop( v );
 
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch == Channel_Ext || rch >= Channel_Math1 )
     {
@@ -1302,7 +1416,7 @@ digitizer_channel_position( Var_T * v )
     position = get_double( v, "channel position" );
     too_many_arguments( v );
 
-    if ( fabs( pos ) >= 5.005 )
+    if ( fabs( position ) >= 5.005 )
     {
         print( FATAL, "Requested channel position of %.2f div out of range, "
                "must be within +/- 5 div.\n", position );
@@ -1341,9 +1455,7 @@ digitizer_coupling( Var_T * v )
 
     long fch = get_strict_long( v, "channel number" );
     v = vars_pop( v );
-
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch >= Channel_Math1 )
     {
@@ -1402,13 +1514,22 @@ digitizer_coupling( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->chans[ rch ].is_coupling )
+        {
+            print( SEVERE, "Coupling of channel %s has alredy been set "
+                   "in preparations section, discarding new value.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( INT_VAR, rs->chans[ rch ].coupling );
+        }
+
         rs->chans[ rch ].coupling = req_coup;
-        rs->chans[ rch ]._is_coupling = true;
+        rs->chans[ rch ].is_coupling = true;
         return vars_push( INT_VAR, req_coup );
     }
 
-    check( rs_rto_channel_set_coupling( rs->dev, rch, &req_coup ) );
-    return vars__push( INT_VAR, req_coup );
+    coup = req_coup;
+    check( rs_rto_channel_set_coupling( rs->dev, rch, &coup ) );
+    return vars_push( INT_VAR, ( long ) coup );
 }
 
 
@@ -1426,9 +1547,7 @@ digitizer_bandwidth_limiter( Var_T * v )
 
     long fch = get_strict_long( v, "channel number" );
     v = vars_pop( v );
-
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch == Channel_Ext || rch >= Channel_Math1 )
     {
@@ -1462,11 +1581,11 @@ digitizer_bandwidth_limiter( Var_T * v )
         if (    ! strcasecmp( v->val.sptr, "Off" ) )
             req_bw = Bandwidth_Full;
         else if ( ! strcasecmp( v->val.sptr, "20MHz" ) )
-            req_bw = Bandwidth_MH20;
+            req_bw = Bandwidth_MHz20;
         else if ( ! strcasecmp( v->val.sptr, "200MHz" ) )
-            req_bw = Bandwidth_MH200;
+            req_bw = Bandwidth_MHz200;
         else if ( ! strcasecmp( v->val.sptr, "800MHz" ) )
-            req_bw = Bandwidth_MH800;
+            req_bw = Bandwidth_MHz800;
         else
         {
             print( FATAL, "Invalid bandwidth limiter '%s'.\n", v->val.sptr );
@@ -1491,13 +1610,13 @@ digitizer_bandwidth_limiter( Var_T * v )
     if ( FSC2_MODE != EXPERIMENT )
     {
         rs->chans[ rch ].bandwidth = req_bw;
-        rs->chans[ rch ]._is_bandwidth = true;
+        rs->chans[ rch ].is_bandwidth = true;
         return vars_push( INT_VAR, req_bw );
     }
 
-    req_bw;
-    check( rs_rto_channel_set_bandwidth( rs->dev, rch, &req_bw ) );
-    return vars__push( INT_VAR, req_bw );
+    bw = req_bw;
+    check( rs_rto_channel_set_bandwidth( rs->dev, rch, &bw ) );
+    return vars_push( INT_VAR, ( long ) bw );
 }
 
 
@@ -1520,19 +1639,19 @@ digitizer_ext_channel_filter( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! rs->chans[ rch ].is_ext_filter )
+                if ( ! rs->chans[ Channel_Ext ].is_ext_filter )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( INT_VAR, rs->chans[ rch ].ext_filter );
+                return vars_push( INT_VAR,
+                                  rs->chans[ Channel_Ext ].ext_filter );
 
             default :
 			{
                 check( rs_rto_channel_filter_type( rs->dev, Channel_Ext,
-												   &ft ) );
-				check( rs_rto_channel_filter_cut_off( rs->dev, Channel_Ext,
-													  &fco ) );
+                                                   &ft ) );
+				check( rs_rto_channel_cut_off( rs->dev, Channel_Ext, &fco ) );
                 return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
 			}
 		}
@@ -1585,7 +1704,7 @@ digitizer_ext_channel_filter( Var_T * v )
 		else
 		{
 			print( FATAL, "Invalid filter type for external trigger input "
-				   "'%s'.\n", v->val,sptr );
+				   "'%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1606,7 +1725,7 @@ digitizer_ext_channel_filter( Var_T * v )
 	}
 
 	check( rs_rto_channel_set_filter_type( rs->dev, Channel_Ext, &ft ) );
-	check( rs_rto_channel_set_filter_cut_off( rs->dev, Channel_Ext, &fco ) );
+	check( rs_rto_channel_set_cut_off( rs->dev, Channel_Ext, &fco ) );
 
 	return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
 }
@@ -1624,9 +1743,8 @@ digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    long fch = get_long_double( v, "channel" );
+    long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch == Channel_Ext )
     {
@@ -1635,19 +1753,19 @@ digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN w = NULL;
+    RS_RTO_WIN * w = NULL;
     if ( ( v = vars_pop( v ) ) )
          w = get_window( v );
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        size_t p;
+        size_t np;
         if ( ! w )
-            np = lrnd( rs->acq.timebase / rs.acq.resolution );
+            np = lrnd( rs->acq.timebase / rs->acq.resolution );
         else
-            np = lrnd( ( w->end - w->start ) / rs.acq.resolution );
+            np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
 
-        Var_T nv = vars_push( FLOAT_ARR, NULL, np );
+        Var_T * nv = vars_push( FLOAT_ARR, NULL, np );
         double * dp = nv->val.dpnt;
         for ( size_t i = 0; i < np; i++ )
             dp[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
@@ -1655,50 +1773,17 @@ digitizer_get_curve( Var_T * v )
         return nv;
     }
 
-    bool ch_state;
-    check( rs_rto_channel_state( rs->dev, rch, &ch_state ) );
-    if ( ! state )
-    {
-        print( FATAL, "Can't get data from channel which isn't "
-               "switched on.\n" );
-        THROW( EXCEPTION );
-    }
-
-    bool with_limits = false;
-    if ( w )
-    {
-        double ws = w->start;
-        double we = w->end;
-        int ret = rs_rto_acq_set_download_limits( rs->dev, &ws, &we );
-        if ( ret != FSC3_SUCCESS )
-        {
-            if ( ret != FSC3_INVALID_ARG )
-                check( ret );
-
-            print( FATAL, "Window oes not fit curve range.\n" );
-            THROW( EXCEPTION );
-        }
-
-        with_limits = true;
-    }
-    
-    check( rs_rto_acq_download_limits_enabled( rs->dev, &with_limits ) );
-           
     double * data;
     size_t length;
 
-    check( rs_rto_channel_data( rs->dev, rch, &data, &length ) );
+    get_waveform( rch, w, &data, &length );
 
-    if ( length == 0 )
-    {
-        free( data );
-        print( FATAL, "Curve has no data.\n" );
-        THROW( EXCEPTION );
-    }
+    Var_T * nv;
+    CLOBBER_PROTECT( data );
 
     TRY
     {
-        Var_T * v = vars_push( FLOAT_ARR, NULL, ( ssize_t ) length );
+        nv = vars_push( FLOAT_ARR, data, ( ssize_t ) length );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1707,11 +1792,30 @@ digitizer_get_curve( Var_T * v )
         RETHROW;
     }
 
-    memcpy( nv->val.dpnt, data, length * sizeof *nv->val.dpnt );
     free( data );
 
     return nv;
 }       
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_get_area( Var_T * v )
+{
+    return get_calculated_curve_data( v, area );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_get_amplitude( Var_T * v )
+{
+    return get_calculated_curve_data( v, amplitude );
+}
 
 
 /*----------------------------------------------------*
@@ -1732,17 +1836,16 @@ digitizer_trigger_channel( Var_T * v )
 
             case TEST :
                 return vars_push( INT_VAR,
-                                  rto_ch_2_fsc2_chan( rs->trig.source ) );
+                                  rto_ch_2_fsc2_ch( rs->trig.source ) );
 
             default :
                 check( rs_rto_trigger_source( rs->dev, &rch ) );
-                return vars_push( INT_VAR, rto_ch_2_fsc2_chan( rch ) ):
+                return vars_push( INT_VAR, rto_ch_2_fsc2_ch( rch ) );
         }
 
     long fch = get_strict_long( v, "trigger_channel" );
-    too_many_arguemtns( v );
+    too_many_arguments( v );
     rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch >= Channel_Math1 )
     {
@@ -1752,13 +1855,20 @@ digitizer_trigger_channel( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_source )
+        {
+            print( SEVERE, "Trigger channel has alredy been set "
+                   "in preparations section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->trig.source );
+        }
+
         rs->trig.source = rch;
         rs->trig.is_source = true;
         return vars_push( INT_VAR, fch );
     }
 
     check( rs_rto_trigger_set_source( rs->dev, &rch ) );
-    return vars_push( INT_VAR, rto_ch_2_fsc2_chan( rch ) ):
+    return vars_push( INT_VAR, rto_ch_2_fsc2_ch( rch ) );
 }
 
 
@@ -1777,7 +1887,6 @@ digitizer_trigger_level( Var_T * v )
     int fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
 	int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch >= Channel_Ch1 )
     {
@@ -1799,21 +1908,29 @@ digitizer_trigger_level( Var_T * v )
                 return vars_push( FLOAT_VAR, rs->trig.level[ rch ] );
 
             default :
-                check( rs_rto_trigger_level( rs->dev, rch, &level ) );
-                return vars_push( FLOAT_VAR, level ):
+                check( rs_rto_trigger_channel_level( rs->dev, rch, &level ) );
+                return vars_push( FLOAT_VAR, level );
         }
 
     double req_level = get_double( v, "trigger_levek" );
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_level )
+        {
+            print( SEVERE, "Trigger level for channel %s has already been "
+                   "set in preparations section, discarding new value.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( FLOAT_VAR, rs->trig.level[ rch ] );
+        }
+
         rs->trig.level[ rch ] = req_level;
         rs->trig.is_level[ rch ] = true;
         return vars_push( FLOAT_VAR, req_level );
     }
 
     level = req_level;
-    int ret = rs_rto_trigger_set_level( rs->dec, rch, &level );
+    int ret = rs_rto_trigger_set_channel_level( rs->dev, rch, &level );
     if ( ret != FSC3_SUCCESS )
     {
         if ( ret != FSC3_INVALID_ARG )
@@ -1821,12 +1938,12 @@ digitizer_trigger_level( Var_T * v )
 
         double min_level, max_level;
 
-        check( rs_rto_trigger_min_level( rs->dev, rch, &min_level ) );
-        check( rs_rto_trigger_min_level( rs->dev, rch, &max_level ) );
+        check( rs_rto_trigger_channel_min_level( rs->dev, rch, &min_level ) );
+        check( rs_rto_trigger_channel_min_level( rs->dev, rch, &max_level ) );
 
-        char * s1 - pp( req_level );
-        char * s2 - pp( min_level );
-        char * s3 - pp( max_level );
+        char * s1 = pp( req_level );
+        char * s2 = pp( min_level );
+        char * s3 = pp( max_level );
 
         print( FATAL, "Requested trigger level of %sV oot of range, must be "
                "between %sV and %sV.\n", s1, s2, s3 );
@@ -1840,8 +1957,8 @@ digitizer_trigger_level( Var_T * v )
 
     if ( req_level != 0 && fabs( ( req_level - level ) / req_level ) > 0.01 )
     {
-        char * s1 - pp( req_level );
-        char * s2 - pp( level );
+        char * s1 = pp( req_level );
+        char * s2 = pp( level );
 
         print( WARN, "Trigger level had to be adjusted from %sV to %sV.\n",
                s1, s2 );
@@ -1869,7 +1986,6 @@ digitizer_trigger_slope( Var_T * v )
     int fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
 	int rch = fsc2_ch_2_rto_ch( fch );
-    rs->chans[ rch ].in_use = true;
 
     if ( rch >= Channel_Ch1 )
     {
@@ -1877,7 +1993,7 @@ digitizer_trigger_slope( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    int_slope;
+    int slope;
 
     if ( ! v )
         switch ( FSC2_MODE )
@@ -1891,8 +2007,8 @@ digitizer_trigger_slope( Var_T * v )
                 return vars_push( INT_VAR, rs->trig.slope[ rch ] );
 
             default :
-                check( rs_rto_trigger_slope( rs->dev, rch, &slope ) );
-                return vars_push( INT_VAR, ( long ) slope ):
+                check( rs_rto_trigger_channel_slope( rs->dev, rch, &slope ) );
+                return vars_push( INT_VAR, ( long ) slope );
         }
 
     long req_slope;
@@ -1928,13 +2044,21 @@ digitizer_trigger_slope( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        rs->trig->slope[ rch ] = req_slope;
-        rs->trig->is_slope[ rch ] = true;
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_slope[ rch ] )
+        {
+            print( SEVERE, "Trigger slope for channel %s has alredy been set "
+                   "in preparations section, discarding new value.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( INT_VAR, rs->trig.slope[ rch ] );
+        }
+
+        rs->trig.slope[ rch ] = req_slope;
+        rs->trig.is_slope[ rch ] = true;
         return vars_push( INT_VAR, req_slope );
     }
 
     slope = req_slope;
-    check( rs_rto_trigger_set_slope( rs->dev, rch, &slope ) );
+    check( rs_rto_trigger_set_channel_slope( rs->dev, rch, &slope ) );
     return vars_push( INT_VAR, ( long ) slope );
 }
 
@@ -1945,7 +2069,7 @@ digitizer_trigger_slope( Var_T * v )
 Var_T *
 digitizer_trigger_mode( Var_T * v )
 {
-    int mode
+    int mode;
 
     if ( ! v )
         switch ( FSC2_MODE )
@@ -1960,17 +2084,17 @@ digitizer_trigger_mode( Var_T * v )
 
             default :
                 check( rs_rto_trigger_mode( rs->dev, &mode ) );
-                return vars_push( INT_VAR, ( long ) mode ):
+                return vars_push( INT_VAR, ( long ) mode );
         }
 
     long req_mode;
 
     if ( v->type == STR_VAR )
     {
-        if ( ! strcasecmp( v->val.sprt, "AUTO" ) )
+        if ( ! strcasecmp( v->val.sptr, "AUTO" ) )
             req_mode = Trig_Mode_Auto;
-        else if (    ! strcasecmp( v->val.sprt, "NORMAL" )
-                  || ! strcasecmp( v->val.sprt, "NORM" ) )
+        else if (    ! strcasecmp( v->val.sptr, "NORMAL" )
+                  || ! strcasecmp( v->val.sptr, "NORM" ) )
             req_mode = Trig_Mode_Normal;
         else
         {
@@ -1991,6 +2115,13 @@ digitizer_trigger_mode( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_mode )
+        {
+            print( SEVERE, "Trigger mode has alredy been set "
+                   "in preparations section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->trig.mode );
+        }
+
         rs->trig.mode = req_mode;
         rs->trig.is_mode = true;
         return vars_push( INT_VAR, req_mode );
@@ -2020,28 +2151,35 @@ digitizer_trigger_delay( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOT_VAR, rs->trig.position );
+                return vars_push( FLOAT_VAR, rs->trig.position );
 
             default :
                 check( rs_rto_trigger_position( rs->dev, &pos) );
-                return vars_push( FLOAT_VAR, pos ):
+                return vars_push( FLOAT_VAR, pos );
         }
 
-    doube req_pos = get_double( v, "trigger_delay" );
+    double req_pos = get_double( v, "trigger_delay" );
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->trig.is_position )
+        {
+            print( SEVERE, "Trigger dekay has alredy been set "
+                   "in preparations section, discarding new value.\n" );
+            return vars_push( FLOAT_VAR, rs->trig.position );
+        }
+
         rs->trig.position = req_pos;
         rs->trig.is_position = true;
         return vars_push( FLOAT_VAR, req_pos );
     }
 
     pos = req_pos;
-    int ret = rs_rto_triiger_set_position( rs->dev, &pos );
+    int ret = rs_rto_trigger_set_position( rs->dev, &pos );
     if ( ret != FSC3_SUCCESS )
     {
-        if ( ret != FSC2_INVALID_ARG )
+        if ( ret != FSC3_INVALID_ARG )
             check( ret );
 
         double min_pos, max_pos;
@@ -2052,7 +2190,7 @@ digitizer_trigger_delay( Var_T * v )
         char * s2 = pp( min_pos );
         char * s3 = pp( max_pos );
 
-        print( DATAL, "Requested trigger delay of %ss is out of range, must "
+        print( FATAL, "Requested trigger delay of %ss is out of range, must "
                "be between %ss and %ss.\n", s1, s2, s3 );
 
         T_free( s3 );
@@ -2071,7 +2209,7 @@ digitizer_trigger_delay( Var_T * v )
                s1, s2 );
 
         T_free( s2 );
-        T_Free( s1 );
+        T_free( s1 );
     }
 
     return vars_push( FLOAT_VAR, pos );
@@ -2115,7 +2253,7 @@ digitizer_define_window( Var_T * v )
     else
     {
         w = rs->w;
-        while ( w->next != NULL )
+        while ( w->next )
             w = w->next;
         w->next = T_malloc( sizeof *w->next );
         w = w->next;
@@ -2186,7 +2324,7 @@ digitizer_window_width( Var_T * v )
     double width = get_double( v, "window width" );
     too_many_arguments( v );
 
-    if ( w->width <= 0 )
+    if ( width <= 0 )
     {
         print( FATAL, "Invalid zero or negative window width.\n" );
         THROW( EXCEPTION );
@@ -2202,7 +2340,7 @@ digitizer_window_width( Var_T * v )
  *------------------------------------*/
 
 Var_T *
-digitizer_window_width( Var_T * v )
+digitizer_change_window( Var_T * v )
 {
     if ( rs->w == NULL )
     {
@@ -2219,10 +2357,10 @@ digitizer_window_width( Var_T * v )
     RS_RTO_WIN * w = get_window( v );
     v = vars_pop( v );
 
-    w->tart = get_double( v, "window position" );
+    w->start = get_double( v, "window position" );
     v = vars_pop( v );
     double width = get_double( v, "window width" );
-    too_many_argu,ents( v );
+    too_many_arguments( v );
 
     if ( width <= 0 )
     {
@@ -2273,11 +2411,12 @@ digitizer_check_window( Var_T * v )
  *------------------------------------*/
 
 Var_T *
-digitizer_window_limits( Var_T *  UNUSED_ARG )
+digitizer_window_limits( Var_T * v  UNUSED_ARG )
 {
+    double limits[ 2 ];
+
     if ( FSC2_MODE != EXPERIMENT )
     {
-        double * limits[ 2 ];
         limits[ 0 ] = -1.0e24;
         limits[ 1 ] =  2.0e24;
         return vars_push( FLOAT_ARR, limits, 2 );
@@ -2286,21 +2425,74 @@ digitizer_window_limits( Var_T *  UNUSED_ARG )
     double min_start, max_end;
     check( rs_rto_acq_max_download_limits( rs->dev, &min_start, &max_end ) );
 
-    double * limits[ 2 ];
     limits[ 0 ] = min_start;
     limits[ 1 ] = max_end - min_start;
     return vars_push( FLOAT_ARR, limits, 2 );
 }
 
 
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
-digitizer_change_window, -1, ALL;       // change an existing window
-digitizer_get_area, -1, EXP;
-digitizer_get_area_fast, -1, EXP;
-digitizer_get_curve, -1, EXP;
-digitizer_get_curve_fast, -1, EXP;
-digitizer_get_amplitude, -1, EXP;
-digitizer_get_amplitude_fast, -1, EXP;
+Var_T *
+digitizer_math_function( Var_T * v )
+{
+    if ( ! v )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
+
+    long fch = get_strict_long( v, "math channel" );
+    v = vars_pop( v );
+    int rch = fsc2_ch_2_rto_ch( fch );
+
+    if ( rch < Channel_Math4 )
+    {
+        print( FATAL, "Function can only be used with math channels.\n" );
+        THROW( EXCEPTION );
+    }
+
+    char * func = NULL;
+
+    if ( ! v )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! rs->chans[ rch ].function )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( STR_VAR, rs->chans[ rch ].function );
+
+            default :
+                check( rs_rto_channel_function( rs->dev, rch, &func ) );
+                Var_T * nv = vars_push( STR_VAR, func );
+                free( func );
+                return nv;
+
+        }
+
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "Function to set for a math channel must be a "
+               "string.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        T_free( rs->chans[ rch ].function );
+        rs->chans[ rch ].function = T_strdup( v->val.sptr );
+    }
+    else
+        check( rs_rto_channel_set_function( rs->dev, rch, v->val.sptr ) );
+
+    return vars_push( INT_VAR, 1L );
+}   
 
 
 /*----------------------------------------------------*
@@ -2332,35 +2524,42 @@ static
 int
 fsc2_ch_2_rto_ch( long ch )
 {
+    int rch = -1;
+
     if ( ch == CHANNEL_CH1 )
         return Channel_Ch1;
     else if ( ch == CHANNEL_CH2 )
-        return Channel_Ch2;
+        rch = Channel_Ch2;
     else if ( ch == CHANNEL_CH3 && rs->num_channels == 4 )
-        return Channel_Ch2;
+        rch = Channel_Ch3;
     else if ( ch == CHANNEL_CH4 && rs->num_channels == 4 )
-        return Channel_Ch4;
+        rch = Channel_Ch4;
     else if ( ch == CHANNEL_EXT )
-        return Channel_Ext;
+        rch = Channel_Ext;
     else if ( ch == CHANNEL_MATH1 )
-        return Channel_MATH1;
+        rch = Channel_Math1;
     else if ( ch == CHANNEL_MATH2 )
-        return Channel_MATH2;
+        rch = Channel_Math2;
     else if ( ch == CHANNEL_MATH3 )
-        return Channel_MATH3;
+        rch = Channel_Math3;
     else if ( ch == CHANNEL_MATH4 )
-        return Channel_MATH4;
-
-    if ( ch == CHANNEL_CH3 || ch == CHANNEL+CH4 )
-        print( FATAL, "This model has only 2 measurement channels, can't "
-               "use channel '%s'.\n", Channel_Names[ ch ] );
-    else if ( ch < CHANNEL_CH1 || ch >= NUM_CHANNEL_NAMES )
-        print( FATAL, "Invalid channel number '%d'.\n", ch );
+        rch = Channel_Math4;
     else
-        print( FATAL, "Channel '%s' does not exist on this device.\n",
-               Channel_Names[ ch ] );
+    {
+        if ( ch == CHANNEL_CH3 || ch == CHANNEL_CH4 )
+            print( FATAL, "This model has only 2 measurement channels, can't "
+                   "use channel '%s'.\n", Channel_Names[ ch ] );
+        else if ( ch < CHANNEL_CH1 || ch >= NUM_CHANNEL_NAMES )
+            print( FATAL, "Invalid channel number '%d'.\n", ch );
+        else
+            print( FATAL, "Channel '%s' does not exist on this device.\n",
+                   Channel_Names[ ch ] );
 
-    THROW( EXCEPTION );
+        THROW( EXCEPTION );
+    }
+
+    rs->chans[ rch ].in_use = true;
+    return rch;
 }
 
 
@@ -2375,7 +2574,7 @@ rto_ch_2_fsc2_ch( int ch )
                           CHANNEL_CH4, CHANNEL_MATH1, CHANNEL_MATH2,
                           CHANNEL_MATH3, CHANNEL_MATH4 };
 
-    if ( ch < 0 || ch >= ( int ) sizeof chs / sizeof *chs )
+    if ( ch < 0 || ch >= ( int ) ( sizeof chs / sizeof *chs ) )
         fsc2_impossible( );
 
     return chs[ ch ];
@@ -2389,13 +2588,15 @@ static
 void
 check( int err_code )
 {
-    if ( err_code == FSC3_SUCCESS || )
+    if ( err_code == FSC3_SUCCESS )
         return;
 
     if ( ! rs->dev )
         fsc2_impossible( );
 
-    print( FATAL, rs_rto_last_error( rs->dev ) );
+    print( FATAL, "%s%s", err_prefix, rs_rto_last_error( rs->dev ) );
+    err_prefix = "";
+
     THROW( EXCEPTION );
 }
 
@@ -2406,7 +2607,7 @@ check( int err_code )
 static
 long
 to_ext_filter( int ft,
-				int fco )
+               int fco )
 {
 	if ( ft == Filter_Type_Off )
 		return Ext_Filter_Off;
@@ -2421,7 +2622,7 @@ to_ext_filter( int ft,
 	}
 	else if ( ft == Filter_Type_High_Pass )
 	{
-		( fco == Filter_Cut_Off_kHz5 )
+		if ( fco == Filter_Cut_Off_kHz5 )
 			return Ext_Filter_High_Pass_5kHz;
 		else if ( fco == Filter_Cut_Off_kHz50 )
 			return Ext_Filter_High_Pass_50kHz;
@@ -2445,7 +2646,7 @@ from_ext_filter( long   e,
 {
 	if ( e == Ext_Filter_Off )
 		*ft = Filter_Type_Off;
-	else if ( e = Ext_Filter_Low_Pass_5kHz )
+	else if ( e == Ext_Filter_Low_Pass_5kHz )
 	{
 		*ft  = Filter_Type_Low_Pass;
 		*fco = Filter_Cut_Off_kHz5;
@@ -2460,7 +2661,7 @@ from_ext_filter( long   e,
 		*ft  = Filter_Type_Low_Pass;
 		*fco = Filter_Cut_Off_MHz50;
 	}
-	else if ( e = Ext_Filter_High_Pass_5kHz )
+	else if ( e == Ext_Filter_High_Pass_5kHz )
 	{
 		*ft  = Filter_Type_High_Pass;
 		*fco = Filter_Cut_Off_kHz5;
@@ -2484,23 +2685,696 @@ from_ext_filter( long   e,
 }
 
 
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+get_waveform( int           rch,
+              RS_RTO_WIN  * w,
+              double     ** data,
+              size_t      * length )
+{
+    bool ch_state;
+    check( rs_rto_channel_state( rs->dev, rch, &ch_state ) );
+    if ( ! ch_state )
+    {
+        print( FATAL, "Can't get data from channel which isn't "
+               "switched on.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bool with_limits = false;
+    if ( w )
+    {
+        double ws = w->start;
+        double we = w->end;
+        int ret = rs_rto_acq_set_download_limits( rs->dev, &ws, &we );
+        if ( ret != FSC3_SUCCESS )
+        {
+            if ( ret != FSC3_INVALID_ARG )
+                check( ret );
+
+            print( FATAL, "Window does not fit waveform range.\n" );
+            THROW( EXCEPTION );
+        }
+
+        with_limits = true;
+    }
+    
+    check( rs_rto_acq_download_limits_enabled( rs->dev, &with_limits ) );
+           
+    check( rs_rto_channel_data( rs->dev, rch, data, length ) );
+
+    if ( *length == 0 )
+    {
+        free( *data );
+        print( FATAL, "Curve has no data.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 static
 RS_RTO_WIN *
 get_window( Var_T * v )
 {
-    long wid = get_strict_long( v, "window ID" );
+    return get_window_from_long( get_strict_long( v, "window ID" ) );
+
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+RS_RTO_WIN *
+get_window_from_long( long wid )
+{
+    if ( ! rs->w )
+    {
+        print( FATAL, "No windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( wid >= WINDOW_START_NUMBER )
-        for ( w = rw->w; w != NULL; w = w->next )
+        for ( RS_RTO_WIN * w = rs->w; w != NULL; w = w->next )
             if ( w->num == wid )
                 return w;
 
-    print( FATAL, "Argument isn't a valid window number.\n" );
+    print( FATAL, "Argument isn't a valid window ID.\n" );
     THROW( EXCEPTION );
 
     return NULL;
 }
 
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+get_window_list( Var_T       ** v,
+                 RS_RTO_WIN *** wins,
+                 long         * win_count )
+{
+    CLOBBER_PROTECT( wins );
+
+    if ( *v )
+    {
+        if ( ( *v )->type == INT_VAR )
+        {
+            int count = 1;
+            Var_T * vn = ( *v )->next;
+            while ( vn )
+            {
+                count++;
+                vn = vn->next;
+            }
+
+            *wins = T_malloc( count * sizeof **wins );
+
+            TRY
+            {
+                do
+                {
+                    ( *wins )[ *win_count ] = get_window( *v );
+                    *win_count += 1;
+                } while ( ( *v = vars_pop( *v ) ) );
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                T_free( *wins );
+                RETHROW;
+            }
+        }
+        else if ( ( *v )->type == INT_ARR )
+        {
+            *wins = T_malloc( ( *v )->len * sizeof *wins );
+
+            TRY
+            {
+                for ( ssize_t i = 0; i < ( *v )->len; ++i )
+                {
+                    ( *wins )[ *win_count ] =
+                                  get_window_from_long( ( *v )->val.lpnt[ i ] );
+                    *win_count += 1;
+                }
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                T_free( *wins );
+                RETHROW;
+            }
+
+            *v = vars_pop( *v );
+        }
+        else
+        {
+            print( FATAL, "Argument neither a list nor an array of window "
+                   "IDs.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+}
+
+
+/*----------------------------------------------------*
+ * Helper function for digitizer_get_area() and
+ * digitizer_get_amplitude - they just differ in the
+ * math done on the data which can easily be dealt
+ * with using a handler function for this/
+ *----------------------------------------------------*/
+
+Var_T *
+get_calculated_curve_data( Var_T  * v,
+                           double   ( handler )( double *, size_t ) )
+{
+    // We need at least a channel
+
+    if ( ! v )
+    {
+        print( FATAL, "Missing argument(s).\n" );
+        THROW( EXCEPTION );
+    }
+
+    long fch = get_strict_long( v, "channel" );
+    v = vars_pop( v );
+    int rch = fsc2_ch_2_rto_ch( fch );
+
+    if ( rch == Channel_Ext )
+    {
+        print( FATAL, "Can't get curve from external trigger input "
+               "channel.\n" );
+        THROW( EXCEPTION );
+    }
+
+    // Check for windows - this could be either an array with windo w IDs
+    // or simply a list of them. get_window_list() leaves the 'wins'
+    // argument unchanged if there are no windows.
+
+    RS_RTO_WIN ** wins = NULL;
+    long win_count = 0;
+
+    CLOBBER_PROTECT( wins );
+
+    get_window_list( &v, &wins, &win_count );
+
+    too_many_arguments( v );
+
+    // Just return some dummy data during a test run
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        T_free( wins );
+
+        if ( win_count <= 1 )
+            return vars_push( FLOAT_VAR, handler( NULL, 0 ) );
+
+        Var_T * nv = vars_push( FLOAT_ARR, NULL, win_count );
+
+        for ( long i = 0; i < win_count; ++i )
+            nv->val.dpnt[ i ] = handler( NULL, 0 );
+
+        return nv;
+    }
+        
+    // If the number of windows isn't larger than 1 things are straight
+    // forward
+
+    if ( win_count <= 1 )
+    {
+        double * data;
+        size_t length;
+
+        TRY
+        {
+            get_waveform( rch, wins ? *wins : NULL, &data, &length );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( wins );
+            RETHROW;
+        }
+
+        double res = handler( data, length );
+
+        free( data );
+        T_free( wins );
+        return vars_push( FLOAT_VAR, res );
+    }
+
+    // With several windows things get a bit more involved, use a helper
+    // function for dealing with that.
+
+    Var_T * nv;
+
+    TRY
+    {
+        nv = get_subcurve_data( rch, wins, win_count, handler );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( wins );
+        RETHROW;
+    }
+
+    T_free( wins );
+    return nv;
+}
+
+
+/*----------------------------------------------------*
+ * Helper function for getting area/amplitude data when
+ * more than 1 window is involved. Due to the overhead of
+ * fetching a curve (even a partial one) it might be a lot
+ * faster getting only one, covering all windows and then
+ * picking data from that. Only of the windows are far
+ * apart with lots of data in between it might be better
+ * doing several fetches.
+ *----------------------------------------------------*/
+
+static
+Var_T *
+get_subcurve_data( int rch,
+                   RS_RTO_WIN ** wins,
+                   long          win_count,
+                   double        ( *handler )( double *, size_t ) )
+{
+    // Make an estimate if fetches of several partial curve will be faster
+    // then a single fetch of the part that covers the whole range of
+    // windows.
+
+    double reso;
+    check( rs_rto_acq_resolution( rs->dev, &reso ) );
+
+    double min_pos = wins[ 0 ]->start;
+    double max_pos = wins[ 0 ]->end;
+    double max_width = max_pos - min_pos;
+    double tot_width = max_width;
+
+    for ( long i = 1; i < win_count; ++i )
+    {
+        min_pos = d_min( min_pos, wins[ i ]->start );
+        max_pos = d_max( max_pos, wins[ i ]->end );
+        max_width = d_max( max_width, wins[ i ]->end - wins[ i ]->start );
+        tot_width += wins[ i ]->end - wins[ i ]->start;
+    }
+
+    double single_time =   CURVE_DELAY
+                         + ( max_pos - min_pos )
+                         / ( 0.25 * TRANSFER_RATE * reso );
+    double multi_time  =   CURVE_DELAY * win_count
+                         + tot_width /  ( 0.25 * TRANSFER_RATE * reso );
+
+    Var_T * nv = vars_push( FLOAT_ARR, NULL, win_count );
+    double * data;
+    size_t length;
+
+    if ( single_time <= multi_time )
+    {
+        RS_RTO_WIN win = { min_pos, max_pos, 0, NULL };
+
+        get_waveform( rch, &win, &data, &length );
+
+        for ( long i = 0; i < win_count; ++i )
+        {
+            long start_ind = lrnd( ( wins[ i ]->start - min_pos ) / reso );
+            long end_ind   =   length
+                             - lrnd( ( max_pos - wins[ i ]->end ) / reso );
+            nv->val.dpnt[ i ] = handler( data + start_ind,
+                                         end_ind - start_ind );
+        }
+
+        free( data );
+    }
+    else
+    {
+        for ( long i = 0; i < win_count; ++i )
+        {
+            get_waveform( rch, wins[ i ], &data, &length );
+            nv->val.dpnt[ i ] = handler( data, length );
+            free( data );
+        }
+    }
+
+    return nv;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+double
+area( double * data,
+      size_t   length )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return 1.234e-8;
+
+    double res = 0;
+    for ( size_t i = 0; i < length; i++ )
+        res += *data++;
+    return res;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+double
+amplitude( double * data,
+           size_t   length )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return 1.234e-7;
+
+    double min = HUGE_VAL;
+    double max = - HUGE_VAL;
+    for ( size_t i = 0; i < length; i++ )
+    {
+        min = d_min( min, *data );
+        max = d_max( max, *data++ );
+    }
+
+    return max - min;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_prep_acq( void )
+{
+    rs->acq.is_timebase = false;
+    rs->acq.timebase = 1e-7;
+
+    rs->acq.is_resolution = false;
+    rs->acq.resolution = 1e-10;
+
+    rs->acq.is_record_length = false;
+    rs->acq.record_length = 10000;
+
+    rs->acq.is_mode = false;
+    rs->acq.mode = Acq_Mode_Normal;
+
+    rs->acq.is_num_averages = false;
+    rs->acq.num_averages = 10;
+
+    rs->acq.is_num_segments = false;
+    rs->acq.num_segments = 10;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_prep_trig( void )
+{
+    rs->trig.source = Channel_Ch1;
+    rs->trig.is_source = false;
+
+    for ( int i = 0; i < 5; i++ )
+    {
+        rs->trig.level[  i ] = 0.0;
+        rs->trig.is_level[ i ] = false;
+
+        rs->trig.slope[ i ] = Trig_Slope_Positive;
+        rs->trig.is_slope[ i ] =  false;
+    }
+
+    rs->trig.mode = Trig_Mode_Normal;
+    rs->trig.is_mode = false;
+
+    rs->trig.position = 5.0e-8;
+    rs->trig.is_position = false;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_prep_chans( void )
+{
+    for ( int i = 0; i < 9; i++ )
+    {
+        RS_RTO_CHAN * ch = rs->chans + i;
+
+        ch->in_use = false;
+
+        ch->state = false;
+        ch->is_state = false;
+
+        ch->scale = 0.05;
+        ch->is_scale = false;
+
+        ch->offset = 0;
+        ch->is_offset = false;
+
+        ch->position = 0;
+        ch->is_position = false;
+
+        ch->coupling = Coupling_AC;
+        ch->is_coupling = false;
+
+        ch->bandwidth = Bandwidth_Full;
+        ch->is_bandwidth = false;
+
+        ch->ext_filter = Ext_Filter_Off;
+        ch->is_ext_filter = true;
+
+        ch->function = NULL;
+    }
+
+    rs->chans[ Channel_Ch1 ].state = true;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_exp_acq( void )
+{
+    if ( rs->acq.is_timebase )
+    {
+        double tb = rs->acq.timebase;
+        check( rs_rto_acq_set_timebase( rs->dev, &tb ) );
+    }
+
+    if ( rs->acq.is_record_length )
+    {
+        unsigned long rl = rs->acq.record_length;
+        check( rs_rto_acq_set_record_length( rs->dev, &rl ) );
+    }
+
+    if ( rs->acq.is_mode )
+    {
+        int mode = rs->acq.mode;
+        check( rs_rto_acq_set_mode( rs->dev, &mode ) );
+    }
+
+    if ( rs->acq.is_num_averages )
+    {
+        unsigned long na = rs->acq.num_averages;
+        check( rs_rto_acq_set_average_count( rs->dev, &na ) );
+    }
+
+    if ( rs->acq.is_num_segments )
+    {
+        unsigned long ns = rs->acq.num_segments;
+        check( rs_rto_acq_set_segment_count( rs->dev, &ns ) );
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_exp_trig( void )
+{
+    if ( rs->trig.is_source )
+    {
+        int source = rs->trig.source;
+        check( rs_rto_trigger_set_source( rs->dev, &source ) );
+    }
+
+    for ( int i = 0; i < 5; i++ )
+    {
+        if ( rs->trig.is_level[ i ] )
+        {
+            double lvl = rs->trig.level[ i ];
+            check( rs_rto_trigger_set_channel_level( rs->dev, i, &lvl ) );
+        }
+                
+        if ( rs->trig.is_slope[ i ] )
+        {
+            int slope = rs->trig.slope[ i ];
+            check( rs_rto_trigger_set_channel_slope( rs->dev, i, &slope ) );
+        }
+    }
+
+    if ( rs->trig.is_mode )
+    {
+        int mode = rs->trig.mode;
+        check( rs_rto_trigger_set_mode( rs->dev, &mode ) );
+    }
+
+    if ( rs->trig.is_position )
+    {
+        double pos = rs->trig.position;
+        check( rs_rto_trigger_set_position( rs->dev, &pos ) );
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+init_exp_chans( void )
+{
+    for ( int i = 0; i < 9; i++ )
+    {
+        RS_RTO_CHAN * ch = rs->chans + i;
+
+        if ( ! ch->in_use )
+            continue;
+
+        if ( ch->is_state )
+        {
+            bool state = ch->state;
+            check( rs_rto_channel_set_state( rs->dev, i, &state ) );
+        }
+
+        if ( ch->is_scale )
+        {
+            double scale = ch->scale;
+            check( rs_rto_channel_set_scale( rs->dev, i, &scale ) );
+        }
+
+        if ( ch->is_offset )
+        {
+            double offs = ch->offset;
+            check( rs_rto_channel_set_offset( rs->dev, i, &offs ) );
+        }
+
+        if ( ch->is_position )
+        {
+            double pos = ch->position;
+            check( rs_rto_channel_set_position( rs->dev, i, &pos ) );
+        }
+
+        if ( ch->is_coupling )
+        {
+            int coup = ch->coupling;
+            check( rs_rto_channel_set_coupling( rs->dev, i, &coup ) );
+        }
+
+        if ( ch->is_bandwidth )
+        {
+            int bw = ch->bandwidth;
+            check( rs_rto_channel_set_bandwidth( rs->dev, i, &bw ) );
+        }
+
+        if ( ch->is_ext_filter )
+        {
+            int ft, fco;
+
+            from_ext_filter( ch->ext_filter, &ft, &fco );
+
+            check( rs_rto_channel_set_filter_type( rs->dev, i, &ft ) );
+            if ( ft != Filter_Type_Off )
+                check( rs_rto_channel_set_cut_off( rs->dev, i, &fco ) );
+        }
+
+        if ( ch->function )
+            check( rs_rto_channel_set_function( rs->dev, i, ch->function ) );
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+copy_windows( RS_RTO_WIN ** dst,
+              RS_RTO_WIN  * src )
+{
+    if ( ! src )
+        return;
+
+    RS_RTO_WIN ** orig_dst = dst;
+    RS_RTO_WIN * cur;
+
+    while ( src )
+    {
+        TRY
+        {
+            cur = T_malloc( sizeof *cur );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            delete_windows( orig_dst );
+            RETHROW;
+        }
+
+        if ( dst == orig_dst )
+            *dst = cur;
+        else
+            ( *dst )->next = cur;
+
+        *cur = *src;
+        cur->next = NULL;
+
+        dst = &cur->next;
+        src = src->next;
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+delete_windows( RS_RTO_WIN ** wp )
+{
+    if ( ! *wp )
+        return;
+
+    RS_RTO_WIN * cur = *wp;
+
+    while ( cur )
+    {
+        RS_RTO_WIN * nxt = cur->next;
+        T_free( cur );
+        cur = nxt;
+    }
+
+    *wp = NULL;
+}
 
 
 /*                                                                              

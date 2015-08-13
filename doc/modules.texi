@@ -572,8 +572,8 @@ return vars_push( INT_ARRAY, data, 2L );
 @end example
 @noindent
 Keep in mind that @code{vars_push()} always makes a copy of the array
-you passed it - if what you passed it is a pointer to allocated
-memory it's your responsibility to @code{@ref{T_free()}} it.
+you pass it - if what you pass it is a pointer to allocated memory
+it's your responsibility to @code{@ref{T_free()}} it.
 
 As a complete example here is a rather simple but working function named
 @code{square()} that returns the square of the value it got passed:

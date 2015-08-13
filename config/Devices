@@ -60,6 +60,7 @@ lecroy_wr_s   // LeCroy Waverunner and Waverunner 2 (serial)
 lecroy_ws     // LeCroy WaveSurfer (LAN)
 ag54830b      // Agilent 54830B oscilloscope controlled via GPIB
 ag54830b_l    // Agilent 54830B oscilloscope controlled via LAN
+rs_rto        // Rohde&Schwarz RTO series
 
 
 // Lock-in amplifiers

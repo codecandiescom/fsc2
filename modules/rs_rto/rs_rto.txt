@@ -1,0 +1,2003 @@
+This text documents all three libraries - for C++, C and Python -
+for the Rohde&Schwarz RTO series of oscilloscopes at once since
+they are all very similar (which is to be expected since the C
+and Python versions are derived from the C++ version). The de-
+scriptions of the C++ methods typically contain information that
+may be missing or only mntioned in passing from the others in
+order to be not too repetitive.
+
+This library only supports a rather limited subset of the
+capabilities of the device. Part of the reason is that for
+the purposes the library was written for a lot of these
+capabilities are of no interest. Another reason is that
+the documentation for the device while extensive is in many
+aspects incomplete, confusing and or even plain wrong.
+
+What's supported?
+
+a) Only one waveform per channel
+b) Only simple edge triggering via an input channel or
+   the external trigger input
+c) Measurement in either normal or averaged mode or using
+   "Ultra Segmentation"
+
+When using the library please keep in mind that many functions
+for setting properties of the device may not set them to exactly
+the value you asked for but to the nearest value the device allows.
+And also be aware that many settings may have effects on others,
+often in complex, non-intuitive (and un-documented) ways.
+
+
+0. Error handling
+=================
+
+The C++ and Python versions throw exceptions on errors. Most of
+them are "invalid argument" exceptions when you request something
+the device can't do. The C++ version throws, beside the standard
+exceptions, the following exceptions derived from std::exception:
+
+   comm_failure       : communication problems with the device
+   bad_data           : the device returned unexpected data
+   operational_error  : function has been called without required
+                        prerequisites being satisfied
+
+All but two functions of the C library (the function for opening
+a connection to the device and that for returning a string with
+the last encountered error) return an integer, indication success
+or failure. Possible values are
+
+    FSC3_SUCCESS            (0) successful call of function
+    FSC3_INVALID_ARG        (1) invalid arguments passed to function
+    FSC3_COMM_FAILURE       (2) communication with device failed
+    FSC3_BAD_DATA           (3) device sent unexpected data
+    FSC3_OP_ERROR           (4) prerequisites for function call not satisfied
+    FSC3_OUT_OF_MEMORY      (5) memory exhausted
+    FSC3_OTHER_ERROR        (6) other run-time error
+
+To obtain an explanatory string with information about the reasons
+of an error (which comes automatically with the exception in C++ and
+Python) for C the function rs_rto_last_error() can be used, see
+below.
+
+Since (nearly) all C functions return a value indicating success or
+failure other results are returned via pointers to variables supplied
+by the caller. Also functtions for setting properties expect a pointer
+to a variable with the value to be set, which then is used to return
+the exact value of what has actually been set by the device (which in
+a number of cases may slightly deviate from the requested value).
+
+
+1) Logging
+==========
+
+For debugging and monitoring purposes information about the communication
+with the device can be written to a log file. Unless logging is disabled,
+The file is created in the directory for temporary files, which is
+controlled by the 'TMP_DIR' environment variable and defaults to '/tmp',
+and has the name a name following the pattern
+
+     RS_RTO (VXI-11 at $IP).log
+
+where '$IP' is to be replaced by the IP address string used for
+connecting to the device. The amount of information written to
+that file can be controlled by an argument used when connecting
+to the device.
+
+An existing log file gets overwritten whenever the connection to
+the device is opened anew.
+
+
+2) Opening a connection to the device
+=====================================
+
+C++:
+
+  Constructor of an instance of the 'rs_rto' class with two arguments,
+  the IP address (either a string with the numerical address in quad-dot
+  notation or as a hostname (to be resolved via DNS) and, optionally, a
+  log level, either 'Log_Level::None' (no logging), 'Log_Level::Low'
+  (only errors are logged), 'Log_Level::Normal' (also all function calls
+  are logged) or 'Log_Level::High' (data arguments or return values of
+  function calls are logged.
+
+  Note: the instances of the class are not copyable. And only a
+  single connection can be opened to a single device - an attempt
+  to open a second connection will be flagged as a communication
+  failure (with an error message indicating that the device is
+  already locked).
+
+C:
+
+    rs_rto_t * rs_rto_open(char const *ip_address, int log_level);
+
+  The IP address is the same as in the C++ version, the (non-
+  optional!) log_Level use 'Log_Level_None' (or 0), 'Log_Level_Low'
+  (or 1), 'Log_Level_Normal' (or 2) or 'Log_Level_High' (or 3).
+
+  The return value, an opaque pointer to the underlying C++ class,
+  is required as the first argument in all other C functions. Trying
+  to use some other pointer instead, not returned by rs_rto_open(),
+  results in undefined behavior. Note that you have to call the
+  opposite function rs_rto_close() to close the connection, unlock
+  the device and release resources.
+
+  On failure a NULL pointer is returned.
+
+Python:
+
+  Constructor of the 'rs_rto' class, like in C++ with a required
+  string for the IP address and an optional log level, one of
+  'Log_Level.None', 'Log_Level.Low', 'Log_Level.Normal' or
+  'Log_Level.High'.
+
+  Note: the instances of the class are not copyable.
+
+
+3. Closing the connection
+=========================
+
+C++:
+
+  Nothing required, handled automatically by class destructor -
+  either let the variable for the class instance go out of scope or,
+  if you hold a pointer to it, called 'delete' on it.
+
+C:
+
+    int rs_rto_close(rs_rto_t *rs);
+
+  Needs to be called to close connection to device and release
+  resources.
+
+Python:
+
+  Nothing required, handled automatically by class destructor.
+
+
+4. Getting information about the device
+=======================================
+
+C++:
+
+  The following methods return information about the name and model
+  of the installed options:
+
+    std::string const & name() const;
+
+    rs_rto::Model model() const;
+
+    std::vector<rs_rto::Option> options() const;
+
+    bool has_option(rs_rto::Option option) const;
+
+  The name is simply a string containing "RS_RTO".
+
+  The rs_rto::Model enumeration class can assume the following values:
+
+    Model::RTO1002
+    Model::RTO1004
+    Model::RTO1012
+    Model::RTO1014
+    Model::RTO1022
+    Model::RTO1024
+    Model::RTO1044
+
+  The options() method returns an array with the installed options,
+  the rs_rto::Option enumeration class can have the values:
+
+    Option::B1
+    Option::B4
+    Option::B10
+    Option::B18
+    Option::B19
+    Option::B101
+    Option::B102
+    Option::B103
+    Option::B104
+    Option::B200
+    Option::B201
+    Option::B202
+    Option::B203
+    Option::B205
+    Option::K1
+    Option::K2
+    Option::K3
+    Option::K4
+    Option::K5
+    Option::K6
+    Option::K7
+    Option::K8
+    Option::K9
+    Option::K11
+    Option::K12
+    Option::K13
+    Option::K17
+    Option::K21
+    Option::K22
+    Option::K23
+    Option::K24
+    Option::K26
+    Option::K31
+    Option::K40
+    Option::K50
+    Option::K52
+    Option::K55
+    Option::K60
+    Option::U1
+
+  The has_option() method returns if the option passed as the argument
+  is installed in the device.
+
+  To find out what's the maximum available memory (in samples) under
+  the best conditions (typically with only one channel switched on)
+  is use the method
+
+    unsigned long max_memory( ) const;
+
+  To find out about the number of measurement channels use the method
+
+    int num_channels( ) const;
+
+C:
+
+  The corresponding C functions are
+
+    char const * rs_tro_name(rs_rto_t *rs);
+
+    int rs_rto_model(rs_rto_t *rs, int *model);
+
+    int rs_rto_options(rs_rto_t *rs, int **options, size_t *length);
+
+    int rs_rto_has_option(rs_tro_t *rs, int option, bool *is_available);
+
+  The string pointed to by the return value of rs_tro_name() must not be
+  de-allocated and the pointer becomes invalid once rs_rto_close() has
+  been called.
+
+  The model returned via the 'model' pointer argument to rs_tro_model() are
+
+    Model_RTO1002
+    Model_RTO1004
+    Model_RTO1012
+    Model_RTO1014
+    Model_RTO1022
+    Model_RTO1024
+    Model_RTO1044
+
+  The rs_tro_options() function expects a pointer to pointer to int to
+  allow it to return a pointer to an array of ints, and a pointer to a
+  size_t value for returning the length of that array. The values in the
+  returned array can be
+
+    Option_B1
+    Option_B4
+    Option_B10
+    Option_B18
+    Option_B19
+    Option_B101
+    Option_B102
+    Option_B103
+    Option_B104
+    Option_B200
+    Option_B201
+    Option_B202
+    Option_B203
+    Option_B205
+    Option_K1
+    Option_K2
+    Option_K3
+    Option_K4
+    Option_K5
+    Option_K6
+    Option_K7
+    Option_K8
+    Option_K9
+    Option_K11
+    Option_K12
+    Option_K13
+    Option_K17
+    Option_K21
+    Option_K22
+    Option_K23
+    Option_K24
+    Option_K26
+    Option_K31
+    Option_K40
+    Option_K50
+    Option_K52
+    Option_K55
+    Option_K60
+    Option_U1
+
+  The array returned by the function must be de-allocated by the caller!
+
+  The rs_rto_has_option() function takes an option as its second
+  argument and returns via the third if that option is available for
+  the device.
+
+    int rs_rto_has_option( rs_rto_t const * rs, int option,
+                          bool * is_available);
+
+  With
+
+    int rs_rto_max_memory(rs_rto_t const * rs, unsigned long *size);
+
+  it's possible to obtain the maximum memory size (in samples) under the
+  best circumstances.
+
+  The function
+
+    int rs_rto_num_channels(rs_rto_t const * rs, int * count);
+
+  Allows to determine the number of measurement channels.
+
+
+Python:
+
+  In Python both the name, model and list of options information are handled
+  as (read-only) properties while the check for a specific option is a
+  method call (with the option as the only argument). If 'rs' is the class
+  variable, e.g
+
+    >>> print rs.name
+    'RS_RTO'
+    >>> print rs.model
+    RTO1024
+    >>> print rs.options
+    [rs_rto_py.Option.B101]
+    >>> print rs.has_option(Option.K60)
+    False
+    >>> print rs.has_option(Option.B101)
+    True
+
+  Possible values for the model are
+
+    Model.RTO1002
+    Model.RTO1004
+    Model.RTO1012
+    Model.RTO1014
+    Model.RTO1022
+    Model.RTO1024
+    Model.RTO1044
+
+  and for the options
+
+    Option.B1
+    Option.B4
+    Option.B10
+    Option.B18
+    Option.B19
+    Option.B101
+    Option.B102
+    Option.B103
+    Option.B104
+    Option.B200
+    Option.B201
+    Option.B202
+    Option.B203
+    Option.B205
+    Option.K1
+    Option.K2
+    Option.K3
+    Option.K4
+    Option.K5
+    Option.K6
+    Option.K7
+    Option.K8
+    Option.K9
+    Option.K11
+    Option.K12
+    Option.K13
+    Option.K17
+    Option.K21
+    Option.K22
+    Option.K23
+    Option.K24
+    Option.K26
+    Option.K31
+    Option.K40
+    Option.K50
+    Option.K52
+    Option.K55
+    Option.K60
+    Option.U1
+
+  The maximum available memory size (in samples) under the best conditions
+  is a property:
+
+    >>> print rs.max_memory
+    200000000
+
+  Also the number of measurement channels is a property:
+
+    >>> print rs.num_channels
+    4
+
+
+5. Controlling display and keyboard
+===================================
+
+C++:
+
+  These function can be used to control if the display will be updated
+  constantly or just a static image while the device is in remote state
+  and if the keyboard is locked out:
+
+    bool display_emabled() const;
+
+    bool set_display_enabled(bool state);
+
+    bool keyboard_locked() const;
+
+    bool set_keyboard_locked(bool state);
+
+C:
+
+  The orresponding function in C are
+
+    int rs_rto_display_enabled(rs_rto_t const * rs, bool * state);
+
+    int rs_rto_set_display_enabled(rs_rto_t * rs, bool * state);
+
+    int rs_rto_keyboard_locked(rs_rto_t const * rs, bool * state);
+
+    int rs_rto_set_keyboard_locked(rs_rto_t * rs, bool * state);
+
+Python:
+
+  Under Python both settings are implenmented as boolean attributes:
+
+   >>> print rs.display_enabled
+   True
+   >>> rs.display_enabled = False
+   >>> print rs.keyboard_locked
+   False
+   >>> rs.keyboard_locked = True
+
+
+6. Trigger subsystem
+====================
+
+C++:
+
+  The trigger subsystem is accessed via the member class 'trig' of the
+  main 'RS_RTO' class. It has various methods to control the trigger mode,
+  source, level and slope as well as methods for controlling the trigger
+  out output system. Note that only a single edge-trigger can be used with
+  this library.
+
+  There are trigger modes, Trig_Mode::Auto, Trig_Mode::Normal and
+  Trig_Mode::Free_Running. In auto mode after a certain time without
+  an external trigger an acquisition is started anyway. In normal mode
+  acquisitions are only started on an external trigger. And in free-running
+  mode external triggers are disregarded, instead acquisitions are restarted
+  at a high rate. The mode is controlled via he methods of the 'trig' class
+
+    Trig_Mode mode() const;
+
+    Trig_Mode set_mode(Trig_Mode mode);
+
+  The methods
+
+    Channel source() const
+
+    Channel set_source(Channel source);
+
+  control the trigger source channel. These can be Channel:Ch1, Channel::Ch2,
+  Channel::Ch3, Channel::Ch4 (the latter two only for devices with 4 channels)
+  and Channel::Ext, the extrenal trigger input.
+
+  Note that a different trigger level and slope is maintained for each of
+  the possible trigger channels.
+
+  To query or set the trigger level for the currently selected trigger
+  source use
+
+    double level();
+
+    double set_level(double level);
+
+  Since the range of possible trigger level settings depend on a lot of
+  circumstance you can query the minimum and maximum settings fore the
+  currently selected trigger channel with\
+
+    double min_level();
+
+    double max_level();
+
+  You may also query or set the trigger level and the range for channels
+  not currently set as the trigger source with the overloaded methods
+
+    double level(Channel ch);
+
+    double set_level(Channel ch, double level);
+
+    double min_level(Channel ch);
+
+    double max_level(Channel ch);
+
+  The slope of the trigger is controlled via the methods
+
+    Trig_Slope slope() const;
+
+    Trig_Slope slope(Channel ch) const;
+
+    Trig_Slope set_slope(Trig_Slope slope);
+
+    Trig_Slope set_slope(Channel    ch, Trig_Slope slope);
+
+  The methods not expecting a channel argument query or set the slope
+  for the currently set trigger source, the others can be used for any
+  of the possible trigegr channels. The slope is either 'Trig_Slope::Positive
+  or Trig_Slope::Negative.
+
+  To determine or set the trigger position use
+
+    double position();
+
+    double set_position(double pos);
+
+  The position is always relative to the start of the measure waveform.
+  Thus a positive value effects that the measurement of the waveform
+  starts before the trigger (pre-trigger) while negative values result
+  in a delay between the trigger and the start of the measurement.
+
+  The range of values the trigger position can be set to depend on a
+  number of other settings and the extrem values can be queried with
+
+    double earliest_position();
+
+    double latest_position();
+
+  Finally, you may query if the trigger system is in an overloaded state
+  (signal out of measurement range) with
+
+    bool is_overloaded();
+
+  The device can produce a pulse a certain time after a trigger has been
+  received, with is output at the EXT TRIGGER OUT connector. The following
+  methods deal with this.
+
+  To quuery or enable or disable creatio of an trigger out pulse use
+
+    bool out_pulse_state() const;
+
+    bool set_out_pulse_state(bool state);
+
+  The polarity of the produced pulse is controlled with
+
+    Polarity out_pulse_polarity() const;
+
+    Polarity set_out_pulse_polarity(Polarity pol);
+
+  where the polarity is either Polarity::Positive or Polarity::Negative.
+
+  The length of the created pulse can be controlled with
+
+    double out_pulse_length() const;
+
+    double set_out_pulse_length(double len);
+
+  The length can be set between 4 ns and 1 ms.
+
+  The delay betweeen the detection of the trigger and the creation of the
+  trigger out signal is controlled via
+
+    double out_pulse_delay();
+
+    double set_out_pulse_delay(double delay);
+
+  Since the delay time (to be specified in seconds) depends on other
+  settings its minimum and maximum value under the current circumstances
+  can be queried with
+
+    double min_out_pulse_delay();
+
+    double max_out_pulse_delay();
+
+  A final function of the trigger subsystem allows to raise a trigger
+  when running in normal acquisition mode by calling
+
+    void raise();
+
+
+C:
+
+  The finctions for setting the trigger mode are
+
+    int rs_rto_trigger_mode(rs_rto_t const * rs, int * mode );
+
+    int rs_rto_set_trigger_mode(rs_rto_t * rs, int * mode);
+
+  The 'mode' can be either 'Trig_Mode_Auto', 'Trig_Mode_Normal' or
+  'Trig_Mode_Free_Running'.
+
+   To query or set the trigger source chanel use
+
+    int rs_rto_trigger_source(rs_rto_t const * rs, int * soirce);
+
+    int rs_rto_set_trigger_source(rs_rto_t * rs, int * source);
+
+  The possible values for the channel are 'Channel_Ch1', 'Channel_Ch2',
+  'Channel_Ch3', 'Channel_Ch4' (the latter two only for devices with
+  4 channels) or 'Channel_Ext'.
+
+  The yrigger level for the currently selected trigger channel can be
+  queried or set with
+
+    int rs_rto_trigger_level(rs_rto_t * rs, double * level);
+
+    int rs_rto_set_trigger_level(rs_rto_t * rs, double * level);
+
+  The minimum and maximum level for this channel can be obtained with
+
+    int rs_rto_trigger_min_level(rs_rto_t * rs, double * min_level);
+
+    int rs_rto_trigger_max_level(rs_rto_t * rs, double * max_level);
+
+  To query or set the trigger level for other channnels, not currently
+  selected as the trigger source, use
+
+    int rs_rto_trigger_channel_level(rs_rto_t * rs, int channel,
+                                     double * level);
+
+    int rs_rto_set_trigger_channel_level(rs_rto_t * rs, int channel,
+                                         double * level);
+
+  And also the limits for the levels of these channels can be obtained with
+
+     int rs_rto_trigger_channel_min_level(rs_rto_t * rs, int channel,
+                                          double * min_level);
+
+     int rs_rto_trigger_channel_max_level(rs_rto_t * rs, int channel,
+                                          double * max_level);
+
+  To query or set the slope for the currently selected trigger channel use
+
+    int rs_rto_trigger_slope(rs_rto_t const * rs, int * slope);
+
+    int rs_rto_set_trigger_slope(rs_rto_t * rs, int * slope);
+
+  Possible values for the slope are 'Trig_Slope_Positive' and
+  'Trig_Slope_Neagtive'
+
+  To also query or set the slope for channels currently not set as the
+  trigger channel use
+
+    int rs_rto_trigger_channel_slope(rs_rto_t const * rs, int channel,
+                                     int * slope);
+
+    int rs_rto_set_trigger_channel_slope(rs_rto_t * rs, int channel,
+                                         int * slope);
+
+  The trigger position (relative to the start of the measurement) can
+  be controlled with
+
+     int rs_rto_trigger_position(rs_rto_t * rs, double * pos);
+
+     int rs_rto_trigger_set_position(rs_rto_t * rs, double * pos);
+
+  To find out about the extrema that can be set for the trigger position
+  use
+
+     int rs_rto_trigger_earliest_position(rs_rto_t * rs, double * min_pos);
+
+     int rs_rto_trigger_latest_position(rs_rto_t * rs, double * max_pos);
+
+
+  In order to find out if the trigger system is overloaded use
+
+    int rs_rto_trigger_is_overloaded(rs_rto_t * rs, bool * is_overloaded );
+
+  To find out if the output pulse after the trigger is enabled or to
+  enable or disable it use
+
+    int rs_rto_trigger_out_pulse_state(rs_rto_t const * rs, bool * enabled);
+
+    int rs_rto_set_trigger_out_pulse_state(rs_rto_t * rs, bool * enabled);
+
+  The polarity of the output pulse can be queried or set with
+
+    int rs_rto_trigger_out_pulse_polarity(rs_rto_t const * rs, int * pol);
+
+    int rs_rto_set_trigger_out_pulse_polarity(rs_rto_t * rs, int * pol);
+
+  Possible values for the polarity are 'Polarity_Positive' and
+  'Polarity_Negative'
+
+  The length of the output pulse (between 4 ns and 1 ms) is controlled with
+
+    int rs_rto_trigger_out_pulse_length(rs_rto_t const * rs, double * len);
+
+    int rs_rto_set_trigger_out_pulse_length(rs_rto_t * rs, double * len );
+
+  The delay between the trigger and the output pulse can be queried and
+  set with
+
+    int rs_rto_out_pulse_delay(rs_rto_t * rs, double * delay);
+
+    int rs_rto_set_out_pulse_delay(rs_rto_t * rs, double * delay);
+
+  The minimum and maximum possible settings for the delay under the current
+  circumstances are returned by
+
+    int rs_rto_min_out_pulse_delay(rs_rto_t * rs, double * min_delay);
+
+    int rs_rto_max_out_pulse_delay(rs_rto_t * rs, double * max_delay);
+
+  Finally, to force a trigger use
+
+    int rs_rto_trigger_raise(rs_rto_t * rs);
+
+Python:
+
+  In Python most of the methods of the 'trig' subsystem are implemented
+  as properties. The trigger mode is controlled via the 'mode' property
+
+    >>> print rs.trig.mode
+    Auto
+    >>> rs.trig.mode = Trig_Mode.Normal
+
+  Possible mode settings are Trig_Mode.Auto, Trig_Mode.Normal and
+  Trig_Mode.Free_Running.
+
+  The trigger source channel is also a property
+
+    >>> print rs.trig.source
+    Ch1
+    >>> rs.trig.source = Channel.Ext
+
+  Possible trigger channels are Channel.Ch1, Channel.Ch2, Channel.Ch3,
+  Channel.Ch4 (the latter two only for devices with 4 channels) and
+  Channel.Ext.
+
+  The trigger level of the currently selected trigger channel can be accessed
+  via the 'level' property. Also the minimum and maximum values are treated
+  as properties
+
+    >>> print rs.trig.source
+    Ext
+    >>> print rs.trig.level
+    0.1
+    >>> rs.trig.level = 0.25
+    >>> print rs.trig.min_level
+    -6.82
+    >>> print rs.trig.max_level
+    6.86
+
+  To get or set the trigger levels for other channels, not selected at the
+  moment, and including the minimum and maximum possible settings, there are
+  the following methods:
+
+    >>> print rs.trig.get_level( Channel.Ch4 )
+    0.001
+    >>> rs.trig.set_level( Channel.Ch4, 2e-3 );
+    >>> print rs.trig.get_min_level( Channel.Ch4 )
+    -0.25
+    >>> print rs.trig.get_max_level( Channel.Ch4 )
+    0.25
+
+  Of course, these methods also can be used with the currently selected
+  trigger source channel.
+
+  The same applies for the slope. The slope of the currently selected
+  trigger channel can be accessed as a property
+
+    >>> print rs.trig.slope
+    Positive
+    >>> rs.trig.slope = Trig_Slope.Negative
+
+  Those of non-selected channels can be obtained and manipulated using
+  methods:
+
+    >>> print rs.trig.get_slope( Channel.Ch4 )
+    Negative
+    >>> rs.trig.get_slope( Channel.Ch4, Trig_Slope.Positive )
+
+  Possibe settings for the slope are Trig_Slope.Positive and
+  Trig_Slope.Negative.
+
+  The trigger position (as metioned above relative to the start of the
+  waveform, so a negative value means a delay between receipt of the
+  trigger and a positive one is the amount of pre-trigger) is also
+  a property. And it is also possible to query for the limits of the
+  range the trigger position casn be set to under the current circumstances:
+
+    >>> print rs.trig.position
+    5e-07
+    >>> rs.trig.position = 0
+    >>> print rs.trig.earliest_position
+    -99.9999995
+    >>> print rs.trig.latest_position
+    0.01
+
+  To check if the currently selected trigger channel is in overload condition
+  use the 'is_overloaded' property:
+
+    >>> rs.trig.is_overloaded
+    False
+
+  If pulses are output on receipt of triggers is controlled via
+  the 'out_pulse_state' property
+
+    >>> rs.trig.out_pulse_state
+    False
+    >>> rs.trig.out_pulse_state = True
+
+  and its polarity by the 'out_pulse_polarity' property
+
+    >>> print rs.trig.out_pulse_polarity
+    Positive
+    >>> rs.trig.out_pulse_polarity = Polarity.Negative
+
+  It can be set to either Polarity.Positive or Polarity.Negative.
+
+  The length of this pulse (between 4 ns and 1 ms) can be accessed
+  by the 'out_pulse_length' property:
+
+    print rs.trig.out_pulse_length
+    1e-07
+    >>> rs.trig.out_pulse_length = 1e-8
+
+  And the delay of the pulse (afte the trigger) is also a property,
+  with two more for the minimum and maximum settings under the
+  current conditions:
+
+    >>> print rs.trig.out_pulse_delay
+    0.0001
+    >>> rs.trig.out_pulse_delay = 5e-5
+    >>> print rs.trig.min_out_pulse_delay
+    3e-05
+    >>> print rs.trig.max_out_pulse_delay
+    0.000512
+
+  The final method of the 'trig' subsystem raises a single trigger when
+  the device is running in normal acquisition mode:
+
+    >>> rs.trig.raise()
+
+
+7. Acquisition subsystem
+========================
+
+  The acquisition subsystem handles "horizontal" settings like the
+  timebase, resolution and record length as well as the acquisition
+  mode and numbers of averages and segments (in Ultra Segmentation
+  mode) to measure. Then it has methods to start and stop acquisitions
+  and to check if and acquisition is underway. Keep in mind that
+  several of the settings are interdependent, especially timebase,
+  resolution and record length, which in turn also are limited by
+  the available memory and thus the number of channels used (and
+  even the acquisition mode or the type of math function that may
+  be displayed). Some settings also have effects on other subsystems,
+  e.g. the trigger position.
+
+  Normally, the timebase will be kept constant unless a modification
+  is asked for. Switching to a longer timenbase will result, as far
+  as possible by increasing the record length. Only if not enough
+  memory is available the resolution is reduced. But there have
+  been situation were the device itself changed the timebase for
+  reasons which are not documented anywhere. So it is prudent to
+  recheck all these settings before doing a lengthy meaurement...
+
+C++:
+
+  The acquisition subsystem is accessed via the member class 'acq' of the
+  main 'RS_RTO' class. The following describes all implemented methods
+  of this class.a
+
+  The timebase (in s/div) can be queried or set using the methods
+
+    double timebase( );
+
+    double set_timebase( double timebase );
+
+  The limits of the range of timebases that can be set can be obtained
+  via the methods
+
+    double shortest_timebase( ) const;
+
+    double longest_timebase( ) const;
+
+  While the above methods return the absolute limits one often may be
+  interested in the range of timebases which can be set without inducing
+  a change of the resolution. For this use the methods
+
+    double shortest_timebase_const_resolution( );
+
+    double longest_timebase_const_resolution( );
+
+  Beside the timebase an important setting is the time resolution, i.e.
+  the time between two measured data points. While the device uses a
+  fixed frequency ADC, running at 10 GSa/s (which thus is the best possible
+  resolution), it allows to combine several of these measured points to be
+  combined (fixed by the library to be the average of them), resulting in
+  a reduced resolution - which often is more than sufficient for signals
+  with a much lower maximum frequency component. The current setting of
+  the resolution (in 1/s) can be determined or set with the methods
+
+    double resolution( );
+
+    double set_resolution( double res );
+
+  Keep in mind that the resolution may get changed automatically if
+  you select a different timebase or even if you switch on a new
+  channel. To find out the limits of what the resolution can be
+  set to under current circumstances use
+
+    double lowest_resolution( );
+
+    double highest_resolution( );
+
+  The timebase and resolution setting determine the length of a waveform
+  (to 10 times the product of the timebase and resolution). In some cases
+  you may want to control the record length, trading e.g. less points for
+  a reduced resolution. To qeury or set the record length use the methods
+
+    unsigned long record_length( );
+
+    unsigned long set_record_length( unsigned long rec_len );
+
+  Note that the record length can e only set to even values.
+
+  The minimum and maximum possible record lengths can be requested with
+
+    unsigned long min_record_length( ) const
+
+    unsigned long max_record_length( );
+
+  When changing the timebase there's the qustion which point of the
+  waveform remains at the same position as before (i.e. around which
+  horizontal point the displayed curve will "zoomed"). With most other
+  oscilliscopes this is fixed, but for the RTO series this point can
+  be adjusted to any point within the waveform. With the methods
+
+    double reference_position( );
+
+    double set_reference_position( double pos );
+
+  this point (in seconds after the current start of the waveform) can
+  be queried or set. The possible range is 0 to 10 times the timebase. 
+
+  When doing acquisitions you can chose between three modes. In normal
+  mode single waveforms get measured and displayed. Woith average mode
+  a number of repeated measurement of the same waveform is averaged.
+  And in "segmented" mode a number of (typically short) waveforms are
+  measured with very little deadtime in bewteen amd are all stored for
+  later inspection. To find out the current mode or set a new one use
+
+    Acq_Mode mode( ) const
+
+    Acq_Mode set_mode( Acq_Mode mode );
+
+  Possible settings for the mode are Acq_Mode::Normal, Acq_Mode::Average
+  and Acq_Mode::Segmented.
+
+  When doing acquisitions with averaging the number of measurements
+  to be averaged can be controlled with
+
+    unsigned long average_count( ) const
+
+    unsigned long set_average_count( unsigned long cnt );
+
+  The minimum number of averages is 1, the maximun number can be queried with
+
+    unsigned long max_average_count( ) const
+
+  And when doing segmented measurement the number of segments measured
+  is controlled via
+
+    unsigned long segment_count( ) const
+
+    unsigned long set_segment_count( unsigned long cnt );
+
+  The minimum number of segments is 1, the maximum number is returned by
+
+    unsigned long max_segment_count( );
+
+  This number depends strongly on the current settings of the device.
+
+  Acquisitions can be done either continously, i.e. get automatically
+  restarted once one is finished, or the device can stop once an
+  acquisition is done (i.e. in normal mode a single measurement has
+  been done, in averaging mode the number of requested waveforms to
+  be averaged has been measured, or, in segmented mode, the requested
+  number of waveforms has been sampled). The two methods
+
+    void run( )
+
+    void run_single( );
+
+  start such a single acquisition cycle (they're absolutely identical),
+  To start a continous acquisition - which is not possible in segmented
+  acquisition mode - use instead
+
+    void run_continuous( );
+
+  To abort a running acquisition use
+
+    bool stop( );
+
+  The methods returns a true value if an acquisition was actually stopped
+  and false if no acquisition was underway.
+
+  TTo check if an acquisition is running call
+
+    bool is_running( );
+
+  The method
+
+    bool is_waiting_for_trigger( );
+
+  can be used if the device is currently waiting for a trigger during
+  an acquisition.
+
+  The final method
+
+    unsigned long available_segments( );
+
+  returns how many segments can be downloaded. Note that segments are also
+  be produced running in normal and average acquisition mode, they then
+  contain a history of the acquired waveforms.
+
+  The device allows to restrict the download of data to a subset of the
+  measured data. To test if such a restriction is switched on or off
+  or to switch it on or of use
+
+    bool down_limits_enabled();
+
+    bool set_download_limits_enabled(bool state);
+
+  To determine the currently set limits use
+
+    std::vector< double > download_limits();
+
+  with the return value being a vector with two elements, the first for
+  the start and the second for the end.
+
+  To set new limits use
+
+    std::vector< double > set_download_limits(double start, double end);
+
+  Both values are to be given is seconds, relative to the trigger position
+  and must be within the measured waveform. The start limit may not be be
+  larger than the end value minus the cirrently set resolution. Also note
+  that setting these values does not automatically enable download limiting.
+
+  To find out the lowest possible value for the start limit and the highest
+  possible value for the end limit use
+
+    std::vector< double > max_download_limits();
+
+  Keep in mind that changes of the timebase, the trigger position etc. will
+  automatically modify the settings of the limits.
+
+C:
+
+  To retrieve or set the timebase use
+
+    int rs_rto_acq_timebase(rs_rto_t * rs, double * timebase);
+
+    int rs_rto_acq_set_timebase(rs_rto_t * rs, double * timebase);
+
+  The shortesy and longest timebase can be determined with
+
+    int rs_rto_acq_shortest_timebase(rs_rto_t const * rs, double * shortest);
+
+    int rs_rto_acq_longest_timebase(rs_rto_t const * rs, double * longest);
+
+  To find out the shortest and longest timebase setting that doesn't
+  require a change of the time resolution use
+
+    int rs_rto_acq_shortest_timebase_const_resolution(rs_rto_t const * rs,
+                                                      double * shortest);
+
+    int rs_rto_acq_longest_timebase_const_resolution(rs_rto_t const * rs,
+                                                     double * longest);
+
+  The time resolution can be queried or set with
+
+    int rs_rto_acq_resolution(rs_rto_t * rs, double * resolution);
+
+    int rs_rto_acq_set_resolution(rs_rto_t * rs, double * resolution);
+
+  To obtain the lowest and highest resolutin that can be set under the
+  current conditions use
+
+    int rs_rto_acq_lowest_resolution(rs_rto_t * rs, double * lowest);
+
+    int rs_rto_acq_highest_resolution(rs_rto_t * rs, double * highest);
+
+  The record length can be queried or set with
+
+    int rs_rto_acq_record_length(rs_rto_t * rs, unsigned long * length);
+
+    int rs_rto_acq_set_record_length(rs_rto_t * rs, unsigned long * length);
+
+
+  Before setting the record length the minimum and maximum possible values
+  can be determined with
+
+    int rs_rto_acq_min_record_length(rs_rto_t const * rs,
+                                     unsigned long * min_length );
+
+    int rs_rto_acq_max_record_length(rs_rto_t * rs,
+                                     unsigned long * max_length);
+
+  To query or set the horizontal point (in seconds after the start of   
+  the waveform) which remaiins in place on changes of the timebase the
+  functions
+
+    int rs_rto_acq_reference_position(rs_rto_t * rs, doube * pos);
+
+    int rs_rto_acq_set_reference_position(rs_rto_t * rs, double * pos);
+
+  can be used. The allowed values are between 0 and 10 times the current
+  timebase.
+
+  To find out or set the acquisition mode use
+
+    int rs_rto_acq_mode( rs_rto_tconst * rs, int * mode);
+
+    int rs_rto_acq_set_mode(rs_rto_t * rs, int * mode);
+
+  Possible settings are Acq_Mode_Normal, Acq_Mode_Average and
+  Acq_Mode_Segment.
+
+  The number of acquistions can be queried or set with
+
+    int rs_rto_acq_average_count(rs_rto_t const * rs, unsigned long * count );
+
+    int rs_rto_acq_set_average_count( rs_rto_t * rs, unsigned long * count);
+
+  While the lower limit of averages is 1 the upper limiT is returned by
+
+    int rs_rto_acq_max_average_count(rs_rto_t const * rs,
+                                     unsigned long * max_count);
+
+  To obtain or set the number of segments acquired in segmented acquisition
+  mode use
+
+    int rs_rto_acq_segment_count(rs_rto_t const * rs, unsigned long * count);
+
+    int rs_rto_acq_set_segment_count(rs_rto_t * rs, aunsigned long * count);
+
+  The minimum nmber of segments is 1, the maximum number is returned by
+
+    int rs_rto_acq_max_segment_count(rs_rto_t const * rs,
+                                     unsigned long * max_count);
+
+  To start a single acquisition (which ends when as many waveforms have
+  been measured as required) use one of the (identical) functions
+
+    int rs_rto_acq_run(rs_rto_t * rs);
+
+    int rs_rto_acq_run_single(rs_rto_t * rs);
+
+  To start a continuous acquisition (which gets restarted automatically
+  once an acqusition cycle is finished but is not available in segmented
+  acquisition mode) use instead
+
+    int rs_rto_acq_run_continuous(rs_rto_t * rs);
+
+  To stop a running acquisition use
+
+    int rs_rto_acq_stop(rs_rto_t * rs, bool * was_running);
+
+  If the 'was_running' argument isn't a NULL pointer it gets set to true
+  if an acquisition was actually stopped, otherwise to false.
+
+  To check if an acquisition is still underway call
+
+    int rs_rto_acq_is_running(rs_rto_t * rs, bool * is_running);
+
+  To find out if the device is waiting for a trigger during an acquisition
+  this function can be used:
+
+    int rs_rto_acq_is_waiting_for_trigger(rs_rto_t * rs, bool * is_waiting);
+
+  To determine the number of segments available for download call
+
+    int rs_rto_acq_available_segments(rs_rto_t * rs, unsigned long * count);
+
+  To test or set if download limits are enabled use
+
+    int rs_rto_acq_download_limits_enabled(rs_rto_t * rs, bool *state);
+
+    int rs_rto_acq_set_download_limits_enabled(rs_rto_t * rs, bool * state);
+
+  The functions for reading and setting download limits are
+
+    int rs_rto_acq_download_limits(rs_rto_t * rs,
+                                   double * start, double * end);
+
+    int rs_rto_acq_set_download_limits(rs_rto_t * rs,
+                                       double * start, double * end);
+
+  and the functtion for finding out about the maximum possible settings for
+  the limits is
+
+    int rs_rto_acq_max_download_limits(rs_rto_t * rs,
+                                       double * start, double * end);
+
+Python:
+
+  Also in Python the acquisition system is ciontrolled by an 'acq' class,
+  that is a member of the 'RS_RTO' class. Most functionality is implemented
+  via properries of this class.
+
+  The timebase is controlled via the 'timebase' property:
+
+    >>> print rs.acq.timebase
+    1e-08
+    >>> rs.acq.timebase = 1e-7
+
+  So are the minimum and maximum timebases as well as the minimum and
+  maximum timebases that can be set without a change of the resolution:
+
+    >>> print rs.acq.shortest_timebase
+    1e-08
+    >>> print rs.acq.longest_timebase
+    50.0
+    >>> print rs.acq.shortest_timebase_const_resolution
+    1e-08
+    >>> print rs.acq.longest_timebase_const_resolution
+    1e-07
+
+  To control the time resolutiion use the 'resolution' property:
+
+    >>> print rs.acq.resolution
+    1e-09
+    >>> rs.acq.resolution = 1e-8
+
+  The lowest and highest resolution possible under the current circumstances
+  is another property:
+
+    >>> print rs.acq.lowest_resolution
+    1e-05
+    >>> print rs.acq.highest_resolution
+    1e-10
+
+  Note that the highest resolution can never be better than 100 ps due
+  to the acquisition rate of the ADC of 10 GHz.
+
+  The record length is accessible via the 'record_length' property
+
+    >>> print rs.acq.record_length
+    1000
+    >>> rs.acq.record_length = 10000
+
+  The minimum and maximum record lengths possible under the circumstances
+  are also properties
+
+    >>> print rs.acq.min_record_length
+    1000
+    >>> print rs.acq.max_record_length
+    10000
+
+  In casae you wonder why the maximum value is that low: It's for a
+  timebase of 100 ns, so the waveform is 10 times as long, 1 us. And
+  even with the fastest acquisition rate of 10 GSa/s not more than 10000
+  data points can be sampled during <that time.
+
+  The so-called reference position (the point in time of the waveform
+  that stays "in place" when changing the timebase) is another property:
+
+    >>> print rs.acq.reference_position
+    5e-07
+    >>> rs.acq.reference_position = 2e-7
+
+  It can be set to values between 0 and 10 times the timebase.
+
+  The acquisition mode can be controlled via the 'mode' property, with
+  possible values of Ac1_Mde.Normal, Acq_Mode.Averagew and Acq_Mode.Segnented:
+
+    >>> print rs.acq.mode
+    Normal
+    >>> rs.acq.mode = Acq_Mode.Average
+    >>> rs.acq.mode = Acq_Mode.Segmented
+    >>> print rs.acq.mode
+    Segmented
+
+  The number waveforms measured for averaging that will be acquired in
+  average acquisition mode is accessible via the 'average_count' property:
+
+    >>> rs.acq.average_count
+    10
+    >>> rs.acq.average_count = 100
+    >>> rs.acq.max_average_count
+    16777215
+
+  The last line also shows the 'max_average_count' property which cotains
+  the maximum number of averages possible (the lower limit always being 1).
+
+  For segmented acquisition mode the number of segments that will be
+  acquired is set via the 'segment_count' property:
+
+    >>> print rs.acq.segment_count
+    20
+    >>> rs.acq.segment_count = 400
+    >>> rs.acq.max_segment_count
+    100000
+
+  The also used 'max+segment_count' is the maximum number of segments that
+  can be measured under the current conditions. The lower limit is alwats 1.
+
+  To start a single acquisition cycle (after which the device stops) use
+  one of the methods 'run()' or 'run_single()'. To start a continuous
+  acquisition (automatically restarted) use 'run_continous()' (not
+  available in segmented aquisition mode). And to stop an acquisition
+  use the 'stop()' method (which returns if an acquisiton was actualy
+  stopped). To determine if an acquisition is still running use the
+  'is_running' property, and to find out if the device is waiting for
+  a trigger the 'is_waiting_for_trigger' property.
+
+    >>> rs.acq.mode= Acq_Mode.Normal
+    >>> rs.acq.run_continuous()
+    >>> rs.acq.is_running
+    True
+    >>> rs.acq.is_waiting_for_trigger
+    False
+    >>> rs.acq.is_running
+    True
+    >>> rs.acq.stop()
+    True
+    >>> rs.acq.is_running
+    False
+    >>> rs.acq.mode= Acq_Mode.Average
+    >>> rs.acq.run()
+    >>> rs.acq.is_running
+    True
+    >>> rs.acq.is_running
+    False
+
+  Finally, to find out how many segments have been acquired (and are
+  thus ready for download) check the 'available_segments' property
+
+    >>> print rs.acq.available_segments
+    23077
+
+  (The rather large number of segments contains the history of previously
+  acquired waveforms - also when normal or average acquisition mode is
+  used.).
+
+  Enabling or disabling (and testing for the state) of download limiting
+  is done via a property:
+
+    >>> print rs.acq.download_limits_enabled
+    False
+    >>> rs.acq.download_limits_enabled = True
+
+  Also the limits are a property with a list (of two elements) value
+
+    >>> print rs.acq.download_limits
+    [-5e-08, 5e-08]
+    >>> rs.acq.download_limits = [-1e-8, 1e-8 ]
+    >>> print rs.acq.download_limits
+    [-1e-08, 1e-08]
+    >>> rs.acq.download_limits = [-1e-8, 0, 1e-8 ]
+    >>> print rs.acq.download_limits
+    [-1e-08, 0.0]
+
+  If the list used for setting the property contains more than two values
+  the superfluous ones are silently discarded.
+
+  Finally, also the maximum values for the start and end limuts is a
+  list property:
+
+    >>> print rs.acq.max_download_limits
+    [-5e-08, 5e-08]
+
+
+8. Channels subsystem
+=====================
+
+  In C++ and Python all channels (measurement channels, external trigger
+  channel and math channels) with their properties are  all instances
+  of a 'chan' class. They are accessible via a class 'chans' that is
+  a member of the 'RS_RTO' class and has some similarities to an array.
+  You get at the individual channels using the typical array notation,
+  i.e. by indexing within square braces, '[' and ']'. As indices the
+  following enumaeration values for the channels have to be used
+
+C++:
+
+    Channel::Ext       # external trigger channel
+    Channel::Ch1
+    Channel::Ch2
+    Channel::Ch3       # only for devices with 4 channels
+    Channel::Ch4       # only for devices with 4 channels
+    Channel::Math1
+    Channel::Math2
+    Channel::Math3
+    Channel::Math4
+
+  For example to print the offset of teh first input channel, in C++
+  you might use
+
+    std::cout << rs.chans[ Channel::Ch1 ].offset() << std::endl;
+
+Python:
+
+    Channel.Ext
+    Channel.Ch1
+    Channel.Ch2
+    Channel.Ch3
+    Channel.Ch4
+    Channel.Math1
+    Channel.Math2
+    Channel.Math3
+    Channel.Math4
+
+  In Python you might use
+
+    >>> print rs.chans[ Channel.Ch1 ].offset
+
+  to print out the offset of the first input channel.
+
+C:
+
+   In C all functions for accessing channel properties require an
+   integer argument for the channel, for which the following pre-defined
+   macros should be used:
+
+    Channel_Ext
+    Channel_Ch1
+    Channel_Ch2
+    Channel_Ch3
+    Channel_Ch4
+    Channel_Math1
+    Channel_Math2
+    Channel_Math3
+    Channel_Math4
+
+  You could use
+
+    double offset;
+    rs_rto_channel( rs, Channel_Ch1, &offset );
+    printf( "%f\n", offset );
+
+  to print out the offset of the first input channel.
+
+
+9. Channel subsystems
+=====================
+
+  There are quite a number of methods/functions/attributes for dealing
+  with channels. Naturally, not all methods can be applied to all types
+  of channels (e.g. setting a mathematical function only makes sense
+  for math channels). Trying to apply a method to a channel that either
+  does not exist or does not support the method results in an "invalid
+  argument" exception (or the function returning the corresponding error
+  code in C).
+
+C++:
+
+ To test if a channel exists use
+
+    bool exists( ) const;
+
+  It returns always true except for measurement channels 3 and 4 on devices
+  that only have 2 measurement channels.
+
+  To obtain a string with the name of the channel use
+
+    std::string name( ) const;
+
+  It returns a name in the form of e.g. "Channel::Ch1".
+
+  The on/off state of a channel can be queried and set using the methods
+
+    bool state( );
+
+    bool set_state( bool state );
+
+  All measurement channels as well the external trigger input channel have
+  a method for testing if they are in overloaded state:
+
+    bool is_overloaded( bool reset );
+
+  The (optional) argument indicates if an attempt should be made to reset
+  the overload condition (defaults to true).
+
+  For measurement channels the scale (in V/div) can be obtained or
+  set with
+
+    double scale( );
+
+    double set_scale( double scale );
+
+  The minimum and maximum scale setting for the measurement channel under
+  the current conditions can requested with
+
+    double min_scale( );
+
+    double max_scale( );
+
+  For measurement channels also a constant voltage offset can be added.
+  To query the current offset, set a new offset or obtain the minimum
+  and maximum pffset valuse under the current circumstances the methods
+
+    double offset( );
+
+    double set_offset( double offset );
+
+    double min_offset( );
+
+    double max_offset( );
+
+  Measurement channels also can be vertically positioned. To query or
+  set the vertical position *within +/-5 div) use
+
+    double position( ) const;
+
+    double set_position( double pos );
+
+  For all measurement channels and the external trigger input channel the
+  input coupling can be tested or set with
+
+    Coupling coupling( ) const;
+
+    Coupling set_coupling( Coupling coup );
+
+  The coupling can be either Coupling::DC50 (DC, 50 Ohm), Coupling::DC1M
+  (DC, 1 MOhm) or Coupling::AC.
+
+  For measurement channels also several different bandwidths can be used.
+  To query or set the bandwidth use
+
+    Bandwidth bandwidth( ) const;
+
+    Bandwidth set_bandwidth( Bandwidth bw );
+
+  Possible settings are Bandwidth::Full, Bandwidth::MHz20, Bandwidth::MHz200
+  and Bandwidth::MHz800. Note that a bandwidth of 800 MHz is only possible
+  with DC 50 coupling and is not available at all for the models RTO1002
+  and RTO10004.
+
+  The external trigger input channel allows to set a low- or high-pass
+  filter. To test which filter is in use and change it use
+
+    Filter_Type filter_type( ) const;
+
+    Filter_Type set_filter_type( Filter_Type type );
+
+  Possible settings are Filter_Type::Off, Filter_Type::Low_Pass and
+  Filter_Type::High_Pass.
+
+  To determine or set the cut-off frequency of the filter of the external
+  trigger input channel use
+
+    Filter_Cut_Off cut_off( ) const;
+
+    Filter_Cut_Off set_cut_off( Filter_Cut_Off cut_off );
+
+  Possible settings for the cut-off frequency are Filter_Cut_Off::kHz5,
+  Filter_Cut_Off::kHz50 and Filter_Cut_Off::MHz50.
+
+  After an acquisition the measured (or computed) data can be fetched
+  from measurement and math channels. In preparation to doing so you
+  can request data about (typically) the time of the first and the last
+  point (relative to the trigger) and the number of data points. These
+  are returned in a structure of type Data_Header using
+
+    Data_Header header( );
+
+  The Data_Header structure is defined in the libraries header file as
+
+    struct Data_Header {
+        double start;
+        double end;
+        unsigned long length;
+    };
+
+  To request the data (in V for measurement channels) of the currently
+  stored waveform use
+
+    std::vector< double > data( );
+
+  If you've done an acquisition in segmented acquisition mode you can
+  obtain all the measured waveforms with
+
+    std::vector< std::vector< double > > segment_data(unsigned long start,
+                                                      unsigned long count);
+
+  The two arguments to specify the (zero-based) index of the first segment
+  and the number of segments to be downloaded. If 'count' is omited (or 0)
+  it defaults to "all segments from 'start' and if 'start' is also omited
+  downloads starts with the first avaialable segment. If the sum of 'start'
+  and 'count' is larger than the number of available segments (as reported
+  by the 'available_segments' property of the acquisition subsystem) a
+  std::invalid_argument exception will be thrown.
+
+  Note that this method may also be used to download all stored history
+  waveforms after an acquisition in normal or averaged acquisition mode.
+  But keep in mind that the length of the history is not limited by what's
+  been set by the segment_count() of the trigger system and can be very
+  large (and thus will require very long to download from the device).
+  If in any doubt check the number with the avaiable_segments() method
+  of the trigger subsystem.
+
+  Finally, for math channels functions can be defined that control what
+  data these channels calculate. See the manual for the device for the
+  details of how such functions must be defined. To obtain the currently
+  set function use
+
+    std::string function( );
+
+  It returns an empty string if no function has been set for that math
+  channel. To set a new function use
+
+    std::string set_function( std::string const & );
+
+  The function will abort with an std::invalid_argument exception if the
+  device deems the function to be not acceptable.
+
+C:
+
+  Note that all fucntions for accessing the properties of channels require
+  an integer number for the channel as their second argument. Preferably
+  use the macros for the channel numbers documented above.
+
+  To test if a channel exists use
+
+    int rs_rto_channel_exists(rs_rto_t const  * rs, int ch, bool * exists);
+
+  The name of a channel (inm the form of e.g. "Channel_Ch1" is returned
+  by
+
+    int rs_rto_channel_name(rs_rto_t const * rs, int ch, char ** name);
+
+  Note that it's the callers responsibility to deallocate the memory
+  used for the string and returned via the 'name' argument!
+
+  To test if a channel is on or off or to switch it on or off use
+
+    int rs_rto_channel_state(rs_rto_t * rs, int ch, bool * state);
+
+    int rs_rto_channel_set_state(rs_rto_t * rs, int ch, bool * state);
+
+  To test if one of the measurement channels or the external trigger input
+  channel is in overload condition use
+
+    int rs_rto_channel_is_overloaded(rs_rto_t * rs, int ch,
+                                     bool* is_overloaded);
+
+  This will also automatically try to reset that condition.
+
+  For measurement channels the scaling (in V/div) can be queried or set
+  with
+
+    int rs_rto_channel_scale(rs_rto_t * rs, int ch, double * scale);
+
+    int rs_rto_channel_set_scale(rs_rto_t * rs, int ch, double * scale);
+
+  The minimum, and maximum values the scale can be set to under the
+  current circumstances are obtained with
+
+    int rs_rto_channel_min_scale(rs_rto_t * rs, int ch, double * min_scale);
+
+    int rs_rto_channel_max_scale(rs_rto_t * rs, int ch, double * max_scale);
+
+  A constant voltage offset for measurement channels can be queried or set
+  with
+
+    int rs_rto_channel_offset(rs_rto_t * rs, int ch, double * offset);
+
+    int rs_rto_channel_set_offset(rs_rto_t * rs, int ch, double * offset);
+
+  The minimum and maximum values that can currently be set for the offset
+  are returned by
+
+    int rs_rto_channel_min_offset(rs_rto_t * rs, int ch, double * min_offset);
+
+    int rs_rto_channel_max_offset( rs_rto_t * rs, int ch, double * max_offset);
+
+  Measurement channels also can be vertiocally shifted (within +/- 5 div).
+  This position can be queried and set with
+
+    int rs_rto_channel_position(rs_rto_t * rs, int ch, double * pos);
+
+    int rs_rto_channel_set_position(rs_rto_t * rs,int ch, double * pos);
+
+  For measurement channels as well as for the external trigger input channel
+  the input coupling can be obtained or modified using
+
+    int rs_rto_channel_coupling(rs_rto_t * rs, int ch, int * coup);
+
+    int rs_rto_channel_set_coupling(rs_rto_t * rs, int ch, int * coup);
+
+  The values the 'coup' argument can have are Coupling_DC50 (DC, 50 Ohm),
+  Coupling_DC1M (DC, 1 MOhm) and Coupling_AC.
+
+  For measurement channels a upper limit for the input bandwidth can
+  be queried or set:
+
+    int rs_rto_channel_bandwidth(rs_rto_t const * rs, int ch, int * bw);
+
+    int rs_rto_channel_set_bandwidth(rs_rto_t * rs, int ch, int * bw);
+
+  Possible settings for the bandwidth are Bandwidth_Full, Bandwidth_Mhz20,
+  Bandwidth_MHz200 and Bandwidth_MHz800 (only for DC 50 coupling and not
+  available for the models RTO1002 and RTO1004).
+
+  For the external triger input channel a low- or high-pass filter can
+  be used. To determine or set the type of filter use
+
+    int rs_rto_channel_filter_type(rs_rto_t const * rs, int ch, int * ft );
+
+    int rs_rto_channel_set_filter_type(rs_rto_t * rs, int ch, int * ft);
+
+  The filter type argument can be either Filter_Type_Off, Filter_Type_Low_Pass
+  or Filter_Type_High_Pass.
+
+  The cut-off filter frequency for the filter of the external trigger input
+  channel can be determined or set with
+
+    int rs_rto_channel_cut_off(rs_rto_t const * rs, int ch, int * fco);
+
+    int rs_rto_channel_set_cut_off(rs_rto_t * rs, int ch, int * fco);
+
+  Allowed settings for the cut-off frequency setting are Filter_Cut_Off_kHz5,
+  Filter_Cut_Off_kHz50 and Filter_Cut_Off_MHz50.
+
+  Data sets can be downloaded from the measurement channels and the math
+  channels. Berfore doing so one may download a structure of type Data_Header_t
+  with information about (typically) the start end end time of the data
+  (relative to the trigger) and the number of points in the data set.
+  This can be done with
+
+    int rs_rto_channel_header(rs_rto_t * rs, int ch, Data_Header_t * header);
+
+  The Data_Header_t structure (you must supply a pointer to an existing
+  instance of such a structure is defined in the header file for the library
+  and is defined like this:
+
+    struct Data_Header_t {
+        double startl;
+        double end;
+        unsigned long length;
+    }
+
+  To download the data of a channel use
+
+    int rs_rto_channel_data(rs_rto_t * rs, int ch,
+                            double ** data, size_t * length);
+
+  The function returns a newly allocated array of doubles with 'length'
+  elements. It is the callers responsibility to deallocate that array
+  when done with it.
+
+  To download the data from an acquisition done in segmented acquisition mode
+  use:
+
+    int rs_rto_channel_segment_data(rs_rto_t * rs, int ch,
+                                    double *** data, size_t * num_segments,
+                                    size_t * length);
+
+    int rs_rto_channel_segment_data_subset(rs_rto_t * rs, int ch,
+                                           unsigned long start_index,
+                                           unsigned long count,
+                                           double *** data,
+                                           size_t * num_segments,
+                                           size_t * length);
+
+  The second function allows to download only a subset of the segments,
+  starting at the (zero-based) start index and downloading only 'count'
+  segments. Make sure that the sum of 'start_index' and 'count' does not
+  exceed the number of avaialable segments as reported by the
+  rs_rto_acq_available_segments() function.
+
+  Via the 'data' argument an array (with 'num_segments' elements) of arrays
+  of double (each with 'length' elements is returned. The memory for this
+  arraty of arrays has to be deallocated by the caller. To do so first
+  call free() on the first pointer in 'data', then free() on data itself.
+  Example:
+
+    double **data;
+    size_t num_segments, length;
+    rs_rto_channel_segment_data(rs, Channel_Ch1, &data, &num_segments,
+                                &length);
+    ....
+    free(*data),
+    free(data);
+
+  Also consider the comments to the equivalent C++ method 'data()' outlined
+  above.
+
+  Math channels need to be set-up with a function, telling them what kind
+  calculations they are supposed to do. To find out about the currently
+  active function use
+
+    int rs_rto_channel_function(rs_rto_t * rs, int ch, char ** func);
+
+  The string returned via the last argument must be deallocated by the caller.
+  It will be the empty string if no function has been set for the math channel.
+
+  To set a new function use
+
+    int rs_rto_channel_set_function(rs_rto_t * rs, int ch, char const *func);
+
+  See the manual for the device to find out what kind of functions can be set.
+  If the device rejects the math function FSC3_INVALID_ARG will be returned.
+
+Python:
+
+  To test if a channel exists at all use the 'exists' peroperty:
+
+    >>> print rs.chans[ Channel.Ch1 ].exists
+    True
+
+  To get the name of a channel as a string use
+
+    >>> print rs.chans[ Channel.Ch1 ].name
+    Channel.Ch1
+  
+  The scale (in V/div) of a measurement channel is accessible as a property.
+  And so are the minimum and maximum possible scale settings for the channel
+  under the current circumstances.
+
+    >>> print rs.chans[ Channel.Ch1 ].scale
+    0.05
+    >>> rs.chans[ Channel.Ch1 ].scale = 0.1
+    >>> print rs.chans[ Channel.Ch1 ].min_scale
+    0.001
+    >>> print rs.chans[ Channel.Ch1 ].max_scale
+    10.0
+
+  The constant voltage offset of a measurement channel and its minimum and
+  maximum setting are also properties:
+
+    >>> print rs.chans[ Channel.Ch1 ].offset
+    0.0
+    >>> rs.chans[ Channel.Ch1 ].offset = 0.1
+    >>> print rs.chans[ Channel.Ch1 ].min_offset
+    -0.65
+    >>> print rs.chans[ Channel.Ch1 ].max_offset
+    0.65
+
+  Beside an offset a measurement channel can also be vertically positioned
+  within +/- 5 div:
+
+    >>> print rs.chans[ Channel.Ch1 ].position
+    0.0
+    >>> rs.chans[ Channel.Ch1 ].position = 4.2
+
+  All measurement channels and also the external trigger input channel
+  have a 'coupling' property:
+
+    >>> print rs.chans[ Channel.Ch1 ].coupling
+    AC
+    >>> rs.chans[ Channel.Ch1 ].coupling = Coupling.DC1M
+
+  The coupling can be either Coupling.DC50 (DC, 50 Ohm), Coupling.DC1M
+  (DC, 1 MOhm) or Coupling.AC.
+
+  For measurement channels also several different bandwidths can be used.
+  to access them use the 'bandwidth' property:
+
+    >>> print rs.chans[ Channel.Ch1 ].bandwidth
+    Full
+    >>> rs.chans[ Channel.Ch1 ].bandwidth = Bandwidth.MHz20
+
+  Possible settings are Bandwidth.Full, Bandwidth.MHz20, Bandwidth.MHz200
+  and Bandwidth.MHz800. Note that a bandwidth of 800 MHz is only possible
+  with DC 50 coupling and is not available at all for the models RTO1002
+  and RTO10004.
+
+  The external trigger input channel allows to set a low- or high-pass
+  filter. it can be accessed via the 'filter_type' property:
+
+    >>> print rs.chans[ Channel.Ext ].filter_type
+    Off
+    >>> rs.chans[ Channel.Ext ].filter_typea = Filter_Type.Low_Pass
+
+  Possible settings are Filter_Type.Off, Filter_Type.Low_Pass and
+  Filter_Type.High_Pass.
+
+  To determine or set the cut-off frequency of the filter of the external
+  trigger input channel use its 'cut_off' property:
+
+    >>> print rs.chans[ Channel.Ext ].cut_off
+    kHz50
+    >>> rs.chans[ Channel.Ext ].cut_off = Filter_Cut_Off.MHz50
+
+  Possible settings for the cut-off frequency are Filter_Cut_Off.kHz5,
+  Filter_Cut_Off.kHz50 and Filter_Cut_Off.MHz50.
+
+  After an acquisition the measured (or computed) data can be fetched
+  from measurement and math channels. In preparation to doing so you
+  can request data about (typically) the time of the first and the last
+  point (relative to the trigger) and the number of data points. These
+  are returned as a class by using the 'header()' method. The returned
+  class has three properties, 'start' for (typically) the start time
+  of the waveform (relative to the trigger), 'end' for the end time
+  and 'length' for the number of data points.
+
+    >>> header = rs.chans[ Channel.Ch1 ].header()
+    >>> print header.start
+    -5e-07
+    >>> print header.end
+    5e-07
+    >>> print header.length
+    10000
+
+  The 'data() method is used to download the data of a channel as a list:
+
+    >>> data = rs.chans[ Channel.Ch1 ].data()
+    >>> len(data)
+    10000
+    >>> print len(data)
+    10000
+    >>> print data[0]
+    0.000239315719227
+    >>> print data[9999]
+    0.000100358207419
+
+  Data from an acquisition in semented acquisition mode can be downloaded
+  using the 'segment_data()' method (for measurement channels only). It
+  returns a list of lists of data:
+
+    >>> rs.acq.mode = Acq_Mode.Segmented
+    >>> rs.acq.segment_count = 10
+    >>> rs.acq.run()
+    >>> rs.acq.is_running
+    False
+    >>> seg_data = rs.chans[ Channel.Ch1 ].segment_data()
+    >>> print len(seg_data)
+    10
+    >>> print len(seg_data[0])
+    10000
+    >>> print seg_data[0][0]
+    -0.000790506601334
+    >>> print seg_data[9][9999]
+    -0.00474306941032
+
+  Please also see the comments in the description of the C++ version
+  of this method!
+
+  Finally, for math channels functions can be defined that control what
+  data these channels calculate. See the manual for the device for the
+  details of how such functions must be defined. The functions are
+  accessed via the 'function' method:
+
+    >>> print rs.chans[ Channel.Math1 ].function
+    c1w1+c2w1
+    >>> rs.chans[ Channel.Math1 ].function = 'fftmag(c1w1)'
+
+  This example shows that the function for the first math channel was set
+  to the sum of the first waveforms of the first and second measurement
+  channel. It then was changed so that the first math channel calculates
+  the FFT magnitude of the first measurement channel.
+
+
+10. Utilities
+=============
+
+C:
+
+  The C library has the function
+
+    char const * rs_smb100a_last_error(rs_smb100a_t const *rs);
+
+  It can be used to obtain an error message when one of the other functions
+  return, indicating that the call failed. The string pointed to must not
+  be de-allocated and the pointer becomes invalid once rs_smb100a_close()
+  has been called.
+
+
+11. Problems
+============
+
+While the transfer speed of data isn't too bad (typically at least
+10 MB/s) the time for transfering data is, especially for small
+data sets, severely increased by some internal overhead in the
+oscilloscope. Typically, it takes 30 to 40 ms before a transfer
+starts at all after the device has been sent the command to
+transfer data. For short curves with a few thousands of sample
+points this completely dominates the time required for a data
+set to arrive at the computer.
+
+And it's even worse when transfering a set of segments. Here
+the combined overhead for selecting a segment and starting the
+transfer typically is 70 to 100 ms.
