@@ -186,13 +186,15 @@ Var_T * digitizer_start_acquisition( Var_T * v );
 Var_T * digitizer_channel_state( Var_T * v );
 Var_T * digitizer_sensitivity( Var_T * v );
 Var_T * digitizer_offset( Var_T * v );
-Var_T * digitizer_get_curve( Var_T * v );
 Var_T * digitizer_channel_position( Var_T * v );
 Var_T * digitizer_coupling( Var_T * v );
 Var_T * digitizer_bandwidth_limiter( Var_T * v );
 Var_T * digitizer_ext_channel_filter( Var_T * v );
+Var_T * digitizer_get_curve( Var_T * v );
 Var_T * digitizer_get_area( Var_T * v );
 Var_T * digitizer_get_amplitude( Var_T * v );
+Var_T * digitizer_get_segments( Var_T * v );
+Var_T * digitizer_available_segments( Var_T * v );
 Var_T * digitizer_trigger_channel( Var_T * v );
 Var_T * digitizer_trigger_level( Var_T * v );
 Var_T * digitizer_trigger_slope( Var_T * v );
@@ -1854,6 +1856,98 @@ Var_T *
 digitizer_get_amplitude( Var_T * v )
 {
     return get_calculated_curve_data( v, amplitude );
+}
+
+
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_get_segments( Var_T * v )
+{
+    if ( ! v )
+    {
+        print( FATAL, "Missing argument(s).\n" );
+        THROW( EXCEPTION );
+    }
+
+    long fch = get_strict_long( v, "channel" );
+    v = vars_pop( v );
+    int rch = fsc2_ch_2_rto_ch( fch );
+
+    if ( rch == Channel_Ext )
+    {
+        print( FATAL, "Can't get curve from external trigger input "
+               "channel.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        long ns = rs->acq.num_segments;
+        long np = lrnd( rs->acq.timebase / rs->acq.resolution );
+
+        Var_T * nv = vars_push_matrix( FLOAT_REF, 2, ns, np );
+
+        for ( long i = 0; i < ns; i++ )
+        {
+            double * dp = nv->val.vptr[ i ]->val.dpnt;
+            for ( long j = 0; j < np; j++ )
+                *dp++ = 1.0e-7 * sin( M_PI * j / 122.0 );
+        }
+
+        return nv;
+    }
+
+    double ** data;
+    size_t num_segments;
+    size_t length;
+
+    CLOBBER_PROTECT( data );
+
+    check( rs_rto_channel_segment_data( rs->dev, rch, &data, &num_segments,
+                                        &length ) );
+
+    Var_T * nv;
+
+    TRY
+    {
+        nv = vars_push_matrix( FLOAT_REF,  2,
+                               ( long ) num_segments, ( long ) length );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        free( *data );
+        free( data );
+        RETHROW;
+    }
+
+    for ( size_t i = 0; i < num_segments; i++ )
+        memcpy( nv->val.vptr[ i ]->val.dpnt, data[ i ],
+                length * sizeof **data );
+
+    free( *data );
+    free( data );
+
+    return nv;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_available_segments( Var_T * v  UNUSED_ARG )
+{
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, rs->acq.num_segments );
+
+    unsigned long cnt;
+    check( rs_rto_acq_available_segments( rs->dev, &count ) );
+    return vars_push( INT_VAR, ( long ) count );
 }
 
 

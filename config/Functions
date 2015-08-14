@@ -246,6 +246,8 @@ digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
 /* The following function are onluy supported for the Rhode&Schwarz
    RTO series of digitizers */
 
+digitizer_get_segments, 1, EXP;
+digitizer_available_segments, 0, EXP;
 digitizer_display_enable, -1, EXP;
 digitizer_stop, 0, EXP;
 digitizer_timebase_limits, 0, EXP;
