@@ -934,7 +934,7 @@ rs_rto_trigger_set_out_pulse_length( rs_rto_t * rs,
  *----------------------------------------------------*/
 
 int
-rs_rto_triiger_out_pulse_delay( rs_rto_t * rs,
+rs_rto_trigger_out_pulse_delay( rs_rto_t * rs,
                                 double   * delay )
 {
     try
