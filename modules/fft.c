@@ -121,7 +121,6 @@ fft_real( Var_T * v )
                *b;
         double norm;
 
-
         too_many_arguments( v );
 
         /* Sanity checks */
@@ -139,6 +138,7 @@ fft_real( Var_T * v )
         }
 
         n = r->len;
+        nv = vars_push_matrix( FLOAT_REF, 2, 2, n / 2 + 1 );
 
         /* Set up a pointer to the input data. If those are double values
            we can use the array from the variable directly, otherwise we
@@ -180,22 +180,6 @@ fft_real( Var_T * v )
         /* Do the FFT */
 
         fftw_execute( plan );
-
-        /* Setup array to be returned */
-
-        TRY
-        {
-            nv = vars_push_matrix( FLOAT_REF, 2, 2, n / 2 + 1 );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            fftw_destroy_plan( plan );
-            fftw_free( out );
-            if ( r->type == INT_ARR )
-                fftw_free( in );
-            RETHROW;
-        }
 
         /* Copy data over from result array into new variable */
 
