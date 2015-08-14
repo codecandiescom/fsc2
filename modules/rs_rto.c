@@ -229,6 +229,11 @@ static void get_waveform( int           rch,
                           RS_RTO_WIN  * w,
                           double     ** data,
                           size_t      * length );
+static void get_segments( int            rch,
+                          RS_RTO_WIN   * w,
+                          double     *** data,
+                          size_t       * num_segments,
+                          size_t       * length );
 static Var_T * get_calculated_curve_data( Var_T  * v,
                                           double   ( handler )( double *,
                                                                 size_t ) );
@@ -1798,6 +1803,8 @@ digitizer_get_curve( Var_T * v )
     if ( ( v = vars_pop( v ) ) )
          w = get_window( v );
 
+    too_many_arguments( v );
+
     if ( FSC2_MODE != EXPERIMENT )
     {
         size_t np;
@@ -1874,7 +1881,6 @@ digitizer_get_segments( Var_T * v )
     }
 
     long fch = get_strict_long( v, "channel" );
-    v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
     if ( rch == Channel_Ext )
@@ -1884,10 +1890,20 @@ digitizer_get_segments( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    RS_RTO_WIN * w = NULL;
+    if ( ( v = vars_pop( v ) ) )
+         w = get_window( v );
+
+    too_many_arguments( v );
+
     if ( FSC2_MODE != EXPERIMENT )
     {
         long ns = rs->acq.num_segments;
-        long np = lrnd( rs->acq.timebase / rs->acq.resolution );
+        long np;
+        if ( ! w )
+            np = lrnd( rs->acq.timebase / rs->acq.resolution );
+        else
+            np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
 
         Var_T * nv = vars_push_matrix( FLOAT_REF, 2, ns, np );
 
@@ -1907,8 +1923,7 @@ digitizer_get_segments( Var_T * v )
 
     CLOBBER_PROTECT( data );
 
-    check( rs_rto_channel_segment_data( rs->dev, rch, &data, &num_segments,
-                                        &length ) );
+    get_segments( rch, w, &data, &num_segments, &length );
 
     Var_T * nv;
 
@@ -3159,6 +3174,59 @@ get_waveform( int           rch,
     {
         free( *data );
         print( FATAL, "Curve has no data.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+static
+void
+get_segments( int            rch,
+              RS_RTO_WIN   * w,
+              double     *** data,
+              size_t       * num_segments,
+              size_t       * length )
+{
+    bool ch_state;
+    check( rs_rto_channel_state( rs->dev, rch, &ch_state ) );
+    if ( ! ch_state )
+    {
+        print( FATAL, "Can't get data from channel which isn't "
+               "switched on.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bool with_limits = false;
+    if ( w )
+    {
+        double ws = w->start;
+        double we = w->end;
+        int ret = rs_rto_acq_set_download_limits( rs->dev, &ws, &we );
+        if ( ret != FSC3_SUCCESS )
+        {
+            if ( ret != FSC3_INVALID_ARG )
+                check( ret );
+
+            print( FATAL, "Window does not fit waveform range.\n" );
+            THROW( EXCEPTION );
+        }
+
+        with_limits = true;
+    }
+    
+    check( rs_rto_acq_download_limits_enabled( rs->dev, &with_limits ) );
+           
+    check( rs_rto_channel_segment_data( rs->dev, rch, data,
+                                        num_segments, length ) );
+
+    if ( ! *length )
+    {
+        free( **data );
+        free( *data );
+        print( FATAL, "Segments have no data.\n" );
         THROW( EXCEPTION );
     }
 }
