@@ -1945,7 +1945,7 @@ digitizer_available_segments( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE != EXPERIMENT )
         return vars_push( INT_VAR, rs->acq.num_segments );
 
-    unsigned long cnt;
+    unsigned long count;
     check( rs_rto_acq_available_segments( rs->dev, &count ) );
     return vars_push( INT_VAR, ( long ) count );
 }
