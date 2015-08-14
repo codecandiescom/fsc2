@@ -504,14 +504,13 @@ static bool
 spectrapro_275_read( char   * buf,
 					 size_t * len )
 {
-    size_t to_fetch = *len;
+    volatile size_t to_fetch = *len;
     size_t already_read = 0;
     char *lbuf;
     long llen = *len;
     bool done = UNSET;
 
 
-    CLOBBER_PROTECT( to_fetch );
     CLOBBER_PROTECT( already_read );
     CLOBBER_PROTECT( done );
 

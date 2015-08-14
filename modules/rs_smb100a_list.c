@@ -59,7 +59,7 @@ list_cleanup( void )
  *----------------------------------------------------*/
 
 void
-list_select( char const * name )
+list_select( char const * volatile name )
 {
     if ( name && *name )
         list_check_list_name( name );
@@ -118,7 +118,7 @@ void
 list_setup_A( double const * freqs,
               double const * pows,
               long           len,
-              char   const * name )
+              char   const * volatile name )
 {
     // Check arguments
 
@@ -221,7 +221,7 @@ void
 list_setup_B( double const * freqs,
               double         pow,
               long           len,
-              char   const * name )
+              char   const * volatile name )
 {
     double * pows = T_malloc( len * sizeof *pows );
     CLOBBER_PROTECT( pows );
@@ -250,7 +250,7 @@ list_setup_B( double const * freqs,
 void
 list_setup_C( double const * freqs,
               long           len,
-              char   const * name )
+              char   const * volatile name )
 {
     list_setup_B( freqs, rs->pow.req_pow, len, name );
 }
@@ -400,9 +400,9 @@ list_index( void )
  *----------------------------------------------------*/
 
 bool
-list_delete_list( char const * name )
+list_delete_list( char const * volatile name )
 {
-    char const * n;
+    char const * volatile n;
 
     if ( ! name || ! *name )
     {
@@ -459,7 +459,7 @@ list_get_all( void )
     size_t length = 10000;
     char * reply = T_malloc( length );
     CLOBBER_PROTECT( reply );
-    char * r;
+    char * volatile r;
 
     TRY
     {

@@ -187,10 +187,8 @@ mw_attenuator_name( Var_T * v  UNUSED_ARG )
 Var_T *
 mw_attenuator_load_calibration( Var_T * v )
 {
-    FILE *tfp = NULL;
+    FILE * volatile tfp = NULL;
 
-
-    CLOBBER_PROTECT( tfp );
 
     if ( hjs_attenuator.is_step )
     {

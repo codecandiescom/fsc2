@@ -30,10 +30,10 @@
 #define FAILURE           -1
 
 
-void vicp_open( const char * /* dev_name       */,
-                const char * /* address        */,
-                long         /* us_timeout     */,
-                bool         /* quit_on_signal */  );
+void vicp_open( const char    * /* dev_name       */,
+                const char    * /* address        */,
+                volatile long   /* us_timeout     */,
+                bool            /* quit_on_signal */  );
 
 void vicp_close( void );
 

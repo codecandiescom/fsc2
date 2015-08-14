@@ -88,7 +88,7 @@ rs690_do_update( void )
 static bool
 rs690_update_pulses( bool flag )
 {
-    int i, j;
+    volatile int i, j;
     int l, m;
     Function_T *f;
     Pulse_T *p;
@@ -96,9 +96,6 @@ rs690_update_pulses( bool flag )
     Pulse_T **pm_elem;
     Pulse_Params_T *pp;
 
-
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( j );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {

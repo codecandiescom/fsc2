@@ -705,11 +705,10 @@ agilent_53181a_get_coupling( void )
 {
     char reply[ 25 ];
     long length = sizeof reply - 1;
-    int coup = -1;
+    volatile int coup = -1;
     double val = 0.0;
 
 
-    CLOBBER_PROTECT( coup );
     CLOBBER_PROTECT( val );
 
     agilent_53181a_talk( ":INP1:COUP?", reply, &length );

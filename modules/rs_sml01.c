@@ -976,11 +976,9 @@ synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
 Var_T *
 synthesizer_use_table( Var_T * v )
 {
-    FILE *tfp = NULL;
+    FILE * volatile tfp = NULL;
     char *tfname;
 
-
-    CLOBBER_PROTECT( tfp );
 
     /* Try to figure out the name of the table file - if no argument is given
        use the default table file, otherwise use the user supplied file name */

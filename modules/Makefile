@@ -455,7 +455,7 @@ cleanup:
 		$(MAKE) -f Makefile.$$n clean;                          \
     done
 	$(RM) $(RMFLAGS) *.o *_lexer.c me_dio_*.c cscope.out *.make \
-		  xvi11_clnt.c vxi11_svc.c vxi11_xdr.c vxi11.h *~
+		  vxi11_clnt.c vxi11_svc.c vxi11_xdr.c vxi11.h *~
 
 clean:
 	$(MAKE) cleanup

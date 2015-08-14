@@ -460,23 +460,23 @@ enum Impedance inp_set_impedance( enum Impedance imp );
 
 void list_init( void );
 void list_cleanup( void );
-void list_select( char const * name );
+void list_select( char const * volatile name );
 void list_setup_A( double const * freqs,
                    double const * pows,
                    long           len,
-                   char   const * name );
+                   char   const * volatile name );
 void list_setup_B( double const * freqs,
                    double         pows,
                    long           len,
-                   char   const * name );
+                   char   const * volatile name );
 void list_setup_C( double const * freqs,
                    long           len,
-                   char   const * name );
+                   char   const * volatile name );
 void list_start( bool relearn_list );
 void list_stop( bool keep_rf_on );
 int list_length( void );
 int list_index( void );
-bool list_delete_list( char const * name );
+bool list_delete_list( char const * volatile name );
 char * list_get_all( void );
 double * list_frequencies( void );
 double * list_powers( void );

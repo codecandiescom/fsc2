@@ -235,8 +235,10 @@ main( void )
        for connections on the socket. */
 
     char c = ACK;
-    write( STDOUT_FILENO, &c, 1 );
+    ssize_t dummy = write( STDOUT_FILENO, &c, 1 );
     close( STDOUT_FILENO );
+
+    if ( dummy == -1 ) { /* silence stupid compiler warning */ }
 
     /* Wait for connections and quit when no clients exist anymore (the
        first client will connect more or less immediately since it's our

@@ -92,7 +92,7 @@ Var_T *func_get_long( const char * /* name */,
                       int        * /* acc  */,
                       bool         /* flag */  );
 
-Var_T *func_call( Var_T * /* f */ );
+Var_T *func_call( Var_T * volatile /* f */ );
 
 void close_all_files( void );
 

@@ -121,8 +121,8 @@ static unsigned short get_ushort( const unsigned char * p );
 int
 send_mail( const char * subject,
            const char * from  UNUSED_ARG,
-           const char * cc_to,
-           const char * to,
+           const char * volatile cc_to,
+           const char * volatile to,
            FILE *       fp )
 {
     FILE *mail;

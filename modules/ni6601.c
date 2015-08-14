@@ -54,8 +54,8 @@ Var_T * counter_dio_read(                 Var_T * v );
 Var_T * counter_dio_write(                Var_T * v );
 
 
-static Var_T * ni6601_get_data( long   to_fetch,
-                                double wait_secs );
+static Var_T * ni6601_get_data( volatile long   to_fetch,
+                                volatile double wait_secs );
 
 static int ni6601_counter_number( long ch );
 
@@ -832,8 +832,8 @@ counter_get_buffered_counts( Var_T * v )
  *---------------------------------------------------------------*/
 
 static Var_T *
-ni6601_get_data( long   to_fetch,
-                 double wait_secs )
+ni6601_get_data( volatile long   to_fetch,
+                 volatile double wait_secs )
 {
     ssize_t ret = 0;
     int quit_on_signal;
@@ -843,16 +843,13 @@ ni6601_get_data( long   to_fetch,
     unsigned long *buf;
     long *final_buf;
     ssize_t i;
-    long us_wait = 0;
+    volatile long us_wait = 0;
     struct timeval before,
                    after;
     Var_T *nv;
 
 
     CLOBBER_PROTECT( received );
-    CLOBBER_PROTECT( us_wait );
-    CLOBBER_PROTECT( to_fetch );
-    CLOBBER_PROTECT( wait_secs );
 
     if ( wait_secs > 0.0 )
         us_wait = lrnd( wait_secs * 1.0e6 );

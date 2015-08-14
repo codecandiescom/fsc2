@@ -29,11 +29,11 @@ extern bool Dont_Save;                 /* defined in func.c */
 static bool STD_Is_Open = UNSET;
 
 
-static Var_T * f_openf_int( Var_T * /* v */,
-                            bool    /* do_compress */ );
+static Var_T * f_openf_int( Var_T         * /* v */,
+                            volatile bool   /* do_compress */ );
 
-static Var_T * f_getf_int( Var_T * /* v */,
-                           bool    /* do_compress */ );
+static Var_T * f_getf_int( Var_T         * /* v */,
+                           volatile bool   /* do_compress */ );
 
 static Var_T * f_clonef_int( Var_T * /* v */,
                              bool    /* do_compress */ );
@@ -59,8 +59,8 @@ static long print_browser( int          browser,
                            const char * comment );
 
 static long print_include( int          fid,
-                           char       * cp,
-                           const char * comment,
+                           char       * volatile cp,
+                           const char * volatile comment,
                            const char * cur_file );
 
 static long T_fprintf( long         fn,
@@ -223,22 +223,20 @@ f_opengzf( Var_T * v )
 
 static
 Var_T *
-f_openf_int( Var_T * v,
-             bool    do_compress )
+f_openf_int( Var_T         * v,
+             volatile bool   do_compress )
 {
     Var_T *cur;
     long i;
     char *fn;
     char *m;
     struct stat stat_buf;
-    FILE *fp = NULL;
-    gzFile gp = NULL;
-    File_List_T *old_File_List = NULL;
+    FILE * volatile fp = NULL;
+    gzFile volatile gp = NULL;
+    File_List_T * volatile old_File_List = NULL;
 
 
     CLOBBER_PROTECT( fn );
-    CLOBBER_PROTECT( fp );
-    CLOBBER_PROTECT( old_File_List );
 
     /* If there was a call of 'f_save()' etc. without a previous call to
        'f_getf()' or 'f_openf()' then 'f_save()' (or one of its brethrens)
@@ -489,24 +487,22 @@ f_getgzf( Var_T * v )
 
 static
 Var_T *
-f_getf_int( Var_T * v,
-            bool    do_compress )
+f_getf_int( Var_T        * v,
+           volatile bool   do_compress )
 {
     Var_T *cur;
     long i;
     char *s[ ] = { NULL, NULL, NULL, NULL, NULL };
-    FILE *fp = NULL;
-    gzFile gp = NULL;
+    FILE * volatile fp = NULL;
+    gzFile volatile gp = NULL;
     struct stat stat_buf;
     char *r = NULL;
-    char *new_r, *m;
-    File_List_T *old_File_List = NULL;
+    char * new_r;
+    char *m;
+    File_List_T * volatile old_File_List = NULL;
 
 
-    CLOBBER_PROTECT( fp );
-    CLOBBER_PROTECT( gp );
     CLOBBER_PROTECT( r );
-    CLOBBER_PROTECT( old_File_List );
 
     /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
        then 'f_save()' already called 'f_getf()' by itself and now does not
@@ -986,17 +982,12 @@ batch_mode_file_open( char * name,
                       bool   do_compress )
 {
     unsigned long cn = 0;
-    char *new_name = NULL;
+    char * volatile new_name = NULL;
     struct stat stat_buf;
-    FILE *fp = NULL;
-    gzFile gp = NULL;
-    File_List_T *old_File_List = NULL;
+    FILE * volatile fp = NULL;
+    gzFile volatile gp = NULL;
+    File_List_T * volatile old_File_List = NULL;
 
-
-    CLOBBER_PROTECT( new_name );
-    CLOBBER_PROTECT( old_File_List );
-    CLOBBER_PROTECT( fp );
-    CLOBBER_PROTECT( gp );
 
     /* If no prefered file name is given (e.g. if we came here from f_getf())
        we make one up from the name of the currently executed EDL script
@@ -1906,7 +1897,7 @@ do_printf( long    file_num,
     char *fmt_start,
          *fmt_end,
          *sptr;
-    Var_T *cv;
+    Var_T * volatile cv;
     long count = 0;
     char store;
     int need_vars;
@@ -1915,7 +1906,6 @@ do_printf( long    file_num,
 
     CLOBBER_PROTECT( fmt_end );
     CLOBBER_PROTECT( sptr );
-    CLOBBER_PROTECT( cv );
     CLOBBER_PROTECT( count );
 
     sptr = v->val.sptr;
@@ -2343,22 +2333,20 @@ print_browser( int          browser,
 
 static long
 print_include( int          fid,
-               char       * cp,
-               const char * comment,
-               const char * cur_file )
+               char       * volatile cp,
+               const char * volatile   comment,
+               const char  * cur_file )
 {
-    char delim = '\0';
-    char *ep;
-    FILE *finc = NULL;
+    volatile char delim = '\0';
+    char * ep;
+    FILE * finc = NULL;
     char buf[ PRINT_BUF_SIZE ];
     static long count;
     static int level;
-    char *file_name = NULL;
+    char * volatile file_name = NULL;
     struct passwd *pwe;
 
 
-    CLOBBER_PROTECT( delim );
-    CLOBBER_PROTECT( file_name );
     CLOBBER_PROTECT( cp );
 
     if ( ! strcmp( cur_file, EDL.files->name ) )

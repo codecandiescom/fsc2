@@ -45,22 +45,16 @@ f_screate( Var_T * var )
     Var_T *v = var;
     Iobject_T *new_io = NULL;
     Iobject_T *ioi;
-    Iobject_Type_T type;
-    double start_val,
-           end_val;
-    double step = 0.0;
-    char *label = NULL;
-    char *help_text = NULL;
+    volatile Iobject_Type_T type;
+    volatile double start_val,
+                    end_val;
+    volatile double step = 0.0;
+    char * volatile label = NULL;
+    char * volatile help_text = NULL;
 
 
     CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( new_io );
-    CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( start_val );
-    CLOBBER_PROTECT( end_val );
-    CLOBBER_PROTECT( step );
-    CLOBBER_PROTECT( label );
-    CLOBBER_PROTECT( help_text );
 
     /* We need at least the type of the slider and the minimum and maximum
        value */

@@ -70,7 +70,8 @@ ep385_do_update( void )
 static bool
 ep385_update_pulses( bool flag )
 {
-    int i, j;
+    int i;
+    volatile int j;
     int l, m;
     Function_T *f;
     Pulse_T *p;
@@ -80,7 +81,6 @@ ep385_update_pulses( bool flag )
 
 
     CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( j );
     CLOBBER_PROTECT( f );
     CLOBBER_PROTECT( ch );
 

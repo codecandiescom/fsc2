@@ -42,11 +42,11 @@ static Var_T * f_mchanged_child( Var_T * v );
  *---------------------------------------------------------*/
 
 Var_T *
-f_mcreate( Var_T * var )
+f_mcreate( Var_T * volatile var )
 {
     Var_T *v = var;
     Var_T *lv;
-    long num_strs = 0;
+    volatile long num_strs = 0;
     size_t len = 0;
     Iobject_T *new_io = NULL;
     Iobject_T *ioi = NULL;
@@ -54,7 +54,6 @@ f_mcreate( Var_T * var )
 
 
     CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( num_strs );
     CLOBBER_PROTECT( new_io );
     CLOBBER_PROTECT( ioi );
 

@@ -107,6 +107,9 @@ Exception_Types_T get_exception_type( const char * /* file */,
    putting automatic variable that could be clobbered into registers.
    The following hack seems to do the trick for all gcc versions. */
 
+/*
+#define CLOBBER_PROTECT( a )
+*/
 #define CLOBBER_PROTECT( a )                                  \
      do {                                                     \
          unsigned char *xI3_2sYzii = ( unsigned char * ) &a;  \

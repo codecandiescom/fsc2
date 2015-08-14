@@ -93,18 +93,18 @@ static PCI_MIO_16E_1_AI_TRIG_ARGS trig;
  *---------------------------------------------------------------------*/
 
 Var_T *
-daq_ai_channel_setup( Var_T * v )
+daq_ai_channel_setup( Var_T * volatile v )
 {
     int channel;
     double range;
-    int *channels = NULL;
-    double *ranges = NULL;
+    int * volatile channels = NULL;
+    double * volatile ranges = NULL;
     int type;
-    NI_DAQ_AI_TYPE *types = NULL;
+    NI_DAQ_AI_TYPE * volatile types = NULL;
     int pol;
-    NI_DAQ_BU_POLARITY *polarities = NULL;
+    NI_DAQ_BU_POLARITY * volatile polarities = NULL;
     int dither_enable;
-    NI_DAQ_STATE *dither_enables = NULL;
+    NI_DAQ_STATE * volatile dither_enables = NULL;
     int num_channels = 0;
     double bpr_list[ ] = { 10.0, 5.0, 2.5, 1.0, 0.5, 0.25, 0.1, 0.05 };
     double upr_list[ ] = { 10.0, 5.0, 2.0, 1.0, 0.5, 0.2, 0.1 };
@@ -119,19 +119,12 @@ daq_ai_channel_setup( Var_T * v )
     int ret = NI_DAQ_OK;
 
 
-    CLOBBER_PROTECT( channels );
-    CLOBBER_PROTECT( ranges );
     CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( types );
     CLOBBER_PROTECT( pol );
-    CLOBBER_PROTECT( polarities );
     CLOBBER_PROTECT( dither_enable );
-    CLOBBER_PROTECT( dither_enables );
-    CLOBBER_PROTECT( num_channels );
+   CLOBBER_PROTECT( num_channels );
     CLOBBER_PROTECT( old_range_index );
     CLOBBER_PROTECT( ret );
-    CLOBBER_PROTECT( v );
-
 
     if ( v == NULL )
     {

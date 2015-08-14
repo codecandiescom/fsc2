@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -66,7 +66,7 @@ int splitlex_destroy( void );
 
 /* local functions */
 
-static bool section_parser( int section );
+static bool section_parser( volatile int section );
 
 
 %}
@@ -186,7 +186,7 @@ bool
 scan_main( const char * name,
            FILE       * fp )
 {
-    bool split_error;
+    volatile bool split_error;
     int d_fd;
 
 
@@ -281,10 +281,8 @@ scan_main( const char * name,
  *--------------------------------------------------------------------*/
 
 static bool
-section_parser( int section )
+section_parser( volatile int section )
 {
-    CLOBBER_PROTECT( section );
-
     TRY
     {
         do

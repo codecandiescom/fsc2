@@ -433,13 +433,15 @@ pm_max_deviation( double        freq,
             ind = 0;
             break;
 
-        case MOD_MODE_NORMAL :
-            ind = 1;
-            break;
-
         case MOD_MODE_HIGH_DEVIATION :
             ind = 2;
             break;
+
+        case MOD_MODE_NORMAL :
+        default :
+            ind = 1;
+            break;
+
     }
 
     for ( size_t i = 0; i < sizeof mod_ranges / sizeof *mod_ranges; i++ )

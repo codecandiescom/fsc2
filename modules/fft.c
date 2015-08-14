@@ -64,7 +64,7 @@ fft_real( Var_T * v )
           *nv;
     int n;
     fftw_plan plan;
-    double *dp;
+    double * dp;
     int i;
           
 
@@ -115,14 +115,12 @@ fft_real( Var_T * v )
 
     if ( ! c )     /* forward transformation */
     {
-        double *in;
+        double * in;
         fftw_complex *out = NULL;
         double *a,
                *b;
         double norm;
 
-
-        CLOBBER_PROTECT( in );
 
         too_many_arguments( v );
 
@@ -345,7 +343,7 @@ fft_real( Var_T * v )
         fftw_destroy_plan( plan );
         fftw_free( out );
         fftw_free( in );
-     }
+    }
 
     return nv;
 }
@@ -476,19 +474,17 @@ fft_complex( Var_T * v )
 {
 	fftw_complex *data;
 	fftw_plan     plan;
-	Var_T        *r,
-		         *c;
-	double       *dp,
-                 *rp,
-		         *cp;
-	int           dir;
-	int           n;
-	int           i;
-	Var_T         *nv;
-
+	Var_T         *r,
+		          *c;
+	double        *dp,
+                  *rp,
+		          *cp;
+	volatile int   dir;
+	int            n;
+	int            i;
+	Var_T          *nv;
 
     CLOBBER_PROTECT( dp );
-    CLOBBER_PROTECT( dir );
 
 	if ( v == NULL )
 	{

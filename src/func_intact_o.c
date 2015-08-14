@@ -43,26 +43,19 @@ Var_T *
 f_ocreate( Var_T * var )
 {
     Var_T *v = var;
-    Iobject_Type_T type;
-    char *label = NULL;
-    char *help_text = NULL;
-    char *form_str = NULL;
+    volatile Iobject_Type_T type;
+    char * volatile label = NULL;
+    char * volatile help_text = NULL;
+    char * volatile form_str = NULL;
     Iobject_T *new_io = NULL;
     Iobject_T *ioi;
-    long lval = 0;
-    double dval = 0.0;
-    char *sptr = NULL;
+    volatile long lval = 0;
+    volatile double dval = 0.0;
+    char * volatile sptr = NULL;
 
 
     CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( label );
-    CLOBBER_PROTECT( help_text );
-    CLOBBER_PROTECT( form_str );
     CLOBBER_PROTECT( new_io );
-    CLOBBER_PROTECT( lval );
-    CLOBBER_PROTECT( dval );
-    CLOBBER_PROTECT( sptr );
 
     /* At least the type of the input or output object must be specified */
 

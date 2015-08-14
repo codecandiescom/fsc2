@@ -83,15 +83,10 @@ dg2020_do_update( void )
 bool
 dg2020_reorganize_pulses( bool flag )
 {
-    int i;
-    int j;
     Function_T *f;
     Pulse_T *p;
 
-
-    CLOBBER_PROTECT( i );
-
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( volatile int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = dg2020.function + i;
 
@@ -115,7 +110,7 @@ dg2020_reorganize_pulses( bool flag )
         }
         CATCH( EXCEPTION )
         {
-            for ( j = 0; j <= i; j++ )
+            for ( int j = 0; j <= i; j++ )
             {
                 f = dg2020.function + j;
                 f->pulse_params = T_free( f->pulse_params );
@@ -198,7 +193,7 @@ dg2020_reorganize_pulses( bool flag )
 
     dg2020_shape_padding_check_2( );
 
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
         dg2020_commit( dg2020.function + i, flag );
 
     return OK;

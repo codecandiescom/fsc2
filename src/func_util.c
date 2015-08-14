@@ -5042,9 +5042,10 @@ f_spike_rem( Var_T * v )
     double m, stdev = 0.0, mean = 0.0;
     double r;
     double sigmas = 5.0;
-    ssize_t *ol_indices = NULL;
-    ssize_t ol_len = 0, ol_count = 0;
-    long max_spike_width = 3;
+    ssize_t * volatile ol_indices = NULL;
+    volatile ssize_t ol_len = 0;
+    ssize_t ol_count = 0;
+    volatile long max_spike_width = 3;
     Var_T *nv;
 
 
@@ -5052,10 +5053,7 @@ f_spike_rem( Var_T * v )
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( stdev );
     CLOBBER_PROTECT( mean );
-    CLOBBER_PROTECT( ol_indices );
-    CLOBBER_PROTECT( ol_len );
     CLOBBER_PROTECT( ol_count );
-    CLOBBER_PROTECT( max_spike_width );
 
     if ( v == NULL )
     {

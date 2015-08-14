@@ -82,19 +82,16 @@ accept_new_data( bool empty_queue )
 {
     char *buf;
     int type;
-    int dim = 0;
-    struct timeval time_struct;
-    double start_time = 0.0;
+    volatile int dim = 0;
+    volatile double start_time = 0.0;
 
-
-    CLOBBER_PROTECT( dim );
-    CLOBBER_PROTECT( start_time );
 
     /* Get the time we arrived here, it's later used to avoid spending too
        much time in the loop for accepting data sets */
 
     if ( ! empty_queue )
     {
+        struct timeval time_struct;
         gettimeofday( &time_struct, NULL );
         start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
     }
@@ -171,6 +168,7 @@ accept_new_data( bool empty_queue )
 
         if ( ! empty_queue )
         {
+            struct timeval time_struct;
             gettimeofday( &time_struct, NULL );
             if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
                  - start_time >= MAX_ACCEPT_TIME )

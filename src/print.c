@@ -1189,20 +1189,19 @@ eps_make_scale( FILE * fp,
     double rwc_delta,           /* distance between small ticks (in rwc) */
            order,               /* and its order of magnitude */
            mag;
+    volatile double d_start_fine; /* position of first small tick (in points) */
     double d_delta_fine,        /* distance between small ticks (in points) */
-           d_start_fine,        /* position of first small tick (in points) */
            d_start_medium,      /* position of first medium tick (in points) */
-           d_start_coarse,      /* position of first large tick (in points) */
-           cur_p;               /* loop variable with position */
-    int medium_factor,          /* number of small tick spaces between */
-        coarse_factor;          /* medium and large tick spaces */
+           d_start_coarse;      /* position of first large tick (in points) */
+    volatile int medium_factor, /* number of small tick spaces between */
+                 coarse_factor; /* medium and large tick spaces */
     int medium,                 /* loop counters for medium and large ticks */
         coarse;
     double rwc_start = 0,       /* rwc value of first point */
            rwc_start_fine,      /* rwc value of first small tick */
            rwc_start_medium,    /* rwc value of first medium tick */
            rwc_start_coarse;    /* rwc value of first large tick */
-    double rwc_coarse;
+    volatile double rwc_coarse;
     double x, y;
     char lstr[ 128 ];
     double s2d[ 3 ];
@@ -1211,12 +1210,8 @@ eps_make_scale( FILE * fp,
     char *label;
 
 
-    CLOBBER_PROTECT( d_start_fine );
-    CLOBBER_PROTECT( medium_factor );
-    CLOBBER_PROTECT( coarse_factor );
     CLOBBER_PROTECT( medium );
     CLOBBER_PROTECT( coarse );
-    CLOBBER_PROTECT( rwc_coarse );
     CLOBBER_PROTECT( x );
 
     if ( dim == 1 )
@@ -1376,7 +1371,7 @@ eps_make_scale( FILE * fp,
 
         /* Draw all the ticks and numbers */
 
-        for ( cur_p = d_start_fine; cur_p < w;
+        for ( volatile double cur_p = d_start_fine; cur_p < w;
               medium++, coarse++, cur_p += d_delta_fine )
         {
             x = cur_p + x_0;
@@ -1427,7 +1422,7 @@ eps_make_scale( FILE * fp,
 
         /* Draw all the ticks and numbers */
 
-        for ( cur_p = d_start_fine; cur_p < h;
+        for ( volatile double cur_p = d_start_fine; cur_p < h;
               medium++, coarse++, cur_p += d_delta_fine )
         {
             y = cur_p + y_0;
@@ -1467,7 +1462,8 @@ eps_make_scale( FILE * fp,
                 }
                 TRY_SUCCESS;
             }
-            CATCH( OUT_OF_MEMORY_EXCEPTION ) { }
+            CATCH( OUT_OF_MEMORY_EXCEPTION )
+            { }
         }
 
         /* Make the color scale */
@@ -1478,7 +1474,7 @@ eps_make_scale( FILE * fp,
 
         fprintf( fp, "%.2f %.2f m 0 %.2f rl s\n", x - 1.0, y_0, h );
 
-        for ( cur_p = d_start_fine; cur_p < h;
+        for ( volatile double cur_p = d_start_fine; cur_p < h;
               medium++, coarse++, cur_p += d_delta_fine )
         {
             y = cur_p + y_0;
@@ -1856,7 +1852,7 @@ print_comm( FILE * fp )
 static char **
 split_into_lines( int * num_lines )
 {
-    char **lines = NULL;
+    char ** volatile lines = NULL;
     char *cp;
     int nl;
     int cur_size = GUESS_NUM_LINES;
@@ -1865,7 +1861,6 @@ split_into_lines( int * num_lines )
     ptrdiff_t count;
 
 
-    CLOBBER_PROTECT( lines );
     CLOBBER_PROTECT( nl );
     CLOBBER_PROTECT( cur_size );
     CLOBBER_PROTECT( i );

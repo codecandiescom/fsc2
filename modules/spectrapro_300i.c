@@ -628,12 +628,9 @@ monochromator_groove_density( Var_T * v )
 Var_T *
 monochromator_load_calibration( Var_T * v )
 {
-    char *calib_file = NULL;
-    FILE *cfp = NULL;
+    char * volatile calib_file = NULL;
+    FILE * volatile cfp = NULL;
 
-
-    CLOBBER_PROTECT( calib_file );
-    CLOBBER_PROTECT( cfp );
 
     if ( v == NULL )
     {

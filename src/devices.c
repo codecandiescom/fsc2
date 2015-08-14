@@ -33,7 +33,7 @@ device_add( const char * name )
 {
     Device_Name_T *dl;
     char *dev_name;
-    char *real_name = NULL;
+    char * volatile real_name = NULL;
     const char *search_name;
     char *lib_name = NULL;
     struct stat buf;
@@ -44,8 +44,6 @@ device_add( const char * name )
     char *ldc;
     size_t pathmax = get_pathmax( );
 
-
-    CLOBBER_PROTECT( real_name );
 
     dev_name = string_to_lower( T_strdup( name ) );
 

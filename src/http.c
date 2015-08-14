@@ -221,11 +221,13 @@ http_check( void )
 
         reply[ 1 ] = '\n';
 
+        ssize_t dummy = 0;
+
         switch ( query )
         {
             case 'S' :                             /* state of the program ? */
                 reply[ 0 ]  = ( char ) Fsc2_Internals.state + '0';
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                dummy = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'W' :                       /* wich windows are displayed ? */
@@ -241,12 +243,12 @@ http_check( void )
                         reply[ 0 ] = ( G_2d.is_cut ? '7' : '3' );
                 }
 
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                dummy = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'C' :            /* which 2D curve is currently displayed ? */
                 reply[ 0 ] = ( char ) ( G_2d.active_curve + 1 ) + '0';
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                dummy = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'E' :             /* send the contents of the error browser */
@@ -271,6 +273,8 @@ http_check( void )
                          "server.\n", query, query );
 #endif
         }
+
+        if ( dummy == -1 ) { /* silence stupid compiler warning */ }
     }
 }
 
@@ -297,16 +301,20 @@ http_send_error_browser( int pd )
     if ( ( i = fl_get_browser_maxline( b ) - MAX_LINES_TO_SEND  ) < 0 )
         i = 0;
 
+    ssize_t dummy = 0;
+
     while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
     {
         if ( *l != '\0' )
-            write( pd, l, strlen( l ) );
+            dummy = write( pd, l, strlen( l ) );
         else
-            write( pd, &space, 1 );
-        write( pd, &newline, 1 );
+            dummy = write( pd, &space, 1 );
+        dummy = write( pd, &newline, 1 );
     }
 
-    write( pd, &newline, 1 );
+    dummy = write( pd, &newline, 1 );
+
+    if ( dummy == -1 ) { /* silence stupid compiler warning */ }
 }
 
 
@@ -326,6 +334,8 @@ http_send_picture( int pd,
 
     reply[ 1 ] = '\n';
 
+    ssize_t dummy = 0;
+
     /* If the server asks for a window that isn't shown anymore we send a '0'
        to indicate that it has to send the "Not available" picture instead of
        the one the client is looking for. */
@@ -336,7 +346,7 @@ http_send_picture( int pd,
          || ( type == 3 && ! G_2d.is_cut ) )
     {
         reply[ 0 ] = '0';
-        write( pd, reply, 2 );
+        dummy = write( pd, reply, 2 );
         return;
     }
 
@@ -356,9 +366,9 @@ http_send_picture( int pd,
         dump_window( type, tmp_fd );
 
         reply[ 0 ] = '1';
-        write( pd, reply, 2 );
-        write( pd, filename, strlen( filename ) );
-        write( pd, reply + 1, 1 );
+        dummy = write( pd, reply, 2 );
+        dummy = write( pd, filename, strlen( filename ) );
+        dummy = write( pd, reply + 1, 1 );
 
         TRY_SUCCESS;
     }
@@ -371,10 +381,12 @@ http_send_picture( int pd,
         }
 
         reply[ 0 ] = '0';
-        write( pd, reply, 2 );
+        dummy = write( pd, reply, 2 );
     }
 
     close( tmp_fd );
+
+    if ( dummy == -1 ) { /* silence stupid compiler warning */ }
 }
 
 

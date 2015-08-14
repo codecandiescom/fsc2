@@ -306,17 +306,14 @@ static inline void vicp_set_length( unsigned char * header,
  *-------------------------------------------------------------*/
 
 void
-vicp_open( const char * dev_name,
-           const char * address,
-           long         us_timeout,
-           bool         quit_on_signal )
+vicp_open( const char    * dev_name,
+           const char    * address,
+           volatile long   us_timeout,
+           bool            quit_on_signal )
 {
     int           fd;
     unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
     ssize_t       bytes_written;
-
-
-    CLOBBER_PROTECT( us_timeout );
 
     if ( vicp.handle >= 0 )
     {

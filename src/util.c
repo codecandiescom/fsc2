@@ -790,12 +790,16 @@ filter_edl( const char * name,
              || dup2( pd[ 1 ], STDOUT_FILENO ) == -1
              || dup2( ed[ 1 ], STDERR_FILENO ) == -1 )
         {
+            ssize_t dummy;
             if ( errno == EMFILE )
-                write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-                       "running out of system resources.\n", 71 );
+                dummy = write( pd[ 1 ], "\x03\nStarting the test procedure "
+                               "failed, running out of system resources.\n",
+                               71 );
             else
-                write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-                       "internal error detected.\n", 63 );
+                dummy = write( pd[ 1 ], "\x03\nStarting the test procedure "
+                               "failed, internal error detected.\n", 63 );
+
+            if ( dummy == -1 ) { /* silence stupid compiler warning */ }
 
             fclose( fp );
             close( pd[ 1 ] );
@@ -835,8 +839,10 @@ filter_edl( const char * name,
        single byte to the child so it knows we have its PID. */
 
     close( pdt[ 0 ] );
-    write( pdt[ 1 ], &c, 1 );
+    ssize_t dummy = write( pdt[ 1 ], &c, 1 );
     close( pdt[ 1 ] );
+
+    if ( dummy == -1 ) { /* silence stupid compiler warning */ }
 
     /* Close write side of the pipes, we're only going to read */
 
@@ -1471,13 +1477,12 @@ fsc2_fline( FILE * fp )
     char *line;
     char *p;
     size_t buf_len;
-    size_t rem_len;
+    volatile size_t rem_len;
     size_t len = 0;
     size_t offset;
 
 
     CLOBBER_PROTECT( buf_len );
-    CLOBBER_PROTECT( rem_len );
     CLOBBER_PROTECT( line );
     CLOBBER_PROTECT( p );
 

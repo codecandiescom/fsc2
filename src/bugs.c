@@ -120,12 +120,12 @@ bug_report_callback( FL_OBJECT * a,
     fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
     cmd = get_string( "ulimit -a -S >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    int dummy = system( cmd );
     T_free( cmd );
 
     cmd = get_string( "echo >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    dummy = system( cmd );
     T_free( cmd );
 
     /* Append current disk usage to the file to detect problems due to a
@@ -133,7 +133,7 @@ bug_report_callback( FL_OBJECT * a,
 
     cmd = get_string( "df >> %f", filename );
     fflush( tmp );
-    system( cmd );
+    dummy = system( cmd );
     T_free( cmd );
 
     /* Assemble the command for invoking the editor */
@@ -161,7 +161,7 @@ bug_report_callback( FL_OBJECT * a,
 
     do
     {
-        system( cmd );
+        dummy = system( cmd );
         res = fl_show_choices( "Please choose one of the following options:",
                                3, "Send", "Forget", "Edit", 1 );
     } while ( res == 3 );
@@ -171,6 +171,8 @@ bug_report_callback( FL_OBJECT * a,
     fflush( tmp );
 
     unlink( filename );                /* delete the temporary file */
+
+    if ( dummy == -1 ) { /* silence stupdo compiler warning */ }
 
     /* Send the report if the user wants it. */
 

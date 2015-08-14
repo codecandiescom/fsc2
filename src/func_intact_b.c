@@ -41,19 +41,15 @@ Var_T *
 f_bcreate( Var_T * var )
 {
     Var_T *v = var;
-    Iobject_Type_T type;
-    long coll = -1;
-    char *label = NULL;
-    char *help_text = NULL;
-    Iobject_T *new_io = NULL;
-    Iobject_T *ioi, *cio;
+    volatile Iobject_Type_T type;
+    volatile long coll = -1;
+    char * volatile label = NULL;
+    char * volatile help_text = NULL;
+    Iobject_T * volatile new_io = NULL;
+    Iobject_T * ioi, *cio;
 
 
     CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( coll );
-    CLOBBER_PROTECT( label );
-    CLOBBER_PROTECT( help_text );
     CLOBBER_PROTECT( new_io );
 
     /* At least the type of the button must be specified */

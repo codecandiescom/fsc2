@@ -857,7 +857,8 @@ keithley2600a_show_errors( void )
     else if ( error_count == 0 )
         return;
 
-    char * mess = T_strdup( "Device reports the following errors:\n" );
+    char * volatile mess =
+                        T_strdup( "Device reports the following errors:\n" );
 
     TRY
     {

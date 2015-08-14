@@ -510,7 +510,7 @@ func_cmp2( const void * a,
  *----------------------------------------------------------------*/
 
 Var_T *
-func_call( Var_T * f )
+func_call( Var_T * volatile f )
 {
     Var_T *ap;
     Var_T *ret = NULL;

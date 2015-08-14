@@ -84,10 +84,8 @@ FILE *
 spectrapro_300i_find_calib( char * name )
 {
     FILE *cfp = NULL;
-    char *new_name = NULL;
+    char * volatile new_name = NULL;
 
-
-    CLOBBER_PROTECT( new_name );
 
     /* Expand a leading tilde to the users home directory */
 
@@ -948,13 +946,11 @@ spectrapro_300i_install_grating( long         gn,
 {
     char *buf;
     size_t i;
-    bool is_supported = SET;
+    volatile bool is_supported = SET;
     const char *blaze_id = part_no + 6;
     char reply[ 8 ];
     char blaze[ ] = "       ";    /* seven spaces and a '\0' character */
 
-
-    CLOBBER_PROTECT( is_supported );
 
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
@@ -1167,14 +1163,13 @@ static
 bool spectrapro_300i_read( char *   buf,
                            size_t * len )
 {
-    size_t to_fetch = *len;
+    volatile size_t to_fetch = *len;
     size_t already_read = 0;
     char *lbuf;
     long llen = *len;
     bool done = UNSET;
 
 
-    CLOBBER_PROTECT( to_fetch );
     CLOBBER_PROTECT( already_read );
     CLOBBER_PROTECT( done );
 

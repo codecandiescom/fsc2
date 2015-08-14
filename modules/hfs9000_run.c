@@ -83,11 +83,10 @@ hfs9000_update_pulses( bool flag )
     int i;
     Function_T *f;
     Pulse_T *p;
-    bool needed_update = UNSET;
+    volatile bool needed_update = UNSET;
 
 
     CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( needed_update );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {

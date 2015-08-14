@@ -979,9 +979,11 @@ spex_cd2a_pos_mess_check( const char * bp )
         bp++;
 
     errno = 0;
-    strtod( bp, &ep );
+    double dummy = strtod( bp, &ep );
     if ( errno || ep != eu + 9 )
         spex_cd2a_wrong_data( );
+
+    if ( dummy ) { /* silence stupid compiler warning */ }
 }
 
 

@@ -112,10 +112,10 @@ Var_T *daq_name( Var_T *v );
 
 /* Functions from pci_mio_16e_1_ai.c */
 
-Var_T * daq_ai_channel_setup(         Var_T * /* v */ );
-Var_T * daq_ai_acq_setup(             Var_T * /* v */ );
-Var_T * daq_ai_start_acquisition(     Var_T * /* v */ );
-Var_T * daq_ai_get_curve(             Var_T * /* v */ );
+Var_T * daq_ai_channel_setup(         Var_T * volatile /* v */ );
+Var_T * daq_ai_acq_setup(             Var_T *          /* v */ );
+Var_T * daq_ai_start_acquisition(     Var_T *          /* v */ );
+Var_T * daq_ai_get_curve(             Var_T *          /* v */ );
 
 
 /* Functions from pci_mio_16e_1_ao.c */
