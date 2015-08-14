@@ -3166,7 +3166,7 @@ get_waveform( int           rch,
         with_limits = true;
     }
     
-    check( rs_rto_acq_download_limits_enabled( rs->dev, &with_limits ) );
+    check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
            
     check( rs_rto_channel_data( rs->dev, rch, data, length ) );
 
@@ -3217,7 +3217,7 @@ get_segments( int            rch,
         with_limits = true;
     }
     
-    check( rs_rto_acq_download_limits_enabled( rs->dev, &with_limits ) );
+    check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
            
     check( rs_rto_channel_segment_data( rs->dev, rch, data,
                                         num_segments, length ) );
