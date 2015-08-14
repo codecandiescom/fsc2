@@ -3172,6 +3172,15 @@ get_waveform( int           rch,
         }
     }
     
+    while ( 1 )
+    {
+        stop_on_user_request( );
+        bool is_running;
+        check( rs_rto_acq_is_running( rs->dev, &is_running ) );
+        if ( ! is_running )
+            break;
+    }
+
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
     check( rs_rto_channel_data( rs->dev, rch, data, length ) );
 
@@ -3221,6 +3230,16 @@ get_segments( int            rch,
     }
 
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
+
+    while ( 1 )
+    {
+        stop_on_user_request( );
+        bool is_running;
+        check( rs_rto_acq_is_running( rs->dev, &is_running ) );
+        if ( ! is_running )
+            break;
+    }
+
     check( rs_rto_channel_segment_data( rs->dev, rch, data,
                                         num_segments, length ) );
 

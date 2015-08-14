@@ -349,7 +349,7 @@ rs_rto_inp_chan::segment_data( unsigned long start,
 
     if ( m_rs.acq.is_running( ) )
         throw operational_error( "Segmented data can't be fetched while "
-                                 "acquisition is still ubnderway" );
+                                 "acquisition is still underway" );
 
     std::vector< std::vector< double > > res;
 
