@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Anton Savitsky / Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -263,8 +263,10 @@ digitizer_timebase( Var_T * v )
  *-----------------------------------------------------------------*/
 
 Var_T *
-digitizer_time_per_point( Var_T * v  UNUSED_ARG )
+digitizer_time_per_point( Var_T * v )
 {
+	too_many_arguments( v );
+
 	double tpp = 0.0;
 
 

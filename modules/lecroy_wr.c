@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -725,8 +725,10 @@ digitizer_record_length( Var_T *v UNUSED_ARG )
  *----------------------------------------------------------------*/
 
 Var_T *
-digitizer_time_per_point( Var_T * v  UNUSED_ARG )
+digitizer_time_per_point( Var_T * v )
 {
+    too_many_arguments( v );
+
     if (    FSC2_MODE == PREPARATION
          && ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_interleaved ) )
         no_query_possible( );
