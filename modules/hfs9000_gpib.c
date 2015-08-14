@@ -60,8 +60,7 @@ hfs9000_init( const char * name )
 
     if ( hfs9000.is_timebase )
     {
-        strcpy( cmd, "TBAS:PER " );
-        strcat( gcvt( hfs9000.timebase, 9, cmd + strlen( cmd) ), "\n" );
+        sprintf( cmd, "TBAS:PER %.9g\n", hfs9000.timebase );
         hfs9000_command( cmd );
     }
     else
@@ -162,10 +161,9 @@ hfs9000_init( const char * name )
                      CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ) );
             hfs9000_command( cmd );
 
-            sprintf( cmd, "PGEN%c:CH%c:HIGH ",
-                     CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ) );
-            strcat( gcvt( hfs9000.channel[ i ].function->high_level,
-                          5, cmd + strlen( cmd ) ), "\n" );
+            sprintf( cmd, "PGEN%c:CH%c:HIGH %.5g\n",
+                     CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ),
+                     hfs9000.channel[ i ].function->high_level );
             hfs9000_command( cmd );
         }
 
@@ -175,10 +173,9 @@ hfs9000_init( const char * name )
                      CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ) );
             hfs9000_command( cmd );
 
-            sprintf( cmd, "PGEN%c:CH%c:LOW ",
-                     CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ) );
-            strcat( gcvt( hfs9000.channel[ i ].function->low_level,
-                          5, cmd + strlen( cmd ) ), "\n" );
+            sprintf( cmd, "PGEN%c:CH%c:LOW %.5g\n",
+                     CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ),
+                     hfs9000.channel[ i ].function->low_level );
             hfs9000_command( cmd );
         }
     }
@@ -274,9 +271,7 @@ hfs9000_setup_trig_in( void )
 
         if ( hfs9000.is_trig_in_level )
         {
-            strcpy( cmd, "TBAS:TIN:LEV " );
-            strcat( gcvt( hfs9000.trig_in_level, 8, cmd + strlen( cmd ) ),
-                    "\n" );
+            sprintf( cmd, "TBAS:TIN:LEV %.8g\n", hfs9000.trig_in_level );
             hfs9000_command( cmd );
         }
 

@@ -135,11 +135,9 @@ lecroy9400_get_timebase( void )
 bool
 lecroy9400_set_timebase( double timebase )
 {
-    char cmd[ 40 ] = "TD,";
+    char cmd[ 40 ];
 
-
-    gcvt( timebase, 6, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    sprintf( cmd, "TD,%.6g\n", timebase );
     if ( lecroy9400_write( cmd, strlen( cmd ) ) == FAIL )
         lecroy9400_comm_failure( );
 
@@ -224,11 +222,9 @@ lecroy9400_get_trigger_level( void )
 bool
 lecroy9400_set_trigger_level( double level )
 {
-    char cmd[ 40 ] = "TRL,";
+    char cmd[ 40 ];
 
-
-    gcvt( level, 6, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    sprintf( cmd, "TRL,%.6g\n", level );
     if ( lecroy9400_write( cmd, strlen( cmd ) ) == FAIL )
         lecroy9400_comm_failure( );
 
@@ -269,9 +265,7 @@ lecroy9400_set_sens( int channel, double sens )
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-    sprintf( cmd, "C%1dVD,", channel + 1 );
-    gcvt( sens, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    sprintf( cmd, "C%1dVD,%.8g\n", channel + 1,sens );
     if ( lecroy9400_write( cmd, strlen( cmd ) ) == FAIL )
         lecroy9400_comm_failure( );
 
@@ -314,9 +308,7 @@ lecroy9400_set_offset( int channel, double offset )
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-    sprintf( cmd, "C%1dOF,", channel + 1 );
-    gcvt( offset, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    sprintf( cmd, "C%1dOF,%.8g\n", channel + 1, offset );
     if ( lecroy9400_write( cmd, strlen( cmd ) ) == FAIL )
         lecroy9400_comm_failure( );
 

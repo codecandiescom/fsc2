@@ -342,14 +342,13 @@ dg2020_run( bool flag )
 static bool
 dg2020_set_timebase( double timebase )
 {
-    char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
-
+    char cmd[ 40 ];
 
     if (    timebase < MIN_TIMEBASE * 0.99999
          || timebase > MAX_TIMEBASE * 1.00001 )
         return FAIL;
 
-    strcat( gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) ), "\n" );
+    sprintf( cmd, "SOUR:OSC:INT:FREQ %.4g\n", 1.0 / timebase );
     dg2020_command( cmd );
 
     return OK;

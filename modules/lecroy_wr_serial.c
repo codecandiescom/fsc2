@@ -363,9 +363,7 @@ lecroy_wr_set_timebase( double timebase )
     char cmd[ 40 ] = "TDIV ";
     ssize_t to_send;
 
-
-    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\r" );
-    to_send = strlen( cmd );
+    to_send = sprintf( cmd, "TDIV %.8g\r", timebase );;
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
@@ -519,9 +517,7 @@ lecroy_wr_set_sens( int    channel,
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV ", channel + 1 );
-    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\r" );
-    to_send = strlen( cmd );
+    to_send = sprintf( cmd, "C%1d:VDIV %.8g\r", channel + 1, sens );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
@@ -560,12 +556,9 @@ lecroy_wr_set_offset( int    channel,
     char cmd[ 40 ];
     ssize_t to_send;
 
-
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:OFST ", channel + 1 );
-    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\r" );
-    to_send = strlen( cmd );
+    to_send = sprintf( cmd, "C%1d:OFST %.8g\r", channel + 1, offset );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
@@ -938,7 +931,6 @@ lecroy_wr_set_trigger_level( int    channel,
     char cmd[ 40 ];
     ssize_t to_send;
 
-
     fsc2_assert(    (    channel >= LECROY_WR_CH1
                       && channel <= LECROY_WR_CH_MAX )
                  || channel == LECROY_WR_EXT
@@ -951,8 +943,7 @@ lecroy_wr_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\r" );
-
+    sprintf( cmd + strlen( cmd ), "%6g\r", level );
     to_send = strlen( cmd );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
@@ -1213,9 +1204,8 @@ lecroy_wr_get_trigger_delay( void )
 bool
 lecroy_wr_set_trigger_delay( double delay )
 {
-    char cmd[ 40 ] = "TRDL ";
+    char cmd[ 40 ];
     ssize_t to_send;
-
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
        percentage of the full horizontal screen width */
@@ -1223,9 +1213,7 @@ lecroy_wr_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
-    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\r" );
-
-    to_send = strlen( cmd );
+    to_send = sprintf( cmd, "TRDL %.8g\r", delay );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );

@@ -187,7 +187,6 @@ lecroy9400_get_timebase( void )
     char reply[ 30 ];
     long length = sizeof reply;
 
-
     lecroy9400_talk( "TD,?", reply, &length );
     reply[ length - 1 ] = '\0';
     return T_atod( reply );
@@ -200,10 +199,9 @@ lecroy9400_get_timebase( void )
 bool
 lecroy9400_set_timebase( double timebase )
 {
-    char cmd[ 40 ] = "TD,";
+    char cmd[ 40 ];
 
-
-    gcvt( timebase, 6, cmd + strlen( cmd ) );
+    sprintf( cmd, "TD,%.6g", timebase );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -384,10 +382,9 @@ lecroy9400_get_trigger_level( void )
 bool
 lecroy9400_set_trigger_level( double level )
 {
-    char cmd[ 40 ] = "TRL,";
+    char cmd[ 40 ];
 
-
-    gcvt( level, 6, cmd + strlen( cmd ) );
+    sprintf( cmd, "TRL,%.6g", level );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -468,11 +465,9 @@ lecroy9400_set_sens( int    channel,
 {
     char cmd[ 40 ];
 
-
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-    sprintf( cmd, "C%1dVD,", channel + 1 );
-    gcvt( sens, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "C%1dVD,%.8g", channel + 1, sens );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -513,11 +508,9 @@ lecroy9400_set_offset( int    channel,
 {
     char cmd[ 40 ];
 
-
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
 
-    sprintf( cmd, "C%1dOF,", channel + 1 );
-    gcvt( offset, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "C%1dOF,%.8g", channel + 1, offset );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
@@ -775,7 +768,6 @@ lecroy9400_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRD,";
 
-
     /* For positive delay (i.e. pre-trigger) the delay must be set as a
        percentage of the full horizontal screen width (i.e. 10 times the
        timebase) */
@@ -783,7 +775,7 @@ lecroy9400_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy9400.timebase;
 
-    gcvt( delay, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "TRD,%8g", delay );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 }

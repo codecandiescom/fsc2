@@ -321,12 +321,10 @@ lecroy_ws_get_timebase( void )
 bool
 lecroy_ws_set_timebase( double timebase )
 {
-    char cmd[ 40 ] = "TDIV ";
+    char cmd[ 40 ];
     ssize_t len;
 
-
-    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
-    len = strlen( cmd );
+    len = sprintf( cmd, "TDIV %.8g\n", timebase );;
     if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
@@ -459,12 +457,9 @@ lecroy_ws_set_sens( int    channel,
     char cmd[ 40 ];
     ssize_t len;
 
-
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV ", channel - LECROY_WS_CH1 + 1 );
-    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\n" );
-    len = strlen( cmd );
+    len = sprintf( cmd, "C%1d:VDIV %.8g\n", channel - LECROY_WS_CH1 + 1, sens );
     if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
@@ -504,12 +499,10 @@ lecroy_ws_set_offset( int    channel,
     char cmd[ 40 ];
     ssize_t len;
 
-
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-    sprintf( cmd, "C%1d:OFST ", channel - LECROY_WS_CH1 + 1 );
-    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\n" );
-    len = strlen( cmd );
+    len = sprintf( cmd, "C%1d:OFST %.8g\n",
+                   channel - LECROY_WS_CH1 + 1, offset );
     if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
@@ -789,7 +782,6 @@ lecroy_ws_set_trigger_level( int    channel,
     char cmd[ 40 ];
     ssize_t len;
 
-
     fsc2_assert(    (    channel >= LECROY_WS_CH1
                       && channel <= LECROY_WS_CH_MAX )
                  || channel == LECROY_WS_EXT
@@ -802,7 +794,7 @@ lecroy_ws_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\n" );
+    sprintf( cmd + strlen( cmd ), "%.6g\n", level );
     len = strlen( cmd );
     if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
@@ -1061,9 +1053,8 @@ lecroy_ws_get_trigger_delay( void )
 bool
 lecroy_ws_set_trigger_delay( double delay )
 {
-    char cmd[ 40 ] = "TRDL ";
+    char cmd[ 40 ];
     ssize_t len;
-
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
        percentage of the full horizontal screen width */
@@ -1071,8 +1062,7 @@ lecroy_ws_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_ws.timebase;
 
-    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\n" );
-    len = strlen( cmd );
+    len = sprintf( cmd, "TRDL %.8g\n", delay );
     if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
 
