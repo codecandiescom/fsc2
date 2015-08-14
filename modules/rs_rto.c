@@ -955,6 +955,13 @@ digitizer_acquisition_mode( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->acq.is_mode )
+        {
+            print( SEVERE, "Acquisition mode has already been set in "
+                   "preparations section, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->acq.mode );
+        }
+
         rs->acq.mode = req_mode;
         rs->acq.is_mode = true;
         return vars_push( INT_VAR, req_mode );
@@ -1155,7 +1162,8 @@ digitizer_max_num_segments( Var_T * v  UNUSED_ARG )
 Var_T *
 digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
-    check( rs_rto_acq_run_single( rs->dev ) );
+    if ( FSC2_MODE == EXPERIMENT )
+        check( rs_rto_acq_run_single( rs->dev ) );
     return vars_push( INT_VAR, 1L );
 }
 
