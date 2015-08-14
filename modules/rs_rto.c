@@ -2516,7 +2516,7 @@ digitizer_change_window( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    w->end = width - w->start;
+    w->end = w->start + width;
 
     return vars_push( INT_VAR, 1L );
 }
