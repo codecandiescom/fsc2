@@ -677,7 +677,7 @@ digitizer_record_length( Var_T *v UNUSED_ARG )
 Var_T *
 digitizer_time_per_point( Var_T * v )
 {
-    too_many_arguments( );
+    too_many_arguments( v );
 
     if (    FSC2_MODE == PREPARATION
          && ( ! lecroy93xx.is_timebase || ! lecroy93xx.is_interleaved ) )

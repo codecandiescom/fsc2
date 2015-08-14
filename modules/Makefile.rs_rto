@@ -18,7 +18,7 @@
 # 
 
 
-INCLUDES   += -I$(mdir)/rs_rto
+#INCLUDES   += -I$(mdir)/rs_rto
 LIBS       += -L$(mdir)/rs_rto
 
 export        # export all symbols to the sub-makefiles

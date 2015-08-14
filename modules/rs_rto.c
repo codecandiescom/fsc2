@@ -19,14 +19,13 @@
 
 
 #include "fsc2_module.h"
-#include "rs_rto_c.h"
+#include "rs_rto/rs_rto_c.h"
 #include "lan.h"
 #include "rs_rto.conf"
 
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
-
 
 
 // Some estimates for the overhead for downloading a data set
@@ -48,15 +47,15 @@ enum Ext_Filter
 	Ext_Filter_High_Pass_50MHz
 };
 
-typedef struct RS_RTO_WIN
+typedef struct RS_RTO_Win
 {
     double start;
     double end;
     long num;
-    struct RS_RTO_WIN * next;
-}  RS_RTO_WIN;
+    struct RS_RTO_Win * next;
+}  RS_RTO_Win;
 
-typedef struct
+typedef struct  // RS_RTO_Trig
 {
     int source;
     bool is_source;
@@ -84,9 +83,9 @@ typedef struct
 
     double out_pulse_delay;
     bool is_out_pulse_delay;
-} RS_RTO_TRIG;
+} RS_RTO_Trig;
 
-typedef struct
+typedef struct  // RS_RT_Chan
 {
     bool in_use;
 
@@ -112,9 +111,9 @@ typedef struct
     bool is_ext_filter;
 
     char * function;
-} RS_RTO_CHAN;
+} RS_RT_Chan;
 
-typedef struct
+typedef struct  // RS_RTO_Acq
 {
     double timebase;
     bool is_timebase;
@@ -133,7 +132,7 @@ typedef struct
 
     long num_segments;
     bool is_num_segments;
-}  RS_RTO_ACQ;
+}  RS_RTO_Acq;
 
 
 typedef struct
@@ -146,13 +145,13 @@ typedef struct
 
     bool display_enabled;
 
-    RS_RTO_ACQ acq;
+    RS_RTO_Acq acq;
 
-    RS_RTO_CHAN chans[ Channel_Math4 + 1 ];
+    RS_RT_Chan chans[ Channel_Math4 + 1 ];
 
-    RS_RTO_TRIG trig;
+    RS_RTO_Trig trig;
 
-    RS_RTO_WIN * w;
+    RS_RTO_Win * w;
     long num_windows;
 
 }  RS_RTO;
@@ -223,14 +222,14 @@ static long to_ext_filter( int ft,
 static void from_ext_filter( long   e,
 							 int  * ft,
 							 int  * fco );
-static RS_RTO_WIN * get_window( Var_T * v );
-static RS_RTO_WIN * get_window_from_long( long wid );
+static RS_RTO_Win * get_window( Var_T * v );
+static RS_RTO_Win * get_window_from_long( long wid );
 static void get_waveform( int           rch,
-                          RS_RTO_WIN  * w,
+                          RS_RTO_Win  * w,
                           double     ** data,
                           size_t      * length );
 static void get_segments( int            rch,
-                          RS_RTO_WIN   * w,
+                          RS_RTO_Win   * w,
                           double     *** data,
                           size_t       * num_segments,
                           size_t       * length );
@@ -238,7 +237,7 @@ static Var_T * get_calculated_curve_data( Var_T  * v,
                                           double   ( handler )( double *,
                                                                 size_t ) );
 static Var_T * get_subcurve_data( int rch,
-                                  RS_RTO_WIN ** wins,
+                                  RS_RTO_Win ** wins,
                                   long          win_count,
                                   double        ( *handler )( double *,
                                                               size_t ) );
@@ -253,9 +252,9 @@ static void init_exp_acq( void );
 static void init_exp_trig( void );
 static void init_exp_chans( void );
 static
-void copy_windows( RS_RTO_WIN       ** dst,
-                   RS_RTO_WIN const  * volatile src );
-static void delete_windows( RS_RTO_WIN ** wp );
+void copy_windows( RS_RTO_Win       ** dst,
+                   RS_RTO_Win const  * volatile src );
+static void delete_windows( RS_RTO_Win ** wp );
 
 
 
@@ -263,7 +262,7 @@ static void delete_windows( RS_RTO_WIN ** wp );
 static  RS_RTO rs_rto_exp, rs_rto_test;
 static RS_RTO * rs;
 
-static RS_RTO_WIN * prep_wins;
+static RS_RTO_Win * prep_wins;
 static char const * err_prefix = "";
 
 
@@ -1114,6 +1113,13 @@ digitizer_num_segments( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->acq.is_num_segments )
+        {
+            print( SEVERE, "Number of segments has already been set in "
+                   "preparations, discarding new value.\n" );
+            return vars_push( INT_VAR, rs->acq.num_segments );
+        }
+
         rs->acq.num_segments = num_segments;
         rs->acq.is_num_segments = true;
         return vars_push( INT_VAR, num_segments );
@@ -1217,6 +1223,14 @@ digitizer_channel_state( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->chans[ rch ].is_state )
+        {
+            print( SEVERE, "State of channel %s has already been set "
+                   "preparations, leaving value unchanged.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( INT_VAR, rs->chans[ rch ].state ? 1L : 0L );
+        }
+
         rs->chans[ rch ].state = state;
         rs->chans[ rch ].is_state = false;
     }
@@ -1479,6 +1493,14 @@ digitizer_channel_position( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->chans[ rch ].is_position )
+        {
+            print( SEVERE, "Position channel %s has already been set "
+                   "preparations, leaving value unchanged.\n",
+                   Channel_Names[ fch ] );
+            return vars_push( FLOAT_VAR, rs->chans[ rch ].position );
+        }
+
         rs->chans[ rch ].position = position;
         rs->chans[ rch ].is_position = true;
         return vars_push( FLOAT_VAR, position );
@@ -1773,6 +1795,15 @@ digitizer_ext_channel_filter( Var_T * v )
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
+        if (    FSC2_MODE == PREPARATION
+             && rs->chans[ Channel_Ext ].is_ext_filter )
+        {
+            print( SEVERE, "Filter for external trigger input channel has "
+                   "already been set preparations, leaving value "
+                   "unchanged.\n" );
+            return vars_push( INT_VAR,rs->chans[ Channel_Ext ].ext_filter );
+        }
+
 		rs->chans[ Channel_Ext ].ext_filter = ext_filter;
 		rs->chans[ Channel_Ext ].is_ext_filter = true;
 		return vars_push( INT_VAR, ext_filter );
@@ -1807,7 +1838,7 @@ digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = NULL;
+    RS_RTO_Win * w = NULL;
     if ( ( v = vars_pop( v ) ) )
          w = get_window( v );
 
@@ -1898,7 +1929,7 @@ digitizer_get_segments( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = NULL;
+    RS_RTO_Win * w = NULL;
     if ( ( v = vars_pop( v ) ) )
          w = get_window( v );
 
@@ -2400,7 +2431,7 @@ digitizer_define_window( Var_T * v )
 
     /* Create a new window structure and append it to the list of windows */
 
-    RS_RTO_WIN * w;
+    RS_RTO_Win * w;
 
     if ( ! rs->w )
     {
@@ -2442,7 +2473,7 @@ digitizer_window_position( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = get_window( v );
+    RS_RTO_Win * w = get_window( v );
 
     if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, w->start );
@@ -2472,7 +2503,7 @@ digitizer_window_width( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = get_window( v );
+    RS_RTO_Win * w = get_window( v );
 
     if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, w->end - w->start );
@@ -2510,7 +2541,7 @@ digitizer_change_window( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = get_window( v );
+    RS_RTO_Win * w = get_window( v );
     v = vars_pop( v );
 
     w->start = get_double( v, "window position" );
@@ -2542,7 +2573,7 @@ digitizer_check_window( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    RS_RTO_WIN * w = get_window( v );
+    RS_RTO_Win * w = get_window( v );
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -2641,6 +2672,14 @@ digitizer_math_function( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if ( FSC2_MODE == PREPARATION && rs->chans[ rch ].function )
+        {
+            print( SEVERE, "Funcion for math channel %s already has been "
+                   "set in proparations, leaving it unchanged.\n",
+                Channel_Names[ fch ] );
+            return vars_push( STR_VAR, rs->chans[ rch ].function );
+        }
+
         T_free( rs->chans[ rch ].function );
         rs->chans[ rch ].function = T_strdup( v->val.sptr );
     }
@@ -2691,7 +2730,7 @@ digitizer_trigger_out_pulse_state( Var_T * v )
         rs->trig.is_out_pulse_state = true;
     }
     else
-          check( rs_rto_trigger_out_pulse_state( rs->dev, &state ) );
+        check( rs_rto_trigger_out_pulse_state( rs->dev, &state ) );
 
     return vars_push( INT_VAR, state ? 1L : 0L );
 }
@@ -3143,7 +3182,7 @@ from_ext_filter( long   e,
 static
 void
 get_waveform( int           rch,
-              RS_RTO_WIN  * w,
+              RS_RTO_Win  * w,
               double     ** data,
               size_t      * length )
 {
@@ -3199,7 +3238,7 @@ get_waveform( int           rch,
 static
 void
 get_segments( int            rch,
-              RS_RTO_WIN   * w,
+              RS_RTO_Win   * w,
               double     *** data,
               size_t       * num_segments,
               size_t       * length )
@@ -3257,7 +3296,7 @@ get_segments( int            rch,
  *----------------------------------------------------*/
 
 static
-RS_RTO_WIN *
+RS_RTO_Win *
 get_window( Var_T * v )
 {
     return get_window_from_long( get_strict_long( v, "window ID" ) );
@@ -3269,7 +3308,7 @@ get_window( Var_T * v )
  *----------------------------------------------------*/
 
 static
-RS_RTO_WIN *
+RS_RTO_Win *
 get_window_from_long( long wid )
 {
     if ( ! rs->w )
@@ -3279,7 +3318,7 @@ get_window_from_long( long wid )
     }
 
     if ( wid >= WINDOW_START_NUMBER )
-        for ( RS_RTO_WIN * w = rs->w; w != NULL; w = w->next )
+        for ( RS_RTO_Win * w = rs->w; w != NULL; w = w->next )
             if ( w->num == wid )
                 return w;
 
@@ -3296,7 +3335,7 @@ get_window_from_long( long wid )
 static
 void
 get_window_list( Var_T       ** v,
-                 RS_RTO_WIN *** wins,
+                 RS_RTO_Win *** wins,
                  long         * win_count )
 {
     CLOBBER_PROTECT( wins );
@@ -3396,7 +3435,7 @@ get_calculated_curve_data( Var_T  * v,
     // or simply a list of them. get_window_list() leaves the 'wins'
     // argument unchanged if there are no windows.
 
-    RS_RTO_WIN ** wins = NULL;
+    RS_RTO_Win ** wins = NULL;
     long win_count = 0;
 
     CLOBBER_PROTECT( wins );
@@ -3482,7 +3521,7 @@ get_calculated_curve_data( Var_T  * v,
 static
 Var_T *
 get_subcurve_data( int rch,
-                   RS_RTO_WIN ** wins,
+                   RS_RTO_Win ** wins,
                    long          win_count,
                    double        ( *handler )( double *, size_t ) )
 {
@@ -3518,7 +3557,7 @@ get_subcurve_data( int rch,
 
     if ( single_time <= multi_time )
     {
-        RS_RTO_WIN win = { min_pos, max_pos, 0, NULL };
+        RS_RTO_Win win = { min_pos, max_pos, 0, NULL };
 
         get_waveform( rch, &win, &data, &length );
 
@@ -3625,7 +3664,7 @@ init_prep_trig( void )
     rs->trig.source = Channel_Ch1;
     rs->trig.is_source = false;
 
-    for ( int i = 0; i < 5; i++ )
+    for ( int i = Channel_Ext; i <= Channel_Ch4; i++ )
     {
         rs->trig.level[  i ] = 0.0;
         rs->trig.is_level[ i ] = false;
@@ -3663,7 +3702,7 @@ init_prep_chans( void )
 {
     for ( int i = 0; i <= Channel_Math4; i++ )
     {
-        RS_RTO_CHAN * ch = rs->chans + i;
+        RS_RT_Chan * ch = rs->chans + i;
 
         ch->in_use = false;
 
@@ -3747,7 +3786,7 @@ init_exp_trig( void )
         check( rs_rto_trigger_set_source( rs->dev, &source ) );
     }
 
-    for ( int i = 0; i < 5; i++ )
+    for ( int i = Channel_Ext; i <= Channel_Ch4; i++ )
     {
         if ( rs->trig.is_level[ i ] )
         {
@@ -3807,9 +3846,9 @@ static
 void
 init_exp_chans( void )
 {
-    for ( int i = 0; i <= Channel_Math4; i++ )
+    for ( int i = Channel_Ext; i <= Channel_Math4; i++ )
     {
-        RS_RTO_CHAN * ch = rs->chans + i;
+        RS_RT_Chan * ch = rs->chans + i;
 
         if ( ! ch->in_use )
             continue;
@@ -3872,18 +3911,18 @@ init_exp_chans( void )
 
 static
 void
-copy_windows( RS_RTO_WIN       ** dst,
-              RS_RTO_WIN const  * volatile src )
+copy_windows( RS_RTO_Win       ** dst,
+              RS_RTO_Win const  * volatile src )
 {
     if ( ! src )
         return;
 
-    RS_RTO_WIN ** orig_dst = dst;
+    RS_RTO_Win ** orig_dst = dst;
     CLOBBER_PROTECT( orig_dst );
 
     TRY
     {
-        RS_RTO_WIN * cur;
+        RS_RTO_Win * cur;
 
         while ( src )
         {
@@ -3916,16 +3955,16 @@ copy_windows( RS_RTO_WIN       ** dst,
 
 static
 void
-delete_windows( RS_RTO_WIN ** wp )
+delete_windows( RS_RTO_Win ** wp )
 {
     if ( ! *wp )
         return;
 
-    RS_RTO_WIN * cur = *wp;
+    RS_RTO_Win * cur = *wp;
 
     while ( cur )
     {
-        RS_RTO_WIN * nxt = cur->next;
+        RS_RTO_Win * nxt = cur->next;
         T_free( cur );
         cur = nxt;
     }

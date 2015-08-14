@@ -128,7 +128,7 @@ digitizer_show_channel( Var_T * v )
 	char cmd[ 30 ];
 
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -152,7 +152,7 @@ digitizer_show_channel( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( v = vars_pop( v ) ) == NULL )
+	if ( ! ( v = vars_pop( v ) ) )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -203,7 +203,7 @@ digitizer_timebase( Var_T * v )
 	double timebase;
 
 
-	if ( v == NULL )
+	if ( ! v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -268,7 +268,6 @@ digitizer_time_per_point( Var_T * v )
 
 	double tpp = 0.0;
 
-
 	switch ( FSC2_MODE )
 	{
 		case PREPARATION :
@@ -284,7 +283,7 @@ digitizer_time_per_point( Var_T * v )
 		case EXPERIMENT :
 			ag54830b_l.timebase = ag54830b_l_get_timebase( );
 			ag54830b_l.rec_len = ag54830b_l_get_record_length( );
-			tpp=ag54830b_l.timebase *10.0 / ag54830b_l.rec_len;
+			tpp = ag54830b_l.timebase *10.0 / ag54830b_l.rec_len;
 			return vars_push( FLOAT_VAR, tpp );
 	}
 
@@ -301,8 +300,7 @@ digitizer_sensitivity( Var_T * v )
 	long channel;
 	double sens;
 
-
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -318,7 +316,7 @@ digitizer_sensitivity( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ( v = vars_pop( v ) ) == NULL )
+	if ( ! ( v = vars_pop( v ) ) )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -366,7 +364,7 @@ digitizer_num_averages( Var_T * v )
 	long num_avg;
 
 
-	if ( v == NULL )
+	if ( ! v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -424,7 +422,7 @@ digitizer_record_length( Var_T * v )
 	long rec_len;
 
 
-	if ( v == NULL )
+	if ( ! v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -481,7 +479,7 @@ digitizer_trigger_position( Var_T * v )
 	double trig_pos;
 
 
-	if ( v == NULL )
+	if ( ! v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -560,7 +558,7 @@ digitizer_get_curve( Var_T * v )
 
 	/* The first variable got to be a channel number */
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -622,7 +620,7 @@ digitizer_get_curve_fast( Var_T * v )
 
 	/* The first variable got to be a channel number */
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -694,7 +692,7 @@ digitizer_get_xorigin( Var_T * v )
 	double xorg = 1.0;
 
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -729,7 +727,7 @@ digitizer_get_xincrement( Var_T * v )
 	double xinc = 1.0;
 
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -764,7 +762,7 @@ digitizer_get_yorigin( Var_T * v )
 	double yorg = 1.0;
 
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
@@ -799,7 +797,7 @@ digitizer_get_yincrement( Var_T * v )
 	double yinc = 1.0;
 
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );

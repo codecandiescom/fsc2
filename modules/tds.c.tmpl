@@ -685,7 +685,7 @@ digitizer_timebase( Var_T * v )
 Var_T *
 digitizer_time_per_point( Var_T * v )
 {
-    too_many_arguments( );
+    too_many_arguments( v );
 
     /* During the experiment if the digitizer's keyboard isn't locked we
        need to reread the timebase, record length and trigger position and

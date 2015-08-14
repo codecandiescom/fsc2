@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -335,10 +335,9 @@ lecroy_wr_get_timebase( void )
 bool
 lecroy_wr_set_timebase( double timebase )
 {
-    char cmd[ 40 ] = "TDIV ";
+    char cmd[ 40 ];
 
-
-    gcvt( timebase, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "TDIV %.8g", timebase );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_comm_failure( );
 
@@ -486,8 +485,7 @@ lecroy_wr_set_sens( int    channel,
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV ", channel + 1 );
-    gcvt( sens, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "C%1d:VDIV %.8g", channel + 1, sens );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_comm_failure( );
 
@@ -528,8 +526,7 @@ lecroy_wr_set_offset( int    channel,
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:OFST ", channel + 1 );
-    gcvt( offset, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "C%1d:OFST %.8g", channel + 1, offset );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_comm_failure( );
 
@@ -904,7 +901,7 @@ lecroy_wr_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    gcvt( level, 6, cmd + strlen( cmd ) );
+    sprintf( cmd + strlen( cmd ), "%.6g", level );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_comm_failure( );
 
@@ -1153,8 +1150,7 @@ lecroy_wr_get_trigger_delay( void )
 bool
 lecroy_wr_set_trigger_delay( double delay )
 {
-    char cmd[ 40 ] = "TRDL ";
-
+    char cmd[ 40 ];
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
        percentage of the full horizontal screen width */
@@ -1162,7 +1158,7 @@ lecroy_wr_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
-    gcvt( delay, 8, cmd + strlen( cmd ) );
+    sprintf( cmd, "TRDL %.8g", delay );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_comm_failure( );
 

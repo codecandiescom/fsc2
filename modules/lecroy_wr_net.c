@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -343,12 +343,10 @@ lecroy_wr_get_timebase( void )
 bool
 lecroy_wr_set_timebase( double timebase )
 {
-    char cmd[ 40 ] = "TDIV ";
+    char cmd[ 40 ];
 	ssize_t len;
 
-
-    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
-	len = strlen( cmd );
+	len = sprintf( cmd, "TDIV %.8g\n", timebase );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
@@ -506,12 +504,9 @@ lecroy_wr_set_sens( int    channel,
     char cmd[ 40 ];
 	ssize_t len;
 
-
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV ", channel + 1 );
-    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\n" );
-	len = strlen( cmd );
+    len = sprintf( cmd, "C%1d:VDIV %.8g\n", channel + 1, sens );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
@@ -554,12 +549,9 @@ lecroy_wr_set_offset( int    channel,
     char cmd[ 40 ];
 	ssize_t len;
 
-
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:OFST ", channel + 1 );
-    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\n" );
-	len = strlen( cmd );
+	len = sprintf( cmd, "C%1d:OFST %.8g\n", channel + 1, offset );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
@@ -960,7 +952,7 @@ lecroy_wr_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\n" );
+    sprintf( cmd + strlen( cmd ), "%.6g\n", level );
 	len = strlen( cmd );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -1217,9 +1209,8 @@ lecroy_wr_get_trigger_delay( void )
 bool
 lecroy_wr_set_trigger_delay( double delay )
 {
-    char cmd[ 40 ] = "TRDL ";
+    char cmd[ 40 ];
 	ssize_t len;
-
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
        percentage of the full horizontal screen width */
@@ -1227,8 +1218,7 @@ lecroy_wr_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
-    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\n" );
-	len = strlen( cmd );
+	len = sprintf( cmd, "TRDL %.8g\n", delay );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
 
