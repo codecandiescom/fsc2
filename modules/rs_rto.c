@@ -3148,8 +3148,8 @@ get_waveform( int           rch,
         THROW( EXCEPTION );
     }
 
-    bool with_limits = false;
-    if ( w )
+    bool with_limits = w != NULL;
+    if ( with_limits )
     {
         double ws = w->start;
         double we = w->end;
@@ -3162,12 +3162,9 @@ get_waveform( int           rch,
             print( FATAL, "Window does not fit waveform range.\n" );
             THROW( EXCEPTION );
         }
-
-        with_limits = true;
     }
     
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
-           
     check( rs_rto_channel_data( rs->dev, rch, data, length ) );
 
     if ( *length == 0 )
@@ -3199,8 +3196,8 @@ get_segments( int            rch,
         THROW( EXCEPTION );
     }
 
-    bool with_limits = false;
-    if ( w )
+    bool with_limits = w != NULL;
+    if ( with_limits )
     {
         double ws = w->start;
         double we = w->end;
@@ -3213,16 +3210,13 @@ get_segments( int            rch,
             print( FATAL, "Window does not fit waveform range.\n" );
             THROW( EXCEPTION );
         }
-
-        with_limits = true;
     }
-    
+
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
-           
     check( rs_rto_channel_segment_data( rs->dev, rch, data,
                                         num_segments, length ) );
 
-    if ( ! *length )
+    if ( ! *num_segments || ! *length )
     {
         free( **data );
         free( *data );
