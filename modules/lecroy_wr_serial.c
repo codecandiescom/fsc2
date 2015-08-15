@@ -1688,17 +1688,11 @@ double
 lecroy_wr_get_amplitude( int        ch,
                          Window_T * w )
 {
-    unsigned char *data = NULL;
-    unsigned char *dp;
-    long i;
+    unsigned char * data = NULL;
     double gain, offset;
-    long min, max;
-    long val;
+    double res;
     long length;
 
-
-    CLOBBER_PROTECT( min );
-    CLOBBER_PROTECT( max );
 
     /* Get the curve from the device */
 
@@ -1707,18 +1701,20 @@ lecroy_wr_get_amplitude( int        ch,
     /* Calculate the maximum and minimum voltages from the data (data are
        hex encoded 16 bit (MSB first), two's complement integers) */
 
-    min = LONG_MAX;
-    max = LONG_MIN;
-
     TRY
     {
-        for ( i = 0, dp = data; i < length; dp += 4, i++ )
-        {
-            val = lecroy_wr_s_hex_to_int( dp );
+        long min = LONG_MAX,
+             max = LONG_MIN;
 
+        unsigned char * dp = data;
+        for ( long i = 0; i < length; dp += 4, i++ )
+        {
+            long val = lecroy_wr_s_hex_to_int( dp );
             max = l_max( val, max );
             min = l_min( val, min );
         }
+
+        res = gain * ( max - min );
 
         TRY_SUCCESS;
     }
@@ -1732,7 +1728,7 @@ lecroy_wr_get_amplitude( int        ch,
 
     /* Return difference between highest and lowest value (in volt units) */
 
-    return gain * ( max - min );
+    return res;
 }
 
 
