@@ -621,7 +621,7 @@ synthesizer_setup_list( Var_T * v )
     }
 
     double * freqs = NULL;
-    double * pows  = NULL;
+    double * volatile pows  = NULL;
 
     CLOBBER_PROTECT( freqs );
     CLOBBER_PROTECT( pows );
@@ -694,7 +694,7 @@ synthesizer_setup_list( Var_T * v )
         }
         else
         {
-            print( FATAL, "Second argument is neither a string, a number "
+            print( FATAL, "Second argument is neither a string, nor a number "
                    "nor a 1-dimensional array.\n" );
             THROW( EXCEPTION );
         }
@@ -705,7 +705,6 @@ synthesizer_setup_list( Var_T * v )
     {
         T_free( pows );
         T_free( freqs );
-
         RETHROW;
     }
 

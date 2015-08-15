@@ -402,8 +402,8 @@ vars_arr_create( Var_T * a,
  *---------------------------------------------------------------------*/
 
 Var_T *
-vars_init_list( Var_T * v,
-                ssize_t level )
+vars_init_list( Var_T * volatile v,
+                ssize_t          level )
 {
     ssize_t count = 0;
     ssize_t i;

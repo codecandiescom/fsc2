@@ -1355,7 +1355,7 @@ fsc2_serial_log_message( int          sn,
 static void
 open_serial_log( int sn )
 {
-    char *log_file_name = NULL;
+    char * volatile log_file_name = NULL;
     char *dev_name = NULL;
     char *cp;
 

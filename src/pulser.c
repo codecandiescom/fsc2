@@ -1184,13 +1184,12 @@ p_get_by_num( long pnum,
     int function;
     double ptime;
     long cycle;
-    Var_T *v = NULL;
+    Var_T * volatile v = NULL;
     long dev_num = -1;
     P_List_T *cur_p;
     long stored_Cur_Pulser;
 
 
-    CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( dev_num );
 
     for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )

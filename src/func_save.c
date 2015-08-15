@@ -1898,7 +1898,7 @@ do_printf( long    file_num,
          *fmt_end,
          *sptr;
     Var_T * volatile cv;
-    long count = 0;
+    volatile long count = 0;
     char store;
     int need_vars;
     int need_type;
@@ -1906,7 +1906,6 @@ do_printf( long    file_num,
 
     CLOBBER_PROTECT( fmt_end );
     CLOBBER_PROTECT( sptr );
-    CLOBBER_PROTECT( count );
 
     sptr = v->val.sptr;
     fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );

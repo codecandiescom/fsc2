@@ -1474,16 +1474,14 @@ fsc2_show_fselector( const char * message,
 char *
 fsc2_fline( FILE * fp )
 {
-    char *line;
+    char * volatile line;
     char *p;
-    size_t buf_len;
+    volatile size_t buf_len;
     volatile size_t rem_len;
     size_t len = 0;
     size_t offset;
 
 
-    CLOBBER_PROTECT( buf_len );
-    CLOBBER_PROTECT( line );
     CLOBBER_PROTECT( p );
 
     if ( ! fp )

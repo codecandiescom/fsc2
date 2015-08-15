@@ -60,7 +60,7 @@ lecroy_wr_init( const char * name )
     ssize_t len = sizeof buf;
     int i;
     bool with_eoi;
-    int extra_needed_channels = 0;
+    volatile int extra_needed_channels = 0;
 
 
     /* Open a socket to the device */

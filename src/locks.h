@@ -22,7 +22,7 @@
 #define LOCKS_HEADER
 
 
-bool fsc2_obtain_uucp_lock( const char * /* name */ );
+bool fsc2_obtain_uucp_lock( const char * volatile /* name */ );
 
 void fsc2_release_uucp_lock( const char * /* name */ );
 

@@ -1331,7 +1331,7 @@ FILE *
 fsc2_lan_open_log( const char * dev_name )
 {
     FILE *fp;
-    char *fname = NULL;
+    char * volatile fname = NULL;
 
 
     if ( lan_log_level <= LL_NONE )

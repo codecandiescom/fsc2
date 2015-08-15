@@ -39,7 +39,7 @@ static bool check_lock_file( int          fd,
  *----------------------------------------------------------------*/
 
 bool
-fsc2_obtain_uucp_lock( const char * name )
+fsc2_obtain_uucp_lock( const char * volatile name )
 {
     int fd;
 	char *fn = NULL;

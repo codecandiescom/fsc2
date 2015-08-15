@@ -870,8 +870,7 @@ digitizer_record_length( Var_T * v )
         print( FATAL, "Requested record length of %ld out of range, must "
                "be between %lu and %lu.\n",
                record_length, min_rec_len, max_rec_len );
-        THROW( EXCEPTION );
-    }
+        THROW( EXCEPTION );    }
 
     if ( rec_len != ( unsigned long ) record_length )
         print( WARN, "Record length had to be adjusted fron %ld to %lu.\n",
@@ -3913,7 +3912,7 @@ init_exp_chans( void )
 
 static
 void
-copy_windows( RS_RTO_Win       ** dst,
+copy_windows( RS_RTO_Win       ** volatile dst,
               RS_RTO_Win const  * volatile src )
 {
     if ( ! src )

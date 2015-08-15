@@ -35,9 +35,9 @@ struct dpoint {
 };
 
 
-static dpoint_T * eval_display_args( Var_T * v,
-                                     int     dim,
-                                     int   * npoints );
+static dpoint_T * eval_display_args( Var_T * volatile v,
+                                     int              dim,
+                                     int   *          npoints );
 
 extern sigjmp_buf Alrm_Env;                   /* defined in run.c */
 extern volatile sig_atomic_t Can_Jmp_Alrm;    /* defined in run.c */
@@ -2634,16 +2634,13 @@ f_display_2d( Var_T * v )
  *-------------------------------------------------------------------*/
 
 static dpoint_T *
-eval_display_args( Var_T * v,
-                   int     dim,
-                   int   * nsets )
+eval_display_args( Var_T * volatile v,
+                   int              dim,
+                   int   *          nsets )
 {
-    dpoint_T *dp = NULL;
+    dpoint_T * volatile dp = NULL;
     long i;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( dp );
 
     *nsets = 0;
     if ( v == NULL )

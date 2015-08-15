@@ -1195,14 +1195,14 @@ eps_make_scale( FILE * fp,
            d_start_coarse;      /* position of first large tick (in points) */
     volatile int medium_factor, /* number of small tick spaces between */
                  coarse_factor; /* medium and large tick spaces */
-    int medium,                 /* loop counters for medium and large ticks */
-        coarse;
+    volatile int medium,        /* loop counters for medium and large ticks */
+                 coarse;
     double rwc_start = 0,       /* rwc value of first point */
            rwc_start_fine,      /* rwc value of first small tick */
            rwc_start_medium,    /* rwc value of first medium tick */
            rwc_start_coarse;    /* rwc value of first large tick */
     volatile double rwc_coarse;
-    double x, y;
+    volatile double x, y;
     char lstr[ 128 ];
     double s2d[ 3 ];
     int r_coord;
@@ -1855,15 +1855,13 @@ split_into_lines( int * num_lines )
     char ** volatile lines = NULL;
     char *cp;
     int nl;
-    int cur_size = GUESS_NUM_LINES;
-    int i = 0;
+    volatile int cur_size = GUESS_NUM_LINES;
+    volatile int i = 0;
     int j;
     ptrdiff_t count;
 
 
     CLOBBER_PROTECT( nl );
-    CLOBBER_PROTECT( cur_size );
-    CLOBBER_PROTECT( i );
 
 
     TRY

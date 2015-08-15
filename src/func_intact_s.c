@@ -42,8 +42,8 @@ static Var_T *f_schanged_child( Var_T * v );
 Var_T *
 f_screate( Var_T * var )
 {
-    Var_T *v = var;
-    Iobject_T *new_io = NULL;
+    Var_T * volatile v = var;
+    Iobject_T * volatile new_io = NULL;
     Iobject_T *ioi;
     volatile Iobject_Type_T type;
     volatile double start_val,
@@ -52,9 +52,6 @@ f_screate( Var_T * var )
     char * volatile label = NULL;
     char * volatile help_text = NULL;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( new_io );
 
     /* We need at least the type of the slider and the minimum and maximum
        value */

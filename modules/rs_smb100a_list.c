@@ -179,8 +179,7 @@ list_setup_A( double const * freqs,
         return;
     }
 
-    char * cmd = NULL;
-    CLOBBER_PROTECT( cmd );
+    char * volatile cmd = NULL;
 
     TRY
     {
