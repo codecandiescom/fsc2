@@ -195,6 +195,8 @@ Var_T * digitizer_get_curve( Var_T * v );
 Var_T * digitizer_get_area( Var_T * v );
 Var_T * digitizer_get_amplitude( Var_T * v );
 Var_T * digitizer_get_segments( Var_T * v );
+Var_T * digitizer_get_segment_area( Var_T * v );
+Var_T * digitizer_get_segment_amplitude( Var_T * v );
 Var_T * digitizer_available_segments( Var_T * v );
 Var_T * digitizer_trigger_channel( Var_T * v );
 Var_T * digitizer_trigger_level( Var_T * v );
@@ -238,6 +240,8 @@ static void get_segments( int            rch,
 static Var_T * get_calculated_curve_data( Var_T  * v,
                                           double   ( handler )( double *,
                                                                 size_t ) );
+Var_T * get_calculated_segment_data( Var_T  * v,
+                                     double   ( handler )( double *, size_t ) );
 static Var_T * get_subcurve_data( int rch,
                                   RS_RTO_Win ** wins,
                                   long          win_count,
@@ -1907,8 +1911,6 @@ digitizer_get_amplitude( Var_T * v )
 }
 
 
-
-
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
@@ -1989,6 +1991,26 @@ digitizer_get_segments( Var_T * v )
     free( data );
 
     return nv;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_get_segment_area( Var_T * v )
+{
+    return get_calculated_segment_data( v, area );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_get_segment_amplitude( Var_T * v )
+{
+    return get_calculated_segment_data( v, amplitude );
 }
 
 
@@ -3265,7 +3287,7 @@ get_segments( int            rch,
             if ( ret != FSC3_INVALID_ARG )
                 check( ret );
 
-            print( FATAL, "Window does not fit waveform range.\n" );
+            print( FATAL, "Window does not fit into waveform time range.\n" );
             THROW( EXCEPTION );
         }
     }
@@ -3286,8 +3308,10 @@ get_segments( int            rch,
 
     if ( ! *num_segments || ! *length )
     {
-        free( **data );
+        if ( *data )
+            free( **data );
         free( *data );
+        *data = NULL;
         print( FATAL, "Segments have no data.\n" );
         THROW( EXCEPTION );
     }
@@ -3583,6 +3607,175 @@ get_subcurve_data( int rch,
             free( data );
         }
     }
+
+    return nv;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+get_calculated_segment_data( Var_T  * v,
+                             double   ( handler )( double *, size_t ) )
+{
+    // We need at least a channel
+
+    if ( ! v )
+    {
+        print( FATAL, "Missing argument(s).\n" );
+        THROW( EXCEPTION );
+    }
+
+    long fch = get_strict_long( v, "channel" );
+    v = vars_pop( v );
+    int rch = fsc2_ch_2_rto_ch( fch );
+
+    if ( rch == Channel_Ext )
+    {
+        print( FATAL, "Can't get segments from external trigger input "
+               "channel.\n" );
+        THROW( EXCEPTION );
+    }
+
+    // Check for windows - this could be either an array with window IDs
+    // or simply a list of them. get_window_list() leaves the 'wins'
+    // argument unchanged if there are no windows.
+
+    RS_RTO_Win ** wins = NULL;
+    long win_count = 0;
+
+    CLOBBER_PROTECT( wins );
+
+    get_window_list( &v, &wins, &win_count );
+
+    too_many_arguments( v );
+
+    // Just return some dummy data during a test run
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        T_free( wins );
+
+        if ( win_count <= 1 )
+        {
+            Var_T * nv = vars_push( FLOAT_ARR, NULL, rs->acq.num_segments );
+
+            for ( ssize_t i = 0; i < nv->len; i++ )
+                nv->val.dpnt[ i ] = handler( NULL, 0 );
+
+            return nv;
+        }
+
+        Var_T * nv = vars_push_matrix( FLOAT_REF, 2,
+                                       rs->acq.num_segments, win_count );
+
+        for ( ssize_t i = 0; i < nv->len; i++ )
+        {
+            double * dp = nv->val.vptr[ i ]->val.dpnt;
+
+            for ( long j = 0; i < win_count; ++j )
+                *dp++ = handler( NULL, 0 );
+        }
+
+        return nv;
+    }
+        
+    // If there are windows create a window that covers the whole range of
+    // the windows
+
+    RS_RTO_Win fw = { HUGE_VAL, -HUGE_VAL, 0, NULL };
+
+    if ( win_count != 0 )
+        for ( long i = 0; i < win_count; i++ )
+        {
+            fw.start = d_min( fw.start, wins[ i ]->start );
+            fw.end   = d_max( fw.end,   wins[ i ]->end   );
+        }
+                               
+    // Get the segments for this combined window 
+
+    double ** data = NULL;
+    size_t num_segments;
+    size_t length;
+
+    CLOBBER_PROTECT( data );
+
+    TRY
+    {
+        get_segments( rch, win_count ? &fw : NULL, &data,
+                      &num_segments, &length );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        if ( data )
+            free( *data );
+        free( data );
+        T_free( wins );
+        RETHROW;
+    }
+
+    if ( win_count <= 1 )
+    {
+        T_free( wins );
+
+        Var_T * nv;
+
+        TRY
+        {
+            nv = vars_push( FLOAT_ARR, NULL, &num_segments );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            free( *data );
+            free( data );
+            RETHROW;
+        }
+
+        for ( size_t i = 0; i < num_segments; i++ )
+            nv->val.dpnt[ i ] = handler( data[ i ], length );
+
+        free( *data );
+        free( data );
+
+        return nv;
+    }
+              
+    Var_T * nv;
+
+    TRY
+    {
+        nv = vars_push_matrix( FLOAT_REF, 2, num_segments, win_count );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        free( *data );
+        free( data );
+        T_free( wins );
+        RETHROW;
+    }
+
+    for ( size_t i = 0; i < num_segments; i++ )
+    {
+        double reso = ( fw.end - fw.end ) / length;
+        double *dp = nv->val.vptr[ i ]->val.dpnt;
+
+        for ( long j = 0; j < win_count; j++ )
+        {
+            long start_ind = lrnd( ( wins[ i ]->start - fw.start ) / reso );
+            long end_ind   =   length
+                             - lrnd( ( fw.end - wins[ i ]->end ) / reso );
+            *dp++ = handler( data[ i ] + start_ind,
+                             end_ind - start_ind );
+        }
+    }
+
+    free( *data );
+    free( data );
+    T_free( wins );
 
     return nv;
 }

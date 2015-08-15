@@ -2715,9 +2715,10 @@ must have been called before starting the acquisition.
 @item digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
 arguments, the channel the data are to be fetched from and, optionally,
-a window ID as returned by @ref{digitizer_define_window()} to specify
-the time interval. Valid choices of the data channel depend on the model
-of the digitizer:
+a window ID as returned by @ref{digitizer_define_window()} to restrict
+the returned data to an interval of the measured wavform.
+
+Valid choices of the data channel depend on the model of the digitizer:
 @table @samp
 @item TDS520
 @itemx TDS520A
@@ -2779,7 +2780,7 @@ after a still running acquisition sequence (started by a call of
 returned as an array of floating point numbers with a number of
 elements depending on the current settings of the digitizer (timebase,
 record lengths, memory size etc.) and possibly the window width
-(if a window is to be used).
+(if a window is being used).
 
 For the @strong{Tektronix} oscilloscopes the function positions the
 cursors at the start and end point of the specified window (or the first
@@ -2805,7 +2806,7 @@ where no visual feedback is used, the function is identical to
 @findex digitizer_get_area()
 @item digitizer_get_area()
 This function is currently not implemented for the @ref{lecroy9400,
-LeCroy 9400} oscilloscope.
+LeCroy 9400} oscilloscope!
 
 The function returns the area under one of the measured curves. It
 expects at least one argument, the oscilloscopes channel the data are to
