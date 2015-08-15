@@ -1315,7 +1315,7 @@ monochromator_wavelength_axis( Var_T * v )
 Var_T *
 monochromator_wavenumber_axis( Var_T * v )
 {
-    double wl = spex_cd2a.wavelength;
+    volatile double wl = spex_cd2a.wavelength;
     Var_T *cv;
     Var_T *fv;
     long num_pixels;
@@ -1324,7 +1324,6 @@ monochromator_wavenumber_axis( Var_T * v )
 
 
     CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
     {

@@ -1339,7 +1339,7 @@ monochromator_wavelength_axis( Var_T * v )
 Var_T *
 monochromator_wavenumber_axis( Var_T * v )
 {
-    double wl;
+    volatile double wl;
     Var_T *cv;
     Var_T *fv;
     long int num_pixels;
@@ -1348,7 +1348,6 @@ monochromator_wavenumber_axis( Var_T * v )
 
 
     CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
     {

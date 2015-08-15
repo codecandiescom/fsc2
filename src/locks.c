@@ -144,7 +144,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
  *---------------------------------------------------*/
 
 void
-fsc2_release_uucp_lock( const char * name )
+fsc2_release_uucp_lock( const char * volatile name )
 {
 	char *fn = NULL;
 

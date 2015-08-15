@@ -88,7 +88,7 @@ bool
 lecroy_wr_init( void )
 {
     int i;
-    int extra_needed_channels = 0;
+    volatile int extra_needed_channels = 0;
 
 
     if ( ! lecroy_wr_serial_open( ) )
@@ -1663,8 +1663,10 @@ lecroy_wr_get_area( int        ch,
 
     TRY
     {
+        double a = 0;
         for ( i = 0, dp = data; i < length; dp += 4, i++ )
-            area += gain * lecroy_wr_s_hex_to_int( dp ) - offset;
+            a += gain * lecroy_wr_s_hex_to_int( dp ) - offset;
+        area = a;
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1921,11 +1923,10 @@ lecroy_wr_get_float_value( int          ch,
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
+    char * volatile ptr = cmd;
     double val = 0.0;
 
 
-    CLOBBER_PROTECT( ptr );
     CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
