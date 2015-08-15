@@ -47,28 +47,28 @@ fft_name( Var_T * v  UNUSED_ARG )
 
 
 /*------------------------------------------------------------------*
- * Does a 1-dimensional DFT of real data. For a forward transform
- * expects just a 1-dimensioal array. For backwar transform accepts
- * either two 1-dimensional arrays or a single 2-dimensional one.
- * For a backward transform also another argument with the number
- * of points the resulting 1-dimensional array is to have must be
- * given (which, in turn, must be either twice the length of the
- * input arrays or one more).
+ * Function does a 1-dimensional DFT of real data. For a forward
+ * transform it expects just a 1-dimensioal array. For a backward
+ * transform it accepts either two 1-dimensional arrays or a single
+ * 2-dimensional one. For a backward transform also another argument
+ * with the number of points the resulting 1-dimensional array is to
+ * have must be given (which, in turn, must be either twice the length
+ * of the input arrays or one more).
  *------------------------------------------------------------------*/
 
 Var_T *
 fft_real( Var_T * v )
 {
-    Var_T *r = NULL,
-          *c = NULL,
-          *nv;
+    Var_T * r = NULL,
+          * c = NULL,
+          * nv;
     int n;
     fftw_plan plan;
     double * dp;
     int i;
           
 
-	if ( v == NULL )
+	if ( ! v )
 	{
 		print( FATAL, "Missing arguments\n" );
 		THROW( EXCEPTION );
@@ -181,7 +181,7 @@ fft_real( Var_T * v )
 
         fftw_execute( plan );
 
-        /* Copy data over from result array into new variable */
+        /* Copy data over from result array into the new variable */
 
         dp = ( double * ) out;
         a = nv->val.vptr[ 0 ]->val.dpnt;

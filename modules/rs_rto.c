@@ -29,22 +29,24 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 // Some estimates for the overhead for downloading a data set
-// or a segment and the data transfer rate.
+// and the data transfer rate.
 
 #define CURVE_DELAY   0.03     // 30 ms
-#define SEGMENT_DELAY 0.08     // 80 ms
 #define TRANSFER_RATE 10e6     // 10 MB/s
 
 
+// Enumeration for settings of filter for externnal trigger input
+// channel, combining type of filter and cut-off frequency
+
 enum Ext_Filter
 {
-	Ext_Filter_Off,
-	Ext_Filter_Low_Pass_5kHz,
-	Ext_Filter_Low_Pass_50kHz,
-	Ext_Filter_Low_Pass_50MHz,
-	Ext_Filter_High_Pass_5kHz,
-	Ext_Filter_High_Pass_50kHz,
-	Ext_Filter_High_Pass_50MHz
+    Ext_Filter_Off,
+    Ext_Filter_Low_Pass_5kHz,
+    Ext_Filter_Low_Pass_50kHz,
+    Ext_Filter_Low_Pass_50MHz,
+    Ext_Filter_High_Pass_5kHz,
+    Ext_Filter_High_Pass_50kHz,
+    Ext_Filter_High_Pass_50MHz
 };
 
 typedef struct RS_RTO_Win
@@ -60,10 +62,10 @@ typedef struct  // RS_RTO_Trig
     int source;
     bool is_source;
 
-    double level[ 5 ];
+    double level[ 5 ];       // one setting for each possible source channel
     bool is_level[ 5 ];
 
-    int slope[ 5 ];
+    int slope[ 5 ];          // one setting for each possible source channel
     bool is_slope[ 5 ];
 
     int mode;
@@ -92,25 +94,25 @@ typedef struct  // RS_RT_Chan
     bool state;
     bool is_state;
 
-    double scale;
+    double scale;                // Channel_Ch[1-4] only
     bool is_scale;
 
-    double offset;
+    double offset;               // Channel_Ch[1-4] only
     bool is_offset;
 
-    double position;
+    double position;             // Channel_Ch[1-4] only
     bool is_position;
 
-    int coupling;
+    int coupling;                // Channel_Ch[1-4] and Channel_Ext only
     bool is_coupling;
 
-    int bandwidth;
+    int bandwidth;               // Channel_Ch[1-4] only
     bool is_bandwidth;
 
-    int ext_filter;
+    int ext_filter;              // Channnel_ext only
     bool is_ext_filter;
 
-    char * function;
+    char * function;             // Channel_Math[1-4] only
 } RS_RT_Chan;
 
 typedef struct  // RS_RTO_Acq
@@ -218,10 +220,10 @@ static int fsc2_ch_2_rto_ch( long ch );
 static long rto_ch_2_fsc2_ch( int ch );
 static void check( int err_code );
 static long to_ext_filter( int ft,
-						   int fco );
+                           int fco );
 static void from_ext_filter( long   e,
-							 int  * ft,
-							 int  * fco );
+                             int  * ft,
+                             int  * fco );
 static RS_RTO_Win * get_window( Var_T * v );
 static RS_RTO_Win * get_window_from_long( long wid );
 static void get_waveform( int           rch,
@@ -1708,8 +1710,8 @@ digitizer_ext_channel_filter( Var_T * v )
         THROW( EXCEPTION );
     }
 
-	int ft;
-	int fco;
+    int ft;
+    int fco;
 
     if ( ! v )
         switch ( FSC2_MODE )
@@ -1724,77 +1726,77 @@ digitizer_ext_channel_filter( Var_T * v )
                                   rs->chans[ Channel_Ext ].ext_filter );
 
             default :
-			{
+            {
                 check( rs_rto_channel_filter_type( rs->dev, Channel_Ext,
                                                    &ft ) );
-				check( rs_rto_channel_cut_off( rs->dev, Channel_Ext, &fco ) );
+                check( rs_rto_channel_cut_off( rs->dev, Channel_Ext, &fco ) );
                 return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
-			}
-		}
+            }
+        }
 
-	long ext_filter;
+    long ext_filter;
 
-	if ( v->type == STR_VAR )
-	{
-		if ( ! strcasecmp( v->val.sptr, "Off" ) )
-		{
-			ext_filter = Ext_Filter_Off;
-			ft = Filter_Type_Off;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "Low_Pass_5kHz" ) )
-		{
-			ext_filter = Ext_Filter_Low_Pass_5kHz;
-			ft = Filter_Type_Low_Pass;
-			fco = Filter_Cut_Off_kHz5;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50kHz" ) )
-		{
-			ext_filter = Ext_Filter_Low_Pass_50kHz;
-			ft = Filter_Type_Low_Pass;
-			fco = Filter_Cut_Off_kHz50;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50MHz" ) )
-		{
-			ext_filter = Ext_Filter_Low_Pass_50MHz;
-			ft = Filter_Type_Low_Pass;
-			fco = Filter_Cut_Off_MHz50;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "High_Pass_5kHz" ) )
-		{
-			ext_filter = Ext_Filter_High_Pass_5kHz;
-			ft = Filter_Type_High_Pass;
-			fco = Filter_Cut_Off_kHz5;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "Low_High_50kHz" ) )
-		{
-			ext_filter = Ext_Filter_High_Pass_50kHz;
-			ft = Filter_Type_High_Pass;
-			fco = Filter_Cut_Off_kHz50;
-		}
-		else if ( ! strcasecmp( v->val.sptr, "Low_High_50MHz" ) )
-		{
-			ext_filter = Ext_Filter_High_Pass_50MHz;
-			ft = Filter_Type_High_Pass;
-			fco = Filter_Cut_Off_MHz50;
-		}
-		else
-		{
-			print( FATAL, "Invalid filter type for external trigger input "
-				   "'%s'.\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		ext_filter = get_strict_long( v, "external trigger input "
-									  "filter type" );
-		from_ext_filter( ext_filter, &ft, &fco );
-	}
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "Off" ) )
+        {
+            ext_filter = Ext_Filter_Off;
+            ft = Filter_Type_Off;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "Low_Pass_5kHz" ) )
+        {
+            ext_filter = Ext_Filter_Low_Pass_5kHz;
+            ft = Filter_Type_Low_Pass;
+            fco = Filter_Cut_Off_kHz5;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50kHz" ) )
+        {
+            ext_filter = Ext_Filter_Low_Pass_50kHz;
+            ft = Filter_Type_Low_Pass;
+            fco = Filter_Cut_Off_kHz50;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50MHz" ) )
+        {
+            ext_filter = Ext_Filter_Low_Pass_50MHz;
+            ft = Filter_Type_Low_Pass;
+            fco = Filter_Cut_Off_MHz50;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "High_Pass_5kHz" ) )
+        {
+            ext_filter = Ext_Filter_High_Pass_5kHz;
+            ft = Filter_Type_High_Pass;
+            fco = Filter_Cut_Off_kHz5;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "Low_High_50kHz" ) )
+        {
+            ext_filter = Ext_Filter_High_Pass_50kHz;
+            ft = Filter_Type_High_Pass;
+            fco = Filter_Cut_Off_kHz50;
+        }
+        else if ( ! strcasecmp( v->val.sptr, "Low_High_50MHz" ) )
+        {
+            ext_filter = Ext_Filter_High_Pass_50MHz;
+            ft = Filter_Type_High_Pass;
+            fco = Filter_Cut_Off_MHz50;
+        }
+        else
+        {
+            print( FATAL, "Invalid filter type for external trigger input "
+                   "'%s'.\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        ext_filter = get_strict_long( v, "external trigger input "
+                                      "filter type" );
+        from_ext_filter( ext_filter, &ft, &fco );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
+    if ( FSC2_MODE != EXPERIMENT )
+    {
         if (    FSC2_MODE == PREPARATION
              && rs->chans[ Channel_Ext ].is_ext_filter )
         {
@@ -1804,15 +1806,15 @@ digitizer_ext_channel_filter( Var_T * v )
             return vars_push( INT_VAR,rs->chans[ Channel_Ext ].ext_filter );
         }
 
-		rs->chans[ Channel_Ext ].ext_filter = ext_filter;
-		rs->chans[ Channel_Ext ].is_ext_filter = true;
-		return vars_push( INT_VAR, ext_filter );
-	}
+        rs->chans[ Channel_Ext ].ext_filter = ext_filter;
+        rs->chans[ Channel_Ext ].is_ext_filter = true;
+        return vars_push( INT_VAR, ext_filter );
+    }
 
-	check( rs_rto_channel_set_filter_type( rs->dev, Channel_Ext, &ft ) );
-	check( rs_rto_channel_set_cut_off( rs->dev, Channel_Ext, &fco ) );
+    check( rs_rto_channel_set_filter_type( rs->dev, Channel_Ext, &ft ) );
+    check( rs_rto_channel_set_cut_off( rs->dev, Channel_Ext, &fco ) );
 
-	return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
+    return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
 }
 
 
@@ -2011,7 +2013,7 @@ digitizer_available_segments( Var_T * v  UNUSED_ARG )
 Var_T *
 digitizer_trigger_channel( Var_T * v )
 {
-	int rch;
+    int rch;
 
     if ( ! v )
         switch ( FSC2_MODE )
@@ -2073,7 +2075,7 @@ digitizer_trigger_level( Var_T * v )
 
     int fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
-	int rch = fsc2_ch_2_rto_ch( fch );
+    int rch = fsc2_ch_2_rto_ch( fch );
 
     if ( rch >= Channel_Ch1 )
     {
@@ -2172,7 +2174,7 @@ digitizer_trigger_slope( Var_T * v )
 
     int fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
-	int rch = fsc2_ch_2_rto_ch( fch );
+    int rch = fsc2_ch_2_rto_ch( fch );
 
     if ( rch >= Channel_Ch1 )
     {
@@ -3100,29 +3102,29 @@ long
 to_ext_filter( int ft,
                int fco )
 {
-	if ( ft == Filter_Type_Off )
-		return Ext_Filter_Off;
-	else if ( ft == Filter_Type_Low_Pass )
-	{
-		if ( fco == Filter_Cut_Off_kHz5 )
-			return Ext_Filter_Low_Pass_5kHz;
-		else if ( fco == Filter_Cut_Off_kHz50 )
-			return Ext_Filter_Low_Pass_50kHz;
-		else if ( fco == Filter_Cut_Off_MHz50 )
-			return Ext_Filter_Low_Pass_50MHz;
-	}
-	else if ( ft == Filter_Type_High_Pass )
-	{
-		if ( fco == Filter_Cut_Off_kHz5 )
-			return Ext_Filter_High_Pass_5kHz;
-		else if ( fco == Filter_Cut_Off_kHz50 )
-			return Ext_Filter_High_Pass_50kHz;
-		else if ( fco == Filter_Cut_Off_MHz50 )
-			return Ext_Filter_High_Pass_50MHz;
-	}
+    if ( ft == Filter_Type_Off )
+        return Ext_Filter_Off;
+    else if ( ft == Filter_Type_Low_Pass )
+    {
+        if ( fco == Filter_Cut_Off_kHz5 )
+            return Ext_Filter_Low_Pass_5kHz;
+        else if ( fco == Filter_Cut_Off_kHz50 )
+            return Ext_Filter_Low_Pass_50kHz;
+        else if ( fco == Filter_Cut_Off_MHz50 )
+            return Ext_Filter_Low_Pass_50MHz;
+    }
+    else if ( ft == Filter_Type_High_Pass )
+    {
+        if ( fco == Filter_Cut_Off_kHz5 )
+            return Ext_Filter_High_Pass_5kHz;
+        else if ( fco == Filter_Cut_Off_kHz50 )
+            return Ext_Filter_High_Pass_50kHz;
+        else if ( fco == Filter_Cut_Off_MHz50 )
+            return Ext_Filter_High_Pass_50MHz;
+    }
 
-	fsc2_impossible( );
-	return -1;
+    fsc2_impossible( );
+    return -1;
 }
 
 
@@ -3132,47 +3134,47 @@ to_ext_filter( int ft,
 static
 void
 from_ext_filter( long   e,
-				 int  * ft,
-				 int  * fco )
+                 int  * ft,
+                 int  * fco )
 {
-	if ( e == Ext_Filter_Off )
-		*ft = Filter_Type_Off;
-	else if ( e == Ext_Filter_Low_Pass_5kHz )
-	{
-		*ft  = Filter_Type_Low_Pass;
-		*fco = Filter_Cut_Off_kHz5;
-	}
-	else if ( e == Ext_Filter_Low_Pass_50kHz )
-	{
-		*ft  = Filter_Type_Low_Pass;
-		*fco = Filter_Cut_Off_kHz50;
-	}
-	else if ( e == Ext_Filter_Low_Pass_50MHz )
-	{
-		*ft  = Filter_Type_Low_Pass;
-		*fco = Filter_Cut_Off_MHz50;
-	}
-	else if ( e == Ext_Filter_High_Pass_5kHz )
-	{
-		*ft  = Filter_Type_High_Pass;
-		*fco = Filter_Cut_Off_kHz5;
-	}
-	else if ( e == Ext_Filter_High_Pass_50kHz )
-	{
-		*ft  = Filter_Type_High_Pass;
-		*fco = Filter_Cut_Off_kHz50;
-	}
-	else if ( e == Ext_Filter_High_Pass_50MHz )
-	{
-		*ft  = Filter_Type_High_Pass;
-		*fco = Filter_Cut_Off_MHz50;
-	}
-	else
-	{
-		print( FATAL, "Invalid external trigger input channel filter '%d'.\n",
-			   e );
-		THROW( EXCEPTION );
-	}
+    if ( e == Ext_Filter_Off )
+        *ft = Filter_Type_Off;
+    else if ( e == Ext_Filter_Low_Pass_5kHz )
+    {
+        *ft  = Filter_Type_Low_Pass;
+        *fco = Filter_Cut_Off_kHz5;
+    }
+    else if ( e == Ext_Filter_Low_Pass_50kHz )
+    {
+        *ft  = Filter_Type_Low_Pass;
+        *fco = Filter_Cut_Off_kHz50;
+    }
+    else if ( e == Ext_Filter_Low_Pass_50MHz )
+    {
+        *ft  = Filter_Type_Low_Pass;
+        *fco = Filter_Cut_Off_MHz50;
+    }
+    else if ( e == Ext_Filter_High_Pass_5kHz )
+    {
+        *ft  = Filter_Type_High_Pass;
+        *fco = Filter_Cut_Off_kHz5;
+    }
+    else if ( e == Ext_Filter_High_Pass_50kHz )
+    {
+        *ft  = Filter_Type_High_Pass;
+        *fco = Filter_Cut_Off_kHz50;
+    }
+    else if ( e == Ext_Filter_High_Pass_50MHz )
+    {
+        *ft  = Filter_Type_High_Pass;
+        *fco = Filter_Cut_Off_MHz50;
+    }
+    else
+    {
+        print( FATAL, "Invalid external trigger input channel filter '%d'.\n",
+               e );
+        THROW( EXCEPTION );
+    }
 }
 
 
