@@ -857,6 +857,7 @@ digitizer_record_length( Var_T * v )
 
     rec_len = record_length;
     int ret = rs_rto_acq_set_record_length( rs->dev, &rec_len );
+    if ( ret != FSC3_SUCCESS )
     {
         if ( ret != FSC3_INVALID_ARG )
             check( ret );
