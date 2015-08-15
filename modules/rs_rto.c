@@ -31,7 +31,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 // Some estimates for the overhead for downloading a data set
 // and the data transfer rate.
 
-#define CURVE_DELAY   0.03     // 30 ms
+#define CURVE_DELAY   0.04     // 40 ms
 #define TRANSFER_RATE 10e6     // 10 MB/s
 
 
@@ -160,8 +160,8 @@ typedef struct
 
 
 int rs_rto_init_hook( void );
-int rs_rto_test_hool( void );
-int rs_rto_end_of_test_hool( void );
+int rs_rto_test_hook( void );
+int rs_rto_end_of_test_hook( void );
 int rs_rto_exp_hook( void );
 int rs_rto_end_of_exp_hook( void );
 void rs_rto_exit_hook( void );
@@ -297,7 +297,7 @@ rs_rto_init_hook( void )
  *----------------------------------------------------*/
 
 int
-rs_rto_test_hool( void )
+rs_rto_test_hook( void )
 {
     // Make a copy of the windows that may have been created during the
     // preparations section - they will have to be copied over to rs_rto_exp
@@ -334,7 +334,7 @@ rs_rto_test_hool( void )
  *----------------------------------------------------*/
 
 int
-rs_rto_end_of_test_hool( void )
+rs_rto_end_of_test_hook( void )
 {
 
     // Delete all math function strings and all windows from the test run,

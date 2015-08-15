@@ -624,12 +624,10 @@ synthesizer_setup_list( Var_T * v )
     double * volatile pows  = NULL;
 
     CLOBBER_PROTECT( freqs );
-    CLOBBER_PROTECT( pows );
 
     TRY
     {
         ssize_t flen = v->len;
-
         freqs = T_malloc( flen * sizeof *freqs );
 
         if ( v->type == FLOAT_ARR )
