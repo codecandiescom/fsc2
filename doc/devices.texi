@@ -2169,15 +2169,40 @@ The function can be called only in the @code{EXPERIMENT} section.
 @findex digitizer_ext_channel_filter()
 @item   digitizer_ext_channel_filter()
 This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device allows to set a low- or high-pass filter (with anumber
+of different cut-off frequencies) for the external trigger input
+channel. This function allows to query or set that filter. The
+possible arguments (or return values as integers are)
 
-XXXXXXXXX
+@table @samp
+@item @code{"Off"}             or @code{0}
+Filter switched off
+@item @code{"Low_Pass_5kHz"}   or @code{1}
+Low-pass filter with @w{5 kHz} cut-off frequency
+@item @code{"Low_Pass_50kHz"}  or @code{2}
+Low-pass filter with @w{50 kHz} cut-off frequency
+@item @code{"Low_Pass_50MHz"}  or @code{3}
+Low-pass filter with @w{50 MHz} cut-off frequency
+@item @code{"High_Pass_5kHz"}  or @code{4}
+High-pass filter with @w{5 kHz} cut-off frequency
+@item @code{"High_Pass_50kHz"} or @code{5}
+High-pass filter with @w{50 kHz} cut-off frequency
+@item @code{"High_Pass_50MHz"} or @code{6}
+High-pass filter with @w{50 MHz} cut-off frequency
+
+@end table
 
 
 @anchor{digitizer_channel_position()}
 @findex digitizer_channel_position()
 @item   digitizer_channel_position()
 This function is only available for the @ref{rs_rto, R&S RTO series}.
-XXXXXXXXX
+The displayed waveform of a channel can be moved vertically between
+-5 and @w{5 dib}. This function allows to query or set the position.
+It expects at least one argument, either a digitizing or a math
+channel. Without another argument the current position is returned.
+When called with a second argument this will be used as the new
+vertical position.
 
 
 @anchor{digitizer_num_averages()}
