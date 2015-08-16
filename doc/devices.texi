@@ -1758,6 +1758,9 @@ LT374L, LT584, LT584M and LT584L, 44Xi, 44MXi, 62Xi, 64Xi, 64MXi,
 @item @ref{lecroy_ws}, @ref{lecroy_ws, lecroy_ws_g}
 LeCroy WaveSurfer series controlled via LAN or GPIB (models 422, 424,
 432, 434, 452 and 454)
+
+@item @ref{rs_rto, Rohde&Schwarz RTO series}
+(Models RTO1002, RTO1004, RTO1012, RTO1014, RTO1022, RTO1024, RTO1044)
 @end table
 @noindent
 To use a module in an experiment put its name into the @code{DEVICES}
@@ -1783,16 +1786,20 @@ First digitizer channel (all models)
 Second digitizer channel (all models)
 @item CH3
 Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E, some models of the 93xx, Waverunner and WaveSurfer series)
+LeCroy 9424E, some models of the 93xx, Waverunner, WaveSurfer
+and Rohde&Schwarz RTO series)
 @item CH4
 Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E, some models of the 93xx, Waverunner and WaveSurfer series)
+LeCroy 9424E, some models of the 93xx, Waverunner, WaveSurfer and
+Rohde&Schwarz RTO series)
 @item MATH1
-First mathematic function channel (all Tektronix digitizers)
+First mathematic function channel (all Tektronix and R&S RTO digitizers)
 @item MATH2
-Second mathematic function channel (all Tektronix digitizers)
+Second mathematic function channel (all Tektronix and R&S RTO digitizers)
 @item MATH3
-Third mathematic function channel (all Tektronix digitizers)
+Third mathematic function channel (all Tektronix and R&S RTO digitizers)
+@item MATH4
+Fourth mathematic function channel (R&S RTO digitizers)
 @item REF1
 First reference channel (all Tektronix digitizers)
 @item REF2
@@ -1841,7 +1848,8 @@ Fourth function (averaging) channel (LeCroy 93xx, Waverunner, WaveSurfer)
 @item LINE
 Line In for trigger (all models)
 @item EXT
-External trigger input (LeCroy 93xx, 94xx (except 9424), WaveSurfer, Waverunner)
+External trigger input (LeCroy 93xx, 94xx (except 9424), WaveSurfer,
+Waverunner) and R&S RTO series
 @item EXT10
 External amplified trigger input (LeCroy 93xx, 94xx (except 9424 and 9424E), 
 WaveSurfer, Waverunner)
@@ -1853,14 +1861,22 @@ WaveSurfer, Waverunner)
 @table @samp
 @item @ref{digitizer_name()}
 @item @ref{digitizer_timebase()}
+@item @ref{digitizer_timebase_limits()}
+@item @ref{digitizer_timebase_const_resolution_limits()}
 @item @ref{digitizer_interleave_mode()}
 @item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_time_per_point_limits()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
 @item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_ext_channel_filter()}
+@item @ref{digitizer_channel_position()}
 @item @ref{digitizer_num_averages()}
+@item @ref{digitizer_num_segments()}
+@item @ref{digitizer_max_num_segments()}
 @item @ref{digitizer_averaging()}
+@item @ref{digitizer_acquisition_mode()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
 @item @ref{digitizer_trigger_slope()}
@@ -1869,22 +1885,39 @@ WaveSurfer, Waverunner)
 @item @ref{digitizer_trigger_position()}
 @item @ref{digitizer_trigger_delay()}
 @item @ref{digitizer_record_length()}
+@item @ref{digitizer_record_length_limits()}
 @item @ref{digitizer_memory_size()}
 @item @ref{digitizer_define_window()}
 @item @ref{digitizer_change_window()}
 @item @ref{digitizer_window_position()}
 @item @ref{digitizer_window_width()}
+@item @ref{digitizer_window_limits()}
+@item @ref{digitizer_check_window()}
 @item @ref{digitizer_display_channel()}
+@item @ref{digitizer_channel_state()}
 @item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_stop()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_curve_fast()}
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_area_fast()}
 @item @ref{digitizer_get_amplitude()}
 @item @ref{digitizer_get_amplitude_fast()}
+@item @ref{digitizer_get_segments()}
+@item @ref{digitizer_get_segment_area()}
+@item @ref{digitizer_get_segment_amplitude()}
+@item @ref{digitizer_available_segments()}
 @item @ref{digitizer_run()}
 @item @ref{digitizer_copy_curve()}
+@item @ref{digitizer_math_function()}
 @item @ref{digitizer_lock_keyboard()}
+@item @ref{digitizer_display_enable()}
+@item @ref{digitizer_trigger_out_pulse_state()}
+@item @ref{digitizer_trigger_out_pulse_length()}
+@item @ref{digitizer_trigger_out_pulse_polarity()}
+@item @ref{digitizer_trigger_out_pulse_delay()}
+@item @ref{digitizer_trigger_out_pulse_delay_limits()}
 @end table
 
 @noindent
@@ -1922,8 +1955,38 @@ getting aborted if the new timebase setting isn't compatible with a
 previously set trigger delay (i.e.@: if the trigger delay requested
 previously isn't possible with the new setting of the timebase).
 
-The function can be called in query mode (i.e.@: without an argument)
-in the @code{EXPERIMENT} section only.
+For the @ref{rs_rto, R&S RTO series} the time resolution (point per
+time) is kept unmodified as far as possible (given that enough memory
+is available), to keep the record length constant a following call of
+@ref{digitizer_time_per_point()} is necessary. The trigger delay
+changes automatically if the previous setting isn't compatible with
+the new timebase.
+
+The function can be called in the @code{EXPERIMENT} section only.
+
+
+@anchor{digitizer_timebase_limits()}
+@findex digitizer_timebase_limits()
+@item   digitizer_timebase_limits()
+This function is only supported for the @ref{rs_rto, R&S RTO series}.
+It takes no arguments and returns an array with two elements with the
+shortest and longest timebase that can be set under the current
+circumstances.
+
+The function can be called in the @code{EXPERIMENT} section only.
+
+
+@anchor{digitizer_timebase_const_resolution_limits()}
+@findex digitizer_timebase_const_resolution_limits()
+@item   digitizer_timebase_const_resolution_limits()
+This function is only supported for the @ref{rs_rto, R&S RTO series}.
+This function is only supported for the @ref{rs_rto, R&S RTO series}.
+It takes no arguments and returns an array with two elements with
+the shortest and longest timebase that can be set under the
+current circumstances without resulting in an automatic change of the
+time resolution.
+
+The function can be called in the @code{EXPERIMENT} section only.
 
 
 @anchor{digitizer_time_per_point()}
@@ -1932,6 +1995,20 @@ in the @code{EXPERIMENT} section only.
 The function (to be called in the @code{EXPERIMENT} section only)
 returns the time difference (in seconds) between two data points
 measured by the digitizer.
+
+For the @ref{rs_rto, R&S RTO series} this function also can be called
+to request a certain time resolution (highest possible resolution is
+@w{100 ps}. This will change the record length.
+
+@anchor{digitizer_time_per_point_limits()}
+@findex digitizer_time_per_point_limits()
+@item   digitizer_time_per_point_limits()
+This function is only supported for the @ref{rs_rto, R&S RTO series}.
+It takes no arguments and returns an array with two values, the
+shortest and the longest time resolution possible under current
+circumstances (timebase, memort available etc.).
+
+The function can be called in the @code{EXPERIMENT} section only.
 
 
 @anchor{digitizer_interleave_mode()}
@@ -1956,47 +2033,23 @@ requested, and @code{0} for single shot (SS) mode.
 @findex digitizer_sensitivity()
 @item digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
-called with two arguments) the sensitivity setting of one of the channels
-of the oscilloscope. It needs at least one argument, the channel. Which
-channels that can be used as arguments depends on the model of the
-oscilloscope:
-@table @samp
-@item TDS520
-@itemx TDS520A
-@itemx TDS520C
-@itemx LeCroy 9400
-@itemx LeCroy 9410
-@itemx LeCroy 9420
-@itemx LeCroy 9450
-@itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
-@itemx LeCroy WaveSurfer (422, 432, 452)
-@code{CH1} or @code{CH2}
-@item TDS540
-@itemx TDS744A
-@itemx TDS754A
-@itemx LeCroy 9424
-@itemx LeCroy 9424E
-@itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
-@itemx LeCroy WaveSurfer (424, 434, 454)
-@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@end table
+called with two arguments) the sensitivity setting of one of the
+channels of the oscilloscope. The channel can be any of the digitizing
+channels of the oscilloscope.
 
 If a second argument is given this is taken to be the new sensitivity
-setting (in Volts per division). If the sensitivity value passed to the
-function is not one of the available settings the nearest allowed value
-is used instead. Please note that for some of the oscilloscopes the
-range of admissible sensitivity settings depends on the input impedance
--- unfortunately this can only be checked for when the experiment has
-already been started!
+setting (in Volts per division). If the sensitivity value passed to
+the function is not one of the available settings the nearest allowed
+value is used instead. Please note that for some of the oscilloscopes
+the range of admissible sensitivity settings depends on the input
+impedance -- unfortunately this can only be checked for when the
+experiment has already been started. Requesting an impossible setting
+may either result in the @code{EDL} script getting aborted or in an
+automatic change of the input coupling (always accompanied by a
+warning message).
 
 If no second argument is given the current sensitivity setting for the
 channel is returned.
-
-Please note that for some of the oscilloscopes the range of input
-sensitivity settings may depend on the input impedance and requesting
-an invalid combination may result in aborting the @code{EDL} script
-or an automatic change of the input coupling (always accompanied by
-a warning message).
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -2006,31 +2059,16 @@ argument) only in the @code{EXPERIMENT} section.
 @findex digitizer_offset()
 @item digitizer_offset()
 The function queries (if called with just one argument) or sets (if
-called with two arguments) the offset setting of one of the channels
-of the oscilloscope. Currently this function only exists for the
-@strong{LeCroy} osccilloscopes (except @ref{lecroy9400, 9400}). It
-needs at least one argument, the channel. The channels that can be
-used as arguments depends on the model of the oscilloscope:
-@table @samp
-@item LeCroy 9400
-@itemx LeCroy 9420
-@itemx LeCroy 9410
-@itemx LeCroy 9450
-@itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
-@itemx LeCroy WaveSurfer (422, 432, 452)
-@code{CH1} or @code{CH2}
-@item LeCroy 9424
-@itemx LeCroy 9424E
-@itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
-@itemx LeCroy WaveSurfer (424, 434, 454)
-@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@end table
+called with two arguments) the offset setting of one of the digitizing
+channels of the oscilloscope. Currently this function only exists for
+the @strong{LeCroy} osccilloscopes (except @ref{lecroy9400, 9400} and
+the @ref{rs_rto, R&S RTO series}.
 
 If a second argument is given this is taken to be the new offset
 setting (in Volts). If no second argument is given the current offset
 setting for the channel is returned.
 
-The allowed range for the offset normally depends on the sensitivity
+The allowed range for theo ffset normally depends on the sensitivity
 setting for the channel. Please refer to the device manual.
 
 The function can be called in query mode (i.e.@: without a second
@@ -2041,40 +2079,11 @@ argument) only in the @code{EXPERIMENT} section.
 @findex digitizer_coupling()
 @item digitizer_coupling()
 The function queries (if called with just one argument) or sets (if
-called with two arguments) the input coupling of one of the channels
-of the oscilloscope. Currently this function only exists for the
-Tektronix and @strong{LeCroy} oscilloscopes.
-
-It needs at least one argument, the channel. The channels that can be
-used as arguments depends on the model of the oscilloscope:
-@table @samp
-@item TDS520
-@itemx TDS520A
-@itemx TDS520C
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{AUX1}, @code{AUX2}
-@end itemize
-@itemx LeCroy 9400
-@itemx LeCroy 9410
-@itemx LeCroy 9420
-@itemx LeCroy 9450
-@itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
-@itemx LeCroy Wavesurver (422, 432, 452)
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@end itemize
-@itemx TDS540
-@itemx TDS744A
-@itemx TDS754A
-@itemx LeCroy 9424
-@itemx LeCroy 9424E
-@itemx LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
-@itemx LeCroy Wavesurver (424, 434, 454)
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@end itemize
-@end table
+called with two arguments) the input coupling of one of some of the
+channels of the oscilloscope, all digizitizing channels and, for the
+@ref{rs_rto, R&S RTO series}, the external trigger input channel.
+Currently this function only exists for the Tektronix,
+@strong{LeCroy} and @strong{Rohde&Schwarz} oscilloscopes.
 
 If a second argument is given this is taken to be the new input coupling
 setting, which has to b specified a string or an integer number, where
@@ -2100,13 +2109,12 @@ argument) only in the @code{EXPERIMENT} section.
 This function allows to set or query the bandwidth limiter(s) of the
 oscilloscopes. For the oscilloscopes of the Lecroy93xx and Lecroy94xx
 series the bandwidth can only be set or queried for all channels at
-once, while for the other supported oscilloscopes the bandwidth
-limit can be set for individual channels. The result us that
-for the Lecroy93xx and Lecroy94xx series oscilloscopes the
-function takes either no (in query mode) or a single argument
-(if the bandwidth is to be set), while for all others (Lecroy
-WaveSurfer and Tektronix) the function expects one or two arguments,
-the first one always being the channel to be set up.
+once, while for the other supported oscilloscopes the bandwidth limit
+can be set for individual channels. Thus for the Lecroy93xx and
+Lecroy94xx series oscilloscopes the function takes either no (in query
+mode) or a single argument (if the bandwidth is to be set), while for
+all others the function expects one or two arguments, the first one
+always being the digitizing channel to be set up.
 
 For the oscilloscopes of the Lecroy93xx and Lecroy94xx series
 the function queries (if called with no argument) or sets (if
@@ -2120,19 +2128,19 @@ returns @code{1} if the bandwidth limiter is on, @code{0} if it's off.
 
 For all but one of the supported models of the @ref{lecroy_wr, LeCroy
 Waverunner} series three possible settings exist. It can be switched
-off by calling the function with a string argument of @code{"OFF"} (or
-an integer argument of @code{0}) to achieve the highst model-dependent
-bandwidth (see specifications). It can be set to @code{200 MHz} by
-calling the function with the string @code{"200MHZ"} (or the value
-@code{2}). Finally by calling it with the string @code{"ON"} (or an
-integer argument of @code{1}) for bandwidth can be restricted to
-@code{25 MHz} for the Waverunner models LT322, LT342(L), LT262(ML) and
-LT372(L)) and to @code{20 MHz} for the Waverunner-2 models LT224,
-LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L) and
-LT584(M/L) and all @code{Xi} models. The only exception is the
-Waverunner model LT322 were the maximum bandwidth is @code{200 MHz},
-thus switching te bandwidth limiter off and setting it to @code{200
-MHz} has the same effect.
+off (i.e.@: for using the full bandwidth) by calling the function with
+a string argument of @code{"OFF"} (or an integer argument of @code{0})
+to achieve the highst model-dependent bandwidth (see specifications).
+It can be set to @code{200 MHz} by calling the function with the
+string @code{"200MHZ"} (or the value @code{2}). Finally by calling it
+with the string @code{"ON"} (or an integer argument of @code{1}) for
+bandwidth can be restricted to @code{25 MHz} for the Waverunner models
+LT322, LT342(L), LT262(ML) and LT372(L)) and to @code{20 MHz} for the
+Waverunner-2 models LT224, LT344(L), LT364(L), LT264(M/ML),
+LT354(M/ML), LT374(M/L) and LT584(M/L) and all @code{Xi} models. The
+only exception is the Waverunner model LT322 were the maximum
+bandwidth is @code{200 MHz}, thus switching the bandwidth limiter off
+and setting it to @code{200 MHz} has the same effect.
 
 For the @ref{lecroy_ws, LeCroy WaveSurfer} with the models
 @strong{422} and @strong{424} only @code{"OFF"} and @code{"ON"} can be
@@ -2147,24 +2155,41 @@ full bandwidth, @code{"20MHZ"} or @code{1} and @code{"100MHZ"} or
 @code{2}. The models TDS744A and TDS754A support a further setting,
 @code{"250MHZ"} or @code{3}.
 
-The function can be called in query mode (i.e.@: without a second
-argument) only in the @code{EXPERIMENT} section.
+
+For all models of the @ref{rs_rto, R&S RTO series} 4 possible
+settings exist: @code{"OFF"} (or @code{0}) for full bandwidth,
+@code{"20MHz"} (or @code{1}), @code{"200MHz"} (or @code{2})
+And @code{"800MHz"} (or @code{4}) (though note that this setting
+is equivalent to @code{"OFF"} for the models RTO1002 and RTO1004).
+
+The function can be called only in the @code{EXPERIMENT} section.
+
+
+@anchor{digitizer_ext_channel_filter()}
+@findex digitizer_ext_channel_filter()
+@item   digitizer_ext_channel_filter()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+
+XXXXXXXXX
+
+
+@anchor{digitizer_channel_position()}
+@findex digitizer_channel_position()
+@item   digitizer_channel_position()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+XXXXXXXXX
 
 
 @anchor{digitizer_num_averages()}
 @findex digitizer_num_averages()
 @item digitizer_num_averages()
-This function is intended for the @strong{Tektronix} digitizers, see at
-the end on how to also use it with the @strong{LeCroy} oscilloscopes. It
-queries (if called with no argument) or sets (if called with an argument)
-the number of averages done by the oscilloscope. If the number of averages
-is passed to the function it must be at least 1 (which will switch the
+For the @strong{Tektronix} digitizers the function queries (if called
+with no argument) or sets (if called with an argument) the number of
+averages done by the oscilloscope. If the number of averages is passed
+to the function it must be at least 1 (which will switch the
 oscilloscope into @code{SAMPLE} mode). If the argument is larger than
-the maximum number of averages the maximum available number of averages
-is used instead.
-
-The function can be called in query mode (i.e.@: without an argument)
-only in the @code{EXPERIMENT} section.
+the maximum number of averages the maximum available number of
+averages is used instead.
 
 For the @strong{LeCroy} oscilloscopes this function can only be used
 in query mode and returns the number of averages that has been set in
@@ -2175,6 +2200,11 @@ argument, the the channel used to do the averaging, i.e.@: either
 9424}, @ref{lecroy9424e, 9424E}, @ref{lecroy9450, 9450} and
 @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D} for
 the @ref{lecroy_ws, Waverunner}.
+
+For the @ref{rs_rto, R&S RTO series} the function can be used to query
+or set the number of averages sampled when doing a easurrement in
+@code{Averaged} @ref{digitizer_acquisition_mode(), acquisition mode}).
+Possible values are between 1 and 16777215.
 
 @table @strong
 @item Please note:
@@ -2188,6 +2218,26 @@ averages this bug starts at because it only shows up in the
 signal-to-noise ratio being worse by a factor of the square root of 2
 than is to be expected.
 @end table
+
+
+@anchor{digitizer_num_segments()}
+@findex digitizer_num_segments()
+@item   digitizer_num_segments()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+queries or sets the number of waveforms measured during acquisition
+in @code{"Segmented} @ref{digitizer_acquisition_mode(), acquisition
+mode} (also called "Ultra Segmentation"). The lower limit this can be
+set to is 1, the upper limit depends on a lot of circumstances, use
+@ref{digitizer_max_num_segments()} to find out what ot is.
+
+@anchor{digitizer_max_num_segments()}
+@findex digitizer_max_num_segments()
+@item   digitizer_max_num_segments()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+takes no arguments and returns the maximum number of segments that can
+be mesured under the current circumstances in
+@ref{digitizer_acquisition_mode(), acquisition mode} (also called
+"Ultra Segmentation")
 
 
 @anchor{digitizer_averaging()}
@@ -2285,6 +2335,21 @@ value is set only as many points as have been set will be returned by
 a @ref{digitizer_get_curve()} command.
 
 
+@anchor{digitizer_acquisition_mode()}
+@findex digitizer_acquisition_mode()
+@item   digitizer_acquisition_mode()
+This function only exists for the @ref{rs_rto, R&S RTO series}. These
+devices have three "qcquisition modes". You can either just measure a
+single waveform, measure and average a number of waveforms or measure
+a consecutive set of single waveforms, which is called "Ultra
+Segmentation" (in this mode a much faster repetition frequency is
+possible and data don't need to be downloaded in between since all
+waveforms are stored on the device). This function can be used to
+query or set this acquisition mode. Possible values are the string
+@code{"Normal"} (or the integer @code{0}), @code{"Averaged"} (or
+@code{1}) and @code{"Segmented"} (or @code{2}).
+
+
 @anchor{digitizer_trigger_channel()}
 @findex digitizer_trigger_channel()
 @item digitizer_trigger_channel()
@@ -2301,6 +2366,7 @@ numeric!):
 @item @code{AUX1}, @code{AUX2} or @code{LINE} (can be abbreviated to
 @code{LIN})
 @end itemize
+
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
@@ -2320,33 +2386,44 @@ numeric!):
 @item @code{EXT}, @code{EXT10} or @code{LINE} (can be abbreviated to
 @code{LIN})
 @end itemize
+
 @item LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemx LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{EXT}, @code{EXT10} or @code{LINE} (can be abbreviated to
-@code{LIN})
+@item @code{EXT}, @code{EXT10} or @code{LINE} (can be abbreviated to @code{LIN})
 @end itemize
+
 @item LeCroy 9424
 @itemize @bullet
 @item @code{CH1}, @code{CH2} or @code{CH4}
 @item @code{LINE} (can be abbreviated to @code{LIN})
 @end itemize
+
 @item LeCroy 9424E
 @itemize @bullet
 @item @code{CH1}, @code{CH2}
 @item @code{EXT} or @code{LINE} (can be abbreviated to @code{LIN})
 @end itemize
+
+@item R&S RTO1002
+@itemx R&S RTO1012
+@itemx R&S RTO1022
+@itemize @bullet
+@item @code{CH1}, @code{CH2}
+@item @code{EXT}
+@end itemize
+
+@item R&S RTO1004
+@itemx R&S RTO1014
+@itemx R&S RTO1024
+@itemx R&S RTO1044
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3}, @code{CH4}
+@item @code{EXT}
+@end itemize
+
 @end table
-The function can be called in query mode (i.e.@: without an argument)
-only if either it has already been called with an argument or in the
-@code{EXPERIMENT} section.
-
-Please note: In some cases the trigger level automatically gets
-adjusted when changing the trigger coupling if the trigger level
-is too large for the new coupling setting.
-
-
 
 @anchor{digitizer_trigger_level()}
 @findex digitizer_trigger_level()
@@ -2355,17 +2432,31 @@ is too large for the new coupling setting.
 Function for setting or quering the trigger level of one of the
 trigger channels of the LeCroy @ref{lecroy9400, 9400},
 @ref{lecroy9410, 9410}, @ref{lecroy9420, 9420}, @ref{lecroy9424,
-9424}, @ref{lecroy9424e, 9424E}, @ref{lecroy9450, 9450} and
-@ref{lecroy_ws, Waverunner} digitizers. For all digitizers except the
-@ref{lecroy9400, LeCroy 9400} it expects at least a single argument,
-the trigger channel, see the channels listed for the function
+9424}, @ref{lecroy9424e, 9424E}, @ref{lecroy9450, 9450},
+@ref{lecroy_ws, Waverunner} and @ref{rs_rto, R&S RTO series}
+digitizers. For all digitizers except the @ref{lecroy9400, LeCroy
+9400} it expects at least a single argument, the trigger channel, see
+the channels listed for the function
 @ref{digitizer_trigger_channel()}, for obvious reasons excluding the
 @code{LINE} channel. If called with no further argument the current
 setting for the trigger level of this channel (or the general level
 setting in case of the @ref{lecroy9400, LeCroy 9400}) is returned. If
 called with a second argument it must be the trigger level (in Volt)
 to be set for that channel. The accepted range for the level depends
-on the model and the trigger coupling setting.
+on the model, the trigger coupling setting and channel sensitivity.
+
+Please note: In some cases the trigger level automatically gets
+adjusted when changing the trigger coupling if the trigger level
+is too large for the new coupling setting. For the @ref{rs_rto, R&S
+RTO series} also, for digitizing channels, the sensitivity setting
+can influence the triger level.
+
+@table @strong
+@item Please note:
+Setting a trigger level for one of several possible trigger
+channels does @strong{not} automatically make this channel the
+selected trigger channel.
+@end table
 
 
 @anchor{digitizer_trigger_slope()}
@@ -2374,10 +2465,11 @@ on the model and the trigger coupling setting.
 Function for setting or quering the trigger slope of one of the
 trigger channels of the LeCroy @ref{lecroy9400, 9400},
 @ref{lecroy9410, 9410}, @ref{lecroy9420, 9420}, @ref{lecroy9424,
-9424}, @ref{lecroy9424e, 9424E}, @ref{lecroy9450, 9450} and
-@ref{lecroy_wr, Waverunner} digitizers. For all digitizers except the
-@ref{lecroy9400, LeCroy 9400} it expects at least a single argument,
-the trigger channel, see the channels listed for the function
+9424}, @ref{lecroy9424e, 9424E}, @ref{lecroy9450, 9450},
+@ref{lecroy_wr, Waverunner} and @ref{rs_rto, R&S RTO series}
+digitizers. For all digitizers except the @ref{lecroy9400, LeCroy
+9400} it expects at least a single argument, the trigger channel, see
+the channels listed for the function
 @ref{digitizer_trigger_channel()}. If called with no further argument
 the current setting for the trigger slope of this channel (or the
 general slope in the case of the @ref{lecroy9400, LeCroy 9400}) as a
@@ -2420,7 +2512,10 @@ coupling for the channel pass the function a second argument, either
 an integer as it gets returnedon queries, or one of the strings
 @code{"AC"}, @code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or (except
 for the @ref{lecroy9400, LeCroy 9400} and @ref{lecroy9410, 9410})
-@code{"HF"} .
+@code{"HF"}.
+
+This function does not exist for the @ref{rs_rto, R&S RTO series},
+use @ref{digitizer_coupling()} instead.
 
 @table @strong
 @item Please note:
@@ -2449,6 +2544,7 @@ a string or an integer. The following values are allowed:
 @item @code{SINGLE} or @code{2}
 @item @code{SEQUENCE} or @code{3}
 @end itemize
+
 @item LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9424
@@ -2461,6 +2557,7 @@ a string or an integer. The following values are allowed:
 @item @code{SEQUENCE} or @code{3}
 @item @code{WRAP} or @code{4}
 @end itemize
+
 @item LeCroy Waverunner
 @itemx LeCroy Waverunner
 @itemize @bullet
@@ -2469,6 +2566,13 @@ a string or an integer. The following values are allowed:
 @item @code{SINGLE} or @code{2}
 @item @code{STOP} or @code{3}
 @end itemize
+
+@item R&S RTO series
+@itemize @bullet
+@item @code{AUTO} or @code{0}
+@item @code{NORM} or @code{1}
+@end itemize
+
 @end table
 Currently, setting the @code{SEQUENCE} or @code{WRAP} trigger modes isn't
 supported.
@@ -2479,18 +2583,26 @@ supported.
 @findex digitizer_record_length()
 @item digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
-with an argument) the length of the traces measured by the digitizer.
+with an argument) the length of the traces waveform by the digitizer.
 If called with an argument the value passed to the function will be
 rounded up to the nearest allowed values if necessary.
 
-For all @strong{LeCroy} oscilloscopes the function can only be called
-in query mode, i.e.@: without an argument. And changing the memory
-size via @code{@ref{digitizer_memory_size()}} afterwards may
-invalidate the returned value.
+For all @strong{LeCroy} and @ref{rs_rto, R&S RTO series} oscilloscopes
+the function can only be called in query mode, i.e.@: without an
+argument. For the @strong{LeCroy} changing the memory size via
+@code{@ref{digitizer_memory_size()}} afterwards may invalidate the
+returned value. For the @ref{rs_rto, R&S RTO series} changing the
+timebase or time resolution always changes the record length, several
+other settings may als lead to a change.
 
-Except for the @strong{LeCroy} oscilloscopes, the function can be called
-in query mode (i.e.@: without an argument) only if either it has already
-been called with an argument or when in the @code{EXPERIMENT} section.
+
+@anchor{digitizer_record_length_limits()}
+@findex digitizer_record_length_limits()
+@item   digitizer_record_length_limits()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+returns an array with 2 integers, the lower (always 1000) and the
+upper limit the record length can be set to under the current
+conditions.
 
 
 @anchor{digitizer_memory_size()}
@@ -2677,6 +2789,23 @@ stops only at the start of the experiment if it detects that an impossible
 window width is going to be requested during the experiment.
 
 
+@anchor{digitizer_window_limits()}
+@findex digitizer_window_limits()
+@item   digitizer_window_limits()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+returns an array with two values, the earliest possible window
+position and the possible maximum width.
+
+
+@anchor{digitizer_check_window()}
+@findex digitizer_check_window()
+@item   digitizer_check_window()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+expects a window ID as its only argument and returns if using the
+window under the current circumstances is possible (i.e.@: if it
+fits into the measured waveform).
+
+
 @anchor{digitizer_display_channel()}
 @findex digitizer_display_channel()
 @item digitizer_display_channel()
@@ -2696,14 +2825,30 @@ useless) you may have to use this function to make sure the channel
 stays switched on.
 
 
+@anchor{digitizer_channel_state()}
+@findex digitizer_channel_state()
+@item   digitizer_channel_state()
+This function is only supported for the @ref{rs_rto, R&S RTO series}.
+It allows to switch digitizing and math channels on or off (or query
+their state). If called with a single argument, the channel it is
+returned if that channel is on or off. If called with a second,
+boolean argument the channel is switched on or off accordingly.
+
+Please note: switchin on new channels typically requires memory. which
+then isn't available for other channels anymore. As a result the
+record length and thus also the time resolution may become reduced.
+
 
 @anchor{digitizer_start_acquisition()}
 @findex digitizer_start_acquisition()
 @item digitizer_start_acquisition()
 This function starts an acquisition sequence of the oscilloscope.
 Previously measured curves are discarded and new data are sampled
-until the requested number of averages has been reached. The function
-can only be used in the @code{EXPERIMENT} section of the @code{EDL} file.
+until the requested number of averages has been reached or, for the
+@ref{rs_rto, R&S RTO series} when riun in @code{Segmented}
+@ref{digitizer_acquisition_mode(), acquisition mode}, until the
+requested number of segments has mean measured. The function can only
+be used in the @code{EXPERIMENT} section of the @code{EDL} file.
 
 Please note that for starting an acquisition involving averages for the
 @strong{LeCroy} oscilloscopes the function @ref{digitizer_averaging()}
@@ -2727,6 +2872,7 @@ Valid choices of the data channel depend on the model of the digitizer:
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
+
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
@@ -2734,6 +2880,7 @@ Valid choices of the data channel depend on the model of the digitizer:
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
+
 @item LeCroy 9400
 @itemx LeCroy 9410
 @itemx LeCroy 9420
@@ -2743,6 +2890,7 @@ Valid choices of the data channel depend on the model of the digitizer:
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+
 @item LeCroy 9424
 @itemx LeCroy 9424E
 @itemize @bullet
@@ -2750,28 +2898,45 @@ Valid choices of the data channel depend on the model of the digitizer:
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+
 @item LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
 @item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @end itemize
+
 @item LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
 @item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @end itemize
+
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH}
 @end itemize
+
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH}
 @end itemize
+
+@item Rohde&Schwarz RTO (RTO1002, RTO1012, RTO1022)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}
+@item @code{MATH1}, @code{MATH2}, @code{MATH3}, @code{MATH4}
+@end itemize
+
+@item Rohde&Schwarz RTO (RTO1002, RTO1012, RTO1022)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3}, @code{CH4}
+@item @code{MATH1}, @code{MATH2}, @code{MATH3}, @code{MATH4}
+@end itemize
+
 @end table
 
 Unless data from a memory channel are fetched the function only returns
@@ -2808,63 +2973,11 @@ where no visual feedback is used, the function is identical to
 This function is currently not implemented for the @ref{lecroy9400,
 LeCroy 9400} oscilloscope!
 
-The function returns the area under one of the measured curves. It
-expects at least one argument, the oscilloscopes channel the data are to
-be taken from. The channel that can be used depend on the model of
-the digitizer:
-@table @samp
-@item TDS520
-@itemx TDS520A
-@itemx TDS520C
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@end itemize
-@item TDS540
-@itemx TDS744A
-@itemx TDS754A
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@end itemize
-@item LeCroy 9410
-@itemx LeCroy 9420
-@itemx LeCroy 9450
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MEM_C} or @code{MEM_D}
-@item @code{FUNC_E} or @code{FUNC_F}
-@end itemize
-@item LeCroy 9424
-@itemx LeCroy 9424E
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MEM_C} or @code{MEM_D}
-@item @code{FUNC_E} or @code{FUNC_F}
-@end itemize
-@item LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
-@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
-@end itemize
-@item LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
-@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
-@end itemize
-@item LeCroy WaveSurfer (422, 432, 452)
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MATH}
-@end itemize
-@item LeCroy WaveSurfer (424, 434, 454)
-@itemize @bullet
-@item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MATH}
-@end itemize
-@end table
+The function returns the area under one of the measured curves, i.e.@:
+simply the sum of all values. It expects at least one argument, the
+oscilloscopes channel the data are to be taken from. The channel that
+can be used are the same as those that can be used with the
+@ref{digitizer_get_curve()} function.
 
 The following, optional arguments are a list of integer variables or
 1-dimensional integer arrays, where each number (or array element) is a
@@ -2928,60 +3041,8 @@ LeCroy 9400} oscilloscope.
 The function returns the amplitude, i.e.@: the difference between the
 maximum and minimum voltage, from the digitizer. The function takes at
 least one argument, the channel the data are to be fetched from. Valid
-choices of the data channel depend on the model of the digitizer:
-@table @samp
-@item TDS520
-@itemx TDS520A
-@itemx TDS520C
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@end itemize
-@item TDS540
-@itemx TDS744A
-@itemx TDS754A
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@end itemize
-@item LeCroy 9410
-@itemx LeCroy 9420
-@itemx LeCroy 9450
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MEM_C} or @code{MEM_D}
-@item @code{FUNC_E} or @code{FUNC_F}
-@end itemize
-@item LeCroy 9424
-@itemx LeCroy 9424E
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MEM_C} or @code{MEM_D}
-@item @code{FUNC_E} or @code{FUNC_F}
-@end itemize
-@item LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
-@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
-@end itemize
-@item LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
-@itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
-@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
-@end itemize
-@item LeCroy WaveSurfer (422, 432, 452)
-@itemize @bullet
-@item @code{CH1} or @code{CH2}
-@item @code{MATH}
-@end itemize
-@item LeCroy WaveSurfer (424, 434, 454)
-@itemize @bullet
-@item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{MATH}
-@end itemize
-@end table
+choices of the data channel depend on the model and are the same as
+for the @ref{digitizer_get_curve()} function.
 
 The following, optional arguments are a list of integer variables or
 1-dimensional integer arrays, where each number (or array element) is a
@@ -3018,7 +3079,6 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
-
 @anchor{digitizer_get_amplitude_fast()}
 @findex digitizer_get_amplitude_fast()
 @item digitizer_get_amplitude_fast()
@@ -3027,6 +3087,74 @@ except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
 time interval. It is not implemented for the @strong{LeCroy} digitizers,
 where no visual feedback is used.
+
+
+@anchor{digitizer_get_segments()}
+@findex digitizer_get_segments()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+@item   digitizer_get_segments()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device allows fastacquisition of a number of waveforms, called
+"Ultra Segmentation". With this function a a set of such segments
+can be downloaded. It expects at least one argument, the channel the
+waveforms are to be downloaded from. This can be one of the digitizing
+channels or one of the math channels. An optional second argument is
+a window ID. The function returns a two-dimensional array with as
+many waveforms as segments got downloaded. Before a download is
+started the function waits for a running acquisition to finish.
+
+
+@anchor{digitizer_get_segment_area()}
+@findex digitizer_get_segment_area()
+@item   digitizer_get_segment_area()
+@item   digitizer_get_segments()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+This function allows to obtain the areas (sums of the data points) for
+the available segments. It expects at least one argument, the channel
+of the segments. This can be any of the digitizing channels or one of
+the math cahnnels. If no further argument is given the function
+returns a 1-dimensional array with the areas for each of the segments.
+
+It may also be called with either a window ID or an array of window
+IDs. If called with a single window ID (or an array with only a
+single element) also a 1-dimensional array is returned with the
+areas in the window range of the segments.
+
+If called with an array with more than one window ID a 2-dimensional
+array us returned, with one sub-array for each segment and each
+sub-array  containing the areas for the windows.
+
+
+
+@anchor{digitizer_get_segment_amplitude()}
+@findex digitizer_get_segment_amplitude()
+@item   digitizer_get_segment_amplitude()
+@item   digitizer_get_segments()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+This function allows to obtain the amplitudes (differences between
+largest and smallest data point) for the available segments. It
+expects at least one argument, the channel of the segments. This can
+be any of the digitizing channels or one of the math cahnnels. If
+no further argument is given the function returns a 1-dimensional
+array with the amplitudes for each of the segments.
+
+It may also be called with either a window ID or an array of window
+IDs. If called with a single window ID (or an array with only a
+single element) also 1-dimensional array is returned with the
+amplitides in the window range of the segments.
+
+If called with an array with more than one window ID a 2-dimensional
+array us returned, with one sub-array for each segment and each
+sub-array  containing the amplitudes for the windows.
+
+
+@anchor{digitizer_available_segments()}
+@findex digitizer_available_segments()
+@item  digitizer_available_segments()
+@item   digitizer_get_segments()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+It takes no arguments and returns how many segments are available for
+download. 
 
 
 @anchor{digitizer_run()}
@@ -3040,6 +3168,18 @@ following an acquisition (at least up to the next call of
 acquisition is done. It accepts no arguments and can only be used in
 the @code{EXPERIMENT} section. The function does not exist for the
 @strong{LeCroy} oscilloscopes.
+
+For the @ref{rs_rto, R&S RTO series} the function starts a contimuous
+run which can only be stopped using a call of @ref{digitizer_stop()}.
+Don'try to fetch waveforms while the device is in a continuous run
+since downloding waveforms requires that the device is stopped.
+
+
+@anchor{digitizer_stop()}
+@findex digitizer_stop()
+@item   digitizer_stop()
+This function only exists for the @ref{rs_rto, R&S RTO series}. It
+takes no argument and stops a contimuous run of the oscilloscope.
 
 
 @anchor{digitizer_copy_curve()}
@@ -3060,6 +3200,7 @@ of the digitizer)
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
+
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
@@ -3067,6 +3208,7 @@ of the digitizer)
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
+
 @item LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9450
@@ -3074,30 +3216,36 @@ of the digitizer)
 @item @code{CH1} or @code{CH2}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+
 @item LeCroy 9424
 @itemx LeCroy 9424E
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+
 @item LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @end itemize
+
 @item LeCroy Waverunner (LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L), LT584(M/L))
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @end itemize
+
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @end itemize
+
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
 @end itemize
+
 @end table
 
 The second argument is the channel the data are to be copied to, i.e.@: one
@@ -3136,6 +3284,25 @@ a new acquisition before fetching the data from the prvious one, thus
 reducing the time required to do an experiment.
 
 
+@anchor{digitizer_math_function()}
+@findex digitizer_math_function()
+@item   digitizer_math_function()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+It allows to query or set the function of one of the math functions.
+Its first argument is always one of the math channels. If there's
+no further argument the currently used function is returned as a
+string (or the empty string if no function is active). If passed a
+second argument, a string with a formula, the function of the math
+channel is set accordingly. A very simple formula would be e.g.@:
+@code{"c1w1-c2w1"} to make the math channel calculate the difference
+between the first waveforms of the first and second input channel.
+For a description of functions that can be used see the manual for
+the device.
+
+Please note: setting a function for a math channel does not
+als switch it on. This has to be done using the function
+@ref{digitizer_channel_state()}.
+
 
 @anchor{digitizer_lock_keyboard()}
 @findex digitizer_lock_keyboard()
@@ -3148,6 +3315,61 @@ able to control the digitizer also via its keyboard it can be unlocked
 call this function with an argument of @code{0} or @code{"OFF"}, to
 re-lock the keyboard call it again with a non-zero argument,
 @code{"ON"} or no argument at all.
+
+@anchor{digitizer_display_enable()}
+@findex digitizer_display_enable()
+@item   digitizer_display_enable()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+This device allows to disable display updates while in remote mode
+(a static graphic is shown instead). Using this function it can be
+queried or set if the display is to be enabled or disabled.
+
+
+@anchor{digitizer_trigger_out_pulse_state()}
+@findex digitizer_trigger_out_pulse_state()
+@item   digitizer_trigger_out_pulse_state()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device can emit a pulse some time after it triggered. This
+function can be used to query or set if such a pulse is created.
+
+
+@anchor{digitizer_trigger_out_pulse_length()}
+@findex digitizer_trigger_out_pulse_length()
+@item   digitizer_trigger_out_pulse_length()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device can emit a pulse some time after it triggered. This
+function can be used to query or set the length of this pulse.
+The possible range of the length is @w{4 ns} to @w{1 ms}.
+
+
+@anchor{digitizer_trigger_out_pulse_polarity()}
+@findex digitizer_trigger_out_pulse_polarity()
+@item   digitizer_trigger_out_pulse_polarity()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device can emit a pulse some time after it triggered. This
+function queries or sets the polirity of the pulse. Possible settings
+are @code{"POSITIVE"} (or @code{0}) and @code{"NEGATIVE"} (or
+@code{1}).
+
+
+@anchor{digitizer_trigger_out_pulse_delay()}
+@findex digitizer_trigger_out_pulse_delay()
+@item   digitizer_trigger_out_pulse_delay()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+The device can emit a pulse some time after it triggered. This
+function queries or sets the delay between the trigger and the
+emission of the pulse. The minimum delay depends on all kinds of
+circumstances but can be never less than @w{800 ms} or larger than
+@w{1 s}.
+
+
+@anchor{digitizer_trigger_out_pulse_delay_limits()}
+@findex digitizer_trigger_out_pulse_delay_limits()
+@item  digitizer_trigger_out_pulse_delay_limits()
+This function is only available for the @ref{rs_rto, R&S RTO series}.
+It takes no arguments and returns an array with two values, the
+minimum and maximum delay between the trigger and the trigger out
+pulse posssible under the current circumstances.
 
 @end table
 

@@ -88,6 +88,7 @@ List of devices, sorted by module name:
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
 @c * q_bmwb::          Bruker ER 051 QG Q-Band Bridge
+* rs_rto::          Rohde & Schwarz RTO series of Oscilloscopes
 * rs_smb100a::      Rohde & Schwarz SMB100A Signal Generator
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
@@ -188,6 +189,7 @@ List of devices, sorted by module name:
 @item @ref{pci_mio_16e_1}   National Instruments PCI-MIO-16E-1 DAQ card
 @item @ref{pt2025}          Metrolab NMR Teslameter PT2025
 @c @item @ref{q_bmwb}          Bruker ER 051 QG Q-Band Bridge
+@item @ref{rs_rto}          Rohde & Schwarz RTO series of oscilloscopes
 @item @ref{rs_smb100a}      Rohde & Schwarz SMB100A Signal Generator
 @item @ref{rs_sml01}        Rohde & Schwarz SML01 Signal Generator
 @item @ref{rs_spec10}       Roper Scientific Spec-10 CCD Camera
@@ -3604,7 +3606,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, rs_smb100a, pci_mio_16e_1, Device Reference
+@node pt2025, rs_rto, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -3634,7 +3636,7 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 @paragraphindent 0
 @strong{Supported functions}:
 @table @samp
-@item @ref{gaussmeter_name()}
+g@item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
 @item @ref{measure_field()}
 @item @ref{gaussmeter_resolution()}
@@ -3644,7 +3646,119 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 @c #############################################################
 
-@c @node q_bmwb, rs_smb100a, pt2025, Device Reference
+@node rs_rto, rs_smb100a, pt2025, Device Reference
+
+@iftex
+@subheading Rohde & Schwarz RTO series of Oscikkoscopes
+@end iftex
+@ifnottex
+@section  Rohde & Schwarz RTO series of Oscikkoscopes
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rs_rto}
+
+
+
+@paragraphindent 0
+@strong{Description}: @uref{https://www.rohde-schwarz.com/en/product/rto-productstartpage_63493-10790.html, Rohde&Schwarz} RTO series of oscilloscopes
+(Models RTO1002, RTO1004, RTO1012, RTO1014, RTO1022, RTO1024, RTO1044)
+
+@paragraphindent 0
+@strong{Controlled via}: WLAN (VXI-11)
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Note}: While the documentation for this device is impressive
+in size, the content is actually (especially for when compared to
+those for other devices by Rohde&Schwarz) extremely poor:
+incomprehensible, incomplete and in many places plain wrong. Its worst
+failure, though, is that it doesn't descrive which settings interact
+and how they influence each other, making it impossible to know with
+any amount of certainty how these devices will behave under all kinds
+of circumstances. Thus it is not possible to check during the test run
+if any of the requested settings will actually be possible and the
+function return values that attemot to indicate that everything is
+fine. Only during the real experiment it can be tested if the
+requested settings can be used and thus there's hardly any
+protections.
+
+@paragraphindent 0
+This module supports only a small subset of the functionality of
+the device, mainly things that will typically be used in time-resolved
+EPR and ENDOR experiments.
+
+@paragraphindent 0
+@strong{Note}: While transfering measured data is decently fast (at
+least @w{10 MB/s} with 4 bytes per data point), starting a download
+incurs a rather long overhead (time between issuing the command to
+send data and data starting to arrive) of about @w{40 ms}, exceeding
+the time for the actual data transfer at least for short waveforms by
+orders of magnitude. For downloading waveforms measured with the
+"Ultra Segmentation" feature it's even worse, overheads of 60 to
+@w{100 ms} seem to be the rule. For this reason alone the use of the
+RTO series as a data digitizing device seems to be questionable...
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_lock_keyboard()}
+@item @ref{digitizer_display_enable()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_stop()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_timebase_limits()}
+@item @ref{digitizer_timebase_const_resolution_limits()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_time_per_point_limits()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_record_length_limits()}
+@item @ref{digitizer_acquisition_mode()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_num_segments()}
+@item @ref{digitizer_max_num_segments()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_channel_state()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_channel_position()}
+@item @ref{digitizer_coupling()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_ext_channel_filter()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_get_segments()}
+@item @ref{digitizer_get_segment_area()}
+@item @ref{digitizer_get_segment_amplitude()}
+@item @ref{digitizer_available_segments()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_check_window()}
+@item @ref{digitizer_window_limits()}
+@item @ref{digitizer_math_function()}
+@item @ref{digitizer_trigger_out_pulse_state()}
+@item @ref{digitizer_trigger_out_pulse_length()}
+@item @ref{digitizer_trigger_out_pulse_polarity()}
+@item @ref{digitizer_trigger_out_pulse_delay()}
+@item @ref{digitizer_trigger_out_pulse_delay_limits()}
+@end table
+
+
+@c #############################################################
+
+@c @node q_bmwb, rs_smb100a, rs_rto, Device Reference
 @c @iftex
 @c @subheading Bruker ER 051 QG Q-Band Bridge
 @c @end iftex
@@ -3689,7 +3803,7 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 @c #############################################################
 
-@node rs_smb100a, rs_sml01, pt2025, Device Reference
+@node rs_smb100a, rs_sml01, rs_rto, Device Reference
 @iftex
 @subheading Rohde & Schwarz SMB100A Signal Generator 
 @end iftex

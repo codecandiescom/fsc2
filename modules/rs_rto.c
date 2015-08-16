@@ -180,7 +180,6 @@ Var_T * digitizer_record_length( Var_T * v );
 Var_T * digitizer_record_length_limits( Var_T * v );
 Var_T * digitizer_acquisition_mode( Var_T * v );
 Var_T * digitizer_num_averages( Var_T * v );
-Var_T * digitizer_max_num_averages( Var_T * v );
 Var_T * digitizer_num_segments( Var_T * v );
 Var_T * digitizer_max_num_segments( Var_T * v );
 Var_T * digitizer_start_acquisition( Var_T * v );
@@ -1066,21 +1065,6 @@ digitizer_num_averages( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-digitizer_max_num_averages( Var_T * v  UNUSED_ARG )
-{
-    unsigned long max = 16777215;
-
-    if ( FSC2_MODE == EXPERIMENT )
-        check( rs_rto_acq_max_average_count( rs->dev, &max ) );
-
-    return vars_push( INT_VAR, ( long ) max );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *
 digitizer_num_segments( Var_T * v )
 {
     unsigned long n_seg;
@@ -1694,6 +1678,17 @@ digitizer_bandwidth_limiter( Var_T * v )
         rs->chans[ rch ].bandwidth = req_bw;
         rs->chans[ rch ].is_bandwidth = true;
         return vars_push( INT_VAR, req_bw );
+    }
+
+    // RTO1002 and RTO1004 can't set 800 MHz bandwidth limiter
+
+    if ( req_bw == Bandwidth_MHz800 )
+    {
+        int model;
+        check( rs_rto_model( rs->dev, &model ) );
+
+        if ( model == Model_RTO1002 || model == Model_RTO1004 )
+            req_bw = Bandwidth_Full;
     }
 
     bw = req_bw;
@@ -2933,6 +2928,13 @@ digitizer_trigger_out_pulse_delay( Var_T * v )
     if ( req_delay <= 0 )
     {
         print( FATAL, "Invalid zero or negative trigger out pulse delay.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( delay < 799.5e-9 || delay >= 1.0000000005 )
+    {
+        print( FATAL, "Trigger out pulse delay out of range, must always be"
+               "between 800 ns and 1 s.\n" );
         THROW( EXCEPTION );
     }
 
