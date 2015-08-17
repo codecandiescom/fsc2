@@ -41,6 +41,7 @@ class RS_RTO;
 class rs_rto_chan
 {
 	friend class rs_rto_chans;
+	friend class rs_rto_acq;
 
 
   public:

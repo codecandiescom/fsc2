@@ -37,6 +37,11 @@ rs_rto_math_chan::rs_rto_math_chan( RS_RTO  & rs,
 	char buf[ 7 ];
 	sprintf( buf, "CALC:MATH%d", chan_number );
 	m_prefix = buf;
+
+    if ( m_rs.acq.mode( ) == Acq_Mode::Average )
+        set_arith_mode( Arith_Mode::Average );
+    else
+        set_arith_mode( Arith_Mode::Off );
 }
 
 
@@ -59,6 +64,18 @@ rs_rto_math_chan::set_state( bool on_off )
     std::string cmd = m_prefix + ":STAT ";
 	m_rs.write( cmd + ( on_off ? '1' : '0' ) );
     return state( );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Arith_Mode
+rs_rto_math_chan::set_arith_mode( Arith_Mode mode )
+{
+    std::string cmd = m_prefix + ":ARIT ";
+    m_rs.write( cmd + ( mode == Arith_Mode::Off ? "OFF" : "AVER" ) );
+    return mode;
 }
 
 

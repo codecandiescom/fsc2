@@ -24,7 +24,7 @@
 #include "rs_rto.conf"
 
 
-const char device_name[ ]  = DEVICE_NAME;
+const char device_name[ ]  = "RS_RTO";
 const char generic_type[ ] = DEVICE_TYPE;
 
 
@@ -281,9 +281,10 @@ rs_rto_init_hook( void )
 
     rs->dev = NULL;
 
-    rs->num_channels = 4;
+    rs->keyboard_locked = false;
+    rs->display_enabled = false;
 
-    rs = &rs_rto_exp;
+    rs->num_channels = 4;      // guess for preparations and test run
 
     rs->w = NULL;
     rs->num_windows = 0;
@@ -302,32 +303,26 @@ rs_rto_init_hook( void )
 int
 rs_rto_test_hook( void )
 {
-    // Make a copy of the windows that may have been created during the
-    // preparations section - they will have to be copied over to rs_rto_exp
-    // each time a new experiment is started.
+    // Move the windows that may have been created during the preparation
+    // phase - they will have to be copied over to rs_rto_exp each time a
+    // new experiment is started.
 
     copy_windows( &prep_wins, rs_rto_exp.w );
     delete_windows( &rs_rto_exp.w );
 
     rs_rto_test = rs_rto_exp;
+    rs = &rs_rto_test;
 
     // Make sure the strings in the test structure are real copies of
     // the strings in the other
 
-    for ( int i = Channel_Math1; i < Channel_Math4; i++ )
-    {
-        if ( rs_rto_test.chans[ i ].function )
-            rs_rto_test.chans[ i ].function =
-                                T_strdup( rs_rto_test.chans[ i ].function );
-        else
-            rs_rto_test.chans[ i ].function = T_strdup( "" );
-    }
+    for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
+        if ( rs->chans[ i ].function )
+            rs->chans[ i ].function = T_strdup( rs->chans[ i ].function );
 
-    // Make a copy of the windows created during preparations
+    // Get a copy of the windows created during preparations
 
-    copy_windows( &rs_rto_test.w, prep_wins );
-
-    rs = &rs_rto_test;
+    copy_windows( &rs->w, prep_wins );
 
     return 1;
 }
@@ -389,7 +384,7 @@ rs_rto_exp_hook( void )
 
     // Get a copy of the windows created during the preparations section
 
-    copy_windows( &rs_rto_exp.w, prep_wins );
+    copy_windows( &rs->w, prep_wins );
 
     // Now set up the device the way it was requested during the preparations
     // phase - extend the error message a bit to make clear that errors
@@ -440,7 +435,7 @@ rs_rto_exit_hook( void )
 
     if ( rs->dev )
     {
-               rs_rto_close( rs->dev )  ;
+        rs_rto_close( rs->dev )  ;
         rs->dev = NULL;
     }
 
@@ -449,6 +444,9 @@ rs_rto_exit_hook( void )
     delete_windows( &rs_rto_test.w );
     delete_windows( &rs_rto_exp.w );
     delete_windows( &prep_wins );
+
+    for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
+        T_free( rs->chans[ i ].function );
 }
 
 
@@ -458,7 +456,7 @@ rs_rto_exit_hook( void )
 Var_T *
 digitizer_name( Var_T * v  UNUSED_ARG )
 {
-    return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, device_name );
 }
 
 
@@ -590,6 +588,13 @@ digitizer_timebase( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( timebase < 9.5e-8 || timebase > 50 )
+    {
+        print( FATAL, "Timescale out of range, must always be between "
+               "10 ns/div and 50 s/div.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( FSC2_MODE != EXPERIMENT )
     {
         if ( FSC2_MODE == PREPARATION && rs->acq.is_timebase )
@@ -621,8 +626,8 @@ digitizer_timebase( Var_T * v )
         char * s2 = pp( min_tb ); 
         char * s3 = pp( max_tb ); 
 
-        print( FATAL, "Timebase of %ss out of range, must be between %ss and "
-               "%ss.\n", s1, s2, s3 );
+        print( FATAL, "Timebase of %ss out of range, must be between %ss/div "
+               "and " "%ss/div.\n", s1, s2, s3 );
 
         T_free( s3 );
         T_free( s2 );
@@ -636,7 +641,7 @@ digitizer_timebase( Var_T * v )
         char * s1 = pp( req_timebase ); 
         char * s2 = pp( timebase ); 
         
-        print( WARN, "Timebase has been set to %ss instead of %ss.\n",
+        print( WARN, "Timebase has been set to %ss/div instead of %ss/div.\n",
                s2, s1 );
 
         T_free( s2 );
@@ -1703,12 +1708,6 @@ digitizer_bandwidth_limiter( Var_T * v )
 Var_T *
 digitizer_ext_channel_filter( Var_T * v )
 {
-    if ( ! v )
-    {
-        print( FATAL, "Missing argument(s).\n" );
-        THROW( EXCEPTION );
-    }
-
     int ft;
     int fco;
 
@@ -1834,7 +1833,7 @@ digitizer_get_curve( Var_T * v )
 
     if ( rch == Channel_Ext )
     {
-        print( FATAL, "Can't get curve from external trigger input "
+        print( FATAL, "Can't get curves from external trigger input "
                "channel.\n" );
         THROW( EXCEPTION );
     }
@@ -1848,10 +1847,20 @@ digitizer_get_curve( Var_T * v )
     if ( FSC2_MODE != EXPERIMENT )
     {
         size_t np;
-        if ( ! w )
-            np = lrnd( rs->acq.timebase / rs->acq.resolution );
+        if ( ! rs->acq.is_record_length )
+        {
+            if ( ! w )
+                np = lrnd( rs->acq.timebase / rs->acq.resolution );
+            else
+                np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
+        }
         else
-            np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
+        {
+            np = rs->acq.record_length;
+            if ( w )
+                np = lrnd(   np * 0.1 * ( w->end - w->start )
+                           / rs->acq.timebase );
+        }
 
         Var_T * nv = vars_push( FLOAT_ARR, NULL, np );
         double * dp = nv->val.dpnt;
@@ -1921,10 +1930,9 @@ digitizer_get_segments( Var_T * v )
     long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == Channel_Ext || rch >= Channel_Math1 )
     {
-        print( FATAL, "Can't get curve from external trigger input "
-               "channel.\n" );
+        print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
     }
 
@@ -1938,10 +1946,21 @@ digitizer_get_segments( Var_T * v )
     {
         long ns = rs->acq.num_segments;
         long np;
-        if ( ! w )
-            np = lrnd( rs->acq.timebase / rs->acq.resolution );
+
+        if ( ! rs->acq.is_record_length )
+        {
+            if ( ! w )
+                np = lrnd( rs->acq.timebase / rs->acq.resolution );
+            else
+                np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
+        }
         else
-            np = lrnd( ( w->end - w->start ) / rs->acq.resolution );
+        {
+            np = rs->acq.record_length;
+            if ( w )
+                np = lrnd(   np * 0.1 * ( w->end - w->start )
+                           / rs->acq.timebase );
+        }
 
         Var_T * nv = vars_push_matrix( FLOAT_REF, 2, ns, np );
 
@@ -1959,15 +1978,14 @@ digitizer_get_segments( Var_T * v )
     size_t num_segments;
     size_t length;
 
-    CLOBBER_PROTECT( data );
-
     get_segments( rch, w, &data, &num_segments, &length );
 
     Var_T * nv;
+    CLOBBER_PROTECT( data );
 
     TRY
     {
-        nv = vars_push_matrix( FLOAT_REF,  2,
+        nv = vars_push_matrix( FLOAT_REF, 2,
                                ( long ) num_segments, ( long ) length );
         TRY_SUCCESS;
     }
@@ -2670,7 +2688,8 @@ digitizer_math_function( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( STR_VAR, rs->chans[ rch ].function );
+                return vars_push( STR_VAR, rs->chans[ rch ].function ?
+                                           rs->chans[ rch ].function : "" );
 
             default :
                 check( rs_rto_channel_function( rs->dev, rch, &func ) );
@@ -2701,11 +2720,11 @@ digitizer_math_function( Var_T * v )
 
         T_free( rs->chans[ rch ].function );
         rs->chans[ rch ].function = T_strdup( v->val.sptr );
+        return vars_push( STR_VAR, rs->chans[ rch ].function );
     }
-    else
-        check( rs_rto_channel_set_function( rs->dev, rch, v->val.sptr ) );
 
-    return vars_push( INT_VAR, 1L );
+    check( rs_rto_channel_set_function( rs->dev, rch, v->val.sptr ) );
+    return vars_push( STR_VAR, v->val.sptr );
 }   
 
 
@@ -3633,10 +3652,9 @@ get_calculated_segment_data( Var_T  * v,
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == Channel_Ext || rch >= Channel_Math1  )
     {
-        print( FATAL, "Can't get segments from external trigger input "
-               "channel.\n" );
+        print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
     }
 

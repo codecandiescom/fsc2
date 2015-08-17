@@ -3119,14 +3119,14 @@ where no visual feedback is used.
 This function is only available for the @ref{rs_rto, R&S RTO series}.
 @item   digitizer_get_segments()
 This function is only available for the @ref{rs_rto, R&S RTO series}.
-The device allows fastacquisition of a number of waveforms, called
-"Ultra Segmentation". With this function a a set of such segments
-can be downloaded. It expects at least one argument, the channel the
+The device allows fast acquisition of a number of waveforms, called
+"Ultra Segmentation". With this function a a set of such segments can
+be downloaded. It expects at least one argument, the channel the
 waveforms are to be downloaded from. This can be one of the digitizing
-channels or one of the math channels. An optional second argument is
-a window ID. The function returns a two-dimensional array with as
-many waveforms as segments got downloaded. Before a download is
-started the function waits for a running acquisition to finish.
+channels. An optional second argument is a window ID. The function
+returns a two-dimensional array with as many waveforms as segments got
+downloaded. Before a download is started the function waits for a
+running acquisition to finish.
 
 
 @anchor{digitizer_get_segment_area()}
@@ -3136,18 +3136,18 @@ started the function waits for a running acquisition to finish.
 This function is only available for the @ref{rs_rto, R&S RTO series}.
 This function allows to obtain the areas (sums of the data points) for
 the available segments. It expects at least one argument, the channel
-of the segments. This can be any of the digitizing channels or one of
-the math cahnnels. If no further argument is given the function
-returns a 1-dimensional array with the areas for each of the segments.
+of the segments. This can be any of the digitizing channels. If no
+further argument is given the function returns a 1-dimensional array
+with the areas for each of the segments.
 
-It may also be called with either a window ID or an array of window
-IDs. If called with a single window ID (or an array with only a
+It may also be called with either a set of window IDs or an array of
+window IDs. If called with a single window ID (or an array with only a
 single element) also a 1-dimensional array is returned with the
 areas in the window range of the segments.
 
-If called with an array with more than one window ID a 2-dimensional
-array us returned, with one sub-array for each segment and each
-sub-array  containing the areas for the windows.
+If called with a set of window IDs or an array with more than one
+window ID a 2-dimensional array us returned, with one sub-array for
+each segment and each sub-array containing the areas for the windows.
 
 
 
@@ -3159,18 +3159,19 @@ This function is only available for the @ref{rs_rto, R&S RTO series}.
 This function allows to obtain the amplitudes (differences between
 largest and smallest data point) for the available segments. It
 expects at least one argument, the channel of the segments. This can
-be any of the digitizing channels or one of the math cahnnels. If
-no further argument is given the function returns a 1-dimensional
-array with the amplitudes for each of the segments.
+be any of the digitizing channels. If no further argument is given the
+function returns a 1-dimensional array with the amplitudes for each of
+the segments.
 
-It may also be called with either a window ID or an array of window
-IDs. If called with a single window ID (or an array with only a
+It may also be called with either a set of window IDs or an array of
+window IDs. If called with a single window ID (or an array with only a
 single element) also 1-dimensional array is returned with the
 amplitides in the window range of the segments.
 
-If called with an array with more than one window ID a 2-dimensional
-array us returned, with one sub-array for each segment and each
-sub-array  containing the amplitudes for the windows.
+If called with a set of window IDs or an array with more than one
+window ID a 2-dimensional array us returned, with one sub-array for
+each segment and each sub-array containing the amplitudes for the
+windows.
 
 
 @anchor{digitizer_available_segments()}

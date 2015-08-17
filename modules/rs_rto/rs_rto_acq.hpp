@@ -198,8 +198,12 @@ class rs_rto_acq
     unsigned long m_min_rec_len;
     double m_adc_rate;
 
+    // Note: with disabled iinterpolation time scale can never be below
+    // 10 ns - ADC rate is 10 GSa/s and there are at least 100 points per
+    // division
+
     double const m_timebase_increment   = 1e-12;
-    double const m_resolution_increment = 1e-10;
+    double const m_resolution_increment = 1e-8;
 
     Acq_Mode m_mode;
     unsigned long m_avg_count;

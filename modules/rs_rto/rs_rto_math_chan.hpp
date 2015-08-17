@@ -52,6 +52,9 @@ class rs_rto_math_chan : public rs_rto_chan
 	std::string
 	function( );
 
+    Arith_Mode
+    set_arith_mode( Arith_Mode mode );
+
 	std::string
 	set_function( std::string const & f );
 
