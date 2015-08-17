@@ -79,6 +79,61 @@ rs_rto_math_chan::set_arith_mode( Arith_Mode mode )
 }
 
 
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+rs_rto_math_chan::scale( )
+{
+    return m_rs.query< double >( m_prefix + ":VERT:SCAL?" );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+rs_rto_math_chan::set_scale( double sc )
+{
+ 	if ( sc < m_min_scale || sc > m_max_scale )
+		throw std::invalid_argument( "Math channel scale out of range" );
+
+    char buf[ 40 ];
+    sprintf( buf, "%s:VERT:SCAL %.8g", m_prefix.c_str( ), sc );
+    m_rs.write( buf );
+
+    return scale( );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+rs_rto_math_chan::offset( )
+{
+    return m_rs.query< double >( m_prefix + ":VERT:OFFS?" );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+double
+rs_rto_math_chan::set_offset( double offs )
+{
+ 	if ( offs < m_min_offset || offs > m_max_offset )
+		throw std::invalid_argument( "Math channel offset out of range" );
+
+    char buf[ 40 ];
+    sprintf( buf, "%s:VERT:OFFS %.8g", m_prefix.c_str( ), offs );
+    m_rs.write( buf );
+
+    return offset( );
+}
+
+
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 

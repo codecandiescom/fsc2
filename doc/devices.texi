@@ -2035,7 +2035,8 @@ requested, and @code{0} for single shot (SS) mode.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the sensitivity setting of one of the
 channels of the oscilloscope. The channel can be any of the digitizing
-channels of the oscilloscope.
+channels of the oscilloscope (and, in the case of the @ref{rs_rto, R&S
+RTO series}, also any of the math channels).
 
 If a second argument is given this is taken to be the new sensitivity
 setting (in Volts per division). If the sensitivity value passed to
@@ -2062,7 +2063,8 @@ The function queries (if called with just one argument) or sets (if
 called with two arguments) the offset setting of one of the digitizing
 channels of the oscilloscope. Currently this function only exists for
 the @strong{LeCroy} osccilloscopes (except @ref{lecroy9400, 9400} and
-the @ref{rs_rto, R&S RTO series}.
+the @ref{rs_rto, R&S RTO series} (which also allows setting an offset
+for the math channels).
 
 If a second argument is given this is taken to be the new offset
 setting (in Volts). If no second argument is given the current offset

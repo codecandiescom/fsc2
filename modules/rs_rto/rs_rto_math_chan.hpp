@@ -49,11 +49,19 @@ class rs_rto_math_chan : public rs_rto_chan
 	bool
 	set_state( bool state );
 
-	std::string
-	function( );
-
     Arith_Mode
     set_arith_mode( Arith_Mode mode );
+
+    double scale( );
+
+    double set_scale( double sc );
+
+    double offset( );
+
+    double set_offset( double sc );
+
+	std::string
+	function( );
 
 	std::string
 	set_function( std::string const & f );
@@ -75,6 +83,12 @@ class rs_rto_math_chan : public rs_rto_chan
     operator = ( rs_rto_math_chan const & ) = delete;
 
 	std::string m_prefix;
+
+    double const m_min_scale = 1.0e-15;
+    double const m_max_scale = 1.0e26;
+
+    double const m_min_offset = -1.0e26;
+    double const m_max_offset =  1.0e26;
 };
 
 }

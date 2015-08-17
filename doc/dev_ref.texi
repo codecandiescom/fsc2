@@ -3698,8 +3698,8 @@ send data and data starting to arrive) of about @w{40 ms}, exceeding
 the time for the actual data transfer at least for short waveforms by
 orders of magnitude. For downloading waveforms measured with the
 "Ultra Segmentation" feature it's even worse, overheads of 60 to
-@w{100 ms} seem to be the rule. For this reason alone the use of the
-RTO series as a data digitizing device seems to be questionable...
+@w{100 ms} seem to be the rule. For this reason alone the RTO series
+seems to be not really suitable for use as a data digitizing device...
 
 
 @paragraphindent 0

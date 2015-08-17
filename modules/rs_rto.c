@@ -147,6 +147,8 @@ typedef struct
 
     bool display_enabled;
 
+    bool is_running_cont;
+
     RS_RTO_Acq acq;
 
     RS_RT_Chan chans[ Channel_Math4 + 1 ];
@@ -336,7 +338,7 @@ rs_rto_end_of_test_hook( void )
 {
 
     // Delete all math function strings and all windows from the test run,
-    // they will never be used again
+    // they'll never be used again
 
     for ( int i = Channel_Math1; i <= Channel_Math4; ++i )
         rs->chans[ i ].function = T_free( rs->chans[ i ].function );
@@ -392,6 +394,12 @@ rs_rto_exp_hook( void )
 
     err_prefix = "Durings device initialization: ";
 
+    // Stop a continuous run
+
+    bool was_running;
+    check( rs_rto_acq_stop( rs->dev, &was_running ) );
+    rs->is_running_cont = false;
+
     init_exp_acq( );
     init_exp_trig( );
     init_exp_chans( );
@@ -439,14 +447,19 @@ rs_rto_exit_hook( void )
         rs->dev = NULL;
     }
 
-    // Delete all windows
+    // Delete all windows which may still exist
 
     delete_windows( &rs_rto_test.w );
     delete_windows( &rs_rto_exp.w );
     delete_windows( &prep_wins );
 
+    // Get rid of all function strings
+
     for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
+    {
         T_free( rs->chans[ i ].function );
+        T_free( rs_rto_test.chans[ i ].function );
+    }
 }
 
 
@@ -522,20 +535,15 @@ digitizer_display_enable( Var_T * v )
 
 
 /*----------------------------------------------------*
+ * Starts a continuous run
  *----------------------------------------------------*/
 
 Var_T *
 digitizer_run( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( INT_VAR, 1L );
-
-    bool is_running;
-    check( rs_rto_acq_is_running( rs->dev, &is_running ) );
-    if ( is_running )
-        return vars_push( INT_VAR, 0L );
-
-    check( rs_rto_acq_run_continuous( rs->dev ) );
+    if ( FSC2_MODE == EXPERIMENT )
+        check( rs_rto_acq_run_continuous( rs->dev ) );
+    rs->is_running_cont = true;
     return vars_push( INT_VAR, 1L );
 }
 
@@ -546,6 +554,8 @@ digitizer_run( Var_T * v  UNUSED_ARG )
 Var_T *
 digitizer_stop( Var_T * v  UNUSED_ARG )
 {
+    rs->is_running_cont = false;
+
     if ( FSC2_MODE != EXPERIMENT )
         return vars_push( INT_VAR, 1L );
 
@@ -599,8 +609,8 @@ digitizer_timebase( Var_T * v )
     {
         if ( FSC2_MODE == PREPARATION && rs->acq.is_timebase )
         {
-            print( SEVERE, "Time base has already been set in preparations "
-                   "section, discarding new value.\n" );
+            print( SEVERE, "Time base has already been set in preparation, "
+                   "discarding new value.\n" );
             return vars_push( FLOAT_VAR, rs->acq.timebase );
         }
 
@@ -1253,10 +1263,9 @@ digitizer_sensitivity( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1 )
+    if ( rch == Channel_Ext )
     {
-        print( FATAL, "Channel '%s' has no sensitivity.\n",
-               Channel_Names[ fch ] );
+        print( FATAL, "Can't set sensitivity for external trigger input.\n" );
         THROW( EXCEPTION );
     }
 
@@ -1284,6 +1293,14 @@ digitizer_sensitivity( Var_T * v )
     if ( scale <= 0 )
     {
         print( FATAL, "Zero or negative channel sensitivity.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if (    rch >= Channel_Math4
+         && ( scale < 1.0e-15 || scale >= 1.0e26 ) )
+    {
+        print( FATAL, "Scale of %g out of range for math channel. must be "
+               "between 1e-15 and 1e26.\n", scale );
         THROW( EXCEPTION );
     }
 
@@ -1359,10 +1376,9 @@ digitizer_offset( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1 )
+    if ( rch == Channel_Ext )
     {
-        print( FATAL, "Channel '%s' has no offset.\n",
-               Channel_Names[ fch ] );
+        print( FATAL, "Can't set offset for external trigger input.\n" );
         THROW( EXCEPTION );
     }
 
@@ -1386,6 +1402,14 @@ digitizer_offset( Var_T * v )
 
     offset = get_double( v, "channel offset" );
     too_many_arguments( v );
+
+    if (    rch >= Channel_Math4
+         && ( offset < -1.0e26 || offset > 1.0e26 ) )
+    {
+        print( FATAL, "Offset of %g out of range for math channel. must be "
+               "between -1e26 and 1e26.\n", offset );
+        THROW( EXCEPTION );
+    }
 
     if ( FSC2_MODE != EXPERIMENT )
     {
@@ -3256,14 +3280,17 @@ get_waveform( int           rch,
         }
     }
     
-    while ( 1 )
-    {
-        stop_on_user_request( );
-        bool is_running;
-        check( rs_rto_acq_is_running( rs->dev, &is_running ) );
-        if ( ! is_running )
-            break;
-    }
+    // Unless in continuous run mode wait for acquisition to finish
+
+    if ( ! rs->is_running_cont )
+        while ( 1 )
+        {
+            stop_on_user_request( );
+            bool is_running;
+            check( rs_rto_acq_is_running( rs->dev, &is_running ) );
+            if ( ! is_running )
+                break;
+        }
 
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
     check( rs_rto_channel_data( rs->dev, rch, data, length ) );
@@ -3315,14 +3342,17 @@ get_segments( int            rch,
 
     check( rs_rto_acq_set_download_limits_enabled( rs->dev, &with_limits ) );
 
-    while ( 1 )
-    {
-        stop_on_user_request( );
-        bool is_running;
-        check( rs_rto_acq_is_running( rs->dev, &is_running ) );
-        if ( ! is_running )
-            break;
-    }
+    // Unless running in continous mode wait for acquisition to finish
+
+    if ( rs->is_running_cont )
+        while ( 1 )
+        {
+            stop_on_user_request( );
+            bool is_running;
+            check( rs_rto_acq_is_running( rs->dev, &is_running ) );
+            if ( ! is_running )
+                break;
+        }
 
     check( rs_rto_channel_segment_data( rs->dev, rch, data,
                                         num_segments, length ) );

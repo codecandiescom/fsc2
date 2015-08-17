@@ -108,11 +108,15 @@ C++:
 
 C:
 
-    rs_rto_t * rs_rto_open(char const *ip_address, int log_level);
+    rs_rto_t * rs_rto_open(char const *ip_address, int log_level,
+			   			   char ** err);
 
   The IP address is the same as in the C++ version, the (non-
   optional!) log_Level use 'Log_Level_None' (or 0), 'Log_Level_Low'
-  (or 1), 'Log_Level_Normal' (or 2) or 'Log_Level_High' (or 3).
+  (or 1), 'Log_Level_Normal' (or 2) or 'Log_Level_High' (or 3). If
+  the 'err' argument isn;t NULL it points after a failed call of
+  the function to a string with an error message (which the caller
+  has to deallocate).
 
   The return value, an opaque pointer to the underlying C++ class,
   is required as the first argument in all other C functions. Trying
@@ -607,7 +611,7 @@ C:
 
     int rs_rto_trigger_mode(rs_rto_t const * rs, int * mode );
 
-    int rs_rto_set_trigger_mode(rs_rto_t * rs, int * mode);
+    int rs_rto_trigger_set_mode(rs_rto_t * rs, int * mode);
 
   The 'mode' can be either 'Trig_Mode_Auto', 'Trig_Mode_Normal' or
   'Trig_Mode_Free_Running'.
@@ -616,7 +620,7 @@ C:
 
     int rs_rto_trigger_source(rs_rto_t const * rs, int * soirce);
 
-    int rs_rto_set_trigger_source(rs_rto_t * rs, int * source);
+    int rs_rto_trigger_set_source(rs_rto_t * rs, int * source);
 
   The possible values for the channel are 'Channel_Ch1', 'Channel_Ch2',
   'Channel_Ch3', 'Channel_Ch4' (the latter two only for devices with
@@ -627,7 +631,7 @@ C:
 
     int rs_rto_trigger_level(rs_rto_t * rs, double * level);
 
-    int rs_rto_set_trigger_level(rs_rto_t * rs, double * level);
+    int rs_rto_trigger_set_level(rs_rto_t * rs, double * level);
 
   The minimum and maximum level for this channel can be obtained with
 
@@ -641,7 +645,7 @@ C:
     int rs_rto_trigger_channel_level(rs_rto_t * rs, int channel,
                                      double * level);
 
-    int rs_rto_set_trigger_channel_level(rs_rto_t * rs, int channel,
+    int rs_rto_trigger_set_channel_level(rs_rto_t * rs, int channel,
                                          double * level);
 
   And also the limits for the levels of these channels can be obtained with
@@ -656,7 +660,7 @@ C:
 
     int rs_rto_trigger_slope(rs_rto_t const * rs, int * slope);
 
-    int rs_rto_set_trigger_slope(rs_rto_t * rs, int * slope);
+    int rs_rto_trigger_set_slope(rs_rto_t * rs, int * slope);
 
   Possible values for the slope are 'Trig_Slope_Positive' and
   'Trig_Slope_Neagtive'
@@ -667,7 +671,7 @@ C:
     int rs_rto_trigger_channel_slope(rs_rto_t const * rs, int channel,
                                      int * slope);
 
-    int rs_rto_set_trigger_channel_slope(rs_rto_t * rs, int channel,
+    int rs_rto_trigger_set_channel_slope(rs_rto_t * rs, int channel,
                                          int * slope);
 
   The trigger position (relative to the start of the measurement) can
@@ -694,13 +698,13 @@ C:
 
     int rs_rto_trigger_out_pulse_state(rs_rto_t const * rs, bool * enabled);
 
-    int rs_rto_set_trigger_out_pulse_state(rs_rto_t * rs, bool * enabled);
+    int rs_rto_trigger_set_out_pulse_state(rs_rto_t * rs, bool * enabled);
 
   The polarity of the output pulse can be queried or set with
 
     int rs_rto_trigger_out_pulse_polarity(rs_rto_t const * rs, int * pol);
 
-    int rs_rto_set_trigger_out_pulse_polarity(rs_rto_t * rs, int * pol);
+    int rs_rto_trigger_set_out_pulse_polarity(rs_rto_t * rs, int * pol);
 
   Possible values for the polarity are 'Polarity_Positive' and
   'Polarity_Negative'
@@ -709,21 +713,21 @@ C:
 
     int rs_rto_trigger_out_pulse_length(rs_rto_t const * rs, double * len);
 
-    int rs_rto_set_trigger_out_pulse_length(rs_rto_t * rs, double * len );
+    int rs_rto_trigger_set_out_pulse_length(rs_rto_t * rs, double * len );
 
   The delay between the trigger and the output pulse can be queried and
   set with
 
-    int rs_rto_out_pulse_delay(rs_rto_t * rs, double * delay);
+    int rs_rto_trigger_out_pulse_delay(rs_rto_t * rs, double * delay);
 
-    int rs_rto_set_out_pulse_delay(rs_rto_t * rs, double * delay);
+    int rs_rto_trigger_set_out_pulse_delay(rs_rto_t * rs, double * delay);
 
   The minimum and maximum possible settings for the delay under the current
   circumstances are returned by
 
-    int rs_rto_min_out_pulse_delay(rs_rto_t * rs, double * min_delay);
+    int rs_rto_trigger_min_out_pulse_delay(rs_rto_t * rs, double * min_delay);
 
-    int rs_rto_max_out_pulse_delay(rs_rto_t * rs, double * max_delay);
+    int rs_rto_trigger_max_out_pulse_delay(rs_rto_t * rs, double * max_delay);
 
   Finally, to force a trigger use
 
@@ -1500,7 +1504,7 @@ C++:
   The (optional) argument indicates if an attempt should be made to reset
   the overload condition (defaults to true).
 
-  For measurement channels the scale (in V/div) can be obtained or
+  For measurement and math channels the scale (in V/div) can be obtained or
   set with
 
     double scale( );
@@ -1514,17 +1518,23 @@ C++:
 
     double max_scale( );
 
-  For measurement channels also a constant voltage offset can be added.
-  To query the current offset, set a new offset or obtain the minimum
-  and maximum pffset valuse under the current circumstances the methods
+  For the math channels the minimum and maximum scales are 1e-15 and 1e26.
+
+  For measurement and math channels also a constant voltage offset can be
+  added. To query the current offset, set a new offset use the methods
 
     double offset( );
 
     double set_offset( double offset );
 
+  To obtain the minimum and maximum offset valuse for measurement channels
+  under the current circumstances use
+
     double min_offset( );
 
     double max_offset( );
+
+  For math channels the minimum and maximum offset settings are +/-1e26.
 
   Measurement channels also can be vertically positioned. To query or
   set the vertical position *within +/-5 div) use
