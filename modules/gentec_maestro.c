@@ -1942,7 +1942,7 @@ gentec_maestro_get_statistics( double * data )
         if ( strncmp( cp, labels[ i ], strlen( labels[ i ]  ) ) )
             gentec_maestro_failure( );
 
-        cp += strlen( labels[ i ];
+        cp += strlen( labels[ i ] );
         char *ep;
         errno = 0;
         data[ i ] = strtod( cp, &ep );
