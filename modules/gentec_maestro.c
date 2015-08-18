@@ -1921,11 +1921,11 @@ gentec_maestro_get_statistics( double * data )
 {
     char const *labels[ ] = { "Current Value:",
                               "Maximum:",
-                              "Minimum:"
+                              "Minimum:",
                               "Average:",
                               "Standard Deviation:",
                               "RMS stability:",
-                              "PTP stability:"
+                              "PTP stability:",
                               "Pulse Number:",
                               "Total Pulses:",
                               "Average Power:",
