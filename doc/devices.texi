@@ -9582,7 +9582,7 @@ indices into the returned array) have the following meaning:
 @item 1
 Current value
 @item 2
-Naximum
+Maximum
 @item 3
 Minimum
 @item 4
