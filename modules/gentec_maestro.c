@@ -1939,7 +1939,7 @@ gentec_maestro_get_statistics( double * data )
 
     for ( size_t i = 0; i < sizeof labels / sizeof *labels; i++ )
     {
-        if ( strncmp( reply, labels[ i ], strlen( labels[ i ]  ) ) )
+        if ( strncmp( cp, labels[ i ], strlen( labels[ i ]  ) ) )
             gentec_maestro_failure( );
 
         char *ep;
