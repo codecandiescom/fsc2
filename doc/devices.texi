@@ -9367,6 +9367,7 @@ section of the @code{EDL} script.
 @item @ref{powermeter_offset()}
 @item @ref{powermeter_get_laser_repetition_frequency()}
 @item @ref{powermeter_analog_output()}
+@item @ref{powermeter_statistics()}
 @end table
 
 @noindent
@@ -9561,13 +9562,48 @@ the laser (in @code{Hz}.
 @anchor{powermeter_analog_output()}
 @findex powermeter_analog_output()
 @item powermeter_analog_output()
-Th device has an analog output for the measured power or energy whcih
+The device has an analog output for the measured power or energy whcih
 can be enabled or disabled. This function allows to query if analog
 output is enabled or disabled and to switch it on or off. If called
 with no argument the function returns @code{1} or @code{0}, depending
 on the analog outpu being enabled or not. Calling it with a boolean
 argument, either the strings @code{"OFF"} or @code{"ON} or the
 @code{0} or a non-zero value, disables or enables the analog output.
+
+
+@anchor{powermeter_statistics()}
+@findex powermeter_statistics()
+@item   powermeter_statistics()
+The device can calculate statisitcs on the pulses it measured. This
+function, which accepts no arguments, returns these statistics as a
+floating point array with 12 elements. The elements (as given by their
+indices into the returned array) have the following meaning:
+@table @code
+@item 1
+Current value
+@item 2
+Naximum
+@item 3
+Minimum
+@item 4
+Average
+@item 5
+Standard Deviation
+@item 6
+RMS stability
+@item 7
+PTP stability
+@item 8
+Pulse Number
+@item 9
+Total Pulses
+@item 10
+Average Power
+@item 11
+Rep Rate
+@item 12
+Uncorrected Value
+@end table
 
 @end table
 

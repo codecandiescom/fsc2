@@ -79,6 +79,7 @@ Var_T * powermeter_multiplier( Var_T * v );
 Var_T * powermeter_offset( Var_T * v );
 Var_T * powermeter_get_laser_repetition_frequency( Var_T * v );
 Var_T * powermeter_analog_output( Var_T * v );
+Var_T * powermeter_statistics( Var_T * v );
 
 
 /* Internal functions */
@@ -110,6 +111,7 @@ static double gentec_maestro_set_user_multiplier( double mul );
 static double gentec_maestro_get_user_multiplier( void );
 static double gentec_maestro_set_user_offset( double offset );
 static double gentec_maestro_get_user_offset( void );
+static void gentec_maestro_get_statistics( double * data );
 #if 0
 static bool gentec_maestro_set_energy_mode( bool on_off );
 #endif
@@ -1101,6 +1103,34 @@ powermeter_analog_output( Var_T * v )
 
 
 /*---------------------------------------------------*
+ * Returns the statistics data the device collected as
+ * an (floating point) array with 12 elements
+ *---------------------------------------------------*/
+
+Var_T *
+powermeter_statistics( Var_T * v  UNUSED_ARG )
+{
+    double data[ 12 ] = { 1.8e-5,      // current value
+                          3.2e-5,      // maximum
+                          1.2e-6,      // minimum
+                          1.7e-5,      // average
+                          2.1e-6,      // standard deviation
+                          1.0e-7,      // RMS stability
+                          8.2e-6,      // PTP stability
+                          2132,        // pulse number
+                          10000,       // total pulses
+                          1.7e-5,      // average power
+                          20.012,      // rep. rate
+                          0.000018     // uncorrected
+                        };
+
+    if ( FSC2_MODE == EXPERIMENT )
+        gentec_maestro_get_statistics( data );
+    return vars_push( FLOAT_ARR, data, 12 );
+}
+
+
+/*---------------------------------------------------*
  * Sets a new scale given the corresponding index
  *---------------------------------------------------*/
 
@@ -1876,6 +1906,56 @@ gentec_maestro_get_user_offset( void )
         gentec_maestro_failure( );
 
     return gentec_maestro.user_offset = offset;
+}
+
+
+/*---------------------------------------------------*
+ * Requests the current statistics values from the device.
+ * The command and what it returns is undocumented and this
+ * is just derived from what was observed...
+ *---------------------------------------------------*/
+
+static
+void
+gentec_maestro_get_statistics( double * data )
+{
+    char const *labels[ ] = { "Current Value:",
+                              "Maximum:",
+                              "Minimum:"
+                              "Average:",
+                              "Standard Deviation:",
+                              "RMS stability:",
+                              "PTP stability:"
+                              "Pulse Number:",
+                              "Total Pulses:",
+                              "Average Power:",
+                              "Rep Rate:",
+                              "Uncorrected Value:" };
+
+    char reply[ 500 ];
+    gentec_maestro_talk( "*vsu", reply, sizeof reply );
+
+    char *cp = reply;
+
+    for ( size_t i = 0; i < sizeof labels / sizeof *labels; i++ )
+    {
+        if ( strncmp( reply, labels[ i ], strlen( labels[ i ]  ) ) )
+            gentec_maestro_failure( );
+
+        char *ep;
+        errno = 0;
+        data[ i ] = strtod( cp, &ep );
+        if (    ep == cp
+             || errno == ERANGE )
+            gentec_maestro_failure( );
+
+        cp = ep;
+        while ( isspace( ( int ) *cp ) )
+            cp++;
+    }
+
+    if ( *cp )
+        gentec_maestro_failure( );
 }
 
 

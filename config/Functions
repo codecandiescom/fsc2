@@ -621,7 +621,7 @@ powermeter_multiplier, -1, ALL;
 powermeter_offset, -1, ALL;
 powermeter_get_laser_repetition_frequency, 0, EXP;
 powermeter_analog_output, -1, ALL;
-
+powermeter_statistics, 0, EXP;
 
 
 /* Source-meter functions (Keithley2600A) */

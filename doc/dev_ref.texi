@@ -1220,6 +1220,7 @@ either the USB or serial port or the LAN connection,
 @item @ref{powermeter_offset()}
 @item @ref{powermeter_get_laser_repetition_frequency()}
 @item @ref{powermeter_analog_output()}
+@item @ref{powermeter_statistics()}
 @end table
 
 
