@@ -1965,6 +1965,8 @@ gentec_maestro_get_statistics( double * data )
 
     if ( data[ 3 ] )
         data[ 6 ] = 100 * ( data[ 1 ] - data[ 2 ] ) / data[ 3 ];
+    else
+        data[ 6 ] = 0;
 }
 
 
