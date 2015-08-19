@@ -293,7 +293,7 @@ eprint( int          severity,
         }
         else if ( severity == SEVERE )
         {
-            strcpy( buffer, "@C13@f" );
+            strcpy( buffer, "@C4@f" );
             cp += 5;
             space_left -= 5;
         }
