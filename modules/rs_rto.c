@@ -591,7 +591,7 @@ digitizer_timebase( Var_T * v )
                 return vars_push( FLOAT_VAR, timebase );
         }
 
-    timebase = get_double( v, "time base" );
+    timebase = get_double( v, NULL);
     too_many_arguments( v );
 
     if ( timebase <= 0 )
@@ -726,7 +726,7 @@ digitizer_time_per_point( Var_T * v )
                 return vars_push( FLOAT_VAR, resolution );
         }
 
-    resolution = get_double( v, "time per points" );
+    resolution = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( resolution <= 0 )
@@ -1289,7 +1289,7 @@ digitizer_sensitivity( Var_T * v )
                 return vars_push( FLOAT_VAR, scale );
         }
 
-    scale = get_double( v, "channel sensitivity" );
+    scale = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( scale <= 0 )
@@ -1298,7 +1298,7 @@ digitizer_sensitivity( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if (    rch >= Channel_Math4
+    if (    ( rch >= Channel_Math1 && rch <= Channel_Math4 )
          && ( scale < 1.0e-15 || scale >= 1.0e26 ) )
     {
         print( FATAL, "Scale of %g out of range for math channel. must be "
@@ -1402,10 +1402,10 @@ digitizer_offset( Var_T * v )
                 return vars_push( FLOAT_VAR, offset );
         }
 
-    offset = get_double( v, "channel offset" );
+    offset = get_double( v, NULL );
     too_many_arguments( v );
 
-    if (    rch >= Channel_Math4
+    if (    ( rch >= Channel_Math1 && rch <= Channel_Math4 )
          && ( offset < -1.0e26 || offset > 1.0e26 ) )
     {
         print( FATAL, "Offset of %g out of range for math channel. must be "
@@ -1477,7 +1477,8 @@ digitizer_channel_position( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1 )
+    if (    rch == Channel_Ext
+         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
     {
         print( FATAL, "Channel '%s' has no position.\n",
                Channel_Names[ fch ] );
@@ -1502,7 +1503,7 @@ digitizer_channel_position( Var_T * v )
                 return vars_push( FLOAT_VAR, position );
         }
 
-    position = get_double( v, "channel position" );
+    position = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( fabs( position ) >= 5.005 )
@@ -1554,9 +1555,9 @@ digitizer_coupling( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 )
+    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
     {
-        print( FATAL, "Channel '%s' has no input coupling.\n",
+        print( FATAL, "Math channel '%s' has no input coupling.\n",
                Channel_Names[ fch ] );
         THROW( EXCEPTION );
     }
@@ -1646,7 +1647,8 @@ digitizer_bandwidth_limiter( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1 )
+    if (    rch == Channel_Ext
+         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
     {
         print( FATAL, "Channel '%s' has no bandwidth limiter.\n",
                Channel_Names[ fch ] );
@@ -2019,7 +2021,8 @@ digitizer_get_segments( Var_T * v )
     long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1 )
+    if (    rch == Channel_Ext
+         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
     {
         print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
@@ -2160,7 +2163,7 @@ digitizer_trigger_channel( Var_T * v )
     too_many_arguments( v );
     rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 )
+    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
     {
         print( FATAL, "Math cnannels can't be used as trigegr channels" );
         THROW( EXCEPTION );
@@ -2201,7 +2204,7 @@ digitizer_trigger_level( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 )
+    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
     {
         print( FATAL, "Math channel can't be a trigger channel" );
         THROW( EXCEPTION );
@@ -2225,7 +2228,7 @@ digitizer_trigger_level( Var_T * v )
                 return vars_push( FLOAT_VAR, level );
         }
 
-    double req_level = get_double( v, "trigger_levek" );
+    double req_level = get_double( v, NULL );
 
     if ( FSC2_MODE != EXPERIMENT )
     {
@@ -2300,7 +2303,7 @@ digitizer_trigger_slope( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 )
+    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
     {
         print( FATAL, "Math channel can't be a trigger channel" );
         THROW( EXCEPTION );
@@ -2471,7 +2474,7 @@ digitizer_trigger_delay( Var_T * v )
                 return vars_push( FLOAT_VAR, pos );
         }
 
-    double req_pos = get_double( v, "trigger_delay" );
+    double req_pos = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -2544,9 +2547,9 @@ digitizer_define_window( Var_T * v )
 
     /* Get the start point of the window */
 
-    double win_start = get_double( v, "window start position" );
+    double win_start = get_double( v, NULL );
     v = vars_pop( v );
-    double win_width = get_double( v, "window width" );
+    double win_width = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( win_width <= 0.0 )
@@ -2604,7 +2607,7 @@ digitizer_window_position( Var_T * v )
     if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, w->start );
 
-    w->start = get_double( v, "window position" );
+    w->start = get_double( v, NULL );
     too_many_arguments( v );
 
     return vars_push( FLOAT_VAR, w->start );
@@ -2634,7 +2637,7 @@ digitizer_window_width( Var_T * v )
     if ( ! ( v = vars_pop( v ) ) )
         return vars_push( FLOAT_VAR, w->end - w->start );
 
-    double width = get_double( v, "window width" );
+    double width = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( width <= 0 )
@@ -2670,9 +2673,9 @@ digitizer_change_window( Var_T * v )
     RS_RTO_Win * w = get_window( v );
     v = vars_pop( v );
 
-    w->start = get_double( v, "window position" );
+    w->start = get_double( v, NULL );
     v = vars_pop( v );
-    double width = get_double( v, "window width" );
+    double width = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( width <= 0 )
@@ -2897,7 +2900,7 @@ digitizer_trigger_out_pulse_length( Var_T * v )
                 return vars_push( FLOAT_VAR, len );
         }
 
-    double req_len = get_double( v, "trigger out pulse length" );
+    double req_len = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( req_len < 2e-9 || req_len >= 1.000002e-3 )
@@ -3040,7 +3043,7 @@ digitizer_trigger_out_pulse_delay( Var_T * v )
                 return vars_push( FLOAT_VAR, delay );
         }
 
-    double req_delay = get_double( v, "trigger out pulse delay" );
+    double req_delay = get_double( v, NULL );
     too_many_arguments( v );
 
     if ( req_delay <= 0 )
@@ -3783,7 +3786,8 @@ get_calculated_segment_data( Var_T  * v,
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext || rch >= Channel_Math1  )
+    if (    rch == Channel_Ext
+         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
     {
         print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
