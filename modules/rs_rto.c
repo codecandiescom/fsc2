@@ -457,8 +457,9 @@ rs_rto_exit_hook( void )
 
     for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
     {
-        T_free( rs->chans[ i ].function );
-        T_free( rs_rto_test.chans[ i ].function );
+        rs->chans[ i ].function = T_free( rs->chans[ i ].function );
+        rs_rto_test.chans[ i ].function =
+                                    T_free( rs_rto_test.chans[ i ].function );
     }
 }
 
