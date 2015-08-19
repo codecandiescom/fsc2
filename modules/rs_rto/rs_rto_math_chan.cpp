@@ -147,6 +147,9 @@ rs_rto_math_chan::function( )
 std::string
 rs_rto_math_chan::set_function( std::string const & f )
 {
+    if ( f.empty( ) )
+        throw std::invalid_argument( "Can't set empty string as function" );
+
 	if (    f.find( "'" ) != std::string::npos
 		 || f.find( '"' ) != std::string::npos )
 		throw std::invalid_argument( "Function may not contain quotes" );

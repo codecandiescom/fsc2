@@ -2731,6 +2731,12 @@ digitizer_math_function( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( ! *v->val.sptr )
+    {
+        print( FATAL, "Can't set empty string as math function.\n" );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
