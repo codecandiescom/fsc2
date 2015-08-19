@@ -276,8 +276,8 @@ rs_rto_close(  rs_rto_t * rs )
  *----------------------------------------------------*/
 
 int
-rs_rto_model( rs_rto_t * rs,
-			  int      * model )
+rs_rto_model( rs_rto_t const * rs,
+			  int            * model )
 {
     try
     {
