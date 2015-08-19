@@ -37,7 +37,6 @@ rs_rto_math_chan::rs_rto_math_chan( RS_RTO  & rs,
 	char buf[ 7 ];
 	sprintf( buf, "CALC:MATH%d", chan_number );
 	m_prefix = buf;
-    m_rs.write( m_prefix + ":ARIT OFF" );
 }
 
 
@@ -64,10 +63,9 @@ rs_rto_math_chan::set_state( bool on_off )
 
 
 /*----------------------------------------------------*
- * This function can't be used for undocmented reasons -
- * attempts to set it to anything else than "OFF" resiulted
- * in errors of "-200,"Execution error;Function not available;"
- * "CALC:MATH1:ARIT AVER".
+ * This function can't be used for undocmented reasons attempts to
+ * use it resiulted in errors of "-200,"Execution error;Function
+ * not available;CALC:MATH1:ARIT AVER" (same for "OFF").
  *----------------------------------------------------*/
 
 #if 0
