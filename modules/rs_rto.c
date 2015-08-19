@@ -2737,6 +2737,7 @@ digitizer_math_function( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    func = T_strdup( v->val.sptr );
     too_many_arguments( v );
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -2746,16 +2747,19 @@ digitizer_math_function( Var_T * v )
             print( SEVERE, "Funcion for math channel %s already has been "
                    "set in proparations, leaving it unchanged.\n",
                 Channel_Names[ fch ] );
+            T_free( func );
             return vars_push( STR_VAR, rs->chans[ rch ].function );
         }
 
         T_free( rs->chans[ rch ].function );
-        rs->chans[ rch ].function = T_strdup( v->val.sptr );
+        rs->chans[ rch ].function = func;
         return vars_push( STR_VAR, rs->chans[ rch ].function );
     }
 
-    check( rs_rto_channel_set_function( rs->dev, rch, v->val.sptr ) );
-    return vars_push( STR_VAR, v->val.sptr );
+    check( rs_rto_channel_set_function( rs->dev, rch, func ) );
+    Var_T * nv = vars_push( STR_VAR, func );
+    T_free( func );
+    return nv;
 }   
 
 
