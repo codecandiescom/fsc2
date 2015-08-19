@@ -3376,7 +3376,7 @@ get_segments( int            rch,
 
     // Unless running in continous mode wait for acquisition to finish
 
-    if ( rs->is_running_cont )
+    if ( ! rs->is_running_cont )
         while ( 1 )
         {
             stop_on_user_request( );
