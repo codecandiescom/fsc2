@@ -3054,8 +3054,11 @@ digitizer_trigger_out_pulse_delay( Var_T * v )
 
     if ( delay < 799.5e-9 || delay >= 1.0000000005 )
     {
-        print( FATAL, "Trigger out pulse delay out of range, must always be"
-               "between 800 ns and 1 s.\n" );
+        char * s1 = pp( delay );
+
+        print( FATAL, "Trigger out pulse delay of %ss out of range, must "
+               "always be between 800 ns and 1 s.\n", s1 );
+        T_free( s1 );
         THROW( EXCEPTION );
     }
 
