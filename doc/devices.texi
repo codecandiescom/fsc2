@@ -2159,11 +2159,12 @@ full bandwidth, @code{"20MHZ"} or @code{1} and @code{"100MHZ"} or
 @code{"250MHZ"} or @code{3}.
 
 
-For all models of the @ref{rs_rto, R&S RTO series} 4 possible
-settings exist: @code{"OFF"} (or @code{0}) for full bandwidth,
-@code{"20MHz"} (or @code{1}), @code{"200MHz"} (or @code{2})
-And @code{"800MHz"} (or @code{4}) (though note that this setting
-is equivalent to @code{"OFF"} for the models RTO1002 and RTO1004).
+For all models of the @ref{rs_rto, R&S RTO series} 4 possible settings
+exist: @code{"OFF"} (or @code{0}) for full bandwidth, @code{"20MHz"}
+(or @code{1}), @code{"200MHz"} (or @code{2}) And @code{"800MHz"} (or
+@code{4}) Though note that this setting is equivalent to @code{"OFF"}
+for the models RTO1002 and RTO1004. Also, the @w{800 MHz} setting is
+only possible with the DC @w{50 Ohm} input coupling setting.
 
 The function can be called only in the @code{EXPERIMENT} section.
 

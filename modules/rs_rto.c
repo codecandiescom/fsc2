@@ -4238,6 +4238,12 @@ init_exp_chans( void )
 
         if ( ch->is_bandwidth )
         {
+            int model;
+            check( rs_rto_model( rs->dev, &model ) );
+
+            if ( model == Model_RTO1002 || model == Model_RTO1004 )
+                ch->bandwidth = Bandwidth_Full;
+
             int bw = ch->bandwidth;
             check( rs_rto_channel_set_bandwidth( rs->dev, i, &bw ) );
         }
