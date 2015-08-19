@@ -49,8 +49,10 @@ class rs_rto_math_chan : public rs_rto_chan
 	bool
 	set_state( bool state );
 
+#if 0
     Arith_Mode
     set_arith_mode( Arith_Mode mode );
+#endif
 
     double scale( );
 

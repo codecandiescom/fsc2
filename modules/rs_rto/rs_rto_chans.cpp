@@ -57,6 +57,8 @@ rs_rto_chans::rs_rto_chans( RS_RTO & rs )
         }
 	}
 
+    // Create a set of dummy channels for non-existing measurement channels
+
     for ( int i = m_rs.m_num_channels + 1;
           i <= enum_to_value( Channel::Ch4 ); ++i )
     {

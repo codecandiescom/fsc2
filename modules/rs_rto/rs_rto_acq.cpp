@@ -74,11 +74,13 @@ rs_rto_acq::reset( )
     else
         m_mode = Acq_Mode::Normal;
 
+#if 0
     for ( int i = enum_to_value( Channel::Math1 );
           i <= enum_to_value( Channel::Math4 ); ++i )
                 m_rs.chans[ m_rs.s_channel_mapper.v2e( i ) ].set_arith_mode(
                                      m_mode == Acq_Mode::Normal ?
                                      Arith_Mode::Off : Arith_Mode::Average );
+#endif
 
     // Never try to actually display segment data
 
@@ -464,6 +466,7 @@ rs_rto_acq::set_mode( Acq_Mode mode )
     else if ( mode == Acq_Mode::Segmented )
         m_rs.write( "ACQ:SEGM:STAT 1" );
 
+#if 0
     if (    ( m_mode == Acq_Mode::Average && mode != Acq_Mode::Average )
          || ( m_mode != Acq_Mode::Average && mode == Acq_Mode::Average ) )
         for ( int i = enum_to_value( Channel::Math1 );
@@ -471,6 +474,7 @@ rs_rto_acq::set_mode( Acq_Mode mode )
             m_rs.chans[ m_rs.s_channel_mapper.v2e( i ) ].set_arith_mode(
                                     mode == Acq_Mode::Normal ?
                                     Arith_Mode::Off : Arith_Mode::Average );
+#endif
 
     return m_mode = mode;
 }
