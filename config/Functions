@@ -247,6 +247,7 @@ digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
    RTO series of digitizers */
 
 digitizer_available_data, 1, EXP;
+digitizer_max_num_segments, 0, EXP;
 digitizer_get_segments, -1, EXP;
 digitizer_get_segment_area, -1, EXP;
 digitizer_get_segment_amplitude, -1, EXP;
