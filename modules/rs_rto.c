@@ -1916,6 +1916,7 @@ digitizer_get_curve( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+#if 0
         if (    rs->acq.mode == Acq_Mode_Average
              && ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
         {
@@ -1923,6 +1924,7 @@ digitizer_get_curve( Var_T * v )
                    "uses \"Average\" acquisition mode.\n" );
             THROW( EXCEPTION );
         }
+#endif
 
         size_t np;
         if ( ! rs->acq.is_record_length )
@@ -1948,6 +1950,7 @@ digitizer_get_curve( Var_T * v )
         return nv;
     }
 
+#if 0
     if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
     {
         int mode;
@@ -1960,6 +1963,7 @@ digitizer_get_curve( Var_T * v )
             THROW( EXCEPTION );
         }
     }
+#endif
 
     double * data;
     size_t length;
@@ -3589,6 +3593,7 @@ get_calculated_curve_data( Var_T  * v,
         THROW( EXCEPTION );
     }
 
+#if 0
     if ( FSC2_MODE != EXPERIMENT )
     {
         if (    rs->acq.mode == Acq_Mode_Average
@@ -3614,6 +3619,7 @@ get_calculated_curve_data( Var_T  * v,
             }
         }
     }
+#endif
 
     // Check for windows - this could be either an array with windo w IDs
     // or simply a list of them. get_window_list() leaves the 'wins'
