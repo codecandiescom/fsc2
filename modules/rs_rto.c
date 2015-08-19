@@ -2695,7 +2695,7 @@ digitizer_math_function( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch < Channel_Math4 )
+    if ( rch < Channel_Math1 || rch > Channel_Math3 )
     {
         print( FATAL, "Function can only be used with math channels.\n" );
         THROW( EXCEPTION );
