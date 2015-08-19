@@ -2300,7 +2300,7 @@ digitizer_trigger_slope( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Ch1 )
+    if ( rch >= Channel_Math1 )
     {
         print( FATAL, "Math channel can't be a trigger channel" );
         THROW( EXCEPTION );
