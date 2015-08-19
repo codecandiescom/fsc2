@@ -26,33 +26,33 @@
 
 
 static int ni_daq_open( struct inode * /* inode_p */,
-			struct file *  /* file_p  */);
+			struct file  * /* file_p  */);
 
 static int ni_daq_release( struct inode * /* inode_p */,
-			   struct file *  /* file_p  */ );
+			   struct file  * /* file_p  */ );
 
-static unsigned int ni_daq_poll( struct file *              /* file_p */,
+static unsigned int ni_daq_poll( struct file              * /* file_p */,
 				 struct poll_table_struct * /* pt     */ );
 
 static ssize_t ni_daq_read( struct file * /* file_p */,
 			    char __user * /* buff   */,
 			    size_t        /* count  */,
-			    loff_t *      /* offp   */ );
+			    loff_t      * /* offp   */ );
 
 static ssize_t ni_daq_write( struct file       * /* file_p */,
 			     const char __user *  /* buff   */,
 			     size_t               /* count  */,
-			     loff_t *             /* offp   */ );
+			     loff_t             * /* offp   */ );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int ni_daq_ioctl( struct inode * /* inode_p */,
-			 struct file *  /* file_p  */,
-			 unsigned int   /* cmd     */,
-			 unsigned long  /* arg     */ );
+static int ni_daq_ioctl( struct inode  * /* inode_p */,
+			 struct file   * /* file_p  */,
+			 unsigned int    /* cmd     */,
+			 unsigned long   /* arg     */ );
 #else
-static long ni_daq_ioctl( struct file *  /* file_p */,
-			  unsigned int   /* cmd    */,
-			  unsigned long  /* arg    */ );
+static long ni_daq_ioctl( struct file   * /* file_p */,
+			  unsigned int    /* cmd    */,
+			  unsigned long   /* arg    */ );
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
@@ -87,10 +87,10 @@ struct file_operations ni_daq_file_ops = {
  *---------------------------------------------------------------------*/
 
 static int ni_daq_open( struct inode * inode_p,
-			struct file *  file_p )
+			struct file  * file_p )
 {
 	int minor;
-	Board *board;
+	Board * board;
 
 
 	minor = MINOR( inode_p->i_rdev );
@@ -131,10 +131,10 @@ static int ni_daq_open( struct inode * inode_p,
  *---------------------------------------------------------------------*/
 
 static int ni_daq_release( struct inode * inode_p,
-			   struct file *  file_p )
+			   struct file  * file_p )
 {
 	int minor;
-	Board *board;
+	Board * board;
 
 
 	file_p = file_p;
@@ -177,11 +177,11 @@ static int ni_daq_release( struct inode * inode_p,
  * Function for dealing with poll() and select() calls for the driver
  *--------------------------------------------------------------------*/
 
-static unsigned int ni_daq_poll( struct file *              file_p,
+static unsigned int ni_daq_poll( struct file              * file_p,
 				 struct poll_table_struct * pt )
 {
 	int minor;
-	Board *board;
+	Board * board;
 	unsigned int mask = 0;
 
 
@@ -209,8 +209,8 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 
 		/* As long as the acquisition hasn't ended (in which case
 		   the SC TC interrupt would have been raised) and there are
-		   no new data in the data buffer enable the STOP interrupt
-		   (indicating that new data are available) and let
+		   no new data in the data buffer enable the STOP interrupt,
+		   (indicating that new data are available, and let
 		   poll_wait() do whatever it needs to do. When the STOP
 		   interrupts finally arrives disable it again, otherwise
 		   we would get flooded with these interrupts... */
@@ -259,10 +259,10 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 static ssize_t ni_daq_read( struct file * file_p,
 			    char __user * buff,
 			    size_t        count,
-			    loff_t *      offp )
+			    loff_t      * offp )
 {
 	int minor;
-	Board *board;
+	Board * board;
 	int ret;
 
 
@@ -371,10 +371,10 @@ static ssize_t ni_daq_read( struct file * file_p,
  * Not implemented yet (to be used with the AO subsystem)
  *--------------------------------------------------------*/
 
-static ssize_t ni_daq_write( struct file *        file_p,
-			     const char __user *  buff,
-			     size_t               count,
-			     loff_t *             offp )
+static ssize_t ni_daq_write( struct file       * file_p,
+			     const char __user * buff,
+			     size_t              count,
+			     loff_t            * offp )
 {
 	return -ENOSYS;
 }
@@ -385,18 +385,18 @@ static ssize_t ni_daq_write( struct file *        file_p,
  *--------------------------------------------------------------*/
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int ni_daq_ioctl( struct inode * inode_p,
-			 struct file *  file_p,
-			 unsigned int   cmd,
-			 unsigned long  arg )
+static int ni_daq_ioctl( struct inode  * inode_p,
+			 struct file   * file_p,
+			 unsigned int    cmd,
+			 unsigned long   arg )
 #else
-static long ni_daq_ioctl( struct file *  file_p,
-			  unsigned int   cmd,
-			  unsigned long  arg )
+static long ni_daq_ioctl( struct file   * file_p,
+			  unsigned int    cmd,
+			  unsigned long   arg )
 #endif
 {
 	int minor;
-	Board *board;
+	Board * board;
 	int ret;
 
 

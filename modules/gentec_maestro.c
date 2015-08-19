@@ -1110,18 +1110,18 @@ powermeter_analog_output( Var_T * v )
 Var_T *
 powermeter_statistics( Var_T * v  UNUSED_ARG )
 {
-    double data[ 12 ] = { 1.8e-5,      // current value
-                          3.2e-5,      // maximum
-                          1.2e-6,      // minimum
-                          1.7e-5,      // average
-                          2.1e-6,      // standard deviation
-                          1.0e-7,      // RMS stability
-                          8.2e-6,      // PTP stability
-                          2132,        // pulse number
-                          10000,       // total pulses
-                          1.7e-5,      // average power
-                          20.012,      // rep. rate
-                          0.000018     // uncorrected
+    double data[ 12 ] = { 0.000688229,      // current value
+                          0.000718887,      // maximum
+                          0.000667027,      // minimum
+                          0.000693885,      // average
+                          7.48871e-6,       // standard deviation
+                          1.07924,          // RMS stability
+                          7.47386,          // PTP stability
+                          5097,             // pulse number
+                          10000,            // total pulses
+                          0.000693885,      // average power
+                          100.001358,       // rep. rate
+                          0.000688          // uncorrected
                         };
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -1957,6 +1957,14 @@ gentec_maestro_get_statistics( double * data )
 
     if ( *cp )
         gentec_maestro_failure( );
+
+    // Fix a bug in the firmware: the reported PTP stability is always
+    // identical to the RMS stability. But it should be the difference
+    // between the maximum and minimun, divided by the average (and then
+    // multiplied by 100)
+
+    if ( data[ 3 ] )
+        data[ 6 ] = 100 * ( data[ 1 ] - data[ 2 ] ) / data[ 3 ];
 }
 
 
