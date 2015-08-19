@@ -1871,6 +1871,14 @@ digitizer_get_curve( Var_T * v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
+        if (    rs->acq.mode == Acq_Mode_Average
+             && ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+        {
+            print( FATAL, "Can't download data for math channel when device "
+                   "uses \"Average\" acquisition mode.\n" );
+            THROW( EXCEPTION );
+        }
+
         size_t np;
         if ( ! rs->acq.is_record_length )
         {
@@ -1893,6 +1901,19 @@ digitizer_get_curve( Var_T * v )
             dp[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 
         return nv;
+    }
+
+    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    {
+        int mode;
+        check( rs_rto_acq_mode( rs->dev, &mode ) );
+
+        if ( mode == Acq_Mode_Average )
+        {
+            print( FATAL, "Can't download data for math channel when device "
+                   "uses \"Average\" acquisition mode.\n" );
+            THROW( EXCEPTION );
+        }
     }
 
     double * data;
@@ -3517,6 +3538,32 @@ get_calculated_curve_data( Var_T  * v,
         print( FATAL, "Can't get curve from external trigger input "
                "channel.\n" );
         THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if (    rs->acq.mode == Acq_Mode_Average
+             && ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+        {
+            print( FATAL, "Can't download data for math channel when device "
+                   "uses \"Average\" acquisition mode.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+        {
+            int mode;
+            check( rs_rto_acq_mode( rs->dev, &mode ) );
+
+            if ( mode == Acq_Mode_Average )
+            {
+                print( FATAL, "Can't download data for math channel when "
+                       "device uses \"Average\" acquisition mode.\n" );
+                THROW( EXCEPTION );
+            }
+        }
     }
 
     // Check for windows - this could be either an array with windo w IDs
