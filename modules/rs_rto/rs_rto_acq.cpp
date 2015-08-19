@@ -74,6 +74,12 @@ rs_rto_acq::reset( )
     else
         m_mode = Acq_Mode::Normal;
 
+    for ( int i = enum_to_value( Channel::Math1 );
+          i <= enum_to_value( Channel::Math4 ); ++i )
+                m_rs.chans[ m_rs.s_channel_mapper.v2e( i ) ].set_arith_mode(
+                                     m_mode == Acq_Mode::Normal ?
+                                     Arith_Mode::Off : Arith_Mode::Average );
+
     // Never try to actually display segment data
 
     m_rs.write( "ACQ:SEGM:AUT 0" );

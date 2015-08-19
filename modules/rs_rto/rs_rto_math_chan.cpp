@@ -37,11 +37,6 @@ rs_rto_math_chan::rs_rto_math_chan( RS_RTO  & rs,
 	char buf[ 7 ];
 	sprintf( buf, "CALC:MATH%d", chan_number );
 	m_prefix = buf;
-
-    if ( m_rs.acq.mode( ) == Acq_Mode::Average )
-        set_arith_mode( Arith_Mode::Average );
-    else
-        set_arith_mode( Arith_Mode::Off );
 }
 
 
