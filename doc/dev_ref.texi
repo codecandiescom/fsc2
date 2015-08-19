@@ -3673,15 +3673,16 @@ g@item @ref{gaussmeter_name()}
 
 @paragraphindent 0
 @strong{Note}: While the documentation for this device is impressive
-in size, the content is actually (especially for when compared to
-those for other devices by Rohde&Schwarz) extremely poor:
-incomprehensible, incomplete and in many places plain wrong. Its worst
-failure, though, is that it doesn't descrive which settings interact
-and how they influence each other, making it impossible to know with
-any amount of certainty how these devices will behave under all kinds
-of circumstances. Thus it is not possible to check during the test run
-if any of the requested settings will actually be possible and the
-function return values that attemot to indicate that everything is
+in size, the content is actually (especially when compared to those
+for other devices by Rohde&Schwarz) extremely poor: incomprehensible,
+incomplete and in many places plain wrong. Its worst failure is that
+it doesn't describe which settings interact and how they influence
+each other (or which functionalities are disabled under what
+circumstances), making it impossible to know with any amount of
+certainty how these devices will behave under all kinds of
+circumstances. Thus it is not possible to check during the test run if
+any of the requested settings will actually be possible and the
+function return values that attempt to indicate that everything is
 fine. Only during the real experiment it can be tested if the
 requested settings can be used and thus there's hardly any
 protections.
@@ -3730,6 +3731,7 @@ seems to be not really suitable for use as a data digitizing device...
 @item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_ext_channel_filter()}
+@item @ref{digitizer_available_data()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_amplitude()}

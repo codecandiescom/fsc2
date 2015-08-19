@@ -192,6 +192,7 @@ Var_T * digitizer_channel_position( Var_T * v );
 Var_T * digitizer_coupling( Var_T * v );
 Var_T * digitizer_bandwidth_limiter( Var_T * v );
 Var_T * digitizer_ext_channel_filter( Var_T * v );
+Var_T * digitizer_available_data( Var_T * v );
 Var_T * digitizer_get_curve( Var_T * v );
 Var_T * digitizer_get_area( Var_T * v );
 Var_T * digitizer_get_amplitude( Var_T * v );
@@ -1839,6 +1840,48 @@ digitizer_ext_channel_filter( Var_T * v )
 
     return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
 }
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+digitizer_available_data( Var_T * v )
+{
+    long fch = get_strict_long( v, "channel" );
+    int rch = fsc2_ch_2_rto_ch( fch );
+
+    if ( rch == Channel_Ext )
+    {
+        print( FATAL, "Data are never available for external trigger input "
+               "channel.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        long np;
+
+        if ( ! rs->acq.is_record_length )
+            np = lrnd( rs->acq.timebase / rs->acq.resolution );
+        else
+            np = rs->acq.record_length;
+
+        return vars_push( INT_VAR, np );
+    }
+
+    bool ch_state;
+    check( rs_rto_channel_state( rs->dev, rch, &ch_state ) );
+    if ( ! ch_state )
+    {
+        print( FATAL, "No data are availebl from channel which isn't "
+               "switched on.\n" );
+        THROW( EXCEPTION );
+    }
+    Data_Header_t header;
+    check( rs_rto_channel_header( rs->dev, rch, &header ) );
+    return vars_push( INT_VAR, ( long ) header.length );
+}       
 
 
 /*----------------------------------------------------*
