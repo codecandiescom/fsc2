@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1542,7 +1542,6 @@ writer( int type,
                     header.data.len = 0;
                 else
                     header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
-                va_end( ap );
 
                 /* Don't try to continue writing on EPIPE (SIGPIPE is
                    ignored) */
