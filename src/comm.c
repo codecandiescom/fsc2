@@ -1332,7 +1332,6 @@ writer( int type,
 
             case C_SHOW_CHOICES :
                 str[ 0 ] = va_arg( ap, char * );
-                va_end( ap );
                 if ( str[ 0 ] == NULL )
                     header.data.str_len[ 0 ] = -1;
                 else if ( *str[ 0 ] == '\0' )
