@@ -2234,7 +2234,7 @@ digitizer_trigger_level( Var_T * v )
         double min_level, max_level;
 
         check( rs_rto_trigger_channel_min_level( rs->dev, rch, &min_level ) );
-        check( rs_rto_trigger_channel_min_level( rs->dev, rch, &max_level ) );
+        check( rs_rto_trigger_channel_max_level( rs->dev, rch, &max_level ) );
 
         char * s1 = pp( req_level );
         char * s2 = pp( min_level );
@@ -3123,12 +3123,13 @@ char *
 pp( double t )
 {
     static char ts[ 30 ];
+    double ta = fabs( t );
 
-    if ( t >= 1.0 )
+    if ( ta >= 1.0 )
         sprintf( ts, "%.5f ", t );
-    else if ( t >= 1.0e-3 )
+    else if ( ta >= 1.0e-3 )
         sprintf( ts, "%.5f m", t * 1.0e3 );
-    else if ( t >= 1.0e-6 )
+    else if ( ta >= 1.0e-6 )
         sprintf( ts, "%.5f u", t * 1.0e6);
     else
         sprintf( ts, "%.3f n", t * 1.0e9 );

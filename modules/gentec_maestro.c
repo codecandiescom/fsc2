@@ -1110,6 +1110,8 @@ powermeter_analog_output( Var_T * v )
 Var_T *
 powermeter_statistics( Var_T * v  UNUSED_ARG )
 {
+    // Array with pre-set values for the test run
+
     double data[ 12 ] = { 0.000688229,      // current value
                           0.000718887,      // maximum
                           0.000667027,      // minimum
