@@ -3650,10 +3650,10 @@ g@item @ref{gaussmeter_name()}
 @node rs_rto, rs_smb100a, pt2025, Device Reference
 
 @iftex
-@subheading Rohde & Schwarz RTO series of Oscikkoscopes
+@subheading Rohde & Schwarz RTO series of Oscilloscopes
 @end iftex
 @ifnottex
-@section  Rohde & Schwarz RTO series of Oscikkoscopes
+@section  Rohde & Schwarz RTO series of Oscilloscopes
 @end ifnottex
 
 @paragraphindent 0

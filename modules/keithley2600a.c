@@ -45,15 +45,9 @@ static void check_sweep_data( const double * data,
                               int            num_points );
 static unsigned int get_channel( Var_T ** v );
 static void correct_for_highc( unsigned int ch );
-static char * pretty_print( double       v,
-                            const char * unit );
 static const char * ppc( unsigned int   ch,
                          const char   * prefix );
 static void default_settings( void );
-
-#define ppA( x ) pretty_print( x, "A" )
-#define ppV( x ) pretty_print( x, "V" )
-#define pps( x ) pretty_print( x, "s" )
 
 
 static Keithley2600A_T keithley2600a;
@@ -372,34 +366,23 @@ sourcemeter_output_state( Var_T * v )
 
     if ( ! keithley2600a_test_toggle_source_output( ch ) )
     {
-        char *s1, *s2, *s3;
+        pp_buf bufs[ 3 ];
 
         if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
-        {
-            s1 = ppA( k26->source[ ch ].leveli );
-            s2 = ppA( k26->source[ ch ].rangei );
-            s3 = ppV( k26->source[ ch ].levelv );
-
             print( FATAL, "Can't switch on %sas a current source, "
                    "combination of current level (%s), range (%s) and "
                    "compliance voltage (%s) is not possible.\n",
-                   ppc( ch, "" ), s1, s2, s3 );
-        }
+                   ppc( ch, "" ), pp_a( k26->source[ ch ].leveli, bufs[ 0 ] ),
+                   pp_a( k26->source[ ch ].rangei, bufs[ 1 ] ),
+                   pp_v( k26->source[ ch ].levelv, bufs[ 2 ] ) );
         else
-        {
-            s1 = ppV( k26->source[ ch ].levelv );
-            s2 = ppV( k26->source[ ch ].rangev );
-            s3 = ppA( k26->source[ ch ].leveli );
-
             print( FATAL, "Can't switch on %sas a voltage source, "
                    "combination of voltage level (%s), range (%s) and "
                    "compliance current (%s) is not possible.\n",
-                   ppc( ch, "" ), s1, s2, s3 );
-        }
+                   ppc( ch, "" ), pp_v( k26->source[ ch ].levelv, bufs[ 0 ] ),
+                   pp_v( k26->source[ ch ].rangev, bufs[ 2 ] ),
+                   pp_a( k26->source[ ch ].leveli, bufs[ 2 ] ) );
 
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
         THROW( EXCEPTION );
     }
 
@@ -458,32 +441,24 @@ sourcemeter_source_mode( Var_T * v )
 
     if ( ! keithley2600a_test_toggle_source_func( ch ) )
     {
-        char *s1, *s2, *s3;
+        pp_buf bufs[ 3 ];
 
         if ( mode == OUTPUT_DCAMPS )
-        {
-            s1 = ppA( k26->source[ ch ].leveli );
-            s2 = ppA( k26->source[ ch ].rangei );
-            s3 = ppV( k26->source[ ch ].levelv );
-
             print( FATAL, "Can't switch %sto current source mode, combination "
                    "of current level (%s), range (%s) and compliance voltage "
-                   "(%s) is not possible.\n", ppc( ch, "" ), s1, s2, s3 );
-        }
+                   "(%s) is not possible.\n", ppc( ch, "" ),
+                   pp_a( k26->source[ ch ].leveli, bufs[ 0 ] ),
+                   pp_a( k26->source[ ch ].rangei, bufs[ 1 ] ),
+                   pp_v( k26->source[ ch ].levelv, bufs[ 2 ] ) );
         else
-        {
-            s1 = ppV( k26->source[ ch ].levelv );
-            s2 = ppV( k26->source[ ch ].rangev );
-            s3 = ppA( k26->source[ ch ].leveli );
-
             print( FATAL, "Can't switch %sto current source mode, combination "
                    "of voltage level (%s), range (%s) and compliance current "
-                   "(%s) is not possible.\n", ppc( ch, "" ), s1, s2, s3 );
-        }
+                   "(%s) is not possible.\n", ppc( ch, "" ),
+                   pp_v( k26->source[ ch ].levelv, bufs[ 0 ] ),
+                   pp_v( k26->source[ ch ].rangev, bufs[ 1 ] ),
+                   pp_a( k26->source[ ch ].leveli, bufs[ 2 ] ) );
 
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -513,13 +488,12 @@ sourcemeter_source_voltage( Var_T * v )
 
     if ( ! keithley2600a_check_source_levelv( ch, volts ) )
     {
-        char * s1 = ppV( volts );
-        char * s2 = ppV( keithley2600a_max_source_levelv( ch ) );
-
+        pp_buf bufs[ 2 ];
         print( FATAL, "Voltage of %s %sis out of currently possible range, "
-               "may not exceed +/-%s.\n", s1,  ppc( ch, "for" ), s2 );
-        T_free( s2 );
-        T_free( s1 );
+               "may not exceed +/-%s.\n",
+               pp_v( volts, bufs[ 0 ] ),
+               ppc( ch, "for" ),
+               pp_v( keithley2600a_max_source_levelv( ch ), bufs[ 1 ] ) );
         THROW( EXCEPTION );
     }
 
@@ -554,13 +528,11 @@ sourcemeter_source_current( Var_T * v )
 
     if ( ! keithley2600a_check_source_leveli( ch, amps ) )
     {
-        char * s1 = ppA( amps );
-        char * s2 = ppA( keithley2600a_max_source_leveli( ch ) );
-
+        pp_buf bufs[ 2 ];
         print( FATAL, "Source current of %s %sis out of currently possible "
-               "range, may not exceed +/-%s.\n", s1, ppc( ch, "for" ), s2 );
-        T_free( s2 );
-        T_free( s1 );
+               "range, may not exceed +/-%s.\n",
+               pp_a( amps, bufs[ 0 ] ), ppc( ch, "for" ),
+               pp_a( keithley2600a_max_source_leveli( ch ), bufs[ 1 ] ) );
         THROW( EXCEPTION );
     }
 
@@ -866,16 +838,12 @@ sourcemeter_compliance_voltage( Var_T * v )
 
     if ( ! keithley2600a_check_source_limitv( ch, limit ) )
     {
-        char * s1 = ppV( limit );
-        char * s2 = ppV( keithley2600a_min_source_limitv( ch ) );
-        char * s3 = ppV( keithley2600a_max_source_limitv( ch ) );
-
+        pp_buf bufs[ 3 ];
         print( FATAL, "Requested compliance voltage %sof %s is out of range, "
                "must be between %s and %s under current circumstances.\n",
-               ppc( ch, "for" ), s1, s2, s3 );
-        T_free( s1 );
-        T_free( s2 );
-        T_free( s3 );
+               ppc( ch, "for" ), pp_v( limit, bufs[ 0 ] ),
+               pp_v( keithley2600a_min_source_limitv( ch ), bufs[ 1 ] ),
+               pp_v( keithley2600a_max_source_limitv( ch ), bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
@@ -910,16 +878,13 @@ sourcemeter_compliance_current( Var_T * v )
 
     if ( ! keithley2600a_check_source_limiti( ch, limit ) )
     {
-        char * s1 = ppA( limit );
-        char * s2 = ppA( keithley2600a_min_source_limiti( ch ) );
-        char * s3 = ppA( keithley2600a_max_source_limiti( ch ) );
-
+        pp_buf bufs[ 3 ];
         print( FATAL, "Requested compliance current %sof %s is out of range, "
                "must be between %s and %s under current circumstances.\n",
-               ppc( ch, "for" ), s1, s2, s3 );
-        T_free( s1 );
-        T_free( s2 );
-        T_free( s3 );
+               ppc( ch, "for" ), pp_a( limit, bufs[ 0 ] ),
+               pp_a( keithley2600a_min_source_limiti( ch ), bufs[ 1 ] ),
+               pp_a( keithley2600a_max_source_limiti( ch ), bufs[ 2 ] ) );
+
         THROW( EXCEPTION );
     }
 
@@ -1127,16 +1092,13 @@ sourcemeter_source_max_off_current( Var_T * v )
 
     if ( ! keithley2600a_check_source_offlimiti( ch, limit ) )
     {
-        char * s1 = ppA( limit );
-        char * s2 = ppA( keithley2600a_min_source_offlimiti( ch ) );
-        char * s3 = ppA( keithley2600a_max_source_offlimiti( ch ) );
-
+        pp_buf bufs[ 3 ];
         print( FATAL, "Requested maximum current in normal off state %sof %s "
                "out of range, must be between %s and %s.\n",
-               ppc( ch, "for" ), s1, s2, s3 );
-        T_free( s1 );
-        T_free( s2 );
-        T_free( s3 );
+               ppc( ch, "for" ), pp_a( limit, bufs[ 0 ] ),
+               pp_a( keithley2600a_min_source_offlimiti( ch ), bufs[ 1 ] ),
+               pp_a( keithley2600a_max_source_offlimiti( ch ), bufs[ 2 ] ) );
+
         THROW( EXCEPTION );
     }
 
@@ -1589,15 +1551,12 @@ sourcemeter_measure_time( Var_T * v )
 
     if ( ! keithley2600a_check_measure_time( t ) )
     {
-        char *s1 = pps( t );
-        char *s2 = pps( keithley2600a_min_measure_time( ) );
-        char *s3 = pps( keithley2600a_max_measure_time( ) );
-
+        pp_buf bufs[ 3 ];
         print( FATAL, "Requested measure time of %s %snot possible, must "
-               "be between %s and %s.\n", s1, ppc( ch, "for" ), s2, s3 );
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+               "be between %s and %s.\n", pp_s( t, bufs[ 0 ] ),
+               ppc( ch, "for" ),
+               pp_s( keithley2600a_min_measure_time( ), bufs[ 1 ] ),
+               pp_s( keithley2600a_max_measure_time( ), bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
@@ -2076,11 +2035,9 @@ sourcemeter_contact_check( Var_T * v )
     if (    ! k26->source[ ch ].output
          && k26->source[ ch ].offlimiti < MIN_CONTACT_CURRENT_LIMIT )
     {
-        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
-
+        pp_buf buf;
         print( FATAL, "Contact check not possible while current is limited "
-               "to less than %s.\n", s );
-        T_free( s );
+               "to less than %s.\n", pp_a( MIN_CONTACT_CURRENT_LIMIT, buf ) );
         THROW( EXCEPTION );
     }
 
@@ -2115,23 +2072,20 @@ sourcemeter_contact_resistance( Var_T * v )
     if (    k26->source[ ch ].output
          && k26->source[ ch ].leveli < MIN_CONTACT_CURRENT_LIMIT )
     {
-        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
-
+        pp_buf buf;
         print( FATAL, "Contact resistance measurement not possible while "
-               "output is on but current is limited to less than %s.\n", s );
-        T_free( s );
+               "output is on but current is limited to less than %s.\n",
+               pp_a( MIN_CONTACT_CURRENT_LIMIT, buf ) );
         THROW( EXCEPTION );
     }
 
     if (    ! k26->source[ ch ].output
          && k26->source[ ch ].offlimiti < MIN_CONTACT_CURRENT_LIMIT )
     {
-        char * s = ppA( MIN_CONTACT_CURRENT_LIMIT );
-
+        pp_buf buf;
         print( FATAL, "Contact resistance measurement not possible while "
                "output is off and off-current is limited to less than %s.\n",
-               s );
-        T_free( s );
+               pp_a( MIN_CONTACT_CURRENT_LIMIT, buf ) );
         THROW( EXCEPTION );
     }
 
@@ -2517,11 +2471,10 @@ get_list_sweep_params( Var_T        * v,
     if (    ( sweep_what == VOLTAGE && max_val > MAX_SOURCE_LEVELV )
          || ( sweep_what == CURRENT && max_val > MAX_SOURCE_LEVELI ) )
     {
-        char * s = sweep_what == VOLTAGE ? ppV( max_val ) : ppA( max_val );
-
+        pp_buf buf;
         print( FATAL, "Largest value of %s in %s sweep list too large.\n",
-               s, what );
-        T_free( s );
+               sweep_what == VOLTAGE ?
+               pp_v( max_val, buf ) : pp_a( max_val, buf ), what );
         THROW( EXCEPTION );
     }
 
@@ -2617,40 +2570,6 @@ correct_for_highc( unsigned int ch )
     low = keithley2600a_min_measure_lowrangei( ch );
     if ( k26->measure[ ch ].lowrangei < low  )
         k26->measure[ ch ].lowrangei = low;
-}
-
-
-/*---------------------------------------------------------------------*
- * Helper function for outputting floating point data in a scientific
- * notation that is easy to read for the user. Returns an allocated
- * string the caller has to deallocated using T_free(). The first
- * argument is the number to output, the second a basic unit of
- * measure to append at the end.
- *---------------------------------------------------------------------*/
-
-static
-char *
-pretty_print( double       v,
-              const char * unit )
-{
-    double av = fabs( v );
-
-    if ( av >= 0.999995e6 )
-        return get_string( "%.6g M%s", 1.0e-6, v, unit );
-    else if ( av >= 0.999995e3 )
-        return get_string( "%.6g k%s", 1.0e-3, v, unit );
-    else if ( av >= 0.999995 )
-        return get_string( "%.6g %s", v, unit );
-    else if ( av >= 0.999995e-3 )
-        return get_string( "%.6g m%s", v * 1.0e3, unit );
-    else if ( av >= 0.999995e-6 )
-        return get_string( "%.6g u%s", v * 1.0e6, unit );
-    else if ( av >= 0.999995e-9 )
-        return get_string(  "%.6g n%s", v * 1.0e9, unit );
-    else if ( av >= 0.999995e-12 )
-        return get_string( "%.6g p%s", v * 1.0e12, unit );
-
-    return get_string( "%.6g %s", v, unit );
 }
 
 

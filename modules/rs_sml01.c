@@ -1770,19 +1770,20 @@ synthesizer_pulse_width( Var_T * v )
 
     if ( ticks == 0 || ticks > lrnd( MAX_PULSE_WIDTH / MIN_PULSE_WIDTH ) )
     {
-        print( FATAL, "Invalid pulse width of %s, allowed range is %ld ns "
-               "to %.1f s\n", rs_sml01_pretty_print( width ),
-               lrnd( MIN_PULSE_WIDTH * 1.0e9 ), MAX_PULSE_WIDTH );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Invalid pulse width of %s, allowed range is %s to %s.\n",
+               pp_s( width, bufs[ 0 ] ), pp_s( MIN_PULSE_WIDTH, bufs[ 1 ] ),
+               pp_s( MAX_PULSE_WIDTH, bufs[ 2 ] );
         THROW( EXCEPTION );
     }
 
     if ( fabs( ticks * MIN_PULSE_WIDTH - width ) > 0.01 * MIN_PULSE_WIDTH )
     {
-        char *t = T_strdup( rs_sml01_pretty_print( width ) );
-        print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
-               rs_sml01_pretty_print( ticks * MIN_PULSE_WIDTH ) );
-        T_free( t );
+        pp_buf bufs[ 3 ];
+        print( SEVERE, "Pulse width of %s isn't an integer multiple of %s, "
+               "changing it to %s.\n", pp_s( width, bufs[ 0 ] ),
+               pp_s( MIN_PULSE_WIDTH, bufs[ 1 ] ),
+               pp_s( ticks * MIN_PULSE_WIDTH, bufs[ 2 ] ) );
         width = ticks * MIN_PULSE_WIDTH;
     }
 
@@ -1831,19 +1832,21 @@ synthesizer_pulse_delay( Var_T * v )
 
     if ( ticks == 0 || ticks > lrnd( MAX_PULSE_DELAY / MIN_PULSE_DELAY ) )
     {
-        print( FATAL, "Invalid pulse delay of %s, allowed range is %d ns "
-               "to %.1f s\n", rs_sml01_pretty_print( delay ),
-               irnd( MIN_PULSE_DELAY * 1.0e9 ), MIN_PULSE_DELAY );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Invalid pulse delay of %s, allowed range is %s to %s.\n",
+               pp_s( delay, bufs[ 0 ] ),
+               pp_s( MIN_PULSE_DELAY, bufs[ 1 ] ),
+               pp_s( MAX_PULSE_DELAY, bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( fabs( ticks * MIN_PULSE_DELAY - delay ) > 0.01 * MIN_PULSE_DELAY )
     {
-        char *t = T_strdup( rs_sml01_pretty_print( delay ) );
-        print( SEVERE, "Pulse delay of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_DELAY * 1.0e9 ),
-               rs_sml01_pretty_print( ticks * MIN_PULSE_DELAY ) );
-        T_free( t );
+        pp_buf bufs[ 3 ];
+        print( SEVERE, "Pulse delay of %s isn't an integer multiple of %s, "
+               "changing it to %s.\n", pp_s( delay, bufs[ 0 ] ),
+               pp_s( MIN_PULSE_DELAY, bufs[ 1 ] ),
+               pp_s( ticks * MIN_PULSE_DELAY, bufs[ 2 ] ) );
         delay = ticks * MIN_PULSE_DELAY;
     }
 
@@ -1921,19 +1924,21 @@ synthesizer_double_pulse_delay( Var_T * v )
     if (    ticks < lrnd( MIN_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH )
          || ticks > lrnd( MAX_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH ) )
     {
+        pp_buf bufs[ 3 ];
         print( FATAL, "Invalid double pulse delay of %s, allowed range is "
-               "%ld ns to %.1f s\n", rs_sml01_pretty_print( delay ),
-               lrnd( MIN_DOUBLE_PULSE_DELAY * 1.0e9 ), MAX_DOUBLE_PULSE_DELAY );
+               "%s to %s.\n", pp_s( delay, bufs[ 0 ] ),
+               pp_s( MIN_DOUBLE_PULSE_DELAY, bufs[ 1 ] ),
+               pp_s( MAX_DOUBLE_PULSE_DELAY, bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( fabs( ticks * MIN_PULSE_WIDTH - delay ) > 0.01 * MIN_PULSE_WIDTH )
     {
-        char *t = T_strdup( rs_sml01_pretty_print( delay ) );
-        print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
-               "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
-               rs_sml01_pretty_print( ticks * MIN_PULSE_WIDTH ) );
-        T_free( t );
+        pp_buf bufs[ 3 ];
+        print( SEVERE, "Pulse width of %s isn't an integer multiple of %s, "
+               "changing it to %s.\n", pp_s( delay, bufs[ 0 ] ),
+               pp_s( MIN_PULSE_WIDTH, bufs[ 1 ] ),
+               pp_s( ticks * MIN_PULSE_WIDTH, bufs[ 2 ] ) );
         delay = ticks * MIN_PULSE_WIDTH;
     }
 

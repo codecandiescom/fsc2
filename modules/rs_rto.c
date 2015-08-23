@@ -219,7 +219,6 @@ Var_T * digitizer_trigger_out_pulse_delay( Var_T * v );
 Var_T * digitizer_trigger_out_pulse_delay_limits( Var_T * v );
 
 
-static char * pp( double t );
 static int fsc2_ch_2_rto_ch( long ch );
 static long rto_ch_2_fsc2_ch( int ch );
 static void check( int err_code );
@@ -634,30 +633,19 @@ digitizer_timebase( Var_T * v )
         check( rs_rto_acq_shortest_timebase( rs->dev, &min_tb ) );
         check( rs_rto_acq_longest_timebase( rs->dev, &max_tb ) );
 
-        char * s1 = pp( req_timebase ); 
-        char * s2 = pp( min_tb ); 
-        char * s3 = pp( max_tb ); 
-
-        print( FATAL, "Timebase of %ss out of range, must be between %ss/div "
-               "and " "%ss/div.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Timebase of %s out of range, must be between %s "
+               "and %s.\n", pp_sd( req_timebase, bufs[ 0 ] ),
+               pp_sd( min_tb, bufs[ 1 ] ), pp_sd( max_tb, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( fabs( timebase - req_timebase ) / req_timebase > 0.01 )
     {
-        char * s1 = pp( req_timebase ); 
-        char * s2 = pp( timebase ); 
-        
-        print( WARN, "Timebase has been set to %ss/div instead of %ss/div.\n",
-               s2, s1 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Timebase has been set to %s instead of %s.\n",
+               pp_sd( timebase, bufs[ 0 ] ), pp_sd( req_timebase, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, timebase );
@@ -769,30 +757,20 @@ digitizer_time_per_point( Var_T * v )
         check( rs_rto_acq_lowest_resolution( rs->dev, &min_res ) );
         check( rs_rto_acq_highest_resolution( rs->dev, &max_res ) );
 
-        char * s1 = pp( req_resolution ); 
-        char * s2 = pp( min_res ); 
-        char * s3 = pp( max_res ); 
-
-        print( FATAL, "Time per point of %ss out of range, must be between "
-               "%ss and %ss.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Time per point of %s out of range, must be between "
+               "%s and %s.\n", pp_s( req_resolution, bufs[ 0 ] ),
+               pp_s( min_res, bufs[ 1 ] ), pp_s( max_res, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( fabs( resolution - req_resolution ) / req_resolution > 0.01 )
     {
-        char * s1 = pp( req_resolution ); 
-        char * s2 = pp( resolution ); 
-        
-        print( WARN, "Time per point has been set to %ss instead of "
-               "%ss.\n", s2, s1 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Time per point has been set to %s instead of %s.\n",
+               pp_s( resolution, bufs[ 0 ] ),
+               pp_s( req_resolution, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, resolution );
@@ -1332,29 +1310,19 @@ digitizer_sensitivity( Var_T * v )
         check( rs_rto_channel_min_scale( rs->dev, rch, &min_scale ) );
         check( rs_rto_channel_min_scale( rs->dev, rch, &max_scale ) );
 
-        char *s1 = pp( req_scale );
-        char *s2 = pp( min_scale );
-        char *s3 = pp( max_scale );
-
-        print( FATAL, "Requested sensitivity of %sV/div out of range, must be "
-               "between %sV/div and %sV/div.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Requested sensitivity of % out of range, must be "
+               "between %s and %s.\n", pp_vd( req_scale, bufs[ 0 ] ),
+               pp_vd( min_scale, bufs[ 1 ] ), pp_vd( max_scale, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( fabs( req_scale - scale ) / req_scale > 0.01 )
     {
-        char * s1 = pp( req_scale );
-        char * s2 = pp( scale );
-        print( WARN, "Requested sensitivity of %sV/div had to be adjusted to "
-               "%sV/div.\n", s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Requested sensitivity of %s had to be adjusted to %s.\n",
+               pp_vd( req_scale, bufs[ 0 ] ), pp_vd( scale, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, scale );
@@ -1431,29 +1399,19 @@ digitizer_offset( Var_T * v )
         check( rs_rto_channel_min_offset( rs->dev, rch, &min_offset ) );
         check( rs_rto_channel_min_offset( rs->dev, rch, &max_offset ) );
 
-        char *s1 = pp( req_offset );
-        char *s2 = pp( min_offset );
-        char *s3 = pp( max_offset );
-
-        print( FATAL, "Requested offset of %sV out of range, must be "
-               "between %sV and %sV.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Requested offset of %s out of range, must be between "
+               "%s and %s.\n", pp_v( req_offset, bufs[ 0 ] ),
+               pp_v( min_offset, bufs[ 1 ] ), pp_v( max_offset, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( fabs( req_offset - offset ) / req_offset > 0.01 )
     {
-        char * s1 = pp( req_offset );
-        char * s2 = pp( offset );
-        print( WARN, "Requested offset of %sV had to be adjusted to %sV.\n",
-               s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Requested offset of %s had to be adjusted to %s.\n",
+               pp_v( req_offset, bufs[ 0 ] ), pp_v( offset, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, offset );
@@ -2236,30 +2194,20 @@ digitizer_trigger_level( Var_T * v )
         check( rs_rto_trigger_channel_min_level( rs->dev, rch, &min_level ) );
         check( rs_rto_trigger_channel_max_level( rs->dev, rch, &max_level ) );
 
-        char * s1 = pp( req_level );
-        char * s2 = pp( min_level );
-        char * s3 = pp( max_level );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Requested trigger level of %s out of range, must be "
+               "between %s and %s.\n", pp_v( req_level, bufs[ 0 ] ),
+               pp_v( min_level, bufs[ 1 ] ), pp_v( max_level, bufs[ 2 ] ) );
 
-        print( FATAL, "Requested trigger level of %sV oot of range, must be "
-               "between %sV and %sV.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
 
         THROW( EXCEPTION );
     }
 
     if ( req_level != 0 && fabs( ( req_level - level ) / req_level ) > 0.01 )
     {
-        char * s1 = pp( req_level );
-        char * s2 = pp( level );
-
-        print( WARN, "Trigger level had to be adjusted from %sV to %sV.\n",
-               s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Trigger level had to be adjusted from %s to %s.\n",
+               pp_v( req_level, bufs[ 0 ] ), pp_v( level, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, level );
@@ -2481,30 +2429,19 @@ digitizer_trigger_delay( Var_T * v )
         check( rs_rto_trigger_earliest_position( rs->dev, &min_pos ) );
         check( rs_rto_trigger_latest_position( rs->dev, &max_pos ) );
 
-        char * s1 = pp( req_pos );
-        char * s2 = pp( min_pos );
-        char * s3 = pp( max_pos );
-
-        print( FATAL, "Requested trigger delay of %ss is out of range, must "
-               "be between %ss and %ss.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Requested trigger delay of %s is out of range, must "
+               "be between %s and %s.\n", pp_s( req_pos, bufs[ 0 ] ),
+               pp_s( min_pos, bufs[ 1 ] ), pp_s( max_pos, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( req_pos != 0 && fabs( ( req_pos - pos ) / req_pos ) > 0.01 )
     {
-        char * s1 = pp( req_pos );
-        char * s2 = pp( pos );
-
-        print( WARN, "Trigger delay had to be adjusted from %ss to %ss.\n",
-               s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
+               pp_s( req_pos, bufs[ 0 ] ), pp_s( pos, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, pos );
@@ -2884,11 +2821,11 @@ digitizer_trigger_out_pulse_length( Var_T * v )
 
     if ( req_len < 2e-9 || req_len >= 1.000002e-3 )
     {
-        char *s1 = pp( req_len );
+        pp_buf buf;
+        print( FATAL, "Requested trigger out pulse length of %s is out of "
+               "range, absolute limits are 4 ns to 1 ms.\n",
+               pp_s( req_len, buf ) );
 
-        print( FATAL, "Requested trigger out pulse length of %ss is out of "
-               "range, absolute limits are 4 ns to 1 ms.\n", s1 );
-        T_free( s1 );
         THROW( EXCEPTION );
     }
 
@@ -2911,14 +2848,9 @@ digitizer_trigger_out_pulse_length( Var_T * v )
 
     if ( fabs( req_len - len ) / req_len > 0.01 )
     {
-        char * s1 = pp( req_len );
-        char * s2 = pp( len );
-
-        print( WARN, "Trigger out pulse length had to be adjusted from %ss "
-               "to %ss.\n", s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Trigger out pulse length had to be adjusted from %s "
+               "to %s.\n", pp_s( req_len, bufs[ 0 ] ), pp_s( len, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, len );
@@ -3033,11 +2965,9 @@ digitizer_trigger_out_pulse_delay( Var_T * v )
 
     if ( req_delay < 799.5e-9 || req_delay >= 1.0000000005 )
     {
-        char * s1 = pp( req_delay );
-
-        print( FATAL, "Trigger out pulse delay of %ss out of range, must "
-               "always be between 800 ns and 1 s.\n", s1 );
-        T_free( s1 );
+        pp_buf buf;
+        print( FATAL, "Trigger out pulse delay of %s out of range, must "
+               "always be between 800 ns and 1 s.\n", pp_s( req_delay, buf ) );
         THROW( EXCEPTION );
     }
 
@@ -3067,30 +2997,21 @@ digitizer_trigger_out_pulse_delay( Var_T * v )
         check( rs_rto_trigger_min_out_pulse_delay( rs->dev, &min_delay ) );
         check( rs_rto_trigger_max_out_pulse_delay( rs->dev, &max_delay ) );
 
-        char * s1 = pp( req_delay );
-        char * s2 = pp( min_delay );
-        char * s3 = pp( max_delay );
-
-        print( FATAL, "Requested trigger out pulse delay of %ss is out of "
-               "range, must be between %ss and %ss.\n", s1, s2, s3 );
-
-        T_free( s3 );
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 3 ];
+        print( FATAL, "Requested trigger out pulse delay of %s is out of "
+               "range, must be between %s and %s.\n",
+               pp_s( req_delay, bufs[ 0 ] ), pp_s( min_delay, bufs[ 1 ] ),
+               pp_s( max_delay, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( fabs( req_delay - delay ) / req_delay > 0.01 )
     {
-        char * s1 = pp( req_delay );
-        char * s2 = pp( delay );
-
-        print( WARN, "Trigger out pulse delay had to be adjusted from %ss "
-               "to %ss.\n", s1, s2 );
-
-        T_free( s2 );
-        T_free( s1 );
+        pp_buf bufs[ 2 ];
+        print( WARN, "Trigger out pulse delay had to be adjusted from %s to "
+               "%s.\n", pp_s( req_delay, bufs[ 0 ] ),
+               pp_s( delay, bufs[ 1 ] ) );
     }
 
     return vars_push( FLOAT_VAR, delay );
@@ -3112,29 +3033,6 @@ digitizer_trigger_out_pulse_delay_limits( Var_T * v  UNUSED_ARG )
     }
 
     return vars_push( FLOAT_ARR, limits, 2 );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-static
-char *
-pp( double t )
-{
-    static char ts[ 30 ];
-    double ta = fabs( t );
-
-    if ( ta >= 1.0 )
-        sprintf( ts, "%.5f ", t );
-    else if ( ta >= 1.0e-3 )
-        sprintf( ts, "%.5f m", t * 1.0e3 );
-    else if ( ta >= 1.0e-6 )
-        sprintf( ts, "%.5f u", t * 1.0e6);
-    else
-        sprintf( ts, "%.3f n", t * 1.0e9 );
-
-    return T_strdup( ts );
 }
 
 

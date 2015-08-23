@@ -697,6 +697,43 @@ fsc2_config_dir( void )
 }
 
 
+/*----------------------------------------------------*
+ * Helper function for outputting floating point data in a scientific
+ * notation that is easy to read for the user. Returns an allocated
+ * string the caller has to deallocated using T_free(). The first
+ * argument is the number to output, the second the buffer to print to
+ * and the third a unit of measure to append at the end.
+ *----------------------------------------------------*/
+
+char *
+pretty_print( double       val,
+              char       * buf,
+              char const * unit )
+{
+    double aval = fabs( val );
+
+    if ( aval >= 0.999995 )
+    {
+        if ( aval < 0.999995e3 )
+            snprintf( buf, PP_BUF_LEN, "%.6g %s", val, unit );
+        else if ( aval < 0.999995e6 )
+            snprintf( buf, PP_BUF_LEN, "%.6g k%s", val * 1.0e-3, unit );
+        else if ( aval < 0.999995e9 )
+            snprintf( buf, PP_BUF_LEN, "%.6g M%s", val * 1.0e-6, unit );
+        else
+            snprintf( buf, PP_BUF_LEN, "%.6g G%s", val * 1.0e-9, unit );
+    }
+    else if ( aval >= 0.999995e-3 )
+        snprintf( buf, PP_BUF_LEN, "%.6g m%s", val * 1.0e3, unit );
+    else if ( aval >= 0.999995e-6 )
+        snprintf( buf, PP_BUF_LEN, "%.6g u%s", val * 1.0e6, unit );
+    else
+        snprintf( buf, PP_BUF_LEN, "%.3g n%s", val * 1.0e9, unit );
+
+    return buf;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

@@ -109,6 +109,20 @@ int fsc2_fclose( FILE * /* stream */ );
 
 const char *fsc2_config_dir( void );
 
+char * pretty_print( double       val,
+                     char       * buf,
+                     char const * unit );
+
+#define PP_BUF_LEN  50
+typedef char pp_buf[ PP_BUF_LEN + 1 ];
+
+#define pp_s(  a, b )  pretty_print( a, b, "s" )
+#define pp_sd( a, b )  pretty_print( a, b, "s/div" )
+#define pp_v(  a, b )  pretty_print( a, b, "V" )
+#define pp_vd( a, b )  pretty_print( a, b, "V/div" )
+#define pp_a(  a, b )  pretty_print( a, b, "A" )
+#define pp_o(  a, b )  pretty_print( a, b, "Ohm" )
+
 
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
                                          estimate for calculation of time in
