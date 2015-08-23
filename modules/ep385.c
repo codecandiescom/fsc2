@@ -169,7 +169,7 @@ ep385_init_hook( void )
         f->uses_auto_shape_pulses = UNSET;
         f->uses_auto_twt_pulses = UNSET;
         f->max_seq_len = 0;
-        for ( j = 0; j <= MAX_CHANNELS; j++ )
+        for ( j = 0; j < MAX_CHANNELS; j++ )
             f->channel[ j ] = NULL;
         f->max_duty_warning = 0;
     }

@@ -46,11 +46,9 @@ tds_tmpl_init( const char * name )
     double cp1, cp2;
     char buffer[ 100 ];
     long len = sizeof buffer;
-    bool lock_state;
+    volatile bool lock_state;
     int on_count, needed_count, needed_on_count;
 
-
-    CLOBBER_PROTECT( lock_state );
 
 #ifndef NO_GATED_MEASUREMENTS
     tds_tmpl.meas_source = -1;

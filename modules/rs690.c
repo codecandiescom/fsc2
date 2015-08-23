@@ -179,7 +179,7 @@ rs690_init_hook( void )
         f->next_phase = 0;
         f->uses_auto_shape_pulses = UNSET;
         f->uses_auto_twt_pulses = UNSET;
-        for ( j = 0; j <= MAX_CHANNELS; j++ )
+        for ( j = 0; j < MAX_CHANNELS; j++ )
             f->channel[ j ] = NULL;
         f->max_duty_warning = 0;
     }
