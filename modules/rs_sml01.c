@@ -1773,7 +1773,7 @@ synthesizer_pulse_width( Var_T * v )
         pp_buf bufs[ 3 ];
         print( FATAL, "Invalid pulse width of %s, allowed range is %s to %s.\n",
                pp_s( width, bufs[ 0 ] ), pp_s( MIN_PULSE_WIDTH, bufs[ 1 ] ),
-               pp_s( MAX_PULSE_WIDTH, bufs[ 2 ] );
+               pp_s( MAX_PULSE_WIDTH, bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
