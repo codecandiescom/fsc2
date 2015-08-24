@@ -135,12 +135,12 @@ typedef struct Message_Queue Message_Queue_T;
 struct Comm_Struct {
     int type;
     union {
-        ptrdiff_t len;
+        ssize_t len;
         int int_data;
         long long_data;
         float float_data;
         double double_data;
-        long str_len[ 4 ];
+        ssize_t str_len[ 4 ];
     } data;
 };
 

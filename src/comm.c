@@ -96,10 +96,10 @@
 static bool parent_reader( Comm_Struct_T * header );
 static bool child_reader( void          * ret,
                           Comm_Struct_T * header );
-static void pipe_read( char   * buf,
-                       size_t   bytes_to_read );
-static bool pipe_write( char   * buf,
-                        size_t   bytes_to_write );
+static void pipe_read( void    * buf,
+                       ssize_t   bytes_to_read );
+static bool pipe_write( void const * buf,
+                        ssize_t      bytes_to_write );
 static bool send_browser( FL_OBJECT * browser );
 
 static bool Comm_is_setup = UNSET;
@@ -359,7 +359,7 @@ reader( void * ret )
 
     TRY
     {
-        pipe_read( ( char * ) &header, sizeof header );
+        pipe_read( &header, sizeof header );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -372,6 +372,23 @@ reader( void * ret )
 
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
+
+#define HANDLE_READ( func )                    \
+    TRY                                        \
+    {                                          \
+        data = T_malloc( header->data.len );   \
+        pipe_read( data, header->data.len );   \
+        func( data, header->data.len );        \
+        TRY_SUCCESS;                           \
+    }                                          \
+    OTHERWISE                                  \
+    {                                          \
+        T_free( data );                        \
+        return FAIL;                           \
+    }                                          \
+    T_free( data );                            \
+    break;
+
 
 static bool
 parent_reader( Comm_Struct_T * header )
@@ -395,8 +412,7 @@ parent_reader( Comm_Struct_T * header )
                 {
                     str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
-                    pipe_read( str[ 0 ],
-                               ( size_t ) header->data.str_len[ 0 ] );
+                    pipe_read( str[ 0 ], header->data.str_len[ 0 ] );
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
@@ -425,8 +441,7 @@ parent_reader( Comm_Struct_T * header )
                 {
                     str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
-                    pipe_read( str[ 0 ],
-                               ( size_t ) header->data.str_len[ 0 ] );
+                    pipe_read( str[ 0 ], header->data.str_len[ 0 ] );
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
@@ -455,8 +470,7 @@ parent_reader( Comm_Struct_T * header )
                 {
                     str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
-                    pipe_read( str[ 0 ],
-                               ( size_t ) header->data.str_len[ 0 ] );
+                    pipe_read( str[ 0 ], header->data.str_len[ 0 ] );
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
@@ -483,8 +497,8 @@ parent_reader( Comm_Struct_T * header )
 
             TRY
             {
-                pipe_read( ( char * ) &n1, sizeof( int ) );
-                pipe_read( ( char * ) &n2, sizeof( int ) );
+                pipe_read( &n1, sizeof( int ) );
+                pipe_read( &n2, sizeof( int ) );
 
                 for ( i = 0; i < 4; i++ )
                 {
@@ -492,8 +506,7 @@ parent_reader( Comm_Struct_T * header )
                     {
                         str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-                        pipe_read( str[ i ],
-                                   ( size_t ) header->data.str_len[ i ] );
+                        pipe_read( str[ i ], header->data.str_len[ i ] );
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
@@ -531,8 +544,7 @@ parent_reader( Comm_Struct_T * header )
                     {
                         str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-                        pipe_read( str[ i ],
-                                   ( size_t ) header->data.str_len[ i ] );
+                        pipe_read( str[ i ], header->data.str_len[ i ] );
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
@@ -575,8 +587,7 @@ parent_reader( Comm_Struct_T * header )
                     {
                         str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
-                        pipe_read( str[ i ],
-                                   ( size_t ) header->data.str_len[ i ] );
+                        pipe_read( str[ i ], header->data.str_len[ i ] );
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
@@ -595,504 +606,101 @@ parent_reader( Comm_Struct_T * header )
             break;
 
         case C_LAYOUT :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_layout( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_layout );
 
         case C_BCREATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_bcreate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_bcreate );
 
         case C_BDELETE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_bdelete( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_bdelete );
 
         case C_BSTATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_bstate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_bstate );
 
         case C_BCHANGED :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_bchanged( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_bchanged );
 
         case C_SCREATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_screate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_screate );
 
         case C_SDELETE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_sdelete( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_sdelete );
 
         case C_SSTATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_sstate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_sstate );
 
         case C_SCHANGED :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_schanged( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_schanged );
 
         case C_ICREATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_icreate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_icreate );
 
         case C_IDELETE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_idelete( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_idelete );
 
         case C_ISTATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_istate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_istate );
 
         case C_ICHANGED :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_ichanged( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_ichanged );
 
         case C_MCREATE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_mcreate( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_mcreate );
 
         case C_MADD :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_madd( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_madd );
 
         case C_MTEXT :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_mtext( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_mtext );
 
         case C_MDELETE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_mdelete( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_mdelete );
 
         case C_MCHOICE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_mchoice( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_mchoice );
 
         case C_MCHANGED :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_mchanged( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_mchanged );
 
         case C_TBCHANGED :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_tbchanged( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_tbchanged );
 
         case C_TBWAIT :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_tbwait( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_tbwait );
 
         case C_ODELETE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_objdel( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_objdel );
 
         case C_FREEZE :
             parent_freeze( header->data.int_data );
             break;
 
         case C_GETPOS :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_getpos( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_getpos );
 
         case C_CLABEL :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_clabel( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_clabel );
 
         case C_XABLE :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_xable( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_xable );
 
         case C_CB_1D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_cb_1d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_cb_1d );
 
         case C_CB_2D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_cb_2d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_cb_2d );
 
         case C_ZOOM_1D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_zoom_1d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_zoom_1d );
 
         case C_ZOOM_2D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_zoom_2d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_zoom_2d );
 
         case C_FSB_1D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_fsb_1d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_fsb_1d );
 
         case C_FSB_2D :
-            TRY
-            {
-                data = T_malloc( ( size_t ) header->data.len );
-                pipe_read( data, ( size_t ) header->data.len );
-                exp_fsb_2d( data, header->data.len );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                T_free( data );
-                return FAIL;
-            }
-            T_free( data );
-            break;
+            HANDLE_READ( exp_fsb_2d );
 
         default :                     /* this better never gets triggered... */
             fsc2_impossible( );
@@ -1120,7 +728,7 @@ child_reader( void          * ret,
             return OK;
 
         case C_STR :
-            if ( header->data.len == -1 )
+            if ( header->data.str_len[ 0 ] == -1 )
             {
                 if ( ret != NULL )
                      *( ( char ** ) ret ) = NULL;
@@ -1129,10 +737,10 @@ child_reader( void          * ret,
 
             TRY
             {
-                retstr = T_malloc( ( size_t ) header->data.len + 1 );
-                if ( header->data.len > 0 )
-                    pipe_read( retstr, ( size_t ) header->data.len );
-                retstr[ header->data.len ] = '\0';
+                retstr = T_malloc( header->data.str_len[ 0 ] + 1 );
+                if ( header->data.str_len[ 0 ] > 0 )
+                    pipe_read( retstr, header->data.str_len[ 0 ] );
+                retstr[ header->data.str_len[ 0 ] ] = '\0';
                 TRY_SUCCESS;
             }
             OTHERWISE
@@ -1176,7 +784,7 @@ child_reader( void          * ret,
                     * ( char ** ) ret =
                          T_malloc( ( size_t ) header->data.str_len[ 0 ] + 1 );
                     pipe_read( * ( char ** ) ret,
-                               ( size_t ) header->data.str_len[ 0 ] );
+                               header->data.str_len[ 0 ] );
                     * ( * ( char ** ) ret +  header->data.str_len[ 0 ] ) = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
@@ -1192,16 +800,26 @@ child_reader( void          * ret,
             }
             return OK;
 
-        case C_BCREATE_REPLY   : case C_BSTATE_REPLY  : case C_BCHANGED_REPLY :
-        case C_SCREATE_REPLY   : case C_SSTATE_REPLY  : case C_SCHANGED_REPLY :
-        case C_ICREATE_REPLY   : case C_ISTATE_REPLY  : case C_ICHANGED_REPLY :
-        case C_MCREATE_REPLY   : case C_MCHOICE_REPLY : case C_MCHANGED_REPLY :
-        case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY  : case C_GETPOS_REPLY :
+        case C_BCREATE_REPLY   :
+        case C_BSTATE_REPLY    :
+        case C_BCHANGED_REPLY  :
+        case C_SCREATE_REPLY   :
+        case C_SSTATE_REPLY    :
+        case C_SCHANGED_REPLY  :
+        case C_ICREATE_REPLY   :
+        case C_ISTATE_REPLY    :
+        case C_ICHANGED_REPLY  :
+        case C_MCREATE_REPLY   :
+        case C_MCHOICE_REPLY   :
+        case C_MCHANGED_REPLY  :
+        case C_TBCHANGED_REPLY :
+        case C_TBWAIT_REPLY    :
+        case C_GETPOS_REPLY    :
             if ( ret != NULL )
             {
                 TRY
                 {
-                    pipe_read( ( char * ) ret, ( size_t ) header->data.len );
+                    pipe_read( ( char * ) ret, header->data.len );
                     TRY_SUCCESS;
                 }
                 OTHERWISE
@@ -1214,7 +832,7 @@ child_reader( void          * ret,
             {
                 retstr = T_malloc( ( size_t ) header->data.len + 1 );
                 if ( header->data.len > 0 )
-                    pipe_read( retstr, ( size_t ) header->data.len );
+                    pipe_read( retstr, header->data.len );
                 retstr[ header->data.len ] = '\0';
                 TRY_SUCCESS;
             }
@@ -1232,16 +850,43 @@ child_reader( void          * ret,
             }
             return OK;
 
-        case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
-        case C_IDELETE_REPLY : case C_MADD_REPLY    : case C_MDELETE_REPLY :
-        case C_ODELETE_REPLY : case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
-        case C_CB_1D_REPLY   : case C_CB_2D_REPLY   : case C_ZOOM_1D_REPLY :
-        case C_ZOOM_2D_REPLY : case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
+        case C_LAYOUT_REPLY  :
+        case C_BDELETE_REPLY :
+        case C_SDELETE_REPLY :
+        case C_IDELETE_REPLY :
+        case C_MADD_REPLY    :
+        case C_MDELETE_REPLY :
+        case C_ODELETE_REPLY :
+        case C_CLABEL_REPLY  :
+        case C_XABLE_REPLY   :
+        case C_CB_1D_REPLY   :
+        case C_CB_2D_REPLY   :
+        case C_ZOOM_1D_REPLY :
+        case C_ZOOM_2D_REPLY :
+        case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
             return ( header->data.long_data != 0 ? OK : FAIL );
     }
 
     fsc2_impossible( );            /* this better never gets triggered... */
     return FAIL;
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+static
+void
+header_strlen_setup( Comm_Struct_T * h,
+                     int             field,
+                     char    const * str )
+{
+    if ( ! str )
+        h->data.str_len[ field ] = -1;
+    else if ( ! *str )
+        h->data.str_len[ field ] = 0;
+    else
+        h->data.str_len[ field ] = strlen( str );
 }
 
 
@@ -1280,91 +925,47 @@ writer( int type,
             case C_EPRINT :
                 str[ 0 ] = va_arg( ap, char * );
                 va_end( ap );
-                if ( str[ 0 ] == NULL )
-                    header.data.str_len[ 0 ] = -1;
-                else if ( *str[0 ] == '\0' )
-                    header.data.str_len[ 0 ] = 0;
-                else
-                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-                    return FAIL;
-
-                if (    header.data.str_len[ 0 ] > 0
-                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-                    return FAIL;
-                break;
+                header_strlen_setup( &header, 0, str[ 0 ] );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( str[ 0 ], header.data.str_len[ 0 ] );
 
             case C_SHOW_MESSAGE :
                 str[ 0 ] = va_arg( ap, char * );
                 va_end( ap );
-                if ( str[ 0 ] == NULL )
-                    header.data.str_len[ 0 ] = -1;
-                else if ( *str[ 0 ] == '\0' )
-                    header.data.str_len[ 0 ] = 0;
-                else
-                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-                    return FAIL;
-                if (    header.data.str_len[ 0 ] > 0
-                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-                    return FAIL;
-                break;
+                header_strlen_setup( &header, 0, str[ 0 ] );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( str[ 0 ], header.data.str_len[ 0 ] );
 
             case C_SHOW_ALERT :
                 str[ 0 ] = va_arg( ap, char * );
                 va_end( ap );
-                if ( str[ 0 ] == NULL )
-                    header.data.str_len[ 0 ] = -1;
-                else if ( *str[ 0 ] == '\0' )
-                    header.data.str_len[ 0 ] = 0;
-                else
-                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-                    return FAIL;
-
-                if (    header.data.str_len[ 0 ] > 0
-                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-                    return FAIL;
-                break;
+                header_strlen_setup( &header, 0, str[ 0 ] );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( str[ 0 ], header.data.str_len[ 0 ] );
 
             case C_SHOW_CHOICES :
                 str[ 0 ] = va_arg( ap, char * );
-                if ( str[ 0 ] == NULL )
-                    header.data.str_len[ 0 ] = -1;
-                else if ( *str[ 0 ] == '\0' )
-                    header.data.str_len[ 0 ] = 0;
-                else
-                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
+                header_strlen_setup( &header, 0, str[ 0 ] );
 
                 n1 = va_arg( ap, int );
 
                 for ( i = 1; i < 4; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
-                    if ( str[ i ] == NULL )
-                        header.data.str_len[ i ] = -1;
-                    else if ( *str[ i ] == '\0' )
-                        header.data.str_len[ i ] = 0;
-                    else
-                        header.data.str_len[ i ] = strlen( str[ i ] );
+                    header_strlen_setup( &header, i, str[ i ] );
                 }
 
                 n2 = va_arg( ap, int );
                 va_end( ap );
 
-                if (    ! pipe_write( ( char * ) &header, sizeof header )
-                     || ! pipe_write( ( char * ) &n1, sizeof( int ) )
-                     || ! pipe_write( ( char * ) &n2, sizeof( int ) ) )
+                if (    ! pipe_write( &header, sizeof header )
+                     || ! pipe_write( &n1, sizeof( int ) )
+                     || ! pipe_write( &n2, sizeof( int ) ) )
                     return FAIL;
 
                 for ( i = 0; i < 4; i++ )
-                    if ( header.data.str_len[ i ] > 0 )
-                        if ( ! pipe_write( str[ i ],
-                                       ( size_t ) header.data.str_len[ i ] ) )
-                            return FAIL;
+                    if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
+                        return FAIL;
                 break;
 
             case C_SHOW_FSELECTOR :
@@ -1373,33 +974,25 @@ writer( int type,
                 for ( i = 0; i < 4; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
-                    if ( str[ i ] == NULL )
-                        header.data.str_len[ i ] = -1;
-                    else if ( *str[ i ] == '\0' )
-                        header.data.str_len[ i ] = 0;
-                    else
-                        header.data.str_len[ i ] = strlen( str[ i ] );
+                    header_strlen_setup( &header, i, str[ i ] );
                 }
 
                 va_end( ap );
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+
+                if ( ! pipe_write( &header, sizeof header ) )
                     return FAIL;
 
                 /* Write out all four strings */
 
                 for ( i = 0; i < 4; i++ )
-                {
-                    if ( header.data.str_len[ i ] > 0 )
-                        if ( ! pipe_write( str[ i ],
-                                       ( size_t ) header.data.str_len[ i ] ) )
-                            return FAIL;
-                }
-
+                    if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
+                        return FAIL;
                 break;
 
-            case C_PROG : case C_OUTPUT :
+            case C_PROG   :
+            case C_OUTPUT :
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             case C_INPUT :
                 /* Set up the two argument strings */
@@ -1407,52 +1000,61 @@ writer( int type,
                 for ( i = 0; i < 2; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
-                    if ( str[ i ] == NULL )
-                        header.data.str_len[ i ] = -1;
-                    else if ( *str[ i ] == '\0' )
-                        header.data.str_len[ i ] = 0;
-                    else
-                        header.data.str_len[ i ] = strlen( str[ i ] );
+                    header_strlen_setup( &header, i, str[ i ] );
                 }
+
                 va_end( ap );
 
                 /* Send header and the two strings */
 
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
+                if ( ! pipe_write( &header, sizeof header ) )
                     return FAIL;
                 for ( i = 0; i < 2; i++ )
-                    if (    header.data.str_len[ i ] > 0
-                         && ! pipe_write( str[ i ],
-                                        ( size_t ) header.data.str_len[ i ] ) )
+                    if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
                         return FAIL;
                 break;
 
-            case C_LAYOUT   : case C_BCREATE   : case C_BDELETE  :
-            case C_BSTATE   : case C_BCHANGED  : case C_SCREATE  :
-            case C_SDELETE  : case C_SSTATE    : case C_SCHANGED :
-            case C_ICREATE  : case C_IDELETE   : case C_ISTATE   :
-            case C_ICHANGED : case C_MCREATE   : case C_MADD     :
-            case C_MTEXT    : case C_MDELETE   : case C_MCHOICE  :
-            case C_MCHANGED : case C_TBCHANGED : case C_TBWAIT   :
-            case C_ODELETE  : case C_CLABEL    : case C_XABLE    :
-            case C_GETPOS   : case C_CB_1D     : case C_CB_2D    :
-            case C_ZOOM_1D  : case C_ZOOM_2D   : case C_FSB_1D   :
-            case C_FSB_2D   :
+            case C_LAYOUT   :
+            case C_BCREATE   :
+            case C_BDELETE   :
+            case C_BSTATE    :
+            case C_BCHANGED  :
+            case C_SCREATE   :
+            case C_SDELETE   :
+            case C_SSTATE    :
+            case C_SCHANGED  :
+            case C_ICREATE   :
+            case C_IDELETE   :
+            case C_ISTATE    :
+            case C_ICHANGED  :
+            case C_MCREATE   :
+            case C_MADD      :
+            case C_MTEXT     :
+            case C_MDELETE   :
+            case C_MCHOICE   :
+            case C_MCHANGED  :
+            case C_TBCHANGED :
+            case C_TBWAIT    :
+            case C_ODELETE   :
+            case C_CLABEL    :
+            case C_XABLE     :
+            case C_GETPOS    :
+            case C_CB_1D     :
+            case C_CB_2D     :
+            case C_ZOOM_1D   :
+            case C_ZOOM_2D   :
+            case C_FSB_1D    :
+            case C_FSB_2D    :
                 header.data.len = va_arg( ap, ptrdiff_t );
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) )
-                {
-                    va_end( ap );
-                    return FAIL;
-                }
                 data = va_arg( ap, void * );
                 va_end( ap );
-                return pipe_write( ( char * ) data,
-                                   ( size_t ) header.data.len );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( data, header.data.len );
 
             case C_FREEZE :
                 header.data.int_data = va_arg( ap, int );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             default :                     /* this should never be reached... */
                 va_end( ap );
@@ -1465,115 +1067,88 @@ writer( int type,
         {
             case C_ACK :
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
-            case C_BCREATE_REPLY   : case C_BSTATE_REPLY   :
-            case C_BCHANGED_REPLY  : case C_SCREATE_REPLY  :
-            case C_SSTATE_REPLY    : case C_SCHANGED_REPLY :
-            case C_ICREATE_REPLY   : case C_ISTATE_REPLY   :
-            case C_ICHANGED_REPLY  : case C_MCREATE_REPLY  :
-            case C_MCHOICE_REPLY   : case C_MCHANGED_REPLY :
-            case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY   :
+            case C_BCREATE_REPLY   :
+            case C_BSTATE_REPLY    :
+            case C_BCHANGED_REPLY  :
+            case C_SCREATE_REPLY   :
+            case C_SSTATE_REPLY    :
+            case C_SCHANGED_REPLY  :
+            case C_ICREATE_REPLY   :
+            case C_ISTATE_REPLY    :
+            case C_ICHANGED_REPLY  :
+            case C_MCREATE_REPLY   :
+            case C_MCHOICE_REPLY   :
+            case C_MCHANGED_REPLY  :
+            case C_TBCHANGED_REPLY :
+            case C_TBWAIT_REPLY    :
             case C_GETPOS_REPLY    :
                 header.data.len = va_arg( ap, ptrdiff_t );
-                if (    ! pipe_write( ( char * ) &header, sizeof header )
-                     && errno == EPIPE )
-                {
-                    va_end( ap );
-                    return FAIL;
-                }
-
                 data = va_arg( ap, void * );
                 va_end( ap );
-                return pipe_write( ( char * ) data,
-                                   ( size_t ) header.data.len );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( data, header.data.len );
 
             case C_MTEXT_REPLY :
                 str[ 0 ] = va_arg( ap, char * );
                 va_end( ap );
-                if ( str[ 0 ] == NULL )
-                    header.data.str_len[ 0 ] = -1;
-                else if ( *str[ 0 ] == '\0' )
-                    header.data.str_len[ 0 ] = 0;
-                else
-                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
-
-                if (    ! pipe_write( ( char * ) &header, sizeof header )
-                     && errno == EPIPE )
-                    return FAIL;
-
-                if ( header.data.str_len[ 0 ] > 0 )
-                    return pipe_write( str[ 0 ], ( size_t ) header.data.len );
-                break;
+                header_strlen_setup( &header, 0, str[ 0 ] );
+                return    pipe_write( ( char * ) &header, sizeof header )
+                       && pipe_write( str[ 0 ], header.data.str_len[ 0 ] );
 
             case C_ISTATE_STR_REPLY :
                 header.data.len = va_arg( ap, ptrdiff_t );
-                if (    ! pipe_write( ( char * ) &header, sizeof header )
-                     && errno == EPIPE )
-                {
-                    va_end( ap );
-                    return FAIL;
-                }
-
                 data = va_arg( ap, void * );
                 va_end( ap );
-                return pipe_write( ( char * ) data,
-                                   ( size_t ) header.data.len );
-                break;
+                return    pipe_write( ( char * ) &header, sizeof header )
+                       && pipe_write( data, header.data.len );
 
-            case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
-            case C_SDELETE_REPLY : case C_IDELETE_REPLY :
-            case C_MADD_REPLY    : case C_MDELETE_REPLY :
-            case C_ODELETE_REPLY : case C_CLABEL_REPLY  :
-            case C_XABLE_REPLY   : case C_CB_1D_REPLY   :
-            case C_CB_2D_REPLY   : case C_ZOOM_1D_REPLY :
-            case C_ZOOM_2D_REPLY : case C_FSB_1D_REPLY  :
+            case C_LAYOUT_REPLY  :
+            case C_BDELETE_REPLY :
+            case C_SDELETE_REPLY :
+            case C_IDELETE_REPLY :
+            case C_MADD_REPLY    :
+            case C_MDELETE_REPLY :
+            case C_ODELETE_REPLY :
+            case C_CLABEL_REPLY  :
+            case C_XABLE_REPLY   :
+            case C_CB_1D_REPLY   :
+            case C_CB_2D_REPLY   :
+            case C_ZOOM_1D_REPLY :
+            case C_ZOOM_2D_REPLY :
+            case C_FSB_1D_REPLY  :
             case C_FSB_2D_REPLY  :
                 header.data.long_data = va_arg( ap, long );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             case C_STR :
                 str[ 0 ] = va_arg( ap, char * );
                 va_end( ap );
-                if ( str[ 0 ] == NULL )
-                    header.data.len = -1;
-                else if ( *str[ 0 ] == '\0' )
-                    header.data.len = 0;
-                else
-                    header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
-
-                /* Don't try to continue writing on EPIPE (SIGPIPE is
-                   ignored) */
-
-                if (    ! pipe_write( ( char * ) &header, sizeof header )
-                     && errno == EPIPE )
-                    return FAIL;
-
-                if (    header.data.len > 0
-                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
-                    return FAIL;
-                break;
+                header_strlen_setup( &header, 0, str[ 0 ] );
+                return    pipe_write( &header, sizeof header )
+                       && pipe_write( str[ 0 ], header.data.str_len[ 0 ] );
 
             case C_INT :
                 header.data.int_data = va_arg( ap, int );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             case C_LONG :
                 header.data.long_data = va_arg( ap, long );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             case C_FLOAT :
                 header.data.float_data = ( float ) va_arg( ap, double );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             case C_DOUBLE :
                 header.data.double_data = va_arg( ap, double );
                 va_end( ap );
-                return pipe_write( ( char * ) &header, sizeof header );
+                return pipe_write( &header, sizeof header );
 
             default :                     /* this should never be reached... */
                 va_end( ap );
@@ -1613,9 +1188,10 @@ send_browser( FL_OBJECT * browser )
  *--------------------------------------------------------------*/
 
 static void
-pipe_read( char   * buf,
-           size_t   bytes_to_read )
+pipe_read( void    * vbuf,
+           ssize_t   bytes_to_read )
 {
+    char * buf = vbuf;
     long bytes_read;
     long already_read = 0;
     sigset_t new_mask, old_mask;
@@ -1670,9 +1246,13 @@ pipe_read( char   * buf,
  *--------------------------------------------------------------*/
 
 static bool
-pipe_write( char   * buf,
-            size_t   bytes_to_write )
+pipe_write( void const * vbuf,
+            ssize_t      bytes_to_write )
 {
+    if ( bytes_to_write <= 0 )
+        return OK;
+
+    char const * buf = vbuf;
     long bytes_written;
     long already_written = 0;
     sigset_t new_mask, old_mask;
