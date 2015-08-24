@@ -1373,7 +1373,6 @@ writer( int type,
                 for ( i = 0; i < 4; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
-                    va_end( ap );
                     if ( str[ i ] == NULL )
                         header.data.str_len[ i ] = -1;
                     else if ( *str[ i ] == '\0' )
@@ -1382,6 +1381,7 @@ writer( int type,
                         header.data.str_len[ i ] = strlen( str[ i ] );
                 }
 
+                va_end( ap );
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
 
