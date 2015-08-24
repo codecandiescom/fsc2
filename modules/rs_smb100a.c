@@ -605,7 +605,7 @@ synthesizer_mod_mode( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-synthesizer_setup_list( Var_T * v )
+synthesizer_setup_list( Var_T * volatile v )
 {
     if ( ! v )
     {
@@ -620,10 +620,8 @@ synthesizer_setup_list( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    double * freqs = NULL;
+    double * volatile freqs = NULL;
     double * volatile pows  = NULL;
-
-    CLOBBER_PROTECT( freqs );
 
     TRY
     {

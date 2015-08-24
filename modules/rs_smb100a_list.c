@@ -78,8 +78,7 @@ list_select( char const * volatile name )
 
     // Check if the list exists and has any points, otherwise give up
 
-    char * cmd = NULL;
-    CLOBBER_PROTECT( cmd );
+    char * volatile cmd = NULL;
 
     TRY
     {
@@ -142,11 +141,8 @@ list_setup_A( double const * freqs,
 
     // Check all frequencies and powers and store them
 
-    double * freq_list = NULL;
-    double * pow_list  = NULL;
-
-    CLOBBER_PROTECT( freq_list );
-    CLOBBER_PROTECT( pow_list );
+    double * volatile freq_list = NULL;
+    double * volatile pow_list  = NULL;
 
     TRY
     {
@@ -222,8 +218,7 @@ list_setup_B( double const * freqs,
               long           len,
               char   const * volatile name )
 {
-    double * pows = T_malloc( len * sizeof *pows );
-    CLOBBER_PROTECT( pows );
+    double * volatile pows = T_malloc( len * sizeof *pows );
 
     for ( long i = 0; i < len; i++ )
         pows[ i ] = pow;
@@ -264,8 +259,7 @@ list_send( char const   * type,
            double const * data,
            long           length )
 {
-    char * cmd = 0;
-    CLOBBER_PROTECT( cmd );
+    char * volatile cmd = 0;
 
     TRY
     {
@@ -423,8 +417,7 @@ list_delete_list( char const * volatile name )
         return true;
     }
 
-    char * cmd = get_string( "LIST:DEL \"%s\"", n );
-    CLOBBER_PROTECT( cmd );
+    char * volatile cmd = get_string( "LIST:DEL \"%s\"", n );
 
     TRY
     {
@@ -456,8 +449,7 @@ list_get_all( void )
         return T_strdup( "test_list1,test_list2,test_list3" );
 
     size_t length = 10000;
-    char * reply = T_malloc( length );
-    CLOBBER_PROTECT( reply );
+    char * volatile reply = T_malloc( length );
     char * volatile r;
 
     TRY

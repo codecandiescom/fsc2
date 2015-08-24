@@ -1490,20 +1490,18 @@ monochromator_grating_adjust( Var_T * v )
  *----------------------------------------------------------------------*/
 
 Var_T *
-monochromator_calibrate( Var_T * v )
+monochromator_calibrate( Var_T * volatile v )
 {
     Calib_Params_T c;
     Var_T *cv;
     int acc;
     long grating;
     long gn;
-    double *x = NULL, *dx;
+    double * volatile x = NULL;
+    double * dx;
     double epsilon;
     ssize_t i;
 
-
-    CLOBBER_PROTECT( x );
-    CLOBBER_PROTECT( v );
 
     /* Check if there's a CCD camera module loaded */
 

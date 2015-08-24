@@ -5033,24 +5033,14 @@ Var_T *
 f_spike_rem( Var_T * v )
 {
     double *diffs;
-    long *lpnt;
-    double *dpnt;
-    ssize_t diffs_len, start, next, end, i, j, k;
-    double m, stdev = 0.0, mean = 0.0;
-    double r;
+    ssize_t diffs_len;
     double sigmas = 5.0;
     ssize_t * volatile ol_indices = NULL;
-    volatile ssize_t ol_len = 0;
-    ssize_t ol_count = 0;
-    volatile long max_spike_width = 3;
-    Var_T *nv;
+    ssize_t volatile ol_len = 0;
+    ssize_t volatile ol_count = 0;
+    long volatile max_spike_width = 3;
+    Var_T * nv;
 
-
-    CLOBBER_PROTECT( dpnt );
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( stdev );
-    CLOBBER_PROTECT( mean );
-    CLOBBER_PROTECT( ol_count );
 
     if ( v == NULL )
     {
@@ -5121,21 +5111,30 @@ f_spike_rem( Var_T * v )
 
     /* Calculate all point differences and the mean of the curve */
 
+    double mean = 0.0;
     if ( v->type == INT_ARR )
-        for ( lpnt = v->val.lpnt, i = 0; i < diffs_len; lpnt++, i++ )
+    {
+        long * lpnt = v->val.lpnt;
+        for ( ssize_t i = 0; i < diffs_len; lpnt++, i++ )
             mean += diffs[ i ] = *( lpnt + 1 ) - *lpnt;
+    }
     else
-        for ( dpnt = v->val.dpnt, i = 0; i < diffs_len; dpnt++, i++ )
+    {
+        double * dpnt = v->val.dpnt;
+        for ( ssize_t i = 0; i < diffs_len; dpnt++, i++ )
             mean += diffs[ i ] = *( dpnt + 1 ) - *dpnt;
+    }
 
     mean /= diffs_len;
 
     /* Calculate the standard deviation of the differences and multiply
        by the factor above which a difference is taken to be an outlier */
 
-    for ( dpnt = diffs, i = 0; i < diffs_len; dpnt++, i++ )
+    double stdev = 0.0;
+    double * dpnt = diffs; 
+    for ( ssize_t i = 0; i < diffs_len; dpnt++, i++ )
     {
-        r = mean - *dpnt;
+        double r = mean - *dpnt;
         stdev += r * r;
     }
 
@@ -5143,7 +5142,8 @@ f_spike_rem( Var_T * v )
 
     /* Find the outliers and store their indices */
 
-    for ( dpnt = diffs, i = 0; i < diffs_len; dpnt++, i++ )
+    dpnt = diffs;
+    for ( ssize_t i = 0; i < diffs_len; dpnt++, i++ )
         if ( fabs( *dpnt - mean ) > stdev )
         {
             if ( ol_count >= ol_len )
@@ -5194,11 +5194,11 @@ f_spike_rem( Var_T * v )
        are less than max_spike_width apart from the fringes of the curve -
        the curve could start or end with a spike */
 
-    start = 0;
+    ssize_t start = 0;
     if ( ol_indices[ start ] < max_spike_width )
         start++;
 
-    end = ol_count;
+    ssize_t end = ol_count;
     if ( ol_indices[ end - 1 ] >= nv->len - max_spike_width - 1 )
         end--;
 
@@ -5206,7 +5206,7 @@ f_spike_rem( Var_T * v )
        have opposite signs of the derivative. Then use linear interpolation
        for the region in between */
 
-    for ( i = start; i < end - 1; i++ )
+    for ( ssize_t i = start; i < end - 1; i++ )
         if (    ol_indices[ i + 1 ] - ol_indices[ i ] <= max_spike_width
              && (    (    diffs[ ol_indices[ i ] ] > mean
                        && diffs[ ol_indices[ i + 1 ] ] < mean )
@@ -5215,23 +5215,25 @@ f_spike_rem( Var_T * v )
         {
             if ( v->type == INT_ARR )
             {
-                m = (   nv->val.lpnt[ ol_indices[ i + 1 ] + 1 ]
-                      - nv->val.lpnt[ ol_indices[ i ] ] )
+                double m = (   nv->val.lpnt[ ol_indices[ i + 1 ] + 1 ]
+                             - nv->val.lpnt[ ol_indices[ i ] ] )
                     / ( ol_indices[ i + 1 ] - ol_indices[ i ] + 1 );
-                for ( k = 1, j = ol_indices[ i ] + 1; j <= ol_indices[ i + 1 ];
-                      j++, k++ )
+                size_t k = 1;
+                for ( ssize_t j = ol_indices[ i ] + 1;
+                      j <= ol_indices[ i + 1 ]; j++ )
                     nv->val.lpnt[ j ] = nv->val.lpnt[ ol_indices[ i ] ]
-                                        + lrnd( k * m );
+                                        + lrnd( k++ * m );
             }
             else
             {
-                m = (   nv->val.dpnt[ ol_indices[ i + 1 ] + 1 ]
-                      - nv->val.dpnt[ ol_indices[ i ] ] )
+                double m = (   nv->val.dpnt[ ol_indices[ i + 1 ] + 1 ]
+                             - nv->val.dpnt[ ol_indices[ i ] ] )
                     / ( ol_indices[ i + 1 ] - ol_indices[ i ] + 1 );
-                for ( k = 1, j = ol_indices[ i ] + 1; j <= ol_indices[ i + 1 ];
-                      j++, k++ )
-                    nv->val.dpnt[ j ] = nv->val.dpnt[ ol_indices[ i ] ]
-                                        + k * m;
+                size_t k = 1;
+                for ( ssize_t j = ol_indices[ i ] + 1;
+                      j <= ol_indices[ i + 1 ];  j++ )
+                    nv->val.dpnt[ j ] =   nv->val.dpnt[ ol_indices[ i ] ]
+                                        + k++ * m;
             }
 
             ol_indices[ i ] = ol_indices[ i + 1 ] = -1;
@@ -5249,7 +5251,7 @@ f_spike_rem( Var_T * v )
              || ol_indices[ 1 ] == -1
              || ol_indices[ 1 ] - start > max_spike_width )
         {
-            for ( i = 0; i <= start; i++ )
+            for ( ssize_t i = 0; i <= start; i++ )
                 if ( v->type == INT_ARR )
                     nv->val.lpnt[ i ] = nv->val.lpnt[ start + 1 ];
                 else
@@ -5263,20 +5265,22 @@ f_spike_rem( Var_T * v )
                        || (    diffs[ start ] < mean
                             && diffs[ ol_indices[ 1 ] ] > mean ) ) )
         {
-            next = ol_indices[ 1 ] + 1;
+            ssize_t next = ol_indices[ 1 ] + 1;
             if ( v->type == INT_ARR )
             {
-                m = ( nv->val.lpnt[ next ] - nv->val.lpnt[ start ] )
-                    / ( next - start );
-                for ( k = 1, j = start + 1; j < next; j++, k++ )
-                    nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k * m );
+                double m =   ( nv->val.lpnt[ next ] - nv->val.lpnt[ start ] )
+                           / ( next - start );
+                size_t k = 1;
+                for ( ssize_t j = start + 1; j < next; j++ )
+                    nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k++ * m );
             }
             else
             {
-                m = ( nv->val.dpnt[ next ] - nv->val.dpnt[ start ] )
-                    / ( next - start );
-                for ( k = 1, j = start + 1; j < next; j++, k++ )
-                    nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k * m;
+                double m =   ( nv->val.dpnt[ next ] - nv->val.dpnt[ start ] )
+                           / ( next - start );
+                size_t k = 1;
+                for ( ssize_t j = start + 1; j < next; j++ )
+                    nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k++ * m;
             }
 
             ol_indices[ 0 ] = ol_indices[ 1 ] = -1;
@@ -5294,7 +5298,7 @@ f_spike_rem( Var_T * v )
              || ol_indices[ ol_count - 2 ] == -1
              || end - ol_indices[ ol_count - 2 ] > max_spike_width )
         {
-            for ( i = end + 1; i < nv->len; i++ )
+            for ( ssize_t i = end + 1; i < nv->len; i++ )
                 if ( v->type == INT_ARR )
                     nv->val.lpnt[ i ] = nv->val.lpnt[ end  ];
                 else
@@ -5311,18 +5315,19 @@ f_spike_rem( Var_T * v )
             end++;
             if ( v->type == INT_ARR )
             {
-                m = ( nv->val.lpnt[ end ] - nv->val.lpnt[ start ] )
-                    / ( start - end );
-                for ( k = 1, j = start + 1; j < end;
-                      j++, k++ )
-                    nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k * m );
+                double m =   ( nv->val.lpnt[ end ] - nv->val.lpnt[ start ] )
+                           / ( start - end );
+                size_t k = 1;
+                for ( ssize_t j = start + 1; j < end; j++ )
+                    nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k++ * m );
             }
             else
             {
-                m = ( nv->val.dpnt[ end ] - nv->val.dpnt[ start ] )
-                    / ( end - start );
-                for ( k = 1, j = start + 1; j < end; j++, k++ )
-                    nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k * m;
+                double m =   ( nv->val.dpnt[ end ] - nv->val.dpnt[ start ] )
+                           / ( end - start );
+                size_t k = 1;
+                for ( ssize_t j = start + 1; j < end; j++ )
+                    nv->val.dpnt[ j ] = nv->val.dpnt[ start ] + k++ * m;
             }
         }
     }
