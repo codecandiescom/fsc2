@@ -1898,13 +1898,13 @@ digitizer_get_curve( Var_T * v )
         return nv;
     }
 
-    double * data;
+    double *d;
     size_t length;
 
-    get_waveform( rch, w, &data, &length );
+    get_waveform( rch, w, &d, &length );
 
+    double * volatile data = d;
     Var_T * nv;
-    CLOBBER_PROTECT( data );
 
     TRY
     {
@@ -2003,14 +2003,14 @@ digitizer_get_segments( Var_T * v )
         return nv;
     }
 
-    double ** data;
+    double ** d;
     size_t num_segments;
     size_t length;
 
-    get_segments( rch, w, &data, &num_segments, &length );
+    get_segments( rch, w, &d, &num_segments, &length );
 
+    double ** volatile data = d;
     Var_T * nv;
-    CLOBBER_PROTECT( data );
 
     TRY
     {
@@ -3371,11 +3371,9 @@ get_window_from_long( long wid )
 static
 void
 get_window_list( Var_T       ** v,
-                 RS_RTO_Win *** wins,
+                 RS_RTO_Win *** volatile wins,
                  long         * win_count )
 {
-    CLOBBER_PROTECT( wins );
-
     if ( *v )
     {
         if ( ( *v )->type == INT_VAR )
@@ -3471,12 +3469,11 @@ get_calculated_curve_data( Var_T  * v,
     // or simply a list of them. get_window_list() leaves the 'wins'
     // argument unchanged if there are no windows.
 
-    RS_RTO_Win ** wins = NULL;
+    RS_RTO_Win ** ws = NULL;
     long win_count = 0;
 
-    CLOBBER_PROTECT( wins );
-
-    get_window_list( &v, &wins, &win_count );
+    get_window_list( &v, &ws, &win_count );
+    RS_RTO_Win ** volatile wins = ws;
 
     too_many_arguments( v );
 
@@ -3652,12 +3649,11 @@ get_calculated_segment_data( Var_T  * v,
     // or simply a list of them. get_window_list() leaves the 'wins'
     // argument unchanged if there are no windows.
 
-    RS_RTO_Win ** wins = NULL;
+    RS_RTO_Win ** ws = NULL;
     long win_count = 0;
 
-    CLOBBER_PROTECT( wins );
-
-    get_window_list( &v, &wins, &win_count );
+    get_window_list( &v, &ws, &win_count );
+    RS_RTO_Win ** volatile wins = ws;
 
     too_many_arguments( v );
 
@@ -3705,16 +3701,16 @@ get_calculated_segment_data( Var_T  * v,
                                
     // Get the segments for this combined window 
 
-    double ** data = NULL;
+    double ** d = NULL;
+    double ** volatile data = NULL;
     size_t num_segments;
     size_t length;
 
-    CLOBBER_PROTECT( data );
-
     TRY
     {
-        get_segments( rch, win_count ? &fw : NULL, &data,
+        get_segments( rch, win_count ? &fw : NULL, &d,
                       &num_segments, &length );
+        data = d;
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -4128,8 +4124,7 @@ copy_windows( RS_RTO_Win       ** volatile dst,
     if ( ! src )
         return;
 
-    RS_RTO_Win ** orig_dst = dst;
-    CLOBBER_PROTECT( orig_dst );
+    RS_RTO_Win ** volatile orig_dst = dst;
 
     TRY
     {

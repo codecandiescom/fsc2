@@ -44,18 +44,14 @@ static Var_T * f_mchanged_child( Var_T * v );
 Var_T *
 f_mcreate( Var_T * volatile var )
 {
-    Var_T *v = var;
-    Var_T *lv;
+    Var_T * volatile v = var;
+    Var_T * lv;
     volatile long num_strs = 0;
     size_t len = 0;
-    Iobject_T *new_io = NULL;
-    Iobject_T *ioi = NULL;
+    Iobject_T * volatile new_io = NULL;
+    Iobject_T * volatile ioi = NULL;
     long i;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( new_io );
-    CLOBBER_PROTECT( ioi );
 
     /* At least a label and one menu entry must be specified */
 

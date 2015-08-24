@@ -416,15 +416,12 @@ rs_spec10_get_fd_list( void )
 {
     DIR *dir;
     struct dirent *de;
-    int *fd_list = NULL;
-    int num_fds = 0;
+    int * volatile fd_list = NULL;
+    int volatile num_fds = 0;
     char *dn;
     int fd;
     struct stat buf;
 
-
-    CLOBBER_PROTECT( fd_list );
-    CLOBBER_PROTECT( num_fds );
 
     if ( ( dir = opendir( "/proc/self/fd" ) ) == NULL )
         return NULL;

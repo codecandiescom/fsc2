@@ -119,12 +119,12 @@ daq_ai_channel_setup( Var_T * volatile v )
     int ret = NI_DAQ_OK;
 
 
-    CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( pol );
-    CLOBBER_PROTECT( dither_enable );
-   CLOBBER_PROTECT( num_channels );
-    CLOBBER_PROTECT( old_range_index );
-    CLOBBER_PROTECT( ret );
+//    CLOBBER_PROTECT( type );
+//    CLOBBER_PROTECT( pol );
+//    CLOBBER_PROTECT( dither_enable );
+//   CLOBBER_PROTECT( num_channels );
+//    CLOBBER_PROTECT( old_range_index );
+//    CLOBBER_PROTECT( ret );
 
     if ( v == NULL )
     {

@@ -1109,12 +1109,9 @@ fsc2_simplex( size_t   n,
            alpha = 1.0,     /* reflection factor*/
            beta = 0.5,      /* contraction factor*/
            gamm = 2.0;      /* expansion factor */
-    size_t i, j;            /* counters */
     size_t highest,         /* index of corner with largest/smallest */
            lowest;          /* function value */
 
-
-    CLOBBER_PROTECT( i );
 
     /* Get enough memory for the corners of the simplex, center points and
        function values at the (n + 1) corners */
@@ -1128,9 +1125,9 @@ fsc2_simplex( size_t   n,
     /* Set up the corners of the simplex and calculate the function values
        at these positions */
 
-    for ( i = 0; i < n + 1; i++ )
+    for ( size_t volatile i = 0; i < n + 1; i++ )
     {
-        for ( j = 0; j < n; j++ )
+        for ( size_t j = 0; j < n; j++ )
             p[ i * n  + j ] = x[ j ];
 
         if ( i != n )
@@ -1161,7 +1158,7 @@ fsc2_simplex( size_t   n,
         y_lowest = y_2nd_highest = y[ lowest ];
         y_highest = y[ highest ];
 
-        for ( i = 2; i < n + 1; i++ )
+        for ( size_t i = 2; i < n + 1; i++ )
         {
             if ( y[ i ] < y_lowest )
                 y_lowest = y[ lowest = i ];
@@ -1179,9 +1176,10 @@ fsc2_simplex( size_t   n,
         /* Calculate center of simplex (excluding the corner with the largest
            function value) */
 
-        for ( j = 0; j < n; j++ )
+        for ( size_t j = 0; j < n; j++ )
         {
-            for ( p_centroid[ j ] = 0.0, i = 0; i < n + 1; i++ )
+            p_centroid[ j ] = 0.0;
+            for ( size_t i = 0; i < n + 1; i++ )
             {
                 if ( i == highest )
                     continue;
@@ -1195,7 +1193,7 @@ fsc2_simplex( size_t   n,
            value at the center point and calculate the function value at
            this new point */
 
-        for ( j = 0; j < n; j++ )
+        for ( size_t j = 0; j < n; j++ )
             p_1st_try[ j ] = ( 1.0 + alpha ) * p_centroid[ j ]
                              - alpha * p[ highest * n + j ];
 
@@ -1207,7 +1205,7 @@ fsc2_simplex( size_t   n,
 
         if ( y_1st_try < y_highest )
         {
-            for ( j = 0; j < n; j++ )
+            for ( size_t j = 0; j < n; j++ )
                 p[ highest * n + j ] = p_1st_try[ j ];
 
             y[ highest ] = y_1st_try;
@@ -1218,7 +1216,7 @@ fsc2_simplex( size_t   n,
 
         if ( y_1st_try < y_lowest )
         {
-            for ( j = 0; j < n; j++ )
+            for ( size_t j = 0; j < n; j++ )
                 p_2nd_try[ j ] = gamm * p_1st_try[ j ] +
                                  ( 1.0 - gamm ) * p_centroid[ j ];
 
@@ -1230,7 +1228,7 @@ fsc2_simplex( size_t   n,
 
             if ( y_2nd_try < y_1st_try )
             {
-                for ( j = 0; j < n; j++ )
+                for ( size_t j = 0; j < n; j++ )
                     p[ highest * n + j ] = p_2nd_try[ j ];
 
                 y[ highest ] = y_2nd_try;
@@ -1245,7 +1243,7 @@ fsc2_simplex( size_t   n,
         if ( y_1st_try < y_2nd_highest )
             continue;                     /* start next cycle */
 
-        for ( j = 0; j < n; j++ )
+        for ( size_t j = 0; j < n; j++ )
             p_2nd_try[ j ] = beta * p[ highest * n + j ]
                              + ( 1.0 - beta ) * p_centroid[ j ];
 
@@ -1259,18 +1257,18 @@ fsc2_simplex( size_t   n,
 
         if ( y_2nd_try < y[ highest ] )
         {
-            for ( j = 0; j < n; j++ )
+            for ( size_t j = 0; j < n; j++ )
                 p[ highest * n +  j ] = p_2nd_try[ j ];
 
             y[ highest ] = y_2nd_try;
         }
         else
-            for ( i = 0; i < n + 1; i++ )
+            for ( size_t i = 0; i < n + 1; i++ )
             {
                 if ( i == lowest )
                     continue;
 
-                for ( j = 0; j < n; j++ )
+                for ( size_t j = 0; j < n; j++ )
                     p[ i * n + j ] =
                                 0.5 * ( p[ i * n + j ] + p[ lowest * n +  j ]);
 
@@ -1284,11 +1282,11 @@ fsc2_simplex( size_t   n,
 
     y_lowest = y[ 0 ];
 
-    for ( i = 1; i < n + 1; i++ )
+    for ( size_t i = 1; i < n + 1; i++ )
         if ( y_lowest > y[ i ] )
             y_lowest = y[ lowest = i ];
 
-    for ( j = 0; j < n; j++ )
+    for ( size_t j = 0; j < n; j++ )
         x[ j ] = p[ lowest * n + j ];
 
     T_free( p );
@@ -1475,14 +1473,12 @@ char *
 fsc2_fline( FILE * fp )
 {
     char * volatile line;
-    char *p;
-    volatile size_t buf_len;
-    volatile size_t rem_len;
+    char * volatile p;
+    size_t volatile buf_len;
+    size_t volatile rem_len;
     size_t len = 0;
     size_t offset;
 
-
-    CLOBBER_PROTECT( p );
 
     if ( ! fp )
         THROW( EXCEPTION );

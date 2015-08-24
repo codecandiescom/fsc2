@@ -475,9 +475,8 @@ double *
 query_list( char const * cmd,
             int          list_length  )
 {
-    char * reply = NULL;
+    char * volatile reply = NULL;
     double * res = NULL;
-    CLOBBER_PROTECT( reply );
 
     if ( rs->use_binary )
     {

@@ -429,16 +429,13 @@ monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
  *-------------------------------------------------------------------------*/
 
 Var_T *
-monochromator_scan_setup( Var_T * v )
+monochromator_scan_setup( Var_T * volatile v )
 {
-    double start = 0.0;
+    double volatile start = 0.0;
     double step;
     long num_steps;
     double vals[ 2 ];
 
-
-    CLOBBER_PROTECT( start );
-    CLOBBER_PROTECT( v );
 
     if ( v == NULL )
     {
@@ -631,11 +628,6 @@ monochromator_scan_setup( Var_T * v )
 Var_T *
 monochromator_wavelength( Var_T * v )
 {
-    double wl;
-
-
-    CLOBBER_PROTECT( wl );
-
     if ( v == NULL )
     {
         if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
@@ -648,7 +640,7 @@ monochromator_wavelength( Var_T * v )
                           spex_cd2a_wl2Uwl( spex_cd2a.wavelength ) );
     }
 
-    wl = get_double( v, "wavelength" );
+    double volatile wl = get_double( v, "wavelength" );
 
     TRY
     {
@@ -702,11 +694,6 @@ monochromator_wavelength( Var_T * v )
 Var_T *
 monochromator_wavenumber( Var_T * v )
 {
-    double wl;
-
-
-    CLOBBER_PROTECT( wl );
-
     if ( v == NULL )
     {
         if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
@@ -719,7 +706,7 @@ monochromator_wavenumber( Var_T * v )
                           spex_cd2a_wl2Uwn( spex_cd2a.wavelength ) );
     }
 
-    wl = get_double( v, "wavenumber" );
+    double volatile wl = get_double( v, "wavenumber" );
 
     TRY
     {
@@ -1189,15 +1176,13 @@ monochromator_calibrate( Var_T * v )
 Var_T *
 monochromator_wavelength_axis( Var_T * v )
 {
-    double wl;
-    Var_T *cv;
+    double volatile wl;
+    Var_T * cv;
     long num_pixels;
     int acc;
     long roi;
     long bin;
 
-
-    CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
         wl = get_double( v, "center wavelength" );
@@ -1313,7 +1298,7 @@ monochromator_wavelength_axis( Var_T * v )
  *-----------------------------------------------------------------------*/
 
 Var_T *
-monochromator_wavenumber_axis( Var_T * v )
+monochromator_wavenumber_axis( Var_T * volatile v )
 {
     volatile double wl = spex_cd2a.wavelength;
     Var_T *cv;
@@ -1322,8 +1307,6 @@ monochromator_wavenumber_axis( Var_T * v )
     int acc;
     long bin;
 
-
-    CLOBBER_PROTECT( v );
 
     if ( v != NULL )
     {

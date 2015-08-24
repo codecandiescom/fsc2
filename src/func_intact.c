@@ -572,16 +572,12 @@ f_objdel_parent( Var_T * v )
  *----------------------------------------------*/
 
 Var_T *
-f_obj_clabel( Var_T * v )
+f_obj_clabel( Var_T * volatile v )
 {
-    Iobject_T *io;
-    char *label = NULL;
+    Iobject_T * volatile io;
+    char * volatile label = NULL;
     long ID = 0;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( label );
-    CLOBBER_PROTECT( io );
 
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {

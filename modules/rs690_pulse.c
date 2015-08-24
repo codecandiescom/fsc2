@@ -510,10 +510,8 @@ rs690_change_pulse_position( long   pnum,
                              double p_time )
 {
     Pulse_T *p = rs690_get_pulse( pnum );
-    Ticks new_pos = 0;
+    Ticks volatile new_pos = 0;
 
-
-    CLOBBER_PROTECT( new_pos );
 
     if ( p_time + p->function->delay < 0 )
     {
@@ -598,10 +596,8 @@ rs690_change_pulse_length( long   pnum,
                            double p_time )
 {
     Pulse_T *p = rs690_get_pulse( pnum );
-    Ticks new_len = 0;
+    Ticks volatile new_len = 0;
 
-
-    CLOBBER_PROTECT( new_len );
 
     if ( p_time < 0 )
     {
@@ -690,10 +686,8 @@ rs690_change_pulse_position_change( long   pnum,
                                     double p_time )
 {
     Pulse_T *p = rs690_get_pulse( pnum );
-    Ticks new_dpos = 0;
+    Ticks volatile new_dpos = 0;
 
-
-    CLOBBER_PROTECT( new_dpos );
 
     TRY
     {
@@ -739,10 +733,8 @@ rs690_change_pulse_length_change( long   pnum,
                                   double p_time )
 {
     Pulse_T *p = rs690_get_pulse( pnum );
-    Ticks new_dlen = 0;
+    Ticks volatile new_dlen = 0;
 
-
-    CLOBBER_PROTECT( new_dlen );
 
     TRY
     {

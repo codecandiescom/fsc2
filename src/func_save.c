@@ -1889,18 +1889,15 @@ static long
 do_printf( long    file_num,
            Var_T * v )
 {
-    char *fmt_start,
-         *fmt_end,
-         *sptr;
+    char * fmt_start;
+    char * volatile fmt_end;
+    char * volatile sptr;
     Var_T * volatile cv;
-    volatile long count = 0;
+    long volatile count = 0;
     char store;
     int need_vars;
     int need_type;
 
-
-    CLOBBER_PROTECT( fmt_end );
-    CLOBBER_PROTECT( sptr );
 
     sptr = v->val.sptr;
     fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
@@ -2331,7 +2328,7 @@ print_include( int          fid,
                const char * volatile   comment,
                const char  * cur_file )
 {
-    volatile char delim = '\0';
+    char volatile delim = '\0';
     char * ep;
     FILE * finc = NULL;
     char buf[ PRINT_BUF_SIZE ];
@@ -2340,8 +2337,6 @@ print_include( int          fid,
     char * volatile file_name = NULL;
     struct passwd *pwe;
 
-
-    CLOBBER_PROTECT( cp );
 
     if ( ! strcmp( cur_file, EDL.files->name ) )
     {

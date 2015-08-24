@@ -177,17 +177,15 @@ func_list_parse( Func_T ** fncts,
                  size_t    num_func )
 {
     static bool is_restart = UNSET;
-    size_t nf = num_func;
+    size_t volatile nf = num_func;
     size_t num_predef_func = num_func;
     size_t num;
     size_t cur;
     struct stat buf;
-    char *ld_path;
-    char *ld = NULL;
-    char *ldc;
+    char * ld_path;
+    char * ld = NULL;
+    char * ldc;
 
-
-    CLOBBER_PROTECT( nf );
 
     EDL.Fname = T_free( EDL.Fname );
 

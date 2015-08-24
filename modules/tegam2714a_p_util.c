@@ -442,9 +442,7 @@ tegam2714a_p_show_pulses( void )
 
     if ( pid == 0 )
     {
-        char *cmd = NULL;
-
-        CLOBBER_PROTECT( cmd );
+        char * volatile cmd = NULL;
 
         close( pd[ 1 ] );
 

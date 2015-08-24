@@ -877,7 +877,7 @@ start_printing( FILE       * fp,
  *------------------------------------------------------------------------*/
 
 static void
-print_header( FILE       * fp,
+print_header( FILE       * volatile fp,
               const char * name )
 {
     time_t d;
@@ -885,8 +885,6 @@ print_header( FILE       * fp,
     struct passwd *pwd;
     struct utsname un;
 
-
-    CLOBBER_PROTECT( fp );
 
     /* Writes EPS header plus some routines into the file */
 
@@ -1193,26 +1191,22 @@ eps_make_scale( FILE * fp,
     double d_delta_fine,        /* distance between small ticks (in points) */
            d_start_medium,      /* position of first medium tick (in points) */
            d_start_coarse;      /* position of first large tick (in points) */
-    volatile int medium_factor, /* number of small tick spaces between */
+    int volatile medium_factor, /* number of small tick spaces between */
                  coarse_factor; /* medium and large tick spaces */
-    volatile int medium,        /* loop counters for medium and large ticks */
+    int volatile medium,        /* loop counters for medium and large ticks */
                  coarse;
     double rwc_start = 0,       /* rwc value of first point */
            rwc_start_fine,      /* rwc value of first small tick */
            rwc_start_medium,    /* rwc value of first medium tick */
            rwc_start_coarse;    /* rwc value of first large tick */
     volatile double rwc_coarse;
-    volatile double x, y;
+    double volatile x, y;
     char lstr[ 128 ];
     double s2d[ 3 ];
     int r_coord;
     double rwcs, rwcd;
     char *label;
 
-
-    CLOBBER_PROTECT( medium );
-    CLOBBER_PROTECT( coarse );
-    CLOBBER_PROTECT( x );
 
     if ( dim == 1 )
     {
@@ -1853,15 +1847,11 @@ static char **
 split_into_lines( int * num_lines )
 {
     char ** volatile lines = NULL;
-    char *cp;
-    int nl;
-    volatile int cur_size = GUESS_NUM_LINES;
-    volatile int i = 0;
-    int j;
+    char * cp;
+    int volatile nl;
+    int volatile cur_size = GUESS_NUM_LINES;
+    int volatile i = 0;
     ptrdiff_t count;
-
-
-    CLOBBER_PROTECT( nl );
 
 
     TRY
@@ -1940,7 +1930,7 @@ split_into_lines( int * num_lines )
     }
     OTHERWISE
     {
-        for ( j = 0; j < i; j++ )
+        for ( int j = 0; j < i; j++ )
             T_free( lines[ i ] );
         T_free( lines );
         return NULL;

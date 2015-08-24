@@ -2621,11 +2621,8 @@ f_slice( Var_T * v )
     }
 
     Var_T * new_var = NULL;
-    ssize_t old_len;
-    Var_T ** old_vptr;
-
-    CLOBBER_PROTECT( old_len );
-    CLOBBER_PROTECT( old_vptr );
+    ssize_t volatile old_len;
+    Var_T ** volatile old_vptr;
 
     switch ( v->type )
     {

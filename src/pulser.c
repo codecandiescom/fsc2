@@ -329,18 +329,13 @@ void
 p_set_delay( long    func,
              Var_T * v )
 {
-    double delay;
-
-
-    CLOBBER_PROTECT( delay );
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
     /* Check the variable and get its value */
 
-    delay = get_double( v, "delay" );
+    double volatile delay = get_double( v, "delay" );
     vars_pop( v );
 
     delay = is_mult_ns( delay, "Delay" );
@@ -511,16 +506,11 @@ p_set_v_low( long    func,
 void
 p_set_timebase( Var_T * v )
 {
-    double timebase;
-
-
-    CLOBBER_PROTECT( timebase );
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    timebase = get_double( v, "time base" );
+    double  volatile timebase = get_double( v, "time base" );
     timebase = is_mult_ns( timebase, "Time base"  );
     vars_pop( v );
 
@@ -785,16 +775,11 @@ p_set_trigger_impedance( Var_T * v )
 void
 p_set_rep_time( Var_T * v )
 {
-    double rep_time;
-
-
-    CLOBBER_PROTECT( rep_time );
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    rep_time = get_double( v, "repetition time" );
+    double volatile rep_time = get_double( v, "repetition time" );
     vars_pop( v );
 
     if ( rep_time < 9.9e-10 )
@@ -1185,12 +1170,10 @@ p_get_by_num( long pnum,
     double ptime;
     long cycle;
     Var_T * volatile v = NULL;
-    long dev_num = -1;
+    long volatile dev_num = -1;
     P_List_T *cur_p;
     long stored_Cur_Pulser;
 
-
-    CLOBBER_PROTECT( dev_num );
 
     for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
         if ( cur_p->num == pnum )
@@ -1525,16 +1508,11 @@ p_set_gp( Var_T * v )
 void
 p_set_max_seq_len( Var_T * v )
 {
-    double seq_len;
-
-
-    CLOBBER_PROTECT( seq_len );
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    seq_len = get_double( v, "maximum pattern length" );
+    double volatile seq_len = get_double( v, "maximum pattern length" );
     vars_pop( v );
 
     seq_len = is_mult_ns( seq_len, "Maximum pattern length" );

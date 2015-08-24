@@ -52,7 +52,7 @@ static void resolve_generic_type( Device_T * dev );
 void
 load_all_drivers( void )
 {
-    Device_T *cd;
+    Device_T * volatile cd;
     bool saved_need_GPIB;
     bool saved_need_USB;
 #if defined WITH_RULBUS
@@ -62,8 +62,6 @@ load_all_drivers( void )
 #if defined WITH_MEDRIVER
     bool saved_need_MEDRIVER;
 #endif
-
-    CLOBBER_PROTECT( cd );
 
     Need_GPIB     = UNSET;
     Need_RULBUS   = UNSET;
@@ -781,11 +779,6 @@ run_exp_hooks( void )
 void
 run_end_of_exp_hooks( void )
 {
-    Device_T *cd;
-
-
-    CLOBBER_PROTECT( cd );
-
     if ( EDL.Device_List == NULL )
         return;
 
@@ -800,6 +793,7 @@ run_end_of_exp_hooks( void )
     Cur_Pulser = -1;
     Fsc2_Internals.in_hook = SET;
 
+    Device_T * volatile cd;
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 
@@ -847,11 +841,6 @@ run_end_of_exp_hooks( void )
 void
 run_exit_hooks( void )
 {
-    Device_T *cd;
-
-
-    CLOBBER_PROTECT( cd );
-
     if ( EDL.Device_List == NULL )
         return;
 
@@ -859,6 +848,7 @@ run_exit_hooks( void )
        very first in the list. Also make sure that all exit hooks are run even
        if some of them fail with an exception. */
 
+    Device_T * volatile cd;
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 
@@ -909,11 +899,6 @@ run_exit_hooks( void )
 void
 run_child_exit_hooks( void )
 {
-    Device_T *cd;
-
-
-    CLOBBER_PROTECT( cd );
-
     if ( EDL.Device_List == NULL )
         return;
 
@@ -921,6 +906,7 @@ run_child_exit_hooks( void )
        the very first one in the list. Also make sure that all child exit
        hooks are run even if some of them fail with an exception. */
 
+    Device_T * volatile cd;
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 

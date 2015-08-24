@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -416,14 +416,10 @@ vars_push_matrix( Var_Type_T type,
                   int        dim,
                   ... )
 {
-    Var_T *nv;
+    Var_T * volatile nv;
     va_list ap;
-    ssize_t *sizes;
-    ssize_t i;
+    ssize_t * volatile sizes;
 
-
-    CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( sizes );
 
     if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
         fsc2_impossible( );
@@ -435,7 +431,7 @@ vars_push_matrix( Var_Type_T type,
 
     va_start( ap, dim );
 
-    for ( i = 0; i < dim; i++ )
+    for ( int i = 0; i < dim; i++ )
     {
         sizes[ i ] = ( ssize_t ) va_arg( ap, long );
 
@@ -456,19 +452,19 @@ vars_push_matrix( Var_Type_T type,
         RETHROW;
     }
 
-    for ( i = 0; i < sizes[ 0 ]; i++ )
+    for ( ssize_t i = 0; i < sizes[ 0 ]; i++ )
         nv->val.vptr[ i ] = NULL;
 
     TRY
     {
-        for ( i = 0; i < sizes[ 0 ]; i++ )
+        for ( ssize_t i = 0; i < sizes[ 0 ]; i++ )
             nv->val.vptr[ i ] = vars_push_submatrix( nv, type, dim - 1,
                                                      sizes + 1 );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
-        for ( i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
+        for ( ssize_t i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
             vars_free( nv->val.vptr[ i ], SET );
         T_free( sizes );
         RETHROW;

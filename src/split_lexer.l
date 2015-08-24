@@ -186,11 +186,9 @@ bool
 scan_main( const char * name,
            FILE       * fp )
 {
-    volatile bool split_error;
+    bool volatile split_error;
     int d_fd;
 
-
-    CLOBBER_PROTECT( split_error );
 
     fsc2_assert( fp != NULL );
 

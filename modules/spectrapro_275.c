@@ -504,17 +504,13 @@ static bool
 spectrapro_275_read( char   * buf,
 					 size_t * len )
 {
-    volatile size_t to_fetch = *len;
-    size_t already_read = 0;
-    char *lbuf;
+    size_t volatile to_fetch = *len;
+    size_t volatile already_read = 0;
     long llen = *len;
-    bool done = UNSET;
+    bool volatile done = UNSET;
 
 
-    CLOBBER_PROTECT( already_read );
-    CLOBBER_PROTECT( done );
-
-    lbuf = T_malloc( llen );
+    char * lbuf = T_malloc( llen );
 
     do
     {
@@ -607,17 +603,10 @@ static char *
 spectrapro_275_talk( const char * buf,
 					 size_t       len )
 {
-    char *lbuf;
-    size_t comm_len;
-    size_t already_read;
-
-
-    CLOBBER_PROTECT( lbuf );
-
     fsc2_assert( buf != NULL && *buf != '\0' && len != 0 );
 
-    lbuf = get_string( "%s\r", buf );
-    comm_len = strlen( lbuf );
+    char * volatile lbuf = get_string( "%s\r", buf );
+    size_t comm_len = strlen( lbuf );
 
     if ( ! spectrapro_275_comm( SERIAL_WRITE, lbuf ) )
     {
@@ -641,9 +630,10 @@ spectrapro_275_talk( const char * buf,
     /* Now we read the reply by the device, if necessary extending the
        buffer. */
 
+    size_t volatile already_read = 0;
+
     TRY
     {
-        already_read = 0;
         len += 5;
         lbuf = T_realloc( lbuf, len );
 

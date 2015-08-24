@@ -327,10 +327,8 @@ http_send_picture( int pd,
 {
     char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
     char reply[ 2 ];
-    int tmp_fd = -1;
+    int volatile tmp_fd = -1;
 
-
-    CLOBBER_PROTECT( tmp_fd );
 
     reply[ 1 ] = '\n';
 

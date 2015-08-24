@@ -42,19 +42,17 @@ static Var_T *f_ochanged_child( Var_T * v );
 Var_T *
 f_ocreate( Var_T * var )
 {
-    Var_T * v = var;
+    Var_T * volatile v = var;
     volatile Iobject_Type_T type;
     char * volatile label = NULL;
     char * volatile help_text = NULL;
     char * volatile form_str = NULL;
     Iobject_T * volatile new_io = NULL;
     Iobject_T * ioi;
-    volatile long lval = 0;
-    volatile double dval = 0.0;
+    long volatile lval = 0;
+    double volatile dval = 0.0;
     char * volatile sptr = NULL;
 
-
-    CLOBBER_PROTECT( v );
 
     /* At least the type of the input or output object must be specified */
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -407,12 +407,10 @@ vars_init_list( Var_T * volatile v,
 {
     ssize_t count = 0;
     ssize_t i;
-    Var_T *cv, *nv;
+    Var_T * cv;
+    Var_T * volatile nv;
     int type = INT_VAR;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( nv );
 
     /* Find the start of the of list initializers, marked by a variable of
        type REF_PTR */

@@ -491,15 +491,12 @@ multimeter_lock_keyboard( Var_T * v )
 Var_T *
 multimeter_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
     
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = T_strdup( v->val.sptr );

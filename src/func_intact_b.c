@@ -40,17 +40,14 @@ static Var_T *f_bchanged_child( Var_T * v );
 Var_T *
 f_bcreate( Var_T * var )
 {
-    Var_T *v = var;
-    volatile Iobject_Type_T type;
-    volatile long coll = -1;
+    Var_T * volatile v = var;
+    Iobject_Type_T volatile type;
+    long volatile coll = -1;
     char * volatile label = NULL;
     char * volatile help_text = NULL;
     Iobject_T * volatile new_io = NULL;
     Iobject_T * ioi, *cio;
 
-
-    CLOBBER_PROTECT( v );
-    CLOBBER_PROTECT( new_io );
 
     /* At least the type of the button must be specified */
 

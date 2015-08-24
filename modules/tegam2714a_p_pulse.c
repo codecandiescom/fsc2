@@ -425,10 +425,8 @@ tegam2714a_p_change_pulse_length( long   pnum,
                                   double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
-    Ticks new_len = 0;
+    Ticks volatile new_len = 0;
 
-
-    CLOBBER_PROTECT( new_len );
 
     if ( p_time < 0.0 )
     {
@@ -527,10 +525,8 @@ tegam2714a_p_change_pulse_length_change( long   pnum,
                                          double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
-    Ticks new_dlen = 0;
+    Ticks volatile new_dlen = 0;
 
-
-    CLOBBER_PROTECT( new_dlen );
 
     TRY
     {

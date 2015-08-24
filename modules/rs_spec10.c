@@ -547,24 +547,18 @@ ccd_camera_clear_cycles( Var_T * v )
 Var_T *
 ccd_camera_get_image( Var_T * v  UNUSED_ARG )
 {
-    uns16 *frame = NULL;
-    long width, height;
+    uns16 * volatile frame = NULL;
+    long volatile width;
+    long volatile height;
     unsigned long max_val;
-    Var_T *nv = NULL;
+    Var_T * volatile nv = NULL;
     long i, j, k, l, row_index;
-    uns16 *cf;
-    long *dest;
-    uns16 bin[ 2 ];
-    uns16 urc[ 2 ];
+    uns16 * cf;
+    long * dest;
+    uns16 volatile bin[ 2 ];
+    uns16 volatile urc[ 2 ];
     uns32 size;
 
-
-    CLOBBER_PROTECT( frame );
-    CLOBBER_PROTECT( width );
-    CLOBBER_PROTECT( height );
-    CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( bin );
-    CLOBBER_PROTECT( urc );
 
     /* Store the original binning size and the position of the upper right
        hand corner, they might become adjusted and need to be reset at the
@@ -748,26 +742,20 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
 Var_T *
 ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 {
-    uns16 *frame = NULL;
-    long width,
-         height;
+    uns16 * volatile frame = NULL;
+    long volatile width;
+    long volatile height;
     unsigned long max_val;
-    Var_T *nv = NULL;
+    Var_T * volatile nv = NULL;
     long i,
          j,
          k;
-    uns16 *cf;
-    long *dest;
-    uns16 bin[ 2 ];
-    uns16 urc[ 2 ];
+    uns16 * cf;
+    long * dest;
+    uns16 volatile bin[ 2 ];
+    uns16 volatile urc[ 2 ];
     uns32 size;
 
-
-    CLOBBER_PROTECT( frame );
-    CLOBBER_PROTECT( width );
-    CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( bin );
-    CLOBBER_PROTECT( urc );
 
     /* Store the original binning sizes and the position of the upper right
        hand corner, they might become re-adjusted and need to be reset at the

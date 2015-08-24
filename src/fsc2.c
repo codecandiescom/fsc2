@@ -1236,18 +1236,16 @@ void
 load_file( FL_OBJECT * a  UNUSED_ARG,
            long        reload )
 {
-    const char *fn;
-    EDL_Files_T *old_list = EDL.files;
-    size_t old_count = EDL.file_count;
-    FILE *fp;
+    const char * fn;
+    EDL_Files_T * old_list = EDL.files;
+    size_t volatile old_count = EDL.file_count;
+    FILE * fp;
     int fd_flags;
     char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
     int c;
     int tmp_fd;
     FILE *tmp_fp;
 
-
-    CLOBBER_PROTECT( old_count );
 
     /* If new file is to be loaded get its name and store it, otherwise use
        the previous name */

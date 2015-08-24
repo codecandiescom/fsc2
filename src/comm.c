@@ -396,10 +396,8 @@ parent_reader( Comm_Struct_T * header )
     char *str[ 4 ] = { NULL, NULL, NULL, NULL };
     int i;
     int n1, n2;
-    char *data = NULL;
+    char * volatile data = NULL;
 
-
-    CLOBBER_PROTECT( data );
 
     switch ( header->type )
     {
@@ -717,10 +715,8 @@ static bool
 child_reader( void          * ret,
               Comm_Struct_T * header )
 {
-    char *retstr = NULL;
+    char * volatile retstr = NULL;
 
-
-    CLOBBER_PROTECT( retstr );
 
     switch ( header->type )
     {
