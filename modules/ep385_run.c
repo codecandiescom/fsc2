@@ -70,25 +70,16 @@ ep385_do_update( void )
 static bool
 ep385_update_pulses( bool flag )
 {
-    int i;
-    volatile int j;
-    int l, m;
-    Function_T *f;
     Pulse_T *p;
-    Channel_T *ch;
     Pulse_T **pm_elem;
     Pulse_Params_T *pp;
 
 
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( f );
-    CLOBBER_PROTECT( ch );
-
     ep385.needs_update = UNSET;
 
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
-        f = ep385.function + i;
+        Function_T * f = ep385.function + i;
 
         /* Nothing to be done for unused functions */
 
@@ -102,9 +93,9 @@ ep385_update_pulses( bool flag )
         /* Set up and check pulses for each channel associated with the
            function according to the current phase. */
 
-        for ( j = 0; j < f->num_channels; j++ )
+        for ( int volatile j = 0; j < f->num_channels; j++ )
         {
-            ch = f->channel[ j ];
+            Channel_T * ch = f->channel[ j ];
 
             if ( ch->num_pulses == 0 )
                 continue;
@@ -121,7 +112,8 @@ ep385_update_pulses( bool flag )
 
             pm_elem = f->pm[ f->next_phase * f->num_channels + j ];
 
-            for ( ch->num_active_pulses = 0, m = 0;
+            ch->num_active_pulses = 0; 
+            for ( int m = 0;
                   m < f->num_pulses && ( p = pm_elem[ m ] ) != NULL; m++ )
             {
                 if ( ! p->is_active )
@@ -172,7 +164,8 @@ ep385_update_pulses( bool flag )
 
             if ( ch->num_active_pulses == ch->old_num_active_pulses )
             {
-                for ( m = 0; m < ch->num_active_pulses; m++ )
+                int m = 0;
+                for ( ; m < ch->num_active_pulses; m++ )
                 if (    ch->pulse_params[ m ].pos !=
                                                 ch->old_pulse_params[ m ].pos
                      || ch->pulse_params[ m ].len !=
@@ -227,8 +220,8 @@ ep385_update_pulses( bool flag )
                 if ( flag )                 /* during test run */
                     THROW( EXCEPTION );
 
-                for ( l = 0; l <= i; i++ )
-                    for ( m = 0; m <= j; m++ )
+                for ( int l = 0; l <= i; i++ )
+                    for ( int m = 0; m <= j; m++ )
                     {
                         memcpy( ch->pulse_params, ch->old_pulse_params,
                                 ch->old_num_active_pulses
@@ -259,17 +252,17 @@ ep385_update_pulses( bool flag )
        needs to be tested - thanks to Celine Elsaesser for pointing this
        out. */
 
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
-        f = ep385.function + i;
+        Function_T * f = ep385.function + i;
         if (    ( ! f->is_used && f->num_channels == 0 )
              || i == PULSER_CHANNEL_PHASE_1
              || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
-        for ( j = 0; j < f->num_channels; j++ )
+        for ( int j = 0; j < f->num_channels; j++ )
         {
-            ch = f->channel[ j ];
+            Channel_T * ch = f->channel[ j ];
             if ( ch->num_active_pulses == 0 )
                 continue;
 
@@ -318,9 +311,9 @@ ep385_update_pulses( bool flag )
         }
     }
 
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
-        f = ep385.function + i;
+        Function_T * f = ep385.function + i;
         if (    ( ! f->is_used && f->num_channels == 0 )
              || i == PULSER_CHANNEL_PHASE_1
              || i == PULSER_CHANNEL_PHASE_2 )
@@ -550,7 +543,6 @@ ep385_full_reset( void )
     int i, j;
     Pulse_T *p = ep385.pulses;
     Function_T *f;
-    Channel_T *ch;
 
 
     /* Reset all pulses */
@@ -602,7 +594,7 @@ ep385_full_reset( void )
 
         for ( j = 0; j < f->num_channels; j++ )
         {
-            ch = f->channel[ j ];
+            Channel_T * ch = f->channel[ j ];
 
             ch->needs_update = SET;
 

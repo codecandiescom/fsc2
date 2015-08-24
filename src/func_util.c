@@ -5131,10 +5131,9 @@ f_spike_rem( Var_T * v )
        by the factor above which a difference is taken to be an outlier */
 
     double stdev = 0.0;
-    double * dpnt = diffs; 
-    for ( ssize_t i = 0; i < diffs_len; dpnt++, i++ )
+    for ( ssize_t i = 0; i < diffs_len; i++ )
     {
-        double r = mean - *dpnt;
+        double r = mean - diffs[ i ];
         stdev += r * r;
     }
 
@@ -5142,9 +5141,8 @@ f_spike_rem( Var_T * v )
 
     /* Find the outliers and store their indices */
 
-    dpnt = diffs;
-    for ( ssize_t i = 0; i < diffs_len; dpnt++, i++ )
-        if ( fabs( *dpnt - mean ) > stdev )
+    for ( ssize_t volatile i = 0; i < diffs_len; i++ )
+        if ( fabs( diffs[ i ] - mean ) > stdev )
         {
             if ( ol_count >= ol_len )
             {
