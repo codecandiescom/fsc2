@@ -228,15 +228,12 @@ f_openf_int( Var_T         * v,
 {
     Var_T *cur;
     long i;
-    char *fn;
     char *m;
     struct stat stat_buf;
     FILE * volatile fp = NULL;
     gzFile volatile gp = NULL;
     File_List_T * volatile old_File_List = NULL;
 
-
-    CLOBBER_PROTECT( fn );
 
     /* If there was a call of 'f_save()' etc. without a previous call to
        'f_getf()' or 'f_openf()' then 'f_save()' (or one of its brethrens)
@@ -289,7 +286,7 @@ f_openf_int( Var_T         * v,
     for ( i = 0, cur = v; i < 6 && cur; i++, cur = cur->next )
         vars_check( cur, STR_VAR );
 
-    fn = v->val.sptr;
+    char * volatile fn = v->val.sptr;
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
     {
@@ -496,13 +493,11 @@ f_getf_int( Var_T        * v,
     FILE * volatile fp = NULL;
     gzFile volatile gp = NULL;
     struct stat stat_buf;
-    char *r = NULL;
+    char * volatile r = NULL;
     char * new_r;
     char *m;
     File_List_T * volatile old_File_List = NULL;
 
-
-    CLOBBER_PROTECT( r );
 
     /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
        then 'f_save()' already called 'f_getf()' by itself and now does not
