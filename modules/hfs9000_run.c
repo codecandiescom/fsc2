@@ -80,17 +80,12 @@ hfs9000_do_update( void )
 static bool
 hfs9000_update_pulses( bool flag )
 {
-    int i;
-    Function_T *f;
-    Pulse_T *p;
-    volatile bool needed_update = UNSET;
+    bool volatile needed_update = UNSET;
 
 
-    CLOBBER_PROTECT( i );
-
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int volatile i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
-        f = hfs9000.function + i;
+        Function_T * f = hfs9000.function + i;
 
         /* Nothing to be done for unused functions */
 
@@ -115,7 +110,7 @@ hfs9000_update_pulses( bool flag )
             if ( flag )
                 THROW( EXCEPTION );
 
-            for ( p = hfs9000.pulses; p != NULL; p = p->next )
+            for ( Pulse_T * p = hfs9000.pulses; p != NULL; p = p->next )
             {
                 if ( p->is_old_pos )
                     p->pos = p->old_pos;

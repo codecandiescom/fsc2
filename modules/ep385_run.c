@@ -77,7 +77,7 @@ ep385_update_pulses( bool flag )
 
     ep385.needs_update = UNSET;
 
-    for ( int i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int volatile i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         Function_T * f = ep385.function + i;
 
