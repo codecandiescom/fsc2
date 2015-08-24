@@ -57,7 +57,7 @@ lecroy_wr_init( const char * name )
     char buf[ 100 ];
     long len = sizeof buf;
     int i;
-    int extra_needed_channels = 0;
+    int volatile extra_needed_channels = 0;
 
 
     if ( gpib_init_device( name, &lecroy_wr.device ) == FAILURE )
@@ -1783,12 +1783,7 @@ lecroy_wr_get_float_value( int          ch,
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
-    double val = 0.0;
 
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
@@ -1806,12 +1801,11 @@ lecroy_wr_get_float_value( int          ch,
     lecroy_wr_talk( cmd, cmd, &length );
     cmd[ length - 1 ] = '\0';
 
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
-
-    if ( ! *ptr )
+    char * volatile ptr = strchr( cmd, ':' );
+    if ( ! ptr || ! *++ptr )
         lecroy_wr_comm_failure( );
 
+    double volatile val = 0.0;
     TRY
     {
         val = T_atod( ptr );

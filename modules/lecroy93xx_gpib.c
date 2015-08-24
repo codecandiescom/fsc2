@@ -1571,16 +1571,10 @@ lecroy93xx_get_int_value( int          ch,
 
 static double
 lecroy93xx_get_float_value( int          ch,
-                           const char * name )
+                            const char * name )
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
-    double val = 0.0;
-
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY93XX_CH1 && ch <= LECROY93XX_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY93XX_CH1 + 1, name );
@@ -1594,12 +1588,11 @@ lecroy93xx_get_float_value( int          ch,
     lecroy93xx_talk( cmd, cmd, &length );
     cmd[ length - 1 ] = '\0';
 
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
-
-    if ( ! *ptr )
+    char * volatile ptr = strchr( cmd, ':' );
+    if ( ! ptr || ! *++ptr )
         lecroy93xx_gpib_failure( );
 
+    double volatile val = 0.0;
     TRY
     {
         val = T_atod( ptr );

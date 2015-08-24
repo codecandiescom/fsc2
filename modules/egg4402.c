@@ -204,7 +204,8 @@ boxcar_get_curve( Var_T * v )
     volatile long curve_type = -1;
     long curve_number = 0;
     long max_points;
-    long first, last;
+    long volatile first;
+    long volatile last;
     long num_points;
     long i;
     unsigned char *cc, *cn;
@@ -214,9 +215,6 @@ boxcar_get_curve( Var_T * v )
     double max_time;
     bool size_dynamic = UNSET;
 
-
-    CLOBBER_PROTECT( first );
-    CLOBBER_PROTECT( last );
 
     if ( v == NULL )
     {

@@ -412,7 +412,7 @@ epr_mod_read_state( void )
  *--------------------------------------------------------*/
 
 static int
-epr_mod_get_new_cal( int tok )
+epr_mod_get_new_cal( int volatile tok )
 {
     size_t i;
     size_t last;
@@ -535,10 +535,8 @@ epr_mod_cal_data( int tok )
 static int
 epr_mod_get_name( int tok )
 {
-    char *name = NULL;
+    char * volatile name = NULL;
 
-
-    CLOBBER_PROTECT( name );
 
     if ( tok != NAME_TOK )
         epr_mod_state_file_err( 1 );
