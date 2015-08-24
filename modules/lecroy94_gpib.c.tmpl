@@ -1283,20 +1283,17 @@ static
 void
 lecroy94_tmpl_get_prep( int              ch,
                         Window_T *       w,
-                        unsigned char ** data,
+                        unsigned char ** volatile data,
                         long *           length,
                         double *         gain,
                         double *         offset,
                         const char *     what )
 {
-    unsigned int bit_to_test = 0;
+    unsigned volatile int bit_to_test = 0;
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
 
-
-    CLOBBER_PROTECT( data );
-    CLOBBER_PROTECT( bit_to_test );
 
     /* Figure out which channel is to be used and set a few variables
        needed later accordingly */

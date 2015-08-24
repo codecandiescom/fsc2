@@ -1201,19 +1201,16 @@ lecroy93xx_start_acquisition( void )
 static void
 lecroy93xx_get_prep( int              ch,
                     Window_T *       w,
-                    unsigned char ** data,
+                    unsigned char ** volatile data,
                     long *           length,
                     double *         gain,
                     double *         offset )
 {
-    unsigned int bit_to_test = 0;
+    unsigned int volatile bit_to_test = 0;
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
 
-
-    CLOBBER_PROTECT( data );
-    CLOBBER_PROTECT( bit_to_test );
 
     /* Figure out which channel is to be used and set a few variables
        needed later accordingly */
@@ -1527,12 +1524,9 @@ lecroy93xx_get_int_value( int          ch,
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
-    long val = 0;
+    char * volatile ptr = cmd;
+    long volatile val = 0;
 
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY93XX_CH1 && ch <= LECROY93XX_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY93XX_CH1 + 1, name );

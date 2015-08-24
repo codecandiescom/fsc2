@@ -718,20 +718,19 @@ magnet_goto_field_on_end( Var_T * v )
 Var_T *
 magnet_command( Var_T * v )
 {
-    char *cmd = NULL;
-    char reply[ 100 ];
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+
+            char reply[ 100 ];
             ips120_10_talk( cmd, reply, 100 );
+
             T_free( cmd );
             TRY_SUCCESS;
         }
@@ -1332,11 +1331,9 @@ ips120_10_get_act_current( void )
 {
     char reply[ 100 ];
     long length;
-    int retries = 3;
+    int volatile retries = 3;
     double current;
 
-
-    CLOBBER_PROTECT( retries );
 
     while ( retries-- )
     {
@@ -1389,11 +1386,9 @@ ips120_10_get_target_current( void )
 {
     char reply[ 100 ];
     long length;
-    int retries = 3;
+    int volatile retries = 3;
     double current;
 
-
-    CLOBBER_PROTECT( retries );
 
     while ( retries-- )
     {
@@ -1444,11 +1439,9 @@ ips120_10_get_sweep_rate( void )
 {
     char reply[ 100 ];
     long length;
-    int retries = 3;
+    int volatile retries = 3;
     double rate;
 
-
-    CLOBBER_PROTECT( retries );
 
     while ( retries-- )
     {

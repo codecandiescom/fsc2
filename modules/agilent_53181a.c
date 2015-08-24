@@ -520,15 +520,12 @@ freq_counter_measure( Var_T * v )
 Var_T *
 freq_counter_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
@@ -553,21 +550,21 @@ freq_counter_command( Var_T * v )
 Var_T *
 freq_counter_talk( Var_T * v )
 {
-    char *cmd = NULL;
+    vars_check( v, STR_VAR );
+
     char reply[ 100 ];
     long length = sizeof reply - 1;
 
-
-    CLOBBER_PROTECT( cmd );
-
-    vars_check( v, STR_VAR );
-
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+
             agilent_53181a_talk( cmd, reply, &length );
+
             T_free( cmd );
             reply[ length ] = '\0';
             TRY_SUCCESS;
@@ -706,10 +703,8 @@ agilent_53181a_get_coupling( void )
     char reply[ 25 ];
     long length = sizeof reply - 1;
     volatile int coup = -1;
-    double val = 0.0;
+    double volatile val = 0.0;
 
-
-    CLOBBER_PROTECT( val );
 
     agilent_53181a_talk( ":INP1:COUP?", reply, &length );
     reply[ length ] = '\0';
@@ -867,10 +862,8 @@ agilent_53181a_get_digits( void )
 {
     char reply[ 20 ];
     long length = sizeof reply - 1;
-    long digits = 0;
+    long volatile digits = 0;
 
-
-    CLOBBER_PROTECT( digits );
 
     agilent_53181a_talk( ":FREQ:ARM:STOP:DIG?", reply, &length );
     reply[ length ] = '\0';
@@ -912,10 +905,8 @@ agilent_53181a_get_gate_time( void )
 {
     char reply[ 25 ];
     long length = sizeof reply - 1;
-    double gate_time = 0.0;
+    double volatile gate_time = 0.0;
 
-
-    CLOBBER_PROTECT( gate_time );
 
     agilent_53181a_talk( ":FREQ:ARM:STOP:TIM?", reply, &length );
     reply[ length ] = '\0';
@@ -943,10 +934,8 @@ agilent_53181a_get_freq( int channel )
 {
     char str[ 50 ];
     long length = sizeof str - 1;
-    double val = 0.0;
+    double volatile val = 0.0;
 
-
-    CLOBBER_PROTECT( val );
 
     /* If necessary switch the default channel */
 

@@ -230,18 +230,17 @@ mw_attenuator_load_calibration( Var_T * v )
     }
     else
     {
-        char *tfname;
-
-        CLOBBER_PROTECT( tfname );
+        char * volatile tfname;
+        char * tfname2;
 
         vars_check( v, STR_VAR );
-        tfname = T_strdup( v->val.sptr );
+        tfname2 = tfname = T_strdup( v->val.sptr );
         too_many_arguments( v );
 
         TRY
         {
-            tfp = hjs_attenuator_find_calibration( &tfname );
-            hjs_attenuator.calib_file = tfname;
+            tfp = hjs_attenuator_find_calibration( &tfname2 );
+            hjs_attenuator.calib_file = tfname2;
             TRY_SUCCESS;
         }
         CATCH( EXCEPTION )

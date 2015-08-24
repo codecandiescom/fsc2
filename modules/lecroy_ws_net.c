@@ -1779,11 +1779,9 @@ lecroy_ws_talk( const char * cmd,
                 ssize_t    * length )
 {
     ssize_t len = strlen( cmd );
-    int ret = 0;
+    int volatile ret = 0;
     bool with_eoi;
 
-
-    CLOBBER_PROTECT( ret );
 
     TRY
     {

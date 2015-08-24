@@ -696,11 +696,9 @@ Var_T *
 counter_get_buffered_counts( Var_T * v )
 {
     int counter;
-    long num_points;
+    long volatile num_points;
     double wait_secs = -1.0;
 
-
-    CLOBBER_PROTECT( num_points );
 
     if ( v == NULL )
     {
@@ -839,17 +837,15 @@ ni6601_get_data( volatile long   to_fetch,
     int quit_on_signal;
     int eod;
     int timed_out;
-    long received = 0;
-    unsigned long *buf;
-    long *final_buf;
+    long volatile received = 0;
+    unsigned long * buf;
+    long * final_buf;
     ssize_t i;
     volatile long us_wait = 0;
     struct timeval before,
                    after;
-    Var_T *nv;
+    Var_T * nv;
 
-
-    CLOBBER_PROTECT( received );
 
     if ( wait_secs > 0.0 )
         us_wait = lrnd( wait_secs * 1.0e6 );

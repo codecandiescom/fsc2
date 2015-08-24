@@ -639,8 +639,7 @@ gaussmeter_command( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-		char * cmd = NULL;
-		CLOBBER_PROTECT( cmd );
+		char * volatile cmd = NULL;
 
         TRY
         {

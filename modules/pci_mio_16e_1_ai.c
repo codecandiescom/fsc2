@@ -119,13 +119,6 @@ daq_ai_channel_setup( Var_T * volatile v )
     int ret = NI_DAQ_OK;
 
 
-//    CLOBBER_PROTECT( type );
-//    CLOBBER_PROTECT( pol );
-//    CLOBBER_PROTECT( dither_enable );
-//   CLOBBER_PROTECT( num_channels );
-//    CLOBBER_PROTECT( old_range_index );
-//    CLOBBER_PROTECT( ret );
-
     if ( v == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
@@ -637,12 +630,10 @@ daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 {
     size_t i, j;
     Var_T *nv = NULL;
-    double **volts = NULL;
+    double ** volatile volts = NULL;
     ssize_t received_data;
     size_t to_be_fetched = 0;
 
-
-    CLOBBER_PROTECT( volts );
 
     if ( ! pci_mio_16e_1.ai_state.is_acq_running )
     {

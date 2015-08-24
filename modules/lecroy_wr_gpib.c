@@ -1731,12 +1731,9 @@ lecroy_wr_get_int_value( int          ch,
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
-    long val = 0;
+    char * volatile ptr = cmd;
+    long volatile val = 0;
 
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );

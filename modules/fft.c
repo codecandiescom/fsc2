@@ -456,19 +456,17 @@ fft_power_spectrum( Var_T * v )
 Var_T *
 fft_complex( Var_T * v )
 {
-	fftw_complex *data;
-	fftw_plan     plan;
-	Var_T         *r,
-		          *c;
-	double        *dp,
-                  *rp,
-		          *cp;
-	volatile int   dir;
-	int            n;
-	int            i;
-	Var_T          *nv;
-
-    CLOBBER_PROTECT( dp );
+	fftw_complex * data;
+	fftw_plan      plan;
+	Var_T         * r,
+		          * c;
+	double        * volatile dp,
+                  * rp,
+		          * cp;
+	volatile int    dir;
+	int             n;
+	int             i;
+	Var_T          * nv;
 
 	if ( v == NULL )
 	{

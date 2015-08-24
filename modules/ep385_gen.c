@@ -47,9 +47,7 @@ ep385_store_timebase( double timebase )
 
     if ( timebase < FIXED_TIMEBASE )
     {
-        char *min = NULL;
-
-        CLOBBER_PROTECT( min );
+        char * volatile min = NULL;
 
         TRY
         {
@@ -237,12 +235,9 @@ ep385_set_repeat_time( double rep_time )
 {
     double old_rep_time;
     double new_rep_time;
-    double min_repeat_time;
-    double max_repeat_time;
+    double volatile min_repeat_time;
+    double volatile max_repeat_time;
 
-
-    CLOBBER_PROTECT( min_repeat_time );
-    CLOBBER_PROTECT( max_repeat_time );
 
     /* For the following we need the pulsers time base. If it hasn't been
        set yet we default to the built-in clock running at 125 MHz. */

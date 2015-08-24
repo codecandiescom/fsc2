@@ -1647,11 +1647,9 @@ lecroy_wr_get_area( int        ch,
     unsigned char *dp;
     long i;
     double gain, offset;
-    double area = 0.0;
+    double volatile area = 0.0;
     long length;
 
-
-    CLOBBER_PROTECT( area );
 
     /* Get the curve from the device */
 
@@ -1866,12 +1864,9 @@ lecroy_wr_get_int_value( int          ch,
 {
     char cmd[ 100 ];
     long length = sizeof cmd;
-    char *ptr = cmd;
-    long val = 0;
+    char * voltile ptr = cmd;
+    long voletile val = 0;
 
-
-    CLOBBER_PROTECT( ptr );
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
@@ -1920,10 +1915,8 @@ lecroy_wr_get_float_value( int          ch,
     char cmd[ 100 ];
     long length = sizeof cmd;
     char * volatile ptr = cmd;
-    double val = 0.0;
+    double volatile val = 0.0;
 
-
-    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );

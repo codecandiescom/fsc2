@@ -77,14 +77,11 @@ dg2020_do_update( void )
 bool
 dg2020_reorganize_pulses( bool flag )
 {
-    int i;
     Function_T *f;
     Pulse_T *p;
 
 
-    CLOBBER_PROTECT( i );
-
-    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    for ( int volatile i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = dg2020.function + i;
 

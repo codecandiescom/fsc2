@@ -292,10 +292,8 @@ Var_T *
 epr_modulation_add_calibration( Var_T * v )
 {
 	size_t i;
-	Calibration_T * res = NULL;
+	Calibration_T * volatile res = NULL;
 
-
-    CLOBBER_PROTECT( res);
 
 	if ( v == NULL )
 	{

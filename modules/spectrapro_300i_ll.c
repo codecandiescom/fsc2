@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -1280,7 +1280,7 @@ spectrapro_300i_talk( const char * buf,
     /* Now we read the reply by the device, if necessary extending the
        buffer. */
 
-    size_t already_read = 0;
+    size_t volatile already_read = 0;
 
     TRY
     {

@@ -386,9 +386,7 @@ pulser_show_pulses( Var_T * v  UNUSED_ARG )
 
     if ( pid == 0 )
     {
-        char *cmd = NULL;
-
-        CLOBBER_PROTECT( cmd );
+        char * volatile cmd = NULL;
 
         close( pd[ 1 ] );
 
@@ -891,15 +889,12 @@ pulser_stop_on_update( Var_T * v )
 Var_T *
 pulser_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );

@@ -860,15 +860,12 @@ lockin_is_overload( Var_T * v  UNUSED_ARG )
 Var_T *
 lockin_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );

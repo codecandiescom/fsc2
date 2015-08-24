@@ -666,20 +666,19 @@ magnet_goto_field_on_end( Var_T * v )
 Var_T *
 magnet_command( Var_T * v )
 {
-    char *cmd = NULL;
-    char reply[ 100 ];
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+
+            char reply[ 100 ];
             ips20_4_talk( cmd, reply, sizeof reply );
+
             T_free( cmd );
             TRY_SUCCESS;
         }

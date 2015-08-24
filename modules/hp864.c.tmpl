@@ -620,8 +620,6 @@ synthesizer_use_table( Var_T * v )
     char *tfname;
 
 
-    CLOBBER_PROTECT( tfp );
-
     /* Try to figure out the name of the table file - if no argument is given
        use the default table file, otherwise use the user supplied file name */
 
@@ -1157,15 +1155,12 @@ synthesizer_mod_ampl( Var_T * v )
 Var_T *
 synthesizer_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );

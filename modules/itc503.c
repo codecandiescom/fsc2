@@ -645,15 +645,12 @@ temp_contr_lock_keyboard( Var_T * v )
 Var_T *
 temp_contr_command( Var_T * v )
 {
-    char *cmd = NULL;
-
-
-    CLOBBER_PROTECT( cmd );
-
     vars_check( v, STR_VAR );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        char * volatile cmd = NULL;
+
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );

@@ -269,7 +269,7 @@ ag54830b_l_get_curve( int       channel,
 	char cmd[ 50 ];
 	char reply[ 32 ];
 	size_t blength = sizeof reply;
-	char * buffer = NULL;
+	char * volatile buffer = NULL;
 	size_t i;
 	double yinc;
 	double yorg;
@@ -278,8 +278,6 @@ ag54830b_l_get_curve( int       channel,
 	size_t bytes_to_read;
 	char header_str[ 10 ];
 
-
-	CLOBBER_PROTECT ( buffer );
 
 	fsc2_assert(    channel >= AG54830B_L_CH1
 				 && channel < NUM_DISPLAYABLE_CHANNELS );

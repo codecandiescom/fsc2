@@ -69,10 +69,8 @@ hjs_fc_init_hook( void )
     int acc;
     Var_T *v;
     int dev_num;
-    char *func = NULL;
+    char * volatile func = NULL;
 
-
-    CLOBBER_PROTECT( func );
 
     /* Set the default values for the structure for the device */
 
