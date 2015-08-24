@@ -32,18 +32,18 @@
 
 /* Define the maximum number of points to be returned from a sweep - the
    value isn't documented and is derived from the observation that the
-   device may stop sending anymore data after having sent 10200 bytes (10
-   VXI-11 send buffers of 1020 bytes). Now, each point it sends requires
-   up to 14 bytes (including a leading space and a trailing comma) when
-   uing ASCII snd 4 when using binaray, and the value is the result of
-   dividing 10200 by 14 (or 10197 by 4). For simultaneous measrements
-   of voltage and current the two data points get sent, which reduces
-   the number of points in a sweep to halve that value. */
+   device may stop sending data after having sent 10200 bytes (10 VXI-11
+   send buffers of 1020 bytes). Now, each point it sends requires up to
+   14 bytes (including a leading space and a trailing comma) when using
+   ASCII and 4 when using binary, and the value is the result of dividing
+   10200 by 14 (or 10197 by 4). For simultaneous measurements of voltages
+   and currents two data points get sent, which reduces the number of
+   points in a sweep to half these value. */
 
-#if ! defined BINARY_TRANSFER
-#define MAX_SWEEP_RESULT_POINTS  728
-#else
+#if defined BINARY_TRANSFER
 #define MAX_SWEEP_RESULT_POINTS  2549
+#else
+#define MAX_SWEEP_RESULT_POINTS  728
 #endif
 
 
@@ -70,7 +70,7 @@
 #define SENSE_CALA      3      /* calibration */
 
 
-/* Outout off modes */
+/* Output off modes */
 
 #define OUTPUT_NORMAL    0
 #define OUTPUT_HIGH_Z    1
@@ -82,10 +82,12 @@
 #define OUTPUT_OFF       0
 #define OUTPUT_ON        1
 
+
 /* Channel source modes (current/voltage) */
 
 #define OUTPUT_DCAMPS    0
 #define OUTPUT_DCVOLTS   1
+
 
 /* Channel autorange states (on/off) */
 
@@ -115,6 +117,7 @@
 #define AUTOZERO_ONCE    1
 #define AUTOZERO_AUTO    2
 
+
 /* Filter types */
 
 #define FILTER_MOVING_AVG  0
@@ -122,6 +125,7 @@
 #define FILTER_MEDIAN      2
 
 #define MAX_FILTER_COUNT   100
+
 
 /* Macros for types of measurements */
 
@@ -146,7 +150,6 @@
 #define CONTACT_SLOW    2
 
 #define MIN_CONTACT_CURRENT_LIMIT  1.0e-3   /* 1 mA */
-
 
 
 typedef struct
@@ -242,7 +245,7 @@ typedef struct
 
     double linefreq;
 
-    Source_T  source[ NUM_CHANNELS ];
+    Source_T  source[  NUM_CHANNELS ];
     Measure_T measure[ NUM_CHANNELS ];
     Contact_T contact[ NUM_CHANNELS ];
 

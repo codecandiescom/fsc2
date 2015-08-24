@@ -65,7 +65,7 @@ keithley2600a_open( void )
         return FAIL;
     }
 
-    return OK;
+    return SUCCESS;
 }
 
 
@@ -77,7 +77,7 @@ bool
 keithley2600a_close( void )
 {
     if ( ! k26->is_open )
-        return OK;
+        return SUCCESS;
 
     /* Clean up: remove functions we may have created */
 
@@ -93,7 +93,7 @@ keithley2600a_close( void )
         return FAIL;
 
     k26->is_open = false;
-    return OK;
+    return SUCCESS;
 }
 
 
@@ -109,7 +109,7 @@ keithley2600a_cmd( const char * cmd )
     if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		keithley2600a_comm_failure( );
 
-	return OK;
+	return SUCCESS;
 }
 
 
@@ -398,7 +398,7 @@ keithley2600a_get_line_frequency( void )
  * sweeps. Note that functions need to be relatively short (it's
  * not documented how long they may be but it looks like 1024
  * bytes is the limit) since otherwise the input buffer of the
- * device over-runs. No line-feeds are allowed at the ends of the
+ * device overflows. No line-feeds are allowed at the ends of the
  * lines of the funtions!
  *--------------------------------------------------------------*/
 

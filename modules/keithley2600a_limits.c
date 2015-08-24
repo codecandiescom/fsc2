@@ -950,7 +950,8 @@ keithley2600a_test_toggle_source_func( unsigned int ch )
     if ( ! k26->source[ ch ].output )
         return true;
 
-    /* For checks the output must look like it's on */
+    /* For checks things must look as if source function already has been
+       toggled */
 
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
@@ -1011,7 +1012,7 @@ keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
         
 
 /*---------------------------------------------------------------*
- * Returns the nearest measur current range for the requested range.
+ * Returns the nearest measure current range for the requested range.
  * A negative value is returned if the value is too large.
  *---------------------------------------------------------------*/
 
