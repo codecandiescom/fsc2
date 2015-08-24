@@ -418,8 +418,6 @@ epr_mod_get_new_cal( int volatile tok )
     size_t last;
 
 
-    CLOBBER_PROTECT( tok );
-
     if ( tok != CAL_TOK )
         epr_mod_state_file_err( 1 );
 

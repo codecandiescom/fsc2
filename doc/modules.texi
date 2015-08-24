@@ -3007,18 +3007,16 @@ long ** foo( size_t count,
     long ** buffer;
     size_t  i;
 
-
     TRY
     @{
         for ( i = 0; i < count; i++ )
             buffer[ i ] = T_malloc( len * sizeof ** buffer );
-        buffer[ 0 ] = 123;
         TRY_SUCCESS;
     @}
     CATCH( OUT_OF_MEMORY_EXECPTION )
     @{
-        for ( i -= 1; i >= 0; i-- )
-            T_free( i )
+        for ( --i; i >= 0; i-- )
+            T_free( buffer[ i ] )
         RETHROW;
     @}
 
@@ -3027,25 +3025,22 @@ long ** foo( size_t count,
 @end example
 @noindent
 Chances are high that the compiler will use a register for the
-variable @code{i} to speed up execution. But when an exception is
-thrown the value @code{i} had in the loop of the @code{TRY} block may
-get discarded in the process, even though it is still needed.
+variable @code{i} and @code{buffer} to speed up execution. But when an
+exception is thrown the values @code{i} and @code{buffer} had in the
+loop of the @code{TRY} block may get lost in the process, even though
+they're still needed.
 
-Fortunatley, there's a way to take care of this problem: all you need
-is to add an additional statement before @code{TRY} is invoked:
+Fortunatley, there's a simple way to take care of this problem: all
+you need to do is qualify the variables as @code{volatile}. If it's
+a normal variable use e.g.@:
 @example
-CLOBBER_PROTECT( i );
+int volatile int i = 0;
 @end example
 @noindent
-Just insert this line after the definitions of the variables and you're
-save from all these problems. So better be careful when the compiler
-emits warnings like the one above and add a @code{CLOBBER_PROTECT()}
-call for such variables.
-
-If you want to find out more about this problem, have a look at the code
-in @file{exceptions.h} and @file{exceptions.c} and read the
-documentation for the standard C functions @code{setjmp()} and
-@code{longjmp()}.
+and if it's a pointer use
+@example
+long ** volatile buffer;
+@end example
 
 
 @node Functions for memory allocation, The bool type, Error handling with exceptions, Programming Utils
