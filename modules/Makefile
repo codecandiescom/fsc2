@@ -396,11 +396,12 @@ endif
 
 
 # How to create the code and object files needed for the VXI-11 protocol
+# (no compiler warnings here, the code has been created automaically)
 
 $(vxi11_list) vxi11.h: vxi11.x
 	rpcgen $<
-	$(CC) -shared -fpic -c -o vxi11_clnt.o vxi11_clnt.c
-	$(CC) -shared -fpic -c -o vxi11_xdr.o vxi11_xdr.c
+	$(CC) $(LFLAGS) -c -o vxi11_clnt.o vxi11_clnt.c
+	$(CC) $(LFLAGS) -c -o vxi11_xdr.o vxi11_xdr.c
 
 # How to install the modules
 
