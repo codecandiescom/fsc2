@@ -21,7 +21,7 @@
 vxi11_list      := vxi11_clnt.c vxi11_xdr.c
 
 
-# Lists of modules that each get created from the same template
+# Lists of modules that each get created from templates
 
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
@@ -395,11 +395,12 @@ $(addsuffix .c,$(me_dio)): me_dio.c.tmpl
 endif
 
 
-# How to create the code needed for the VXI-11 protocol
+# How to create the code and object files needed for the VXI-11 protocol
 
 $(vxi11_list) vxi11.h: vxi11.x
 	rpcgen $<
-
+	$(CC) -shared -fpic -c -o vxi11_clnt.o vxi11_clnt.c
+	$(CC) -shared -fpic -c -o vxi11_xdr.o vxi11_xdr.c
 
 # How to install the modules
 

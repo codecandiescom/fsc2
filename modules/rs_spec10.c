@@ -552,7 +552,7 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
     long volatile height;
     unsigned long max_val;
     Var_T * volatile nv = NULL;
-    long i, j, k, l, row_index;
+    long row_index;
     uns16 * cf;
     long * dest;
     uns16 volatile bin[ 2 ];
@@ -566,6 +566,7 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
 
     bin[ X ] = rs_spec10->ccd.bin[ X ];
     bin[ Y ] = rs_spec10->ccd.bin[ Y ];
+
     urc[ X ] = rs_spec10->ccd.roi[ X + 2 ];
     urc[ Y ] = rs_spec10->ccd.roi[ Y + 2 ];
 
@@ -642,8 +643,10 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
             size = ( uns32 ) ( width * height *sizeof *frame );
             cf = frame = T_malloc( size );
 
-            for ( i = 0; i < width * height; i++ )
-                frame[ i ] = random( ) % max_val;
+            for ( long i = 0; i < width * height; i++ )
+                *cf++ = random( ) % max_val;
+
+            cf = frame;
         }
 
         nv = vars_push_matrix( INT_REF, 2, height, width );
@@ -659,7 +662,7 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
              || (    rs_spec10->ccd.bin[ X ] == 1
                   && rs_spec10->ccd.bin[ Y ] == 1 ) )
         {
-            for ( i = 0; i < height; i++ )
+            for ( long i = 0; i < height; i++ )
             {
                 if ( RS_SPEC10_UPSIDE_DOWN == 1 )
                     row_index = height - 1 - i;
@@ -669,40 +672,40 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
                 if ( RS_SPEC10_MIRROR == 1 )
                 {
                     dest = nv->val.vptr[ row_index ]->val.lpnt + width - 1;
-                    for ( j = 0; j < width; j++ )
+                    for ( long j = 0; j < width; j++ )
                         *dest-- = ( long ) *cf++;
                 }
                 else
                 {
                     dest = nv->val.vptr[ row_index ]->val.lpnt;
-                    for ( j = 0; j < width; j++ )
+                    for ( long j = 0; j < width; j++ )
                         *dest++ = ( long ) *cf++;
                 }
             }
         }
         else
         {
-            for ( i = 0; i < height; i++ )
+            for ( long i = 0; i < height; i++ )
             {
                 if ( RS_SPEC10_UPSIDE_DOWN == 1 )
                     row_index = height - 1 - i;
                 else
                     row_index = i;
 
-                for ( j = 0; j < rs_spec10->ccd.bin[ Y ]; j++ )
+                for ( long j = 0; j < rs_spec10->ccd.bin[ Y ]; j++ )
                 {
                     if ( RS_SPEC10_MIRROR == 1 )
                     {
                         dest = nv->val.vptr[ row_index ]->val.lpnt + width - 1;
-                        for ( k = 0; k < width; k++, dest-- )
-                            for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
+                        for ( long k = 0; k < width; k++, dest-- )
+                            for ( long l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
                                 *dest += ( long ) *cf++;
                     }
                     else
                     {
                         dest = nv->val.vptr[ row_index ]->val.lpnt;
-                        for ( k = 0; k < width; k++, dest++ )
-                            for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
+                        for ( long k = 0; k < width; k++, dest++ )
+                            for ( long l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
                                 *dest += ( long ) *cf++;
                     }
                 }
@@ -747,9 +750,6 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
     long volatile height;
     unsigned long max_val;
     Var_T * volatile nv = NULL;
-    long i,
-         j,
-         k;
     uns16 * cf;
     long * dest;
     uns16 volatile bin[ 2 ];
@@ -825,8 +825,10 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
             size = ( uns32 ) ( width * sizeof *frame );
             cf = frame = T_malloc( size );
 
-            for ( i = 0; i < width; i++ )
-                frame[ i ] = random( ) * max_val;
+            for ( long i = 0; i < width; i++ )
+                *cf++ = random( ) * max_val;
+
+            cf = frame;
         }
 
         nv = vars_push( INT_ARR, NULL, width );
@@ -841,28 +843,38 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
             if ( RS_SPEC10_MIRROR == 1 )
             {
                 cf += width - 1;
-                for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
+                dest = nv->val.lpnt;
+                for ( long j = 0; j < width; j++ )
                     *dest++ = ( long ) *cf--;
             }
             else
-                for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
+            {
+                dest = nv->val.lpnt;
+                for ( long j = 0; j < width; j++ )
                     *dest++ = ( long ) *cf++;
+            }
         }
         else
         {
             if ( RS_SPEC10_MIRROR == 1 )
             {
                 cf += size / sizeof *frame - 1;
-                for ( i = 0; i < height; i++ )
-                    for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
-                        for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
+                for ( long i = 0; i < height; i++ )
+                {
+                    dest = nv->val.lpnt;
+                    for ( long j = 0; j < width; j++, dest++ )
+                        for ( long k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
                             *dest += ( long ) *cf--;
+                }
             }
             else
-                for ( i = 0; i < height; i++ )
-                    for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
-                        for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
+                for ( long i = 0; i < height; i++ )
+                {
+                    dest = nv->val.lpnt;
+                    for ( long j = 0; j < width; j++, dest++ )
+                        for ( long k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
                             *dest += ( long ) *cf++;
+                }
         }
 
         TRY_SUCCESS;
