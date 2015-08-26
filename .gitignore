@@ -172,3 +172,7 @@ edl/aiesr6.hmi.de/monitor_bruker
 edl/aiesr6.hmi.de/monitor_sr
 .tmp_mc_*
 FcntlLock/MYMETA.yml
+modules/rs_rto/vxi11.h
+modules/rs_rto/vxi11_clnt.c
+modules/rs_rto/vxi11_svc.c
+modules/rs_rto/vxi11_xdr.c

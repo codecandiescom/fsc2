@@ -1653,11 +1653,10 @@ of that file. If the file number corresponds to @code{stdout} or
 @anchor{path_name()}
 @findex path_name()
 @item path_name()
-Function like @code{@ref{file_name()}}, but returning the
-file name with full path information for an opened. In case
-that the funcion is called without an argument and no file
-has been opened yet a warning is output and the string
-@code{"/dev/null"} is returned.
+Function like @code{@ref{file_name()}}, but returning the file name
+with full path information for an opened file. In case that the
+funcion is called without an argument and no file has been opened yet
+a warning is output and the string @code{"/dev/null"} is returned.
 
 
 @end table
