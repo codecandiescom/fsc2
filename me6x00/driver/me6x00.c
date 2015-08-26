@@ -1949,15 +1949,20 @@ static int me6x00_start_stop_conv( void __user * arg,
 			PDEBUG( "me6x00_start_stop_conv(): Sending "
 				"process to sleep\n" );
 
-			interruptible_sleep_on_timeout( &wait, 10 );
-
 			/*
 			 * There are two reasons, why a wake up may occur:
 			 * 1) the timeout is reached.
 			 * 2) a signal was sent to the process (CTRL+C, ...)
 			 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 3, 0, 0 )
+			interruptible_sleep_on_timeout( &wait, 10 );
 			if ( signal_pending( current ) ) {
+#else
+			if ( wait_event_interruptible_timeout( wait,
+					             signal_pending( current ),
+						       	             10 ) ) {
+#endif
 				printk( KERN_WARNING
 					"ME6X00: me6x00_start_stop_conv(): "
 					"aborted by signal\n" );
@@ -2312,8 +2317,16 @@ static int me6x00_write_single( void __user * arg,
 	while ( i++ < 10 && ( which_bit & ( x = me6x00_inl( port ) ) ) ) {
 		PDEBUG( "0x%04X\n", x );
 		PDEBUG( "me6x00_write_single(): Sending process to sleep\n" );
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 3, 0, 0 )
 		interruptible_sleep_on_timeout( &wait, 1 );
 		if ( signal_pending( current ) ) {
+#else
+		if ( wait_event_interruptible_timeout( wait,
+						     signal_pending( current ),
+						     1 ) ) {
+#endif
+
 			PDEBUG( "ME6X00: me6x00_single(): "
 				"aborted by signal\n" );
 			return -EINTR;
@@ -2471,8 +2484,6 @@ static int me6x00_write_continuous( void __user * arg,
 
 			PDEBUG( "me6x00_write_continuous(): Sending process "
 				"to sleep\n" );
-			interruptible_sleep_on( info->wait_queues
-						+ write.dac );
 
 			/*
 			 * There are two reasons why a wake up may occur:
@@ -2480,7 +2491,15 @@ static int me6x00_write_continuous( void __user * arg,
 			 * 2) a signal was sent to the process (CTRL+C, ...)
 			 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 3, 0, 0 )
+			interruptible_sleep_on(   info->wait_queues
+						+ write.dac );
 			if ( signal_pending( current ) ) {
+#else
+			if ( wait_event_interruptible(
+				              info->wait_queues[ write.dac ],
+					      signal_pending( current ) ) ) {
+#endif
 				printk( KERN_WARNING
 					"ME6X00: me6x00_write_continuous() "
 					"aborted by signal\n" );
@@ -2649,15 +2668,20 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
 		while ( me6x00_inl( stat_port ) & 0x8 ) {
 			PDEBUG( "me6x00_write_wraparound(): Sending process "
 				"to sleep\n" );
-			interruptible_sleep_on_timeout( &wait, 10 );
-
 			/*
 			 * There are two reasons why a wake up may occur:
 			 * 1) the timeout is reached
 			 * 2) a signal was sent to the process (CTRL+C, ...)
 			 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 3, 0, 0 )
+			interruptible_sleep_on_timeout( &wait, 10 );
 			if ( signal_pending( current ) ) {
+#else
+			if ( wait_event_interruptible_timeout( wait,
+					             signal_pending( current ),
+						       	             10 ) ) {
+#endif
 				printk( KERN_WARNING "ME6X00: "
 					"me6x00_write_wraparound() aborted by "
 					"signal\n" );

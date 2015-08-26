@@ -132,8 +132,12 @@
 #include <linux/sched.h>
 #include <linux/interrupt.h>
 #include <linux/pci.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 3, 0, 0 )
 #include <asm/io.h>
 #include <asm/system.h>
+#else
+#include <linux/wait.h>
+#endif
 #include <linux/errno.h>
 #include <linux/delay.h>
 #include <linux/unistd.h>
