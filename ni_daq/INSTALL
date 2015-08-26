@@ -533,6 +533,7 @@ function pref_inst() {
 # the name of the kernel we're supposed to compile for.
 
 function get_kernel_version() {
+
 	if [ -n "$NI_DAQ_KERNEL_SOURCE" ]
 	then
 		KERNEL_DIR=$NI_DAQ_KERNEL_SOURCE;
@@ -544,16 +545,13 @@ function get_kernel_version() {
 		fi
 	fi
 
-	if [ ! -e $KERNEL_DIR/include/linux/version.h ]
+	if [ -z "$KERNEL_DIR" ]
 	then
-		dialog --msgbox \
-"To create the driver for NI DAQ boards the file\n\
-$KERNEL_DIR/include/linux/version.h\n\
-(or /usr/include/linux/version.h, depending on how old\n\
-your kernel is) is required. This file contains vital\n\
-information about the kernel the module is intended for.\n\
-Please also see additonal information in the README file.\n\n\
-Unfortunately, the installation can't proceed.\n" 13 68;
+		dialog --msgbox "\n\
+Failed to find the kernel headers which are needed to\n\
+compile the module. Either install the appropriate\n\
+package or set the variable 'NI_DAQ_KERNEL_SOURCE'\n\
+to the location of the kernel headers." 9 60;
 		exit 1;
 	fi
 
@@ -563,19 +561,18 @@ Unfortunately, the installation can't proceed.\n" 13 68;
 				    sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	if [ -z "$KERNEL_VERSION" ]
 	then
-		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_                         \
-                        DIR/include/linux/utsrelease.h                    \
-                        2>/dev/null |                                     \
-				        sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
+		KERNEL_VERSION=`grep UTS_RELEASE                                \
+			            $KERNEL_DIR/include/linux/utsrelease.h          \
+                        2>/dev/null |                                   \
+				   s    ed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
-
 	if [ -z "$KERNEL_VERSION" ]
 	then
-		KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
-                       2>/dev/null | \
+		KERNEL_VERSION=`grep UTS_RELEASE
+		                     $KERNELDIR/include/linux/version.h \
+                       2>/dev/null |
 				       sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
-	fi
-
+    fi
     if [ -z "$KERNEL_VERSION" ]
 	then
         KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease 2>/dev/null`;
@@ -640,7 +637,7 @@ then
    do_install
 else
     if [    \( ! $IS_NEW_KERNEL -a ! -e driver/ni_daq.o  \)  \
-         -o \(   $IS_NEW_KERNEL -a ! -e driver/ni_da.ko \)  \
+         -o \(   $IS_NEW_KERNEL -a ! -e driver/ni_daq.ko \)  \
 		 -o ! -e lib/libni_daq.a                                 \
 		 -o ! -e lib/libni_daq.so ]
 	then

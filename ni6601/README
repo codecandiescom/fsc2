@@ -13,32 +13,36 @@ II. Preparation for installation
 ================================
 
 Before you start compiling and installing the package please note: The
-way the module is build depends strongly on the configuration of the
-kernel the modules is supposed to work with. For 2.4 kernels at least
-the directories with the kernels include (header) files are needed while
-for 2.6 kernels the complete kernel sources are required.
+way modules are build depends strongly on the configuration of the
+kernel the modules is supposed to work with. And for this at least
+the kernel headers for the kernel the module is to be used with are
+required. Typically you just need to install the corresponding
+package for your kernel and everything should work out of the box.
+Things may get a bit more interesting if you're building your own
+kernels instead using one from your distribution.
 
-In the 'include/linux' subdirectory of the kernel sources a file called
-'autoconf.h' is of special importance. It contains information on how the
-kernel was build. Make sure that it is in sync with the kernel (it could
-be out of sync if you have run 'make menuconfig' or 'make xconfig' etc.,
-changed some settings and saved the results, but didn't built the kernel
-with these new settings). Especially important is that the macro
-CONFIG_MODVERSIONS is defined correctly. If you compile the module but
-get error messages about undefined symbols when you try to run depmode or
-insmode on the new module chances are high that CONFIG_MODVERSIONS was
-defined in autoconf.h but the kernel has not been compiled with this option.
+Somewhere in the 'include' subdirectories of the kernel headers a file
+called 'autoconf.h' is of special importance. It contains information on
+how the kernel was build. Make sure that it is in sync with the kernel
+(it could be out of sync if you have run 'make menuconfig' or 'make xconfig'
+etc., changed some settings and saved the results, but didn't built the
+kernel with these new settings). For 2.4 kernels it is of special important
+that the macro CONFIG_MODVERSIONS is defined correctly. If you compile the
+module but get error messages about undefined symbols when you try to run
+'depmode' or 'insmode' on the new module chances are high that this variable
+was defined in autoconf.h but the kernel has not been compiled with this
+option (or the other way round).
 
-Another essential file is 'version.h' in the kernel include directory.
-Without this file the module can not be compiled. The file gets created
-automatically if autoconf.h exists and you at least run 'make dep' in the
-kernel source directory.
+Another essential file is 'utsrelease.h' (or 'version.h' with 2.4 kernels)
+in the kernel include directories. Without this file the module can't be
+compiled. The file gets created automatically if autoconf.h exists and
+you have at least run 'make dep' in the kernel source directory.
 
 If you want to create the module for a kernel you are *not* currently
-running you must set the environment variable NI6601_KERNEL_SOURCE to
-the source directory  of the kernel you want to make the module for.
-It's still required that both 'autoconf.h' and 'version.h' exist for
-this kernel.
+running you must set the environment variable 'NI6601_KERNEL_SOURCE' to
+the kernels headers directory  of the kernel you want to make the module
+for. It's still required that both 'autoconf.h' and 'utsrelease.h' (or
+'version.h') exist for this kernel.
 
 
 III. Compiling and installing via the 'INSTALL' script

@@ -43,34 +43,35 @@ endif
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
-# file linux/utsrelease.h) and then call make again with KERNEL_VER now being
-# set. If KERNEL_VER couldn't be found out that way print an error message
-# and bail out.
+# file linux/utsrelease.h and on even newer in generated/utsrelease.h) and
+# then call make again with KERNEL_VER now being set. If KERNEL_VER could
+# not be found out that way print an error message and bail out.
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
+KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'          \
+                            $(KERNELDIR)/include/generated/utsrelease.h \
+				            2>/dev/null |                               \
+	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
-	                            $(KERNELDIR)/include/generated/utsrelease.h \
-					            2>/dev/null |                               \
-		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
-endif
-
-ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'          \
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'        \
 	                            $(KERNELDIR)/include/linux/utsrelease.h   \
 					            2>/dev/null |                             \
 		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'          \
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'        \
 	                            $(KERNELDIR)/include/linux/version.h      \
 					            2>/dev/null |                             \
 		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
+
+ifeq ($(KERNEL_VER),)
+	KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
+endif
+
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
