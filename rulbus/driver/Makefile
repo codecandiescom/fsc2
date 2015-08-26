@@ -50,21 +50,32 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
-
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
 	                            $(KERNELDIR)/include/linux/utsrelease.h     \
 					            2>/dev/null |                               \
 		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]+UTS_RELEASE[ \t]+\"'            \
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
+	                            $(KERNELDIR)/include/generated/utsrelease.h     \
+					            2>/dev/null |                               \
+		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+endif
+
+ifeq ($(KERNEL_VER),)
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
 		                        $(KERNELDIR)/include/linux/version.h        \
 					            2>/dev/null |                               \
 	        	    	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
+
+
+ifeq ($(KERNEL_VER),)
+	KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
+endif
+
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
