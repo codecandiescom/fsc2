@@ -156,7 +156,7 @@ dg2020_f_init_hook( void )
         dg2020.channel[ i ].function = NULL;
     }
 
-    for ( i = 0; i < 3; i++ )
+    for ( i = 0; i < 2; i++ )
         for ( j = 0; j < 4; j++ )
             for ( k = 0; k < 2; k++ )
                 dg2020.phs[ i ].is_var[ j ][ k ] = UNSET;

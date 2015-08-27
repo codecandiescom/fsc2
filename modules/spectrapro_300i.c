@@ -291,7 +291,7 @@ monochromator_turret( Var_T * v )
 
     if ( ! spectrapro_300i.grating[ new_gn ].is_installed )
     {
-        for ( i = 3 * tn; i < 3 * ( tn + 1 ); i++ )
+        for ( i = 3 * ( int ) tn; i < 3 * ( ( int ) tn + 1 ); i++ )
             if ( spectrapro_300i.grating[ i ].is_installed )
                 break;
 

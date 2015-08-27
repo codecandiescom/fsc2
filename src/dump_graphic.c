@@ -292,100 +292,36 @@ static void
 dump_as_ppm( FILE   * fp,
              XImage * image )
 {
-    int i, j;
-    unsigned long pixel = 0;
-    unsigned long pixel_mask;
-    int key;
-    int bits_used;
-    int bits_per_item;
-    int bits_per_pixel;
-    int bit_order;
-    int bit_shift = 0;
-    CARD8  *bptr;
-    CARD16 *sptr;
-    CARD32 *lptr;
-    char *lineptr;
-    G_Hash_Entry_T *hash;
-    unsigned int hash_size;
-
-
-    hash = G.color_hash;
-    hash_size = G.color_hash_size;
+    G_Hash_Entry_T * hash = G.color_hash;
+    unsigned int  hash_size = G.color_hash_size;
 
     fprintf( fp, "P6\n%d %d\n255\n", image->width, image->height );
 
-    /* Get some information about the image */
-
-    bits_used = bits_per_item = image->bitmap_unit;
-    bits_per_pixel = image->bits_per_pixel;
-
-    if ( bits_per_pixel == 32 )
-        pixel_mask = ~ ( ( unsigned long ) 0 );
-    else
-        pixel_mask = ( ( ( unsigned long ) 1 ) << bits_per_pixel ) - 1;
-
-    bit_order = image->bitmap_bit_order;
-
-    /* Loop through the complete image, line by line */
-
-    for ( lineptr = image->data, i = 0; i < image->height;
-          lineptr += image->bytes_per_line, i++ )
-    {
-        bptr = ( ( CARD8  * ) lineptr ) - 1;
-        sptr = ( ( CARD16 * ) lineptr ) - 1;
-        lptr = ( ( CARD32 * ) lineptr ) - 1;
-
-        bits_used = bits_per_item;
-
-        /* Get next pixel in current line */
-
-        for ( j = 0; j < image->width; j++ )
+    for ( int i = 0; i < image->height; i++ )
+        for ( int j = 0; j < image->width; j++ )
         {
-            if ( bits_used == bits_per_item )
-            {
-                bptr++;
-                sptr++;
-                lptr++;
+            unsigned long pixel = XGetPixel( image, j, i );
+            int key = pixel % hash_size;
 
-                bits_used = 0;
-
-                if ( bit_order == MSBFirst )
-                    bit_shift = bits_per_item - bits_per_pixel;
-                else
-                    bit_shift = 0;
-            }
-
-            switch ( bits_per_item )
-            {
-                case 8 :
-                    pixel = ( *bptr >> bit_shift ) & pixel_mask;
-                    break;
-
-                case 16 :
-                    pixel = ( *sptr >> bit_shift ) & pixel_mask;
-                    break;
-
-                case 32 :
-                    pixel = ( *lptr >> bit_shift ) & pixel_mask;
-                    break;
-            }
-
-            if ( bit_order == MSBFirst )
-                bit_shift -= bits_per_pixel;
-            else
-                bit_shift += bits_per_pixel;
-
-            bits_used += bits_per_pixel;
-
-            /* Get the rgb color from the pixel value via a hash look-up
-               and write the color to the output file */
-
-            key = pixel % hash_size;
             while ( hash[ key ].pixel != pixel )
+            {
                 key = ( key + 1 ) % hash_size;
+                if ( ! hash[ key ].is_used )
+                {
+                    // This can happen due to TTF anti-alializing! Not
+                    // a clean solution (since it expects a certain way
+                    // the color is coded into the pxiel) but better than
+                    // nothing for the time being...
+
+                    hash[ key ].rgb[ RED   ] = pixel >> 16 & 0xFF;
+                    hash[ key ].rgb[ GREEN ] = pixel >> 16 & 0xFF;
+                    hash[ key ].rgb[ BLUE  ] =  pixel      & 0xFF;
+                    break;
+                }
+            }
+
             fwrite( hash[ key ].rgb, 1, 3, fp );
         }
-    }
 }
 
 
@@ -396,12 +332,8 @@ dump_as_ppm( FILE   * fp,
 void
 create_color_hash( void )
 {
-    FL_COLOR i;
-    FL_COLOR pixel;
-    int key;
-    int r = 0, g = 0, b = 0;
     unsigned int hash_size = COLOR_HASH_SIZE;
-    G_Hash_Entry_T *hash;
+    G_Hash_Entry_T * hash;
 
 
     TRY
@@ -412,24 +344,27 @@ create_color_hash( void )
     OTHERWISE
     {
         G.color_hash = NULL;
+        G.color_hash_size = 0;
         return;
     }
 
-    for ( i = 0; i < hash_size; i++ )
+    for ( unsigned int i = 0; i < hash_size; i++ )
         hash[ i ].is_used = UNSET;
 
-    for ( i = 0; i < NUM_COLORS + FL_FREE_COL1 + 2; i++ )
+    FL_COLOR i = 0;
+    for ( i = 0; i < FL_FREE_COL1 + NUM_COLORS + 2; i++ )
     {
-        pixel = fl_get_pixel( i );
+        FL_COLOR pixel = fl_get_pixel( i );
 
-        key = pixel % hash_size;
+        int r, g, b;
+        pixel = fl_getmcolor( i , &r, &g, &b );
+
+        FL_COLOR key = pixel % hash_size;
         while ( hash[ key ].is_used )
             key = ( key + 1 ) % hash_size;
 
         hash[ key ].is_used = SET;
         hash[ key ].pixel = pixel;
-
-        fl_getmcolor( i , &r, &g, &b );
 
         hash[ key ].rgb[ RED   ] = r;
         hash[ key ].rgb[ GREEN ] = g;

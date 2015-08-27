@@ -85,7 +85,7 @@ get_phase_cycled_area_1( Var_T * v )
     static bool is_get_area;
     static bool is_get_area_fast;
     bool is_channel;
-    long channel[ 2 ];
+    long channel[ 2 ] = { -1, -1 };
     static long num_windows;
     long *win_list;
     long i, j;
@@ -225,7 +225,7 @@ get_phase_cycled_area_1( Var_T * v )
                 else
                     func_ptr = func_get( "digitizer_get_area", &acc );
 
-                /* Push the correct channel number onto the stack */
+                /* Push the correct channel number on the stack */
 
                 if (    aseq->sequence[ i ] == ACQ_PLUS_A
                      || aseq->sequence[ i ] == ACQ_MINUS_A )
@@ -304,7 +304,7 @@ get_phase_cycled_area_2( Var_T * v )
     static bool is_get_area_fast;
     bool is_channel;
     bool need_A, need_B;
-    long channel[ 2 ];
+    long channel[ 2 ] = { -1, -1 };
     static long num_windows;
     long *win_list;
     long i, j;

@@ -390,10 +390,18 @@ other_data_request( int    dim,
 
         case D_CHANGE_POINTS :                /* rescale command */
             if ( dim == DATA_1D )
-                rescale_1d( * ( long * ) ptr );
+            {
+                long resc_arg;
+
+                memcpy( &resc_arg, ptr, sizeof resc_arg );
+                rescale_1d( resc_arg );
+            }
             else
             {
-                rescale_2d( ( long * ) ptr );
+                long resc_args[ 2 ];
+
+                memcpy( resc_args, ptr, sizeof resc_args );
+                rescale_2d( resc_args );
                 Need_2d_redraw = Scale_2d_changed[ X ] =
                     Scale_2d_changed[ Y ] = SET;
             }
@@ -428,7 +436,10 @@ other_data_request( int    dim,
                 remove_markers_1d( );
             else
             {
-                remove_markers_2d( ( long * ) ptr );
+                long curves[ MAX_CURVES ];
+
+                memcpy( curves, ptr, sizeof curves );
+                remove_markers_2d( curves );
                 Need_2d_redraw = SET;
             }
             break;
