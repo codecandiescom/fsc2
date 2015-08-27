@@ -3456,7 +3456,7 @@ get_calculated_curve_data( Var_T  * v,
 
     long fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
-    int rch = fsc2_ch_2_rto_ch( fch );
+    int volatile rch = fsc2_ch_2_rto_ch( fch );
 
     if ( rch == Channel_Ext )
     {
@@ -3636,7 +3636,7 @@ get_calculated_segment_data( Var_T  * v,
 
     long fch = get_strict_long( v, "channel" );
     v = vars_pop( v );
-    int rch = fsc2_ch_2_rto_ch( fch );
+    int volatile rch = fsc2_ch_2_rto_ch( fch );
 
     if (    rch == Channel_Ext
          || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
