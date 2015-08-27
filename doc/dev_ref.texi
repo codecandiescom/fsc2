@@ -3696,7 +3696,7 @@ EPR and ENDOR experiments.
 @strong{Note}: While transfering measured data is decently fast (at
 least @w{10 MB/s} with 4 bytes per data point), starting a download
 incurs a rather long overhead (time between issuing the command to
-send data and data starting to arrive) of about @w{40 ms}, exceeding
+send data and data starting to arrive) of 20 to @w{40 ms}, exceeding
 the time for the actual data transfer at least for short waveforms by
 orders of magnitude. For downloading waveforms measured with the
 "Ultra Segmentation" feature it's even worse, overheads of 60 to
