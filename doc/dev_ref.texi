@@ -3672,6 +3672,20 @@ g@item @ref{gaussmeter_name()}
 @strong{Status}: Untested
 
 @paragraphindent 0
+This module supports only a small subset of the functionality of
+the device, mainly things that will typically be used in time-resolved
+EPR and ENDOR experiments.
+
+@paragraphindent 0
+@strong{Note}: This module uses a C++ library for interacting
+with the device which is also part of the code distributed with
+@code{fsc2}. To compile this library a C++ compiler is required,
+of course. The library is part of a new project,
+@uref{http://users.physik.fu-berlin.de/~jtt/Fsc3.html, Fsc3}, which
+is imtended to supply C, C++ libraries and Python modules for direct
+communicatin with devices.
+
+@paragraphindent 0
 @strong{Note}: While the documentation for this device is impressive
 in size, the content is actually (especially when compared to those
 for other devices by Rohde&Schwarz) extremely poor: incomprehensible,
@@ -3686,11 +3700,6 @@ function return values that attempt to indicate that everything is
 fine. Only during the real experiment it can be tested if the
 requested settings can be used and thus there's hardly any
 protections.
-
-@paragraphindent 0
-This module supports only a small subset of the functionality of
-the device, mainly things that will typically be used in time-resolved
-EPR and ENDOR experiments.
 
 @paragraphindent 0
 @strong{Note}: While transfering measured data is decently fast (at
