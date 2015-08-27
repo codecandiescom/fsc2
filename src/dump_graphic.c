@@ -303,22 +303,29 @@ dump_as_ppm( FILE   * fp,
             unsigned long pixel = XGetPixel( image, j, i );
             int key = pixel % hash_size;
 
-            while ( hash[ key ].pixel != pixel )
+            if ( ! hash[ key ].is_used )
             {
-                key = ( key + 1 ) % hash_size;
-                if ( ! hash[ key ].is_used )
-                {
-                    // This can happen due to TTF anti-alializing! Not
-                    // a clean solution (since it expects a certain way
-                    // the color is coded into the pxiel) but better than
-                    // nothing for the time being...
+                // This can happen due to TTF anti-alializing! Not
+                // a clean solution (since it expects a certain way
+                // the color is coded into the pxiel) but better than
+                // nothing for the time being...
 
-                    hash[ key ].rgb[ RED   ] = pixel >> 16 & 0xFF;
-                    hash[ key ].rgb[ GREEN ] = pixel >> 16 & 0xFF;
-                    hash[ key ].rgb[ BLUE  ] =  pixel      & 0xFF;
-                    break;
-                }
+                hash[ key ].rgb[ RED   ] = pixel >> 16 & 0xFF;
+                hash[ key ].rgb[ GREEN ] = pixel >> 16 & 0xFF;
+                hash[ key ].rgb[ BLUE  ] =  pixel      & 0xFF;
             }
+            else
+                while ( hash[ key ].pixel != pixel )
+                {
+                    key = ( key + 1 ) % hash_size;
+                    if ( ! hash[ key ].is_used )
+                    {
+                        hash[ key ].rgb[ RED   ] = pixel >> 16 & 0xFF;
+                        hash[ key ].rgb[ GREEN ] = pixel >> 16 & 0xFF;
+                        hash[ key ].rgb[ BLUE  ] =  pixel      & 0xFF;
+                        break;
+                    }
+                }
 
             fwrite( hash[ key ].rgb, 1, 3, fp );
         }
