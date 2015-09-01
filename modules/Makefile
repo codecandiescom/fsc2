@@ -34,7 +34,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # List of modules that are to be made from a single source file only (as
 # far as they don't require some additional software)
 
-simp_modules    := User_Functions gg_chopper x_bmwb q_bmwb
+simp_modules    := User_Functions gg_chopper x_bmwb q_bmwb opo
 
 # List of modules that get build using their own Makefile (called
 # 'Makefiile.module_name')

@@ -463,7 +463,7 @@ VERSION          := 2.4.0
 
 # Set the optimization level
 
-OPTIMIZATION     := -O3
+OPTIMIZATION     := -O3 -march=native
 
 
 # Define this in order to use mpatrol

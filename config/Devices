@@ -242,3 +242,8 @@ q_bmwb
 // FFT pseudo-module
 
 fft;
+
+
+// OPTA opo (FU Berlin, AG Bittl)
+
+opo;

@@ -19,9 +19,9 @@
 
 
 CXX           := g++
-CXXFLAGS      := -std=c++11 -ggdb -Wall -Wextra
+CXXFLAGS      := -std=c++11 -ggdb -Wall -Wextra -O3 -march=native
 CC            := gcc
-CFLAGS        := -ggdb
+CFLAGS        := -ggdb -O3
 
 SOURCES       := rs_rto.cpp rs_rto_base.cpp rs_rto_trig.cpp rs_rto_chans.cpp \
 				 rs_rto_chan.cpp rs_rto_ext_chan.cpp rs_rto_inp_chan.cpp \

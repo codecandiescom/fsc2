@@ -88,13 +88,6 @@ class rs_rto_chans
 
     RS_RTO & m_rs;
 
-    // We use unique pointers since we don't want anyone making copies
-    // of the channels and thus hand out only references to them. And
-    // initializing the elements of an array of channels with std::move()
-    // also isn't possible since the required move constructor would
-    // have to be public, which would make it possible for a user to
-    // "steal" our channels...
-
 	std::vector< std::unique_ptr< rs_rto_chan > > m_channels;
 
     bool m_avg_mode;

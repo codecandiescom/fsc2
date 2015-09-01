@@ -44,35 +44,35 @@ class rs_rto_math_chan : public rs_rto_chan
   public:
 
 	bool
-	state( );
+	state( ) override;
 
 	bool
-	set_state( bool state );
+	set_state( bool state ) override;
 
 #if 0
     Arith_Mode
     set_arith_mode( Arith_Mode mode );
 #endif
 
-    double scale( );
+    double scale( ) override;
 
-    double set_scale( double sc );
+    double set_scale( double sc ) override;
 
-    double offset( );
+    double offset( ) override;
 
-    double set_offset( double sc );
-
-	std::string
-	function( );
+    double set_offset( double sc ) override;
 
 	std::string
-	set_function( std::string const & f );
+	function( ) override;
+
+	std::string
+	set_function( std::string const & f ) override;
 
     Data_Header
-    header( );
+    header( ) override;
 
     std::vector< double >
-    data( );
+    data( ) override;
 
   private:
 

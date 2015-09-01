@@ -40,34 +40,34 @@ class rs_rto_ext_chan : public rs_rto_chan
   public:
 
 	Coupling
-	coupling( ) const
+	coupling( ) const override
 	{
 		return m_coupling;
 	}
 
 	Coupling
-	set_coupling( Coupling coupling );
+	set_coupling( Coupling coupling ) override;
 
     Filter_Type
-    filter_type( ) const
+    filter_type( ) const override
     {
         return m_filter_type;
     }
 
     Filter_Type
-    set_filter_type( Filter_Type type );
+    set_filter_type( Filter_Type type ) override;
 
     Filter_Cut_Off
-    cut_off( ) const
+    cut_off( ) const override
     {
         return m_cut_off;
     }
 
     Filter_Cut_Off
-    set_cut_off( Filter_Cut_Off cut_off );
+    set_cut_off( Filter_Cut_Off cut_off ) override;
 
     bool
-    is_overloaded( bool confirm );
+    is_overloaded( bool confirm ) override;
 
   private:
 
@@ -77,6 +77,11 @@ class rs_rto_ext_chan : public rs_rto_chan
 	{
 		reset( );
 	}
+
+    rs_rto_ext_chan( rs_rto_ext_chan const & ) = delete;
+
+    rs_rto_ext_chan &
+    operator = ( rs_rto_ext_chan const & ) = delete;
 
 	void
 	reset( );

@@ -57,8 +57,8 @@ std::vector< std::string > const VXI11_Client::s_err_list =
                              "undefined error (27)",                    // 27
                              "undefined error (28)",                    // 28
                              "channel already established",             // 29
-                             "undefined error"
-                                     };
+                             "undefined error"                          // 30
+                           };
 int const VXI11_Client::s_RPC_TIMEOUT_ERROR = 5;
 std::vector< std::string > const VXI11_Client::s_rpc_err_list =
                            { "no_error",                                //  0
@@ -94,9 +94,6 @@ std::vector< std::string > const VXI11_Client::s_rpc_err_list =
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
 VXI11_Client::VXI11_Client( std::string const & device_name,
                             std::string const & address,
                             std::string const & vxi11_name,
@@ -126,9 +123,9 @@ VXI11_Client::VXI11_Client( std::string const & device_name,
  *       if it's locked by another process (0 or negative value
  *       is interpreted to mean a nearly infinite time)
  *
- * Note: connecting can take quite a bit of time and it only
- * times out after about 6 s (this can't be controlled via the
- * 'timeout' argument!).
+ * Note: connecting can take quite a while and it only times out
+ * after about 6 s (this can't be controlled via the 'timeout'
+ * argument!).
  *------------------------------------------------------------*/
 
 bool

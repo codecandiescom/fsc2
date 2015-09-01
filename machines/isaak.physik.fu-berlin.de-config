@@ -16,37 +16,3 @@ sed -i'' -e 's/^[ \t]*#define[ \t]\+\(\(LT[0-9]\+[LM]*\)\|\(_[1246][0-9]\+M\?Xi\
 sed -i'' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1; \/* this is a workaround for a device error!!! *\//' $mdir/er035m_sa.c
 
 sed -i'' -e 's/^[ \t]*nmr.probe_type[ \t]*=[ \t]*PROBE_TYPE_F0;/nmr.probe_type = PROBE_TYPE_F1; \/* this is a workaround for a device error!!! *\//' $mdir/er035m_sas.c
-
-# Add entry for the OPTA OPO device in the device database if it doesn't
-# already exist
-
-if [ -z "`grep '^[ \t]*opo[ \t]*;' $cdir/Devices`" ]; then
-	echo "
-
-// OPTA opo (FU Berlin, AG Bittl)
-
-opo;" >> $cdir/Devices;
-fi
-
-# Also add entries for all OPO EDL functions into the function database (at
-# least if they don't exist yet)
-
-if [ -z "`grep '^[ \t]*opo_' $cdir/Functions`"]; then
-	echo "
-
-/* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */
-
-opo_name, 0, ALL;
-opo_initializeDevice, 0, EXP;
-opo_goTo, 2, EXP;
-opo_scan, 6, EXP;
-opo_setStepperFrequency, 1, EXP;
-opo_originSearch, 0, EXP;
-opo_status, 0, EXP;
-opo_stop, 0, EXP;
-opo_idlerFromSignal, 1, ALL;
-opo_signalFromIdler, 1, ALL;
-opo_calibration, 3, EXP;
-opo_setOffset, 1, EXP;
-opo_goToInteractive, 1, EXP;" >> $cdir/Functions
-fi

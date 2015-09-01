@@ -729,3 +729,19 @@ fft_complex, -1, ALL;
 trigger_name, 0, ALL;
 trigger_length, -1, EXP;
 trigger_raise, 0, EXP;
+
+
+/* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */
+
+opo_name, 0, ALL;
+opo_initializeDevice, 0, EXP;
+opo_goTo, 2, EXP;
+opo_scan, 6, EXP;
+opo_setStepperFrequency, 1, EXP;
+opo_originSearch, 0, EXP;
+opo_status, 0, EXP;
+opo_stop, 0, EXP;
+opo_idlerFromSignal, 1, ALL;
+opo_signalFromIdler, 1, ALL;
+opo_calibration, 3, EXP;
+opo_setOffset, 1, EXP;

@@ -44,94 +44,94 @@ class rs_rto_inp_chan : public rs_rto_chan
   public:
 
 	bool
-	state( );
+	state( ) override;
 
 	bool
-	set_state( bool state );
+	set_state( bool state ) override;
 
 	bool
-	is_overloaded( bool reset = true );
+	is_overloaded( bool reset = true ) override;
 
 	Coupling
-	coupling( ) const
+	coupling( ) const override
 	{
 		return m_coupling;
 	}
 
 	Coupling
-	set_coupling( Coupling coupling );
+	set_coupling( Coupling coupling ) override;
 
 	double
-	scale( );
+	scale( ) override;
 
 	double
-	set_scale( double sc );
+	set_scale( double sc ) override;
 
 	double
-	min_scale( );
+	min_scale( ) override;
 
 	double
-	max_scale( );
+	max_scale( ) override;
 
 	double
-	offset( );
+	offset( ) override;
 
 	double
-	set_offset( double offs );
+	set_offset( double offs ) override;
 
 	double
-	min_offset( );
+	min_offset( ) override;
 
 	double
-	max_offset( );
+	max_offset( ) override;
 
 	double
-	position( ) const
+	position( ) const override
 	{
 		return m_position;
 	}
 
 	double
-	set_position( double position );
+	set_position( double position ) override;
 
 	double
-	impedance( ) const
+	impedance( ) const override
 	{
 		return m_impedance;
 	}
 
 	double
-	set_impedance( double impedance );
+	set_impedance( double impedance ) override;
 
     double
-    min_impedance( ) const
+    min_impedance( ) const override
     {
         return m_min_impedance;
     }
 
     double
-    max_impedance( ) const
+    max_impedance( ) const override
     {
         return m_max_impedance;
     }
 
 	Bandwidth
-	bandwidth( ) const
+	bandwidth( ) const override
 	{
 		return m_bandwidth;
 	}
 
     Bandwidth
-	set_bandwidth( Bandwidth bandwidth );
+	set_bandwidth( Bandwidth bandwidth ) override;
 
     Data_Header
-    header( );
+    header( ) override;
 
     std::vector< double >
-    data( );
+    data( ) override;
 
 	std::vector< std::vector< double > >
-    segment_data( )
+    segment_data( ) override
     {
         return segment_data( 0, 0 );
     }
@@ -144,7 +144,7 @@ class rs_rto_inp_chan : public rs_rto_chan
 
 	std::vector< std::vector< double > >
     segment_data( unsigned long start,
-                  unsigned long count );
+                  unsigned long count ) override;
 
 
   private:
