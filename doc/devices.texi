@@ -2036,8 +2036,11 @@ requested, and @code{0} for single shot (SS) mode.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the sensitivity setting of one of the
 channels of the oscilloscope. The channel can be any of the digitizing
-channels of the oscilloscope (and, in the case of the @ref{rs_rto, R&S
-RTO series}, also any of the math channels).
+channels of the oscilloscope. For the @ref{lecroy_wr, LeCroy
+Waverunner series} in queries also one of the trace channels can be
+used if it has been set for averaging (see
+@ref{digitizer_averaging()}). For the @ref{rs_rto, R&S RTO series},
+also any of the math channels can be used.
 
 If a second argument is given this is taken to be the new sensitivity
 setting (in Volts per division). If the sensitivity value passed to

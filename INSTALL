@@ -17,12 +17,14 @@ The following tools and libraries are needed to compile, install and
 run fsc2:
 
  1) gmake (i.e. the GNU version of 'make')
- 2) gcc/g++
+ 2) gcc/g++ (clang may also do)
  3) flex
  4) bison
  5) install
  6) sed
- 7) The XFORMS (shared) library and the properly installed header
+ 7) grep
+ 8) libz (the library for compressing used with gzip)
+ 9) The XFORMS (shared) library and the properly installed header
     file. You can download all of it from
 
        http://savannah.nongnu.org/projects/xforms/.
@@ -34,19 +36,19 @@ run fsc2:
     the development version, otherwise the required header will be
     missing!)
 
- 8) GPIB library (fsc2 can also be compiled and run without it but
+10) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
 
 
 Optionally, you should have
 
- 9) mail and sendmail (or similar) installed, or, if you want to use the
+11) mail and sendmail (or similar) installed, or, if you want to use the
     built-in mail agent, the libresolv.so library is required.
-10) addr2line
-11) perl (version 5.6 or higher) with the pTk (Tk support) package
-12) pnmtopng
-13) pnmtojpeg
-14) If you want to compile fsc2 with the FFT module you also need
+12) addr2line
+13) perl (version 5.6 or higher) with the pTk (Tk support) package
+14) pnmtopng
+15) pnmtojpeg
+16) If you want to compile fsc2 with the FFT module you also need
     the FFTW library, version 3, which can be downloaded e.g. from
     http://www.fftw.org/
 
@@ -58,16 +60,16 @@ won't work (which also requires the next two utilities).
 
 To create the complete documentation beside Perl you also need
 
-15) makeinfo
-16) install-info (see GNU texinfo)
-17) texi2html (at least version 1.78)
-18)
-19) TeX (if missing no PostScript and PDF documentation is created)
-20) convert and identify from the ImageMagick package (or no PostScript
+17) makeinfo
+18) install-info (see GNU texinfo)
+19) texi2html (at least version 1.78)
+20)
+11) TeX (if missing no PostScript and PDF documentation is created)
+22) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
-21) dvips (if missing no PostScript documentation is created)
-22) pdftex (if missing no PDF documentation will be created)
-23) gzip
+23) dvips (if missing no PostScript documentation is created)
+24) pdftex (if missing no PDF documentation will be created)
+25) gzip
 
 
 
@@ -173,7 +175,7 @@ Devices that are controlled via the serial port (or USB-serial con-
 verters) are always supported (at least as long as the variable
 'WITHOUT_SERIAL_PORTS isn't set).
 
-Normal USB-controlled devices can be used via the libusb package,
+"Normal" USB-controlled devices can be used via the libusb package,
 either verson 0.1 or 1.0 (which has to be installed on your machine).
 
 Devices controlled via LAN can be used if you have a network card and
@@ -193,7 +195,6 @@ the subdirectory, typing "./INSTALL" and answering a few questions.
 Please refer to the documentation (README files) in these subdirectories
 for more details. After a successful installation fsc2 should be able to
 find the libraries and include support for the devices.
-
 
 
 B) Security issues
@@ -561,7 +562,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    November 14, 2009                   Much luck, Jens
+    September 4, 2015                   Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

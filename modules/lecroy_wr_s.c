@@ -759,6 +759,30 @@ digitizer_sensitivity( Var_T * v )
     channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
+    /* If this is a query and the channel is a trace channel set up for
+       aceraging return the sensitivity of the associated measurement
+       channel */
+
+    if ( channel >= LECROY_WR_TA && channel <= LECROY_WR_TD )
+    {
+        if ( v->next )
+        {
+            print( FATAL, "Can't set sensitivity for channel %s.\n",
+                   LECROY_WR_Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }
+
+        if ( lecroy_wr.is_avg_setup[ channel ] )
+            channel = lecroy_wr.source_ch[ channel ];
+        else
+        {
+            print( FATAL, "No averaging has been set up for channel %s, "
+                   "thus can't return sensitivity of associated channel.\n",
+                   LECROY_WR_Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }              
+    }
+
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
@@ -786,7 +810,7 @@ digitizer_sensitivity( Var_T * v )
 
     too_many_arguments( v );
 
-    if ( sens < 0.0 )
+    if ( sens <= 0.0 )
     {
         print( FATAL, "Invalid negative or zero sensitivity.\n" );
         THROW( EXCEPTION );
