@@ -58,28 +58,38 @@ edit_file( FL_OBJECT * a  UNUSED_ARG,
 static void
 start_editor( void )
 {
-    char *ed, *ep;
-    char **argv, **final_argv;
+    char **argv;
     int argc = 1;
     int i;
 
+
+    /* Check the TERM environment variable for the terminal program supposed
+       to be use, and if it's not set, fall back to 'xterm' (hopefully it's
+       installed, but with modern systems even that isn't a given:-( */
+
+    char * term = getenv( "TERM" );
+    if ( ! term || ! *term )
+        term = ( char * ) "xterm";
 
     /* Try to find content of environment variable "EDITOR" - if it doesn't
        exist try to use the one compiled into the program, and as a final
        option use vi as the default editor */
 
-    ed = getenv( "EDITOR" );
+    char * ed = getenv( "EDITOR" );
 
 #if defined EDITOR
     if ( ed == NULL )
         ed = ( char * ) EDITOR;
 #endif
 
+    char * oed = ed;
+    ed = T_strdup( ed );
+
     if ( ed == NULL || *ed == '\0' )
     {
         argv = T_malloc( 5 * sizeof *argv );
 
-        argv[ 0 ] = ( char * ) "xterm";
+        argv[ 0 ] = term;
         argv[ 1 ] = ( char * ) "-e";
         argv[ 2 ] = ( char * ) "vi";
         argv[ 3 ] = EDL.files->name;
@@ -87,7 +97,7 @@ start_editor( void )
     }
     else              /* otherwise use the one given by EDITOR */
     {
-        ep = ed;
+        char * ep = ed;
         while ( *ep && *ep != ' ' )
             ++ep;
 
@@ -98,7 +108,7 @@ start_editor( void )
         {
             argv = T_malloc( 5 * sizeof *argv );
 
-            argv[ 0 ] = ( char * ) "xterm";
+            argv[ 0 ] = ( char * ) term;
             argv[ 1 ] = ( char * ) "-e";
             argv[ 2 ] = ed;
             argv[ 3 ] = EDL.files->name;
@@ -118,7 +128,7 @@ start_editor( void )
 
             argv = T_malloc( ( argc + 5 ) * sizeof *argv );
 
-            argv[ 0 ] = ( char * ) "xterm";
+            argv[ 0 ] = term;
             argv[ 1 ] = ( char * ) "-e";
             for ( ep = ed, i = 2; i < argc + 2; ++i )
             {
@@ -137,12 +147,12 @@ start_editor( void )
        it into a xterm - the same holds for xemacs which, AFAIK, always
        creates its own window. */
 
-    final_argv = argv;
+    char ** final_argv = argv;
 
-    if ( ! strcmp( strip_path( argv[ 2 ] ), "xemacs" ) )
+    char * sed = strip_path( argv[ 2 ] );
+    if ( ! strcmp( sed, "xemacs" ) )
         final_argv = argv + 2;
-
-    if ( ! strcmp( strip_path( argv[ 2 ] ), "emacs" ) )
+    else if ( ! strcmp( sed, "emacs" ) )
     {
         for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )
             /* empty */ ;
@@ -150,8 +160,17 @@ start_editor( void )
             final_argv = argv + 2;
     }
 
+    if ( final_argv == argv )
+    {
+        argv[ 2 ] = get_string( "%s %s", oed, EDL.files->name );
+        argv[ 3 ] = NULL;
+    }
+
     execvp( final_argv[ 0 ], final_argv );
+    if ( final_argv != argv )
+        T_free( argv[ 2 ] );
     T_free( argv );
+    T_free( ed );
     _exit( EXIT_FAILURE );
 }
 
