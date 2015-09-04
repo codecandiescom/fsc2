@@ -149,7 +149,7 @@ start_editor( void )
 
     char ** final_argv = argv;
 
-    char * sed = strip_path( argv[ 2 ] );
+    char const * sed = strip_path( argv[ 2 ] );
     if ( ! strcmp( sed, "xemacs" ) )
         final_argv = argv + 2;
     else if ( ! strcmp( sed, "emacs" ) )
