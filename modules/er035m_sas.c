@@ -804,6 +804,15 @@ er035m_sas_get_field( void )
 
         if ( *++state_flag >= '3' )
         {
+            if ( nmr.keep_going_on_bad_field )
+            {
+                print( SEVERE, "NMR gaussmeter not able to lock onto "
+                       "field, no further attempts to measure the "
+                       "field will be made.\n" );
+                nmr.is_bad_field = true;
+                return -1.0;
+            }
+
             print( FATAL, "NMR gaussmeter can't get lock on the field.\n" );
             THROW( EXCEPTION );
         }
