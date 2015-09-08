@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined GRAPH_HANDLER_2D_HEADER
 #define GRAPH_HANDLER_2D_HEADER
 

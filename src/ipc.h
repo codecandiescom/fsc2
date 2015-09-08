@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined IPC_HEADER
 #define IPC_HEADER
 

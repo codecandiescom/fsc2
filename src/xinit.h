@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined XINIT_HEADER
 #define XINIT_HEADER
 

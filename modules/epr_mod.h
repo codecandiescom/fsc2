@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined EPR_MOD_HEADER
 #define EPR_MOD_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined GPIBD_H
 #define GPIBD_H
 

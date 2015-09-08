@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#pragma once
 #if ! defined ACCEPT_HEADER
 #define ACCEPT_HEADER
 

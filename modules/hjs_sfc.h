@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined HJS_SFC_HEADER
+#define HJS_SFC_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -77,6 +82,9 @@ Var_T * magnet_calibration_file( Var_T * /* v */ );
 
 
 void hjs_sfc_read_calibration( void );
+
+
+#endif
 
 
 /*

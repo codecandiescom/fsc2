@@ -26,6 +26,7 @@
  *------------------------------------------------------------------------*/
 
 
+#pragma once
 #if ! defined GPIB_IF_NI_HEADER
 #define GPIB_IF_NI_HEADER
 

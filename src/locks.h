@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined LOCKS_HEADER
 #define LOCKS_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined Client_Logger_hpp_
 #define Client_Logger_hpp_
 

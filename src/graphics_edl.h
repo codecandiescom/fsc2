@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined GRAPHICS_EDL_HEADER
 #define GRAPHICS_EDL_HEADER
 

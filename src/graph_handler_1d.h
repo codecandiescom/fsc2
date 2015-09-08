@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -18,7 +18,8 @@
  */
 
 
-#if ! defined GRAPH_HANDLER_1D__HEADER
+#pragma once
+#if ! defined GRAPH_HANDLER_1D_HEADER
 #define GRAPH_HANDLER_1D_HEADER
 
 

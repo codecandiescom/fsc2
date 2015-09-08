@@ -33,6 +33,7 @@
  */
 
 
+#pragma once
 #if ! defined VX11_USER_HEADER
 #define VX11_USER_HEADER
 

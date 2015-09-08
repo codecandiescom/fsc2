@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #ifndef FD_bmwb_rsc_h_
 #define FD_bmwb_rsc_h_
 

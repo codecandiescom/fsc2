@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined LECROY_WS_G_HEADER
 #define LECROY_WS_G_HEADER
 

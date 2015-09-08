@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined MODULE_UTIL_HEADER
 #define MODULE_UTIL_HEADER
 

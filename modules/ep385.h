@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined EP385_HEADER
 #define EP385_HEADER
 

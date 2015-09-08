@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined SERIAL_HEADER
 #define SERIAL_HEADER
 

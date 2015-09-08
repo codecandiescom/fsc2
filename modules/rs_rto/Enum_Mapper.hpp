@@ -21,6 +21,7 @@
 /* Helper function for conversion between enum class types */
 
 
+#pragma once
 #if ! defined Enum_Mapper_hpp_
 #define Enum_Mapper_hpp_
 

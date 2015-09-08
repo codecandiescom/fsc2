@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -18,8 +18,9 @@
  */
 
 
+#pragma once
 #if ! defined LECROY_WR_S_HEADER
-#define LECROY_WR_HEADER_S
+#define LECROY_WR_S_HEADER
 
 
 #include "fsc2_module.h"

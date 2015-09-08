@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined PRINT_HEADER
 #define PRINT_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #include "fsc2_module.h"
 #include "gpib.h"
 

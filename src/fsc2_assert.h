@@ -22,6 +22,7 @@
  */
 
 
+#pragma once
 #if ! defined FSC2_ASSERT_HEADER
 #define FSC2_ASSERT_HEADER
 

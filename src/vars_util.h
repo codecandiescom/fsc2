@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined VARS_UTIL_HEADER
 #define VARS_UTIL_HEADER
 

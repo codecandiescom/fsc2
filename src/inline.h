@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined INLINE_HEADER
 #define INLINE_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined BUGS_HEADER
 #define BUGS_HEADER
 

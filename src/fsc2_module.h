@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined FSC2_MODULE_HEADER
 #define FSC2_MODULE_HEADER
 

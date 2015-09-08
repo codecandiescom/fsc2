@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined KEYTHLEY2600A_LL_H_
 #define KEYTHLEY2600A_LL_H_
 

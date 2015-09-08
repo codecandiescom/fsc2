@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined FSC2D_HEADER
 #define FSC2D_HEADER
 

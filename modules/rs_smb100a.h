@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined rs_smb100a_h_
 #define rs_smb100a_h_
 

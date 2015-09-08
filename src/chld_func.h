@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined CHLD_FUNC_HEADER
 #define CHLD_FUNC_HEADER
 

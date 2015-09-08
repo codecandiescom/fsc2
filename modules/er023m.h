@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined ER023M_HEADER
+#define ER023M_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -255,6 +260,9 @@ unsigned char er023m_st( void );
 bool er023m_command( const char * /* cmd */ );
 
 void er023m_failure( void );
+
+
+#endif
 
 
 /*

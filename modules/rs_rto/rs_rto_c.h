@@ -21,6 +21,7 @@
 /* File to be included by programs using the C version of the library */
 
 
+#pragma once
 #if ! defined rs_rto_c_h_
 #define rs_rto_c_h_
 

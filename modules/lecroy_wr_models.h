@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined LECROY_WR_MODELS_HEADER
+#define LECROY_WR_MODELS_HEADER
+
+
 /* In this file values which differ for the different Waverunner oscilloscope
  * are defined.
  *
@@ -659,6 +664,9 @@
 
 #else
 #error "Unknown model of LeCroy WaveRunner/X-Stream"
+#endif
+
+
 #endif
 
 

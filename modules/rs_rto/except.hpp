@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined except_hpp_
 #define except_hpp_
 

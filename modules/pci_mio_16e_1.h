@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined PCI_MIO_16E_1_FSC2_HEADER
 #define PCI_MIO_16E_1_FSC2_HEADER
 

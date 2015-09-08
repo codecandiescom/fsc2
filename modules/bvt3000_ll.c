@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -313,7 +313,7 @@ unsigned char
 bvt300_get_port( int port )
 {
     char buf[ ] = "P0";
-    unsigned int x;
+    unsigned int x = 0xFF;
     char *reply;
 
 
@@ -338,7 +338,7 @@ bvt300_get_port( int port )
 unsigned int
 bvt3000_get_interface_status( void )
 {
-    unsigned int is;
+    unsigned int is = 0xF802;
     char *reply = bvt3000_query( "IS" );
 
 

@@ -38,6 +38,7 @@
  */
 
 
+#pragma once
 #if ! defined ORIEL_MATRIX_H_
 #define ORIEL_MATRIX_H_
 

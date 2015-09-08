@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined RUN_HEADER
 #define RUN_HEADER
 

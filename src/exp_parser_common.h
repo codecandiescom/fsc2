@@ -18,7 +18,7 @@
  */
 
 
-
+#pragma once
 #if ! defined EXP_PARSER_COMMON_HEADER
 #define EXP_PARSER_COMMON_HEADER
 

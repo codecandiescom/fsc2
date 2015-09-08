@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined INTERACTIVE_SLIDERS_HEADER
 #define INTERACTIVE_SLIDERS_HEADER
 

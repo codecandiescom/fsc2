@@ -21,6 +21,7 @@
 /* Header file for the C wrapper */
 
 
+#pragma once
 #if ! defined rs_rto_c_hpp_
 #define rs_rto_c_hpp_
 

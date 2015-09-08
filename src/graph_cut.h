@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined GRAPH_CUT_HEADER
 #define GRAPH_CUT_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined EDIT_HEADER
 #define EDIT_HEADER
 

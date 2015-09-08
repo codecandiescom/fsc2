@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined BVT3000_HEADER
 #define BVT3000_HEADER
 

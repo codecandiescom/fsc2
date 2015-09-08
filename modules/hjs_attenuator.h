@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined HJS_ATTENUATOR_HEADER
+#define HJS_ATTENUATOR_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -74,6 +79,9 @@ Var_T * mw_attenuator_attenuation(         Var_T * /* v */ );
 /* Functions from hjs_attenuator_lexer.l */
 
 void hjs_attenuator_read_calibration( FILE * /* fp */ );
+
+
+#endif
 
 
 /*

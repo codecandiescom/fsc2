@@ -20,6 +20,7 @@
  */
 
 
+#pragma once
 #if ! defined AG54830B_L_HEADER
 #define AG54830B_L_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined HFS9000_HEADER
 #define HFS9000_HEADER
 

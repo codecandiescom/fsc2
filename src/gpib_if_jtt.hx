@@ -26,6 +26,7 @@
  *------------------------------------------------------------------------*/
 
 
+#pragma once
 #if ! defined GPIB_IFF_JTT_HEADER
 #define GPIB_IFF_JTT_HEADER
 

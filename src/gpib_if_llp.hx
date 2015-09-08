@@ -26,6 +26,7 @@
  *------------------------------------------------------------------------*/
 
 
+#pragma once
 #if ! defined GPIB_IF_LLP_HEADER
 #define GPIB_IF_LLP_HEADER
 

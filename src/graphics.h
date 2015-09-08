@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined GRAPHICS_HEADER
 #define GRAPHICS_HEADER
 

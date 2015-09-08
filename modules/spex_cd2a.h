@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined SPEX_CD2A_HEADER
 #define SPEX_CD2A_HEADER
 

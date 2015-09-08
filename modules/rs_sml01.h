@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined RS_SML01_HEADER
+#define RS_SML01_HEADER
+
+
 #include "fsc2_module.h"
 #include "gpib.h"
 
@@ -310,6 +315,9 @@ void rs_sml01_set_double_pulse_delay( double /* delay */ );
 #endif /* WITH_PULSE_MODULATION */
 
 void rs_sml01_setup_triggered_frequency_sweep( double /* step */ );
+
+
+#endif
 
 
 /*

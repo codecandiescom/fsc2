@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -654,7 +654,7 @@ lecroy_ws_get_trigger_source( void )
 {
     char reply[ 100 ];
     long len = sizeof reply;
-    int src;
+    int src = -1;
     char *ptr = reply + 7;
 
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined DG2020_F_HEADER
 #define DG2020_F_HEADER
 

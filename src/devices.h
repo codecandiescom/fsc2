@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined DEVICE_HEADER
 #define DEVICE_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined MAIL_HEADER
 #define MAIL_HEADER
 

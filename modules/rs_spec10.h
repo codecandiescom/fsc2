@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined RS_SPEC10_HEADER
 #define RS_SPEC10_HEADER
 

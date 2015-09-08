@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined DUMP_GRAPHICS_HEADER
 #define DUMP_GRAPHICS_HEADER
 

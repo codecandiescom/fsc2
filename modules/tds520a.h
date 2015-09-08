@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined TDS520A_HEADER
 #define TDS520A_HEADER
 

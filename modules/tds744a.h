@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined TDS744A_HEADER
 #define TDS744A_HEADER
 

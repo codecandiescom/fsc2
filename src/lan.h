@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined LAN_HEADER
 #define LAN_HEADER
 

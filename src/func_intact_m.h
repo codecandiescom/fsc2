@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined INTERACTIVE_MENUS_HEADER
 #define INTERACTIVE_MENUS_HEADER
 

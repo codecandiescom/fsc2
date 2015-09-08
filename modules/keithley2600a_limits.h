@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined KEITHLEY2600A_LIMITS_H_
 #define KEITHLEY2600A_LIMITS_H_
 

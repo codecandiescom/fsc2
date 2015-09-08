@@ -48,6 +48,7 @@
  *******************************************************************/
 
 
+#pragma once
 #ifndef EXCEPTIONS_HEADER
 #define EXCEPTIONS_HEADER
 

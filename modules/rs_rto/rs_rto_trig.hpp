@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined rs_rto_trig_hpp_
 #define rs_rto_trig_hpp_
 

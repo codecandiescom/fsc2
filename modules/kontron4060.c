@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -254,7 +254,7 @@ multimeter_get_data( Var_T * v  UNUSED_ARG )
     char reply[ 100 ];
     long length = sizeof reply;
     char buffer[ 100 ];
-    double val;
+    double val = 0;
 
 
     if ( FSC2_MODE == TEST )

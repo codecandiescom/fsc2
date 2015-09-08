@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined SPEX232_HEADER
 #define SPEX232_HEADER
 

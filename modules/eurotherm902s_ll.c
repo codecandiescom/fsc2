@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -254,12 +254,12 @@ eurotherm902s_set_sw( unsigned int sw )
 unsigned int
 eurotherm902s_get_sw( void )
 {
-    unsigned int sw;
+    unsigned long sw = 0x10000;
     char *reply = bvt3000_query( "SW" );
 
 
     if (    *reply != '>'
-         || sscanf( reply + 1, "%x", &sw ) != 1
+         || sscanf( reply + 1, "%lx", &sw ) != 1
          || sw > 0xFFFF )
         bvt3000_comm_fail( );
     return sw;
@@ -290,12 +290,12 @@ eurotherm902s_set_os( unsigned int os )
 unsigned int
 eurotherm902s_get_os( void )
 {
-    unsigned int os;
+    unsigned long os = 0x10000;
     char *reply = bvt3000_query( "OS" );
 
 
     if (    *reply != '>'
-         || sscanf( reply + 1, "%x", &os ) != 1
+         || sscanf( reply + 1, "%lx", &os ) != 1
          || os > 0xFFFF )
         bvt3000_comm_fail( );
 
@@ -327,12 +327,12 @@ eurotherm902s_set_xs( unsigned int xs )
 unsigned int
 eurotherm902s_get_xs( void )
 {
-    unsigned int xs;
+    unsigned long xs = 0x10000;
     char *reply = bvt3000_query( "XS" );
 
 
     if (    *reply != '>'
-         || sscanf( reply + 1, "%x", &xs ) != 1
+         || sscanf( reply + 1, "%lx", &xs ) != 1
          || xs > 0xFFFF )
         bvt3000_comm_fail( );
 

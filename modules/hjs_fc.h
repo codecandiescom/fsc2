@@ -18,6 +18,11 @@
  */
 
 
+#pragma once
+#if ! defined HJS_FC_HEADER
+#define HJS_FC_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -114,6 +119,9 @@ Var_T * magnet_slope(            Var_T * /* v */ );
 
 
 void hjs_fc_read_calibration( void );
+
+
+#endif
 
 
 /*

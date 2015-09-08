@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined COMM_HEADER
 #define COMM_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined FUNC_SAVE_HEADER
 #define FUNC_SAVE_HEADER
 

@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined BMWB_HEADER_
 #define BMWB_HEADER_
 

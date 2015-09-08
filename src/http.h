@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined HTTP_HEADER
 #define HTTP_HEADER
 

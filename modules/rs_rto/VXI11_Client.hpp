@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined VXI11_Client_hpp_
 #define VXI11_Client_hpp_
 

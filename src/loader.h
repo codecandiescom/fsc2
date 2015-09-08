@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined LOADER_HEADER
 #define LOADER_HEADER
 

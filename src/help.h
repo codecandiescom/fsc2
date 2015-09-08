@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined HELP_HEADER
 #define HELP_HEADER
 

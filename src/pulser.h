@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined PULSER_HEADER
 #define PULSER_HEADER
 

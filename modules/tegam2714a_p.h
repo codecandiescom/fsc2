@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined TEGAM2714A_P_HEADER
 #define TEGAM2714A_P_HEADER
 

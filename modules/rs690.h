@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#pragma once
 #if ! defined RS690_HEADER
 #define RS690_HEADER
 

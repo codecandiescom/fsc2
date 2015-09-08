@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined SPECTRAPRO_300I_HEADER
 #define SPECTRAPRO_300I_HEADER
 

@@ -18,11 +18,12 @@
  */
 
 
-#include "fsc2_module.h"
-
-
+#pragma once
 #if ! defined VICP_HEADER
 #define VICP_HEADER
+
+
+#include "fsc2_module.h"
 
 
 #define SUCCESS            0

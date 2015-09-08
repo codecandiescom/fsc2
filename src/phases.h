@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined PHASES_HEADER
 #define PHASES_HEADER
 

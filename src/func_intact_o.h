@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined INTERACTIVE_OBJECTS_HEADER
 #define INTERACTIVE_OBJECTS_HEADER
 

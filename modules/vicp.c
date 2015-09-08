@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -276,7 +276,9 @@ static inline unsigned char vicp_get_operation( unsigned char * header );
 
 static inline unsigned char vicp_get_version( unsigned char * header );
 
+#if 0
 static inline unsigned char vicp_get_sequence( unsigned char * header );
+#endif
 
 static inline ssize_t vicp_get_length( unsigned char * header );
 
@@ -978,14 +980,17 @@ vicp_get_version( unsigned char * header )
 
 
 /*----------------------------------------------------------------------*
- * Function for evaluation the "sequence number" field of a VICP header
+ * Function for evaluating the "sequence number" field of a VICP header
+ * (currently not used)
  *----------------------------------------------------------------------*/
 
+#if 0
 static inline unsigned char
 vicp_get_sequence( unsigned char * header )
 {
     return header[ VICP_HEADER_SEQUENCE_OFFSET ];
 }
+#endif
 
 
 /*-------------------------------------------------------------*

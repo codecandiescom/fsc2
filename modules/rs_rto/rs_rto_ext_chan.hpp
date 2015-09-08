@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined rs_rto_ext_chan_hpp_
 #define rs_rto_ext_chan_hpp_
 

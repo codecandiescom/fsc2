@@ -18,6 +18,7 @@
  */
 
 
+#pragma once
 #if ! defined VARIABLES_HEADER
 #define VARIABLES_HEADER
 

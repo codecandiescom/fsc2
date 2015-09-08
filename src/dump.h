@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -18,8 +18,9 @@
  */
 
 
+#pragma once
 #if ! defined DUMP_HEADER
-#define DUMP__HEADER
+#define DUMP_HEADER
 
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )
