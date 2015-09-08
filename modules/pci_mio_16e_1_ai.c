@@ -99,13 +99,13 @@ daq_ai_channel_setup( Var_T * volatile v )
     double range;
     int * volatile channels = NULL;
     double * volatile ranges = NULL;
-    int type;
+    volatile int type;
     NI_DAQ_AI_TYPE * volatile types = NULL;
-    int pol;
+    volatile int pol;
     NI_DAQ_BU_POLARITY * volatile polarities = NULL;
-    int dither_enable;
+    volatile int dither_enable;
     NI_DAQ_STATE * volatile dither_enables = NULL;
-    int num_channels = 0;
+    volatile int num_channels = 0;
     double bpr_list[ ] = { 10.0, 5.0, 2.5, 1.0, 0.5, 0.25, 0.1, 0.05 };
     double upr_list[ ] = { 10.0, 5.0, 2.0, 1.0, 0.5, 0.2, 0.1 };
     double *r_list;
@@ -116,7 +116,7 @@ daq_ai_channel_setup( Var_T * volatile v )
     int range_index, old_range_index = -1;
     int other_count;
     size_t i, j;
-    int ret = NI_DAQ_OK;
+    volatile int ret = NI_DAQ_OK;
 
 
     if ( v == NULL )

@@ -1366,7 +1366,7 @@ static double
 ni6601_time_check( double       duration,
                    const char * text )
 {
-    unsigned long ticks;
+    volatile unsigned long ticks;
 
 
     if (    1.01 * duration < 2 * NI6601_TIME_RESOLUTION

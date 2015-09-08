@@ -524,8 +524,12 @@ print( int          severity,
 void
 raise_permissions( void )
 {
-    seteuid( Fsc2_Internals.EUID );
-    setegid( Fsc2_Internals.EGID );
+    if (    seteuid( Fsc2_Internals.EUID )
+            || setegid( Fsc2_Internals.EGID ) )
+    {
+        print( FATAL, "Failed to raise permissions as required.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -537,8 +541,12 @@ raise_permissions( void )
 void
 lower_permissions( void )
 {
-    seteuid( getuid( ) );
-    setegid( getgid( ) );
+    if (    seteuid( getuid( ) )
+         || setegid( getgid( ) ) )
+    {
+        print( FATAL, "Failed to lower permissions as required.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 

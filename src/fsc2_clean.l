@@ -895,8 +895,9 @@ T_strdup( const char * string )
 static void
 lower_permissions( void )
 {
-    seteuid( getuid( ) );
-    setegid( getgid( ) );
+    if (    seteuid( getuid( ) )
+         || setegid( getgid( ) ) )
+        THROW( EXCEPTION );
 }
 
 

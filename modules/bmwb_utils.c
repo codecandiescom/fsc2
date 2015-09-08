@@ -32,8 +32,12 @@
 void
 raise_permissions( void )
 {
-    seteuid( bmwb.EUID );
-    setegid( bmwb.EGID );
+    if (    seteuid( bmwb.EUID )
+         || setegid( bmwb.EGID ) )
+    {
+        fprintf( stderr, "Failed to raise permissions as required.\n" );
+        exit( EXIT_FAILURE );
+    }
 }
 
 
@@ -45,8 +49,12 @@ raise_permissions( void )
 void
 lower_permissions( void )
 {
-    seteuid( getuid( ) );
-    setegid( getgid( ) );
+    if (    seteuid( getuid( ) )
+         || setegid( getgid( ) ) )
+    {
+        fprintf( stderr, "Failed to lower permissions as required.\n" );
+        exit( EXIT_FAILURE );
+    }
 }
 
 
