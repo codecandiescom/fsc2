@@ -24,8 +24,8 @@
  *  2. CF must be set with a resolution of 50 mG
  *  3. Sweep range limits 0 G to 16000 G
  *  4. Sweep range resolution: 100 mG
- *  5. CF plus or minus 0.5 time sweep range may never excced the field
- *     range limits
+ *  5. CF plus or minus 0.5 times the sweep range may never excced the
+ *     field range limits
  *  6. Sweep range is not truely symmetric (in contrast to what the manual
  *     claims), SWA settings can range from 0 to 4095, the generated field
  *     is equal to CF for SWA = 2048
@@ -88,8 +88,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* When setting a new center field or sweep width the value send to the
    device is read back to check if it really got set. If the values differ
-   the ER032M_MAX_SET_RETRIES times the value is again set and also checked
-   before we give up. */
+   the ER032M_MAX_SET_RETRIES is the number of times the value is set again
+   (and checked) before we give up. */
 
 #define ER032M_MAX_SET_RETRIES 3
 
@@ -151,7 +151,7 @@ static double er032m_get_sw( void );
 static int er032m_set_swa( int sweep_address );
 
 #if 0
-static int er032m_get_swa( void );        /* currently not needed */
+static int er032m_get_swa( void );        /* currently not useded */
 #endif
 
 static void er032m_test_leds( void );
@@ -279,7 +279,7 @@ er032m_test_hook( void )
 int
 er032m_end_of_test_hook( void )
 {
-    /* Tell user if field maximum field deviation was more than 1% of the
+    /* Tell user if maximum field deviation was more than 1% of the
        field step width (if one was set) or was larger than the resolution
        reasonably to be expected */
 
