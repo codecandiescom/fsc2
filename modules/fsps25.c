@@ -786,8 +786,8 @@ fsps25_off( void )
 	/* If the current wasn't zero wait long enough for the device to sweep
 	   it down to zero */
 
-	if ( fabs( fsps25.act_current ) > MAX_CURRENT_DIFF )
-		fsc2_usleep( lrnd( ( 6.0e7 * fabs( fsps25.act_current ) )
+	if ( labs( fsps25.act_current ) > MAX_CURRENT_DIFF )
+		fsc2_usleep( lrnd( ( 6.0e7 * labs( fsps25.act_current ) )
 						   / HEATER_OFF_SPEED ), UNSET );
 
 	/* Check the state and give the device up to 3 seconds of extra time if

@@ -19,9 +19,10 @@
 
 
 CXX           := g++
-CXXFLAGS      := -std=c++11 -ggdb -Wall -Wextra -O3 -march=native
+CXXFLAGS      := -std=c++11 -ggdb -Wall -Wextra -O3 -fPIC -march=native
 CC            := gcc
-CFLAGS        := -ggdb3 -O3 -march=native
+CFLAGS        := -ggdb3 -O3 -fPIC -march=native
+LFLAGS        := -shared
 
 SOURCES       := rs_rto.cpp rs_rto_base.cpp rs_rto_trig.cpp rs_rto_chans.cpp \
 				 rs_rto_chan.cpp rs_rto_ext_chan.cpp rs_rto_inp_chan.cpp \
@@ -43,11 +44,11 @@ $(VXI11_SOURCES) vxi11.h: vxi11.x
 	rpcgen -N -M $<
 
 %.o: %.c vxi11.h
-	$(CC) $(CFLAGS) $(LFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(LFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 
 librs_rto_c.so: rs_rto_c.o $(OBJECTS)

@@ -131,7 +131,7 @@ fsc2_addr2line: fsc2_addr2line.o
 	chmod 644 $@
 
 $(resources:.fd=.o): %.o: %.c %.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -fPIC $(INCLUDES) -c -o $@ $<
 
 %.c %.h: %.fd
 	fdesign -convert $<

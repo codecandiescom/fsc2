@@ -213,10 +213,8 @@ Enum_Mapper< Filter_Cut_Off > const filter_cut_off_mapper(
  * since we can create a typedef to it.
  *----------------------------------------------------*/
 
-class RS_RTO_no_namespace : public RS_RTO
+struct RS_RTO_no_namespace : public RS_RTO
 {
-  public:
-
     RS_RTO_no_namespace( char const * ip_address,
                          int          log_level )
         : RS_RTO( ip_address, log_level_mapper.v2e( log_level ) )

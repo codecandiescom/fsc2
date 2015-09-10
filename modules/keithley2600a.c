@@ -2464,7 +2464,7 @@ get_list_sweep_params( Var_T        * v,
     double max_val = 0;
     for ( ssize_t i = 0; i < v->len; i++ )
         if ( v->type == INT_VAR )
-            max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
+            max_val = d_max( max_val, fabs( ( double ) v->val.lpnt[ i ] ) );
         else
             max_val = d_max( max_val, fabs( v->val.dpnt[ i ] ) );
 

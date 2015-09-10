@@ -1134,7 +1134,7 @@ zoom_z_2d( Canvas_T * c )
        position. If the mouse was moved upwards demagnify by the inverse
        factor. */
 
-    factor = 3 * d_min( 1.0, fabs( c->ppos[ Y ] - G.start[ Y ] )
+    factor = 3 * d_min( 1.0, fabs( ( double ) c->ppos[ Y ] - G.start[ Y ] )
                              / G_2d.z_axis.h ) + 1;
 
     if ( G.start[ Y ] < c->ppos[ Y ] )

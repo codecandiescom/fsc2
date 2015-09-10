@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -576,7 +576,7 @@ monochromator_scan_setup( Var_T * volatile v )
 
     num_steps = lrnd( step / spex_cd2a.mini_step );
 
-    if ( fabs( num_steps - lrnd( step / spex_cd2a.mini_step ) ) > 0.01 )
+    if ( fabs( spex_cd2a.mini_step * num_steps - step ) > 0.01 )
     {
         if ( spex_cd2a.mode & WN_MODES )
             print( SEVERE, "Absolute value of step size of %.4f cm^-1 isn't "

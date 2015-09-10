@@ -262,11 +262,14 @@ class rs_rto_base : public VXI11_Client
     set_formats( );
 
     bool
-    write( std::string const & data );
+    write( std::string const & data,
+           bool   = false,
+           double = -1 ) override;
 
     bool
     read( std::string   & data,
-          unsigned long   max_len = 0 );
+          unsigned long   max_len = 0,
+          double                  = -1 ) override;
 
     bool
     read_eos( std::string & data );

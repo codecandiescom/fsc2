@@ -14,19 +14,13 @@ running fsc2 (except the fact that (s)he is running it). It mainly
 contains information about the place in the program where the error
 happened and how the program got to this place. Then follows a listing
 of the EDL script that was run at the time of the crash, the output
-that appeared in the error browser and, finally, some compressed and
-uuencoded text with information about the versions of all the source
-files the program was created from. This list is just a copy of the file
-"version.ugz" in the main fsc2 directory, which gets created when fsc2
-is compiled. You can use the command
+that appeared in the error browser.
 
-   uudecode version.ugz | gunzip -c
-
-or, if you're in the main directory of fsc2,
-
-   make version
-
-to display the contents of the file (but it's pretty boring).
+Unfortunately, nowadays sending the email fails most of the
+time since most machines aren't configured to send mail via
+a mail server that has a DNS entry to let the world know that
+it's a mail server - and then the email doesn't not get accepted
+from recipients mail receiving machine.
 
 If you are concerned about me receiving any information about you or
 your system you don't want me to see it's very easy to get rid of

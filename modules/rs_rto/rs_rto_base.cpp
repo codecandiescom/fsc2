@@ -603,7 +603,9 @@ rs_rto_base::has_option( Option op ) const
  *----------------------------------------------------*/
 
 bool
-rs_rto_base::write( std::string const & data )
+rs_rto_base::write( std::string const & data,
+                    bool,
+                    double )
 {
     if ( ! VXI11_Client::write( data ) )
         throw comm_failure( last_error( ) );
@@ -616,7 +618,8 @@ rs_rto_base::write( std::string const & data )
 
 bool
 rs_rto_base::read( std::string   & data,
-                   unsigned long   max_len )
+                   unsigned long   max_len,
+                   double )
 {
     if ( ! VXI11_Client::read( data, max_len ) )
         throw comm_failure( last_error( ) );

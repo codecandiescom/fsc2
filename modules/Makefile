@@ -16,6 +16,12 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# Everything we compile here becomes part of a shared library and
+# thus we need '-fPIC' to create position-independent code
+
+CFLAGS  += -fPIC
+
+
 # List of files that need to be created for the VXI-11 protocol
 
 vxi11_list      := vxi11_clnt.c vxi11_xdr.c
@@ -375,8 +381,8 @@ $(addsuffix .fsc2_so,$(simp_modules)): %.fsc2_so: %.o
 
 $(addsuffix .o,$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
 	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";         \
-	echo "$(CC) $$incl $(INCLUDES) $(CFLAGS) -c $(LFLAGS) $< -o $@";  \
-	$(CC) $$incl $(INCLUDES) $(CFLAGS) -c $(LFLAGS) $< -o $@
+	echo "$(CC) $$incl $(INCLUDES) $(CFLAGS) $< -o $@";  \
+	$(CC) $$incl $(INCLUDES) $(CFLAGS) -c $< -o $@
 
 
 # Also the modules for controlling the Frankfurt S-band magnet are made
@@ -400,8 +406,10 @@ endif
 
 $(vxi11_list) vxi11.h: vxi11.x
 	rpcgen $<
-	$(CC) $(LFLAGS) -c -o vxi11_clnt.o vxi11_clnt.c
-	$(CC) $(LFLAGS) -c -o vxi11_xdr.o vxi11_xdr.c
+	$(CC) $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC \
+	$(pkg-config --cflags freetype2) -c -o vxi11_clnt.o vxi11_clnt.c
+	$(CC) $(DEBUG_FLAGS) $(OPTIMIZATION) \
+	-fPIC $(pkg-config --cflags freetype2) -c -o vxi11_xdr.o vxi11_xdr.c
 
 # How to install the modules
 

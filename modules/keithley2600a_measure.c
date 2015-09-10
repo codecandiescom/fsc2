@@ -1130,7 +1130,7 @@ prepare_sweep_list( int           measure_what,
         if ( v->type == INT_VAR )
         {
             ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
-            max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
+            max_val = d_max( max_val, fabs( ( double ) v->val.lpnt[ i ] ) );
         }
         else
         {
@@ -1150,7 +1150,7 @@ prepare_sweep_list( int           measure_what,
             if ( v->type == INT_VAR )
             {
                 ep += sprintf( ep, "%.6g,", ( double ) v->val.lpnt[ i ] );
-                max_val = d_max( max_val, fabs( v->val.lpnt[ i ] ) );
+                max_val = d_max( max_val, fabs( ( double ) v->val.lpnt[ i ] ) );
             }
             else
             {

@@ -465,6 +465,10 @@ VERSION          := 2.4.0
 
 OPTIMIZATION     := -O3 -march=native
 
+# Set the debug flags
+
+DEBUG_FLAGS      := -ggdb3
+
 
 # Define this in order to use mpatrol
 
@@ -561,7 +565,7 @@ endif
 ifeq ($(MAKECMDGOALS),release)
 	CFLAGS += -DNDEBUG
 else
-	CFLAGS += -ggdb3
+	CFLAGS += $(DEBUG_FLAGS)
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 		CFLAGS += -DLIBC_MDEBUG
 	endif
@@ -584,7 +588,7 @@ endif
 INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
 	        -I/usr/include/X11 -I/usr/X11/include -I/usr/X11/include/X11 
 
-LFLAGS	 := -shared -fpic
+LFLAGS	 := -shared
 
 
 LIBS := -L/usr/local/lib \
