@@ -523,7 +523,7 @@ CFLAGS           := -std=c99                            \
 					-Waggregate-return                  \
 					-Wnested-externs                    \
 					-Wcast-align                        \
-	                $$$$(pkg-config --cflags freetype2)
+	                $(shell pkg-config --cflags freetype2)
 
 
 BISON         := bison

@@ -56,7 +56,7 @@
 
 $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 	@incl="$(foreach i,$(##_incl),-I$(i))";                           \
-	echo "$(CC) $(CFLAGS) $$incl $(INCLUDES) -c $< -o $@";  \
+	echo "$(CC) $(CFLAGS) $$incl $(INCLUDES) -c $< -o $@";            \
 	$(CC) $(CFLAGS) $$incl $(INCLUDES) -c $< -o $@
 
 
