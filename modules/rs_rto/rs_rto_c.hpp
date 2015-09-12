@@ -33,7 +33,7 @@
 
 extern "C"
 {
-#include "rs_rto_c.h"
+#include "rs_rto.h"
 }
 
 

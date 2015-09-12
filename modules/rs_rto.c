@@ -19,7 +19,7 @@
 
 
 #include "fsc2_module.h"
-#include "rs_rto/rs_rto_c.h"
+#include "rs_rto/rs_rto.h"
 #include "lan.h"
 #include "rs_rto.conf"
 
@@ -35,8 +35,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define TRANSFER_RATE 10e6     // 10 MB/s
 
 
-// Enumeration for settings of filter for externnal trigger input
-// channel, combining type of filter and cut-off frequency
+// Enumeration for settings of the filter for the externnal trigger
+// input channel, combining type of filter and cut-off frequency
 
 enum Ext_Filter
 {
@@ -94,25 +94,25 @@ typedef struct  // RS_RT_Chan
     bool state;
     bool is_state;
 
-    double scale;                // Channel_Ch[1-4] only
+    double scale;                // Ch[1-4] only
     bool is_scale;
 
-    double offset;               // Channel_Ch[1-4] only
+    double offset;               // Ch[1-4] only
     bool is_offset;
 
-    double position;             // Channel_Ch[1-4] only
+    double position;             // Ch[1-4] only
     bool is_position;
 
-    int coupling;                // Channel_Ch[1-4] and Channel_Ext only
+    int coupling;                // Ch[1-4] and Ext only
     bool is_coupling;
 
-    int bandwidth;               // Channel_Ch[1-4] only
+    int bandwidth;               // Ch[1-4] only
     bool is_bandwidth;
 
     int ext_filter;              // Channnel_ext only
     bool is_ext_filter;
 
-    char * function;             // Channel_Math[1-4] only
+    char * function;             // Math[1-4] only
 } RS_RT_Chan;
 
 typedef struct  // RS_RTO_Acq
@@ -151,7 +151,7 @@ typedef struct
 
     RS_RTO_Acq acq;
 
-    RS_RT_Chan chans[ Channel_Math4 + 1 ];
+    RS_RT_Chan chans[ RS_RTO_Channel_Math4 + 1 ];
 
     RS_RTO_Trig trig;
 
@@ -318,7 +318,7 @@ rs_rto_test_hook( void )
     // Make sure the strings in the test structure are real copies of
     // the strings in the other
 
-    for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
+    for ( int i = RS_RTO_Channel_Math1; i <= RS_RTO_Channel_Math4; i++ )
         if ( rs->chans[ i ].function )
             rs->chans[ i ].function = T_strdup( rs->chans[ i ].function );
 
@@ -340,7 +340,7 @@ rs_rto_end_of_test_hook( void )
     // Delete all math function strings and all windows from the test run,
     // they'll never be used again
 
-    for ( int i = Channel_Math1; i <= Channel_Math4; ++i )
+    for ( int i = RS_RTO_Channel_Math1; i <= RS_RTO_Channel_Math4; ++i )
         rs->chans[ i ].function = T_free( rs->chans[ i ].function );
 
     delete_windows( &rs_rto_test.w );
@@ -372,10 +372,10 @@ rs_rto_exp_hook( void )
 
     if ( rs->num_channels != 4 )
     {
-        if (    rs->chans[ Channel_Ch3 ].in_use
-             || rs_rto_test.chans[ Channel_Ch3 ].in_use
-             || rs->chans[ Channel_Ch4 ].in_use
-             || rs_rto_test.chans[ Channel_Ch4 ].in_use )
+        if (    rs->chans[ RS_RTO_Channel_Ch3 ].in_use
+             || rs_rto_test.chans[ RS_RTO_Channel_Ch3 ].in_use
+             || rs->chans[ RS_RTO_Channel_Ch4 ].in_use
+             || rs_rto_test.chans[ RS_RTO_Channel_Ch4 ].in_use )
         {
             print( FATAL, "EDL script uses measirement channels 3 or 4, but "
                    "the device has only 2.\n" );
@@ -455,7 +455,7 @@ rs_rto_exit_hook( void )
 
     // Get rid of all function strings
 
-    for ( int i = Channel_Math1; i <= Channel_Math4; i++ )
+    for ( int i = RS_RTO_Channel_Math1; i <= RS_RTO_Channel_Math4; i++ )
     {
         rs->chans[ i ].function = T_free( rs->chans[ i ].function );
         rs_rto_test.chans[ i ].function =
@@ -925,13 +925,13 @@ digitizer_acquisition_mode( Var_T * v )
     {
         if (    ! strcasecmp( v->val.sptr, "Norm" )
              || ! strcasecmp( v->val.sptr, "Normal" ) )
-            req_mode = Acq_Mode_Normal;
+            req_mode = RS_RTO_Acq_Mode_Normal;
         else if (    ! strcasecmp( v->val.sptr, "Avg" )
                   || ! strcasecmp( v->val.sptr, "Average" ) )
-            req_mode = Acq_Mode_Average;
+            req_mode = RS_RTO_Acq_Mode_Average;
         else if (    ! strcasecmp( v->val.sptr, "Seg" )
                   || ! strcasecmp( v->val.sptr, "Segmented" ) )
-            req_mode = Acq_Mode_Segmented;
+            req_mode = RS_RTO_Acq_Mode_Segmented;
         else
         {
             print( FATAL, "Invalid acquisition mode '%s'.\n", v->val.sptr );
@@ -941,9 +941,9 @@ digitizer_acquisition_mode( Var_T * v )
     else
     {
         req_mode = get_strict_long( v, "acquisition mode" );
-        if (    req_mode != Acq_Mode_Normal
-             && req_mode != Acq_Mode_Average
-             && req_mode != Acq_Mode_Segmented )
+        if (    req_mode != RS_RTO_Acq_Mode_Normal
+             && req_mode != RS_RTO_Acq_Mode_Average
+             && req_mode != RS_RTO_Acq_Mode_Segmented )
         {
             print( FATAL, "Invalid acquisition mode '%ld'.\n", req_mode );
             THROW( EXCEPTION );
@@ -1243,7 +1243,7 @@ digitizer_sensitivity( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == RS_RTO_Channel_Ext )
     {
         print( FATAL, "Can't set sensitivity for external trigger input.\n" );
         THROW( EXCEPTION );
@@ -1276,7 +1276,7 @@ digitizer_sensitivity( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if (    ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if (    ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
          && ( scale < 1.0e-15 || scale >= 1.0e26 ) )
     {
         print( FATAL, "Scale of %g out of range for math channel. must be "
@@ -1346,7 +1346,7 @@ digitizer_offset( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == RS_RTO_Channel_Ext )
     {
         print( FATAL, "Can't set offset for external trigger input.\n" );
         THROW( EXCEPTION );
@@ -1373,7 +1373,7 @@ digitizer_offset( Var_T * v )
     offset = get_double( v, NULL );
     too_many_arguments( v );
 
-    if (    ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if (    ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
          && ( offset < -1.0e26 || offset > 1.0e26 ) )
     {
         print( FATAL, "Offset of %g out of range for math channel. must be "
@@ -1435,8 +1435,8 @@ digitizer_channel_position( Var_T * v )
 
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if (    rch == Channel_Ext
-         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+    if (    rch == RS_RTO_Channel_Ext
+         || ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 ) )
     {
         print( FATAL, "Channel '%s' has no position.\n",
                Channel_Names[ fch ] );
@@ -1513,7 +1513,7 @@ digitizer_coupling( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
     {
         print( FATAL, "Math channel '%s' has no input coupling.\n",
                Channel_Names[ fch ] );
@@ -1543,11 +1543,11 @@ digitizer_coupling( Var_T * v )
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "DC50" ) )
-            req_coup = Coupling_DC50;
+            req_coup = RS_RTO_Coupling_DC50;
         else if ( ! strcasecmp( v->val.sptr, "DC1M" ) )
-            req_coup = Coupling_DC1M;
+            req_coup = RS_RTO_Coupling_DC1M;
         else if ( ! strcasecmp( v->val.sptr, "AC" ) )
-            req_coup = Coupling_AC;
+            req_coup = RS_RTO_Coupling_AC;
         else
         {
             print( FATAL, "Invalid coupling '%s'.\n", v->val.sptr );
@@ -1557,9 +1557,9 @@ digitizer_coupling( Var_T * v )
     else
     {
         req_coup = get_strict_long( v, "coupling" );
-        if (    req_coup != Coupling_DC50
-             && req_coup != Coupling_DC1M
-             && req_coup != Coupling_AC )
+        if (    req_coup != RS_RTO_Coupling_DC50
+             && req_coup != RS_RTO_Coupling_DC1M
+             && req_coup != RS_RTO_Coupling_AC )
         {
             print( FATAL, "Invalid coupling '%ld'.\n", req_coup );
             THROW( EXCEPTION );
@@ -1605,8 +1605,8 @@ digitizer_bandwidth_limiter( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if (    rch == Channel_Ext
-         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+    if (    rch == RS_RTO_Channel_Ext
+         || ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 ) )
     {
         print( FATAL, "Channel '%s' has no bandwidth limiter.\n",
                Channel_Names[ fch ] );
@@ -1636,13 +1636,13 @@ digitizer_bandwidth_limiter( Var_T * v )
     if ( v->type == STR_VAR )
     {
         if (    ! strcasecmp( v->val.sptr, "Off" ) )
-            req_bw = Bandwidth_Full;
+            req_bw = RS_RTO_Bandwidth_Full;
         else if ( ! strcasecmp( v->val.sptr, "20MHz" ) )
-            req_bw = Bandwidth_MHz20;
+            req_bw = RS_RTO_Bandwidth_MHz20;
         else if ( ! strcasecmp( v->val.sptr, "200MHz" ) )
-            req_bw = Bandwidth_MHz200;
+            req_bw = RS_RTO_Bandwidth_MHz200;
         else if ( ! strcasecmp( v->val.sptr, "800MHz" ) )
-            req_bw = Bandwidth_MHz800;
+            req_bw = RS_RTO_Bandwidth_MHz800;
         else
         {
             print( FATAL, "Invalid bandwidth limiter '%s'.\n", v->val.sptr );
@@ -1652,10 +1652,10 @@ digitizer_bandwidth_limiter( Var_T * v )
     else
     {
         req_bw = get_strict_long( v, "bandwidth" );
-        if (    req_bw != Bandwidth_Full
-             && req_bw != Bandwidth_MHz20
-             && req_bw != Bandwidth_MHz200
-             && req_bw != Bandwidth_MHz800 )
+        if (    req_bw != RS_RTO_Bandwidth_Full
+             && req_bw != RS_RTO_Bandwidth_MHz20
+             && req_bw != RS_RTO_Bandwidth_MHz200
+             && req_bw != RS_RTO_Bandwidth_MHz800 )
         {
             print( FATAL, "Invalid bandwidth limiter '%ld'.\n", req_bw );
             THROW( EXCEPTION );
@@ -1673,13 +1673,13 @@ digitizer_bandwidth_limiter( Var_T * v )
 
     // RTO1002 and RTO1004 can't set 800 MHz bandwidth limiter
 
-    if ( req_bw == Bandwidth_MHz800 )
+    if ( req_bw == RS_RTO_Bandwidth_MHz800 )
     {
         int model;
         check( rs_rto_model( rs->dev, &model ) );
 
-        if ( model == Model_RTO1002 || model == Model_RTO1004 )
-            req_bw = Bandwidth_Full;
+        if ( model == RS_RTO_Model_RTO1002 || model == RS_RTO_Model_RTO1004 )
+            req_bw = RS_RTO_Bandwidth_Full;
     }
 
     bw = req_bw;
@@ -1701,19 +1701,20 @@ digitizer_ext_channel_filter( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! rs->chans[ Channel_Ext ].is_ext_filter )
+                if ( ! rs->chans[ RS_RTO_Channel_Ext ].is_ext_filter )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
                 return vars_push( INT_VAR,
-                                  rs->chans[ Channel_Ext ].ext_filter );
+                                  rs->chans[ RS_RTO_Channel_Ext ].ext_filter );
 
             default :
             {
-                check( rs_rto_channel_filter_type( rs->dev, Channel_Ext,
+                check( rs_rto_channel_filter_type( rs->dev, RS_RTO_Channel_Ext,
                                                    &ft ) );
-                check( rs_rto_channel_cut_off( rs->dev, Channel_Ext, &fco ) );
+                check( rs_rto_channel_cut_off( rs->dev, RS_RTO_Channel_Ext,
+                                               &fco ) );
                 return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
             }
         }
@@ -1725,43 +1726,43 @@ digitizer_ext_channel_filter( Var_T * v )
         if ( ! strcasecmp( v->val.sptr, "Off" ) )
         {
             ext_filter = Ext_Filter_Off;
-            ft = Filter_Type_Off;
+            ft = RS_RTO_Filter_Type_Off;
         }
         else if ( ! strcasecmp( v->val.sptr, "Low_Pass_5kHz" ) )
         {
             ext_filter = Ext_Filter_Low_Pass_5kHz;
-            ft = Filter_Type_Low_Pass;
-            fco = Filter_Cut_Off_kHz5;
+            ft  = RS_RTO_Filter_Type_Low_Pass;
+            fco = RS_RTO_Filter_Cut_Off_kHz5;
         }
         else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50kHz" ) )
         {
             ext_filter = Ext_Filter_Low_Pass_50kHz;
-            ft = Filter_Type_Low_Pass;
-            fco = Filter_Cut_Off_kHz50;
+            ft  = RS_RTO_Filter_Type_Low_Pass;
+            fco = RS_RTO_Filter_Cut_Off_kHz50;
         }
         else if ( ! strcasecmp( v->val.sptr, "Low_Pass_50MHz" ) )
         {
             ext_filter = Ext_Filter_Low_Pass_50MHz;
-            ft = Filter_Type_Low_Pass;
-            fco = Filter_Cut_Off_MHz50;
+            ft  = RS_RTO_Filter_Type_Low_Pass;
+            fco = RS_RTO_Filter_Cut_Off_MHz50;
         }
         else if ( ! strcasecmp( v->val.sptr, "High_Pass_5kHz" ) )
         {
             ext_filter = Ext_Filter_High_Pass_5kHz;
-            ft = Filter_Type_High_Pass;
-            fco = Filter_Cut_Off_kHz5;
+            ft =  RS_RTO_Filter_Type_High_Pass;
+            fco = RS_RTO_Filter_Cut_Off_kHz5;
         }
         else if ( ! strcasecmp( v->val.sptr, "Low_High_50kHz" ) )
         {
             ext_filter = Ext_Filter_High_Pass_50kHz;
-            ft = Filter_Type_High_Pass;
-            fco = Filter_Cut_Off_kHz50;
+            ft  = RS_RTO_Filter_Type_High_Pass;
+            fco = RS_RTO_Filter_Cut_Off_kHz50;
         }
         else if ( ! strcasecmp( v->val.sptr, "Low_High_50MHz" ) )
         {
             ext_filter = Ext_Filter_High_Pass_50MHz;
-            ft = Filter_Type_High_Pass;
-            fco = Filter_Cut_Off_MHz50;
+            ft =  RS_RTO_Filter_Type_High_Pass;
+            fco = RS_RTO_Filter_Cut_Off_MHz50;
         }
         else
         {
@@ -1782,21 +1783,22 @@ digitizer_ext_channel_filter( Var_T * v )
     if ( FSC2_MODE != EXPERIMENT )
     {
         if (    FSC2_MODE == PREPARATION
-             && rs->chans[ Channel_Ext ].is_ext_filter )
+             && rs->chans[ RS_RTO_Channel_Ext ].is_ext_filter )
         {
             print( SEVERE, "Filter for external trigger input channel has "
                    "already been set preparations, leaving value "
                    "unchanged.\n" );
-            return vars_push( INT_VAR,rs->chans[ Channel_Ext ].ext_filter );
+            return vars_push( INT_VAR,
+                              rs->chans[ RS_RTO_Channel_Ext ].ext_filter );
         }
 
-        rs->chans[ Channel_Ext ].ext_filter = ext_filter;
-        rs->chans[ Channel_Ext ].is_ext_filter = true;
+        rs->chans[ RS_RTO_Channel_Ext ].ext_filter = ext_filter;
+        rs->chans[ RS_RTO_Channel_Ext ].is_ext_filter = true;
         return vars_push( INT_VAR, ext_filter );
     }
 
-    check( rs_rto_channel_set_filter_type( rs->dev, Channel_Ext, &ft ) );
-    check( rs_rto_channel_set_cut_off( rs->dev, Channel_Ext, &fco ) );
+    check( rs_rto_channel_set_filter_type( rs->dev, RS_RTO_Channel_Ext, &ft ) );
+    check( rs_rto_channel_set_cut_off( rs->dev, RS_RTO_Channel_Ext, &fco ) );
 
     return vars_push( INT_VAR, to_ext_filter( ft, fco ) );
 }
@@ -1811,7 +1813,7 @@ digitizer_available_data( Var_T * v )
     long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == RS_RTO_Channel_Ext )
     {
         print( FATAL, "Data are never available for external trigger input "
                "channel.\n" );
@@ -1859,7 +1861,7 @@ digitizer_get_curve( Var_T * v )
     long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == RS_RTO_Channel_Ext )
     {
         print( FATAL, "Can't get curves from external trigger input "
                "channel.\n" );
@@ -1958,8 +1960,8 @@ digitizer_get_segments( Var_T * v )
     long fch = get_strict_long( v, "channel" );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if (    rch == Channel_Ext
-         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+    if (    rch == RS_RTO_Channel_Ext
+         || ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 ) )
     {
         print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
@@ -2100,7 +2102,7 @@ digitizer_trigger_channel( Var_T * v )
     too_many_arguments( v );
     rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
     {
         print( FATAL, "Math cnannels can't be used as trigegr channels" );
         THROW( EXCEPTION );
@@ -2141,7 +2143,7 @@ digitizer_trigger_level( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
     {
         print( FATAL, "Math channel can't be a trigger channel" );
         THROW( EXCEPTION );
@@ -2230,7 +2232,7 @@ digitizer_trigger_slope( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch >= Channel_Math1 && rch <= Channel_Math4 )
+    if ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 )
     {
         print( FATAL, "Math channel can't be a trigger channel" );
         THROW( EXCEPTION );
@@ -2260,10 +2262,10 @@ digitizer_trigger_slope( Var_T * v )
     {
         if (    ! strcasecmp( v->val.sptr, "POSITIVE" )
              || ! strcasecmp( v->val.sptr, "POS" ) )
-            req_slope = Trig_Slope_Positive;
+            req_slope = RS_RTO_Trig_Slope_Positive;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
                   || ! strcasecmp( v->val.sptr, "NEG" ) )
-            req_slope = Trig_Slope_Negative;
+            req_slope = RS_RTO_Trig_Slope_Negative;
         else
         {
             print( FATAL, "Invalid trigger slope requested: '%s'.\n",
@@ -2274,8 +2276,8 @@ digitizer_trigger_slope( Var_T * v )
     else
     {
         req_slope = get_strict_long( v, "trigger slope" );
-        if (    req_slope != Trig_Slope_Negative
-             && req_slope != Trig_Slope_Positive )
+        if (    req_slope != RS_RTO_Trig_Slope_Negative
+             && req_slope != RS_RTO_Trig_Slope_Positive )
         {
             print( FATAL, "Invalid trigget slope requested: %ld.\n",
                    req_slope );
@@ -2335,10 +2337,10 @@ digitizer_trigger_mode( Var_T * v )
     if ( v->type == STR_VAR )
     {
         if ( ! strcasecmp( v->val.sptr, "AUTO" ) )
-            req_mode = Trig_Mode_Auto;
+            req_mode = RS_RTO_Trig_Mode_Auto;
         else if (    ! strcasecmp( v->val.sptr, "NORMAL" )
                   || ! strcasecmp( v->val.sptr, "NORM" ) )
-            req_mode = Trig_Mode_Normal;
+            req_mode = RS_RTO_Trig_Mode_Normal;
         else
         {
             print( FATAL, "Invalid trigger mode '%s'.\n", v->val.sptr );
@@ -2349,7 +2351,8 @@ digitizer_trigger_mode( Var_T * v )
     {
         req_mode = get_strict_long( v, "trigger_mode" );
 
-        if ( req_mode != Trig_Mode_Auto && req_mode != Trig_Mode_Normal )
+        if (    req_mode != RS_RTO_Trig_Mode_Auto
+             && req_mode != RS_RTO_Trig_Mode_Normal )
         {
             print( FATAL, "Invalid trigger mode: %ld.\n", req_mode );
             THROW( EXCEPTION );
@@ -2679,7 +2682,7 @@ digitizer_math_function( Var_T * v )
     v = vars_pop( v );
     int rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch < Channel_Math1 || rch > Channel_Math3 )
+    if ( rch < RS_RTO_Channel_Math1 || rch > RS_RTO_Channel_Math4 )
     {
         print( FATAL, "Function can only be used with math channels.\n" );
         THROW( EXCEPTION );
@@ -2885,10 +2888,10 @@ digitizer_trigger_out_pulse_polarity( Var_T * v )
     {
         if (    ! strcasecmp( v->val.sptr, "POSITIVE" )
              || ! strcasecmp( v->val.sptr, "POS" ) )
-            pol = Polarity_Positive;
+            pol = RS_RTO_Polarity_Positive;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
                   || ! strcasecmp( v->val.sptr, "NEG" ) )
-            pol = Polarity_Negative;
+            pol = RS_RTO_Polarity_Negative;
         else
         {
             print( FATAL, "Invalid trigger out pulse polarity: '%s'.\n",
@@ -2900,9 +2903,9 @@ digitizer_trigger_out_pulse_polarity( Var_T * v )
     {
         long req_pol = get_strict_long( v, "trigger out pulse polarity" );
         if ( req_pol == 0 )
-            pol = Polarity_Negative;
+            pol = RS_RTO_Polarity_Negative;
         else if ( req_pol == 1 )
-            pol = Polarity_Positive;
+            pol = RS_RTO_Polarity_Positive;
         else
         {
             print( FATAL, "Invalid trigger out pulse polarity: %ld.\n",
@@ -3046,23 +3049,23 @@ fsc2_ch_2_rto_ch( long ch )
     int rch = -1;
 
     if ( ch == CHANNEL_CH1 )
-        return Channel_Ch1;
+        return RS_RTO_Channel_Ch1;
     else if ( ch == CHANNEL_CH2 )
-        rch = Channel_Ch2;
+        rch = RS_RTO_Channel_Ch2;
     else if ( ch == CHANNEL_CH3 && rs->num_channels == 4 )
-        rch = Channel_Ch3;
+        rch = RS_RTO_Channel_Ch3;
     else if ( ch == CHANNEL_CH4 && rs->num_channels == 4 )
-        rch = Channel_Ch4;
+        rch = RS_RTO_Channel_Ch4;
     else if ( ch == CHANNEL_EXT )
-        rch = Channel_Ext;
+        rch = RS_RTO_Channel_Ext;
     else if ( ch == CHANNEL_MATH1 )
-        rch = Channel_Math1;
+        rch = RS_RTO_Channel_Math1;
     else if ( ch == CHANNEL_MATH2 )
-        rch = Channel_Math2;
+        rch = RS_RTO_Channel_Math2;
     else if ( ch == CHANNEL_MATH3 )
-        rch = Channel_Math3;
+        rch = RS_RTO_Channel_Math3;
     else if ( ch == CHANNEL_MATH4 )
-        rch = Channel_Math4;
+        rch = RS_RTO_Channel_Math4;
     else
     {
         if ( ch == CHANNEL_CH3 || ch == CHANNEL_CH4 )
@@ -3128,24 +3131,24 @@ long
 to_ext_filter( int ft,
                int fco )
 {
-    if ( ft == Filter_Type_Off )
+    if ( ft == RS_RTO_Filter_Type_Off )
         return Ext_Filter_Off;
-    else if ( ft == Filter_Type_Low_Pass )
+    else if ( ft == RS_RTO_Filter_Type_Low_Pass )
     {
-        if ( fco == Filter_Cut_Off_kHz5 )
+        if ( fco == RS_RTO_Filter_Cut_Off_kHz5 )
             return Ext_Filter_Low_Pass_5kHz;
-        else if ( fco == Filter_Cut_Off_kHz50 )
+        else if ( fco == RS_RTO_Filter_Cut_Off_kHz50 )
             return Ext_Filter_Low_Pass_50kHz;
-        else if ( fco == Filter_Cut_Off_MHz50 )
+        else if ( fco == RS_RTO_Filter_Cut_Off_MHz50 )
             return Ext_Filter_Low_Pass_50MHz;
     }
-    else if ( ft == Filter_Type_High_Pass )
+    else if ( ft == RS_RTO_Filter_Type_High_Pass )
     {
-        if ( fco == Filter_Cut_Off_kHz5 )
+        if ( fco == RS_RTO_Filter_Cut_Off_kHz5 )
             return Ext_Filter_High_Pass_5kHz;
-        else if ( fco == Filter_Cut_Off_kHz50 )
+        else if ( fco == RS_RTO_Filter_Cut_Off_kHz50 )
             return Ext_Filter_High_Pass_50kHz;
-        else if ( fco == Filter_Cut_Off_MHz50 )
+        else if ( fco == RS_RTO_Filter_Cut_Off_MHz50 )
             return Ext_Filter_High_Pass_50MHz;
     }
 
@@ -3164,36 +3167,36 @@ from_ext_filter( long   e,
                  int  * fco )
 {
     if ( e == Ext_Filter_Off )
-        *ft = Filter_Type_Off;
+        *ft = RS_RTO_Filter_Type_Off;
     else if ( e == Ext_Filter_Low_Pass_5kHz )
     {
-        *ft  = Filter_Type_Low_Pass;
-        *fco = Filter_Cut_Off_kHz5;
+        *ft  = RS_RTO_Filter_Type_Low_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_kHz5;
     }
     else if ( e == Ext_Filter_Low_Pass_50kHz )
     {
-        *ft  = Filter_Type_Low_Pass;
-        *fco = Filter_Cut_Off_kHz50;
+        *ft  = RS_RTO_Filter_Type_Low_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_kHz50;
     }
     else if ( e == Ext_Filter_Low_Pass_50MHz )
     {
-        *ft  = Filter_Type_Low_Pass;
-        *fco = Filter_Cut_Off_MHz50;
+        *ft  = RS_RTO_Filter_Type_Low_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_MHz50;
     }
     else if ( e == Ext_Filter_High_Pass_5kHz )
     {
-        *ft  = Filter_Type_High_Pass;
-        *fco = Filter_Cut_Off_kHz5;
+        *ft  = RS_RTO_Filter_Type_High_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_kHz5;
     }
     else if ( e == Ext_Filter_High_Pass_50kHz )
     {
-        *ft  = Filter_Type_High_Pass;
-        *fco = Filter_Cut_Off_kHz50;
+        *ft  = RS_RTO_Filter_Type_High_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_kHz50;
     }
     else if ( e == Ext_Filter_High_Pass_50MHz )
     {
-        *ft  = Filter_Type_High_Pass;
-        *fco = Filter_Cut_Off_MHz50;
+        *ft  = RS_RTO_Filter_Type_High_Pass;
+        *fco = RS_RTO_Filter_Cut_Off_MHz50;
     }
     else
     {
@@ -3458,7 +3461,7 @@ get_calculated_curve_data( Var_T  * v,
     v = vars_pop( v );
     int volatile rch = fsc2_ch_2_rto_ch( fch );
 
-    if ( rch == Channel_Ext )
+    if ( rch == RS_RTO_Channel_Ext )
     {
         print( FATAL, "Can't get curve from external trigger input "
                "channel.\n" );
@@ -3638,8 +3641,8 @@ get_calculated_segment_data( Var_T  * v,
     v = vars_pop( v );
     int volatile rch = fsc2_ch_2_rto_ch( fch );
 
-    if (    rch == Channel_Ext
-         || ( rch >= Channel_Math1 && rch <= Channel_Math4 ) )
+    if (    rch == RS_RTO_Channel_Ext
+         || ( rch >= RS_RTO_Channel_Math1 && rch <= RS_RTO_Channel_Math4 ) )
     {
         print( FATAL, "Can't get segments from %s.\n", Channel_Names[ fch ] );
         THROW( EXCEPTION );
@@ -3845,7 +3848,7 @@ init_prep_acq( void )
     rs->acq.record_length = 10000;
 
     rs->acq.is_mode = false;
-    rs->acq.mode = Acq_Mode_Normal;
+    rs->acq.mode = RS_RTO_Acq_Mode_Normal;
 
     rs->acq.is_num_averages = false;
     rs->acq.num_averages = 10;
@@ -3862,19 +3865,19 @@ static
 void
 init_prep_trig( void )
 {
-    rs->trig.source = Channel_Ch1;
+    rs->trig.source = RS_RTO_Channel_Ch1;
     rs->trig.is_source = false;
 
-    for ( int i = Channel_Ext; i <= Channel_Ch4; i++ )
+    for ( int i = RS_RTO_Channel_Ext; i <= RS_RTO_Channel_Ch4; i++ )
     {
         rs->trig.level[  i ] = 0.0;
         rs->trig.is_level[ i ] = false;
 
-        rs->trig.slope[ i ] = Trig_Slope_Positive;
+        rs->trig.slope[ i ] = RS_RTO_Trig_Slope_Positive;
         rs->trig.is_slope[ i ] =  false;
     }
 
-    rs->trig.mode = Trig_Mode_Normal;
+    rs->trig.mode = RS_RTO_Trig_Mode_Normal;
     rs->trig.is_mode = false;
 
     rs->trig.position = 5.0e-8;
@@ -3886,7 +3889,7 @@ init_prep_trig( void )
     rs->trig.out_pulse_length = 1e-7;
     rs->trig.is_out_pulse_length = false;
 
-    rs->trig.out_pulse_polarity = Polarity_Positive;
+    rs->trig.out_pulse_polarity = RS_RTO_Polarity_Positive;
     rs->trig.is_out_pulse_polarity = false;
 
     rs->trig.out_pulse_delay = 8e-7;
@@ -3901,7 +3904,7 @@ static
 void
 init_prep_chans( void )
 {
-    for ( int i = 0; i <= Channel_Math4; i++ )
+    for ( int i = 0; i <= RS_RTO_Channel_Math4; i++ )
     {
         RS_RT_Chan * ch = rs->chans + i;
 
@@ -3919,10 +3922,10 @@ init_prep_chans( void )
         ch->position = 0;
         ch->is_position = false;
 
-        ch->coupling = Coupling_AC;
+        ch->coupling = RS_RTO_Coupling_AC;
         ch->is_coupling = false;
 
-        ch->bandwidth = Bandwidth_Full;
+        ch->bandwidth = RS_RTO_Bandwidth_Full;
         ch->is_bandwidth = false;
 
         ch->ext_filter = Ext_Filter_Off;
@@ -3931,7 +3934,7 @@ init_prep_chans( void )
         ch->function = NULL;
     }
 
-    rs->chans[ Channel_Ch1 ].state = true;
+    rs->chans[ RS_RTO_Channel_Ch1 ].state = true;
 }
 
 
@@ -3987,7 +3990,7 @@ init_exp_trig( void )
         check( rs_rto_trigger_set_source( rs->dev, &source ) );
     }
 
-    for ( int i = Channel_Ext; i <= Channel_Ch4; i++ )
+    for ( int i = RS_RTO_Channel_Ext; i <= RS_RTO_Channel_Ch4; i++ )
     {
         if ( rs->trig.is_level[ i ] )
         {
@@ -4047,7 +4050,7 @@ static
 void
 init_exp_chans( void )
 {
-    for ( int i = Channel_Ext; i <= Channel_Math4; i++ )
+    for ( int i = RS_RTO_Channel_Ext; i <= RS_RTO_Channel_Math4; i++ )
     {
         RS_RT_Chan * ch = rs->chans + i;
 
@@ -4089,8 +4092,9 @@ init_exp_chans( void )
             int model;
             check( rs_rto_model( rs->dev, &model ) );
 
-            if ( model == Model_RTO1002 || model == Model_RTO1004 )
-                ch->bandwidth = Bandwidth_Full;
+            if (    model == RS_RTO_Model_RTO1002
+                 || model == RS_RTO_Model_RTO1004 )
+                ch->bandwidth = RS_RTO_Bandwidth_Full;
 
             int bw = ch->bandwidth;
             check( rs_rto_channel_set_bandwidth( rs->dev, i, &bw ) );
@@ -4103,7 +4107,7 @@ init_exp_chans( void )
             from_ext_filter( ch->ext_filter, &ft, &fco );
 
             check( rs_rto_channel_set_filter_type( rs->dev, i, &ft ) );
-            if ( ft != Filter_Type_Off )
+            if ( ft != RS_RTO_Filter_Type_Off )
                 check( rs_rto_channel_set_cut_off( rs->dev, i, &fco ) );
         }
 

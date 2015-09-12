@@ -22,8 +22,8 @@
 
 
 #pragma once
-#if ! defined rs_rto_c_h_
-#define rs_rto_c_h_
+#if ! defined rs_rto_h_
+#define rs_rto_h_
 
 #include <stdbool.h>
 
@@ -50,133 +50,133 @@ enum
 
 enum
 {
-    Log_Level_None,              // no logging at all (and no file opened)
-    Log_Level_Low,               // logs errors only
-    Log_Level_Normal,            // logs function calls and errors
-    Log_Level_High               // logs function calls, all data and errors
+    FSC3_Log_Level_None,         // no logging at all (and no file opened)
+    FSC3_Log_Level_Low,          // logs errors only
+    FSC3_Log_Level_Normal,       // logs function calls and errors
+    FSC3_Log_Level_High          // logs function calls, all data and errors
 };
 
 enum
 {
-    Model_RTO1002,
-    Model_RTO1004,
-    Model_RTO1012,
-    Model_RTO1014,
-    Model_RTO1022,
-    Model_RTO1024,
-    Model_RTO1044
+    RS_RTO_Model_RTO1002,
+    RS_RTO_Model_RTO1004,
+    RS_RTO_Model_RTO1012,
+    RS_RTO_Model_RTO1014,
+    RS_RTO_Model_RTO1022,
+    RS_RTO_Model_RTO1024,
+    RS_RTO_Model_RTO1044
 };
 
 enum
 {
-    Option_B1,
-    Option_B4,
-    Option_B10,
-    Option_B18,
-    Option_B19,
-    Option_B101,
-    Option_B102,
-    Option_B103,
-    Option_B104,
-    Option_B200,
-    Option_B201,
-    Option_B202,
-    Option_B203,
-    Option_B205,
-    Option_K1,
-    Option_K2,
-    Option_K3,
-    Option_K4,
-    Option_K5,
-    Option_K6,
-    Option_K7,
-    Option_K8,
-    Option_K9,
-    Option_K11,
-    Option_K12,
-    Option_K13,
-    Option_K17,
-    Option_K21,
-    Option_K22,
-    Option_K23,
-    Option_K24,
-    Option_K26,
-    Option_K31,
-    Option_K40,
-    Option_K50,
-    Option_K52,
-    Option_K55,
-    Option_K60,
-    Option_U1
+    RS_RTO_Option_B1,
+    RS_RTO_Option_B4,
+    RS_RTO_Option_B10,
+    RS_RTO_Option_B18,
+    RS_RTO_Option_B19,
+    RS_RTO_Option_B101,
+    RS_RTO_Option_B102,
+    RS_RTO_Option_B103,
+    RS_RTO_Option_B104,
+    RS_RTO_Option_B200,
+    RS_RTO_Option_B201,
+    RS_RTO_Option_B202,
+    RS_RTO_Option_B203,
+    RS_RTO_Option_B205,
+    RS_RTO_Option_K1,
+    RS_RTO_Option_K2,
+    RS_RTO_Option_K3,
+    RS_RTO_Option_K4,
+    RS_RTO_Option_K5,
+    RS_RTO_Option_K6,
+    RS_RTO_Option_K7,
+    RS_RTO_Option_K8,
+    RS_RTO_Option_K9,
+    RS_RTO_Option_K11,
+    RS_RTO_Option_K12,
+    RS_RTO_Option_K13,
+    RS_RTO_Option_K17,
+    RS_RTO_Option_K21,
+    RS_RTO_Option_K22,
+    RS_RTO_Option_K23,
+    RS_RTO_Option_K24,
+    RS_RTO_Option_K26,
+    RS_RTO_Option_K31,
+    RS_RTO_Option_K40,
+    RS_RTO_Option_K50,
+    RS_RTO_Option_K52,
+    RS_RTO_Option_K55,
+    RS_RTO_Option_K60,
+    RS_RTO_Option_U1
 };
 
 enum
 {
-    Channel_Ext,
-    Channel_Ch1,
-    Channel_Ch2,
-    Channel_Ch3,
-    Channel_Ch4,
-    Channel_Math1,
-    Channel_Math2,
-    Channel_Math3,
-    Channel_Math4,
+    RS_RTO_Channel_Ext,
+    RS_RTO_Channel_Ch1,
+    RS_RTO_Channel_Ch2,
+    RS_RTO_Channel_Ch3,
+    RS_RTO_Channel_Ch4,
+    RS_RTO_Channel_Math1,
+    RS_RTO_Channel_Math2,
+    RS_RTO_Channel_Math3,
+    RS_RTO_Channel_Math4,
 };
 
 enum
 {
-    Trig_Slope_Negative,
-    Trig_Slope_Positive,
-    Trig_Slope_Either
+    RS_RTO_Trig_Slope_Negative,
+    RS_RTO_Trig_Slope_Positive,
+    RS_RTO_Trig_Slope_Either
 };
 
 enum
 {
-    Trig_Mode_Auto,
-    Trig_Mode_Normal,
-    Trig_Mode_Free_Running
+    RS_RTO_Trig_Mode_Auto,
+    RS_RTO_Trig_Mode_Normal,
+    RS_RTO_Trig_Mode_Free_Running
 };
 
 enum
 {
-    Coupling_AC,
-    Coupling_DC1M,
-    Coupling_DC50
+    RS_RTO_Coupling_AC,
+    RS_RTO_Coupling_DC1M,
+    RS_RTO_Coupling_DC50
 };
 
 enum
 {
-    Bandwidth_Full,
-    Bandwidth_MHz20,
-    Bandwidth_MHz200,
-    Bandwidth_MHz800
+    RS_RTO_Bandwidth_Full,
+    RS_RTO_Bandwidth_MHz20,
+    RS_RTO_Bandwidth_MHz200,
+    RS_RTO_Bandwidth_MHz800
 };
 
 enum
 {
-    Polarity_Positive,
-    Polarity_Negative,
+    RS_RTO_Polarity_Positive,
+    RS_RTO_Polarity_Negative,
 };
 
 enum
 {
-    Acq_Mode_Normal,
-    Acq_Mode_Average,
-    Acq_Mode_Segmented
+    RS_RTO_Acq_Mode_Normal,
+    RS_RTO_Acq_Mode_Average,
+    RS_RTO_Acq_Mode_Segmented
 };
 
 enum
 {
-    Filter_Type_Off,
-    Filter_Type_Low_Pass,
-    Filter_Type_High_Pass
+    RS_RTO_Filter_Type_Off,
+    RS_RTO_Filter_Type_Low_Pass,
+    RS_RTO_Filter_Type_High_Pass
 };
 
 enum
 {
-    Filter_Cut_Off_kHz5,
-    Filter_Cut_Off_kHz50,
-    Filter_Cut_Off_MHz50
+    RS_RTO_Filter_Cut_Off_kHz5,
+    RS_RTO_Filter_Cut_Off_kHz50,
+    RS_RTO_Filter_Cut_Off_MHz50
 };
 
 

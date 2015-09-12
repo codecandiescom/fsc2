@@ -29,138 +29,141 @@ using namespace rs_rto;
 
 static
 Enum_Mapper< Log_Level > const log_level_mapper( 
-    std::map< int, Log_Level >( { { Log_Level_None,   Log_Level::None   },
-                                  { Log_Level_Low,    Log_Level::Low    },
-                                  { Log_Level_Normal, Log_Level::Normal },
-                                  { Log_Level_High,   Log_Level::High   } } ),
+    std::map< int, Log_Level >(
+                            { { FSC3_Log_Level_None,   Log_Level::None   },
+                              { FSC3_Log_Level_Low,    Log_Level::Low    },
+                              { FSC3_Log_Level_Normal, Log_Level::Normal },
+                              { FSC3_Log_Level_High,   Log_Level::High   } } ),
     "log level" );
 
 static
 Enum_Mapper< Channel > const channel_mapper( 
-    std::map< int, Channel >( { { Channel_Ext,   Channel::Ext   },
-                                { Channel_Ch1,   Channel::Ch1   },
-                                { Channel_Ch2,   Channel::Ch2   },
-                                { Channel_Ch3,   Channel::Ch3   },
-                                { Channel_Ch4,   Channel::Ch4   },
-                                { Channel_Math1, Channel::Math1 },
-                                { Channel_Math2, Channel::Math2 },
-                                { Channel_Math3, Channel::Math3 },
-                                { Channel_Math4, Channel::Math4 } } ),
+    std::map< int, Channel >( { { RS_RTO_Channel_Ext,   Channel::Ext   },
+                                { RS_RTO_Channel_Ch1,   Channel::Ch1   },
+                                { RS_RTO_Channel_Ch2,   Channel::Ch2   },
+                                { RS_RTO_Channel_Ch3,   Channel::Ch3   },
+                                { RS_RTO_Channel_Ch4,   Channel::Ch4   },
+                                { RS_RTO_Channel_Math1, Channel::Math1 },
+                                { RS_RTO_Channel_Math2, Channel::Math2 },
+                                { RS_RTO_Channel_Math3, Channel::Math3 },
+                                { RS_RTO_Channel_Math4, Channel::Math4 } } ),
     "channel" );
 
 static
 Enum_Mapper< Model > const model_mapper( 
-    std::map< int, Model >( { { Model_RTO1002, Model::RTO1002 },
-                            { Model_RTO1004, Model::RTO1004 },
-                            { Model_RTO1012, Model::RTO1012 },
-                            { Model_RTO1014, Model::RTO1014 },
-                            { Model_RTO1022, Model::RTO1022 },
-                            { Model_RTO1024, Model::RTO1024 },
-                            { Model_RTO1044, Model::RTO1044 } } ),
+    std::map< int, Model >( { { RS_RTO_Model_RTO1002, Model::RTO1002 },
+                              { RS_RTO_Model_RTO1004, Model::RTO1004 },
+                              { RS_RTO_Model_RTO1012, Model::RTO1012 },
+                              { RS_RTO_Model_RTO1014, Model::RTO1014 },
+                              { RS_RTO_Model_RTO1022, Model::RTO1022 },
+                              { RS_RTO_Model_RTO1024, Model::RTO1024 },
+                              { RS_RTO_Model_RTO1044, Model::RTO1044 } } ),
     "model" );
 
 static
 Enum_Mapper< Option > const option_mapper(
-    std::map< int, Option >( { { Option_B1,   Option::B1   },
-                               { Option_B4,   Option::B4   },
-                               { Option_B10,  Option::B10  },
-                               { Option_B18,  Option::B18  },
-                               { Option_B19,  Option::B19  },
-                               { Option_B101, Option::B101 },
-                               { Option_B102, Option::B102 },
-                               { Option_B103, Option::B103 },
-                               { Option_B104, Option::B104 },
-                               { Option_B200, Option::B200 },
-                               { Option_B201, Option::B201 },
-                               { Option_B202, Option::B202 },
-                               { Option_B203, Option::B203 },
-                               { Option_B205, Option::B205 },
-                               { Option_K1,   Option::K1   },
-                               { Option_K2,   Option::K2   },
-                               { Option_K3,   Option::K3   },
-                               { Option_K4,   Option::K4   },
-                               { Option_K5,   Option::K5   },
-                               { Option_K6,   Option::K6   },
-                               { Option_K7,   Option::K7   },
-                               { Option_K8,   Option::K8   },
-                               { Option_K9,   Option::K9   },
-                               { Option_K11,  Option::K11  },
-                               { Option_K12,  Option::K12  },
-                               { Option_K13,  Option::K13  },
-                               { Option_K17,  Option::K17  },
-                               { Option_K21,  Option::K21  },
-                               { Option_K22,  Option::K22  },
-                               { Option_K23,  Option::K23  },
-                               { Option_K24,  Option::K24  },
-                               { Option_K26,  Option::K26  },
-                               { Option_K31,  Option::K31  },
-                               { Option_K40,  Option::K40  },
-                               { Option_K50,  Option::K50  },
-                               { Option_K52,  Option::K52  },
-                               { Option_K55,  Option::K55  },
-                               { Option_K60,  Option::K60  },
-                               { Option_U1,   Option::U1   } } ),
+    std::map< int, Option >( { { RS_RTO_Option_B1,   Option::B1   },
+                               { RS_RTO_Option_B4,   Option::B4   },
+                               { RS_RTO_Option_B10,  Option::B10  },
+                               { RS_RTO_Option_B18,  Option::B18  },
+                               { RS_RTO_Option_B19,  Option::B19  },
+                               { RS_RTO_Option_B101, Option::B101 },
+                               { RS_RTO_Option_B102, Option::B102 },
+                               { RS_RTO_Option_B103, Option::B103 },
+                               { RS_RTO_Option_B104, Option::B104 },
+                               { RS_RTO_Option_B200, Option::B200 },
+                               { RS_RTO_Option_B201, Option::B201 },
+                               { RS_RTO_Option_B202, Option::B202 },
+                               { RS_RTO_Option_B203, Option::B203 },
+                               { RS_RTO_Option_B205, Option::B205 },
+                               { RS_RTO_Option_K1,   Option::K1   },
+                               { RS_RTO_Option_K2,   Option::K2   },
+                               { RS_RTO_Option_K3,   Option::K3   },
+                               { RS_RTO_Option_K4,   Option::K4   },
+                               { RS_RTO_Option_K5,   Option::K5   },
+                               { RS_RTO_Option_K6,   Option::K6   },
+                               { RS_RTO_Option_K7,   Option::K7   },
+                               { RS_RTO_Option_K8,   Option::K8   },
+                               { RS_RTO_Option_K9,   Option::K9   },
+                               { RS_RTO_Option_K11,  Option::K11  },
+                               { RS_RTO_Option_K12,  Option::K12  },
+                               { RS_RTO_Option_K13,  Option::K13  },
+                               { RS_RTO_Option_K17,  Option::K17  },
+                               { RS_RTO_Option_K21,  Option::K21  },
+                               { RS_RTO_Option_K22,  Option::K22  },
+                               { RS_RTO_Option_K23,  Option::K23  },
+                               { RS_RTO_Option_K24,  Option::K24  },
+                               { RS_RTO_Option_K26,  Option::K26  },
+                               { RS_RTO_Option_K31,  Option::K31  },
+                               { RS_RTO_Option_K40,  Option::K40  },
+                               { RS_RTO_Option_K50,  Option::K50  },
+                               { RS_RTO_Option_K52,  Option::K52  },
+                               { RS_RTO_Option_K55,  Option::K55  },
+                               { RS_RTO_Option_K60,  Option::K60  },
+                               { RS_RTO_Option_U1,   Option::U1   } } ),
     "option" );
 
 static
 Enum_Mapper< Trig_Mode > const trig_mode_mapper(
     std::map< int, Trig_Mode >(
-                      { { Trig_Mode_Auto,         Trig_Mode::Auto         },
-                        { Trig_Mode_Normal,       Trig_Mode::Normal       },
-                        { Trig_Mode_Free_Running, Trig_Mode::Free_Running } } ),
+              { { RS_RTO_Trig_Mode_Auto,         Trig_Mode::Auto         },
+                { RS_RTO_Trig_Mode_Normal,       Trig_Mode::Normal       },
+                { RS_RTO_Trig_Mode_Free_Running, Trig_Mode::Free_Running } } ),
     "trigger mode" );
 
 static
 Enum_Mapper< Trig_Slope > const trig_slope_mapper(
     std::map< int, Trig_Slope >(
-                       { { Trig_Slope_Positive, Trig_Slope::Positive },
-                         { Trig_Slope_Negative, Trig_Slope::Negative },
-                         { Trig_Slope_Either,   Trig_Slope::Either    } } ),
+                    { { RS_RTO_Trig_Slope_Positive, Trig_Slope::Positive },
+                      { RS_RTO_Trig_Slope_Negative, Trig_Slope::Negative },
+                      { RS_RTO_Trig_Slope_Either,   Trig_Slope::Either    } } ),
     "trigger slope" );
 
 static
 Enum_Mapper< Coupling > const coupling_mapper(
-    std::map< int, Coupling >( { { Coupling_DC50, Coupling::DC50 },
-                                 { Coupling_DC1M, Coupling::DC1M },
-                                 { Coupling_AC,   Coupling::AC   } } ),
+    std::map< int, Coupling >( { { RS_RTO_Coupling_DC50, Coupling::DC50 },
+                                 { RS_RTO_Coupling_DC1M, Coupling::DC1M },
+                                 { RS_RTO_Coupling_AC,   Coupling::AC   } } ),
     "coupling" );
 
 static
 Enum_Mapper< Polarity > const polarity_mapper(
-    std::map< int, Polarity >( { { Polarity_Positive, Polarity::Positive },
-                               { Polarity_Negative, Polarity::Negative } } ),
+    std::map< int, Polarity >(
+                    { { RS_RTO_Polarity_Positive, Polarity::Positive },
+                      { RS_RTO_Polarity_Negative, Polarity::Negative } } ),
     "polarity" );
 
 static
 Enum_Mapper< Bandwidth > const bandwidth_mapper( 
-    std::map< int, Bandwidth >( { { Bandwidth_Full,   Bandwidth::Full   },
-                                  { Bandwidth_MHz20,  Bandwidth::MHz20  },
-                                  { Bandwidth_MHz200, Bandwidth::MHz200 },
-                                  { Bandwidth_MHz800, Bandwidth::MHz800 } } ),
+    std::map< int, Bandwidth >(
+                    { { RS_RTO_Bandwidth_Full,   Bandwidth::Full   },
+                      { RS_RTO_Bandwidth_MHz20,  Bandwidth::MHz20  },
+                      { RS_RTO_Bandwidth_MHz200, Bandwidth::MHz200 },
+                      { RS_RTO_Bandwidth_MHz800, Bandwidth::MHz800 } } ),
     "bandwidth" );
 
 static
 Enum_Mapper< Acq_Mode > const acq_mode_mapper(
     std::map< int, Acq_Mode >(
-                          { { Acq_Mode_Normal,    Acq_Mode::Normal    },
-                            { Acq_Mode_Average,   Acq_Mode::Average   },
-                            { Acq_Mode_Segmented, Acq_Mode::Segmented } } ),
+                      { { RS_RTO_Acq_Mode_Normal,    Acq_Mode::Normal    },
+                        { RS_RTO_Acq_Mode_Average,   Acq_Mode::Average   },
+                        { RS_RTO_Acq_Mode_Segmented, Acq_Mode::Segmented } } ),
     "acquisition mode" );
 
 static
 Enum_Mapper< Filter_Type > const filter_type_mapper(
     std::map< int, Filter_Type >(
-                      { { Filter_Type_Off, Filter_Type::Off },
-                        { Filter_Type_Low_Pass, Filter_Type::Low_Pass },
-                        { Filter_Type_High_Pass, Filter_Type::High_Pass } } ),
+               { { RS_RTO_Filter_Type_Off, Filter_Type::Off },
+                 { RS_RTO_Filter_Type_Low_Pass, Filter_Type::Low_Pass },
+                 { RS_RTO_Filter_Type_High_Pass, Filter_Type::High_Pass } } ),
     "filter type" );
 
 static
 Enum_Mapper< Filter_Cut_Off > const filter_cut_off_mapper(
     std::map< int, Filter_Cut_Off >(
-                      { { Filter_Cut_Off_kHz5,  Filter_Cut_Off::kHz5  },
-                        { Filter_Cut_Off_kHz50, Filter_Cut_Off::kHz50 },
-                        { Filter_Cut_Off_MHz50, Filter_Cut_Off::MHz50 } } ),
+               { { RS_RTO_Filter_Cut_Off_kHz5,  Filter_Cut_Off::kHz5  },
+                 { RS_RTO_Filter_Cut_Off_kHz50, Filter_Cut_Off::kHz50 },
+                 { RS_RTO_Filter_Cut_Off_MHz50, Filter_Cut_Off::MHz50 } } ),
     "filter cut off" );
 
 // I know, nobody likes macros in C++, but this would be difficult to
