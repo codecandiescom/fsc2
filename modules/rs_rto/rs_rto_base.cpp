@@ -25,8 +25,9 @@
 
 using namespace rs_rto;
 
-Enum_Mapper< Channel > const rs_rto_base::s_channel_mapper(
-    std::map< int, Channel >(
+Enum_Mapper< Channel, typename std::underlying_type< Channel >::type > const
+rs_rto_base::s_channel_mapper(
+    std::map< typename std::underlying_type< Channel >::type, Channel >(
                      { { enum_to_value( Channel::Ext ),   Channel::Ext   },
                        { enum_to_value( Channel::Ch1 ),   Channel::Ch1   },
                        { enum_to_value( Channel::Ch2 ),   Channel::Ch2   },

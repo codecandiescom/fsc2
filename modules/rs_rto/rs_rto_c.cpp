@@ -28,7 +28,7 @@ using namespace rs_rto;
 
 
 static
-Enum_Mapper< Log_Level > const log_level_mapper( 
+Enum_Mapper< Log_Level, int > const log_level_mapper( 
     std::map< int, Log_Level >(
                             { { FSC3_Log_Level_None,   Log_Level::None   },
                               { FSC3_Log_Level_Low,    Log_Level::Low    },
@@ -37,7 +37,7 @@ Enum_Mapper< Log_Level > const log_level_mapper(
     "log level" );
 
 static
-Enum_Mapper< Channel > const channel_mapper( 
+Enum_Mapper< Channel, int > const channel_mapper( 
     std::map< int, Channel >( { { RS_RTO_Channel_Ext,   Channel::Ext   },
                                 { RS_RTO_Channel_Ch1,   Channel::Ch1   },
                                 { RS_RTO_Channel_Ch2,   Channel::Ch2   },
@@ -50,7 +50,7 @@ Enum_Mapper< Channel > const channel_mapper(
     "channel" );
 
 static
-Enum_Mapper< Model > const model_mapper( 
+Enum_Mapper< Model, int > const model_mapper( 
     std::map< int, Model >( { { RS_RTO_Model_RTO1002, Model::RTO1002 },
                               { RS_RTO_Model_RTO1004, Model::RTO1004 },
                               { RS_RTO_Model_RTO1012, Model::RTO1012 },
@@ -61,7 +61,7 @@ Enum_Mapper< Model > const model_mapper(
     "model" );
 
 static
-Enum_Mapper< Option > const option_mapper(
+Enum_Mapper< Option, int > const option_mapper(
     std::map< int, Option >( { { RS_RTO_Option_B1,   Option::B1   },
                                { RS_RTO_Option_B4,   Option::B4   },
                                { RS_RTO_Option_B10,  Option::B10  },
@@ -104,7 +104,7 @@ Enum_Mapper< Option > const option_mapper(
     "option" );
 
 static
-Enum_Mapper< Trig_Mode > const trig_mode_mapper(
+Enum_Mapper< Trig_Mode, int > const trig_mode_mapper(
     std::map< int, Trig_Mode >(
               { { RS_RTO_Trig_Mode_Auto,         Trig_Mode::Auto         },
                 { RS_RTO_Trig_Mode_Normal,       Trig_Mode::Normal       },
@@ -112,7 +112,7 @@ Enum_Mapper< Trig_Mode > const trig_mode_mapper(
     "trigger mode" );
 
 static
-Enum_Mapper< Trig_Slope > const trig_slope_mapper(
+Enum_Mapper< Trig_Slope, int > const trig_slope_mapper(
     std::map< int, Trig_Slope >(
                     { { RS_RTO_Trig_Slope_Positive, Trig_Slope::Positive },
                       { RS_RTO_Trig_Slope_Negative, Trig_Slope::Negative },
@@ -120,21 +120,21 @@ Enum_Mapper< Trig_Slope > const trig_slope_mapper(
     "trigger slope" );
 
 static
-Enum_Mapper< Coupling > const coupling_mapper(
+Enum_Mapper< Coupling, int > const coupling_mapper(
     std::map< int, Coupling >( { { RS_RTO_Coupling_DC50, Coupling::DC50 },
                                  { RS_RTO_Coupling_DC1M, Coupling::DC1M },
                                  { RS_RTO_Coupling_AC,   Coupling::AC   } } ),
     "coupling" );
 
 static
-Enum_Mapper< Polarity > const polarity_mapper(
+Enum_Mapper< Polarity, int > const polarity_mapper(
     std::map< int, Polarity >(
                     { { RS_RTO_Polarity_Positive, Polarity::Positive },
                       { RS_RTO_Polarity_Negative, Polarity::Negative } } ),
     "polarity" );
 
 static
-Enum_Mapper< Bandwidth > const bandwidth_mapper( 
+Enum_Mapper< Bandwidth, int > const bandwidth_mapper( 
     std::map< int, Bandwidth >(
                     { { RS_RTO_Bandwidth_Full,   Bandwidth::Full   },
                       { RS_RTO_Bandwidth_MHz20,  Bandwidth::MHz20  },
@@ -143,7 +143,7 @@ Enum_Mapper< Bandwidth > const bandwidth_mapper(
     "bandwidth" );
 
 static
-Enum_Mapper< Acq_Mode > const acq_mode_mapper(
+Enum_Mapper< Acq_Mode, int > const acq_mode_mapper(
     std::map< int, Acq_Mode >(
                       { { RS_RTO_Acq_Mode_Normal,    Acq_Mode::Normal    },
                         { RS_RTO_Acq_Mode_Average,   Acq_Mode::Average   },
@@ -151,7 +151,7 @@ Enum_Mapper< Acq_Mode > const acq_mode_mapper(
     "acquisition mode" );
 
 static
-Enum_Mapper< Filter_Type > const filter_type_mapper(
+Enum_Mapper< Filter_Type, int > const filter_type_mapper(
     std::map< int, Filter_Type >(
                { { RS_RTO_Filter_Type_Off, Filter_Type::Off },
                  { RS_RTO_Filter_Type_Low_Pass, Filter_Type::Low_Pass },
@@ -159,7 +159,7 @@ Enum_Mapper< Filter_Type > const filter_type_mapper(
     "filter type" );
 
 static
-Enum_Mapper< Filter_Cut_Off > const filter_cut_off_mapper(
+Enum_Mapper< Filter_Cut_Off, int > const filter_cut_off_mapper(
     std::map< int, Filter_Cut_Off >(
                { { RS_RTO_Filter_Cut_Off_kHz5,  Filter_Cut_Off::kHz5  },
                  { RS_RTO_Filter_Cut_Off_kHz50, Filter_Cut_Off::kHz50 },

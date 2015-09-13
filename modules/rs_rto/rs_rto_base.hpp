@@ -292,7 +292,10 @@ class rs_rto_base : public VXI11_Client
     double const m_def_timeout   = 0.2;     // 200 ms
     double const m_transfer_rate = 1e7;     // 10 MB/s
 
-    static Enum_Mapper< Channel > const s_channel_mapper;
+    static Enum_Mapper< Channel,
+                        typename std::underlying_type< Channel >::type > const
+        s_channel_mapper;
+
 
   private :
 

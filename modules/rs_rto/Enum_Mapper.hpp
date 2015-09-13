@@ -32,48 +32,59 @@
 
 
 /*----------------------------------------------------*
- * Class for converion between a C enumeration and C++
- * enumeration class. Requires a map that translates
- * between the values.
+ * Class for bidirectional mapping between a C++ enumeration class.
+ * and in principle arbitrary values (typically used to convert to
+ * values from a corresponding C enumeration). Requires a map that
+ * translates between the values and a short text snipped describing
+ * what's mapped (for error messages).
  *----------------------------------------------------*/
 
-template< typename T >
+template< typename Enum_Type, typename Value_Type  >
 class Enum_Mapper
 {
-    typedef typename std::underlying_type< T >::type mapped_type;
-
   public:
 
-	Enum_Mapper( std::map< mapped_type, T > const & mapper,
-			std::string                const & name )
-		: m_mapper( mapper )
+	Enum_Mapper( std::map< Value_Type, Enum_Type > const & mapper,
+                 std::string                       const & name )
+		: m_v2e_map( mapper )
 		, m_name( name )
-	{ }
+	{
+        for ( auto const & p : m_v2e_map )
+            m_e2v_map[ p.second ] = p.first;
+    }
+
+	Enum_Mapper( std::map< Enum_Type, Value_Type > const & mapper,
+                 std::string                       const & name )
+		: m_e2v_map( mapper )
+		, m_name( name )
+	{
+        for ( auto const & p : m_e2v_map )
+            m_v2e_map[ p.second ] = p.first;
+    }
 
     // Transformation from C++ to C enuneration - can only fail if the
     // map is incomplete.
 
-    mapped_type
-	e2v( T const & e ) const
+    Value_Type
+	e2v( Enum_Type const & e ) const
 	{
-        for ( auto m : m_mapper )
-            if ( m.second == e )
-                return m.first;
-
-        throw std::runtime_error(   "Internal error, " + m_name
-                                  + " map incomplete" );
+		auto it = m_e2v_map.find( e );
+		if ( it == m_e2v_map.end( ) )
+            throw std::runtime_error(   "Internal error, " + m_name
+                                      + " map incomplete" );
+		return it->second;
 	}
 
     // Translation from C to C++ enumeration - can easily fail since
-    // it can be called with arbitrary integers.
+    // it can be called with arbitrary values.
 
-	T
-	v2e( mapped_type const & v,
+	Enum_Type
+	v2e( Value_Type  const & v,
          std::string const & name = "" ) const
 	{
-		auto it = m_mapper.find( v );
-		if ( it == m_mapper.end( ) )
-			throw std::invalid_argument( " Invalid"
+		auto it = m_v2e_map.find( v );
+		if ( it == m_v2e_map.end( ) )
+			throw std::invalid_argument(  "Invalid "
                                          + ( name.empty( ) ? m_name : name ) );
 		return it->second;
 	}
@@ -81,7 +92,8 @@ class Enum_Mapper
 
   private:
 
-	std::map< mapped_type, T > m_mapper;
+	std::map< Value_Type, Enum_Type > m_v2e_map;
+    std::map< Enum_Type, Value_Type > m_e2v_map;
 	std::string m_name;
 };
 
