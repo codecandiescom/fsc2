@@ -524,6 +524,7 @@ CFLAGS           := -std=c99                            \
 	                $(shell pkg-config --cflags freetype2) \
 					$(OPTIMIZATION)                        \
 					$(DEBUG_FLAGS)
+CXX              ?= g++
 
 
 BISON         := bison

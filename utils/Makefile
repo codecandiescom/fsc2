@@ -55,7 +55,7 @@ edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
 
 ifdef WITH_MEDRIVER
 me_get_subdevices: me_get_subdevices.c
-	gcc -o $@ $< -I$(medriver_incl_path) -L$(medriver_lib_path) $(MEDRIVER_LIB)
+	$(CC) -o $@ $< -I$(medriver_incl_path) -L$(medriver_lib_path) $(MEDRIVER_LIB)
 endif
 
 

@@ -18,11 +18,13 @@
 #
 
 
-CXX           := g++
-CXXFLAGS      := -std=c++11 -Wall -Wextra $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC
-CC            := gcc
+CXX           ?= g++
+CXXFLAGS      := -std=c++11 -Wall -Wextra -D_XOPEN_SOURCE=700 \
+				 $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC
+CC            ?= gcc
 CFLAGS        := $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC
 LFLAGS        := -shared
+
 
 SOURCES       := rs_rto.cpp rs_rto_base.cpp rs_rto_trig.cpp rs_rto_chans.cpp \
 				 rs_rto_chan.cpp rs_rto_ext_chan.cpp rs_rto_inp_chan.cpp \

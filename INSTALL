@@ -536,6 +536,21 @@ if you're using the Bourne or Korn shell (sh or ksh) or bash. Use
 
 if you use the C shell (csh) or tcsh.
 
+If you want to use a different compiler, e.g. clang, ou can invoke
+'make' like this
+
+CC=clang CXX=clang++ make
+
+and it will be used instead of gcc/g++.
+
+You can also modify the optimization and debugging settings
+by passing variables named 'OPTIMIZATION' and DEBUG_FLAGS',
+e.g,
+
+OPTIZATION=-O0 DEBUG_FLAGS="-ggdb -gdwarf-2" make
+
+(The default settings are to compile with '-O3 -march=native' but
+still with debug information, i.e. '-ggdb3'.)
 
 When the compilation of the program succeeds (even though building the
 documentation failed at some stage), you can now install the program
