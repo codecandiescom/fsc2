@@ -3,7 +3,6 @@
 prefix               := /usr/local
 GROUP                := dialout
 EDITOR               := nano
-GPIB_LIBRARY         := NONE
 SERIAL_LOG_LEVEL     := HIGH
 LAN_LOG_LEVEL        := HIGH
 WITH_FFT             := yes

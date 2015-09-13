@@ -31,7 +31,7 @@ all: rs_rto.fsc2_so
 rs_rto.fsc2_so: rs_rto.c rs_rto/*.[ch]pp rs_rto/*.[ch]
 	$(MAKE) -C rs_rto
 	$(CC) $(CFLAGS) $(LFLAGS) -Wl,-rpath=$(ldir) -Wl,-rpath=$(mdir)/rs_rto \
-	$(INCLUDES) $< -o $@ $(LIBS) -lrs_rto_c
+	$(INCLUDES) $< -o $@ $(LIBS) -lrs_rto_fsc2
 
 
 install:

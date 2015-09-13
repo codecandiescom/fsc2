@@ -2091,14 +2091,12 @@ sr810_get_auto_data( int type )
     bool new_try = SET;
 
 
-#ifndef NDEBUG
     if ( sr810.dsp_ch != type )
     {
         eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
-#endif
 
     /* Check if the internal buffer did overflow (i.e. if we already fetched
        the maximum amount of data). In this case we need to take desperate

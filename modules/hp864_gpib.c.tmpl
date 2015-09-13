@@ -417,7 +417,7 @@ hp864_tmpl_set_mod_ampl( int    type,
 
     fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-    switch ( hp864_tmpl.mod_type )
+    switch ( type )
     {
         case MOD_TYPE_FM :
             sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );

@@ -201,7 +201,7 @@ eurotherm902s_set_setpoint( int    sp,
     char buf[ 20 ];
 
     fsc2_assert( sp == SP1 || sp == SP2 );
-    fsc2_assert( sprintf( buf, "S%c%6.1f", sp == SP1 ? 'L' : '2', temp ) <= 8 );
+    sprintf( buf, "S%c%6.1f", sp == SP1 ? 'L' : '2', temp );
     bvt3000_send_command( buf );
 }
 
@@ -242,7 +242,7 @@ eurotherm902s_set_sw( unsigned int sw )
 
     fsc2_assert( sw <= 0xFFFF );
 
-    fsc2_assert( sprintf( buf, "SW>%04x", sw & 0xE005 ) == 7 );
+    sprintf( buf, "SW>%04x", sw & 0xE005 );
     bvt3000_send_command( buf );
 }
 
@@ -278,7 +278,7 @@ eurotherm902s_set_os( unsigned int os )
 
     fsc2_assert( os <= 0xFFFF );
 
-    fsc2_assert( sprintf( buf, "OS>%04x", os & 0x30BF ) == 7 );
+    sprintf( buf, "OS>%04x", os & 0x30BF );
     bvt3000_send_command( buf );
 }
 
@@ -315,7 +315,7 @@ eurotherm902s_set_xs( unsigned int xs )
 
     fsc2_assert( xs <= 0xFFFF );
 
-    fsc2_assert( sprintf( buf, "XS>%04x", xs & 0xFFB7 ) == 7 );
+    sprintf( buf, "XS>%04x", xs & 0xFFB7 );
     bvt3000_send_command( buf );
 }
 
@@ -423,7 +423,7 @@ eurotherm902s_set_adaptive_tune_trigger( double tr )
 
     fsc2_assert( tr >= 0.0 && tr <= MAX_AT_TRIGGER_LEVEL );
 
-    fsc2_assert( sprintf( buf, "TR%3.2f", tr ) <= 8 );
+    sprintf( buf, "TR%3.2f", tr );
     bvt3000_send_command( buf );
 }
 
@@ -474,7 +474,7 @@ eurotherm902s_set_heater_power_limit( double power )
 
 
     fsc2_assert( power >= 0.0 && power <= 100.0 );
-    fsc2_assert( sprintf( buf, "HO%6.1f", power ) <= 8 );
+    sprintf( buf, "HO%6.1f", power );
     bvt3000_send_command( buf );
 }
 
@@ -500,11 +500,10 @@ eurotherm902s_set_heater_power( double power )
 {
     char buf[ 20 ];
 
-
     fsc2_assert( power >= 0.0 && power <= 100.0 );
     fsc2_assert( eurotherm902s_get_mode( ) == AUTOMATIC_MODE );
 
-    fsc2_assert( sprintf( buf, "OP%6.1f", power ) <= 8 );
+    sprintf( buf, "OP%6.1f", power );
     bvt3000_send_command( buf );
 }
 
@@ -531,7 +530,7 @@ eurotherm902s_set_proportional_band( double pb )
 
     fsc2_assert( pb <= MAX_PROPORTIONAL_BAND );
 
-    fsc2_assert( sprintf( buf, "XP%6.2f", pb ) <= 8 );
+    sprintf( buf, "XP%6.2f", pb );
     bvt3000_send_command( buf );
 }
 
@@ -589,7 +588,7 @@ eurotherm902s_set_derivative_time( double dt )
 
     fsc2_assert( dt <= MAX_DERIVATIVE_TIME );
 
-    fsc2_assert( sprintf( buf, "TD%6.2f", dt ) <= 8 );
+    sprintf( buf, "TD%6.2f", dt );
     bvt3000_send_command( buf );
 }
 

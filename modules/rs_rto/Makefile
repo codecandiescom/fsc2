@@ -19,9 +19,9 @@
 
 
 CXX           := g++
-CXXFLAGS      := -std=c++11 -ggdb -Wall -Wextra -O3 -fPIC -march=native
+CXXFLAGS      := -std=c++11 -Wall -Wextra $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC
 CC            := gcc
-CFLAGS        := -ggdb3 -O3 -fPIC -march=native
+CFLAGS        := $(DEBUG_FLAGS) $(OPTIMIZATION) -fPIC
 LFLAGS        := -shared
 
 SOURCES       := rs_rto.cpp rs_rto_base.cpp rs_rto_trig.cpp rs_rto_chans.cpp \
@@ -36,7 +36,7 @@ OBJECTS       := $(SOURCES:.cpp=.o) $(VXI11_SOURCES:.c=.o)
 .SUFFIXES:
 .PHONY: all install uninstall clean
 
-all: librs_rto_c.so
+all: librs_rto_fsc2.so
 
 # Create the VXI-11 C files etc. from the vxi11.x template file
 
@@ -51,17 +51,17 @@ $(VXI11_SOURCES) vxi11.h: vxi11.x
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 
-librs_rto_c.so: rs_rto_c.o $(OBJECTS)
+librs_rto_fsc2.so: rs_rto_c.o $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LFLAGS) -o $@ $^
 
 
 install:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_c.so $(ldir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_fsc2.so $(ldir)
 
 
 uninstall:
-	$(RM) -f $(ldir)/librs_rto_c.so
+	$(RM) -f $(ldir)/librs_rto_fsc2.so
 
 
 clean:
-	$(RM) -f $(VXI11_SOURCES) vxi11_svc.c vxi11.h *~ *.o librs_rto_c.so
+	$(RM) -f $(VXI11_SOURCES) vxi11_svc.c vxi11.h *~ *.o librs_rto_fsc2.so

@@ -1071,12 +1071,10 @@ vars_lhs_range_pointer( Var_T * a,
                         cv->val.dpnt[ i ] = 0.0;
                     break;
 
-#ifndef NDEBUG
                 default :
                     eprint( FATAL, UNSET, "Internal error detected at "
                             "%s:%d.\n", __FILE__, __LINE__ );
                     THROW( EXCEPTION );
-#endif
             }
         }
 

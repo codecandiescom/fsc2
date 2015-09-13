@@ -444,6 +444,18 @@
 # MAIL_ADDRESS       := fsc2@toerring.de
 
 
+# Set the optimization level
+
+OPTIMIZATION     ?= -O3 -march=native
+#OPTIMIZATION     := -O0 -march=native     # for release build
+
+# Set the debug flags
+
+DEBUG_FLAGS      ?= -ggdb3
+#DEBUG_FLAGS      := -DNDEGUG               # for debug build
+
+
+
 ##############################################################################
 #
 # Here follow settings determining the make process - which compiler and
@@ -459,21 +471,7 @@
 
 # Version information
 
-VERSION          := 2.4.0
-
-# Set the optimization level
-
-OPTIMIZATION     := -O3 -march=native
-
-# Set the debug flags
-
-DEBUG_FLAGS      := -ggdb3
-
-
-# Define this in order to use mpatrol
-
-#MPATROL          := YES
-
+VERSION          := 2.5.0
 
 # Set where the program, the libraries etc. get installed
 
@@ -507,23 +505,25 @@ mchdir           := $(fdir)/machines
 # POSIX.1-2008 base specification plus the XSI extension) definitions
 
 SHELL            := /bin/sh
-CC               := gcc
+CC               ?= gcc
 CFLAGS           := -std=c99                            \
-					-D_XOPEN_SOURCE=700                 \
-					-W                                  \
-					-Wall                               \
-					-Wextra                             \
-					-Wwrite-strings                     \
-					-Wstrict-prototypes                 \
-					-Wmissing-prototypes                \
-					-Wmissing-declarations              \
-					-Wredundant-decls                   \
-					-Wshadow                            \
-					-Wpointer-arith                     \
-					-Waggregate-return                  \
-					-Wnested-externs                    \
-					-Wcast-align                        \
-	                $(shell pkg-config --cflags freetype2)
+					-D_XOPEN_SOURCE=700                    \
+					-W                                     \
+					-Wall                                  \
+					-Wextra                                \
+					-Wwrite-strings                        \
+					-Wstrict-prototypes                    \
+					-Wmissing-prototypes                   \
+					-Wmissing-declarations                 \
+					-Wredundant-decls                      \
+					-Wshadow                               \
+					-Wpointer-arith                        \
+					-Waggregate-return                     \
+					-Wnested-externs                       \
+					-Wcast-align                           \
+	                $(shell pkg-config --cflags freetype2) \
+					$(OPTIMIZATION)                        \
+					$(DEBUG_FLAGS)
 
 
 BISON         := bison
@@ -545,44 +545,6 @@ INSTALL       := install
 ############################################################################
 
 
-# If make gets started with 'make debug' switch off optimization and enable
-# built-in memory debugging
-
-ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
-	CFLAGS += -O0
-	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS += -DFSC2_MDEBUG
-	endif
-else
-	CFLAGS += $(OPTIMIZATION)
-endif
-
-
-# If make gets stated with 'make release' switch off all debugging code
-# (i.e. mostly assert() calls etc.). Otherwise enable debug symbols in
-# code and libc memory debugging (if available)
-
-ifeq ($(MAKECMDGOALS),release)
-	CFLAGS += -DNDEBUG
-else
-	CFLAGS += $(DEBUG_FLAGS)
-	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS += -DLIBC_MDEBUG
-	endif
-endif
-
-
-# If make gets started with 'make mdebug' enable both internal memory
-# debugging options as well as libc memory debugging (if available)
-
-ifeq ($(MAKECMDGOALS),mdebug)
-	CFLAGS += -DFSC2_MDEBUG
-	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
-	endif
-endif
-
-
 # Set the minimum include paths and linker flags
 
 INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
@@ -593,12 +555,6 @@ LFLAGS	 := -shared
 
 LIBS := -L/usr/local/lib \
 		-L/usr/X11R6/lib -lforms -lX11 -lXft -lXpm -lm -ldl -lz
-
-ifeq ($(MPATROL),YES)
-	CONFFLAGS := -DMPATROL
-	LIBS      += -lmpatrol -lelf
-endif
-
 
 tagsfile      := $(fdir)/TAGS
 
@@ -1019,7 +975,7 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs install uninstall     \
+.PHONY: all release debug fsc2 config src modules utils docs install uninstall     \
 		http_server test cleanup clean pack pack-git packages   \
 		tags MANIFEST me6x00 ni6601 ni_daq rulbus witio_48
 
@@ -1032,7 +988,7 @@ export            # export all variables to sub-makes
 # via the Makefile in src), the HTTP server, and then the documentation and
 # some other, more or less useful stuff
 
-all release debug mdebug: fsc2_config.h
+all: fsc2_config.h
 ifdef LIBUSB_FAIL
 	@echo "************************************************";    \
 	echo "*   Either WITH_LIBUSB_0_1 or WITH_LIBUSB_1_0  *";     \

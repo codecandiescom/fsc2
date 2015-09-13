@@ -1103,8 +1103,13 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
 static
 double
+#if defined NDEBUG
+prepare_sweep_list( int           measure_what  UNUSED_ARG,
+                                  const Var_T * v )
+#else
 prepare_sweep_list( int           measure_what,
                                   const Var_T * v )
+#endif
 {
     fsc2_assert( v->type == FLOAT_ARR || v->type == INT_ARR );
     fsc2_assert( v->dim == 1 && v->len >= 2

@@ -665,8 +665,13 @@ rs_sml01_get_mod_source( int      type,
  *-------------------------------------------------------------*/
 
 double
+#if defined NDEBUG
+rs_sml01_set_mod_ampl( int    type  UNUSED_ARG,
+                       double ampl )
+#else
 rs_sml01_set_mod_ampl( int    type,
                        double ampl )
+#endif
 {
     char cmd[ 100 ];
 
