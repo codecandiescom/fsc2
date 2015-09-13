@@ -56,7 +56,7 @@ librs_rto_fsc2.so: rs_rto_c.o $(OBJECTS)
 
 
 install:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_fsc2.so $(ldir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) librs_rto_fsc2.so $(prefix)/lib
 
 
 uninstall:
