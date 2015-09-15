@@ -289,8 +289,8 @@ class rs_rto_base : public VXI11_Client
     // enough for all "normal" commands. For data transfers we need to
     // know the amount of data and then use an approximate transfer rate
 
-    double const m_def_timeout   = 0.2;     // 200 ms
-    double const m_transfer_rate = 1e7;     // 10 MB/s
+    double const m_def_timeout   = 0.5;     // 500 ms
+    double const m_transfer_rate = 4e5;     // 400 kB/s with slow networks
 
     static Enum_Mapper< Channel,
                         typename std::underlying_type< Channel >::type > const

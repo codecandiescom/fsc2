@@ -57,8 +57,8 @@ rs_rto_acq::reset( )
     // record length and the upper limit for the time scale
 
     m_adc_rate = m_rs.query< double >( "ACQ:POIN:ARATE?" );
-    m_min_rec_len = m_rs.query< unsigned long >( "ACQ:POIN? MIN" );
     m_max_scale = m_rs.query< double >( "TIM:SCAL? MAX" );
+    m_min_scale = 100.0 /  m_adc_rate;
 
     // Set both the average and the segment count to the value of the
     // acquisition count "register" - it controls both
@@ -108,12 +108,12 @@ rs_rto_acq::timebase( )
 double
 rs_rto_acq::set_timebase( double tb )
 {
-    if (    tb <  shortest_timebase( ) - m_timebase_increment / 2
-         || tb >= longest_timebase( )  + m_timebase_increment / 2 )
+    if (    tb <  shortest_timebase( ) - 0.5 / m_adc_rate
+         || tb >= longest_timebase( )  + 0.5 / m_adc_rate )
         throw std::invalid_argument( "Time base out of range" );
 
     char buf[ 30 ];
-    sprintf( buf, "TIM:SCAL %.12f", tb );
+    sprintf( buf, "TIM:SCAL %.10f", tb );
     m_rs.write( buf );
 \
     return timebase( );
@@ -124,7 +124,7 @@ double
 rs_rto_acq::shortest_timebase_const_resolution( )
 {
     return std::max( shortest_timebase( ),
-                     0.1 * m_min_rec_len * resolution( ) );
+                     0.1 * min_record_length( ) * resolution( ) );
 }
 
 
@@ -170,7 +170,7 @@ rs_rto_acq::set_resolution( double res )
 double
 rs_rto_acq::lowest_resolution( )
 {
-    return 10 * timebase( ) / m_min_rec_len;
+    return 10 * timebase( ) / min_record_length( );
 }
 
 
@@ -201,7 +201,7 @@ rs_rto_acq::record_length( )
 unsigned long
 rs_rto_acq::set_record_length( unsigned long rec_len )
 {
-    if (    rec_len < m_min_rec_len
+    if (    rec_len < min_record_length( )
          || rec_len > max_record_length( ) )
         throw std::invalid_argument( "Record length out of range" );
 
@@ -230,9 +230,25 @@ rs_rto_acq::set_record_length( unsigned long rec_len )
 unsigned long
 rs_rto_acq::max_record_length( )
 {
-    return std::min( static_cast< unsigned long >(   20 * m_adc_rate
-                                                   * timebase( ) ) / 2,
-                     m_rs.query< unsigned long >( "ACQ:POIN? MAX" ) );
+    m_rs.write( "ACQ:POIN:AUTO RECL" );
+    unsigned long len = m_rs.query< unsigned long >( "ACQ:POIN? MAX" );
+    m_rs.write( "ACQ:POIN:AUTO RES" );
+    return len;
+}
+
+
+/*----------------------------------------------------*
+ * Returns the maximum record length possible under the
+ * current conditions
+ *----------------------------------------------------*/
+
+unsigned long
+rs_rto_acq::min_record_length( )
+{
+    m_rs.write( "ACQ:POIN:AUTO RECL" );
+    unsigned long len = m_rs.query< unsigned long >( "ACQ:POIN? MIN" );
+    m_rs.write( "ACQ:POIN:AUTO RES" );
+    return len;
 }
 
 

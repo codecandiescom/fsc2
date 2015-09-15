@@ -50,7 +50,7 @@ class rs_rto_acq
     double
     shortest_timebase( ) const
     {
-        return 0.1 * m_min_rec_len / m_adc_rate;
+        return m_min_scale;
     }
 
     double
@@ -72,10 +72,7 @@ class rs_rto_acq
     set_record_length( unsigned long rec_len );
 
     unsigned long
-    min_record_length( ) const
-    {
-        return m_min_rec_len;
-    }
+    min_record_length( );
 
     unsigned long
     max_record_length( );
@@ -195,6 +192,7 @@ class rs_rto_acq
 
 	RS_RTO & m_rs;
 
+    double m_min_scale;
     double m_max_scale;
     unsigned long m_min_rec_len;
     double m_adc_rate;

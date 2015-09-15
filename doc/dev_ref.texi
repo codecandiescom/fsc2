@@ -3699,7 +3699,10 @@ any of the requested settings will actually be possible and the
 function return values that attempt to indicate that everything is
 fine. Only during the real experiment it can be tested if the
 requested settings can be used and thus there's hardly any
-protections.
+protections. Moreover, new firmware versions seem to change the
+undocumented behaviour of the device, so the module is likely
+to not work correctly with anything but version 2.70.1.0 from
+september 4, 2015.
 
 @paragraphindent 0
 @strong{Note}: While transfering measured data is decently fast (at
