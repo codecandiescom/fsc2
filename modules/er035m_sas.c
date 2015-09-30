@@ -231,9 +231,9 @@ er035m_sas_exp_hook( void )
         er035m_sas_set_resolution( nmr.resolution );
 
     /* Ask gaussmeter to send its status byte and test if it does - sometimes
-	   the fucking thing does not answer (i.e. it just seems to send the prompt
-       character and nothing else) so in this case we give it another chance
-       (or even two, see FAIL_RETRIES above) */
+	   the fucking thing does not answer (i.e. it just seems to send the
+	   prompt character and nothing else) so in this case we give it
+	   another chance (or even two, see FAIL_RETRIES above) */
 
     nmr.state = ER035M_SAS_UNKNOWN;
 
@@ -254,7 +254,7 @@ er035m_sas_exp_hook( void )
         switch ( *bp )
         {
             case '0' :     /* F0 (S-band) probe is connected */
-                nmr.probe_type = PROBE_TYPE_F0;
+nmr.probe_type = PROBE_TYPE_F1; /* this is a workaround for a device error!!! */
                 break;
 
             case '1' :     /* F1 (X-band) probe is connected */
@@ -1002,7 +1002,7 @@ er035m_sas_command( const char * cmd )
 
 	/* Read in prompt char sent as reply */
 
-	char rd_buf[ 10 ];
+	char rd_buf[ 2 ];
 	size_t length = sizeof rd_buf;
 	if ( er035m_sas_read( rd_buf, &length ) != OK )
 		er035m_sas_comm_fail( );
@@ -1174,8 +1174,10 @@ er035m_sas_comm( int type,
             /* Try to read from the gaussmeter, give it up to 2 seconds time
                to respond */
 
-            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr, NULL,
-                                         10 * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
+            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr,
+										   nmr.prompt ? &nmr.prompt : NULL,
+										   ( nmr.prompt ? 10 : 1 )
+										   * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
             {
                 if ( len == 0 )
                     stop_on_user_request( );
