@@ -1044,16 +1044,14 @@ This function only exists for the @strong{Bruker} NMR gauss-meters
 that don't are used for controlling the field ("stand alone" modules),
 @ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. When the lock on the
 field is lost and the module fails to reestablisj it, the function for
-measuring the field normally abort the @code{EDL} script. In some
+measuring the field normally aborts the @code{EDL} script. In some
 cases this can be detrimental since measuring the field is not always
 essential and aborting the whole experiment might be over-kill. To
 avoid that this function can be called (without any arguments). Once
 it has been called (somewhere in the @code{EXPERIMENT} section when
 the function @code{@ref{gaussmeter_field()}} detects that the lock on
-the field has lost and can't be reestablished, it prints out a warning
-and never again, during the execution of the @code{EDL} script,
-attempts to measure the field, instead always returning @code{-1.0}
-for the field value.
+the field has lost and can't be reestablished, it only prints out a
+warning and returns @code{-1.0} as the field value instead of aborting.
 
 
 @anchor{find_field()}
