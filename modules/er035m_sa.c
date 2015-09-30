@@ -18,13 +18,6 @@
  */
 
 
-
-/* On Axel's request: Here's a driver for the Bruker ER035M gaussmeter that
-   allows the gaussmeter to be used in conjunction with the Bruker BH15
-   field controller. The latter is used to control the field while the NMR
-   gaussmeter is only used to measure the field for calibration purposes. */
-
-
 #include "fsc2_module.h"
 #include "gpib.h"
 
@@ -753,7 +746,7 @@ er035m_sa_get_field( void )
 
     /* If the maximum number of retries was exceeded give up */
 
-    if ( tries < 0 )
+    if ( tries <= 0 )
     {
         if ( nmr.keep_going_on_bad_field )
         {

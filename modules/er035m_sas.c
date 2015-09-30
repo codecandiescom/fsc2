@@ -39,7 +39,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define UNDEF_RESOLUTION            -1
 
 
-/* exported functions and symbols */
+/* Exported functions and symbols */
 
 int er035m_sas_init_hook(       void );
 int er035m_sas_test_hook(       void );
@@ -95,7 +95,7 @@ static struct {
     long             upper_search_limit;
     long             lower_search_limit;
 
-    bool keep_going_on_bad_field;
+    bool             keep_going_on_bad_field;
 } nmr, nmr_stored;
 
 static const char * er035m_sas_eol = "\r\n";
@@ -177,7 +177,7 @@ er035m_sas_init_hook( void )
 
     nmr.state      = ER035M_SAS_UNKNOWN;
     nmr.resolution = UNDEF_RES;
-    nmr.prompt     = '\0';
+    nmr.prompt     = '*';
 
     nmr.keep_going_on_bad_field = false;
 
@@ -450,7 +450,7 @@ measure_field( Var_T * v  UNUSED_ARG )
                     break;
 
                 case '2' :             // no probe -> error
-                    print( FATAL, "No field probe connected to the NMR "
+                    print( FATAL, "No field probe connected to the "
                            "gaussmeter.\n" );
                     THROW( EXCEPTION );
 
@@ -501,7 +501,7 @@ measure_field( Var_T * v  UNUSED_ARG )
                     break;
 
                 default :
-                    print( FATAL, "Undocumented data received from the NMR "
+                    print( FATAL, "Undocumented data received from "
                            "gaussmeter.\n" );
                     THROW( EXCEPTION );
             }
@@ -772,7 +772,7 @@ er035m_sas_get_field( void )
 
     /* If the maximum number of retries was exceeded we've got to give up */
 
-    if ( tries < 0 )
+    if ( tries <= 0 )
     {
         if ( nmr.keep_going_on_bad_field )
         {
@@ -994,18 +994,18 @@ static
 void
 er035m_sas_command( const char * cmd )
 {
-    if ( cmd == NULL || *cmd == '\0' )
+    if ( ! cmd || ! *cmd )
         return;
 
 	if ( er035m_sas_write( cmd ) != OK )
 		er035m_sas_comm_fail( );
 
-	/* Read in prompt char sent as reply */
+	/* Try to read the prompt character the device is supposed to send, but
+	   don't expect it to be available - this is firmware bug territory ... */
 
-	char rd_buf[ 2 ];
-	size_t length = sizeof rd_buf;
-	if ( er035m_sas_read( rd_buf, &length ) != OK )
-		er035m_sas_comm_fail( );
+	char buf;
+	long len = 1; 
+	er035m_sas_comm( SERIAL_READ, &buf, &len, 1 );
 }
 
 
@@ -1016,25 +1016,16 @@ static
 bool
 er035m_sas_write( const char * buf )
 {
-    static char *wrbuf = NULL;
-    static long wrlen = 0;
     bool res;
 
-    if ( buf == NULL || *buf == '\0' )
+    if ( ! buf || ! *buf )
         return OK;
-    wrlen = strlen( buf );
 
-    if ( er035m_sas_eol != NULL && strlen( er035m_sas_eol ) > 0 )
+    if ( er035m_sas_eol && strlen( er035m_sas_eol ) > 0 )
     {
-        wrlen += strlen( er035m_sas_eol );
-
-		wrbuf = T_malloc( wrlen + 1 );
-
-        strcpy( wrbuf, buf );
-        strcat( wrbuf, er035m_sas_eol );
-
-        res = er035m_sas_comm( SERIAL_WRITE, wrbuf );
-        T_free( wrbuf );
+		char * wrbuf = get_string( "%s%s", buf, er035m_sas_eol );
+		res = er035m_sas_comm( SERIAL_WRITE, wrbuf );
+		T_free( wrbuf );
     }
     else
         res = er035m_sas_comm( SERIAL_WRITE, buf );
@@ -1048,51 +1039,47 @@ er035m_sas_write( const char * buf )
 
 static
 bool
-er035m_sas_read( char *   buf,
-                 size_t * len )
+er035m_sas_read( char *   buffer,
+                 size_t * length )
 {
-    if ( ! buf || ! *len )
+    if ( ! buffer || ! *length )
         return OK;
 
-    *len -= 1;
-    if ( ! er035m_sas_comm( SERIAL_READ, buf, len ) )
-        return FAIL;
+	/* There's a good chance that there are several prompt characters
+	   "in the pipeline": after each command the device is supposed to
+	   send a single prompt character.If this would happen we could read
+	   it immediately. But the device is buggy and sometimes doesn't send
+	   the prompt character, and it's unclear if it will send it at some
+	   later time (e.g. with the reply to a request). Thus the only way out
+	   is, when other data are expected from the device to first read all
+	   prompt chars that may have been assembled by the device. This is done
+	   one-by-one since we need the prompt char also as the 'termination'
+	   character for messages - since the caller can't know how many bytes
+	   the device will send we otherwise would have to rely on a timeout. But
+	   that's problematic also since the device tales quite a long time to
+	   answer some commands and, if we'd use this as the only criterion, each
+	   read would take as long as that... */
 
-    /* If the prompt character sent by the device with each reply isn't
-	   known yet take it to be the very first byte read (default is '*'
-	   but who knows if this got changed by some unlucky coincidence...) */
+	size_t len;
+	do
+	{
+		len = *length - 1;
+		if ( ! er035m_sas_comm( SERIAL_READ, buffer, &len, 10 ) )
+			return FAIL;
+	} while ( len == 1 && *buffer == nmr.prompt );
 
-    if ( nmr.prompt == '\0' )
-        nmr.prompt = buf[ 0 ];
+	buffer[ len ] = '\0';
 
-    /* Make buffer end with '\0' */
+	/* Remove trailing white space ('\r' and perhaps '\n') and prompt
+	   characters */
 
-    buf[ *len ] = '\0';
+	while (    len-- > 0
+			&& (    isspace( ( int ) buffer[ len ] )
+				 || buffer[ len ] == nmr.prompt ) )
+		buffer[ len ] = '\0';
 
-	// Remove anything that looks like an end-of-line characters
-
-    char * ptr;
-    while (    ( ptr = strchr( buf, '\r' ) )
-            || ( ptr = strchr( buf, '\n' ) ) )
-    {
-        *ptr = '\0';
-        *len = ptr - buf;
-    }
-
-    /* Remove leading prompt characters if there are any */
-
-    for ( ptr = buf; *len > 0 && *ptr == nmr.prompt; ptr++, *len -= 1 )
-        /* empty */ ;
-
-	if ( ptr != buf )
-		memmove( buf, ptr, *len + 1 );
-
-	/* Remove trailing prompt chars */
-
-	while ( *len > 0 && buf[ *len - 1 ] == nmr.prompt )
-		buf[ *--len ] = '\0';
-
-    return OK;
+	*length = strlen( buffer );
+	return OK;
 }
 
 
@@ -1108,6 +1095,7 @@ er035m_sas_comm( int type,
     char *buf;
     ssize_t len;
     size_t *lptr;
+	int factor;
 
     switch ( type )
     {
@@ -1169,14 +1157,14 @@ er035m_sas_comm( int type,
             va_start( ap, type );
             buf = va_arg( ap, char * );
             lptr = va_arg( ap, size_t * );
+			factor = va_arg( ap, int );
             va_end( ap );
 
             /* Try to read from the gaussmeter, give it up to 2 seconds time
                to respond */
 
-            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr,
-										   nmr.prompt ? &nmr.prompt : NULL,
-										   ( nmr.prompt ? 10 : 1 )
+            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr, &nmr.prompt,
+										     factor
 										   * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
             {
                 if ( len == 0 )
