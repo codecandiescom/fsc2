@@ -9775,15 +9775,15 @@ its factory default settings
 @item   sourcemeter_sense_mode()
 The device has three modes in which its channels can be operate. It
 can either do 2-wire ("local") or 4-wire ("remote") measurements and,
-beside that, operate in a calibration mode. This function allows query
-or set this mode for a channel. If called with no arguments (except
-the channel number) it returns an integer, either @code{0} for the
-2-wire ("local"), @code{1} for the 4-wire ("remote") mode or @code{3}
-for the "calibration" mode. if called with another argument, a string
-or an integer number, the channel gets set to the corresponding mode,
-with either @code{"LOCAL"} or @code{"2-WIRE"} or @code{0} for 2-wire,
-@code{"REMOTE"} or @code{"4-WIRE"} or @code{1} for 4-wire and
-@code{"CALIBRATION"} or @code{3} for calibration mode.
+beside that, operate in a calibration mode. This function allows to
+query or set this mode for a channel. If called with no arguments
+(except the channel number) it returns an integer, either @code{0} for
+the 2-wire ("local"), @code{1} for the 4-wire ("remote") mode or
+@code{3} for the "calibration" mode. if called with another argument,
+a string or an integer number, the channel gets set to the
+corresponding mode, with either @code{"LOCAL"}, @code{"2-WIRE"} or
+@code{0} for 2-wire, @code{"REMOTE"}, @code{"4-WIRE"} or @code{1} for
+4-wire and @code{"CALIBRATION"} or @code{3} for calibration mode.
 
 
 @anchor{sourcemeter_source_offmode()}
@@ -9792,13 +9792,13 @@ with either @code{"LOCAL"} or @code{"2-WIRE"} or @code{0} for 2-wire,
 When a channel is switched off it can be in three output-off states:
 in "normal" off-state (the default) it will source @w{0 V}, in "high
 impedance" off-state a relay will be opened to isolate the device's
-output completely from the the circuitry connected to it (this should
-only be done when necessary to avoid excessive wear on the relay), and
-in "zero-output" off-state also @w{0 V} will be output, but the device
+output completely from the circuitry connected to it (this should only
+be done when necessary to avoid excessive wear on the relay), and in
+"zero-output" off-state also @w{0 V} will be output, but the device
 can still be used as an ampere-meter.
 
 This function allows to determine the output-off state when called
-with no arguments beside the channel number. In that case it returns
+with no arguments (beside the channel number). In that case it returns
 an integer, either @code{0} for the "normal" off mode, @code{1} for
 the "high impedance" off-state and @code{2} when in "zero-output"
 off-state.
@@ -9823,7 +9823,7 @@ off accordingly as a source.
 
 Note that switching the channel on will not be possible (and an
 attempt will result in the @code{EDL} script being aborted) if
-settings aren't consistent, e.h.@: if the device is to output a
+settings aren't consistent, e.g.@: if the device is to output a
 voltage and the voltage to be output exceeds the selected voltage
 source range.
 
@@ -9834,13 +9834,14 @@ source range.
 The channels of the device can either be used as voltage or current
 sources. If this function is called for a channel without further
 arguments it returns @code{0} if the channel is set up as a current
-source and @code{1} if it's set as a voltage source (the default).
+source and @code{1} if it's set up as a voltage source (which is the
+default).
 
 Calling the function with an additional argument allows to switch
 between the channel working as a current or voltage source: if called
 with a string of @code{"CURRENT"} or @code{"AMPS"} or an integer value
-of @code{0} it's set up as a current source, and if called with
-@code{"VOLTAGE"}, @code{"VOLTS} or a non-zero integer it is set as
+of @code{0} it's set up as a current source. If called with
+@code{"VOLTAGE"}, @code{"VOLTS} or a non-zero integer it is set up as
 a voltage source.
 
 Note that switching between voltage and current sourcing mode may have
@@ -9881,14 +9882,13 @@ the range of compliance voltage settings.
 The function returns or sets a range for the source voltage (which may
 speed up setting a new output voltage slightly over the use of
 autoranging). If called with no argument (beside the channel number)
-the set source voltage range is returned. If called with another
-argument the source voltage range is set to the nearest range not
-less than that value (unless the value is larger than the largest
-possible range setting, in which case the largest one is set). Setting
-a source voltage range disables autoranging of the voltage range.
-Note that when output is on and the device is in voltage sourcing
-mode, the new range must be large enough to accommodate for the
-currently output voltage.
+the set source voltage range is returned. If called with a second
+argument the source voltage range is set to the nearest range not less
+than that value (unless the value is larger than the largest possible
+range, in which case the largest one is set). Setting a source voltage
+range disables autoranging of the voltage range. Note that when output
+is on and the device is in voltage sourcing mode, the new range must
+be large enough to accommodate the currently output voltage.
 
 
 @anchor{sourcemeter_source_current_range()}
@@ -9897,15 +9897,15 @@ currently output voltage.
 The function returns or sets a range for the source current (which may
 speed up setting a new output current slightly over the use of
 autoranging). If called with no argument (beside the channel number)
-the set source current range is returned. If called with another
+the set source current range is returned. If called with a second
 argument the source current range is set to the nearest range not less
 than that value (unless the value is larger than the largest possible
-range setting, in which case the largest one is set). Setting a source
-current range disables autoranging of the current range. Note that
-when output is on and the device is in current sourcing mode, the new
-range must be large enough to accommodate for the currently output
-current. Also note that when the device is in high-capacitance output
-mode the lowest possible current range setting is @w{1 uA}.
+range, in which case the largest one is set). Setting a source current
+range disables autoranging of the current range. Note that when output
+is on and the device is in current sourcing mode, the new range must
+be large enough to accommodate the currently output current. Also note
+that when the device is in high-capacitance output mode the lowest
+possible current range setting is @w{1 uA}.
 
 
 @anchor{sourcemeter_source_voltage_autoranging()}
@@ -9917,7 +9917,7 @@ best source voltage range setting for the requested output voltages.
 
 If called with no arguments (except the channel number) it returns
 @code{0} is autoranging is off, otherwise @code{1}. if called with
-another boolean argument (@code{"OFF"} or @code{1} for off and
+another boolean argument (@code{"OFF"} or @code{0} for off and
 @code{"ON"} or a non-zero integer for on) autoranging is switched off
 or on accordingly.
 
@@ -9931,7 +9931,7 @@ best source current range setting for the requested output currents.
 
 If called with no arguments (except the channel number) it returns
 @code{0} is autoranging is off, otherwise @code{1}. if called with
-another boolean argument (@code{"OFF"} or @code{1} for off and
+another boolean argument (@code{"OFF"} or @code{0} for off and
 @code{"ON"} or a non-zero integer for on) autoranging is switched off
 or on accordingly.
 
@@ -10022,8 +10022,8 @@ If called with no arguments (except the channel number) the function
 returns either @code{0} if no additional settling time is used (this
 is the default), @code{-1} when a rang dependent settling time is
 added automatically by the device, or the value of a user-set
-additional settling time (in seconds, the undicumented upper
-limit seems to be @w{0.496 s}). If called with another argument
+additional settling time (in seconds, the undocumented upper
+limit seems to be @w{0.496 s}). If called with a second argument
 the additional settling time can be set. If the argument is @code{0}
 no additional settling time will be used. If it is negative the device
 will automatically add a range dependent settling time. Any argument
@@ -10035,8 +10035,8 @@ seconds).
 @findex sourcemeter_source_max_off_current()
 @item   sourcemeter_source_max_off_current()
 When a channel is switched off and it's in "normal" off-state it will
-output @w{0 V} but may still source (or sink) small currents. This
-current's size can be controlled via this function.
+output @w{0 V} but may still source (or sink) small currents. The
+upper limit of that current can be controlled via this function.
 
 If called with no arguments (beside the channel number) the function
 returns the maximum current the channel will source (or sink) when in
@@ -10054,8 +10054,8 @@ instabilities may result. To avoid this the source channels can be set
 to high-capacitance mode (but note that for circuits with low
 capacitance (below @w{100 nF}) other instabilities may arise instead
 if high-capacitance mode is on). This function allows to query if
-high-capacitance mode is on or off for a channel or switch it on or
-off.
+high-capacitance mode is on or off for a channel or to switch it on
+or off.
 
 If called with no arguments (except the channel number) the function
 returns @code{0} if high-capacitance mode is off, otherwise @code{1}.
