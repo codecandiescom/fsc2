@@ -930,6 +930,7 @@ already been loaded.
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
 @item @ref{gaussmeter_keep_going_on_field_error()}
+@item @ref{gaussmeter_keep_going_on_error()}
 @item @ref{find_field()} (deprecated)
 @item @ref{measure_field()} (deprecated)
 @end table
@@ -1043,21 +1044,50 @@ only be called in the @code{EXPERIMENT} section.
 This function only exists for the @strong{Bruker} NMR gauss-meters
 that don't are used for controlling the field ("stand alone" modules),
 @ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. When the lock on the
-field is lost and the module fails to reestablisj it, the function for
-measuring the field normally aborts the @code{EDL} script. In some
-cases this can be detrimental since measuring the field is not always
-essential and aborting the whole experiment might be over-kill. To
-avoid that this function can be called (without any arguments). Once
-it has been called (somewhere in the @code{EXPERIMENT} section when
-the function @code{@ref{gaussmeter_field()}} detects that the lock on
-the field has lost and can't be reestablished, it only prints out a
-warning and returns @code{-1.0} as the field value instead of aborting.
+field is lost and the module fails to reestablish it, or when the
+field is too unstabe to be measured, the function for measuring the
+field normally aborts the @code{EDL} script. In some cases this can be
+detrimental since measuring the field is not always essential and
+aborting the whole experiment might be over-kill. To avoid that this
+function can be called (without any arguments). Once it has been
+called (somewhere in the @code{EXPERIMENT} section when the function
+@code{@ref{gaussmeter_field()}} detects that the lock on the field has
+lost and can't be reestablished, it only prints out a warning and
+returns @code{-1.0} as the field value instead of aborting.
+
+
+@anchor{gaussmeter_keep_going_on_error()}
+@findex gaussmeter_keep_going_on_error()
+@item   gaussmeter_keep_going_on_field_error()
+This function only exists for the @strong{Bruker} NMR gauss-meters
+that don't are used for controlling the field ("stand alone" modules),
+@ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. These devices
+sometimes don't react as they're supposed to (e.g.@: requests to send
+the current field value don't return a value at all or communication
+with the device fails) which normally results in the experiment
+getting stopped. But in some situations it's preferable to continue
+the experiment, even though a function calls didn't return the
+expected value. And for such situations this function can be used to
+set what is suposed to happen.
+
+If called with the string @code{"STOP"} (or the integer @code{1}) the
+device behaves as usual, i.e.@: on all errors the experiment is
+stopped. If called with @code{"CONTINUE"} (or @code{1}) the failed
+function returns @code{-1}, and so will all further calls of
+gaussmeter functions. If called with @code{"RETRY"} (or @code{2}) the
+failed function also returns @code{-1}, but on further calls of
+gaussmeter function another attempt will be made to communicate with
+the device.
+
+If called without an argument the function returns an integer,
+indicating the currently set behaviour.
 
 
 @anchor{find_field()}
 @findex find_field()
-@item find_field()
+@item   find_field()
 Use of this function is deprecated, use @ref{gaussmeter_field()}
+instead.
 
 
 @anchor{measure_field()}

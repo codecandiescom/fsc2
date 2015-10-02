@@ -39,6 +39,22 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define UNDEF_RESOLUTION            -1
 
 
+/* Since the device mis-behaves quite often and field measurements aren't
+   essential in all cases we allow to control what happens if the device
+   does something unexpected or even staps communicationg:
+
+   a) abort the progranm (default)
+   b) continue, but never again try to talk to device
+   c) continue, and on further requests make another attempt to talk to it
+
+   This can be set via the gaussmeter_keep_going_on_error() function.
+*/
+
+#define STOP_ON_BUG      0
+#define CONTINUE_ON_BUG  1
+#define RETRY_ON_BUG     2
+
+
 /* exported functions and symbols */
 
 int er035m_sa_init_hook(       void );
@@ -49,6 +65,7 @@ int er035m_sa_end_of_exp_hook( void );
 Var_T * gaussmeter_name( Var_T * v );
 Var_T * gaussmeter_field( Var_T * v );
 Var_T * gaussmeter_keep_going_on_field_error( Var_T * v );
+Var_T * gausssmeter_keep_going_on_error( Var_T * v );
 Var_T * measure_field( Var_T * v );
 Var_T * gaussmeter_resolution( Var_T * v );
 Var_T * gaussmeter_probe_orientation( Var_T * v );
@@ -85,6 +102,9 @@ struct NMR {
     long lower_search_limit;
 
     bool keep_going_on_bad_field;
+
+	int              bug_behaviour;
+	bool             device_is_dead;
 };
 
 
@@ -160,6 +180,9 @@ er035m_sa_init_hook( void )
 
     nmr.keep_going_on_bad_field = false;
 
+	nmr.bug_behaviour = STOP_ON_BUG;
+	nmr.device_is_dead = false;
+
     return 1;
 }
 
@@ -188,6 +211,9 @@ er035m_sa_exp_hook( void )
     fsc2_assert( nmr.device < 0 );
 
     nmr.keep_going_on_bad_field = false;
+
+	nmr.bug_behaviour = STOP_ON_BUG;
+	nmr.device_is_dead = false;
 
     if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
     {
@@ -380,6 +406,49 @@ gaussmeter_keep_going_on_field_error( Var_T * v  UNUSED_ARG )
  *----------------------------------------------------------------*/
 
 Var_T *
+gausssmeter_keep_going_on_error( Var_T * v )
+{
+	if ( ! v )
+		return vars_push( INT_VAR, nmr.bug_behaviour );
+
+	long behaviour;
+
+	if ( v->type == STR_VAR )
+	{
+		if ( ! strcasecmp( v->val.sptr, "STOP" ) )
+			behaviour = STOP_ON_BUG;
+		else if ( ! strcasecmp( v->val.sptr, "CONTINUE" ) )
+			behaviour = CONTINUE_ON_BUG;
+		else if ( ! strcasecmp( v->val.sptr, "RETRY" ) )
+			behaviour = RETRY_ON_BUG;
+		else
+		{
+			print( FATAL, "Invalid argument \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		behaviour = get_strict_long( v, "behaviour on errors" );
+		if (    behaviour != STOP_ON_BUG
+			 && behaviour != CONTINUE_ON_BUG
+			 && behaviour != RETRY_ON_BUG )
+		{
+			print( FATAL, "Invalid argument: %ld.\n", behaviour );
+			THROW( EXCEPTION );
+		}
+	}
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, ( long ) ( nmr.bug_behaviour = behaviour ) );
+}
+
+
+/*----------------------------------------------------------------*
+ *----------------------------------------------------------------*/
+
+Var_T *
 gaussmeter_field( Var_T * v )
 {
     return measure_field( v );
@@ -397,91 +466,114 @@ measure_field( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
+	if ( nmr.device_is_dead )
+		return vars_push( FLOAT_VAR, -1.0 );
+
     /* If gaussmeter is in oscillator up/down state or the state is unknown
        (i.e. it's standing somewhere but not searching) search for field.
        Starting with searching down is just as probable the wrong decision
        as searching up... */
 
-    if (    nmr.state == ER035M_SA_OU_ACTIVE
-         || nmr.state == ER035M_SA_OD_ACTIVE
-         || nmr.state == ER035M_SA_UNKNOWN )
-        er035m_sa_command( "SD\r" );
+    volatile double field;
 
-    /* Wait for gaussmeter to go into lock state (or FAILURE) */
-
-    while ( nmr.state != ER035M_SA_LOCKED )
+    TRY
     {
-        /* All this can take a long time, allow user to abort */
+        if (    nmr.state == ER035M_SA_OU_ACTIVE
+             || nmr.state == ER035M_SA_OD_ACTIVE
+             || nmr.state == ER035M_SA_UNKNOWN )
+            er035m_sa_command( "SD\r" );
 
-        stop_on_user_request( );
+        /* Wait for gaussmeter to go into lock state (or FAILURE) */
 
-        /* Get status byte and check if lock was achieved */
-
-        char buffer[ 30 ];
-        long length = sizeof buffer;
-        er035m_sa_talk( "PS\r", buffer, &length );
-
-        if ( length < 3 )
+        while ( nmr.state != ER035M_SA_LOCKED )
         {
-            print( FATAL, "Undocumented data received.\n" );
-            THROW( EXCEPTION );
+            /* All this can take a long time, allow user to abort */
+
+            stop_on_user_request( );
+
+            /* Get status byte and check if lock was achieved */
+
+            char buffer[ 30 ];
+            long length = sizeof buffer;
+            er035m_sa_talk( "PS\r", buffer, &length );
+
+            if ( length < 3 )
+            {
+                print( FATAL, "Undocumented data received.\n" );
+                THROW( EXCEPTION );
+            }
+
+            /* Check all bytes sent except the first two */
+
+            for ( char * bp = buffer + 2; *bp; bp++ )
+                switch ( *bp )
+                {
+                    case '4' : case '5' :  /* TRANS L-H or H-L -> test again */
+                        break;
+
+                    case '7' : case '8' :  /* MOD POS or NEG -> just go on */
+                        break;
+
+                    case '9' :      /* System in lock -> very good... */
+                        nmr.state = ER035M_SA_LOCKED;
+                        break;
+
+                    case 'A' :      /* FIELD ? -> error */
+                        if ( nmr.keep_going_on_bad_field )
+                        {
+                            print( SEVERE, "Gaussmeter not able to lock onto "
+                                   "field.\n" );
+                            return vars_push( FLOAT_VAR, -1.0 );
+                        }
+
+                        print( FATAL, "Gaussmeter not able to lock onto "
+                               "field.\n" );
+                        THROW( EXCEPTION );
+
+                    case 'B' :      /* SU active -> OK */
+                        nmr.state = ER035M_SA_SU_ACTIVE;
+                        break;
+
+                    case 'C' :      /* SD active */
+                        nmr.state = ER035M_SA_SD_ACTIVE;
+                        break;
+
+                    case 'D' :   /* OU active -> error (should never happen) */
+                        nmr.state = ER035M_SA_OU_ACTIVE;
+                        print( FATAL, "Gaussmeter has an unidentifiable "
+                               "problem.\n" );
+                        THROW( EXCEPTION );
+
+                    case 'E' :   /* OD active -> error (should never happen) */
+                        nmr.state = ER035M_SA_OD_ACTIVE;
+                        print( FATAL, "Gaussmeter has an unidentifiable "
+                               "problem.\n" );
+                        THROW( EXCEPTION );
+
+                    case 'F' :   /* Search active but at a search limit -> OK*/
+                        nmr.state = ER035M_SA_SEARCH_AT_LIMIT;
+                        break;
+                }
         }
 
-        /* Check all bytes sent except the first two */
+        /* Finally  get current field value */
 
-        for ( char * bp = buffer + 2; *bp; bp++ )
-            switch ( *bp )
-            {
-                case '4' : case '5' :  /* TRANS L-H or H-L -> test again */
-                    break;
+        field = er035m_sa_get_field( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        if ( nmr.bug_behaviour != STOP_ON_BUG )
+        {
+            if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+                nmr.device_is_dead = true;
+            return vars_push( FLOAT_VAR, -1.0 );
+        }
 
-                case '7' : case '8' :  /* MOD POS or NEG -> just go on */
-                    break;
-
-                case '9' :      /* System in lock -> very good... */
-                    nmr.state = ER035M_SA_LOCKED;
-                    break;
-
-                case 'A' :      /* FIELD ? -> error */
-                    if ( nmr.keep_going_on_bad_field )
-                    {
-                        print( SEVERE, "Gaussmeter not able to lock onto "
-                               "field.\n" );
-                        return vars_push( FLOAT_VAR, -1.0 );
-                    }
-
-                    print( FATAL, "Gaussmeter not able to lock onto field.\n" );
-                    THROW( EXCEPTION );
-
-                case 'B' :      /* SU active -> OK */
-                    nmr.state = ER035M_SA_SU_ACTIVE;
-                    break;
-
-                case 'C' :      /* SD active */
-                    nmr.state = ER035M_SA_SD_ACTIVE;
-                    break;
-
-                case 'D' :      /* OU active -> error (should never happen) */
-                    nmr.state = ER035M_SA_OU_ACTIVE;
-                    print( FATAL, "Gaussmeter has an unidentifiable "
-                           "problem.\n" );
-                    THROW( EXCEPTION );
-
-                case 'E' :      /* OD active -> error (should never happen) */
-                    nmr.state = ER035M_SA_OD_ACTIVE;
-                    print( FATAL, "Gaussmeter has an unidentifiable "
-                           "problem.\n" );
-                    THROW( EXCEPTION );
-
-                case 'F' :      /* Search active but at a search limit -> OK*/
-                    nmr.state = ER035M_SA_SEARCH_AT_LIMIT;
-                    break;
-            }
+        RETHROW;
     }
 
-    /* Finally  get current field value */
-
-    return vars_push( FLOAT_VAR, er035m_sa_get_field( ) );
+    return vars_push( FLOAT_VAR, field );
 }
 
 
@@ -501,6 +593,9 @@ gaussmeter_resolution( Var_T * v )
 
         return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
     }
+
+	if ( nmr.device_is_dead )
+		return vars_push( FLOAT_VAR, -1.0 );
 
     double res = get_double( v, "resolution" );
 
@@ -541,7 +636,24 @@ gaussmeter_resolution( Var_T * v )
     nmr.resolution = res_index;
 
     if ( FSC2_MODE == EXPERIMENT )
-        er035m_sa_set_resolution( nmr.resolution );
+    {
+        TRY
+        {
+            er035m_sa_set_resolution( nmr.resolution );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			if ( nmr.bug_behaviour != STOP_ON_BUG )
+			{
+				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+					nmr.device_is_dead = true;
+				return vars_push( FLOAT_VAR, -1.0 );
+			}
+
+			RETHROW;
+		}
+    }
 
     return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
 }
@@ -579,6 +691,9 @@ gaussmeter_command( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        if ( nmr.device_is_dead )
+            return vars_push( INT_VAR, -1 );
+
         char * volatile cmd = NULL;
 
         TRY
@@ -592,7 +707,15 @@ gaussmeter_command( Var_T * v )
         OTHERWISE
         {
             cmd = T_free( cmd );
-            RETHROW;
+
+			if ( nmr.bug_behaviour != STOP_ON_BUG )
+			{
+				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+					nmr.device_is_dead = true;
+				return vars_push( FLOAT_VAR, -1.0 );
+			}
+
+			RETHROW;
         }
     }
 
@@ -609,7 +732,10 @@ gaussmeter_upper_search_limit( Var_T * v )
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.upper_search_limit );
 
-    long int ul = lrnd( get_double( v, "upper search limit" ) );
+	if ( nmr.device_is_dead )
+		return vars_push( FLOAT_VAR, -1.0 );
+
+    volatile long int ul = lrnd( get_double( v, "upper search limit" ) );
 
     if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F1 : nmr.probe_type ] )
@@ -632,7 +758,25 @@ gaussmeter_upper_search_limit( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        er035m_sa_set_upper_search_limit( ul );
+    {
+        TRY
+        {
+            er035m_sa_set_upper_search_limit( ul );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			if ( nmr.bug_behaviour != STOP_ON_BUG )
+			{
+				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+					nmr.device_is_dead = true;
+				return vars_push( FLOAT_VAR, -1.0 );
+			}
+
+			RETHROW;
+		}
+    }
+
     nmr.upper_search_limit = ul;
 
     return vars_push( FLOAT_VAR, ( double ) ul );
@@ -648,7 +792,10 @@ gaussmeter_lower_search_limit( Var_T * v )
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.lower_search_limit );
 
-    long ll = lrnd( get_double( v, "lower search limit" ) );
+	if ( nmr.device_is_dead )
+		return vars_push( FLOAT_VAR, -1.0 );
+
+    volatile long ll = lrnd( get_double( v, "lower search limit" ) );
 
     if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
                                    PROBE_TYPE_F0 : nmr.probe_type ] )
@@ -671,7 +818,25 @@ gaussmeter_lower_search_limit( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        er035m_sa_set_lower_search_limit( ll );
+    {
+        TRY
+        {
+            er035m_sa_set_lower_search_limit( ll );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			if ( nmr.bug_behaviour != STOP_ON_BUG )
+			{
+				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+					nmr.device_is_dead = true;
+				return vars_push( FLOAT_VAR, -1.0 );
+			}
+
+			RETHROW;
+		}
+    }
+
     nmr.lower_search_limit = ll;
 
     return vars_push( FLOAT_VAR, ( double ) ll );
