@@ -65,7 +65,7 @@ int er035m_sas_end_of_exp_hook( void );
 Var_T * gaussmeter_name( Var_T * v );
 Var_T * gaussmeter_field( Var_T * v );
 Var_T * gaussmeter_keep_going_on_field_error( Var_T * v );
-Var_T * gausssmeter_keep_going_on_error( Var_T * v );
+Var_T * gaussmeter_keep_going_on_error( Var_T * v );
 Var_T * gaussmeter_resolution( Var_T * v );
 Var_T * gaussmeter_probe_orientation( Var_T * v );
 Var_T * measure_field( Var_T * v );
@@ -416,7 +416,7 @@ gaussmeter_keep_going_on_field_error( Var_T * v  UNUSED_ARG )
  *----------------------------------------------------------------*/
 
 Var_T *
-gausssmeter_keep_going_on_error( Var_T * v )
+gaussmeter_keep_going_on_error( Var_T * v )
 {
 	if ( ! v )
 		return vars_push( INT_VAR, nmr.bug_behaviour );
