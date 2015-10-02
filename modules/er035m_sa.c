@@ -441,6 +441,9 @@ gausssmeter_keep_going_on_error( Var_T * v )
 
 	too_many_arguments( v );
 
+    if ( behaviour != CONTINUE_ON_BUG )
+        nmr.device_is_dead = false;
+
 	return vars_push( INT_VAR, ( long ) ( nmr.bug_behaviour = behaviour ) );
 }
 
