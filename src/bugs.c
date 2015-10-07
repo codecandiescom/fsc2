@@ -31,7 +31,7 @@ extern int Fail_Mess_Fd;               /* defined in dump.c */
  * additional input by the user. Finally it mails me the report.
  *------------------------------------------------------------------------*/
 
-#if defined ( MAIL_ADDRESS )
+#if defined MAIL_ADDRESS
 void
 bug_report_callback( FL_OBJECT * a,
                      long        b  UNUSED_ARG )
@@ -207,50 +207,67 @@ bug_report_callback( FL_OBJECT * a UNUSED_ARG,
  * This function sends an email to me when fsc2 crashes.
  *-------------------------------------------------------*/
 
-#if ! defined NDEBUG && defined MAIL_ADDRESS
 void
-death_mail( void )
+crash_report( void )
 {
-    FILE *mail;
+    FILE * fp;
+    int tmp_fd;
     char cur_line[ FL_BROWSER_LINELENGTH ];
     char *clp;
     int lines;
     int i;
+    
+    /* Create a temporary file for the mail */
 
+#if defined CRASH_REPORT_DIR
+    char filename[ ] = CRASH_REPORT_DIR "/fsc2.crash.XXXXXX";
+#else
+    char filename[ ] = P_tmpdir "/fsc2.crash.XXXXXX";
+#endif
 
-    if ( ( mail = tmpfile( ) ) == NULL )
+    if (    ( tmp_fd = mkstemp( filename ) ) < 0
+         || ( fp = fdopen( tmp_fd, "w+" ) ) == NULL )
+    {
+        if ( tmp_fd >= 0 )
+        {
+            unlink( filename );
+            close( tmp_fd );
+        }
+
         return;
+    }
+
 
 #if defined _GNU_SOURCE
-    fprintf( mail, "fsc2 (%d, %s) killed by %s signal (%d).\n\n", getpid( ),
+    fprintf( fp, "fsc2 (%d, %s) killed by %s signal (%d).\n\n", getpid( ),
              Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT",
              strsignal( Crash.signo ), Crash.signo );
 #else
-    fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
+    fprintf( fp, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
              Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT", Crash.signo );
 #endif
 
 #ifndef NDEBUG
     if ( Crash.signo == SIGABRT )
-        fprintf( mail, "%s:%d: failed assertion: %s\n\n",
+        fprintf( fp, "%s:%d: failed assertion: %s\n\n",
                  Assert_Struct.filename, Assert_Struct.line,
                  Assert_Struct.expression );
 #endif
 
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined NDEBUG && defined ADDR2LINE
     if ( Crash.trace_length > 0 )
-        dump_stack( mail );
+        dump_stack( fp );
 #endif
 
     if ( EDL.Fname != NULL )
-        fprintf( mail, "\nIn EDL program %s at line = %ld\n\n",
+        fprintf( fp, "\nIn EDL program %s at line = %ld\n\n",
                  EDL.Fname, EDL.Lc );
 
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
     {
         fputs( "Content of program browser:\n\n"
                "--------------------------------------------------\n\n",
-               mail );
+               fp );
 
         lines = fl_get_browser_maxline( GUI.main_form->browser );
         for ( i = 0; i < lines; )
@@ -265,33 +282,26 @@ death_mail( void )
                 while ( *clp++ != 'f' )
                     /* empty */ ;
             }
-            fputs( clp, mail );
-            fputc( '\n', mail );
+            fputs( clp, fp );
+            fputc( '\n', fp );
         }
 
         fputs( "--------------------------------------------------\n\n"
                "Content of output browser:\n"
-               "--------------------------------------------------\n", mail );
+               "--------------------------------------------------\n", fp );
 
         lines = fl_get_browser_maxline( GUI.main_form->error_browser );
         for ( i = 0; i < lines; )
         {
             fputs( fl_get_browser_line( GUI.main_form->error_browser, ++i ),
-                   mail );
-            fputc( ( int ) '\n', mail );
+                   fp );
+            fputc( ( int ) '\n', fp );
         }
     }
 
-    rewind( mail );
-    send_mail( "FSC2: Crash", "fsc2", NULL, MAIL_ADDRESS, mail );
-    fclose( mail );
+    fclose( fp );
+    close( tmp_fd );
 }
-#else
-void
-death_mail( void )
-{
-}
-#endif
 
 
 /*

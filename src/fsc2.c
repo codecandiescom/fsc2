@@ -89,23 +89,10 @@ main( int    argc,
 
     Fsc2_Internals.cmdline_flags = scan_args( &argc, argv, &fname );
 
-    /* Check if other instances of fsc2 are already running. If there are
-       and the current instance of fsc2 wasn't started with the non-exclusive
-       option we've got to quit. If there's no other instance we've got to
-       spawn a process that deals with further instances of fsc2 and takes
-       care of shared memory segments. */
-
-    if ( check_spawn_fsc2d( In_file_fp ) == -1 )
-    {
-        fprintf( stderr, "Failed to start or connect to daemon process for "
-                 "fsc2.\n" );
-        return EXIT_FAILURE;
-    }
-
     /* Initialize xforms stuff, quit on error */
 
-    else if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-              && ! xforms_init( &argc, argv ) )
+    if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+         && ! xforms_init( &argc, argv ) )
     {
         fprintf( stderr, "Graphic setup failed.\n" );
         return EXIT_FAILURE;
@@ -801,18 +788,6 @@ scan_args( int   * argc,
             continue;
         }
 
-        /* Check for '-noCrashMail' flag that tells us not to try to send
-           an email if fsc2 crashed */
-
-        if ( ! strcmp( argv[ cur_arg ], "-noCrashMail" ) )
-        {
-            flags |= NO_MAIL;
-            for ( i = cur_arg; i < *argc; i++ )
-                argv[ i ] = argv[ i + 1 ];
-            *argc -= 1;
-            continue;
-        }
-
         /* Check for '--noBalloons' flag that tells us not to show help
            messages ("ballons") when the mouse hovers over a button for some
            time */
@@ -820,15 +795,6 @@ scan_args( int   * argc,
         if ( ! strcmp( argv[ cur_arg ], "-noBalloons" ) )
         {
             flags |= NO_BALLOON;
-            for ( i = cur_arg; i < *argc; i++ )
-                argv[ i ] = argv[ i + 1 ];
-            *argc -= 1;
-            continue;
-        }
-
-        if ( ! strcmp( argv[ cur_arg ], "-non-exclusive" ) )
-        {
-            fprintf( stderr, "Option '-non-exclusive' is deprecated.\n" );
             for ( i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
@@ -1135,7 +1101,7 @@ scan_args( int   * argc,
 
             if ( Fsc2_Internals.num_test_runs == 0 )
             {
-                Fsc2_Internals.cmdline_flags |= TEST_ONLY | NO_MAIL;
+                Fsc2_Internals.cmdline_flags |= TEST_ONLY;
                 
                 lower_permissions( );
                 if (    ! get_edl_file( *fname )
@@ -1145,7 +1111,7 @@ scan_args( int   * argc,
                       EXIT_SUCCESS : EXIT_FAILURE );
             }
 
-            flags |= NO_MAIL | DO_LOAD | DO_CHECK;
+            flags |= DO_LOAD | DO_CHECK;
         }
 
         cur_arg++;
@@ -1206,13 +1172,13 @@ final_exit_handler( void )
 
     if ( Crash.signo != 0 && Crash.signo != SIGTERM )
     {
-        if (    * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0
-             && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
-        {
-            death_mail( );
-            fprintf( stderr, "A crash report has been sent to %s\n",
-                     MAIL_ADDRESS );
-        }
+        crash_report( );
+        fprintf( stderr, "A crash file has been written to directory '%s'\n",
+#if defined CRASH_REPORT_DIR
+                 CRASH_REPORT_DIR );
+#else
+                 P_tmpdir );
+#endif
 
 #if defined _GNU_SOURCE
         fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
@@ -2177,8 +2143,7 @@ main_sig_handler( int signo )
         default :
 #if ! defined NDEBUG && defined ADDR2LINE
             if (    ! Crash.already_crashed
-                 && signo != SIGABRT
-                 && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+                 && signo != SIGABRT )
             {
                 Crash.already_crashed = SET;
                 Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
@@ -2209,9 +2174,6 @@ usage( int return_status )
              "  -I FILE    start with main window iconified\n"
              "  -ng FILE   run experiment without any graphics\n"
              "  --delete   delete input file when fsc2 is done with it\n"
-             "  -non-exclusive\n"
-             "             run in non-exclusive mode, allowing more than\n"
-             "             one instance of fsc2 to be run at a time\n"
              "  -stopMouseButton Number/Word\n"
              "             mouse button to be used to stop an experiment\n"
              "             1 = \"left\", 2 = \"middle\", 3 = \"right\" "

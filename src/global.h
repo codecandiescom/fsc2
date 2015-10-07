@@ -131,7 +131,6 @@ enum {
     FILESELFONTSIZE,
     HELPFONTSIZE,
     STOPMOUSEBUTTON,
-    NOCRASHMAIL,
     RESOLUTION,
     HTTPPORT
 };
@@ -517,7 +516,6 @@ enum {
     DO_START      = ( 1 <<  2 ),
     DO_SIGNAL     = ( 1 <<  3 ),
     DO_DELETE     = ( 1 <<  4 ),
-    NO_MAIL       = ( 1 <<  5 ),
     NO_BALLOON    = ( 1 <<  6 ),
     BATCH_MODE    = ( 1 <<  7 ),
     DO_CHECK      = ( 1 <<  8 ),                /* used for check runs only */

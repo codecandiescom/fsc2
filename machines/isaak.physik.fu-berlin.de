@@ -13,4 +13,4 @@ EDITOR             := nano
 BROWSER            := firefox
 WITH_HTTP_SERVER   := yes
 DEFAULT_HTTP_PORT  := 8080
-MAIL_ADDRESS       := fsc2@toerring.de
+CRASH_REPORT_DIR   := /home/fsc2

@@ -22,10 +22,10 @@ c_sources      = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
 				 func.c func_basic.c func_util.c func_save.c chld_func.c     \
 				 func_intact.c func_intact_b.c func_intact_s.c               \
 				 func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
-				 exp.c run.c comm.c accept.c gpib.c loader.c mail.c ipc.c    \
-				 locks.c print.c serial.c lan.c graphics.c graphics_edl.c    \
+				 exp.c run.c comm.c accept.c gpib.c loader.c ipc.c locks.c   \
+				 print.c serial.c lan.c graphics.c graphics_edl.c    \
 				 graph_handler_1d.c graph_handler_2d.c graph_cut.c bugs.c    \
-				 fsc2_assert.c dump.c module_util.c fsc2d.c global.c help.c  \
+				 fsc2_assert.c dump.c module_util.c global.c help.c  \
 				 edit.c 
 
 ifdef WITH_HTTP_SERVER

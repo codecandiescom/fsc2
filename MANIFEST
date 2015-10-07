@@ -539,8 +539,6 @@ src/fsc2_clean.l
 src/fsc2_conf_lexer.l
 src/fsc2_conf_parser.y
 src/fsc2_connect.c
-src/fsc2d.c
-src/fsc2d.h
 src/fsc2.h
 src/fsc2_module.h
 src/fsc2_rsc_hr.fd
@@ -605,8 +603,6 @@ src/loader.c
 src/loader.h
 src/locks.c
 src/locks.h
-src/mail.c
-src/mail.h
 src/Makefile
 src/module_util.c
 src/module_util.h

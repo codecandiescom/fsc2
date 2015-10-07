@@ -328,7 +328,8 @@ fsc2_serial_final_reset( void )
  * open().
  *-----------------------------------------------------------------------*/
 
-static struct termios *
+static
+struct termios *
 fail_on_open( int          sn,
               int          fd,
               const char * mess )
@@ -337,7 +338,6 @@ fail_on_open( int          sn,
        so store it before we attempt any other operation */
 
     int stored_errno = errno;
-
 
     /* Close the port if it's already open and then get rid of permissions */
 
@@ -421,7 +421,7 @@ fsc2_serial_open( int sn,
     /* If the port has already been opened with the same flags just return
        the structure with the current terminal settings. If the flags differ
        close the port (after flushing it and resetting the attributes to the
-       original state) and afterwards re-open it with the new flags. */
+       original state) and then re-open it with the new flags. */
 
     if ( Serial_Ports[ sn ].is_open )
     {
@@ -799,16 +799,39 @@ fsc2_serial_read( int          sn,
 
     if ( ll == LL_ALL )
     {
-        if ( still_to_wait == 0 )
-            fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
-                                     "without delay\n", ( long ) count, sn );
-        else if ( still_to_wait < 0 )
-            fsc2_serial_log_message( sn, "Expect to read up to %ld bytes\n",
-                                     ( long ) count, sn );
+        if ( ! term_len )
+        {
+            if ( still_to_wait == 0 )
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                                         "without delay\n", ( long ) count,
+                                         sn );
+            else if ( still_to_wait < 0 )
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes\n",
+                                         ( long ) count, sn );
+            else
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                                         "within %ld ms\n", ( long ) count,
+                                         still_to_wait / 1000, sn );
+        }
         else
-            fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
-                                     "within %ld ms\n", ( long ) count,
-                                     still_to_wait / 1000, sn );
+        {
+            if ( still_to_wait == 0 )
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                                         "without delay until termination "
+                                         "sequence '%s' is received\n",
+                                         ( long ) count, term, sn );
+            else if ( still_to_wait < 0 )
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                                         "until termination sequence '%s' is "
+                                         "received\n", ( long ) count,
+                                         term, sn );
+            else
+                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                                         "within %ld ms or until termination "
+                                         "sequence '%s' is received\n",
+                                         ( long ) count, term,
+                                         still_to_wait / 1000, sn );
+        }
     }
 
     do {
@@ -1247,7 +1270,8 @@ fsc2_tcflow( int sn,
  * fsc2_serial_log_date() writes the date to the log file.
  *---------------------------------------------------------*/
 
-static void
+static
+void
 fsc2_serial_log_date( int sn )
 {
     char tc[ 26 ];
@@ -1279,7 +1303,8 @@ fsc2_serial_log_date( int sn )
  *  * name of the device involved
  *--------------------------------------------------------------*/
 
-static void
+static
+void
 fsc2_serial_log_function_start( int          sn,
                                 const char * function )
 {
@@ -1304,7 +1329,8 @@ fsc2_serial_log_function_start( int          sn,
  *  * name of the device involved
  *---------------------------------------------------------*/
 
-static void
+static
+void
 fsc2_serial_log_function_end( int          sn,
                               const char * function )
 {
@@ -1325,7 +1351,8 @@ fsc2_serial_log_function_end( int          sn,
  * Function for printing out a message to the log file
  *-----------------------------------------------------*/
 
-static void
+static
+void
 fsc2_serial_log_message( int          sn,
                          const char * fmt,
                          ... )
@@ -1352,7 +1379,8 @@ fsc2_serial_log_message( int          sn,
  * Opens the log file 
  *--------------------*/
 
-static void
+static
+void
 open_serial_log( int sn )
 {
     char * volatile log_file_name = NULL;
@@ -1425,7 +1453,8 @@ open_serial_log( int sn )
  * Closes the log file
  *---------------------*/
 
-static void
+static
+void
 close_serial_log( int sn )
 {
     fsc2_assert( sn >= 0 && sn <= Num_Serial_Ports );

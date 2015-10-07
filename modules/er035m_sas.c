@@ -105,8 +105,8 @@ static struct {
     int              resolution; /* set to either RES_VERY_LOW = 0.1 G,
                                     RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
     int              sn;
-    struct termios * tio;        /* serial port terminal interface structure */
-    char             prompt;     /* prompt character send on each reply */
+    struct termios * tio;                // serial port terminal structure
+    char const     * prompt;             // prompt character sent on each reply
     int              probe_orientation;
     int              probe_type;
     long             upper_search_limit;
@@ -197,7 +197,7 @@ er035m_sas_init_hook( void )
 
     nmr.state      = ER035M_SAS_UNKNOWN;
     nmr.resolution = UNDEF_RES;
-    nmr.prompt     = '*';
+    nmr.prompt     = "*";
 
     nmr.keep_going_on_bad_field = false;
 
@@ -419,7 +419,7 @@ Var_T *
 gaussmeter_keep_going_on_error( Var_T * v )
 {
 	if ( ! v )
-		return vars_push( INT_VAR, nmr.bug_behaviour );
+		return vars_push( INT_VAR, ( long ) nmr.bug_behaviour );
 
 	long behaviour;
 
@@ -721,7 +721,7 @@ gaussmeter_command( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
 		if ( nmr.device_is_dead )
-			return vars_push( INT_VAR, 0 );
+			return vars_push( INT_VAR, 0L );
 
 		char * volatile cmd = NULL;
 
@@ -741,7 +741,7 @@ gaussmeter_command( Var_T * v )
 			{
 				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
 					nmr.device_is_dead = true;
-				return vars_push( FLOAT_VAR, -1.0 );
+				return vars_push( INT_VAR, 0L );
 			}
 
 			RETHROW;
@@ -953,7 +953,8 @@ er035m_sas_get_field( void )
         THROW( EXCEPTION );
     }
 
-    /* Finally interpret the field value string */
+    /* Finally interpret the field value string - note that there can be
+	   spaces between the sign and the number which sscanf() doesn't like */
 
     *( state_flag - 1 ) = '\0';
 
@@ -1137,19 +1138,16 @@ er035m_sas_talk( const char * cmd,
         stop_on_user_request( );
 
 		size_t len = *length;
-		if (    er035m_sas_write( cmd ) != OK
-			 || er035m_sas_read( buffer, &len ) != OK )
-			continue;
-
-        if ( len > 0 )
+		if (    er035m_sas_write( cmd ) == OK
+			 && er035m_sas_read( buffer, &len ) == OK
+			 && len > 0 )
 		{
 			*length = len;
-			break;
+			return;
 		}
     }
 
-	if ( retries <= 0 )
-		er035m_sas_comm_fail( );
+	er035m_sas_comm_fail( );
 }
 
 
@@ -1170,7 +1168,7 @@ er035m_sas_command( const char * cmd )
 	   don't expect it to be available - this is firmware bug territory ... */
 
 	char buf;
-	long len = 1; 
+	size_t len = 1; 
 	er035m_sas_comm( SERIAL_READ, &buf, &len, 1 );
 }
 
@@ -1211,28 +1209,28 @@ er035m_sas_read( char *   buffer,
     if ( ! buffer || ! *length )
         return OK;
 
-	/* There's a good chance that there are several prompt characters
-	   "in the pipeline": after each command the device is supposed to
-	   send a single prompt character.If this would happen we could read
-	   it immediately. But the device is buggy and sometimes doesn't send
+	/* There's a chance that there are some prompt characters left "in the
+	   pipeline": after each command the device is supposed to send a single
+	   prompt character. If this would happen we could always read it
+	   immediately. But the device is buggy and sometimes it doesn't send
 	   the prompt character, and it's unclear if it will send it at some
-	   later time (e.g. with the reply to a request). Thus the only way out
-	   is, when other data are expected from the device to first read all
-	   prompt chars that may have been assembled by the device. This is done
-	   one-by-one since we need the prompt char also as the 'termination'
-	   character for messages - since the caller can't know how many bytes
-	   the device will send we otherwise would have to rely on a timeout. But
-	   that's problematic also since the device tales quite a long time to
-	   answer some commands and, if we'd use this as the only criterion, each
-	   read would take as long as that... */
+	   later time (e.g. with the reply to a new request). Thus the only way
+	   out is, when other data are expected from the device, to first read
+	   all prompt chars that may have been assembled by the device. This
+	   is done one-by-one since the prompt char is uses as the 'termination'
+	   character, signaling the end of a messages - since the caller can't
+	   know how many bytes the device will send we otherwise would have to
+	   rely on a timeout. But that's problematic also since the device takes
+	   quite a long time to answer some commands and, if we'd use this as the
+	   only criterion, each read would take as long as that... */
 
 	size_t len;
 	do
 	{
 		len = *length - 1;
-		if ( ! er035m_sas_comm( SERIAL_READ, buffer, &len, 10 ) )
+		if ( er035m_sas_comm( SERIAL_READ, buffer, &len, 10 ) != OK )
 			return FAIL;
-	} while ( len == 1 && *buffer == nmr.prompt );
+	} while ( len == 1 && *buffer == *nmr.prompt );
 
 	buffer[ len ] = '\0';
 
@@ -1241,7 +1239,7 @@ er035m_sas_read( char *   buffer,
 
 	while (    len-- > 0
 			&& (    isspace( ( int ) buffer[ len ] )
-				 || buffer[ len ] == nmr.prompt ) )
+				 || buffer[ len ] == *nmr.prompt ) )
 		buffer[ len ] = '\0';
 
 	*length = strlen( buffer );
@@ -1258,9 +1256,9 @@ er035m_sas_comm( int type,
                  ... )
 {
     va_list ap;
-    char *buf;
+    char * buf;
     ssize_t len;
-    size_t *lptr;
+    size_t * lptr;
 	int factor;
 
     switch ( type )
@@ -1286,9 +1284,7 @@ er035m_sas_comm( int type,
             fsc2_tcflush( nmr.sn, TCIOFLUSH );
             fsc2_tcsetattr( nmr.sn, TCSANOW, nmr.tio );
 
-			/* Switch to remote mode (makes also sure a command with no
-			   reply except for the promptcharacter is sent first, so we
-			   can safely catch that character) */
+			/* Switch to remote mode */
 
 			fsc2_usleep( ER035M_SAS_WAIT, UNSET );
 			er035m_sas_command( "REM" );
@@ -1321,21 +1317,19 @@ er035m_sas_comm( int type,
 
         case SERIAL_READ :
             va_start( ap, type );
-            buf = va_arg( ap, char * );
-            lptr = va_arg( ap, size_t * );
+            buf    = va_arg( ap, char * );
+            lptr   = va_arg( ap, size_t * );
 			factor = va_arg( ap, int );
             va_end( ap );
 
-            /* Try to read from the gaussmeter, give it up to 2 seconds time
-               to respond */
+            /* Try to read from the gaussmeter, give it 200 ms times the
+			   caller supplied factor to respond, but stop immediately on
+			   receiving the prompt character */
 
-            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr, &nmr.prompt,
-										     factor
-										   * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
+            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr, nmr.prompt,
+										   factor * ER035M_SAS_WAIT,
+										   UNSET ) ) <= 0 )
             {
-                if ( len == 0 )
-                    stop_on_user_request( );
-
                 *lptr = 0;
                 return FAIL;
             }
@@ -1345,7 +1339,7 @@ er035m_sas_comm( int type,
                get rid of it... */
 
             *lptr = len;
-            for ( len = 0; len < ( ssize_t ) *lptr; len++ )
+            for ( len = 0; len < ( ssize_t ) *lptr; ++len )
                 buf[ len ] &= 0x7f;
             break;
 

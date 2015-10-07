@@ -42,13 +42,11 @@ run fsc2:
 
 Optionally, you should have
 
-11) mail and sendmail (or similar) installed, or, if you want to use the
-    built-in mail agent, the libresolv.so library is required.
-12) addr2line
-13) perl (version 5.6 or higher) with the pTk (Tk support) package
-14) pnmtopng
-15) pnmtojpeg
-16) If you want to compile fsc2 with the FFT module you also need
+11) addr2line
+12) perl (version 5.6 or higher) with the pTk (Tk support) package
+13) pnmtopng
+14) pnmtojpeg
+15) If you want to compile fsc2 with the FFT module you also need
     the FFTW library, version 3, which can be downloaded e.g. from
     http://www.fftw.org/
 
@@ -60,16 +58,16 @@ won't work (which also requires the next two utilities).
 
 To create the complete documentation beside Perl you also need
 
-17) makeinfo
-18) install-info (see GNU texinfo)
-19) texi2html (at least version 1.78)
-20)
-11) TeX (if missing no PostScript and PDF documentation is created)
-22) convert and identify from the ImageMagick package (or no PostScript
+16) makeinfo
+17) install-info (see GNU texinfo)
+18) texi2html (at least version 1.78)
+19)
+20) TeX (if missing no PostScript and PDF documentation is created)
+21) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
-23) dvips (if missing no PostScript documentation is created)
-24) pdftex (if missing no PDF documentation will be created)
-25) gzip
+22) dvips (if missing no PostScript documentation is created)
+23) pdftex (if missing no PDF documentation will be created)
+24) gzip
 
 
 
@@ -462,25 +460,22 @@ ports are only accessible by programs with root privileges). A reasonable
 choice is 8080.
 
 
-The variable NO_MAIL can be defined if you don't wish that an email gets
-send automatically to me (or someone else adjustable via the variable
-MAIL_ADDRESS, so below) in case the program crashes.
+When fsc2 crashes i tries to write out a report containing information
+about the state of the program, where the crash happend and what EDL
+script was running at the time. Such a report can be very helpful in
+debuuuging the reasons for the crash. The variable CHRASH_REPORT_DIR
+can be used to set the directory the files with the crash reports
+are written to. Per default this is the default directory for temporary
+files (usually '/tmp'), but this directory often gets cleaned out on
+reboots or may not have enough space left (e.g. due to lengthy
+log files). If you set such a directory keep in mind that it has to
+be writable by all users of fsc2. This is typically achieved by
+setting the permissions for the directory with the command
 
+chmod ugo+=rwxt dirname
 
-Normally, fsc2 will try to send mails through the standard mail system,
-i.e. sendmail or one of the possible replacements. If you don't have
-sendmail or a replacement installed but want to send mail anyway you can
-built fsc2 to use its built-in mail transport agent. For this define the
-variable USE_FSC2_MTA. If you're on a IPv6 network please also define the
-variable USE_IPv6.
-
-
-The final variable to be set is the email address of the person that will
-receive bug reports and notifications if fsc2 crashes. Usually, you should
-not change this variable except when you apply changes to the program on
-your own. In this case sending these kind of mails to me obviously doesn't
-make too much sense... Another obvious reason for changing it would be that
-the machine isn't connected to the internet.
+(the 't' bit makes sure only the creator of a file can delete it
+as it's the case for the '/tmp' directory).
 
 
 C1) Device setup

@@ -42,25 +42,23 @@ static struct {
     double SLIDER_SIZE;
 } XI_Sizes;
 
-static char xGeoStr[ 64 ],
-            xdisplayGeoStr[ 64 ],
-            x_1d_displayGeoStr[ 64 ],
-            x_2d_displayGeoStr[ 64 ],
-            xcutGeoStr[ 64 ],
-            xtoolGeoStr[ 64 ],
-            xaxisFont[ 256 ],
-            xsmb[ 64 ],
-            xsizeStr[ 64 ];
+static char xGeoStr[ 64 ];
+static char xdisplayGeoStr[ 64 ];
+static char x_1d_displayGeoStr[ 64 ];
+static char x_2d_displayGeoStr[ 64 ];
+static char xcutGeoStr[ 64 ];
+static char xtoolGeoStr[ 64 ];
+static char xaxisFont[ 256 ];
+static char xsmb[ 64 ];
+static char xsizeStr[ 64 ];
 
-static int xbrowserfs,
-           xtoolboxfs,
-           xfileselectorfs,
-           xhelpfs,
+static int xbrowserfs;
+static int xtoolboxfs;
+static int xfileselectorfs;
+static int xhelpfs;
 #if defined WITH_HTTP_SERVER
-           xport,
+static int xport;
 #endif
-		   xnocm;
-
 
 FL_resource Xresources[ ] = {
     {                         /* geometry of main window */
@@ -158,14 +156,6 @@ FL_resource Xresources[ ] = {
         xsmb,
         "",
         sizeof xsmb
-    },
-    {                         /* switch off crash mails */
-        "noCrashMail",
-        "*.noCrashMail",
-        FL_BOOL,
-        &xnocm,
-        "0",
-        sizeof xnocm
     },
     {                         /* selection of small or large version */
         "size",
@@ -386,7 +376,7 @@ xforms_init( int  * argc,
         fl_set_object_helper( GUI.main_form->run, "Start loaded EDL program" );
         fl_set_object_helper( GUI.main_form->quit, "Quit fsc2" );
         fl_set_object_helper( GUI.main_form->help, "Show documentation" );
-        fl_set_object_helper( GUI.main_form->bug_report, "Mail a bug report" );
+//        fl_set_object_helper( GUI.main_form->bug_report, "Mail a bug report" );
 #if defined WITH_HTTP_SERVER
         www_help = get_string( "Run a HTTP server (on port %d)\n"
                                "that allows to view fsc2's current\n"
@@ -416,9 +406,7 @@ xforms_init( int  * argc,
     /* There's no use for the bug report button if either no mail address
        or no mail program has been set */
 
-#if ! defined( MAIL_ADDRESS )
     fl_hide_object( GUI.main_form->bug_report );
-#endif
 
     /* Don't draw a button for the HTTP server if it's not needed, otherwise
        add a callback for the server button */
@@ -608,11 +596,6 @@ setup_app_options( FL_CMD_OPT app_opt[ ] )
     app_opt[ STOPMOUSEBUTTON ].specifier  = T_strdup( "*.stopMouseButton" );
     app_opt[ STOPMOUSEBUTTON ].argKind    = XrmoptionSepArg;
     app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) "";
-
-    app_opt[ NOCRASHMAIL ].option         = T_strdup( "-noCrashMail" );
-    app_opt[ NOCRASHMAIL ].specifier      = T_strdup( "*.noCrashMail" );
-    app_opt[ NOCRASHMAIL ].argKind        = XrmoptionNoArg;
-    app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) "0";
 
     app_opt[ RESOLUTION ].option          = T_strdup( "-size" );
     app_opt[ RESOLUTION ].specifier       = T_strdup( "*.size" );

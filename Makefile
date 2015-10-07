@@ -413,35 +413,19 @@
 # FLEX_NEEDS_BISON_DECLARATIONS := yes
 
 
-# Uncomment the following line if you don't want the program to send me
-# an email with a report when it crashes.
+# If fsc2 should ever crash it will attempt to write out a crash report,
+# containing information about the the exact location of the crash and
+# the EDL script being used. This report will be written to a file named
+# fsc2.crash.xxxxxx, where the 6 'x' are replaced by random characters
+# in order to create a unique file name). Unless the following variable
+# is set an attempt will be made to write the report to the defaukt
+# directory for temporary files. If it is set it nust be the name of
+# sm alternative directory for which all users of fsc2 have write per-
+# mission for - this can be useful in cases where the default directory
+# for temporary files (usually '/tmp' has not much place and/or is
+# often filled up with other files (e.g. log files from fsc2).
 
-# NO_MAIL            := yes
-
-
-# Normally, fsc2 will use the systems 'mail' command when it needs to
-# send emails. This requires that a mail transport agent (MTA) like
-# sendmail is installed on the system (i.e. sendmail or a similar
-# program is installed, but not necessarily be running, waiting for
-# incoming connections). Otherwise, when no MTA is installed a somewhat
-# rudimentary mail transfer agent built into fsc2 can be used instead.
-# If you want to use fsc2s MTA (e.g. because sendmail isn't installed on
-# your machine) uncomment the following line. In this case you must also
-# uncomment the line defining the USE_IPv6 variable if your machine uses
-# the new IP address scheme with 128 bit addresses instead of the
-# traditional one with only 32 bit addresses.
-
-# USE_FSC2_MTA       := yes
-# USE_IPv6           := yes
-
-
-# This last variable controls to whom emails with bug reports and about
-# crashes will be send - if it's commented out no "Bug report" button
-# will be shown. Please change this if you change the program yourself
-# (in which case sending bug reports or emails about crashes to me
-# wouldn't make too much sense).
-
-# MAIL_ADDRESS       := fsc2@toerring.de
+# CRASH_REPORT_DIR := "/home/tmp"
 
 
 # Set the optimization level
@@ -919,42 +903,13 @@ endif
 
 # Define a variable with the full path of the 'addr2line' program and make
 # sure addr2line gets found by 'which', otherwise don't set the variable.
-# If NO_MAIL or IS_NOT_A_I386 has been defined never send crash mails (which
-# in turn requires ADDR2LINE to be set).
+# If IS_NOT_A_I386 has been defined don't create crash reports (which in
+# turn requires ADDR2LINE to be set).
 
-ifndef NO_MAIL
 ifndef IS_NOT_A_I386
 	ADDR2LINE     := $(shell which addr2line)
 	ifneq ($(word 1,$(ADDR2LINE)),which:)
 		CONFFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
-	endif
-endif
-endif
-
-
-# IF USE_FSC2_MTA has not been defined also create a variable with the full
-# name of the 'mail' program. Otherwise we need the libresolv.so library
-# for the built-in mail transport agent (but if the 'mail' program can't be
-# found revert to using the built-in MTA)
-
-ifdef MAIL_ADDRESS
-	CONFFLAGS += -DMAIL_ADDRESS=\"$(patsubst % ,%,$(MAIL_ADDRESS))\"
-	ifndef USE_FSC2_MTA
-		MAIL_PROGRAM := $(shell which mail)
-		ifneq ($(MAIL_PROGRAM),)
-			ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
-				CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
-			else
-				LIBS      += -lresolv
-				CONFFLAGS += -DUSE_FSC2_MTA
-			endif
-		else
-			LIBS      += -lresolv
-			CONFFLAGS += -DUSE_FSC2_MTA
-		endif
-	else
-		LIBS      += -lresolv
-		CONFFLAGS += -DUSE_FSC2_MTA
 	endif
 endif
 
@@ -967,6 +922,16 @@ ifdef DESCRIPTION
      space := $(empty) $(empty)
 	CONFFLAGS += -DDESCRIPTION=\"$(subst $(space),\\x20,$(subst \",,$(DESCRIPTION)))\"
 endif
+
+# Deal with directory for crash reports
+
+ifdef CRASH_REPORT_DIR
+     comma := ,
+     empty :=
+     space := $(empty) $(empty)
+	CONFFLAGS += -DCRASH_REPORT_DIR=\"$(CRASH_REPORT_DIR)\"
+endif
+
 
 
 export            # export all variables to sub-makes

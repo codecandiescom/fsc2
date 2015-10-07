@@ -1456,12 +1456,11 @@ child_sig_handler( int signo )
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )
     if (    ! Crash.already_crashed
          && Crash.signo != SIGABRT
-         && Crash.signo != SIGTERM
-         && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+         && Crash.signo != SIGTERM )
     {
         Crash.already_crashed = SET;
         Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
-        death_mail( );
+        crash_report( );
     }
 #endif
 

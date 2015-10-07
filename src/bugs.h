@@ -23,7 +23,7 @@
 #define BUGS_HEADER
 
 
-void death_mail( void );
+void crash_report( void );
 
 
 #endif /* ! BUGS_HEADER */
