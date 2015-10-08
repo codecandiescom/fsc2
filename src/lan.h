@@ -93,7 +93,8 @@ ssize_t fsc2_lan_readv( int            /* handle         */,
 
 FILE * fsc2_lan_open_log( const char * /* dev_name */ );
 
-FILE * fsc2_lan_close_log( FILE * /* fp */ );
+FILE * fsc2_lan_close_log( const char * /* dev_name */,
+						   FILE       * /* fp */ );
 
 void fsc2_lan_log_message( FILE       * /* fp  */,
 						   const char * /* fmt */,

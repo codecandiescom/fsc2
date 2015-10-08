@@ -164,7 +164,7 @@ vxi11_open( const char * dev_name,
                                                           "channel to the "
                                                           "device" ) );
         fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
-        log_fp = fsc2_lan_close_log( log_fp );
+        log_fp = fsc2_lan_close_log( name, log_fp );
 
         ip   = T_free( ( char * ) ip );
         name = T_free( ( char * ) name );
@@ -191,7 +191,7 @@ vxi11_open( const char * dev_name,
                               ? vxi11_sperror( core_link->error )
                               : "unknown reasons" );
         fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
-        log_fp = fsc2_lan_close_log( log_fp );
+        log_fp = fsc2_lan_close_log( name, log_fp );
 
         print( FATAL, "Failed to connect to device: %s\n",
                core_link ?
@@ -234,7 +234,7 @@ vxi11_open( const char * dev_name,
                                                           "async channel to "
                                                           "device" ) );
         fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
-        log_fp = fsc2_lan_close_log( log_fp );
+        log_fp = fsc2_lan_close_log( name, log_fp );
 
         destroy_link_1( &core_link->lid, core_client );
         core_link = NULL;
@@ -261,7 +261,7 @@ vxi11_open( const char * dev_name,
                               ? vxi11_sperror( async_link->error )
                               : "unknown reasons" );
         fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
-        log_fp = fsc2_lan_close_log( log_fp );
+        log_fp = fsc2_lan_close_log( name, log_fp );
 
         if ( async_link )
             destroy_link_1( &async_link->lid, async_client );
@@ -346,7 +346,7 @@ vxi11_close( void )
     core_client = NULL;
 
     fsc2_lan_log_function_end( log_fp, "vxi11_close", name );
-    log_fp = fsc2_lan_close_log( log_fp );
+    log_fp = fsc2_lan_close_log( name, log_fp );
 
     ip          = T_free( ( char * ) ip );
     name        = T_free( ( char * ) name );
