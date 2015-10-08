@@ -817,20 +817,17 @@ fsc2_serial_read( int          sn,
         {
             if ( still_to_wait == 0 )
                 fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
-                                         "without delay until termination "
-                                         "sequence '%s' is received\n",
-                                         ( long ) count, term, sn );
+                                         "or until '%s' is received without "
+                                         "delay\n", ( long ) count, term, sn );
             else if ( still_to_wait < 0 )
                 fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
-                                         "until termination sequence '%s' is "
-                                         "received\n", ( long ) count,
-                                         term, sn );
+                                         "or until '%s' is received\n",
+                                         ( long ) count, term, sn );
             else
                 fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
-                                         "within %ld ms or until termination "
-                                         "sequence '%s' is received\n",
-                                         ( long ) count, still_to_wait / 1000,
-                                         term, sn );
+                                         "within %ld ms or until '%s' is "
+                                         "received\n", ( long ) count,
+                                         still_to_wait / 1000, term, sn );
         }
     }
 
