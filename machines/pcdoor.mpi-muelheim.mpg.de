@@ -10,5 +10,4 @@ LAN_LOG_DIR        := /scratch/tmp
 LAN_LOG_LEVEL      := LL_ALL 
 WITH_HTTP_SERVER   := yes
 DEFAULT_HTTP_PORT  := 8080
-MAIL_ADDRESS       := jens@localhost
 FLEX_NEEDS_BISON_DECLARATIONS := yes

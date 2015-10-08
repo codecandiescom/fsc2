@@ -10,5 +10,4 @@ LAN_LOG_LEVEL      := HIGH
 WITH_HTTP_SERVER   := yes
 DEFAULT_HTTP_PORT  := 8080
 EDITOR             := emacs
-MAIL_ADDRESS       := jens
 FLEX_NEEDS_BISON_DECLARATIONS := yes

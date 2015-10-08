@@ -1,4 +1,4 @@
-.TH FSC2 1 "Jan 2008"
+.TH FSC2 1 "Oct 2015"
 .SH NAME
 fsc2 \- program for remote control of spectrometers
 .SH SYNOPSIS
@@ -58,10 +58,6 @@ better be \fBreal careful\fR. This flag is only useful for cases where the
 input file is a temporary file that needs to be deleted when it isn't needed
 anymore.
 .TP
-\fB\-non\-exclusive\fR
-Run \fBfsc2\fR in non-exclusive mode, allowing more than one instance of
-\fBfsc2\fR to be run at the same time.
-.TP
 \fB\-h\fR, \fB\-\-help\fR
 Displays a short help text and exits.
 .TP
@@ -115,11 +111,6 @@ Specifies the mouse button that must be used to activate the stop button while
 the experiment is running. Use the string "left" or the number 1 for the left
 mouse button, "middle" or 2 for the middle and "right" or 3 for the right
 mouse button. Per default each of the three buttons can be used.
-.TP
-\fB\-noCrashMail\fR
-Normally, \fBfsc2\fR automatically sends the author an email whenever it
-crashes with information about the EDL program that was run. When this option
-is used no email is send.
 .TP
 \fB\-noBalloons\fR
 Switches off display of help message balloons.
@@ -180,10 +171,6 @@ This option sets the font to be used in the axes in the display windows.
 Specifies the mouse button that must be used to activate the stop button while
 the experiment is running.
 .TP
-\fBnoCrashMail\fR
-This boolean option tells \fBfsc2\fR not to send an email to the author
-whenever it crashes.
-.TP
 \fBnoBalloons\fR
 Switches off display of help message balloons.
 .TP
@@ -225,13 +212,12 @@ program and write further device drivers.
 .SH LICENSE
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 675 Mass
-Ave, Cambridge, MA 02139, USA.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

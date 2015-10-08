@@ -15,7 +15,6 @@ rulbus_incl_path        := /usr/local/include
 rulbus_lib_path         := /usr/local/lib
 
 FLEX_NEEDS_DECLARATIONS := yes
-MAIL_ADDRESS            := fsc2@toerring.de
 BROWSER                 := firefox
 DESCRIPTION             := "J-band"
 FLEX_NEEDS_BISON_DECLARATIONS := yes

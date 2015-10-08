@@ -1,4 +1,4 @@
-@c  Copyright (C) 1999-2014 Jens Thoms Toerring
+@c  Copyright (C) 1999-2015 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -565,25 +565,20 @@ lower numbered ports are only accessible by programs with root privileges). A
 reasonable choice is 8080.
 
 
-The variable @code{NO_MAIL} can be defined if you don't wish that an email
-gets send automatically to me (or someone else adjustable via the variable
-@code{MAIL_ADDRESS}, so below) in case the program crashes.
+Should fsc2 ever crash it tries to write out a file with information
+about the state of the program at that moment, the @code{EDL} script
+being executed etc. Per default this file will be written to the
+default directory for temporary files (usually @file{/tmp}). The file
+has a name like @file{fsc2.crash.1QfdRL}, where the last 6 characters
+are picked randomly to avoid overwriting already existing files.
 
+In some cases it can be preferable to write these files to some other
+location than the default directory for temporary files. For that
+case the variable @code{CRASH_REPORT_DIR} can be set up with the name
+of the directory (as an absolute path) these files are to written to.
+Please keep in mind that this directory must be writable by all users
+of @code{fsc2}.
 
-Normally, @code{fsc2} will try to send mails through the standard
-mail system, i.e.@: @code{sendmail} or one of the possible replacements.
-If you don't have @code{sendmail} or a replacement installed but want
-to send mail anyway you can built @code{fsc2} to use its built-in mail
-transport agent. For this define the variable @code{USE_FSC2_MTA}. If
-you're on a IPv6 network please also define the variable @code{USE_IPv6}.
-
-
-The final variable to be set, @code{MAIL_ADDRESS}, is the email address of the
-person that will receive bug reports and notifications if @code{fsc2}
-crashes. Usually, you should not change this variable except when you apply
-changes to the program on your own. In this case sending these kind of mails
-to me obviously doesn't make too much sense... Another obvious reason for
-changing it would be that the machine isn't connected to the internet.
 
 @ifnottex
 

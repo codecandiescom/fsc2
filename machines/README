@@ -63,10 +63,8 @@ rulbus_incl_path
 rulbus_lib_path
 WITH_HTTP_SERVER
 DEFAULT_HTTP_PORT
-NO_MAIL
-USE_FSC2_MTA
-USE_IPv6
-MAIL_ADDRESS
+CRASH_REPORT_DIR
+
 
 What they mean is explained in some detail at the top of the
 makefile in the main directory as well as in 'template.nowhere'

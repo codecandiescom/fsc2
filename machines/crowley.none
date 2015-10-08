@@ -19,5 +19,4 @@ pci_mio_16e_1_libs := libni_daq.so
 WITH_RULBUS        := yes
 rulbus_incl_path   := /usr/local/include
 rulbus_lib_path    := /usr/local/lib
-MAIL_ADDRESS       := jens
 FLEX_NEEDS_BISON_DECLARATIONS := yes
