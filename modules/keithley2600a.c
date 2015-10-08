@@ -117,7 +117,7 @@ keithley2600a_exp_hook( void )
     k26 = &keithley2600a;
 
     if ( ! keithley2600a_open( ) )
-        return FAIL;
+        return false;
 
     TRY
     {
