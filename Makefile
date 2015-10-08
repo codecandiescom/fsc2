@@ -544,15 +544,6 @@ LIBS := -L/usr/local/lib \
 tagsfile      := $(fdir)/TAGS
 
 
-# Check that the machine has a new libc, i.e. at least version 2 (which means
-# that /lib/libc.so.6 should exist), otherwise some problems with the older
-# libc have to be dealt with from within the program
-
-ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-	CONFFLAGS += -DIS_STILL_LIBC1
-endif
-
-
 # Set up a variable with the machines FQDN - if necessary follow symbolic
 # links (in cases where the machine has been renamed and the files in the
 # machines subdirectory are still for the old name but a symbolic link has

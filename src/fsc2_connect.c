@@ -50,13 +50,6 @@
 #include "fsc2_config.h"
 
 
-/* Stuff needed if we're still running an old libc */
-
-#if defined IS_STILL_LIBC1
-typedef unsigned int socklen_t;
-#endif
-
-
 /* FSC2_SOCKET must be identical to the definition in global.h ! */
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"

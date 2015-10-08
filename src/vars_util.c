@@ -132,7 +132,6 @@ vars_comp( int     comp_type,
 
     switch ( comp_type )
     {
-#if ! defined IS_STILL_LIBC1     /* libc2 *has* nextafter() */
         case COMP_EQUAL :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT == v2->INT );
@@ -172,36 +171,6 @@ vars_comp( int     comp_type,
                                      || nextafter( VALUE( v1 ), VALUE( v2 ) )
                                                               <= VALUE( v2 ) );
             break;
-#else
-        case COMP_EQUAL :
-            if ( v1->type == INT_VAR && v2->type == INT_VAR )
-                new_var = vars_push( INT_VAR, v1->INT == v2->INT );
-            else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
-            break;
-
-        case COMP_UNEQUAL :
-            if ( v1->type == INT_VAR && v2->type == INT_VAR )
-                new_var = vars_push( INT_VAR, v1->INT != v2->INT );
-            else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
-
-            break;
-
-        case COMP_LESS :
-            if ( v1->type == INT_VAR && v2->type == INT_VAR )
-                new_var = vars_push( INT_VAR, v1->INT < v2->INT );
-            else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
-            break;
-
-        case COMP_LESS_EQUAL :
-            if ( v1->type == INT_VAR && v2->type == INT_VAR )
-                new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
-            else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
-            break;
-#endif
 
         case COMP_AND :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )

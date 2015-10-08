@@ -829,8 +829,8 @@ fsc2_serial_read( int          sn,
                 fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
                                          "within %ld ms or until termination "
                                          "sequence '%s' is received\n",
-                                         ( long ) count, term,
-                                         still_to_wait / 1000, sn );
+                                         ( long ) count, still_to_wait / 1000,
+                                         term, sn );
         }
     }
 
