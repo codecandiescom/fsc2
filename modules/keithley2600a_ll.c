@@ -43,13 +43,13 @@ keithley2600a_open( void )
     /* Never try to open the device more than once */
 
     if ( k26->is_open )
-        return SUCCESS;
+        return true;
 
     /* Try to open an connection to the device */
 
 	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
                      false, false, OPEN_TIMEOUT ) == FAILURE )
-        return FAIL;
+        return false;
 
     k26->is_open = true;
 
@@ -62,10 +62,10 @@ keithley2600a_open( void )
          || vxi11_lock_out( true ) == FAILURE )
     {
         vxi11_close( );
-        return FAIL;
+        return false;
     }
 
-    return SUCCESS;
+    return true;
 }
 
 
@@ -77,7 +77,7 @@ bool
 keithley2600a_close( void )
 {
     if ( ! k26->is_open )
-        return SUCCESS;
+        return true;
 
     /* Clean up: remove functions we may have created */
 
@@ -90,10 +90,10 @@ keithley2600a_close( void )
     /* Close connection to the device */
 
     if ( vxi11_close( ) == FAILURE )
-        return FAIL;
+        return false;
 
     k26->is_open = false;
-    return SUCCESS;
+    return true;
 }
 
 
@@ -109,7 +109,7 @@ keithley2600a_cmd( const char * cmd )
     if ( vxi11_write( cmd, &len, false ) != SUCCESS )
 		keithley2600a_comm_failure( );
 
-	return SUCCESS;
+	return true;
 }
 
 
