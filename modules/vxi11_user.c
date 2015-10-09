@@ -51,10 +51,10 @@ static CLIENT          * async_client  = NULL;
 static Create_LinkResp * async_link    = NULL;
 
 
-static const char      * name          = NULL;
-static const char      * ip            = NULL;
-static long              read_timeout  = VXI11_DEFAULT_TIMEOUT;
-static long              write_timeout = VXI11_DEFAULT_TIMEOUT;
+static const char * name          = NULL;
+static const char * ip            = NULL;
+static long         read_timeout  = VXI11_DEFAULT_TIMEOUT;
+static long         write_timeout = VXI11_DEFAULT_TIMEOUT;
 
 static FILE * log_fp = NULL;
 
@@ -121,9 +121,6 @@ vxi11_open( const char * dev_name,
             bool         create_async,
             long         us_timeout )
 {
-    Create_LinkParms link_parms;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and in the EXPERIMENT
        section */
@@ -136,7 +133,7 @@ vxi11_open( const char * dev_name,
     {
         print( FATAL, "Internal error in module, connection already seems to "
                "exist.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     TRY
@@ -149,13 +146,13 @@ vxi11_open( const char * dev_name,
     {
         if ( name )
             name = T_free( ( char * ) name );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     /* Open log file after we have the connection open and locked */
 
     log_fp = fsc2_lan_open_log( name );
-    fsc2_lan_log_function_start( log_fp, "vxi11_open", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_open" );
 
     if ( ! ( core_client = clnt_create( ip, DEVICE_CORE,
                                         DEVICE_CORE_VERSION, "tcp" ) ) )
@@ -163,7 +160,7 @@ vxi11_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, clnt_spcreateerror( "Failed to open a "
                                                           "channel to the "
                                                           "device" ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open" );
         log_fp = fsc2_lan_close_log( name, log_fp );
 
         ip   = T_free( ( char * ) ip );
@@ -171,10 +168,12 @@ vxi11_open( const char * dev_name,
 
         print( FATAL, "%s",
                clnt_spcreateerror( "Failed to connect to device" ) );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     /* Set up link parameters */
+
+    Create_LinkParms link_parms;
 
     link_parms.clientId     = 0;         /* not needed here */
     link_parms.lockDevice   = lock_device;
@@ -190,7 +189,7 @@ vxi11_open( const char * dev_name,
                               core_link
                               ? vxi11_sperror( core_link->error )
                               : "unknown reasons" );
-        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open" );
         log_fp = fsc2_lan_close_log( name, log_fp );
 
         print( FATAL, "Failed to connect to device: %s\n",
@@ -207,7 +206,7 @@ vxi11_open( const char * dev_name,
         ip   = T_free( ( char * ) ip );
         name = T_free( ( char * ) name );
 
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     /* Steve D. Sharples found that some Agilent Infiniium scopes return 0 as
@@ -223,7 +222,7 @@ vxi11_open( const char * dev_name,
 
     if ( ! create_async )
     {
-        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open" );
         return SUCCESS;
     }
 
@@ -233,7 +232,7 @@ vxi11_open( const char * dev_name,
         fsc2_lan_log_message( log_fp, clnt_spcreateerror( "Failed to open "
                                                           "async channel to "
                                                           "device" ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open" );
         log_fp = fsc2_lan_close_log( name, log_fp );
 
         destroy_link_1( &core_link->lid, core_client );
@@ -248,7 +247,7 @@ vxi11_open( const char * dev_name,
         print( FATAL, "%s",
                clnt_spcreateerror( "Failed to open async connection to "
                                    "device" ) );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
         
     async_link = create_link_1( &link_parms, async_client );
@@ -260,7 +259,7 @@ vxi11_open( const char * dev_name,
                                   async_link
                               ? vxi11_sperror( async_link->error )
                               : "unknown reasons" );
-        fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_open" );
         log_fp = fsc2_lan_close_log( name, log_fp );
 
         if ( async_link )
@@ -279,11 +278,11 @@ vxi11_open( const char * dev_name,
         ip          = T_free( ( char * ) ip );
         name        = T_free( ( char * ) name );
 
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_open", name );
-    return SUCCESS;
+    fsc2_lan_log_function_end( log_fp, "vxi11_open" );
+    return VXI11_SUCCESS;
 }
 
 
@@ -294,10 +293,6 @@ vxi11_open( const char * dev_name,
 int
 vxi11_close( void )
 {
-    Device_Error *dev_error;
-    int ret = SUCCESS;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -310,34 +305,38 @@ vxi11_close( void )
     {
         print( FATAL, "Internal error in module, no connection seems to "
                "exist.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_close", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_close" );
+
+    int ret = VXI11_SUCCESS;
 
     if ( async_client )
     {
         if ( async_link )
         {
-            dev_error = destroy_link_1( &async_link->lid, async_client );
+            Device_Error *dev_error = destroy_link_1( &async_link->lid,
+                                                      async_client );
+
             if ( dev_error && dev_error->error )
                 fsc2_lan_log_message( log_fp, "Failed to close async link: %s",
                                       vxi11_sperror( dev_error->error ) );
             async_link = NULL;
-            ret = FAILURE;
+            ret = VXI11_FAILURE;
         }
 
         clnt_destroy( async_client );
         async_client = NULL;
     }
 
-    dev_error = destroy_link_1( &core_link->lid, core_client );
+    Device_Error *dev_error = destroy_link_1( &core_link->lid, core_client );
 
     if ( dev_error && dev_error->error )
     {
         fsc2_lan_log_message( log_fp, "Failed to close core link: %s",
                               vxi11_sperror( dev_error->error ) );
-        ret = FAILURE;
+        ret = VXI11_FAILURE;
     }
 
     core_link = NULL;
@@ -345,13 +344,13 @@ vxi11_close( void )
     clnt_destroy( core_client );
     core_client = NULL;
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_close", name );
+    fsc2_lan_log_function_end( log_fp, "vxi11_close" );
     log_fp = fsc2_lan_close_log( name, log_fp );
 
     ip          = T_free( ( char * ) ip );
     name        = T_free( ( char * ) name );
 
-    if ( ret == FAILURE )
+    if ( ret == VXI11_FAILURE )
         print( WARN, "Couldn't properly close connection to device." );
     return ret;
 }
@@ -374,7 +373,7 @@ vxi11_set_timeout( int  dir,
     if ( us_timeout < 0 )
     {
         print( FATAL, "Internal error in module, invalid timeout.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     if ( dir == VXI11_READ )
@@ -385,10 +384,10 @@ vxi11_set_timeout( int  dir,
     {
         print( FATAL, "Internal error in module, invalid direction for "
                "timeout.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    return SUCCESS;
+    return VXI11_SUCCESS;
 }
 
 
@@ -400,10 +399,6 @@ vxi11_set_timeout( int  dir,
 int
 vxi11_read_stb( unsigned char * stb )
 {
-    Device_GenericParms generic_parms;
-    Device_ReadStbResp *readstb_resp;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -415,39 +410,42 @@ vxi11_read_stb( unsigned char * stb )
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_read_stb", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_read_stb" );
 
     if ( fsc2_lan_log_level( ) == LL_ALL )
         fsc2_lan_log_message( log_fp, "Trying to read STB within %ld ms\n",
                               read_timeout );
+
+    Device_GenericParms generic_parms;
 
     generic_parms.lid           = core_link->lid;
     generic_parms.flags         = 0;
     generic_parms.lock_timeout  = 0;
     generic_parms.io_timeout    = read_timeout;
 
-    readstb_resp = device_readstb_1( &generic_parms, core_client );
+    Device_ReadStbResp *readstb_resp = device_readstb_1( &generic_parms,
+                                                         core_client );
 
     if ( readstb_resp->error )
     {
         if ( fsc2_lan_log_level( ) == LL_ERR )
             fsc2_lan_log_message( log_fp, "Error in vxi11_read_stb(): %s",
                                   vxi11_sperror( readstb_resp->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_read_stb", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_read_stb" );
 
         print( FATAL, "Failed to read STB.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_read_stb", name );
+    fsc2_lan_log_function_end( log_fp, "vxi11_read_stb" );
 
     if ( stb )
         *stb = readstb_resp->stb;
 
-    return SUCCESS;
+    return VXI11_SUCCESS;
 }
 
 
@@ -459,17 +457,13 @@ vxi11_read_stb( unsigned char * stb )
  *
  * Please note: some devices may not support this operation
  * and it's not always possible to detect this. i.e. the
- * function may return indicating SUCCESS even though the
+ * function may return indicating Success even though the
  * lock state of the device didn't change.
  *----------------------------------------------------------*/
 
 int
 vxi11_lock_out( bool lock_state )
 {
-    Device_GenericParms generic_parms;
-    Device_Error *dev_error;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -481,10 +475,10 @@ vxi11_lock_out( bool lock_state )
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_lock_out", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_lock_out" );
 
     if ( fsc2_lan_log_level( ) == LL_ALL )
         fsc2_lan_log_message( log_fp, "Trying to put device in %s state "
@@ -492,10 +486,14 @@ vxi11_lock_out( bool lock_state )
                               lock_state ? "remote" : "local",
                               write_timeout );
 
+    Device_GenericParms generic_parms;
+
     generic_parms.lid          = core_link->lid;
     generic_parms.flags        = 0;
     generic_parms.lock_timeout = 0;
     generic_parms.io_timeout   = write_timeout;
+
+    Device_Error *dev_error;
 
     if ( lock_state )
         dev_error = device_remote_1( &generic_parms, core_client );
@@ -507,16 +505,16 @@ vxi11_lock_out( bool lock_state )
         if ( fsc2_lan_log_level( ) == LL_ERR )
             fsc2_lan_log_message( log_fp,  "Error in vxi11_lock_out(): %s",
                                   vxi11_sperror( dev_error->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_lock_out", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_lock_out" );
 
         print( FATAL, "Failed to set device into %s state.\n",
                lock_state ? "local" : "remote" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_lock_out", name );
+    fsc2_lan_log_function_end( log_fp, "vxi11_lock_out" );
 
-    return SUCCESS;
+    return VXI11_SUCCESS;
 }
 
 
@@ -525,17 +523,13 @@ vxi11_lock_out( bool lock_state )
  *
  * Please note: some devices may not support this operation
  * and it's not always possible to detect this. i.e. the
- * function may return indicating SUCCESS even though
+ * function may return indicating success even though
  * the device wasn't cleared.
  *----------------------------------------------------------*/
 
 int
 vxi11_device_clear( void )
 {
-    Device_GenericParms generic_parms;
-    Device_Error *dev_error;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -547,35 +541,37 @@ vxi11_device_clear( void )
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_device_clear", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_device_clear" );
 
     if ( fsc2_lan_log_level( ) == LL_ALL )
         fsc2_lan_log_message( log_fp, "Trying to send device clear within "
                               "%ld ms\n", write_timeout );
+
+    Device_GenericParms generic_parms;
 
     generic_parms.lid          = core_link->lid;
     generic_parms.flags        = 0;
     generic_parms.lock_timeout = 0;
     generic_parms.io_timeout   = write_timeout;
 
-    dev_error = device_clear_1( &generic_parms, core_client );
+    Device_Error *dev_error = device_clear_1( &generic_parms, core_client );
 
     if ( dev_error->error )
     {
         if ( fsc2_lan_log_level( ) == LL_ERR )
             fsc2_lan_log_message( log_fp, "Error in vxi11_device_clear(): "
                                   "%s", vxi11_sperror( dev_error->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_device_clear", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_device_clear" );
 
         print( FATAL, "Failed to send device clear.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_device_clear", name );
-    return SUCCESS;
+    fsc2_lan_log_function_end( log_fp, "vxi11_device_clear" );
+    return VXI11_SUCCESS;
 }
 
 
@@ -584,17 +580,13 @@ vxi11_device_clear( void )
  *
  * Please note: some devices may not support this operation
  * and it's not always possible to detect this. i.e. the
- * function may return indicating SUCCESS even though the
+ * function may return indicating success even though the
  * device wasn't triggered.
  *----------------------------------------------------------*/
 
 int
 vxi11_device_trigger( void )
 {
-    Device_GenericParms generic_parms;
-    Device_Error *dev_error;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -606,35 +598,37 @@ vxi11_device_trigger( void )
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_device_trigger", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_device_trigger" );
 
     if ( fsc2_lan_log_level( ) == LL_ALL )
         fsc2_lan_log_message( log_fp, "Trying to send device trigger "
                               "within %ld ms\n", write_timeout );
+
+    Device_GenericParms generic_parms;
 
     generic_parms.lid          = core_link->lid;
     generic_parms.flags        = 0;
     generic_parms.lock_timeout = 0;
     generic_parms.io_timeout   = write_timeout;
 
-    dev_error = device_trigger_1( &generic_parms, core_client );
+    Device_Error *dev_error = device_trigger_1( &generic_parms, core_client );
 
     if ( dev_error->error )
     {
         if ( fsc2_lan_log_level( ) == LL_ERR )
             fsc2_lan_log_message( log_fp, "Error in vxi11_device_trigger(): "
                                   "%s", vxi11_sperror( dev_error->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_device_trigger", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_device_trigger" );
 
         print( FATAL, "Failed to send device trigger.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_device_trigger", name );
-    return SUCCESS;
+    fsc2_lan_log_function_end( log_fp, "vxi11_device_trigger" );
+    return VXI11_SUCCESS;
 }
 
 
@@ -646,12 +640,10 @@ vxi11_device_trigger( void )
  * this function will throw an exception.
  *---------------------------------------------------------*/
 
-static int
+static
+int
 vxi11_abort( void )
 {
-    Device_Error *dev_error;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -663,32 +655,32 @@ vxi11_abort( void )
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     if ( ! async_client || ! async_link )
     {
         print( FATAL, "Internal module error, async channel isn't open.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_abort", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_abort" );
 
-    dev_error = device_abort_1( &async_link->lid, async_client );
+    Device_Error *dev_error = device_abort_1( &async_link->lid, async_client );
 
     if ( dev_error->error )
     {
         if ( fsc2_lan_log_level( ) == LL_ERR )
             fsc2_lan_log_message( log_fp, "Error in vxi11_abort(): %s",
                                   vxi11_sperror( dev_error->error ) );
-        fsc2_lan_log_function_end( log_fp, "vxi11_abort", name );
+        fsc2_lan_log_function_end( log_fp, "vxi11_abort" );
 
         print( FATAL, "Failed to abort.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_abort", name );
-    return SUCCESS;
+    fsc2_lan_log_function_end( log_fp, "vxi11_abort" );
+    return VXI11_SUCCESS;
 }
 
 
@@ -709,11 +701,6 @@ vxi11_write( const char * buffer,
              size_t     * length,
              bool         allow_abort )
 {
-    Device_WriteParms write_parms;
-    size_t bytes_left = *length;
-    struct timeval before,
-                   now;
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -725,48 +712,49 @@ vxi11_write( const char * buffer,
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     if ( *length == 0 )
-        return SUCCESS;
+        return VXI11_SUCCESS;
 
     if ( ! buffer )
     {
         print( FATAL, "Internal error in module, write data buffer is "
                "NULL.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_write", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_write" );
 
     /* Send data to the device taking into account the maximum amount of
        data the device is prepared to accept */
 
     if ( fsc2_lan_log_level( ) >= LL_ALL )
     {
-        fsc2_lan_log_message( log_fp, "Expect to write %lu byte(s) within "
-                              "%lu ms to LAN device %s:\n",
-                              ( unsigned long ) *length,
-                              write_timeout, name );
+        fsc2_lan_log_message( log_fp, "Expect to write %zu byte(s) within "
+                              "%lu ms:\n", *length, write_timeout );
         fsc2_lan_log_data( log_fp, *length, buffer );
     }
 
-    *length = 0;
+    Device_WriteParms write_parms;
 
     write_parms.lid          = core_link->lid;
     write_parms.lock_timeout = 0;
     write_parms.io_timeout   = write_timeout;
 
-    gettimeofday( &before, NULL );
-
     /* If necessary do more than a single write if the messages is longer
        than the device can accept - in that case set the END flag only
        with the last chunk! */
 
+    size_t bytes_left = *length;
+    *length = 0;
+
+    struct timeval before;
+    gettimeofday( &before, NULL );
+
     do
     {
-        Device_WriteResp *write_resp;
 
         /* If an async channel is open give the user a chance to interrupt
            the transfer */
@@ -780,6 +768,7 @@ vxi11_write( const char * buffer,
             THROW( USER_BREAK_EXCEPTION );
         }
 
+        Device_WriteResp *write_resp;
         write_parms.data.data_val = ( char * ) ( buffer + *length );
 
         if ( bytes_left > core_link->maxRecvSize )
@@ -793,6 +782,7 @@ vxi11_write( const char * buffer,
             write_parms.flags         = VXI11_END_FLAG;
         }
 
+        struct timeval now;
         gettimeofday( &now, NULL );
 
         write_parms.io_timeout -= 
@@ -808,25 +798,23 @@ vxi11_write( const char * buffer,
             if ( fsc2_lan_log_level( ) >= LL_ERR )
                 fsc2_lan_log_message( log_fp, "Error in vxi11_write(): "
                                       "failed to write to device, only "
-                                      "%lu of %lu got transmitted: %s\n",
-                                      ( unsigned long ) *length,
-                                      ( unsigned long )
-                                                      ( *length + bytes_left ),
+                                      "%zu of %zu got transmitted: %s\n",
+                                      *length, *length + bytes_left,
                                       vxi11_sperror( write_resp->error ) );
 
-            fsc2_lan_log_function_end( log_fp, "vxi11_write", name );
+            fsc2_lan_log_function_end( log_fp, "vxi11_write" );
             
             print( FATAL, "Failed to send data to device: %s.\n",
                    vxi11_sperror( write_resp->error ) );
-            return FAILURE;
+            return VXI11_FAILURE;
         }
 
         *length += write_parms.data.data_len;
         bytes_left -= write_parms.data.data_len;
     } while ( bytes_left > 0 );
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_write", name );
-    return SUCCESS;
+    fsc2_lan_log_function_end( log_fp, "vxi11_write" );
+    return VXI11_SUCCESS;
 }
 
 
@@ -848,14 +836,6 @@ vxi11_read( char   * buffer,
             size_t * length,
             bool     allow_abort )
 {
-    Device_ReadParms read_parms;
-    Device_ReadResp * read_resp;
-    size_t to_read = *length;
-    size_t expected = *length;
-    struct timeval before,
-                   now;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -867,22 +847,24 @@ vxi11_read( char   * buffer,
     if ( ! core_link || ! core_client || ! name || ! ip )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
     /* Do nothing if no data are to be read */
 
     if ( *length == 0 )
-        return SUCCESS;
+        return VXI11_SUCCESS;
 
     if ( buffer == NULL )
     {
         print( FATAL, "Internal error in module, buffer for data to be read "
                "is NULL.\n" );
-        return FAILURE;
+        return VXI11_FAILURE;
     }
 
-    fsc2_lan_log_function_start( log_fp, "vxi11_read", name );
+    fsc2_lan_log_function_start( log_fp, "vxi11_read" );
+
+    Device_ReadParms read_parms;
 
     read_parms.lid          = core_link->lid;
     read_parms.flags        = 0;
@@ -890,12 +872,21 @@ vxi11_read( char   * buffer,
     read_parms.lock_timeout = 0;
     read_parms.io_timeout   = read_timeout;
 
-    *length = 0;
+    if ( fsc2_lan_log_level( ) >= LL_ALL )
+        fsc2_lan_log_message( log_fp, "Expect to read up to %zu byte(s) within "
+                              "%lu ms\n", *length, read_timeout );
 
     /* Keep reading until either as many bytes have been transmitted as
        the user asked for or the end of the message has been reached */
 
+    size_t to_read = *length;
+    size_t expected = *length;
+    *length = 0;
+
+    struct timeval before;
     gettimeofday( &before, NULL );
+
+    Device_ReadResp * read_resp;
 
     do
     {
@@ -911,37 +902,36 @@ vxi11_read( char   * buffer,
             THROW( USER_BREAK_EXCEPTION );
         }
 
+        struct timeval now;
         gettimeofday( &now, NULL );
 
         read_parms.io_timeout -= 
             lrnd( 1e-3 * (   ( 1000000 * now.tv_sec    + now.tv_usec  )
                            - ( 1000000 * before.tv_sec + before.tv_usec ) ) );
-
         before = now;
 
         read_parms.requestSize = to_read - *length;
 
         read_resp = device_read_1( &read_parms, core_client );
 
-        /* In principle the device should never send more data then it
-           was asked for, so the following test is probably only a result
-           of paranoia... */
+        /* In principle the device should never send more data than it was
+           asked for, so the following test is probably only a result of
+           paranoia... */
 
         if (    ! read_resp->error
              && *length + read_resp->data.data_len > to_read )
         {
             if ( fsc2_lan_log_level( ) >= LL_ERR )
                 fsc2_lan_log_message( log_fp, "Error in vxi11_read(): "
-                                      "device send more data than it was "
-                                      "asked for (%lu instead of %lu).\n",
-                                      ( unsigned long )
-                                         ( *length + read_resp->data.data_len ),
-                                      ( unsigned long ) to_read );
+                                      "device sent more data than it was "
+                                      "asked for (%zu instead of %zu).\n",
+                                      ( *length + read_resp->data.data_len ),
+                                      to_read );
 
-            fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
+            fsc2_lan_log_function_end( log_fp, "vxi11_read" );
             
             print( FATAL, "Failed to read, too many data from device.\n" );
-            return FAILURE;
+            return VXI11_FAILURE;
         }
 
         if ( ! read_resp->error || read_resp->error == VXI11_TIMEOUT_ERROR )
@@ -955,30 +945,27 @@ vxi11_read( char   * buffer,
         {
             if ( fsc2_lan_log_level( ) >= LL_ERR )
                 fsc2_lan_log_message( log_fp, "Timeout in vxi11_read(): only "
-                                      "%lu of %lu bytes got transmitted: %s\n",
-                                      ( unsigned long ) *length,
-                                      ( unsigned long ) to_read,
+                                      "%zu of %zu bytes got transmitted: %s\n",
+                                      *length, to_read,
                                       vxi11_sperror( read_resp->error ) );
 
-            fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
-            return TIMEOUT;
+            fsc2_lan_log_function_end( log_fp, "vxi11_read" );
+            return VXI11_TIMEOUT;
         }
 
         if ( read_resp->error && read_resp->error != VXI11_TIMEOUT_ERROR )
         {
             if ( fsc2_lan_log_level( ) >= LL_ERR )
-                fsc2_lan_log_message( log_fp, "Error in vxi11_read(): "
-                                      "only %lu of %lu bytes got transmitted "
-                                      "before timeout: %s\n",
-                                      ( unsigned long ) *length,
-                                      ( unsigned long ) to_read,
+                fsc2_lan_log_message( log_fp, "Error in vxi11_read(): only %zu "
+                                      "of %zu bytes got transmitted before "
+                                      "timeout: %s\n", *length, to_read,
                                       vxi11_sperror( read_resp->error ) );
 
-            fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
+            fsc2_lan_log_function_end( log_fp, "vxi11_read" );
             
             print( FATAL, "Failed to read data from device: %s.\n",
                    vxi11_sperror( read_resp->error ) );
-            return FAILURE;
+            return VXI11_FAILURE;
         }
     } while ( *length < to_read && ! ( read_resp->reason & VXI11_END_REASON ) );
 
@@ -1002,16 +989,17 @@ vxi11_read( char   * buffer,
         }
     }
 
-    fsc2_lan_log_function_end( log_fp, "vxi11_read", name );
+    fsc2_lan_log_function_end( log_fp, "vxi11_read" );
 
-    return SUCCESS;
+    return VXI11_SUCCESS;
 }
 
 
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static const char *
+static
+const char *
 vxi11_sperror( Device_ErrorCode error )
 {
     static char e[ 100 ];

@@ -26,9 +26,9 @@
 #include "fsc2_module.h"
 
 
-#define SUCCESS            0
-#define SUCCESS_BUT_MORE   1
-#define FAILURE           -1
+#define VICP_SUCCESS            0
+#define VICP_SUCCESS_BUT_MORE   1
+#define VICP_FAILURE           -1
 
 
 void vicp_open( const char    * /* dev_name       */,

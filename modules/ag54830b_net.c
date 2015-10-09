@@ -33,7 +33,7 @@ bool
 ag54830b_l_init( const char * name )
 {
 	if ( vxi11_open( name, NETWORK_ADDRESS, VXI11_NAME,
-					 SET, UNSET, 100000 ) == FAILURE )
+					 SET, UNSET, 100000 ) != VXI11_SUCCESS )
         return FAIL;
 
 	ag54830b_l.device = 0;
@@ -64,7 +64,7 @@ ag54830b_l_command( const char * cmd )
 	size_t len = strlen( cmd );
 
 
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, UNSET ) != VXI11_SUCCESS )
 		ag54830b_l_failure( );
 
 	fsc2_usleep( 4000, UNSET );
@@ -83,12 +83,12 @@ ag54830b_l_command_retry( const char * cmd )
 
 	/* Try to write and on failure wait 4ms and retry once more */
 
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, UNSET ) != VXI11_SUCCESS )
 	{
 		print( SEVERE, "Trouble sending data to device, trying again.\n" );
 		fsc2_usleep( 4000, UNSET );
 		len = strlen( cmd );
-		if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+		if ( vxi11_write( cmd, &len, UNSET ) != VXI11_SUCCESS )
 			ag54830b_l_failure( );
 	}
 
@@ -107,12 +107,12 @@ ag54830b_l_talk( const char * cmd,
 {
 	size_t len = strlen( cmd );
 
-	if ( vxi11_write( cmd, &len, UNSET ) != SUCCESS )
+	if ( vxi11_write( cmd, &len, UNSET ) != VXI11_SUCCESS )
 		ag54830b_l_failure( );
 
 	fsc2_usleep( 4000, UNSET );
 
-	if ( vxi11_read( reply, length, UNSET ) != SUCCESS )
+	if ( vxi11_read( reply, length, UNSET ) != VXI11_SUCCESS )
 		ag54830b_l_failure( );
 
 	fsc2_usleep( 4000, UNSET );
@@ -241,7 +241,7 @@ ag54830b_l_acq_completed( void )
 		while ( 1 )
 		{
 			fsc2_usleep( 20000, UNSET );
-			if ( vxi11_read_stb( &stb ) != SUCCESS )
+			if ( vxi11_read_stb( &stb ) != VXI11_SUCCESS )
 				ag54830b_l_failure( );
 
 			if ( stb & 0x20 )
@@ -301,18 +301,18 @@ ag54830b_l_get_curve( int       channel,
 	do
 	{
 		bytes = 1;
-		if ( vxi11_read( cdata, &bytes, UNSET ) != SUCCESS )
+		if ( vxi11_read( cdata, &bytes, UNSET ) != VXI11_SUCCESS )
 			ag54830b_l_failure( );
 	} while ( *cdata != '#' );
 
 	bytes = 1;
-	if ( vxi11_read( cdata, &bytes, UNSET ) != SUCCESS )
+	if ( vxi11_read( cdata, &bytes, UNSET ) != VXI11_SUCCESS )
 		ag54830b_l_failure( );
 
 	cdata[ 1 ] = '\0';
 	bytes_to_read = T_atoi(cdata); /* read header number of bytes */
 
-	if ( vxi11_read( header_str, &bytes_to_read, UNSET ) != SUCCESS )
+	if ( vxi11_read( header_str, &bytes_to_read, UNSET ) != VXI11_SUCCESS )
 		ag54830b_l_failure( );
 
 	header_str[ bytes_to_read ] = '\0';
@@ -331,7 +331,7 @@ ag54830b_l_get_curve( int       channel,
 
 	TRY
 	{
-		if ( vxi11_read( buffer, &bytes_to_read, UNSET ) != SUCCESS )
+		if ( vxi11_read( buffer, &bytes_to_read, UNSET ) != VXI11_SUCCESS )
 			ag54830b_l_failure( );
 
 		*length = bytes_to_read / 2;
@@ -340,7 +340,7 @@ ag54830b_l_get_curve( int       channel,
         /* Read termination */
 
 		bytes = 2;
-		if ( vxi11_read( cdata, &bytes, UNSET ) != SUCCESS )
+		if ( vxi11_read( cdata, &bytes, UNSET ) != VXI11_SUCCESS )
 			ag54830b_l_failure( );
 
 		TRY_SUCCESS;

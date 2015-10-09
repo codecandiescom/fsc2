@@ -384,7 +384,7 @@ keithley2600a_measure( unsigned int ch,
                    + READ_TIMEOUT
                    + k26->measure[ ch ].extra_delay;
     
-    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
     k26->measure[ ch ].extra_delay = 0;
 
@@ -394,7 +394,7 @@ keithley2600a_measure( unsigned int ch,
 
     /* Reset the read timeout again */
 
-    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
 
     return keithley2600a_line_to_double( buf );
@@ -427,7 +427,7 @@ keithley2600a_measure_iv( unsigned int ch )
                    + READ_TIMEOUT
                    + k26->measure[ ch ].extra_delay;
     
-    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
     k26->measure[ ch ].extra_delay = 0;
 
@@ -437,7 +437,7 @@ keithley2600a_measure_iv( unsigned int ch )
 
     /* Reset the read timeout again */
 
-    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
 
     return keithley2600a_line_to_doubles( buf, iv, 2 );
@@ -914,7 +914,7 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
     timeout += k26->measure[ ch ].extra_delay;
 
-    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
     k26->measure[ ch ].extra_delay = 0;
 
@@ -943,7 +943,7 @@ keithley2600a_sweep_and_measure( unsigned int ch,
 
         cmd = T_free( cmd );
 
-        if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
             keithley2600a_comm_failure( );
 
         data = T_malloc( num_data_points * sizeof *data );
@@ -1041,7 +1041,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
     timeout += k26->measure[ ch ].extra_delay;
 
-    if ( vxi11_set_timeout( VXI11_READ, timeout ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, timeout ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
     k26->measure[ ch ].extra_delay = 0;
 
@@ -1065,7 +1065,7 @@ keithley2600a_list_sweep_and_measure( unsigned int  ch,
 
         cmd = T_free( cmd );
 
-        if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+        if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
             keithley2600a_comm_failure( );
 
         data = T_malloc( num_data_points * sizeof *data );

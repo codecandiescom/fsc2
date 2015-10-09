@@ -112,7 +112,7 @@ fsc2_lan_open( const char * dev_name,
     /* Try to open the log file */
 
     log_fp = fsc2_lan_open_log( dev_name );
-    fsc2_lan_log_function_start( log_fp, "fsc2_lan_open", dev_name );
+    fsc2_lan_log_function_start( log_fp, "fsc2_lan_open" );
 
     /* Try to resolve the address we got from the caller */
 
@@ -122,7 +122,7 @@ fsc2_lan_open( const char * dev_name,
     {
         fsc2_lan_log_message( log_fp,
                               "Error: invalid IP address: %s\n", address );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -134,7 +134,7 @@ fsc2_lan_open( const char * dev_name,
     {
         fsc2_lan_log_message( log_fp, "Error: invalid port number: %d\n",
                               port );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -146,7 +146,7 @@ fsc2_lan_open( const char * dev_name,
     {
         fsc2_lan_log_message( log_fp, "Error: failed to create a socket: %s\n",
                               strerror( errno ) );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -163,7 +163,7 @@ fsc2_lan_open( const char * dev_name,
         close( sock_fd );
         fsc2_lan_log_message( log_fp, "Error: failed to set SO_KEEPALIVE "
                               "option for socket\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -181,7 +181,7 @@ fsc2_lan_open( const char * dev_name,
         close( sock_fd );
         fsc2_lan_log_message( log_fp, "Error: failed to set TCP_NODELAY "
                               "option for socket\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -265,7 +265,7 @@ fsc2_lan_open( const char * dev_name,
             fsc2_lan_log_message( log_fp, "Error: connect() to socket "
                                   "failed: %s\n", strerror( errno ) );
 
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -304,7 +304,7 @@ fsc2_lan_open( const char * dev_name,
         bool need_close = ll->name == NULL;
 
         fsc2_lan_log_message( log_fp, "Error: Running out of memory\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
         fsc2_lan_cleanup( );
         if ( need_close )
         {
@@ -340,7 +340,7 @@ fsc2_lan_open( const char * dev_name,
                               "IP = \"%s\", port = %d\n", dev_name,
                               address, port );
 
-    fsc2_lan_log_function_end( log_fp, "fsc2_lan_open", dev_name );
+    fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
 
     return ll->fd;
 }
@@ -372,7 +372,7 @@ fsc2_lan_close( int handle )
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_close", ll->name );
+    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_close" );
 
     /* Try to close the socket - if it fails give the cleanup routine
        that gets automatically called at the end of the experiment
@@ -386,7 +386,7 @@ fsc2_lan_close( int handle )
         return -1;
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_close", ll->name );
+    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_close" );
 
     if ( ll->prev != NULL )
         ll->prev->next = ll->next;
@@ -447,13 +447,13 @@ fsc2_lan_write( int          handle,
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_write", ll->name );
+    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_write" );
 
     if ( length < 0 )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer length: %ld\n",
                               length );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
         return -1;
     }
 
@@ -462,7 +462,7 @@ fsc2_lan_write( int          handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end since "
                                   "no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
         return 0;
     }
 
@@ -470,7 +470,7 @@ fsc2_lan_write( int          handle,
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer "
                                  "argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
         return -1;
     }
 
@@ -538,7 +538,7 @@ fsc2_lan_write( int          handle,
         fsc2_lan_log_message( ll->log_fp, "Wrote %ld byte(s) to LAN "
                               "device %s\n", ( long ) bytes_written, ll->name );
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write", ll->name );
+    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
 
     return bytes_written;
 }
@@ -582,14 +582,14 @@ fsc2_lan_writev( int                  handle,
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_writev", ll->name );
+    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_writev" );
 
     if ( count == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
         return 0;
     }
 
@@ -598,14 +598,14 @@ fsc2_lan_writev( int                  handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Error: invalid number of "
                                   "data buffers\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
         return 0;
     }
 
     if ( data == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid data argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
         return -1;
     }
 
@@ -615,8 +615,7 @@ fsc2_lan_writev( int                  handle,
         {
             fsc2_lan_log_message( ll->log_fp, "Error: invalid data "
                                   "chunk %d\n", count );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev",
-                                       ll->name );
+            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
             return -1;
         }
 
@@ -628,7 +627,7 @@ fsc2_lan_writev( int                  handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
         return 0;
     }
 
@@ -699,7 +698,7 @@ fsc2_lan_writev( int                  handle,
         fsc2_lan_log_message( ll->log_fp, "Wrote %ld byte(s) to LAN device "
                               "%s\n", ( long ) bytes_written, ll->name );
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev", ll->name );
+    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
 
     return bytes_written;
 }
@@ -741,14 +740,14 @@ fsc2_lan_read( int    handle,
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_read", ll->name );
+    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_read" );
 
     if ( length == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                      "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
         return 0;
     }
 
@@ -756,14 +755,14 @@ fsc2_lan_read( int    handle,
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer length: "
                               "%ld\n", length );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
         return -1;
     }
 
     if ( buffer == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
         return -1;
     }
 
@@ -833,7 +832,7 @@ fsc2_lan_read( int    handle,
         fsc2_lan_log_data( ll->log_fp, bytes_read, buffer );
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read", ll->name );
+    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
 
     return bytes_read;
 }
@@ -881,14 +880,14 @@ fsc2_lan_readv( int            handle,
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_readv", ll->name );
+    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_readv" );
 
     if ( count == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
         return 0;
     }
 
@@ -897,14 +896,14 @@ fsc2_lan_readv( int            handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Error: invalid number of "
                                   "data buffers\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
         return 0;
     }
 
     if ( data == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid data argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
         return -1;
     }
 
@@ -914,7 +913,7 @@ fsc2_lan_readv( int            handle,
         {
             fsc2_lan_log_message( ll->log_fp, "Error: invalid data buffer %d\n",
                                   count );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
             return -1;
         }
 
@@ -926,7 +925,7 @@ fsc2_lan_readv( int            handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
         return 0;
     }
 
@@ -1020,7 +1019,7 @@ fsc2_lan_readv( int            handle,
         }
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv", ll->name );
+    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
 
     return bytes_read;
 }
@@ -1041,8 +1040,7 @@ fsc2_lan_cleanup( void )
     {
         if ( ll->fd != 0 )
         {
-            fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_cleanup()",
-                                         ll->name ? ll->name : "?" );
+            fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_cleanup()" );
 
             shutdown( ll->fd, SHUT_RDWR );
             if ( close( ll->fd ) == -1 )
@@ -1054,8 +1052,7 @@ fsc2_lan_cleanup( void )
                 fsc2_lan_log_message( ll->log_fp, "Closed connection to "
                                       "device %s\n",
                                       ll->name ? ll->name : "?" );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_cleanup()",
-                                       ll->name ? ll->name : "?" );
+            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_cleanup()" );
 
             fsc2_lan_close_log( ll->name ? ll->name : "?", ll->log_fp );
 
@@ -1435,20 +1432,18 @@ fsc2_lan_log_date( FILE * fp )
  * ->
  *  * pointer to log file
  *  * name of the function
- *  * name of the device involved
  *-----------------------------------------------------------*/
 
 void
 fsc2_lan_log_function_start( FILE       * fp,
-                             const char * function,
-                             const char * dev_name )
+                             const char * function )
 {
     if ( fp == NULL || lan_log_level < LL_CE )
         return;
 
     raise_permissions( );
     fsc2_lan_log_date( fp );
-    fprintf( fp, "Call of %s(), dev = %s\n", function, dev_name );
+    fprintf( fp, "Call of %s()\n", function );
     fflush( fp );
     lower_permissions( );
 }
@@ -1460,20 +1455,18 @@ fsc2_lan_log_function_start( FILE       * fp,
  * ->
  *  * pointer to log file
  *  * name of the function
- *  * name of the device involved
  *--------------------------------------------------------*/
 
 void
 fsc2_lan_log_function_end( FILE       * fp,
-                           const char * function,
-                           const char * dev_name )
+                           const char * function )
 {
     if ( fp == NULL || lan_log_level < LL_CE )
         return;
 
     raise_permissions( );
     fsc2_lan_log_date( fp );
-    fprintf( fp, "Exit of %s(), dev = %s\n", function, dev_name );
+    fprintf( fp, "Exit of %s()\n", function );
     fflush( fp );
     lower_permissions( );
 }

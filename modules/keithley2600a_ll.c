@@ -48,7 +48,7 @@ keithley2600a_open( void )
     /* Try to open an connection to the device */
 
 	if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
-                     false, false, OPEN_TIMEOUT ) == FAILURE )
+                     false, false, OPEN_TIMEOUT ) != VXI11_SUCCESS )
         return false;
 
     k26->is_open = true;
@@ -56,10 +56,10 @@ keithley2600a_open( void )
     /* Set a timeout for reads and writes, clear the device and lock
        out the keyboard. */
 
-    if (    vxi11_set_timeout( READ, READ_TIMEOUT ) == FAILURE
-         || vxi11_set_timeout( WRITE, WRITE_TIMEOUT ) == FAILURE
-         || vxi11_device_clear( ) == FAILURE
-         || vxi11_lock_out( true ) == FAILURE )
+    if (    vxi11_set_timeout( READ, READ_TIMEOUT )   != VXI11_SUCCESS
+         || vxi11_set_timeout( WRITE, WRITE_TIMEOUT ) != VXI11_SUCCESS
+         || vxi11_device_clear( )                     != VXI11_SUCCESS
+         || vxi11_lock_out( true )                    != VXI11_SUCCESS )
     {
         vxi11_close( );
         return false;
@@ -89,7 +89,7 @@ keithley2600a_close( void )
 
     /* Close connection to the device */
 
-    if ( vxi11_close( ) == FAILURE )
+    if ( vxi11_close( ) != VXI11_SUCCESS )
         return false;
 
     k26->is_open = false;
@@ -106,7 +106,7 @@ keithley2600a_cmd( const char * cmd )
 {
 	size_t len = strlen( cmd );
 
-    if ( vxi11_write( cmd, &len, false ) != SUCCESS )
+    if ( vxi11_write( cmd, &len, false ) != VXI11_SUCCESS )
 		keithley2600a_comm_failure( );
 
 	return true;
@@ -132,7 +132,8 @@ keithley2600a_talk( const char * cmd,
     keithley2600a_cmd( cmd );
 
     length--;
-    if ( vxi11_read( reply, &length, allow_abort ) != SUCCESS || length < 1 )
+    if (    vxi11_read( reply, &length, allow_abort ) != VXI11_SUCCESS
+         || length < 1 )
         keithley2600a_comm_failure( );
 
     reply[ length ] = '\0';
@@ -376,14 +377,14 @@ keithley2600a_get_line_frequency( void )
     /* Determining the line frequency can take a lot of time, so raise
        the read timeout considerably (to 5 s to be on the safe side) */
 
-    if ( vxi11_set_timeout( VXI11_READ, 5000000 ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, 5000000 ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
 
 	TALK( buf, buf, sizeof buf, false, 7 );
 
     k26->linefreq = keithley2600a_line_to_double( buf );
 
-    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != SUCCESS )
+    if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
         keithley2600a_comm_failure( );
 
     if ( k26->linefreq != 50 && k26->linefreq != 60 )

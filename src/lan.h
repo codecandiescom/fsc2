@@ -101,12 +101,10 @@ void fsc2_lan_log_message( FILE       * /* fp  */,
 						   ...                        );
 
 void fsc2_lan_log_function_start( FILE       * /* handle   */,
-								  const char * /* function */,
-								  const char * /* dev_name */ );
+								  const char * /* function */ );
 
 void fsc2_lan_log_function_end( FILE *       /* fp       */,
-								const char * /* function */,
-								const char * /* dev_name */ );
+								const char * /* function */ );
 
 void fsc2_lan_log_data( FILE       * /* fp     */,
 						long         /* length */,

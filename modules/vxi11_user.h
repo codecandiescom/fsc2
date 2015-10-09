@@ -42,9 +42,9 @@
 #include "vxi11.h"
 
 
-#define SUCCESS            0
-#define FAILURE           -1
-#define TIMEOUT            1
+#define VXI11_SUCCESS            0
+#define VXI11_FAILURE           -1
+#define VXI11_TIMEOUT            1
 
 
 #define VXI11_READ         0

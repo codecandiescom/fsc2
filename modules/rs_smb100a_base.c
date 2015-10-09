@@ -83,7 +83,7 @@ rs_connect( void )
     }
 
     if ( vxi11_open( DEVICE_NAME, NETWORK_ADDRESS, VXI11_NAME,
-                     false, false, 100000 ) == FAILURE )
+                     false, false, 100000 ) != VXI11_SUCCESS )
     {
         print( FATAL, "Failed to connect to device.\n" );
         THROW( EXCEPTION );
@@ -156,7 +156,7 @@ rs_write( char const * data )
 {
     size_t len = strlen( data );
 
-    if ( vxi11_write( data, &len, false ) != SUCCESS )
+    if ( vxi11_write( data, &len, false ) != VXI11_SUCCESS )
         comm_failure( );
 }
 
@@ -168,7 +168,7 @@ void
 rs_write_n( char const * data,
             size_t       length )
 {
-    if ( vxi11_write( data, &length, false ) != SUCCESS )
+    if ( vxi11_write( data, &length, false ) != VXI11_SUCCESS )
         comm_failure( );
 }
 
@@ -183,7 +183,7 @@ rs_talk( char const * cmd,
 {
     rs_write( cmd );
 
-    if ( vxi11_read( reply, &length, false ) != SUCCESS )
+    if ( vxi11_read( reply, &length, false ) != VXI11_SUCCESS )
         comm_failure( );
 
     if ( reply[ length - 1 ] == '\n' )
@@ -204,7 +204,7 @@ rs_talk_bin( char const * cmd,
     rs_write( cmd );
 
     size_t rec = length;
-    if ( vxi11_read( reply, &rec, false ) != SUCCESS )
+    if ( vxi11_read( reply, &rec, false ) != VXI11_SUCCESS )
         comm_failure( );
 
     return rec;

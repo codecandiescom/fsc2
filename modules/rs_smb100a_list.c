@@ -19,7 +19,6 @@
 
 
 #include "rs_smb100a.h"
-#include "vxi11_user.h"
 
 
 static void list_send( char const   * type,

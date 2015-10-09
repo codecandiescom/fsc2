@@ -137,33 +137,33 @@
    with the number of bytes to be send, a flag that tells if the data are
    sent with a trailing EOI, and a flag that tells if the function is supposed
    to return immediately when receiving a signal. The function returns either
-   SUCCESS (0) if the date could be sent successfully, or FAILURE (-1) if
-   sending the data aborted due to receiving a signal. On errors or timeouts
-   the function closes the connection and throws an exception. On return the
-   variable pointed to by the secand argument will contain the number of bytes
-   that have been sent - this also is the case if the function returns FAILURE
-   or did throw an exception.
+   VICP_SUCCESS (0) if the date could be sent successfully, or VICP_FAILURE
+   (-1) if sending the data aborted due to receiving a signal. On errors or
+   timeouts the function closes the connection and throws an exception. On
+   return the variable pointed to by the secand argument will contain the
+   number of bytes that have been sent - this also is the case if the function
+   returns VICP_FAILURE or did throw an exception.
 
    vicp_read() is for reading data the device sends. It takes four arguments:
    a buffer for storing the data, a pointer to a variable with the length of
    the buffer, a pointer to a variable that tells on return if EOI was set
    for the data and a flag telling if the function is supposed to return
-   immediately on signals. The function returns SUCCESS_BUT MORE (1) if a
-   reply was received but not all data could be read because they wouldn't
-   have fit into the user supplied buffer, SUCCESS (0) if the reply was read
-   completely and FAILURE (-1) if the function aborted because a signal was
-   received. On erros or timeouts the function closes the connection and
-   throws an exception. On return the variable pointed to by the second
+   immediately on signals. The function returns VICP_SUCCESS_BUT MORE (1) if
+   a reply was received but not all data could be read because they wouldn't
+   have fit into the user supplied buffer, VICP_SUCCESS (0) if the reply was
+   read completely and VICP_FAILURE (-1) if the function aborted because a
+   signal was received. On erros or timeouts the function closes the connection
+   and throws an exception. On return the variable pointed to by the second
    argument is set to the number of bytes that have been received and the
    third one shows if the data sent have a trailing EOI, even if the function
-   did return with FAILURE or threw an exception.
+   did return with VICP_FAILURE or threw an exception.
 
    If  the function returns less data than the device was willing to send
-   (in which case SUCCESS_BUT_MORE gets returned) the next invocation of
+   (in which case VICP_SUCCESS_BUT_MORE gets returned) the next invocation of
    vicp_read() will return these yet unread data, even if another reply by
    the device was initiated by sending another command in between. I.e.
    "new data" (data resulting from the next command) only will be returned
-   after the function has been called until SUCCESS has been returned.
+   after the function has been called until VICP_SUCCESS has been returned.
 
    Please note: If a read or write gets aborted due to a signal there may
    still be data to be read from the device or the device may still be
@@ -313,9 +313,8 @@ vicp_open( const char    * dev_name,
            volatile long   us_timeout,
            bool            quit_on_signal )
 {
-    int           fd;
-    unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
-    ssize_t       bytes_written;
+    fsc2_assert( dev_name != NULL );
+    fsc2_assert( address != NULL );
 
     if ( vicp.handle >= 0 )
     {
@@ -324,12 +323,10 @@ vicp_open( const char    * dev_name,
         THROW( EXCEPTION );
     }
 
-    fsc2_assert( dev_name != NULL );
-    fsc2_assert( address != NULL );
-
     if ( us_timeout < 0 )
         us_timeout = VICP_DEFAULT_CONNECT_TIMEOUT;
 
+    int fd;
     if ( ( fd = fsc2_lan_open( dev_name, address, VICP_PORT,
                                us_timeout, quit_on_signal ) ) == -1 )
     {
@@ -366,12 +363,15 @@ vicp_open( const char    * dev_name,
        where just the remote and the lockout bits in the operations byte
        are set */
 
+    unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
+
     vicp_set_operation( header, VICP_REMOTE | VICP_LOCKOUT );
     vicp_set_version( header );
     vicp_set_length( header, 0 );
 
-    bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
-                                    VICP_HEADER_SIZE, us_timeout, UNSET );
+    ssize_t bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
+                                            VICP_HEADER_SIZE, us_timeout,
+                                            UNSET );
 
     if ( bytes_written <= 0 )
     {
@@ -391,7 +391,8 @@ vicp_open( const char    * dev_name,
  * device and resetting some internal variables.
  *--------------------------------------------------*/
 
-static void
+static
+void
 vicp_close_without_header( void )
 {
     if ( vicp.handle >= 0 )
@@ -415,10 +416,6 @@ vicp_close_without_header( void )
 void
 vicp_close( void )
 {
-    unsigned char  header[ VICP_HEADER_SIZE ] = { 0 };
-    long           us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
-
-
     if ( vicp.handle < 0 )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
@@ -428,8 +425,12 @@ vicp_close( void )
     /* Send a header with all bits reset in order to get device out of
        remote (and possibly local lockout) state */
 
+    unsigned char  header[ VICP_HEADER_SIZE ] = { 0 };
+
     vicp_set_version( header );
     vicp_set_length( header, 0 );
+
+    long us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
     fsc2_lan_write( vicp.handle, ( char * ) header,
                     VICP_HEADER_SIZE, us_timeout, UNSET );
@@ -450,12 +451,6 @@ vicp_close( void )
 void
 vicp_lock_out( bool lock_state )
 {
-    unsigned char op = VICP_REMOTE;
-    unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
-    ssize_t       bytes_written;
-    long          us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
-
-
     if ( vicp.handle < 0 )
     {
         print( FATAL, "Internal error in module, no connection exists.\n" );
@@ -466,18 +461,25 @@ vicp_lock_out( bool lock_state )
          || ( ! vicp.is_locked && ! lock_state ) )
         return;
 
+    unsigned char op = VICP_REMOTE;
+
     if ( lock_state )
         op |= VICP_LOCKOUT;
 
     if ( vicp.eoi_was_set )
         op |= VICP_EOI;
 
+    unsigned char header[ VICP_HEADER_SIZE ] = { 0 };
+
     vicp_set_operation( header, op );
     vicp_set_version( header );
     vicp_set_length( header, 0 );
 
-    bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
-                                    VICP_HEADER_SIZE, us_timeout, UNSET );
+    long us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
+
+    ssize_t bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
+                                            VICP_HEADER_SIZE, us_timeout,
+                                            UNSET );
 
     if ( bytes_written <= 0 )
     {
@@ -537,8 +539,8 @@ vicp_set_timeout( int  dir,
  * <- The return the variable pointed to by 'length' gets set to the
  *    number of bytes that have been send. There are two possible
  *    return values:
- *     a) SUCCESS (0)           data have been send <successfully
- *     c) FAILURE (-1)          transmission was aborted due to a
+ *     a) VICP_SUCCESS (0)      data have been send <successfully
+ *     c) VICP_FAILURE (-1)     transmission was aborted due to a
  *                              signal
  *    If a timeout happens during the transmission an exception gets
  *    thrown.
@@ -550,20 +552,10 @@ vicp_write( const char * buffer,
             bool         with_eoi,
             bool         quit_on_signal )
 {
-    unsigned char  header[ VICP_HEADER_SIZE ] = { 0 };
-    unsigned char  op = VICP_DATA | VICP_REMOTE;
-    struct iovec   data[ 2 ];
-    ssize_t        total_length;
-    ssize_t        bytes_written;
-    long           us_timeout = vicp.us_write_timeout;
-    struct timeval before,
-                   after;
-
-
     /* Do nothing if there are no data to be sent */
 
     if ( *length == 0 )
-        return SUCCESS;
+        return VICP_SUCCESS;
 
     if ( buffer == NULL )
     {
@@ -582,12 +574,17 @@ vicp_write( const char * buffer,
     /* Set up a iovec structure in order to allow sending the header
        and the data in one go with writev() */
 
+    unsigned char  header[ VICP_HEADER_SIZE ] = { 0 };
+    struct iovec data[ 2 ];
+
     data[ 0 ].iov_base = header;
     data[ 0 ].iov_len  = VICP_HEADER_SIZE;
     data[ 1 ].iov_base = ( void * ) buffer;
     data[ 1 ].iov_len  = *length;
 
     /* Assemble the header, set the EOI flag if the user told us to */
+
+    unsigned char  op = VICP_DATA | VICP_REMOTE;
 
     if ( with_eoi )
         op |= VICP_EOI;
@@ -603,10 +600,12 @@ vicp_write( const char * buffer,
        than the requested amount of bytes were sent on the first try amd
        keep on trying until we're done. */
 
+    struct timeval before;
     gettimeofday( &before, NULL );
 
-    bytes_written = fsc2_lan_writev( vicp.handle, data, 2,
-                                     us_timeout, quit_on_signal );
+    long us_timeout = vicp.us_write_timeout;
+    ssize_t bytes_written = fsc2_lan_writev( vicp.handle, data, 2,
+                                             us_timeout, quit_on_signal );
 
     if ( bytes_written < 0 )
     {
@@ -617,16 +616,18 @@ vicp_write( const char * buffer,
     if ( bytes_written == 0 )
     {
         *length = 0;
-        return FAILURE;
+        return VICP_FAILURE;
     }
 
-    total_length = bytes_written - VICP_HEADER_SIZE;
+    ssize_t total_length = bytes_written - VICP_HEADER_SIZE;
 
     fsc2_assert( total_length >= 0 );
 
     while ( total_length < *length )
     {
+        struct timeval after;
         gettimeofday( &after, NULL );
+
         us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
                       - ( before.tv_sec * 1000000 + before.tv_usec );
 
@@ -654,11 +655,11 @@ vicp_write( const char * buffer,
         if ( bytes_written == 0 )
         {
             *length = total_length;
-            return FAILURE;
+            return VICP_FAILURE;
         }
     }
 
-    return SUCCESS;
+    return VICP_SUCCESS;
 }
 
 
@@ -675,13 +676,13 @@ vicp_write( const char * buffer,
  * <- The function the variable pointed to by 'length' gets set to
  *    the number of bytes that have been received. It has three
  *    possible return values:
- *     a) SUCCESS_BUT_MORE (1)  data have successfully received but
- *                              there are still data the device wants
- *                              to transmit but which didn't fit into
- *                              the user supplied buffer
- *     b) SUCCESS (0)           all data have been received successfully
- *     c) FAILURE (-1)          transmission was aborted due to a
- *                              signal
+ *     a) VICP_SUCCESS_BUT_MORE (1)  data have successfully received but
+ *                                   there are still data the device wants
+ *                                   to transmit but which didn't fit into
+ *                                   the user supplied buffer
+ *     b) VICP_SUCCESS (0)           all data have been received successfully
+ *     c) VICP_FAILURE (-1)          transmission was aborted due to a
+ *                                   signal
  * If a timeout occurs during the transmission an exception gets thrown.
  *
  * Reading stops when we either got as many data as the user asked for
@@ -695,19 +696,10 @@ vicp_read( char    * buffer,
            bool    * with_eoi,
            bool      quit_on_signal )
 {
-    unsigned char  header[ VICP_HEADER_SIZE ];
-    ssize_t        total_length = 0;
-    ssize_t        bytes_read = 0;
-    unsigned long  bytes_to_expect;
-    struct timeval before,
-                   after;
-    long           us_timeout = vicp.us_read_timeout;
-
-
     /* Do nothing if no data are to be read */
 
     if ( *length == 0 )
-        return SUCCESS;
+        return VICP_SUCCESS;
 
     if ( buffer == NULL )
     {
@@ -727,7 +719,14 @@ vicp_read( char    * buffer,
        know from reading the last header that they are in the process of
        being sent by the device. Get them first. */
 
+    struct timeval before,
+                   after;
     gettimeofday( &before, NULL );
+
+    long    us_timeout = vicp.us_read_timeout;
+
+    ssize_t total_length = 0;
+    ssize_t bytes_read = 0;
 
     if ( vicp.remaining > 0 )
     {
@@ -773,7 +772,7 @@ vicp_read( char    * buffer,
            signal (bytes_read is 0) return */
 
         if ( *with_eoi || total_length == *length || bytes_read == 0 )
-            return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
+            return vicp.remaining == 0 ? VICP_SUCCESS : VICP_SUCCESS_BUT_MORE;
     }
 
     /* Loop until either EOI is set or we got as many bytes as we were asked
@@ -781,8 +780,10 @@ vicp_read( char    * buffer,
        a message from the device can be split into several chunks, each
        starting with a new header. */
 
+
     do
     {
+        unsigned char  header[ VICP_HEADER_SIZE ];
         char *h = ( char * ) header;
         ssize_t header_read = 0;
 
@@ -804,7 +805,7 @@ vicp_read( char    * buffer,
             if ( bytes_read == 0 )
             {
                 *length = total_length;
-                return FAILURE;
+                return VICP_FAILURE;
             }
 
             header_read += bytes_read;
@@ -822,6 +823,8 @@ vicp_read( char    * buffer,
 
         /* The header tells us how many bytes we can expect - if there are
            none something must really be going wrong */
+
+        unsigned long  bytes_to_expect;
 
         if ( ( bytes_to_expect = vicp_get_length( header ) ) == 0 )
         {
@@ -879,7 +882,7 @@ vicp_read( char    * buffer,
 
     *length = total_length;
 
-    return vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
+    return vicp.remaining == 0 ? VICP_SUCCESS : VICP_SUCCESS_BUT_MORE;
 }
 
 
@@ -898,12 +901,6 @@ vicp_read( char    * buffer,
 void
 vicp_device_clear( void )
 {
-    int             fd;
-    unsigned char   header[ VICP_HEADER_SIZE ] = { 0 };
-    ssize_t         bytes_written;
-    long            us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
-
-
     if ( vicp.handle < 0 )
     {
         print( FATAL, "Internal error in module, connection "
@@ -914,14 +911,18 @@ vicp_device_clear( void )
     /* Set up the header, no data are to be sent and the operations byte
        must only have the CLEAR bit set. */
 
+    unsigned char   header[ VICP_HEADER_SIZE ] = { 0 };
+
     vicp_set_operation( header, VICP_CLEAR );
     vicp_set_version( header );
     vicp_set_length( header, 0 );
 
     /* Try to send the header, don't abort on signals */
 
-    bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
-                                    VICP_HEADER_SIZE, us_timeout, UNSET );
+    long us_timeout = VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    ssize_t bytes_written = fsc2_lan_write( vicp.handle, ( char * ) header,
+                                            VICP_HEADER_SIZE, us_timeout,
+                                            UNSET );
 
     if ( bytes_written <= 0 )
     {
@@ -944,6 +945,8 @@ vicp_device_clear( void )
     fsc2_lan_close( vicp.handle );
     vicp.handle = -1;
 
+    int fd;
+
     if ( ( fd = fsc2_lan_open( vicp.name, vicp.address, VICP_PORT,
                                VICP_DEFAULT_CONNECT_TIMEOUT, UNSET ) ) == -1 )
     {
@@ -961,7 +964,9 @@ vicp_device_clear( void )
  * Function for evaluating the "operation" field of a VICP header
  *----------------------------------------------------------------*/
 
-static inline unsigned char
+static
+inline
+unsigned char
 vicp_get_operation( unsigned char * header )
 {
     return header[ VICP_HEADER_OPERATION_OFFSET ];
@@ -972,7 +977,9 @@ vicp_get_operation( unsigned char * header )
  * Function for evaluating the "version" field of a VICP header
  *--------------------------------------------------------------*/
 
-static inline unsigned char
+static
+inline
+unsigned char
 vicp_get_version( unsigned char * header )
 {
     return header[ VICP_HEADER_VERSION_OFFSET ];
@@ -985,7 +992,9 @@ vicp_get_version( unsigned char * header )
  *----------------------------------------------------------------------*/
 
 #if 0
-static inline unsigned char
+static
+inline
+unsigned char
 vicp_get_sequence( unsigned char * header )
 {
     return header[ VICP_HEADER_SEQUENCE_OFFSET ];
@@ -998,14 +1007,14 @@ vicp_get_sequence( unsigned char * header )
  * Please note: the length field is a big-endian number
  *-------------------------------------------------------------*/
 
-static inline ssize_t
+static
+inline
+ssize_t
 vicp_get_length( unsigned char * header )
 {
-    int i = VICP_HEADER_MSB_OFFSET;
     unsigned long val = 0;
 
-
-    for ( ; i <= VICP_HEADER_LSB_OFFSET; i++ )
+    for ( int i = VICP_HEADER_MSB_OFFSET; i <= VICP_HEADER_LSB_OFFSET; i++ )
         val = ( val << 8 ) | header[ i ];
 
     return val;
@@ -1016,7 +1025,9 @@ vicp_get_length( unsigned char * header )
  * Function for setting the "operation" field of a VICP header
  *-------------------------------------------------------------*/
 
-static inline void
+static
+inline
+void
 vicp_set_operation( unsigned char * header,
                     unsigned char   operation )
 {
@@ -1028,7 +1039,9 @@ vicp_set_operation( unsigned char * header,
  * Function for setting the "version" field of a VICP header
  *-----------------------------------------------------------*/
 
-static inline void
+static
+inline
+void
 vicp_set_version( unsigned char * header )
 {
     header[ VICP_HEADER_VERSION_OFFSET ] = VICP_HEADER_VERSION_VALUE;
@@ -1038,7 +1051,9 @@ vicp_set_version( unsigned char * header )
  * Function for setting the "sequence number" field of a VICP header
  *-------------------------------------------------------------------*/
 
-static inline void
+static
+inline
+void
 vicp_set_sequence( unsigned char * header )
 {
     /* The sequence number wraps around but may never be 0 */
@@ -1055,15 +1070,15 @@ vicp_set_sequence( unsigned char * header )
  * Please note: the length field is a big-endian number
  *----------------------------------------------------------*/
 
-static inline void
+static
+inline
+void
 vicp_set_length( unsigned char * header,
                  unsigned long   length )
 {
-    int i = VICP_HEADER_LSB_OFFSET;
-
-
-    for ( ; i >= VICP_HEADER_MSB_OFFSET; length >>= 8, i-- )
-        header[ i ] = length & 0xFF;
+    for ( int i = VICP_HEADER_LSB_OFFSET; i >= VICP_HEADER_MSB_OFFSET;
+          length >>= 8 )
+        header[ i-- ] = length & 0xFF;
 }
 
 
