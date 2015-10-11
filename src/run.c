@@ -1450,10 +1450,10 @@ child_sig_handler( int signo )
 
     Crash.signo = signo;
 
-    /* We may be able to determine where the crash happened and then send
-       a mail with information about the crash. */
+    /* We may be able to determine where the crash happened and then create
+       a crash report file with information about the crash. */
 
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined NDEBUG && defined ADDR2LINE
     if (    ! Crash.already_crashed
          && Crash.signo != SIGABRT
          && Crash.signo != SIGTERM )
@@ -1462,9 +1462,9 @@ child_sig_handler( int signo )
         Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
         crash_report( );
     }
-#endif
-
+#else
     Crash.already_crashed = SET;
+#endif
 
     close_all_files( );
 

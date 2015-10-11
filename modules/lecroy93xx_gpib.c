@@ -250,6 +250,7 @@ lecroy93xx_init( const char * name )
            that may not have been possible during the test run */
 
         lecroy93xx_soe_checks( );
+        TRY_SUCCESS;
     }
     OTHERWISE
     {

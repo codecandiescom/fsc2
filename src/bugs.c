@@ -260,7 +260,7 @@ crash_report( void )
 #endif
 
     if ( EDL.Fname != NULL )
-        fprintf( fp, "\nIn EDL program %s at line = %ld\n\n",
+        fprintf( fp, "\n\nIn EDL program %s at line = %ld\n\n",
                  EDL.Fname, EDL.Lc );
 
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )

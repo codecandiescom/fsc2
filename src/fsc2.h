@@ -341,11 +341,11 @@ struct GUI_Info {
 
 
 struct Crash_Info {
-    bool already_crashed;         /* set when crash has happened */
-    volatile sig_atomic_t signo;  /* signal indicating the type of crash */
-    void *address;                /* address the crash happened */
-    void *trace[ MAX_TRACE_LEN ]; /* addresses of backtrace */
-    size_t trace_length;          /* length of backtrace */
+    bool already_crashed;          /* set when crash has happened */
+    volatile sig_atomic_t signo;   /* signal indicating the type of crash */
+    void * address;                /* address the crash happened */
+    void * trace[ MAX_TRACE_LEN ]; /* addresses of backtrace */
+    size_t trace_length;           /* length of backtrace */
 };
 
 

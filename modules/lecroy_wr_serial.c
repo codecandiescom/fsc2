@@ -309,6 +309,7 @@ lecroy_wr_init( void )
            that may not have been possible during the test run */
 
         lecroy_wr_soe_checks( );
+        TRY_SUCCESS;
     }
     OTHERWISE
     {

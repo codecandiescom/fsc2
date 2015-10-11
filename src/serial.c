@@ -64,7 +64,7 @@ static void close_serial_log( int sn );
  * This function must be called by device modules that need a serial
  * port. It checks if the requested serial port is still available
  * and if the user has access permissions to the serial ports device
- * file. If one of these conditions isn't satisfied the function
+ * file. If any of these conditions isn't satisfied the function
  * throws an exception.
  * -> 1. Serial port device file
  *    2. Name of the device the serial port is requested for

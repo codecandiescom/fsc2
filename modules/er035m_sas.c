@@ -469,8 +469,8 @@ gaussmeter_field( Var_T * v )
 
 
 /*----------------------------------------------------------------*
- * find_field() tries to get the gaussmeter into the locked state
- * and returns the current field value in a variable.
+ * measure_field() tries to get the gaussmeter into the locked
+ * state and returns the current field value in a variable.
  *----------------------------------------------------------------*/
 
 Var_T *
@@ -589,6 +589,7 @@ measure_field( Var_T * v  UNUSED_ARG )
 		/* Finally  get current field value */
 
 		field = er035m_sas_get_field( );
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
@@ -1221,8 +1222,8 @@ er035m_sas_read( char *   buffer,
 	   character, signaling the end of a messages - since the caller can't
 	   know how many bytes the device will send we otherwise would have to
 	   rely on a timeout. But that's problematic also since the device takes
-	   quite a long time to answer some commands and, if we'd use this as the
-	   only criterion, each read would take as long as that... */
+	   quite a long time to answer some commands and, if we'd use this as
+	   the only criterion, each read would take as long as that... */
 
 	size_t len;
 	do

@@ -261,6 +261,7 @@ lecroy_ws_init( const char * name )
            that may not have been possible during the test run */
 
         lecroy_ws_soe_checks( );
+        TRY_SUCCESS;
     }
     OTHERWISE
 	{

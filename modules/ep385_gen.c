@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -47,20 +47,9 @@ ep385_store_timebase( double timebase )
 
     if ( timebase < FIXED_TIMEBASE )
     {
-        char * volatile min = NULL;
-
-        TRY
-        {
-            print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-                   ep385_ptime( timebase ), ep385_ptime( FIXED_TIMEBASE ) );
-            THROW( EXCEPTION );
-        }
-        OTHERWISE
-        {
-            if ( min )
-                T_free( min );
-            RETHROW;
-        }
+        print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
+               ep385_ptime( timebase ), ep385_ptime( FIXED_TIMEBASE ) );
+        THROW( EXCEPTION );
     }
 
     ep385.is_timebase = SET;

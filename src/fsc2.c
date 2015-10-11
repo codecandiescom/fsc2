@@ -2149,7 +2149,6 @@ main_sig_handler( int signo )
                 Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
             }
 #endif
-
             Crash.signo = signo;
             Crash.already_crashed = SET;
             exit( EXIT_FAILURE );
