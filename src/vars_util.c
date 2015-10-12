@@ -33,14 +33,11 @@ static Var_T * vars_str_comp( int     comp_type,
 
 Var_T * vars_negate( Var_T * v )
 {
-    Var_T *new_var = v;
-    ssize_t i;
-
-
     /* Make sure that 'v' exists and has RHS type */
 
     vars_check( v, RHS_TYPES | SUB_REF_PTR );
 
+    Var_T *new_var = v;
     if ( v->type == SUB_REF_PTR )
         new_var = v = vars_subref_to_rhs_conv( v );
 
@@ -58,7 +55,7 @@ Var_T * vars_negate( Var_T * v )
             if ( ! ( v->flags & IS_TEMP ) )
                 new_var = vars_push( v->type, v->val.lpnt, v->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 new_var->val.lpnt[ i ] = - new_var->val.lpnt[ i ];
 
             break;
@@ -67,7 +64,7 @@ Var_T * vars_negate( Var_T * v )
             if ( ! ( v->flags & IS_TEMP ) )
                 new_var = vars_push( v->type, v->val.dpnt, v->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 new_var->val.dpnt[ i ] = - new_var->val.dpnt[ i ];
 
             break;
@@ -76,7 +73,7 @@ Var_T * vars_negate( Var_T * v )
             if ( ! ( v->flags & IS_TEMP ) )
                 new_var = vars_push( v->type, v );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_pop( vars_negate( new_var->val.vptr[ i ] ) );
 
             break;
@@ -116,9 +113,6 @@ vars_comp( int     comp_type,
            Var_T * v1,
            Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-
-
     /* If both variables are strings we can also do some kind of comparisons */
 
     if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
@@ -129,6 +123,8 @@ vars_comp( int     comp_type,
 
     vars_check( v1, INT_VAR | FLOAT_VAR );
     vars_check( v2, INT_VAR | FLOAT_VAR );
+
+    Var_T *new_var = NULL;
 
     switch ( comp_type )
     {
@@ -224,7 +220,6 @@ vars_str_comp( int     comp_type,
 {
     Var_T *new_var = NULL;
 
-
     switch ( comp_type )
     {
         case COMP_EQUAL :
@@ -276,10 +271,9 @@ vars_str_comp( int     comp_type,
 Var_T *
 vars_lnegate( Var_T * v )
 {
-    Var_T *new_var;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR );
+
+    Var_T * new_var;
 
     if (    ( v->type == INT_VAR && v->INT == 0 )
          || ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
@@ -304,8 +298,8 @@ vars_arith_len_check( Var_T *      v1,
                       Var_T *      v2,
                       const char * op )
 {
-    ssize_t len1 = -1, len2 = -1;
-
+    ssize_t len1 = -1,
+            len2 = -1;
 
     if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
     {

@@ -54,17 +54,13 @@ static void vars_fix_dims( Var_T * v,
 Var_T *
 vars_arr_rhs( Var_T * v )
 {
-    Var_T *a, *cv;
-    ssize_t ind;
-    int index_count;
-    int range_count = 0;
-
-
     /* The variable pointer this function gets passed is a pointer to the very
        last index on the variable stack. Now we've got to work our way up in
        the stack until we find the first non-index variable, a reference. */
 
-    index_count = vars_check_rhs_indices( &v, &a, &range_count );
+    Var_T * a;
+    int range_count = 0;
+    int index_count = vars_check_rhs_indices( &v, &a, &range_count );
 
     if ( index_count == 0 )
         return a;
@@ -80,6 +76,7 @@ vars_arr_rhs( Var_T * v )
 
     /* Iterate over all indices to find the referenced element or subarray */
 
+    Var_T * cv;
     for ( cv = a; cv->type & ( INT_REF | FLOAT_REF ) && v != NULL;
           v = vars_pop( v ) )
     {
@@ -109,7 +106,7 @@ vars_arr_rhs( Var_T * v )
                 return vars_push( cv->type, cv );
         }
 
-    ind = v->val.lval;
+    ssize_t ind = v->val.lval;
 
     if ( ind >= cv->len )
     {
@@ -136,10 +133,7 @@ vars_check_rhs_indices( Var_T ** v,
                         Var_T ** a,
                         int *    range_count )
 {
-    Var_T *cv = *v;
-    int index_count = 0;
-
-
+    Var_T * cv = *v;
     while ( cv->type != REF_PTR )
         cv = cv->prev;
 
@@ -158,6 +152,7 @@ vars_check_rhs_indices( Var_T ** v,
     /* Loop over all indices (there may also be ":" strings mixed in if
        ranges are being used) */
 
+    int index_count = 0;
     while ( cv )
     {
         index_count++;
@@ -271,11 +266,9 @@ vars_arr_rhs_slice( Var_T * a,
                     int     index_count,
                     int     range_count )
 {
-    Var_T *cv = a;
-
-
     /* Go down to the first submatrix that's indexed by a range */
 
+    Var_T * cv = a;
     for ( ; v->val.lval >= 0; v = vars_pop( v ) )
     {
         if ( v->val.lval >= cv->len )
@@ -337,7 +330,6 @@ vars_arr_rhs_slice_prune( Var_T * nv,
                           Var_T * end )
 {
     bool needs_stage_2 = UNSET;
-
     prune_stage_1( nv, v, a, end, &needs_stage_2 );
 
     if ( needs_stage_2 )
@@ -355,10 +347,9 @@ prune_stage_1( Var_T * nv,
                Var_T * end,
                bool *  needs_stage_2 )
 {
-    ssize_t range_start, range_end, range, i;
-    bool keep = UNSET;
-    Var_T *old_vptr;
-
+    ssize_t range_start,
+            range_end,
+            range;
 
     if ( v->val.lval < 0  )
     {
@@ -436,10 +427,10 @@ prune_stage_1( Var_T * nv,
         return range == 1;
     }
 
-    for ( i = 0; i < range_start; i++ )
+    for ( ssize_t i = 0; i < range_start; i++ )
         vars_free( nv->val.vptr[ i ], SET );
 
-    for ( i = range_end + 1; i < nv->len; i++ )
+    for ( ssize_t i = range_end + 1; i < nv->len; i++ )
         vars_free( nv->val.vptr[ i ], SET );
 
     if ( range_start > 0 )
@@ -456,7 +447,8 @@ prune_stage_1( Var_T * nv,
     if ( v == end )
         return UNSET;
 
-    for ( i = 0; i < nv->len; i++ )
+    bool keep = UNSET;
+    for ( ssize_t i = 0; i < nv->len; i++ )
         keep = prune_stage_1( nv->val.vptr[ i ], v, a, end, needs_stage_2 );
 
     if ( keep )
@@ -466,9 +458,10 @@ prune_stage_1( Var_T * nv,
     {
         nv->type = nv->val.vptr[ 0 ]->type;
 
-        for ( i = 0; i < nv->len; i++ )
+        for ( ssize_t i = 0; i < nv->len; i++ )
         {
-            old_vptr = nv->val.vptr[ i ];
+            Var_T * old_vptr = nv->val.vptr[ i ];
+
             nv->val.vptr[ i ] = nv->val.vptr[ i ]->val.vptr[ 0 ];
             nv->val.vptr[ i ]->from = nv;
             old_vptr->flags |= DONT_RECURSE;
@@ -487,25 +480,21 @@ prune_stage_1( Var_T * nv,
 static void
 prune_stage_2( Var_T * nv )
 {
-    ssize_t i;
-    Var_T **old_vptr_list;
-
-
     if ( nv->val.vptr[ 0 ]->len > 1 )
     {
-        for ( i = 0; i < nv->len; i++ )
+        for ( ssize_t i = 0; i < nv->len; i++ )
             prune_stage_2( nv->val.vptr[ i ] );
         return;
     }
 
-    old_vptr_list = nv->val.vptr;
+    Var_T ** old_vptr_list = nv->val.vptr;
 
     if ( nv->val.vptr[ 0 ]->type == INT_ARR )
     {
         nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
         nv->type = INT_ARR;
 
-        for ( i = 0; i < nv->len; i++ )
+        for ( ssize_t i = 0; i < nv->len; i++ )
         {
             nv->val.lpnt[ i ] = old_vptr_list[ i ]->val.lpnt[ 0 ];
             vars_free( old_vptr_list[ i ], SET );
@@ -516,7 +505,7 @@ prune_stage_2( Var_T * nv )
         nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
         nv->type = FLOAT_ARR;
 
-        for ( i = 0; i < nv->len; i++ )
+        for ( ssize_t i = 0; i < nv->len; i++ )
         {
             nv->val.dpnt[ i ] = old_vptr_list[ i ]->val.dpnt[ 0 ];
             vars_free( old_vptr_list[ i ], SET );
@@ -534,15 +523,12 @@ static void
 vars_fix_dims( Var_T * v,
                int     max_dim )
 {
-    ssize_t i;
-
-
     v->dim = max_dim;
 
     if ( --max_dim == 0 )
         return;
 
-    for ( i = 0; i < v->len; i++ )
+    for ( ssize_t i = 0; i < v->len; i++ )
         vars_fix_dims( v->val.vptr[ i ], max_dim );
 }
 
@@ -558,16 +544,12 @@ vars_fix_dims( Var_T * v,
 Var_T *
 vars_subref_to_rhs_conv( Var_T * v )
 {
-    Var_T *sv;
-    ssize_t i;
+    Var_T * sv = vars_push( INT_VAR, ( long ) v->val.index[ 0 ] );
     int range_count = 0;
-
-
-    sv = vars_push( INT_VAR, ( long ) v->val.index[ 0 ] );
     if ( v->val.index[ 0 ] < 0 )
         range_count++;
 
-    for ( i = 1; i < v->len; i++ )
+    for ( ssize_t i = 1; i < v->len; i++ )
     {
         vars_push( INT_VAR, ( long ) v->val.index[ i ] );
 

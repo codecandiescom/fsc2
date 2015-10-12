@@ -60,14 +60,11 @@ static Var_T * vars_lhs_range_pointer( Var_T * a,
 Var_T *
 vars_arr_lhs( Var_T * v )
 {
-    int dim;
-    int range_count = 0;
-
-
     /* Move up the stack until we find the variable indicating the array or
        matrix itself */
 
-    dim = vars_check_lhs_indices( &v, &range_count );
+    int range_count = 0;
+    int dim = vars_check_lhs_indices( &v, &range_count );
 
     /* If the array is new (i.e. we're still in the VARIABLES section) set
        it up, otherwise return a pointer to the referenced element or a
@@ -93,13 +90,10 @@ static int
 vars_check_lhs_indices( Var_T ** v,
                         int *    range_count )
 {
-    Var_T *cv = *v;
-    Var_T *ref;
-    int index_count = 0;
-
-
     /* If the index variable has the type UNDEF_VAR the whole array has to
        be used */
+
+    Var_T * cv = *v;
 
     if ( cv->type == UNDEF_VAR )
     {
@@ -114,10 +108,11 @@ vars_check_lhs_indices( Var_T ** v,
     fsc2_assert( cv != NULL );
 
     *v = cv;
-    ref = cv->from;
+    Var_T * ref = cv->from;
 
     /* Loop over all indices */
 
+    int index_count = 0;
     for ( cv = cv->next; cv != NULL; cv = cv->next )
     {
         index_count++;
@@ -245,9 +240,6 @@ static Var_T *
 vars_setup_new_array( Var_T * v,
                       int     dim )
 {
-    Var_T *a = v->from;
-
-
     /* We can't continue without indices, i.e. with a definition like "a[ ]" */
 
     if ( v->next->type == UNDEF_VAR )
@@ -259,6 +251,7 @@ vars_setup_new_array( Var_T * v,
 
     /* Set the arrays type and create it as far as possible */
 
+    Var_T * a = v->from;
     a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
 
     vars_arr_create( a, v->next, dim, UNSET );
@@ -284,15 +277,10 @@ vars_arr_create( Var_T * a,
                  int     dim,
                  bool    is_temp )
 {
-    Var_T *c;
-    ssize_t i;
-    ssize_t len;
-
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
     a->dim    = dim;
     a->flags &= ~ NEW_VARIABLE;
-
-    vars_check( v, INT_VAR | FLOAT_VAR );
 
     /* If the size is not defined the whole of the rest of the array must be
        dynamically sized and can be only set up by an assignment sometime
@@ -315,7 +303,7 @@ vars_arr_create( Var_T * a,
         /* Otherwise check that all the following sizes are also dynamically
            sized */
 
-        for ( c = v->next; c != NULL; c = c->next )
+        for ( Var_T * c = v->next; c != NULL; c = c->next )
             if ( ! ( c->flags & IS_DYNAMIC ) )
             {
                 print( FATAL, "Fixed array size after a dynamically set "
@@ -328,6 +316,7 @@ vars_arr_create( Var_T * a,
 
     /* Determine the requested size */
 
+    ssize_t len;
     if ( v->type == INT_VAR )
         len = v->val.lval;
     else
@@ -358,7 +347,7 @@ vars_arr_create( Var_T * a,
         else
         {
             a->val.dpnt = T_malloc( len * sizeof *a->val.dpnt );
-            for ( i = 0; i < len; i++ )
+            for ( ssize_t i = 0; i < len; i++ )
                 a->val.dpnt[ i ] = 0.0;
         }
 
@@ -371,12 +360,12 @@ vars_arr_create( Var_T * a,
 
     a->val.vptr = T_malloc( len * sizeof *a->val.vptr );
 
-    for ( i = 0; i < len; i++ )
+    for ( ssize_t i = 0; i < len; i++ )
         a->val.vptr[ i ] = NULL;
 
     a->len = len;
 
-    for ( i = 0; i < a->len; i++ )
+    for ( ssize_t i = 0; i < a->len; i++ )
     {
         a->val.vptr[ i ] = vars_new( NULL );
         a->val.vptr[ i ]->type  = a->type;
@@ -405,12 +394,8 @@ Var_T *
 vars_init_list( Var_T * volatile v,
                 ssize_t          level )
 {
-    ssize_t count = 0;
-    ssize_t i;
-    Var_T * cv;
     Var_T * volatile nv;
     int type = INT_VAR;
-
 
     /* Find the start of the of list initializers, marked by a variable of
        type REF_PTR */
@@ -438,7 +423,8 @@ vars_init_list( Var_T * volatile v,
        a dimension (if they are left over from previous calls) and
        complaining about variables with too high a dimensions */
 
-    for ( cv = v; cv != NULL; cv = cv->next )
+    ssize_t count = 0;
+    for ( Var_T * cv = v; cv != NULL; cv = cv->next )
     {
         if ( cv->dim > level )
         {
@@ -479,7 +465,7 @@ vars_init_list( Var_T * volatile v,
             nv = vars_push( INT_ARR, NULL, ( long ) count );
             nv->flags |= INIT_ONLY;
             nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
-            for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+            for ( ssize_t i = 0; i < nv->len; i++, v = vars_pop( v ) )
                 nv->val.lpnt[ i ] = v->val.lval;
         }
         else
@@ -487,7 +473,7 @@ vars_init_list( Var_T * volatile v,
             nv = vars_push( FLOAT_ARR, NULL, ( long ) count );
             nv->flags |= INIT_ONLY;
             nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
-            for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+            for ( ssize_t i = 0; i < nv->len; i++, v = vars_pop( v ) )
                 if ( v->type == INT_VAR )
                     nv->val.dpnt[ i ] = ( double ) v->val.lval;
                 else
@@ -517,10 +503,10 @@ vars_init_list( Var_T * volatile v,
         RETHROW;
     }
 
-    for ( i = 0; i < nv->len; i++ )
+    for ( ssize_t i = 0; i < nv->len; i++ )
         nv->val.vptr[ i ] = NULL;
 
-    for ( i = 0; i < nv->len; v = v->next )
+    for ( ssize_t i = 0; i < nv->len; v = v->next )
     {
         if ( v->dim != level )
             continue;
@@ -559,9 +545,6 @@ vars_init_list( Var_T * volatile v,
 void
 vars_arr_init( Var_T * v )
 {
-    Var_T *dest;
-
-
     /* If there aren't any initializers we get v being set to NULL. All we
        need to do is to clear up the variables stack that still contains
        reference to the new array */
@@ -574,6 +557,7 @@ vars_arr_init( Var_T * v )
 
     /* Find the reference to the variable to be initialized */
 
+    Var_T * dest;
     for ( dest = v; dest->prev != NULL; dest = dest->prev )
         /* empty */ ;
 
@@ -745,15 +729,12 @@ static Var_T *
 vars_init_elements( Var_T * a,
                     Var_T * v )
 {
-    ssize_t i;
-
-
     if ( v == NULL )
         return NULL;
 
     if ( a->dim == 1 )
     {
-        for ( i = 0; i < a->len; i++ )
+        for ( ssize_t i = 0; i < a->len; i++ )
         {
             if ( a->type == INT_VAR )
             {
@@ -779,7 +760,7 @@ vars_init_elements( Var_T * a,
         }
     }
     else
-        for ( i = 0; v != NULL && i < a->len; i++ )
+        for ( ssize_t i = 0; v != NULL && i < a->len; i++ )
             v = vars_init_elements( a->val.vptr[ i ], v );
 
     return v;
@@ -801,8 +782,6 @@ vars_lhs_pointer( Var_T * v,
                   int     dim )
 {
     Var_T *a = v->from;
-    Var_T *cv;
-
 
     v = vars_pop( v );
 
@@ -830,7 +809,7 @@ vars_lhs_pointer( Var_T * v,
         THROW( EXCEPTION );
     }
 
-    cv = vars_lhs_simple_pointer( a, a, v, a->dim );
+    Var_T * cv = vars_lhs_simple_pointer( a, a, v, a->dim );
 
     while ( ( v = vars_pop( v ) ) != cv )
         /* empty */ ;
@@ -855,8 +834,6 @@ vars_lhs_sub_pointer( Var_T * v,
 {
     Var_T *a = v->from;
     Var_T *sv;
-    ssize_t i;
-
 
     v = vars_pop( v );
 
@@ -884,7 +861,7 @@ vars_lhs_sub_pointer( Var_T * v,
     sv = vars_push( SUB_REF_PTR, dim + range_count );
     sv->from = a;
 
-    for ( i = 0; v != sv; i++, v = vars_pop( v ) )
+    for ( ssize_t i = 0; v != sv; i++, v = vars_pop( v ) )
         sv->val.index[ i ] = v->val.lval;
 
     return sv;
@@ -902,11 +879,7 @@ vars_lhs_simple_pointer( Var_T * a,
                          Var_T * v,
                          int     dim )
 {
-    ssize_t ind;
-    ssize_t i;
-
-
-    ind = v->val.lval;
+    ssize_t ind = v->val.lval;
     v = v->next;
 
     /* If the index is larger than the length of the array this is a
@@ -926,7 +899,7 @@ vars_lhs_simple_pointer( Var_T * a,
             cv->val.vptr = T_realloc( cv->val.vptr,
                                       ( ind + 1 ) * sizeof *cv->val.vptr );
 
-            for ( i = cv->len; i <= ind; i++ )
+            for ( ssize_t i = cv->len; i <= ind; i++ )
             {
                 cv->val.vptr[ i ]           = vars_new( NULL );
                 cv->val.vptr[ i ]->from     = cv;
@@ -957,7 +930,7 @@ vars_lhs_simple_pointer( Var_T * a,
                     cv->val.dpnt = T_realloc( cv->val.dpnt,
                                                 ( ind + 1 )
                                               * sizeof *cv->val.dpnt );
-                    for ( i = cv->len; i <= ind; i++ )
+                    for ( ssize_t i = cv->len; i <= ind; i++ )
                         cv->val.dpnt[ i ] = 0.0;
                     break;
 
@@ -1006,14 +979,12 @@ vars_lhs_range_pointer( Var_T * a,
                         Var_T * v,
                         int     dim )
 {
-    ssize_t i, range_start, range_end;
-
-
     /* Determine start and end of range */
 
-    range_start = - v->val.lval - 1;
+    ssize_t range_start = - v->val.lval - 1;
     v = v->next;
-    range_end = v->val.lval;
+
+    ssize_t range_end = v->val.lval;
     v = v->next;
 
     /* If the indexed range is larger than the (currently treated) array but
@@ -1035,7 +1006,7 @@ vars_lhs_range_pointer( Var_T * a,
                                         ( range_end + 1 )
                                       * sizeof *cv->val.vptr );
 
-            for ( i = cv->len; i <= range_end; i++ )
+            for ( ssize_t i = cv->len; i <= range_end; i++ )
             {
                 cv->val.vptr[ i ]           = vars_new( NULL );
                 cv->val.vptr[ i ]->from     = cv;
@@ -1067,7 +1038,7 @@ vars_lhs_range_pointer( Var_T * a,
                     cv->val.dpnt = T_realloc( cv->val.dpnt,
                                                 ( range_end + 1 )
                                               * sizeof *cv->val.dpnt );
-                    for ( i = cv->len; i <= range_end; i++ )
+                    for ( ssize_t i = cv->len; i <= range_end; i++ )
                         cv->val.dpnt[ i ] = 0.0;
                     break;
 
@@ -1087,11 +1058,11 @@ vars_lhs_range_pointer( Var_T * a,
         return vars_push( INT_VAR, 0 );
 
     if ( v->val.lval >= 0 )
-        for ( i = range_start; i <= range_end; i++ )
+        for ( ssize_t i = range_start; i <= range_end; i++ )
             vars_pop( vars_lhs_simple_pointer( a, cv->val.vptr[ i ],
                                                v, dim - 1 ) );
     else
-        for ( i = range_start; i <= range_end; i++ )
+        for ( ssize_t i = range_start; i <= range_end; i++ )
             vars_pop( vars_lhs_range_pointer( a, cv->val.vptr[ i ], v,
                                               dim - 1 ) );
 

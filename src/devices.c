@@ -32,20 +32,11 @@ void
 device_add( const char * name )
 {
     Device_Name_T *dl;
-    char *dev_name;
     char * volatile real_name = NULL;
-    const char *search_name;
-    char *lib_name = NULL;
+    const char * search_name;
     struct stat buf;
-    int length;
-    Device_T *cd;
-    char *ld_path;
-    char *ld = NULL;
-    char *ldc;
-    size_t pathmax = get_pathmax( );
 
-
-    dev_name = string_to_lower( T_strdup( name ) );
+    char * dev_name = string_to_lower( T_strdup( name ) );
 
     /* In case the '-l' option was used just look for device modules in
        the source directory of the modules. Otherweise we've first got to
@@ -56,6 +47,7 @@ device_add( const char * name )
        defined by the environment variable 'LD_LIBRARY_PATH' and then
        in the compiled-in path (except when this is a check run). */
 
+    char * lib_name = NULL;
     if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
     {
         lib_name = get_string( moddir "%s.fsc2_so", dev_name );
@@ -64,11 +56,12 @@ device_add( const char * name )
     }
     else
     {
+        char * ld_path;
         if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
         {
-            ld = T_strdup( ld_path );
+            char * ld = T_strdup( ld_path );
 
-            for ( ldc = strtok( ld, ":" ); ldc != NULL;
+            for ( char * ldc = strtok( ld, ":" ); ldc != NULL;
                   ldc = strtok( NULL, ":" ) )
             {
                 lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
@@ -105,7 +98,10 @@ device_add( const char * name )
     {
         /* We need memory for the name of the file the link points to */
 
+        size_t pathmax = get_pathmax( );
         real_name = T_malloc( pathmax + 1 );
+        int length;
+
         if (    ( length = readlink( lib_name, real_name, pathmax + 1 ) ) < 0
              || ( size_t ) length > pathmax )
         {
@@ -160,7 +156,7 @@ device_add( const char * name )
 
     /* Make sure the device isn't already loaded */
 
-    for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+    for ( Device_T * cd = EDL.Device_List; cd != NULL; cd = cd->next )
         if (    ! strcmp( cd->name, dev_name )
              || (    real_name != NULL
                   && ! strcmp( cd->name, real_name ) ) )
@@ -199,11 +195,9 @@ device_add( const char * name )
 void
 device_append_to_list( const char * dev_name )
 {
-    Device_T *cd;
-
-
     /* Append a new new Device structure to the list of devices */
 
+    Device_T * cd;
     if ( EDL.Device_List != NULL )
     {
         for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
@@ -249,18 +243,16 @@ device_append_to_list( const char * dev_name )
 void
 delete_devices( void )
 {
-    Device_T *cd, *cdp;
-
-
     if ( EDL.Device_List == NULL )  /* list is empty or does not exist */
         return;
 
     /* Get last element of list - always delete last entry first */
 
-    for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
+    Device_T * cd;
+    for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 
-    for ( ; cd != NULL; cd = cdp )
+    for ( Device_T * cdp; cd != NULL; cd = cdp )
     {
         if ( cd->is_loaded )
             unload_device( cd );         /* run exit hooks and unload module */
@@ -281,9 +273,8 @@ delete_devices( void )
 void
 delete_device_name_list( void )
 {
-    Device_Name_T *cd, *cdn;
-
-    for ( cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
+    Device_Name_T * cdn;
+    for ( Device_Name_T * cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
     {
         T_free( cd->name );
         cdn = cd->next;

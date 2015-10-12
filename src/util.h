@@ -23,7 +23,7 @@
 #define UTIL_HEADER
 
 
-char *get_string( const char * /* fmt */,
+char *get_string( const char * restrict /* fmt */,
                   ...                     );
 
 char *string_to_lower( char * /* str */ );
@@ -38,7 +38,7 @@ const char *strip_path( const char * /* path */ );
 const char *slash( const char * /* path */ );
 
 long get_file_length( FILE * /* fp  */,
-                      int *  /* len */  );
+                      int  * /* len */  );
 
 void eprint( int          /* severity */,
              bool         /* print_fl */,
@@ -55,16 +55,16 @@ void lower_permissions( void );
 
 char *handle_escape( char * /* str */ );
 
-FILE *filter_edl( const char * /* name */,
-                  FILE *       /* fp   */,
-                  int *        /* serr */ );
+FILE *filter_edl( const char * restrict /* name */,
+                  FILE       * restrict /* fp   */,
+                  int        * restrict /* serr */ );
 
 int fsc2_usleep( unsigned long /* us_dur         */,
                  bool          /* quit_on_signal */  );
 
-int is_in( const char *  /* supplied_in  */,
-           const char ** /* alternatives */,
-           int           /* max          */  );
+int is_in( const char *  restrict /* supplied_in  */,
+           const char ** restrict /* alternatives */,
+           int                    /* max          */  );
 
 void i2rgb( double /* h   */,
             int *  /* rgb */ );
@@ -76,7 +76,7 @@ Var_T *convert_to_channel_number( const char * /* channel_name */ );
 double fsc2_simplex( size_t     /* n         */,
                      double *   /* x         */,
                      double *   /* dx        */,
-                     void *     /* par       */,
+                     void   *  /* par       */,
                      double ( * /* func_name */ )( double *, void * ),
                      double     /* epsilon   */                        );
 

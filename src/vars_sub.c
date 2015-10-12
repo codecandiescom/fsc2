@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -49,6 +49,8 @@ Var_T *
 vars_sub( Var_T * v1,
           Var_T * v2 )
 {
+    fsc2_assert( v1 != v2 );
+
     vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
     vars_check( v2, RHS_TYPES );
 
@@ -86,36 +88,29 @@ vars_sub_i( Var_T * v1,
             Var_T * v2,
             bool    exc )
 {
-    Var_T *new_var = NULL;
-
-
     switch ( v1->type )
     {
         case INT_VAR :
-            new_var = vars_int_var_sub( v1, v2, exc );
-            break;
+            return vars_int_var_sub( v1, v2, exc );
 
         case FLOAT_VAR :
-            new_var = vars_float_var_sub( v1, v2, exc );
-            break;
+            return vars_float_var_sub( v1, v2, exc );
 
         case INT_ARR :
-            new_var = vars_int_arr_sub( v1, v2, exc );
-            break;
+            return vars_int_arr_sub( v1, v2, exc );
 
         case FLOAT_ARR :
-            new_var = vars_float_arr_sub( v1, v2, exc );
-            break;
+            return vars_float_arr_sub( v1, v2, exc );
 
         case INT_REF : case FLOAT_REF :
-            new_var = vars_ref_sub( v1, v2, exc );
-            break;
+            return vars_ref_sub( v1, v2, exc );
 
         default :
             fsc2_impossible( );     /* This can't happen... */
     }
 
-    return new_var;
+    fsc2_impossible( );
+    return NULL;
 }
 
 
@@ -127,14 +122,12 @@ vars_int_var_sub( Var_T * v1,
                   Var_T * v2,
                   bool    exc )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
+    vars_arith_len_check( v1, v2, "subtraction" );
+
+    Var_T * new_var = NULL;
+    void * gp;
     long ir;
     double dr;
-
-
-    vars_arith_len_check( v1, v2, "subtraction" );
 
     switch ( v2->type )
     {
@@ -151,9 +144,9 @@ vars_int_var_sub( Var_T * v1,
 
         case FLOAT_VAR :
             if ( ! exc )
-                dr = ( double ) v1->val.lval - v2->val.dval;
+                dr = v1->val.lval - v2->val.dval;
             else
-                dr = v2->val.dval - ( double ) v1->val.lval;
+                dr = v2->val.dval - v1->val.lval;
             new_var = vars_push( FLOAT_VAR, dr );
 
             vars_pop( v1 );
@@ -166,7 +159,7 @@ vars_int_var_sub( Var_T * v1,
             else
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
-            for ( i = 0; i < v2->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                     ir = v1->val.lval - new_var->val.lpnt[ i ];
@@ -188,19 +181,18 @@ vars_int_var_sub( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < v2->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
-                    dr = ( double ) v1->val.lval - new_var->val.dpnt[ i ];
+                    dr = v1->val.lval - new_var->val.dpnt[ i ];
                 else
-                    dr = new_var->val.dpnt[ i ] - ( double ) v1->val.lval;
+                    dr = new_var->val.dpnt[ i ] - v1->val.lval;
                 new_var->val.dpnt[ i ] = dr;
             }
 
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case INT_REF :
@@ -221,7 +213,6 @@ vars_int_var_sub( Var_T * v1,
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case FLOAT_REF :
@@ -233,9 +224,9 @@ vars_int_var_sub( Var_T * v1,
             while ( ( gp = vars_iter( new_var ) ) != NULL )
             {
                 if ( ! exc )
-                    dr = ( double ) v1->val.lval - * ( double * ) gp;
+                    dr = v1->val.lval - * ( double * ) gp;
                 else
-                    dr = * ( double * ) gp - ( double ) v1->val.lval;
+                    dr = * ( double * ) gp - v1->val.lval;
                 * ( double * ) gp = dr;
             }
 
@@ -260,13 +251,11 @@ vars_float_var_sub( Var_T * v1,
                     Var_T * v2,
                     bool    exc )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
-    double dr;
-
-
     vars_arith_len_check( v1, v2, "subtraction" );
+
+    Var_T * new_var = NULL;
+    void * gp;
+    double dr;
 
     switch ( v2->type )
     {
@@ -287,12 +276,12 @@ vars_float_var_sub( Var_T * v1,
         case INT_ARR :
             new_var = vars_push( FLOAT_ARR, NULL, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
-                    dr = v1->val.dval - ( double ) v2->val.lpnt[ i ];
+                    dr = v1->val.dval - v2->val.lpnt[ i ];
                 else
-                    dr = ( double ) v2->val.lpnt[ i ] - v1->val.dval;
+                    dr = v2->val.lpnt[ i ] - v1->val.dval;
                 new_var->val.dpnt[ i ] = dr;
             }
 
@@ -308,7 +297,7 @@ vars_float_var_sub( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                     dr = v1->val.dval - new_var->val.dpnt[ i ];
@@ -376,14 +365,11 @@ vars_int_arr_sub( Var_T * v1,
                   Var_T * v2,
                   bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
+    vars_arith_len_check( v1, v2, "subtraction" );
+
+    Var_T * new_var = NULL;
     long ir;
     double dr;
-
-
-    vars_arith_len_check( v1, v2, "subtraction" );
 
     switch ( v2->type )
     {
@@ -398,7 +384,7 @@ vars_int_arr_sub( Var_T * v1,
         case INT_ARR :
             if ( v1->flags & IS_TEMP && v1 != v2 )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -409,7 +395,7 @@ vars_int_arr_sub( Var_T * v1,
             else
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                     ir = v1->val.lpnt[ i ] - new_var->val.lpnt[ i ];
@@ -421,7 +407,6 @@ vars_int_arr_sub( Var_T * v1,
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case FLOAT_ARR :
@@ -431,12 +416,12 @@ vars_int_arr_sub( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < v1->len; i++ )
+            for ( ssize_t i = 0; i < v1->len; i++ )
             {
                 if ( ! exc )
-                    dr = ( double ) v1->val.lpnt[ i ] - new_var->val.dpnt[ i ];
+                    dr = v1->val.lpnt[ i ] - new_var->val.dpnt[ i ];
                 else
-                    dr = new_var->val.dpnt[ i ] - ( double ) v1->val.lpnt[ i ];
+                    dr = new_var->val.dpnt[ i ] - v1->val.lpnt[ i ];
                 new_var->val.dpnt[ i ] = dr;
             }
 
@@ -453,7 +438,7 @@ vars_int_arr_sub( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_sub_i( vars_push( INT_ARR, v1->val.lpnt,
                                        ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
@@ -479,13 +464,10 @@ vars_float_arr_sub( Var_T * v1,
                     Var_T * v2,
                     bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-    double dr;
-
-
     vars_arith_len_check( v1, v2, "subtraction" );
+
+    Var_T * new_var = NULL;
+    double dr;
 
     switch ( v2->type )
     {
@@ -504,7 +486,7 @@ vars_float_arr_sub( Var_T * v1,
         case FLOAT_ARR :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -516,7 +498,7 @@ vars_float_arr_sub( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                     dr = v1->val.dpnt[ i ] - new_var->val.dpnt[ i ];
@@ -538,7 +520,7 @@ vars_float_arr_sub( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_sub_i( vars_push( FLOAT_ARR, v1->val.dpnt,
                                        ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
@@ -564,12 +546,9 @@ vars_ref_sub( Var_T * v1,
               Var_T * v2,
               bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-
-
     vars_arith_len_check( v1, v2, "subtraction" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -592,7 +571,7 @@ vars_ref_sub( Var_T * v1,
         case INT_REF : case FLOAT_REF :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -604,13 +583,13 @@ vars_ref_sub( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->dim > new_var->dim )
-                for ( i = 0; i < v1->len; i++ )
+                for ( ssize_t i = 0; i < v1->len; i++ )
                     vars_sub_i( v1->val.vptr[ i ], new_var, exc );
             else if ( v1->dim < new_var->dim )
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_sub_i( v1, new_var->val.vptr[ i ], exc );
             else
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_sub_i( new_var->val.vptr[ i ], v1->val.vptr[ i ],
                                 ! exc );
 

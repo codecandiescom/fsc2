@@ -41,8 +41,7 @@ Var_T *
 vars_mult( Var_T * v1,
            Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-
+    fsc2_assert( v1 != v2 );
 
     vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
     vars_check( v2, RHS_TYPES );
@@ -72,30 +71,28 @@ vars_mult( Var_T * v1,
     switch ( v1->type )
     {
         case INT_VAR :
-            new_var = vars_int_var_mult( v1, v2 );
-            break;
+            return vars_int_var_mult( v1, v2 );
 
         case FLOAT_VAR :
-            new_var = vars_float_var_mult( v1, v2 );
-            break;
+            return vars_float_var_mult( v1, v2 );
 
         case INT_ARR :
-            new_var = vars_int_arr_mult( v1, v2 );
-            break;
+            return vars_int_arr_mult( v1, v2 );
 
         case FLOAT_ARR :
-            new_var = vars_float_arr_mult( v1, v2 );
-            break;
+            return vars_float_arr_mult( v1, v2 );
 
-        case INT_REF : case FLOAT_REF :
-            new_var = vars_ref_mult( v1, v2 );
+        case INT_REF :
+        case FLOAT_REF :
+            return vars_ref_mult( v1, v2 );
             break;
 
         default :
-            break;
+            fsc2_impossible( );     /* This can't happen... */
     }
 
-    return new_var;
+    fsc2_impossible( );
+    return NULL;
 }
 
 
@@ -106,12 +103,9 @@ static Var_T *
 vars_int_var_mult( Var_T * v1,
                    Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
-
-
     vars_arith_len_check( v1, v2, "multiplication" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -135,7 +129,7 @@ vars_int_var_mult( Var_T * v1,
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
             if ( v1->val.lval != 1 )
-                for ( i = 0; i < v2->len; i++ )
+                for ( ssize_t i = 0; i < v2->len; i++ )
                     new_var->val.lpnt[ i ] *= v1->val.lval;
 
             vars_pop( v1 );
@@ -152,13 +146,12 @@ vars_int_var_mult( Var_T * v1,
                                      ( long ) v2->len );
 
             if ( v1->val.lval != 1 )
-                for ( i = 0; i < v2->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     new_var->val.dpnt[ i ] *= ( double ) v1->val.lval;
 
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case INT_REF :
@@ -168,13 +161,15 @@ vars_int_var_mult( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->val.lval != 1 )
+            {
+                void * gp;
                 while ( ( gp = vars_iter( new_var ) ) != NULL )
                     * ( long * ) gp *= v1->val.lval;
+            }
 
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case FLOAT_REF :
@@ -184,8 +179,11 @@ vars_int_var_mult( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->val.lval != 1 )
+            {
+                void * gp;
                 while ( ( gp = vars_iter( new_var ) ) != NULL )
                     * ( double * ) gp *= ( double ) v1->val.lval;
+            }
 
             vars_pop( v1 );
             if ( new_var != v2 )
@@ -207,12 +205,9 @@ static Var_T *
 vars_float_var_mult( Var_T * v1,
                      Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
-
-
     vars_arith_len_check( v1, v2, "multiplication" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -229,13 +224,12 @@ vars_float_var_mult( Var_T * v1,
         case INT_ARR :
             new_var = vars_push( FLOAT_ARR, NULL, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 new_var->val.dpnt[ i ]
                                  = v1->val.dval * ( double ) v2->val.lpnt[ i ];
 
             vars_pop( v1 );
             vars_pop( v2 );
-
             break;
 
         case FLOAT_ARR :
@@ -246,25 +240,26 @@ vars_float_var_mult( Var_T * v1,
                                      ( long ) v2->len );
 
             if ( v1->val.dval != 1.0 )
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     new_var->val.dpnt[ i ] *= v1->val.dval;
 
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case INT_REF :
             new_var = vars_push( FLOAT_REF, v2 );
 
             if ( v1->val.dval != 1.0 )
+            {
+                void *gp;
                 while ( ( gp = vars_iter( new_var ) ) != NULL )
                     * ( double * ) gp *= v1->val.dval;
+            }
 
             vars_pop( v1 );
             vars_pop( v2 );
-
             break;
 
         case FLOAT_REF :
@@ -274,8 +269,11 @@ vars_float_var_mult( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->val.dval != 1.0 )
+            {
+                void * gp;
                 while ( ( gp = vars_iter( new_var ) ) != NULL )
                     * ( double * ) gp *= v1->val.dval;
+            }
 
             vars_pop( v1 );
             if ( v2 != new_var )
@@ -297,12 +295,9 @@ static Var_T *
 vars_int_arr_mult( Var_T * v1,
                    Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-
-
     vars_arith_len_check( v1, v2, "multiplication" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -317,7 +312,7 @@ vars_int_arr_mult( Var_T * v1,
         case INT_ARR :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
             }
@@ -327,13 +322,12 @@ vars_int_arr_mult( Var_T * v1,
             else
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 new_var->val.lpnt[ i ] *= v1->val.lpnt[ i ];
 
             vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case FLOAT_ARR :
@@ -343,14 +337,13 @@ vars_int_arr_mult( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < v1->len; i++ )
+            for ( ssize_t i = 0; i < v1->len; i++ )
                 new_var->val.dpnt[ i ] *= ( double ) v1->val.lpnt[ i ];
 
             if ( v1 != v2 )
                 vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -359,7 +352,7 @@ vars_int_arr_mult( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_mult( vars_push( INT_ARR, v1->val.lpnt, ( long ) v1->len ),
                            new_var->val.vptr[ i ] );
 
@@ -383,12 +376,9 @@ static Var_T *
 vars_float_arr_mult( Var_T * v1,
                      Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-
-
     vars_arith_len_check( v1, v2, "multiplication" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -407,7 +397,7 @@ vars_float_arr_mult( Var_T * v1,
         case FLOAT_ARR :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
             }
@@ -418,14 +408,13 @@ vars_float_arr_mult( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 new_var->val.dpnt[ i ] *= v1->val.dpnt[ i ];
 
             if ( v1 != v2 )
                 vars_pop( v1 );
             if ( new_var != v2 )
                 vars_pop( v2 );
-
             break;
 
         case INT_REF : case FLOAT_REF :
@@ -434,7 +423,7 @@ vars_float_arr_mult( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_mult( vars_push( FLOAT_ARR, v1->val.dpnt,
                                       ( long ) v1->len ),
                            new_var->val.vptr[ i ] );
@@ -459,12 +448,9 @@ static Var_T *
 vars_ref_mult( Var_T * v1,
                Var_T * v2 )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-
-
     vars_arith_len_check( v1, v2, "multiplication" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -487,7 +473,7 @@ vars_ref_mult( Var_T * v1,
         case INT_REF : case FLOAT_REF :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
             }
@@ -498,13 +484,13 @@ vars_ref_mult( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->dim > new_var->dim )
-                for ( i = 0; i < v1->len; i++ )
+                for ( ssize_t i = 0; i < v1->len; i++ )
                     vars_mult( v1->val.vptr[ i ], new_var );
             else if ( v1->dim < new_var->dim )
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_mult( v1, new_var->val.vptr[ i ] );
             else
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_mult( new_var->val.vptr[ i ], v1->val.vptr[ i ] );
 
             if ( v1 != v2 )

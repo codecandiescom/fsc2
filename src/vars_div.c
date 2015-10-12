@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -50,6 +50,8 @@ Var_T *
 vars_div( Var_T * v1,
           Var_T * v2 )
 {
+    fsc2_assert( v1 != v2 );
+
     vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
     vars_check( v2, RHS_TYPES );
 
@@ -87,36 +89,31 @@ vars_div_i( Var_T * v1,
             Var_T * v2,
             bool    exc )
 {
-    Var_T *new_var = NULL;
-
-
     switch ( v1->type )
     {
         case INT_VAR :
-            new_var = vars_int_var_div( v1, v2, exc );
-            break;
+            return vars_int_var_div( v1, v2, exc );
 
         case FLOAT_VAR :
-            new_var = vars_float_var_div( v1, v2, exc );
-            break;
+            return vars_float_var_div( v1, v2, exc );
 
         case INT_ARR :
-            new_var = vars_int_arr_div( v1, v2, exc );
-            break;
+            return vars_int_arr_div( v1, v2, exc );
 
         case FLOAT_ARR :
-            new_var = vars_float_arr_div( v1, v2, exc );
-            break;
+            return vars_float_arr_div( v1, v2, exc );
 
-        case INT_REF : case FLOAT_REF :
-            new_var = vars_ref_div( v1, v2, exc );
+        case INT_REF :
+        case FLOAT_REF :
+            return vars_ref_div( v1, v2, exc );
             break;
 
         default :
-            break;
+            fsc2_impossible( );     /* This can't happen... */
     }
 
-    return new_var;
+    fsc2_impossible( );
+    return NULL;
 }
 
 
@@ -128,14 +125,12 @@ vars_int_var_div( Var_T * v1,
                   Var_T * v2,
                   bool    exc )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
+    vars_arith_len_check( v1, v2, "division" );
+
+    Var_T * new_var = NULL;
+    void * gp;
     long ir;
     double dr;
-
-
-    vars_arith_len_check( v1, v2, "division" );
 
     switch ( v2->type )
     {
@@ -179,7 +174,7 @@ vars_int_var_div( Var_T * v1,
             else
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
-            for ( i = 0; i < v2->len; i++ )
+            for ( ssize_t i = 0; i < v2->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -207,7 +202,7 @@ vars_int_var_div( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < v2->len; i++ )
+            for ( ssize_t i = 0; i < v2->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -297,13 +292,11 @@ vars_float_var_div( Var_T * v1,
                     Var_T * v2,
                     bool    exc )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    void *gp;
-    double dr;
-
-
     vars_arith_len_check( v1, v2, "division" );
+
+    Var_T * new_var = NULL;
+    void * gp;
+    double dr;
 
     switch ( v2->type )
     {
@@ -330,7 +323,7 @@ vars_float_var_div( Var_T * v1,
         case INT_ARR :
             new_var = vars_push( FLOAT_ARR, NULL, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -357,7 +350,7 @@ vars_float_var_div( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -443,14 +436,11 @@ vars_int_arr_div( Var_T * v1,
                   Var_T * v2,
                   bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
+    vars_arith_len_check( v1, v2, "division" );
+
+    Var_T * new_var = NULL;
     long ir;
     double dr;
-
-
-    vars_arith_len_check( v1, v2, "division" );
 
     switch ( v2->type )
     {
@@ -465,7 +455,7 @@ vars_int_arr_div( Var_T * v1,
         case INT_ARR :
             if ( v1->flags & IS_TEMP && v1 != v2 )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -476,7 +466,7 @@ vars_int_arr_div( Var_T * v1,
             else
                 new_var = vars_push( INT_ARR, v2->val.lpnt, ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -504,7 +494,7 @@ vars_int_arr_div( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < v1->len; i++ )
+            for ( ssize_t i = 0; i < v1->len; i++ )
             {
                 if ( ! exc )
                 {
@@ -532,7 +522,7 @@ vars_int_arr_div( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_div_i( vars_push( INT_ARR, v1->val.lpnt,
                                        ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
@@ -558,13 +548,9 @@ vars_float_arr_div( Var_T * v1,
                     Var_T * v2,
                     bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-    double dr;
-
-
     vars_arith_len_check( v1, v2, "division" );
+
+    Var_T *new_var = NULL;
 
     switch ( v2->type )
     {
@@ -583,7 +569,7 @@ vars_float_arr_div( Var_T * v1,
         case FLOAT_ARR :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -595,8 +581,10 @@ vars_float_arr_div( Var_T * v1,
                 new_var = vars_push( FLOAT_ARR, v2->val.dpnt,
                                      ( long ) v2->len );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
             {
+                double dr;
+
                 if ( ! exc )
                 {
                     vars_div_check( new_var->val.dpnt[ i ] );
@@ -623,7 +611,7 @@ vars_float_arr_div( Var_T * v1,
             else
                 new_var = vars_push( v2->type, v2 );
 
-            for ( i = 0; i < new_var->len; i++ )
+            for ( ssize_t i = 0; i < new_var->len; i++ )
                 vars_div_i( vars_push( FLOAT_ARR, v1->val.dpnt,
                                        ( long ) v1->len ),
                             new_var->val.vptr[ i ], exc );
@@ -649,12 +637,9 @@ vars_ref_div( Var_T * v1,
               Var_T * v2,
               bool    exc )
 {
-    Var_T *new_var = NULL;
-    Var_T *vt;
-    ssize_t i;
-
-
     vars_arith_len_check( v1, v2, "division" );
+
+    Var_T * new_var = NULL;
 
     switch ( v2->type )
     {
@@ -677,7 +662,7 @@ vars_ref_div( Var_T * v1,
         case INT_REF : case FLOAT_REF :
             if ( v1->flags & IS_TEMP )
             {
-                vt = v1;
+                Var_T * vt = v1;
                 v1 = v2;
                 v2 = vt;
                 exc = ! exc;
@@ -689,13 +674,13 @@ vars_ref_div( Var_T * v1,
                 new_var = vars_push( v2->type, v2 );
 
             if ( v1->dim > new_var->dim )
-                for ( i = 0; i < v1->len; i++ )
+                for ( ssize_t i = 0; i < v1->len; i++ )
                     vars_div_i( v1->val.vptr[ i ], new_var, exc );
             else if ( v1->dim < new_var->dim )
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_div_i( v1, new_var->val.vptr[ i ], exc );
             else
-                for ( i = 0; i < new_var->len; i++ )
+                for ( ssize_t i = 0; i < new_var->len; i++ )
                     vars_div_i( new_var->val.vptr[ i ], v1->val.vptr[ i ],
                                 ! exc );
 

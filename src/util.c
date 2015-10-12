@@ -45,7 +45,7 @@ static ssize_t do_read( int    fd,
 #define GET_STRING_TRY_LENGTH 128
 
 char *
-get_string( const char * fmt,
+get_string( const char * restrict fmt,
             ... )
 {
     char *c = NULL;
@@ -193,8 +193,8 @@ slash( const char * path )
  *-----------------------------------------------------------------*/
 
 long
-get_file_length( FILE * fp,
-                 int *  len )
+get_file_length( FILE * restrict fp,
+                 int  * restrict len )
 {
     char *cur,
          *end,
@@ -697,9 +697,9 @@ handle_escape( char * str )
  *-------------------------------------------------------------------------*/
 
 FILE *
-filter_edl( const char * name,
-            FILE       * fp,
-            int        * serr )
+filter_edl( const char * restrict name,
+            FILE       * restrict fp,
+            int        * restrict serr )
 {
     int pd[ 2 ];
     int ed[ 2 ];
@@ -926,37 +926,43 @@ fsc2_usleep( unsigned long us_dur,
  *--------------------------------------------------------------------------*/
 
 int
-is_in( const char *  supplied_in,
-       const char ** alternatives,
-       int           max )
+is_in( const char  * restrict supplied_in,
+       const char ** restrict alternatives,
+       int                    max )
 {
-    char *in, *cpy;
-    const char *a;
-    int count;
+    if ( ! supplied_in || ! *supplied_in || ! alternatives || ! max )
+        return -1;
 
+    /* Get pointer to the first non-white-space char in the user supplied
+       input */
 
-    fsc2_assert( supplied_in != NULL && alternatives != NULL );
+    while ( isspace( ( unsigned char ) *supplied_in ) && *++supplied_in )
+        /* empty */ ;
 
-    /* Get copy of input string and get rid of leading and trailing white
-       space */
+    if ( ! *supplied_in )
+        return -1;
 
-    in = cpy = T_strdup( supplied_in );
-    while ( isspace( ( unsigned char ) *in ) )
-        in++;
-    while( isspace( ( unsigned char ) cpy[ strlen( cpy ) - 1 ] ) )
-        cpy[ strlen( cpy ) - 1 ] = '\0';
+    /* Figure out how many character there are in the user supplied input
+       before it ends in all white-space characters */
 
-    /* Now check if the cleaned up input string is identical to one of the
-       alternatives */
+    const char * end = supplied_in + strlen( supplied_in );
+    while ( end > supplied_in && isspace( ( unsigned char ) end[ -1 ] ) )
+        --end;
 
-    for ( cpy = in, a = alternatives[ 0 ], count = 0; a && count < max;
-           a = alternatives[ ++count ] )
-        if ( ! strcasecmp( in, a ) )
-            break;
+    if ( end == supplied_in )
+        return -1;
 
-    T_free( cpy );
+    size_t len = end - supplied_in;
 
-    return ( a && count < max ) ? count : -1;
+    /* Now check if the "valid" part of the user supplied input is identical
+       (except for case) to one of the alternatives */
+
+    const char * a = alternatives[ 0 ];
+    for ( int cnt = 0; a && cnt < max; a = alternatives[ ++cnt ] )
+        if ( ! strncasecmp( supplied_in, a, len ) )
+            return cnt;
+
+    return -1;
 }
 
 

@@ -72,7 +72,6 @@ canvas_handler_2d( FL_OBJECT * obj,
 {
     Canvas_T *c = udata;
 
-
     switch ( ev->type )
     {
         case Expose :

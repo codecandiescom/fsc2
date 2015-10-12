@@ -383,7 +383,6 @@ variables_parser( FILE * in )
 {
     static bool needs_restart = UNSET;
 
-
     /* Don't allow more than one VARIABLES section */
 
     if ( EDL.compilation.sections[ VARIABLES_SECTION ] )

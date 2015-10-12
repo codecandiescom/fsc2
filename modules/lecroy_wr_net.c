@@ -56,13 +56,6 @@ static bool is_running = UNSET;
 bool
 lecroy_wr_init( const char * name )
 {
-    char buf[ 100 ];
-    ssize_t len = sizeof buf;
-    int i;
-    bool with_eoi;
-    volatile int extra_needed_channels = 0;
-
-
     /* Open a socket to the device */
 
     vicp_open( name, NETWORK_ADDRESS, 100000, 1 );
@@ -77,12 +70,17 @@ lecroy_wr_init( const char * name )
 		   first. Then ask for the status byte to make sure the device
 		   reacts. */
 
-		len = 51;
-		if ( vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
-                         "CORD LO;*STB?\n", &len, SET, UNSET ) != VICP_SUCCESS )
+        const char * cmd = "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
+                           "CORD LO;*STB?\n";
+		ssize_t len = strlen( cmd );
+
+		if ( vicp_write( cmd, &len, SET, UNSET ) != VICP_SUCCESS )
             lecroy_wr_lan_failure( );
 
+        char buf[ 100 ];
 		len = sizeof buf;
+        bool with_eoi;
+
 		if ( vicp_read( buf, &len, &with_eoi, UNSET ) != VICP_SUCCESS )
             lecroy_wr_lan_failure( );
 
@@ -91,8 +89,9 @@ lecroy_wr_init( const char * name )
            the user asks for one more to be displayed) */
 
         lecroy_wr.num_used_channels = 0;
+        int extra_needed_channels = 0;
 
-        for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
+        for ( int i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
@@ -105,10 +104,10 @@ lecroy_wr_init( const char * name )
                     extra_needed_channels++;
             }
 
-        for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
+        for ( int i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
             lecroy_wr.is_displayed[ i ] = UNSET;
 
-        for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
+        for ( int i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
             if ( lecroy_wr_is_displayed( i ) )
             {
                 lecroy_wr.is_displayed[ i ] = SET;
@@ -133,7 +132,7 @@ lecroy_wr_init( const char * name )
 
         /* Switch on all channels we know from the test run will be needed */
 
-        for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
+        for ( int i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
             if ( lecroy_wr.is_used[ i ] && ! lecroy_wr.is_displayed[ i ] )
             {
                 lecroy_wr_display( i, SET );
@@ -141,7 +140,7 @@ lecroy_wr_init( const char * name )
                 lecroy_wr.num_used_channels++;
             }
 
-        for ( i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
+        for ( int i = LECROY_WR_TA; i <= LECROY_WR_MAX_FTRACE; i++ )
             if ( lecroy_wr.is_used[ i ] && ! lecroy_wr.is_displayed[ i ] )
             {
                 lecroy_wr_display( i, SET );
@@ -167,7 +166,7 @@ lecroy_wr_init( const char * name )
 
             lecroy_wr.timebase = lecroy_wr_get_timebase( );
 
-            for ( i = 0; i < lecroy_wr.num_tbas; i++ )
+            for ( int i = 0; i < lecroy_wr.num_tbas; i++ )
                 if ( fabs( lecroy_wr.tbas[ i ] - lecroy_wr.timebase ) /
                      lecroy_wr.tbas[ i ] < 0.1 )
                 {
@@ -210,7 +209,7 @@ lecroy_wr_init( const char * name )
         /* Set (if required) the sensitivies, offsets coupling types and
            bandwidth limiters of all measurement channels */
 
-        for ( i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
+        for ( int i = LECROY_WR_CH1; i <= LECROY_WR_CH_MAX; i++ )
         {
             if ( lecroy_wr.is_sens[ i ] )
                 lecroy_wr_set_sens( i, lecroy_wr.sens[ i ] );
@@ -243,7 +242,7 @@ lecroy_wr_init( const char * name )
         /* Set (if required) the trigger level, slope and coupling of the
            trigger channels */
 
-        for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
+        for ( int i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
         {
             int tch = trg_channels[ i ];
 
@@ -1552,30 +1551,25 @@ static
 long
 lecroy_wr_get_avg_count( int ch )
 {
-    char cmd[ 100 ];
-    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
-    ssize_t length = sizeof buf;
-    long len = 0;
-    int i;
-    bool with_eoi;
-
-
     fsc2_assert( ch >= LECROY_WR_TA && ch <= LECROY_WR_MAX_FTRACE );
 
+    char cmd[ 100 ];
 #if ! defined LECROY_WR_IS_XSTREAM
-    sprintf( cmd, "T%c:WF? DESC\n", ch - LECROY_WR_TA + 'A' );
+    ssize_t length = sprintf( cmd, "T%c:WF? DESC\n", ch - LECROY_WR_TA + 'A' );
 #else
-    sprintf( cmd, "F%1d:WF? DESC\n", ch - LECROY_WR_TA + 1 );
+    ssize_t length = sprintf( cmd, "F%1d:WF? DESC\n", ch - LECROY_WR_TA + 1 );
 #endif
-    length = strlen( cmd );
     if ( vicp_write( cmd, &length, SET, UNSET ) != VICP_SUCCESS )
         lecroy_wr_lan_failure( );
 
     /* First thing we read is "DESC,", followed by "#[0-9]", where the number
        after the '#' is the number of bytes to be read next */
 
+    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
     length = 5;
-	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) !=
+    bool with_eoi;
+
+	if (    vicp_read( ( char * ) buf, &length, &with_eoi, UNSET ) ==
                                                                   VICP_FAILURE
          || length != 5
          || strncmp( ( char * ) buf, "DESC,", 5 ) )
@@ -1616,7 +1610,8 @@ lecroy_wr_get_avg_count( int ch )
          || length != LECROY_WR_DESC_LENGTH )
         lecroy_wr_lan_failure( );
 
-    for ( i = 3; i >= 0; i-- )
+    long len = 0;
+    for ( int i = 3; i >= 0; i-- )
         len = 256 * len + buf[ LECROY_WR_AVG_INDEX + i ];
 
     if ( ! with_eoi )
@@ -1672,14 +1667,11 @@ lecroy_wr_get_curve( int         ch,
                      double   ** array,
                      long      * length )
 {
-    double gain, offset;
-    unsigned char *data;
-    unsigned char *dp;
-    long i;
-    int val;
-
-
     /* Get the curve from the device */
+
+    unsigned char *data;
+    double gain,
+           offset;
 
     lecroy_wr_get_prep( ch, w, &data, length, &gain, &offset );
 
@@ -1689,9 +1681,10 @@ lecroy_wr_get_curve( int         ch,
 
     *array = T_malloc( *length * sizeof **array );
 
-    for ( i = 0, dp = data; i < *length; dp += 2, i++ )
+    unsigned char *dp  = data;
+    for ( long i = 0; i < *length; dp += 2, i++ )
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
+        int val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
         if ( dp[ 1 ] & 0x80  )
             val -= 0x10000;
@@ -1710,16 +1703,12 @@ double
 lecroy_wr_get_area( int        ch,
                     Window_T * w )
 {
-    unsigned char *data;
-    unsigned char *dp;
-    long i;
-    double gain, offset;
-    double area = 0.0;
-    int val;
-    long length;
-
-
     /* Get the curve from the device */
+
+    unsigned char *data;
+    long length;
+    double gain,
+           offset;
 
     lecroy_wr_get_prep( ch, w, &data, &length, &gain, &offset );
 
@@ -1727,9 +1716,12 @@ lecroy_wr_get_area( int        ch,
        two's complement integers, which then need to be scaled by gain and
        offset. */
 
-    for ( i = 0, dp = data; i < length; dp += 2, i++ )
+    double area = 0.0;
+    unsigned char *dp  = data;
+
+    for ( long i = 0; i < length; dp += 2, i++ )
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
+        int val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
         if ( dp[ 1 ] & 0x80 )
             val -= 0x10000;
@@ -1750,28 +1742,25 @@ double
 lecroy_wr_get_amplitude( int        ch,
                          Window_T * w )
 {
-    unsigned char *data = NULL;
-    unsigned char *dp;
-    long i;
-    double gain, offset;
-    long min, max;
-    long val;
-    long length;
-
-
     /* Get the curve from the device */
+
+    unsigned char *data;
+    long length;
+    double gain,
+           offset;
 
     lecroy_wr_get_prep( ch, w, &data, &length, &gain, &offset );
 
     /* Calculate the maximum and minimum voltages from the data, data are two
        byte (LSB first), two's complement integers */
 
-    min = LONG_MAX;
-    max = LONG_MIN;
+    long min = LONG_MAX;
+    long max = LONG_MIN;
+    unsigned char *dp  = data;
 
-    for ( i = 0, dp = data; i < length; i++, dp += 2 )
+    for ( long i = 0; i < length; i++, dp += 2 )
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
+        long val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
         if ( dp[ 1 ] & 0x80 )
             val -= 0x10000;
@@ -1795,14 +1784,14 @@ void
 lecroy_wr_copy_curve( long src,
                       long dest )
 {
-    char cmd[ 100 ] = "STO ";
-	ssize_t len;
 
 
     fsc2_assert(    ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
                  || ( src >= LECROY_WR_TA && src <= LECROY_WR_MAX_FTRACE ) );
     fsc2_assert( dest >= LECROY_WR_M1 && dest <= LECROY_WR_M4 );
 
+
+    char cmd[ 100 ] = "STO ";
 
     if ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
         sprintf( cmd + strlen( cmd ), "C%1ld,", src - LECROY_WR_CH1 + 1 );
@@ -1815,8 +1804,8 @@ lecroy_wr_copy_curve( long src,
 #endif
 
     sprintf( cmd + strlen( cmd ), "M%ld\n", dest - LECROY_WR_M1 + 1 );
+	ssize_t len = strlen( cmd );
 
-	len = strlen( cmd );
 	if ( vicp_write( cmd, &len, SET, UNSET ) != VICP_SUCCESS )
         lecroy_wr_lan_failure( );
 }
@@ -1831,18 +1820,13 @@ lecroy_wr_get_data( long   * len,
                     double * gain,
                     double * offset )
 {
-    unsigned char *data;
-    char len_str[ 10 ];
-    bool with_eoi;
-    ssize_t length;
-    ssize_t desc_len;
-    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
-
-
     /* First thing we read is "ALL,", followed by "#[0-9]", where the number
        after the '#' is the number of bytes to be read next */
 
-    length = 6;
+    char len_str[ 10 ];
+    ssize_t length = 6;
+    bool with_eoi;
+
 	if (    vicp_read( len_str, &length, &with_eoi, UNSET ) == VICP_FAILURE
          || length != 6
          || strncmp( len_str, "ALL,#", 5 )
@@ -1874,7 +1858,9 @@ lecroy_wr_get_data( long   * len,
        offset setting (this much faster than using the "INSP?" command,
        which takes about 100 ms) */
 
-    desc_len = LECROY_WR_DESC_LENGTH;
+    unsigned char buf[ LECROY_WR_DESC_LENGTH ];
+    ssize_t desc_len = LECROY_WR_DESC_LENGTH;
+
 	if (    vicp_read( ( char * ) buf, &desc_len, &with_eoi, UNSET ) !=
                                                                    VICP_SUCCESS
          || desc_len != LECROY_WR_DESC_LENGTH )
@@ -1885,7 +1871,7 @@ lecroy_wr_get_data( long   * len,
 
     /* Obtain enough memory and then read all data of the waveform */
 
-    data = T_malloc( length );
+    unsigned char * data = T_malloc( length );
 
     TRY
     {
@@ -1927,24 +1913,22 @@ static
 double
 lecroy_wr_bin_2_float( unsigned char * buf )
 {
-    int i, j;
-    double e, f = 0.0;
-
-
     /* The binary floating point valu is stored LSB first, MSB last, witt
        the topmost bit being the sign, the following 8 bits the power of
        2 (shifted by 127) and the remaining bits the fractional value
        (with the topmost bit, which is always set, left out) */
 
-    e = buf[ 3 ] & 0x80 ? -1.0 : 1.0;
+    double e = buf[ 3 ] & 0x80 ? -1.0 : 1.0;
     e *= pow( 2.0, (   ( ( buf[ 3 ] & 0x7F ) << 1 )
                      | ( ( buf[ 2 ] & 0x80 ) >> 7 ) ) - 127.0 );
 
+    double f = 0.0;
     buf[ 2 ] |= 0x80;
-    for ( i = 0; i < 3; i++ )
+
+    for ( int i = 0; i < 3; i++ )
     {
         unsigned char x = buf[ i ];
-        for ( j = 0; j < 8; x>>= 1, j++ )
+        for ( int j = 0; j < 8; x>>= 1, j++ )
             f = 0.5 * f + ( x & 1 );
     }
 
@@ -1959,7 +1943,6 @@ bool
 lecroy_wr_command( const char * cmd )
 {
 	ssize_t len = strlen( cmd );
-
 
 	if ( vicp_write( cmd, &len, SET, UNSET ) != VICP_SUCCESS )
         lecroy_wr_lan_failure( );
@@ -1981,7 +1964,6 @@ lecroy_wr_get_inr( void )
 {
     char reply[ 10 ] = "INR?";
     ssize_t length = sizeof reply;
-
 
     lecroy_wr_talk( "INR?\n", reply, &length );
     reply[ length - 1 ] = '\0';

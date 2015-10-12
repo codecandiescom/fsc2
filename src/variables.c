@@ -176,12 +176,9 @@ static void * vars_get_pointer( ssize_t * iter,
 Var_T *
 vars_get( const char * name )
 {
-    Var_T *v;
-
-
     /* Try to find the variable with the name passed to the function */
 
-    for ( v = EDL.Var_List; v != NULL; v = v->next )
+    for ( Var_T * v = EDL.Var_List; v != NULL; v = v->next )
     {
         if ( v->name == NULL )
             continue;
@@ -207,15 +204,12 @@ vars_new( const char * name )
 {
     static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
                               NEW_VARIABLE, NULL, NULL, NULL };
-    Var_T *vp;
-
 
     /* Get memory for a new variable structure, initialize it (from a
        template variable, that might be a bit faster than setting all
        elements individually), and get memory for storing the name */
 
-    vp = T_malloc( sizeof *vp );
-
+    Var_T * vp = T_malloc( sizeof *vp );
     *vp = template;
 
     if ( name != NULL )
@@ -263,10 +257,6 @@ Var_T *
 vars_free( Var_T * v,
            bool    also_nameless )
 {
-    ssize_t i;
-    Var_T *ret;
-
-
     fsc2_assert( ! ( v->flags & ON_STACK ) );
 
     if ( v->name == NULL && ! also_nameless )
@@ -293,7 +283,7 @@ vars_free( Var_T * v,
             if ( v->len == 0 )
                 break;
             if ( ! ( v->flags & DONT_RECURSE ) )
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.vptr[ i ] != NULL )
                         vars_free( v->val.vptr[ i ], SET );
             v->val.vptr = T_free( v->val.vptr );
@@ -314,7 +304,7 @@ vars_free( Var_T * v,
     if ( v->next != NULL )
         v->next->prev = v->prev;
 
-    ret = v->next;
+    Var_T * ret = v->next;
     T_free( v );
     return ret;
 }
@@ -327,10 +317,7 @@ vars_free( Var_T * v,
 static void
 free_all_vars( void )
 {
-    Var_T *v;
-
-
-    for ( v = EDL.Var_List; v != NULL; )
+    for ( Var_T * v = EDL.Var_List; v != NULL; )
         v = vars_free( v, UNSET );
 }
 
@@ -416,19 +403,15 @@ vars_push_matrix( Var_Type_T type,
                   int        dim,
                   ... )
 {
-    Var_T * volatile nv;
-    va_list ap;
-    ssize_t * volatile sizes;
-
-
     if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
         fsc2_impossible( );
 
-    nv = vars_push( type, NULL );
+    Var_T * volatile nv = vars_push( type, NULL );
     nv->from = NULL;
 
-    sizes = T_malloc( dim * sizeof *sizes );
+    ssize_t * volatile sizes = T_malloc( dim * sizeof *sizes );
 
+    va_list ap;
     va_start( ap, dim );
 
     for ( int i = 0; i < dim; i++ )
@@ -482,16 +465,12 @@ vars_push_matrix( Var_Type_T type,
  *-----------------------------------------------------------------------*/
 
 static Var_T *
-vars_push_submatrix( Var_T *    from,
-                     Var_Type_T type,
-                     int        dim,
-                     ssize_t *  sizes )
+vars_push_submatrix( Var_T      * from,
+                     Var_Type_T   type,
+                     int          dim,
+                     ssize_t    * sizes )
 {
-    Var_T *nv;
-    ssize_t i;
-
-
-    nv = vars_new( NULL );
+    Var_T * nv = vars_new( NULL );
     nv->flags |= IS_TEMP;
     nv->from = from;
     nv->dim = dim;
@@ -508,7 +487,7 @@ vars_push_submatrix( Var_T *    from,
         {
             nv->type = FLOAT_ARR;
             nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
-            for ( i = 0; i < nv->len; i++ )
+            for ( ssize_t i = 0; i < nv->len; i++ )
                 nv->val.dpnt[ i ] = 0.0;
         }
 
@@ -518,10 +497,10 @@ vars_push_submatrix( Var_T *    from,
     nv->type = type;
     nv->val.vptr = T_malloc( nv->len * sizeof *nv->val.vptr );
 
-    for ( i = 0; i < nv->len; i++ )
+    for ( ssize_t i = 0; i < nv->len; i++ )
         nv->val.vptr[ i ] = NULL;
 
-    for ( i = 0; i < nv->len; i++ )
+    for ( ssize_t i = 0; i < nv->len; i++ )
         nv->val.vptr[ i ] = vars_push_submatrix( nv, type,
                                                  dim - 1, sizes + 1 );
 
@@ -555,18 +534,10 @@ Var_T *
 vars_push( Var_Type_T type,
            ... )
 {
-    Var_T * nsv,
-          * stack,
-          * src;
-    va_list ap;
-    ssize_t i;
-    const char * str;
-
-
     /* Get memory for the new variable to be appended to the stack, set its
        type and initialize some fields */
 
-    nsv         = T_malloc( sizeof *nsv );
+    Var_T * nsv = T_malloc( sizeof *nsv );
     nsv->name   = NULL;
     nsv->type   = type;
     nsv->next   = NULL;
@@ -574,6 +545,7 @@ vars_push( Var_Type_T type,
 
     /* Get the data for the new variable */
 
+    va_list ap;
     va_start( ap, type );
 
     switch ( type )
@@ -592,11 +564,13 @@ vars_push( Var_Type_T type,
             break;
 
         case STR_VAR :
-            str = va_arg( ap, const char * );
-            if ( str != NULL )
-                nsv->val.sptr = T_strdup( str );
-            else
-                nsv->val.sptr = NULL;
+            {
+                const char * str = va_arg( ap, const char * );
+                if ( str != NULL )
+                    nsv->val.sptr = T_strdup( str );
+                else
+                    nsv->val.sptr = NULL;
+            }
             break;
 
         case INT_ARR :
@@ -638,7 +612,7 @@ vars_push( Var_Type_T type,
                 {
                     nsv->val.dpnt = T_malloc(   nsv->len
                                               * sizeof *nsv->val.dpnt );
-                    for ( i = 0; i < nsv->len; i++ )
+                    for ( ssize_t i = 0; i < nsv->len; i++ )
                         nsv->val.dpnt[ i ] = 0.0;
                 }
             }
@@ -652,10 +626,13 @@ vars_push( Var_Type_T type,
             nsv->val.dpnt = va_arg( ap, double * );
             break;
 
-        case INT_REF : case FLOAT_REF :
-            src = va_arg( ap, Var_T * );
-            if ( src != NULL )
-                vars_ref_copy( nsv, src, UNSET );
+        case INT_REF :
+        case FLOAT_REF :
+            {
+                Var_T * src = va_arg( ap, Var_T * );
+                if ( src != NULL )
+                    vars_ref_copy( nsv, src, UNSET );
+            }
             break;
 
         case SUB_REF_PTR :
@@ -679,7 +656,8 @@ vars_push( Var_Type_T type,
 
     /* Finally append the new variable to the stack */
 
-    if ( ( stack = EDL.Var_Stack ) == NULL )
+    Var_T * stack= EDL.Var_Stack;
+    if ( stack == NULL )
     {
         EDL.Var_Stack = nsv;
         nsv->prev = NULL;
@@ -705,10 +683,7 @@ Var_T *
 vars_make( Var_Type_T type,
            Var_T *    src )
 {
-    Var_T *nv = NULL;
-    Var_T *stack;
-    ssize_t i;
-
+    Var_T * nv = NULL;
 
     if ( src->flags & ON_STACK )
     {
@@ -717,7 +692,8 @@ vars_make( Var_Type_T type,
         nv->next  = NULL;
         nv->flags = ON_STACK;
 
-        if ( ( stack = EDL.Var_Stack ) == NULL )
+        Var_T * stack = EDL.Var_Stack;
+        if ( stack == NULL )
         {
             EDL.Var_Stack = nv;
             nv->prev = NULL;
@@ -755,7 +731,7 @@ vars_make( Var_Type_T type,
             if ( nv->len != 0 )
             {
                 nv->val.dpnt = T_malloc(   nv->len * sizeof *nv->val.dpnt );
-                for ( i = 0; i < nv->len; i++ )
+                for ( ssize_t i = 0; i < nv->len; i++ )
                     nv->val.dpnt[ i ] = 0.0;
             }
             else
@@ -824,10 +800,6 @@ vars_ref_copy_create( Var_T * nsv,
                       Var_T * src,
                       bool    exact_copy )
 {
-    Var_T *vd;
-    ssize_t i;
-
-
     /* If we're already at the lowest level, i.e. there are only one-
        dimensional arrays, copy the contents. Then we're done. */
 
@@ -857,7 +829,7 @@ vars_ref_copy_create( Var_T * nsv,
                 {
                     nsv->val.dpnt = T_malloc(   nsv->len
                                               * sizeof *nsv->val.dpnt );
-                    for ( i = 0; i < nsv->len; i++ )
+                    for ( ssize_t i = 0; i < nsv->len; i++ )
                         nsv->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
                 }
                 else
@@ -900,12 +872,12 @@ vars_ref_copy_create( Var_T * nsv,
         RETHROW;
     }
 
-    for ( i = 0; i < nsv->len; i++ )
+    for ( ssize_t i = 0; i < nsv->len; i++ )
         nsv->val.vptr[ i ] = NULL;
 
-    for ( i = 0; i < nsv->len; i++ )
+    for ( ssize_t i = 0; i < nsv->len; i++ )
     {
-        vd = nsv->val.vptr[ i ] = vars_new( NULL );
+        Var_T * vd = nsv->val.vptr[ i ] = vars_new( NULL );
         vd->from = nsv;
         vd->flags &= ~ NEW_VARIABLE;
         if ( ! exact_copy )
@@ -931,13 +903,6 @@ vars_ref_copy_create( Var_T * nsv,
 Var_T *
 vars_pop( Var_T * v )
 {
-    Var_T *ret = NULL;
-    ssize_t i;
-#ifndef NDEBUG
-    Var_T *stack;
-#endif
-
-
     /* Check that this is a variable that can be popped from the stack */
 
     if ( v == NULL || ! ( v->flags & ON_STACK ) )
@@ -947,6 +912,7 @@ vars_pop( Var_T * v )
     /* Figure out if 'v' is really on the stack - otherwise we have found
        a new bug */
 
+    Var_T * stack;
     for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
         /* empty */ ;
 
@@ -956,7 +922,7 @@ vars_pop( Var_T * v )
 
     /* Now get rid of the variable */
 
-    ret = v->next;
+    Var_T * ret = v->next;
 
     if ( v->prev != NULL )
     {
@@ -992,7 +958,7 @@ vars_pop( Var_T * v )
         case INT_REF : case FLOAT_REF :
             if ( ! ( v->flags & DONT_RECURSE ) )
             {
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.vptr[ i ] != NULL )
                         vars_free( v->val.vptr[ i ], SET );
             }
@@ -1027,8 +993,6 @@ void
 vars_check( Var_T * v,
             int     types )
 {
-    int i;
-    int t;
     const char *type_names[ ] = { "STRING", "INTEGER", "FLOAT",
                                   "1D INTEGER ARRAY", "1D FLOAT ARRAY",
                                   "INTEGER MATRIX", "FLOAT MATRIX",
@@ -1067,7 +1031,8 @@ vars_check( Var_T * v,
 
     if ( ! ( v->type & types ) )
     {
-        for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
+        int i = 0;
+        for ( int t = v->type; ! ( t & 1 ); t >>= 1, i++ )
             /* empty */ ;
         if ( v->name != NULL )
             print( FATAL, "The variable '%s' of type %s can't be used in "
@@ -1096,10 +1061,9 @@ vars_check( Var_T * v,
 bool
 vars_exist( Var_T * v )
 {
-    Var_T *lp;
-
-
     fsc2_assert( v != NULL );
+
+    Var_T *lp;
 
     if ( v->flags & ON_STACK )
         for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
@@ -1114,7 +1078,7 @@ vars_exist( Var_T * v )
 
 /*-------------------------------------------------------------------*
  * This function is used to iterate over all elements of a (more-
- * dimensional) array. On each call a (void) pointer to the next
+ * dimensional) array. On each call a void pointer to the next
  * element of the array is returned. When there are no more elements
  * a NULL pointer gets returned.
  * Important: the function *must* be called until NULL gets returned
@@ -1126,9 +1090,6 @@ void *
 vars_iter( Var_T * v )
 {
     static ssize_t *iter = NULL;
-    void *ret;
-    ssize_t i;
-
 
     /* If called with a NULL argument just reset the iter array */
 
@@ -1144,7 +1105,7 @@ vars_iter( Var_T * v )
     if ( iter == NULL )
     {
         iter = T_malloc( v->dim * sizeof *iter );
-        for ( i = 0; i < v->dim - 1; i++ )
+        for ( ssize_t i = 0; i < v->dim - 1; i++ )
             iter[ i ] = 0;
         iter[ v->dim - 1 ] = -1;
     }
@@ -1156,6 +1117,7 @@ vars_iter( Var_T * v )
     /* Find the element associated with the indices in iter, reset the iter
        array when there were no more elements */
 
+    void * ret;
     if ( ( ret = vars_get_pointer( iter, 0, v ) ) == NULL )
     {
         iter = T_free( iter );
@@ -1179,9 +1141,6 @@ vars_get_pointer( ssize_t * iter,
                   ssize_t   depth,
                   Var_T *   p )
 {
-    Var_T *p_next;
-
-
     /* If the index for the current dimension is too large reset it to
        0 and increment the index for the next higher dimension (if we're
        already at the top level we have returned all elements of the array
@@ -1208,7 +1167,7 @@ vars_get_pointer( ssize_t * iter,
         return ( void * ) ( p->val.dpnt + iter[ depth ] );
     else
     {
-        p_next = p->val.vptr[ iter[ depth ] ];
+        Var_T * p_next = p->val.vptr[ iter[ depth ] ];
         return vars_get_pointer( iter, ++depth, p_next );
     }
 }
@@ -1225,13 +1184,10 @@ vars_get_pointer( ssize_t * iter,
 void
 vars_save_restore( bool flag )
 {
-    Var_T *src;
-    Var_T *cpy;
     static Var_T *cpy_area = NULL;
     static bool exists_copy = UNSET;
-    ssize_t var_count;
-    ssize_t i;
-
+    Var_T *src;
+    Var_T *cpy;
 
     if ( flag )
     {
@@ -1243,6 +1199,7 @@ vars_save_restore( bool flag )
             return;
         }
 
+        ssize_t var_count;
         for ( var_count = 0, src = EDL.Var_List; src != NULL; src = src->next )
             var_count++;
 
@@ -1306,7 +1263,7 @@ vars_save_restore( bool flag )
                  || ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
                 continue;
 
-            for ( i = 0; i < cpy->len; i++ )
+            for ( ssize_t i = 0; i < cpy->len; i++ )
                 if (    cpy->val.vptr != NULL
                      && ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
                     vars_free( cpy->val.vptr[ i ], SET );

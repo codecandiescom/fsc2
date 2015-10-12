@@ -131,8 +131,8 @@ no_query_possible( void )
  *--------------------------------------------------------------*/
 
 long
-get_long( Var_T      * v,
-          const char * snippet )
+get_long( Var_T      * restrict v,
+          const char * restrict snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -151,8 +151,8 @@ get_long( Var_T      * v,
  *--------------------------------------------------------------*/
 
 double
-get_double( Var_T      * v,
-            const char * snippet )
+get_double( Var_T      * restrict v,
+            const char * restrict snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -172,8 +172,8 @@ get_double( Var_T      * v,
  *----------------------------------------------------------------------*/
 
 long
-get_strict_long( Var_T      * v,
-                 const char * snippet )
+get_strict_long( Var_T      * restrict v,
+                 const char * restrict snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -243,60 +243,6 @@ get_boolean( Var_T * v )
     }
 
     return v->val.lval != 0;
-}
-
-
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
-
-Var_T *
-get_element( Var_T * v,
-             int     len,
-             ... )
-{
-    va_list ap;
-    long cur_idx;
-
-
-    vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
-
-    if ( len <= 0 || v->dim < len )
-        THROW( EXCEPTION );
-
-    va_start( ap, len );
-
-    while ( len-- > 0 )
-    {
-        cur_idx = va_arg( ap, long );
-
-        if ( cur_idx < 0 || cur_idx >= v->len )
-        {
-            va_end( ap );
-            THROW( EXCEPTION );
-        }
-
-        if ( v->dim > 1 )
-        {
-            fsc2_assert( v != NULL && v->val.vptr != NULL );
-            v = v->val.vptr[ cur_idx ];
-        }
-        else
-        {
-            if ( v->type == INT_ARR )
-            {
-                fsc2_assert( v != NULL && v->val.lpnt != NULL );
-                v = vars_push( INT_VAR, v->val.lpnt[ cur_idx ] );
-            }
-            else
-            {
-                fsc2_assert( v != NULL && v->val.dpnt != NULL );
-                v = vars_push( FLOAT_VAR, v->val.dpnt[ cur_idx ] );
-            }
-        }
-    }
-
-    va_end( ap );
-    return v;
 }
 
 
@@ -382,14 +328,11 @@ experiment_time( void )
  *------------------------------------------------------------------*/
 
 FILE *
-fsc2_fopen( const char * path,
-            const char * mode )
+fsc2_fopen( const char * restrict path,
+            const char * restrict mode )
 {
-    FILE *fp;
-
-
     raise_permissions( );
-    fp = fopen( path, mode );
+    FILE * fp = fopen( path, mode );
 
     /* Probably rarely necessary, but make sure the close-on-exec flag is
        se for the file */
@@ -414,8 +357,8 @@ fsc2_fopen( const char * path,
  *---------------------------------------------------------*/
 
 int
-fsc2_fscanf( FILE *       stream,
-             const char * format,
+fsc2_fscanf( FILE       * restrict stream,
+             const char * restrict format,
              ... )
 {
     va_list ap;
@@ -437,10 +380,10 @@ fsc2_fscanf( FILE *       stream,
  *--------------------------------------------------*/
 
 size_t
-fsc2_fread( void   * ptr,
-            size_t   size,
-            size_t   nmemb,
-            FILE   * stream )
+fsc2_fread( void   * restrict ptr,
+            size_t            size,
+            size_t            nmemb,
+            FILE   * restrict stream )
 {
     size_t num;
 
@@ -458,8 +401,8 @@ fsc2_fread( void   * ptr,
  *-------------------------------------------------------*/
 
 int
-fsc2_fprintf( FILE       * stream,
-              const char * format,
+fsc2_fprintf( FILE       * restrict stream,
+              const char * restrict format,
               ... )
 {
     va_list ap;
@@ -482,10 +425,10 @@ fsc2_fprintf( FILE       * stream,
  *------------------------------------------------*/
 
 size_t
-fsc2_fwrite( void   * ptr,
-             size_t   size,
-             size_t   nmemb,
-             FILE   * stream )
+fsc2_fwrite( const void * restrict ptr,
+             size_t                size,
+             size_t                nmemb,
+             FILE       * restrict stream )
 {
     size_t num;
 
@@ -539,9 +482,9 @@ fsc2_getc( FILE * stream )
  *-------------------------------------------*/
 
 char *
-fsc2_fgets( char * s,
-            int    size,
-            FILE * stream )
+fsc2_fgets( char * restrict s,
+            int             size,
+            FILE * restrict stream )
 {
     char *p;
 
@@ -635,8 +578,8 @@ fsc2_fputc( int    c,
  *-----------------------------------------*/
 
 int
-fsc2_fputs( const char * s,
-            FILE       * stream )
+fsc2_fputs( const char * restrict s,
+            FILE       * restrict stream )
 {
     int num;
 
@@ -706,9 +649,9 @@ fsc2_config_dir( void )
  *----------------------------------------------------*/
 
 char *
-pretty_print( double       val,
-              char       * buf,
-              char const * unit )
+pretty_print( double                val,
+              char       * restrict buf,
+              char const * restrict unit )
 {
     double aval = fabs( val );
 
