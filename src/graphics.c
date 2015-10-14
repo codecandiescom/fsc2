@@ -84,11 +84,6 @@ static struct {
 void
 start_graphics( void )
 {
-    long i;
-    unsigned diff;
-    Window w;
-
-
     if ( ! display_has_been_shown )
         set_defaults( );
 
@@ -109,7 +104,7 @@ start_graphics( void )
         G_1d.rwc_start[ X ] = G_1d.rwc_start_orig[ X ];
         G_1d.rwc_delta[ X ] = G_1d.rwc_delta_orig[ X ];
 
-        for ( i = X; i <= Y; i++ )
+        for ( int i = X; i <= Y; i++ )
             G_1d.label[ i ] = T_strdup( G_1d.label_orig[ i ] );
 
         G_1d.marker_1d = NULL;
@@ -117,19 +112,19 @@ start_graphics( void )
 
     if ( G.dim & 2 )
     {
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
             G_2d.curve_2d[ i ] = NULL;
 
         G_2d.nx = G_2d.nx_orig;
         G_2d.ny = G_2d.ny_orig;
 
-        for ( i = X; i <= Y; i++ )
+        for ( int i = X; i <= Y; i++ )
         {
             G_2d.rwc_start[ i ] = G_2d.rwc_start_orig[ i ];
             G_2d.rwc_delta[ i ] = G_2d.rwc_delta_orig[ i ];
         }
 
-        for ( i = X; i <= Z; i++ )
+        for ( int i = X; i <= Z; i++ )
             G_2d.label[ i ] = T_strdup( G_2d.label_orig[ i ] );
 
         cut_init( );
@@ -164,13 +159,14 @@ start_graphics( void )
 
     if ( ! G.is_init || G.dim & 1 )
     {
-        w = fl_show_form( GUI.run_form_1d->run_1d,
-                          GUI.display_1d_has_pos ?
-                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-                          FL_FULLBORDER,
-                          G.mode == NORMAL_DISPLAY ?
-                          "fsc2: 1D-Display" :
-                          "fsc2: 1D-Display (sliding window)" );
+        Window w = fl_show_form( GUI.run_form_1d->run_1d,
+                                 GUI.display_1d_has_pos
+                                 ? FL_PLACE_POSITION
+                                 : FL_PLACE_MOUSE | FL_FREE_SIZE,
+                                 FL_FULLBORDER,
+                                 G.mode == NORMAL_DISPLAY ?
+                                 "fsc2: 1D-Display" :
+                                 "fsc2: 1D-Display (sliding window)" );
         G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
         fl_addto_selected_xevent( w, FocusIn | FocusOut );
         fl_register_raw_callback( GUI.run_form_1d->run_1d, FL_ALL_EVENT,
@@ -179,10 +175,11 @@ start_graphics( void )
 
     if ( G.dim & 2 )
     {
-        w = fl_show_form( GUI.run_form_2d->run_2d,
-                          GUI.display_2d_has_pos ?
-                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-                          FL_FULLBORDER, "fsc2: 2D-Display" );
+        Window w = fl_show_form( GUI.run_form_2d->run_2d,
+                                 GUI.display_2d_has_pos
+                                 ? FL_PLACE_POSITION
+                                 : FL_PLACE_MOUSE | FL_FREE_SIZE,
+                                 FL_FULLBORDER, "fsc2: 2D-Display" );
         G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
         fl_addto_selected_xevent( w, FocusIn | FocusOut );
         fl_register_raw_callback( GUI.run_form_2d->run_2d, FL_ALL_EVENT,
@@ -195,6 +192,8 @@ start_graphics( void )
 
     if ( G.dim & 1 || ! G.is_init )
     {
+        unsigned int diff;
+
         if ( ! G.is_init || G_1d.nc == 1 )
             diff = MAX_CURVES * GI.curve_button_height;
         else
@@ -205,6 +204,8 @@ start_graphics( void )
 
     if ( G.dim & 2 )
     {
+        unsigned int diff;
+
         if ( G_2d.nc == 1 )
             diff = MAX_CURVES * GI.curve_button_height;
         else
@@ -285,10 +286,6 @@ start_graphics( void )
 static void
 fonts_init( void )
 {
-    XRenderColor xrcolor;
-    int i;
-
-
     if ( ! G.is_init )
         return;
 
@@ -310,9 +307,10 @@ fonts_init( void )
     G.font_asc  = G.font->ascent;
     G.font_desc = G.font->descent;
 
+    XRenderColor xrcolor;
     xrcolor.alpha = 0xffff;
 
-    for ( i = 0; i < MAX_CURVES; i++ )
+    for ( long i = 0; i < MAX_CURVES; i++ )
     {
         int red,
             green,
@@ -345,25 +343,19 @@ fonts_init( void )
 static void
 set_default_sizes( void )
 {
-    int flags;
-    unsigned diff;
-    bool has_pos = false;
-    bool has_size = false;
-    int x, y;
-    unsigned int w, h;
-
-
     /* If the display windows have never been shown before evaluate the
        positions and sizes specified on the command line */
+
+    bool has_pos = false;
+    bool has_size = false;
 
     if ( ! display_has_been_shown )
     {
         if ( * ( ( char * ) Xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
         {
-            flags = XParseGeometry(
-                                ( char * ) Xresources[ DISPLAYGEOMETRY ].var,
-                                &GI.display_x, &GI.display_y,
-                                &GI.display_w, &GI.display_h );
+            int flags = XParseGeometry( Xresources[ DISPLAYGEOMETRY ].var,
+                                        &GI.display_x, &GI.display_y,
+                                        &GI.display_w, &GI.display_h );
 
             if ( WidthValue & flags && HeightValue & flags )
                 has_size = true;
@@ -374,9 +366,10 @@ set_default_sizes( void )
 
         if ( * ( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
         {
-            flags =
-                XParseGeometry( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var,
-                                &x, &y, &w, &h );
+            int x, y;
+            unsigned int w, h;
+            int flags = XParseGeometry( Xresources[ DISPLAY1DGEOMETRY ].var,
+                                        &x, &y, &w, &h );
 
             if ( WidthValue & flags && HeightValue & flags )
             {
@@ -395,9 +388,10 @@ set_default_sizes( void )
 
         if ( * ( ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var ) != '\0' )
         {
-            flags =
-                XParseGeometry( ( char * ) Xresources[ DISPLAY2DGEOMETRY ].var,
-                                &x, &y, &w, &h );
+            int x, y;
+            unsigned int w, h;
+            int flags = XParseGeometry( Xresources[ DISPLAY2DGEOMETRY ].var,
+                                        &x, &y, &w, &h );
 
             if ( WidthValue & flags && HeightValue & flags )
             {
@@ -434,6 +428,8 @@ set_default_sizes( void )
 
     if ( has_size || GUI.display_1d_has_size )
     {
+        unsigned int diff;
+
         if ( ! G.is_init || G_1d.nc == 1 )
             diff = MAX_CURVES * GI.curve_button_height;
         else
@@ -451,6 +447,8 @@ set_default_sizes( void )
 
     if ( has_size || GUI.display_2d_has_size )
     {
+        unsigned int diff;
+
         if ( ! G.is_init || G_2d.nc == 1 )
             diff = MAX_CURVES * GI.curve_button_height;
         else
@@ -553,9 +551,6 @@ set_defaults( void )
 static void
 forms_adapt( void )
 {
-    char *pixmap_file;
-
-
     if ( ! G.is_init )
     {
         fl_hide_object( GUI.run_form_1d->curve_1_button_1d );
@@ -569,6 +564,8 @@ forms_adapt( void )
     }
     else
     {
+        char * pixmap_file;
+
         if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
             pixmap_file = T_strdup( lauxdir "undo.xpm" );
         else
@@ -855,10 +852,6 @@ G_struct_init( void )
     static bool first_time = true;
     static int cursor_1d[ 8 ];
     static int cursor_2d[ 8 ];
-    int i, x, y;
-    unsigned int keymask;
-
-
     /* Get the current mouse button states */
 
     G.button_state = 0;
@@ -866,6 +859,8 @@ G_struct_init( void )
 
     G.drag_canvas = DRAG_NONE;
 
+    int x, y;
+    unsigned int keymask;
     fl_get_mouse( &x, &y, &keymask );
 
     if ( keymask & Button1Mask )
@@ -949,7 +944,7 @@ G_struct_init( void )
 #endif
     }
     else
-        for ( i = 0; i < 7; i++ )
+        for ( int i = 0; i < 7; i++ )
         {
             G_1d.cursor[ i ] = cursor_1d[ i ];
             G_2d.cursor[ i ] = cursor_2d[ i ];
@@ -996,24 +991,19 @@ G_struct_init( void )
 static void
 G_init_curves_1d( void )
 {
-    long i, j;
-    Curve_1d_T *cv;
-    unsigned int depth;
-
-
-    for ( i = 0; i < G_1d.nc; i++ )
+    for ( long  i = 0; i < G_1d.nc; i++ )
         G_1d.curve[ i ] = NULL;
 
-    depth = fl_get_canvas_depth( G_1d.canvas.obj );
+    unsigned int depth = fl_get_canvas_depth( G_1d.canvas.obj );
 
-    for ( i = 0; i < 5; i++ )
+    for ( int i = 0; i < 5; i++ )
         fl_set_cursor_color( G_1d.cursor[ i ], FL_RED, FL_WHITE );
 
-    for ( i = 0; i < G_1d.nc; i++ )
+    for ( long i = 0; i < G_1d.nc; i++ )
     {
         /* Allocate memory for the curve and its data */
 
-        cv = G_1d.curve[ i ] = T_malloc( sizeof *cv );
+        Curve_1d_T * cv = G_1d.curve[ i ] = T_malloc( sizeof *cv );
 
         cv->points = NULL;
         cv->xpoints = NULL;
@@ -1075,7 +1065,7 @@ G_init_curves_1d( void )
 
         cv->points = T_malloc( G_1d.nx * sizeof *cv->points );
 
-        for ( j = 0; j < G_1d.nx; j++ )          /* no points are known yet */
+        for ( long j = 0; j < G_1d.nx; j++ )      /* no points are known yet */
             cv->points[ j ].exist = false;
 
         cv->xpoints = T_malloc( G_1d.nx * sizeof *cv->xpoints );
@@ -1090,18 +1080,12 @@ G_init_curves_1d( void )
 static void
 G_init_curves_2d( void )
 {
-    long i, j;
-    Curve_2d_T *cv;
-    Scaled_Point_T *sp;
-    unsigned int depth;
-
-
-    for ( i = 0; i < G_2d.nc; i++ )
+    for ( long i = 0; i < G_2d.nc; i++ )
         G_2d.curve_2d[ i ] = NULL;
 
-    depth = fl_get_canvas_depth( G_2d.canvas.obj );
+    unsigned int depth = fl_get_canvas_depth( G_2d.canvas.obj );
 
-    for ( i = 0; i < NUM_COLORS + 2; i++ )
+    for ( long i = 0; i < NUM_COLORS + 2; i++ )
     {
         G_2d.gcs[ i ] = XCreateGC( G.d, G_2d.canvas.pm, 0, NULL );
         XSetForeground( G.d, G_2d.gcs[ i ], fl_get_pixel( FL_FREE_COL1 + i ) );
@@ -1109,14 +1093,14 @@ G_init_curves_2d( void )
                             JoinBevel );
     }
 
-    for ( i = 0; i < 7; i++ )
+    for ( int i = 0; i < 7; i++ )
         fl_set_cursor_color( G_2d.cursor[ i ], FL_BLACK, FL_WHITE );
 
-    for ( i = 0; i < G_2d.nc; i++ )
+    for ( long i = 0; i < G_2d.nc; i++ )
     {
         /* Allocate memory for the curve */
 
-        cv = G_2d.curve_2d[ i ] = T_malloc( sizeof *cv );
+        Curve_2d_T * cv = G_2d.curve_2d[ i ] = T_malloc( sizeof *cv );
 
         cv->points = NULL;
         cv->xpoints = NULL;
@@ -1199,7 +1183,8 @@ G_init_curves_2d( void )
 
         cv->points = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->points );
 
-        for ( sp = cv->points, j = 0; j < G_2d.nx * G_2d.ny; sp++, j++ )
+        Scaled_Point_T * sp = cv->points;
+        for ( long j = 0; j < G_2d.nx * G_2d.ny; sp++, j++ )
             sp->exist = false;
 
         cv->xpoints = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->xpoints );
@@ -1221,10 +1206,6 @@ create_label_pixmap( Canvas_T * c,
                      int        coord,
                      char     * label )
 {
-    Pixmap pm;
-    int width, height;
-    int i, j, k;
-    int r_coord = coord;
 
     /* Make sure we don't do something stupid... */
 
@@ -1236,13 +1217,14 @@ create_label_pixmap( Canvas_T * c,
     /* Distinguish between labels for the primary window and the cut window
        (this function is never called for the cut windows y-axis) */
 
+    int r_coord = coord;
     if ( c == &G_2d.cut_z_axis )
         r_coord += 3;
 
     /* Get size for a temporary pixmap */
 
-    width = text_width( label ) + 10;
-    height = G.font_asc + G.font_desc + 5;
+    int width = text_width( label ) + 10;
+    int height = G.font_asc + G.font_desc + 5;
 
     if ( width > USHRT_MAX )
         width = USHRT_MAX;
@@ -1252,8 +1234,8 @@ create_label_pixmap( Canvas_T * c,
     /* Create the temporary pixmap, fill with the color of the axis canvas
        and draw the text */
 
-    pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
-                        fl_get_canvas_depth( c->obj ) );
+    Pixmap pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), width, height,
+                               fl_get_canvas_depth( c->obj ) );
 
     XFillRectangle( G.d, pm, c->gc, 0, 0, width, height );
     XftDrawChange( c->xftdraw, pm );
@@ -1273,8 +1255,9 @@ create_label_pixmap( Canvas_T * c,
         G_1d.label_w = i2u15( height );
         G_1d.label_h = i2u15( width );
 
-        for ( i = 0, k = width - 1; i < width; k--, i++ )
-            for ( j = 0; j < height; j++ )
+        int k = width - 1;
+        for ( int i = 0; i < width; k--, i++ )
+            for ( int j = 0; j < height; j++ )
                 XCopyArea( G.d, pm, G_1d.label_pm, c->gc, i, j, 1, 1, j, k );
     }
     else
@@ -1287,8 +1270,9 @@ create_label_pixmap( Canvas_T * c,
         G_2d.label_w[ r_coord ] = i2u15( height );
         G_2d.label_h[ r_coord ] = i2u15( width );
 
-        for ( i = 0, k = width - 1; i < width; k--, i++ )
-            for ( j = 0; j < height; j++ )
+        int k = width - 1;
+        for ( int i = 0; i < width; k--, i++ )
+            for ( int j = 0; j < height; j++ )
                 XCopyArea( G.d, pm, G_2d.label_pm[ r_coord ], c->gc,
                            i, j, 1, 1, j, k );
     }
@@ -1306,10 +1290,6 @@ create_label_pixmap( Canvas_T * c,
 void
 stop_graphics( void )
 {
-    int i;
-    Marker_1d_T *m, *mn;
-
-
     G.is_fully_drawn = false;
 
     if ( G.is_init )
@@ -1317,17 +1297,17 @@ stop_graphics( void )
         graphics_free( );
 
         if ( G.dim & 1 )
-            for ( i = X; i <= Y; i++ )
+            for ( int i = X; i <= Y; i++ )
                 if ( G_1d.label[ i ] )
                     G_1d.label[ i ] = T_free( G_1d.label[ i ] );
         if ( G.dim & 2 )
-            for ( i = X; i <= Z; i++ )
+            for ( int i = X; i <= Z; i++ )
                 if ( G_2d.label[ i ] )
                     G_2d.label[ i ] = T_free( G_2d.label[ i ] );
 
         XftFontClose( G.d, G.font );
 
-        for ( i = 0; i < MAX_CURVES + 2; i++ )
+        for ( long i = 0; i < MAX_CURVES + 2; i++ )
             XftColorFree( G.d, fl_get_visual(), fl_get_colormap( ),
                           G.xftcolor + i );
 
@@ -1414,11 +1394,13 @@ stop_graphics( void )
         GUI.run_form_2d = NULL;
     }
 
-    for ( m = G_1d.marker_1d; m != NULL; m = mn )
+    Marker_1d_T * m = G_1d.marker_1d;
+    while ( m )
     {
+        Marker_1d_T * mn = m->next;
         XFreeGC( G.d, m->gc );
-        mn = m->next;
-        m = T_free( m );
+        T_free( m );
+        m = mn;
     }
 
     if ( G_stored )
@@ -1432,7 +1414,7 @@ stop_graphics( void )
         memcpy( &G_1d, G_1d_stored, sizeof G_1d );
         G_1d_stored = T_free( G_1d_stored );
 
-        for ( i = X; i <= Y; i++ )
+        for ( int i = X; i <= Y; i++ )
             G_1d.label[ i ] = NULL;
     }
 
@@ -1441,7 +1423,7 @@ stop_graphics( void )
         memcpy( &G_2d, G_2d_stored, sizeof G_2d );
         G_2d_stored = T_free( G_2d_stored );
 
-        for ( i = X; i <= Z; i++ )
+        for ( int i = X; i <= Z; i++ )
             G_2d.label[ i ] = NULL;
     }
 }
@@ -1454,13 +1436,6 @@ stop_graphics( void )
 static void
 graphics_free( void )
 {
-    long i;
-    int coord;
-    Curve_1d_T *cv;
-    Curve_2d_T *cv2;
-    Marker_2d_T *m2, *mn2;
-
-
     /* Deallocate memory for pixmaps, scaled data and XPoints. The function
        must also work correctly when it is called because we run out of
        memory. The way things are organized after allocating memory for a
@@ -1468,9 +1443,11 @@ graphics_free( void )
        for the data is allocated. */
 
     if ( G.dim & 1 )
-        for ( i = 0; i < G_1d.nc; i++ )
+        for ( long i = 0; i < G_1d.nc; i++ )
         {
-            if ( ( cv = G_1d.curve[ i ] ) == NULL )
+            Curve_1d_T * cv = G_1d.curve[ i ];
+
+            if ( ! cv )
                  break;
 
             XFreeGC( G.d, cv->gc );
@@ -1486,12 +1463,14 @@ graphics_free( void )
 
     if ( G.dim & 2 )
     {
-        for ( i = 0; i < NUM_COLORS + 2; i++ )
+        for ( long i = 0; i < NUM_COLORS + 2; i++ )
             XFreeGC( G.d, G_2d.gcs[ i ] );
 
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
         {
-            if ( ( cv2 = G_2d.curve_2d[ i ] ) == NULL )
+            Curve_2d_T * cv2  = G_2d.curve_2d[ i ];
+
+            if ( ! cv2 )
                 break;
 
             XFreeGC( G.d, cv2->gc );
@@ -1500,11 +1479,13 @@ graphics_free( void )
             XFreePixmap( G.d, cv2->left_arrow );
             XFreePixmap( G.d, cv2->right_arrow );
 
-            for ( m2 = cv2->marker_2d; m2 != NULL; m2 = mn2 )
+            Marker_2d_T * m2 = cv2->marker_2d;
+            while ( m2 )
             {
+                Marker_2d_T * mn2 = m2->next;
                 XFreeGC( G.d, m2->gc );
-                mn2 = m2->next;
                 m2 = T_free( m2 );
+                m2 = mn2;
             }
 
             T_free( cv2->points );
@@ -1518,7 +1499,7 @@ graphics_free( void )
             XFreePixmap( G.d, G_1d.label_pm );
 
     if ( G.dim & 2 )
-        for ( coord = Y; coord <= Z; coord++ )
+        for ( int coord = Y; coord <= Z; coord++ )
             if ( G_2d.label[ coord ] )
                 XFreePixmap( G.d, G_2d.label_pm[ coord ] );
 }
@@ -1532,8 +1513,6 @@ canvas_off( Canvas_T  * c,
             FL_OBJECT * obj )
 {
     FL_HANDLE_CANVAS ch;
-
-
     if ( c == &G_1d.x_axis || c == &G_1d.y_axis || c == &G_1d.canvas )
         ch = canvas_handler_1d;
     else
@@ -1566,10 +1545,7 @@ static void
 setup_canvas( Canvas_T  * c,
               FL_OBJECT * obj )
 {
-    XSetWindowAttributes attributes;
     FL_HANDLE_CANVAS ch;
-
-
     if ( c == &G_1d.x_axis || c == &G_1d.y_axis || c == &G_1d.canvas )
         ch = canvas_handler_1d;
     else
@@ -1596,6 +1572,8 @@ setup_canvas( Canvas_T  * c,
                                 fl_get_colormap( ) );
 
     fl_add_canvas_handler( c->obj, Expose, ch, c );
+
+    XSetWindowAttributes attributes;
 
     attributes.backing_store = NotUseful;
     attributes.background_pixmap = None;
@@ -1634,9 +1612,6 @@ setup_canvas( Canvas_T  * c,
 void
 create_pixmap( Canvas_T * c )
 {
-    char dashes[ ] = { 2, 2 };
-
-
     c->gc = XCreateGC( G.d, FL_ObjWin( c->obj ), 0, NULL );
     c->pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
                            fl_get_canvas_depth( c->obj ) );
@@ -1662,6 +1637,8 @@ create_pixmap( Canvas_T * c )
 
         XSetLineAttributes( G.d, c->box_gc, 0, LineOnOffDash, CapButt,
                             JoinMiter );
+
+        char dashes[ ] = { 2, 2 };
         XSetDashes( G.d, c->box_gc, 0, dashes, 2 );
     }
 }
@@ -1691,9 +1668,6 @@ redraw_axis_1d( int coord )
 {
     Canvas_T *c;
     Curve_1d_T *cv = NULL;
-    int width;
-    long i;
-
 
     fsc2_assert( coord == X || coord == Y );
 
@@ -1707,7 +1681,7 @@ redraw_axis_1d( int coord )
 
         if ( G_1d.label[ X ] != NULL )
         {
-            width = text_width( G_1d.label[ X ] );
+            int width = text_width( G_1d.label[ X ] );
             XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
                                c->w - width - 5, c->h - 2 - G.font_desc,
                                 ( XftChar8 const * ) G_1d.label[ X ],
@@ -1728,6 +1702,7 @@ redraw_axis_1d( int coord )
 
     /* Find out the active curve for the axis */
 
+    long i;
     for ( i = 0; i < G_1d.nc; i++ )
     {
         cv = G_1d.curve[ i ];
@@ -1750,22 +1725,20 @@ redraw_axis_1d( int coord )
 void
 redraw_axis_2d( int coord )
 {
-    Canvas_T *c;
-    int width;
-
-
     fsc2_assert( coord == X || coord == Y || coord == Z );
 
     /* First draw the label - for the x-axis it's just done by drawing the
        string while for the y- and z-axis we have to copy a pixmap since the
        label is a string rotated by 90 degree that has been drawn in advance */
 
+    Canvas_T * c;
+
     if ( coord == X )
     {
         c = &G_2d.x_axis;
         if ( G_2d.label[ X ] != NULL )
         {
-            width = text_width( G_2d.label[ X ] );
+            int width = text_width( G_2d.label[ X ] );
             XftDrawStringUtf8( c->xftdraw, G.xftcolor + MAX_CURVES, G.font,
                                c->w - width - 5, c->h - 2 - G.font_desc,
                                 ( XftChar8 const * ) G_2d.label[ X ],
@@ -1809,9 +1782,6 @@ make_label_string( char   * lstr,
                    double   num,
                    int      res )
 {
-    int n, mag;
-
-
     if ( num == 0.0 )
     {
         sprintf( lstr, "0" );
@@ -1820,13 +1790,13 @@ make_label_string( char   * lstr,
 
    res++;
 
-    mag = irnd( floor( log10( fabs( num ) ) ) );
+    int mag = irnd( floor( log10( fabs( num ) ) ) );
     if ( mag >= 0 )
         mag++;
 
     /* n is the number of relevant digits */
 
-    n = i_max( 1, mag - res );
+    int n = i_max( 1, mag - res );
 
     if ( mag > 5 )                              /* num > 10^5 */
         snprintf( lstr, MAX_LABEL_LEN, "%1.*E", n - 1, num );
@@ -1926,25 +1896,19 @@ void
 undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
                          long        b  UNUSED_ARG )
 {
-    long i;
     bool is_undo = false;
-    Curve_1d_T *cv;
-    double temp_s2d,
-           temp_shift;
-    int j;
 
-
-    for ( i = 0; i < G_1d.nc; i++ )
+    for ( long i = 0; i < G_1d.nc; i++ )
     {
-        cv = G_1d.curve[ i ];
+        Curve_1d_T * cv = G_1d.curve[ i ];
 
         if ( ! cv->can_undo )
             continue;
 
-        for ( j = 0; j <= Y; j++ )
+        for ( int j = X; j <= Y; j++ )
         {
-            temp_s2d = cv->s2d[ j ];
-            temp_shift = cv->shift[ j ];
+            double temp_s2d = cv->s2d[ j ];
+            double temp_shift = cv->shift[ j ];
 
             cv->s2d[ j ] = cv->old_s2d[ j ];
             cv->shift[ j ] = cv->old_shift[ j ];
@@ -1981,23 +1945,16 @@ void
 undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
                          long        b  UNUSED_ARG )
 {
-    Curve_2d_T *cv2;
-    double temp_s2d,
-           temp_shift;
-    double temp_z_factor;
-    int j;
-
-
     if (    G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->can_undo )
         return;
 
-    cv2 = G_2d.curve_2d[ G_2d.active_curve ];
+    Curve_2d_T * cv2 = G_2d.curve_2d[ G_2d.active_curve ];
 
-    for ( j = 0; j <= Z; j++ )
+    for ( int j = X; j <= Z; j++ )
     {
-        temp_s2d = cv2->s2d[ j ];
-        temp_shift = cv2->shift[ j ];
+        double temp_s2d = cv2->s2d[ j ];
+        double temp_shift = cv2->shift[ j ];
 
         cv2->s2d[ j ] = cv2->old_s2d[ j ];
         cv2->shift[ j ] = cv2->old_shift[ j ];
@@ -2007,7 +1964,7 @@ undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
     }
 
 
-    temp_z_factor = cv2->z_factor;
+    double temp_z_factor = cv2->z_factor;
     cv2->z_factor = cv2->old_z_factor;
     cv2->old_z_factor = temp_z_factor;
 
@@ -2034,12 +1991,9 @@ undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
 void
 fs_vert_rescale_1d( void )
 {
-    long i;
-
-
     /* Store states of the scales... */
 
-    for ( i = 0; i < G_1d.nc; i++ )
+    for (long  i = 0; i < G_1d.nc; i++ )
         save_scale_state_1d( G_1d.curve[ i ] );
 
     /* ... and rescale to full scale */
@@ -2074,10 +2028,6 @@ void
 fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
                        long        b  UNUSED_ARG )
 {
-    int state;
-    long i;
-
-
     /* Rescaling is useless if graphic isn't initialized */
 
     if ( ! G.is_init )
@@ -2085,7 +2035,7 @@ fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
 
     /* Get new state of button */
 
-    state = fl_get_button( GUI.run_form_1d->full_scale_button_1d );
+    int state = fl_get_button( GUI.run_form_1d->full_scale_button_1d );
 
     if ( state == 1 )        /* full scale got switched on */
     {
@@ -2093,7 +2043,7 @@ fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
 
         /* Store data of previous state... */
 
-        for ( i = 0; i < G_1d.nc; i++ )
+        for ( long i = 0; i < G_1d.nc; i++ )
             save_scale_state_1d( G_1d.curve[ i ] );
 
         /* ... and rescale to full scale */
@@ -2123,9 +2073,6 @@ void
 fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
                        long        b  UNUSED_ARG )
 {
-    int state;
-
-
     /* Rescaling is useless if graphic isn't initialized */
 
     if ( ! G.is_init )
@@ -2133,7 +2080,7 @@ fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
 
     /* Get new state of button */
 
-    state = fl_get_button( GUI.run_form_2d->full_scale_button_2d );
+    int state = fl_get_button( GUI.run_form_2d->full_scale_button_2d );
 
     if ( state == 1 )        /* full scale got switched on */
     {
@@ -2169,11 +2116,9 @@ void
 curve_button_callback_1d( FL_OBJECT * obj,
                           long        data )
 {
-    char hstr[ 128 ];
-
-
     /* Change the help string for the button */
 
+    char hstr[ 128 ];
     if ( ( G_1d.curve[ data - 1 ]->active = fl_get_button( obj ) ) )
         sprintf( hstr, "Exempt curve %ld from\nrescaling operations", data );
     else
@@ -2200,10 +2145,6 @@ void
 curve_button_callback_2d( FL_OBJECT * obj,
                           long        data )
 {
-    char hstr[ 128 ];
-    int bstate;
-
-
     if (    G.drag_canvas == DRAG_2D_X  || G.drag_canvas == DRAG_2D_Y
          || G.drag_canvas == DRAG_2D_Z  || G.drag_canvas == DRAG_2D_C
          || G.drag_canvas == DRAG_CUT_X || G.drag_canvas == DRAG_CUT_Y
@@ -2288,8 +2229,8 @@ curve_button_callback_2d( FL_OBJECT * obj,
     }
     else
     {
-        bstate = fl_get_button( obj );
-        if (    ( bstate && data - 1 == G_2d.active_curve )
+        int bstate = fl_get_button( obj );
+        if (    (   bstate && data - 1 == G_2d.active_curve )
              || ( ! bstate && G_2d.active_curve == -1 ) )
             return;
     }
@@ -2301,6 +2242,8 @@ curve_button_callback_2d( FL_OBJECT * obj,
     {
         G_2d.curve_2d[ G_2d.active_curve ]->active = false;
         G_2d.active_curve = -1;
+
+        char hstr[ 128 ];
         sprintf( hstr, "Show curve %ld", data );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( obj, hstr );
@@ -2341,6 +2284,7 @@ curve_button_callback_2d( FL_OBJECT * obj,
                 break;
         }
 
+        char hstr[ 128 ];
         sprintf( hstr, "Hide curve %ld", data );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( obj, hstr );

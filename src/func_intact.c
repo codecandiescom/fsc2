@@ -92,9 +92,6 @@ static Var_T *f_tb_wait_child( Var_T * v );
 void
 toolbox_create( long layout )
 {
-    int h = 10;
-    int dummy;
-
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
         print( FATAL, "Toolbox can't be used without a GUI.\n" );
@@ -110,11 +107,17 @@ toolbox_create( long layout )
     Toolbox->objs           = NULL;                 /* and also no objects */
     Toolbox->next_ID        = ID_OFFSET;
 
+    int h = 10;
+
     if ( GUI.G_Funcs.size == ( bool ) LOW )
     {
         if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) )
+        {
+            int dummy;
             fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
                                      "1", 1, &dummy, &h );
+        }
+
         h += 8;
 
         FI_sizes.VERT_OFFSET         = 10;
@@ -144,8 +147,12 @@ toolbox_create( long layout )
     else
     {
         if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) )
+        {
+            int dummy;
             fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
                                      "1", 1, &dummy, &h );
+        }
+
         h += 8;
 
         FI_sizes.VERT_OFFSET         = 30;
@@ -226,9 +233,6 @@ f_freeze( Var_T * v )
 void
 parent_freeze( int freeze )
 {
-    Iobject_T *io = NULL;
-
-
     if ( Toolbox == NULL || Toolbox->Tools == NULL )
     {
         Is_frozen = freeze ? true : false;
@@ -262,7 +266,7 @@ parent_freeze( int freeze )
            some bug that keeps some of the objects from getting disabled
            when it's done while the toolbox is hidden */
 
-        for ( io = Toolbox->objs; io != NULL; io = io->next )
+        for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
         {
             if ( IS_OUTPUT( io->type ) )
                 continue;
@@ -300,9 +304,7 @@ parent_freeze( int freeze )
 Var_T *
 f_layout( Var_T * v )
 {
-    long layout;
     const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
-
 
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -325,6 +327,7 @@ f_layout( Var_T * v )
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
+    long layout;
     if ( v->type == INT_VAR )
         layout = v->val.lval != 0 ? HORI : VERT;
     else if ( v->type == FLOAT_VAR )
@@ -375,19 +378,18 @@ f_layout( Var_T * v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_layout_child( long layout )
 {
-    char *buffer, *pos;
     size_t len = sizeof EDL.Lc + sizeof layout;
-
-
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -456,17 +458,13 @@ f_objdel( Var_T * v )
  * parent via the message passing mechanism.
  *--------------------------------------------------------*/
 
-static void
+static
+void
 f_objdel_child( Var_T * v )
 {
-    char *buffer, *pos;
-    size_t len;
-    long ID;
-
-
     /* Do all possible checking of the parameter */
 
-    ID = get_strict_long( v, "object ID" );
+    long ID = get_strict_long( v, "object ID" );
 
     if ( ID < 0 )
     {
@@ -476,14 +474,15 @@ f_objdel_child( Var_T * v )
 
     /* Get a bufer long enough and write data */
 
-    len = sizeof EDL.Lc + sizeof v->val.lval;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -510,12 +509,10 @@ f_objdel_child( Var_T * v )
  * Part of the f_objdel() function run by the parent exclusively
  *---------------------------------------------------------------*/
 
-static void
+static
+void
 f_objdel_parent( Var_T * v )
 {
-    Iobject_T *io = NULL;
-
-
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
         print( FATAL, "Function can't be used without a GUI.\n" );
@@ -532,7 +529,7 @@ f_objdel_parent( Var_T * v )
 
     /* Do checks on parameters */
 
-    io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+    Iobject_T *io = find_object_from_ID( get_strict_long( v, "object ID" ) );
 
     if ( io == NULL )
     {
@@ -574,11 +571,6 @@ f_objdel_parent( Var_T * v )
 Var_T *
 f_obj_clabel( Var_T * volatile v )
 {
-    Iobject_T * volatile io;
-    char * volatile label = NULL;
-    long ID = 0;
-
-
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
         print( FATAL, "Function can't be used without a GUI.\n" );
@@ -587,7 +579,7 @@ f_obj_clabel( Var_T * volatile v )
 
     /* We first need the ID of the object */
 
-    ID = get_strict_long( v, "object ID" );
+    long ID = get_strict_long( v, "object ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -623,7 +615,7 @@ f_obj_clabel( Var_T * volatile v )
 
     /* Check the ID parameter */
 
-    io = find_object_from_ID( ID );
+    Iobject_T * volatile io = find_object_from_ID( ID );
 
     if ( io == NULL )
     {
@@ -631,6 +623,7 @@ f_obj_clabel( Var_T * volatile v )
         THROW( EXCEPTION );
     }
 
+    char * volatile label = NULL;
     TRY
     {
         label = T_strdup( v->val.sptr );
@@ -659,21 +652,20 @@ f_obj_clabel( Var_T * volatile v )
  * parent via the message passing mechanism.
  *-----------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_obj_clabel_child( long   ID,
                     char * label )
 {
-    char *buffer, *pos;
-    size_t len;
-
-    len = sizeof EDL.Lc + sizeof ID + strlen( label ) + 1;
+    size_t len = sizeof EDL.Lc + sizeof ID + strlen( label ) + 1;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -708,11 +700,6 @@ f_obj_clabel_child( long   ID,
 Var_T *
 f_obj_xable( Var_T * v )
 {
-    Iobject_T *io;
-    long ID;
-    bool state;
-
-
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
         print( FATAL, "Function can't be used without a GUI.\n" );
@@ -724,16 +711,14 @@ f_obj_xable( Var_T * v )
 
     /* We first need the ID of the button */
 
-    ID = get_strict_long( v, "object ID" );
-
+    long ID = get_strict_long( v, "object ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid object identifier.\n" );
         THROW( EXCEPTION );
     }
 
-    v = vars_pop( v );
-    state = get_boolean( v );
+    bool state = get_boolean( v = vars_pop( v ) );
 
     /* The child process has to get the parent process to change the state */
 
@@ -750,7 +735,7 @@ f_obj_xable( Var_T * v )
 
     /* Check the ID parameter */
 
-    io = find_object_from_ID( ID );
+    Iobject_T * io = find_object_from_ID( ID );
 
     if ( io == NULL )
     {
@@ -784,21 +769,20 @@ f_obj_xable( Var_T * v )
  * parent via the message passing mechanism.
  *----------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_obj_xable_child( long ID,
                    long state )
 {
-    char *buffer, *pos;
-    size_t len;
-
-    len = sizeof EDL.Lc + sizeof ID + sizeof state;
+   size_t len = sizeof EDL.Lc + sizeof ID + sizeof state;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -833,9 +817,6 @@ f_obj_xable_child( long ID,
 Iobject_T *
 find_object_from_ID( long ID )
 {
-    Iobject_T *io;
-
-
     if ( Toolbox == NULL )            /* no objects defined yet ? */
         return NULL;
 
@@ -844,9 +825,12 @@ find_object_from_ID( long ID )
 
     /* Loop through linked list to find the object */
 
-    for ( io = Toolbox->objs; io != NULL; io = io->next )
+    Iobject_T * io = Toolbox->objs;
+    while ( io )
         if ( io->ID == ID )
             break;
+        else
+            io = io->next;
 
     return io;
 }
@@ -859,11 +843,6 @@ find_object_from_ID( long ID )
 void
 tools_clear( void )
 {
-    Iobject_T *io,
-              *next;
-    long i;
-
-
     Is_frozen = false;
 
     if ( Toolbox == NULL )
@@ -875,9 +854,10 @@ tools_clear( void )
         fl_hide_form( Toolbox->Tools );
     }
 
-    for ( io = Toolbox->objs; io != NULL; io = next )
+    Iobject_T * io = Toolbox->objs;
+    while ( io )
     {
-        next = io->next;
+        Iobject_T * next = io->next;
 
         if ( Toolbox->Tools && io->self )
         {
@@ -893,12 +873,14 @@ tools_clear( void )
 
         if ( io->type == MENU && io->menu_items != NULL )
         {
-            for ( i = 0; i < io->num_items; i++ )
+            for ( long i = 0; i < io->num_items; i++ )
                 T_free( io->menu_items[ i ] );
             T_free( io->menu_items );
         }
 
         T_free( io );
+
+        io = next;
     }
 
     if ( Toolbox->Tools )
@@ -918,13 +900,6 @@ tools_clear( void )
 void
 recreate_Toolbox( void )
 {
-    Iobject_T *io;
-    int flags;
-    int unsigned dummy;
-    int tool_x,
-        tool_y;
-
-
     if ( Fsc2_Internals.mode == TEST )        /* no drawing in test mode */
         return;
 
@@ -939,6 +914,7 @@ recreate_Toolbox( void )
             fl_hide_form( Toolbox->Tools );
         }
 
+        Iobject_T * io;
         for ( io = Toolbox->objs; io != NULL; io = io->next )
         {
             if ( io->self )
@@ -961,8 +937,11 @@ recreate_Toolbox( void )
         if (    ! Has_been_shown
              && * ( char * ) Xresources[ TOOLGEOMETRY ].var != '\0' )
         {
-            flags = XParseGeometry( ( char * ) Xresources[ TOOLGEOMETRY ].var,
-                                    &tool_x, &tool_y, &dummy, &dummy );
+            int unsigned dummy;
+            int tool_x,
+                tool_y;
+            int flags = XParseGeometry( Xresources[ TOOLGEOMETRY ].var,
+                                        &tool_x, &tool_y, &dummy, &dummy );
 
             if ( XValue & flags && YValue & flags )
             {
@@ -976,7 +955,7 @@ recreate_Toolbox( void )
     Toolbox->w = 2 * FI_sizes.VERT_OFFSET;
     Toolbox->h = 2 * FI_sizes.HORI_OFFSET;
 
-    for ( io = Toolbox->objs; io != NULL; io = io->next )
+    for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
         append_object_to_form( io, &Toolbox->w, &Toolbox->h );
 
     fl_end_form( );
@@ -1019,7 +998,8 @@ recreate_Toolbox( void )
  * the event.
  *--------------------------------------------------------------------*/
 
-static int
+static
+int
 toolbox_close_handler( FL_FORM * a  UNUSED_ARG,
                        void    * b  UNUSED_ARG )
 {
@@ -1033,15 +1013,12 @@ toolbox_close_handler( FL_FORM * a  UNUSED_ARG,
  * to the right of the other objects.
  *---------------------------------------------------------------------*/
 
-static FL_OBJECT *
+static
+FL_OBJECT *
 append_object_to_form( Iobject_T * io,
                        int       * w,
                        int       * h )
 {
-    int old_w;
-    int old_h;
-
-
     /* Calculate the x- and y-position of the new object */
 
     if ( io->prev == NULL )
@@ -1126,8 +1103,8 @@ append_object_to_form( Iobject_T * io,
     /* Return the maximum width and height of all objects (plus a bit for
        the border) */
 
-    old_w = *w;
-    old_h = *h;
+    int old_w = *w;
+    int old_h = *h;
 
     *w = i_max( *w, io->x + io->wt + FI_sizes.VERT_OFFSET );
     *h = i_max( *h, io->y + io->ht + FI_sizes.HORI_OFFSET );
@@ -1174,7 +1151,8 @@ append_object_to_form( Iobject_T * io,
  * Creates a normal button, determines its size and sets some properties
  *-----------------------------------------------------------------------*/
 
-static void
+static
+void
 normal_button_setup( Iobject_T * io )
 {
     if ( io->label != NULL )
@@ -1218,7 +1196,8 @@ normal_button_setup( Iobject_T * io )
  * Creates a push button, determines its size and sets some properties
  *---------------------------------------------------------------------*/
 
-static void
+static
+void
 push_button_setup( Iobject_T * io )
 {
     io->w = io->h = FI_sizes.PUSH_BUTTON_SIZE;
@@ -1256,18 +1235,16 @@ push_button_setup( Iobject_T * io )
  * Creates a radio button, determines its size and sets some properties
  *----------------------------------------------------------------------*/
 
-static void
+static
+void
 radio_button_setup( Iobject_T * io )
 {
-    Iobject_T *nio;
-
-
     if ( io->group != NULL )
         fl_addto_group( io->group );
     else
     {
         io->group = fl_bgn_group( );
-        for ( nio = io->next; nio != NULL; nio = nio->next )
+        for ( Iobject_T * nio = io->next; nio; nio = nio->next )
             if ( nio->partner == io->ID )
                 nio->group = io->group;
     }
@@ -1306,7 +1283,7 @@ radio_button_setup( Iobject_T * io )
        got to long) */
 
     if ( Toolbox->layout == HORI )
-        for ( nio = Toolbox->objs; nio != io; nio = nio->next )
+        for ( Iobject_T * nio = Toolbox->objs; nio != io; nio = nio->next )
         {
             if (    nio->type != RADIO_BUTTON
                  || nio->group != io->group
@@ -1334,7 +1311,8 @@ radio_button_setup( Iobject_T * io )
  * Creates a normal slider, determines its size and sets some properties
  *-----------------------------------------------------------------------*/
 
-static void
+static
+void
 slider_setup( Iobject_T * io )
 {
     io->w = FI_sizes.SLIDER_WIDTH;
@@ -1381,12 +1359,10 @@ slider_setup( Iobject_T * io )
  * Creates a value slider, determines its size and sets some properties
  *----------------------------------------------------------------------*/
 
-static void
+static
+void
 val_slider_setup( Iobject_T * io )
 {
-    double prec;
-
-
     io->w = FI_sizes.SLIDER_WIDTH;
     io->h = FI_sizes.SLIDER_HEIGHT;
 
@@ -1419,8 +1395,9 @@ val_slider_setup( Iobject_T * io )
     fl_set_slider_value( io->self, io->value );
     fl_set_slider_return( io->self, io->type == VALUE_SLIDER ?
                           FL_RETURN_CHANGED : FL_RETURN_END_CHANGED );
-    prec = - floor( log10 ( ( io->end_val - io->start_val ) /
-                            ( 0.825 * io->w ) ) );
+
+    double prec = - floor( log10 ( ( io->end_val - io->start_val ) /
+                                   ( 0.825 * io->w ) ) );
     fl_set_slider_precision( io->self,
                              prec <= 0.0 ? 0 : ( int ) lrnd( prec ) );
     if ( io->step != 0.0 )
@@ -1436,12 +1413,10 @@ val_slider_setup( Iobject_T * io )
  * and sets some properties
  *------------------------------------------------------*/
 
-static void
+static
+void
 int_input_setup( Iobject_T * io )
 {
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     io->w = FI_sizes.IN_OUT_WIDTH;
     io->h = FI_sizes.IN_HEIGHT;
 
@@ -1472,6 +1447,8 @@ int_input_setup( Iobject_T * io )
 
     fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
     fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+
+    char buf[ MAX_INPUT_CHARS + 1 ];
     snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
     fl_set_input( io->self, buf );
 }
@@ -1482,12 +1459,10 @@ int_input_setup( Iobject_T * io )
  * size and sets some properties
  *-------------------------------------------------------*/
 
-static void
+static
+void
 float_input_setup( Iobject_T * io )
 {
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     io->w = FI_sizes.IN_OUT_WIDTH;
     io->h = FI_sizes.IN_HEIGHT;
 
@@ -1518,6 +1493,8 @@ float_input_setup( Iobject_T * io )
 
     fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
     fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+
+    char buf[ MAX_INPUT_CHARS + 1 ];
     snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
     fl_set_input( io->self, buf );
 }
@@ -1528,12 +1505,10 @@ float_input_setup( Iobject_T * io )
  * and sets some properties
  *-------------------------------------------------------*/
 
-static void
+static
+void
 int_output_setup( Iobject_T * io )
 {
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     io->w = FI_sizes.IN_OUT_WIDTH;
     io->h = FI_sizes.OUT_HEIGHT;
 
@@ -1568,6 +1543,8 @@ int_output_setup( Iobject_T * io )
     fl_set_object_color( io->self, FL_COL1, FL_COL1 );
     fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
     fl_deactivate_object( io->self );
+
+    char buf[ MAX_INPUT_CHARS + 1 ];
     snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
     fl_set_input( io->self, buf );
 }
@@ -1578,12 +1555,10 @@ int_output_setup( Iobject_T * io )
  * size and sets some properties
  *--------------------------------------------------------*/
 
-static void
+static
+void
 float_output_setup( Iobject_T * io )
 {
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     io->w = FI_sizes.IN_OUT_WIDTH;
     io->h = FI_sizes.OUT_HEIGHT;
 
@@ -1618,6 +1593,8 @@ float_output_setup( Iobject_T * io )
     fl_set_object_color( io->self, FL_COL1, FL_COL1 );
     fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
     fl_deactivate_object( io->self );
+
+    char buf[ MAX_INPUT_CHARS + 1 ];
     snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
     fl_set_input( io->self, buf );
 }
@@ -1628,12 +1605,10 @@ float_output_setup( Iobject_T * io )
  * and sets some properties
  *-----------------------------------------------------*/
 
-static void
+static
+void
 string_output_setup( Iobject_T * io )
 {
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     io->w = FI_sizes.IN_OUT_WIDTH;
     io->h = FI_sizes.OUT_HEIGHT;
 
@@ -1668,6 +1643,8 @@ string_output_setup( Iobject_T * io )
     fl_set_object_color( io->self, FL_COL1, FL_COL1 );
     fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
     fl_deactivate_object( io->self );
+
+    char buf[ MAX_INPUT_CHARS + 1 ];
     snprintf( buf, MAX_INPUT_CHARS + 1, "%s", io->val.sptr );
     fl_set_input( io->self, buf );
 }
@@ -1677,16 +1654,15 @@ string_output_setup( Iobject_T * io )
  * Creates a menu, determines its size and sets some properties
  *--------------------------------------------------------------*/
 
-static void
+static
+void
 menu_setup( Iobject_T * io )
 {
-    long i;
-    int wt, ht;
-
-
     io->w = io->h = 0;
-    for ( i = 0; i < io->num_items; i++ )
+    for ( long i = 0; i < io->num_items; i++ )
     {
+        int wt, ht;
+
         fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
                                  io->menu_items[ i ],
                                  strlen( io->menu_items[ i ] ),
@@ -1728,7 +1704,7 @@ menu_setup( Iobject_T * io )
         io->ht = io->h;
     }
 
-    for ( i = 0; i < io->num_items; i++ )
+    for ( long i = 0; i < io->num_items; i++ )
         fl_addto_choice( io->self, io->menu_items[ i ] );
 
     fl_set_choice( io->self, io->state );
@@ -1741,26 +1717,25 @@ menu_setup( Iobject_T * io )
  * to be used by the functions button_state() etc.
  *----------------------------------------------------------*/
 
-static void
+static
+void
 tools_callback( FL_OBJECT * obj,
                 long        data  UNUSED_ARG )
 {
-    Iobject_T *io, *oio;
-    long lval;
-    double dval;
-    const char *buf;
-    int old_state;
-    char obuf[ MAX_INPUT_CHARS + 1 ];
-    int old_errno;
-
-
     /* Find out which object got changed */
 
-    for ( io = Toolbox->objs; io != NULL; io = io->next )
+    Iobject_T *io;
+    for ( io = Toolbox->objs; io; io = io->next )
         if ( io->self == obj )
             break;
 
     fsc2_assert( io != NULL );            /* this can never happen :) */
+
+    long lval;
+    double dval;
+    const char *buf;
+    char obuf[ MAX_INPUT_CHARS + 1 ];
+    int old_state;
 
     switch ( io->type )
     {
@@ -1783,7 +1758,7 @@ tools_callback( FL_OBJECT * obj,
             io->state = fl_get_button( obj );
             if ( io->state != old_state )
             {
-                for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
+                for ( Iobject_T * oio = Toolbox->objs; oio; oio = oio->next )
                 {
                     if (    oio == io
                          || oio->type != RADIO_BUTTON
@@ -1819,7 +1794,7 @@ tools_callback( FL_OBJECT * obj,
                 lval = 0;
             else
             {
-                old_errno = errno;
+                int old_errno = errno;
                 lval = strtol( buf, NULL, 10 );
                 errno = old_errno;
             }
@@ -1848,7 +1823,7 @@ tools_callback( FL_OBJECT * obj,
                 dval = 0.0;
             else
             {
-                old_errno = errno;
+                int old_errno = errno;
                 dval = strtod( buf, NULL );
                 errno = old_errno;
             }
@@ -1914,13 +1889,11 @@ tools_callback( FL_OBJECT * obj,
 bool
 check_format_string( const char * buf )
 {
-    const char *bp = buf;
-    const char *lcp;
-
+    const char * bp = buf;
     if ( *bp != '%' )     /* format must start with '%' */
         return false;
 
-    lcp = bp + strlen( bp ) - 1;      /* last char must be g, f or e */
+    const char * lcp = bp + strlen( bp ) - 1;  /* last char must be g, f or e */
     if (    toupper( ( int ) *lcp ) != 'G'
          && toupper( ( int ) *lcp ) != 'F'
          && toupper( ( int ) *lcp ) != 'E' )
@@ -1957,8 +1930,6 @@ void
 convert_escapes( char * str )
 {
     char *ptr = str;
-
-
     while ( ( ptr = strchr( ptr, '\\' ) ) != NULL )
     {
         switch ( * ( ptr + 1 ) )
@@ -1992,20 +1963,19 @@ check_label( const char * str )
                            ">|", "|>", "-->", "=", "arrow", "returnarrow",
                            "square", "circle", "line", "plus", "UpLine",
                            "DnLine", "UpArrow", "DnArrow" };
-    const char *p = str;
-    unsigned int i;
-    bool is_ar = false;
-
 
     /* If the label string does not start with a '@' character or with two of
        them nothing further needs to be checked. */
 
+    const char * p = str;
     if ( *p != '@' || ( *p == '@' && *( p + 1 ) == '@' ) )
         return;
 
     /* If given the first part is either the '#' character (to guarantee a
        fixed aspect ratio) or the size change (either '+' or '-', followed
        by a single digit). */
+
+    bool is_ar = false;
 
     p++;
     if ( *p == '#' )
@@ -2071,7 +2041,7 @@ check_label( const char * str )
     /* The remaining must be one of the allowed strings as defined by the
        aray 'sym'. */
 
-    for ( i = 0; i < NUM_ELEMS( sym ); i++ )
+    for ( size_t i = 0; i < NUM_ELEMS( sym ); i++ )
         if ( ! strcmp( p, sym[ i ] ) )
             return;
 
@@ -2085,7 +2055,8 @@ check_label( const char * str )
 /*---------------------------------------------------*
  *---------------------------------------------------*/
 
-static void
+static
+void
 store_toolbox_position( void )
 {
     get_form_position( Toolbox->Tools, &GUI.toolbox_x, &GUI.toolbox_y );
@@ -2105,9 +2076,6 @@ store_toolbox_position( void )
 Var_T *
 f_tb_changed( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* The child process has it's own way of dealing with this */
 
     if ( Fsc2_Internals.I_am == CHILD )
@@ -2126,7 +2094,8 @@ f_tb_changed( Var_T * v )
     {
         for ( ; v != NULL; v = vars_pop( v ) )
         {
-            io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+            Iobject_T * io =
+                      find_object_from_ID( get_strict_long( v, "object ID" ) );
 
             if ( io == NULL )
             {
@@ -2143,7 +2112,7 @@ f_tb_changed( Var_T * v )
 
     /* If there were no arguments loop over all objects */
 
-    for ( io = Toolbox->objs; io != NULL; io = io->next )
+    for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
         if ( ! IS_OUTPUT( io->type ) && io->is_changed )
             return vars_push( INT_VAR, io->ID );
 
@@ -2157,24 +2126,19 @@ f_tb_changed( Var_T * v )
  * wait for it's reply.
  *--------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_tb_changed_child( Var_T * v )
 {
-    char *buffer, *pos;
-    Var_T *cv;
-    size_t len;
-    long *result;
-    long cid;
-    long var_count = 0;
-
-
     /* Calculate length of buffer needed */
 
-    len = sizeof EDL.Lc + sizeof var_count + 1;
+    long var_count = 0;
+    size_t len = sizeof EDL.Lc + sizeof var_count + 1;
+
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
-    for ( cv = v; cv != NULL; cv = cv->next )
+    for ( Var_T * cv = v; cv; cv = cv->next )
     {
         vars_check( v, INT_VAR );
         if ( cv->val.lval < ID_OFFSET )
@@ -2187,7 +2151,8 @@ f_tb_changed_child( Var_T * v )
         var_count++;
     }
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
     pos += sizeof EDL.Lc;
@@ -2211,7 +2176,7 @@ f_tb_changed_child( Var_T * v )
 
     /* Ask parent process to return the ID of the first changed object */
 
-    result = exp_tbchanged( buffer, pos - buffer );
+    long * result = exp_tbchanged( buffer, pos - buffer );
 
     /* Bomb out if parent returns failure */
 
@@ -2221,7 +2186,7 @@ f_tb_changed_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    cid = result[ 1 ];
+    long cid = result[ 1 ];
     T_free( result );
 
     return vars_push( INT_VAR, cid );
@@ -2239,12 +2204,6 @@ f_tb_changed_child( Var_T * v )
 Var_T *
 f_tb_wait( Var_T * v )
 {
-    Iobject_T *io;
-    double duration;
-    double secs;
-    struct itimerval sleepy;
-
-
     /* The child process has it's own way of dealing with this */
 
     if ( Fsc2_Internals.I_am == CHILD )
@@ -2259,13 +2218,12 @@ f_tb_wait( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    double duration = -1.0;
     if ( v != NULL )
     {
         duration = get_double( v, "maximum wait time for object change" );
         v = vars_pop( v );
     }
-    else
-        duration = -1.0;
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 0L );
@@ -2283,7 +2241,8 @@ f_tb_wait( Var_T * v )
     {
         for ( ; v != NULL; v = v->next )
         {
-            io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+            Iobject_T * io =
+                       find_object_from_ID( get_strict_long( v, "object ID" ) );
 
             if ( io == NULL )
             {
@@ -2300,7 +2259,7 @@ f_tb_wait( Var_T * v )
     }
     else    /* if there were no arguments loop over all objects */
     {
-        for ( io = Toolbox->objs; io != NULL; io = io->next )
+        for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
             if ( ! IS_OUTPUT( io->type ) && io->is_changed )
             {
                 tb_wait_handler( io->ID );
@@ -2315,7 +2274,8 @@ f_tb_wait( Var_T * v )
     {
         for ( ; v != NULL; v = vars_pop( v ) )
         {
-            io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+            Iobject_T * io =
+                       find_object_from_ID( get_strict_long( v, "object ID" ) );
 
             if ( io == NULL )
             {
@@ -2329,7 +2289,7 @@ f_tb_wait( Var_T * v )
     }
     else    /* if there were no arguments loop over all objects */
     {
-        for ( io = Toolbox->objs; io != NULL; io = io->next )
+        for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
         {
             if ( ! IS_OUTPUT( io->type ) )
                 io->report_change = true;
@@ -2349,6 +2309,9 @@ f_tb_wait( Var_T * v )
 
     if ( duration > 0.0 )
     {
+        struct itimerval sleepy;
+        double secs;
+
         sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
         sleepy.it_value.tv_usec = lrnd( modf( duration, &secs ) * 1.0e6 );
         sleepy.it_value.tv_sec = lrnd( secs );
@@ -2370,21 +2333,16 @@ f_tb_wait( Var_T * v )
  * parent returning a result which gets passed on to the EDL script.
  *---------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_tb_wait_child( Var_T * v )
 {
-    char *buffer, *pos;
-    Var_T *cv;
-    size_t len;
-    double duration;
-    long *result;
-    long cid;
-    long var_count = 0;
-
-
     /* Calculate length of buffer needed */
 
-    len = sizeof EDL.Lc + sizeof duration + sizeof var_count + 1;
+    double duration = -1.0;
+    long var_count = 0;
+    size_t len = sizeof EDL.Lc + sizeof duration + sizeof var_count + 1;
+
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
@@ -2393,10 +2351,8 @@ f_tb_wait_child( Var_T * v )
         duration = get_double( v, "maximum wait time for object change" );
         v = vars_pop( v );
     }
-    else
-        duration = -1.0;
 
-    for ( cv = v; cv != NULL; cv = cv->next )
+    for ( Var_T * cv = v; cv != NULL; cv = cv->next )
     {
         vars_check( v, INT_VAR );
         if ( cv->val.lval < ID_OFFSET )
@@ -2409,7 +2365,8 @@ f_tb_wait_child( Var_T * v )
         var_count++;
     }
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
     pos += sizeof EDL.Lc;
@@ -2436,7 +2393,7 @@ f_tb_wait_child( Var_T * v )
 
     /* Ask parent process to return the ID of the first changed object */
 
-    result = exp_tbwait( buffer, pos - buffer );
+    long * result = exp_tbwait( buffer, pos - buffer );
 
     /* Bomb out if parent returns failure (but only if we didn't got a
        legal DO_QUIT signal) */
@@ -2447,7 +2404,7 @@ f_tb_wait_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    cid = result[ 1 ];
+    long cid = result[ 1 ];
     T_free( result );
 
     return vars_push( INT_VAR, cid );
@@ -2463,11 +2420,6 @@ f_tb_wait_child( Var_T * v )
 void
 tb_wait_handler( long ID )
 {
-    long result[ 2 ];
-    Iobject_T *io;
-    struct itimerval sleepy;
-
-
     /* Do nothing if the timer has expired and we arrive here from the
        callback for an object or the callback for the 'STOP' button (in
        which case we're called with an argument of -1). */
@@ -2479,14 +2431,14 @@ tb_wait_handler( long ID )
 
     if ( Fsc2_Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
     {
+        struct itimerval sleepy;
         sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
         setitimer( ITIMER_REAL, &sleepy, NULL );
     }
 
-    result[ 0 ] = 1;
-    result[ 1 ] = ID >= 0 ? ID : 0;
+    long result[  ] = { 1,  ID >= 0 ? ID : 0 };
 
-    for ( io = Toolbox->objs; io != NULL; io = io->next )
+    for ( Iobject_T * io = Toolbox->objs; io != NULL; io = io->next )
         io->report_change = false;
 
     Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;

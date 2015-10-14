@@ -379,6 +379,7 @@ handle_change_label( int          dim,
         long length;
         memcpy( &length, ptr, sizeof length );
         ptr += sizeof length;
+
         label[ i ] = ( char * ) ptr;
         ptr += length;
     }
@@ -804,8 +805,7 @@ accept_1d_data_sliding( long         curve,
             for ( long i = 0; i < G_1d.nc; cv = G_1d.curve[ ++i ] )
             {
                 Scaled_Point_T * sp = cv->points;
-                for ( long count = cv->count; count > 0;
-                      sp++, count-- )
+                for ( long count = cv->count; count > 0; sp++, count-- )
                     sp->v = factor * sp->v + offset;
             }
 
@@ -824,7 +824,7 @@ accept_1d_data_sliding( long         curve,
     if ( len > G_1d.nx )
     {
         fsc2_assert( type ==  INT_ARR || type == FLOAT_ARR );
-        ptr += ( len - G_1d.nx )
+        ptr +=   ( len - G_1d.nx )
                * ( type == INT_ARR ? sizeof( long ) : sizeof( double ) );
         len = G_1d.nx;
     }
@@ -842,8 +842,7 @@ accept_1d_data_sliding( long         curve,
             if ( shift >= cv->count )
             {
                 Scaled_Point_T * sp = cv->points;
-                for ( long count = cv->count; count > 0;
-                      sp++, count-- )
+                for ( long count = cv->count; count > 0; sp++, count-- )
                     sp->exist = false;
                 cv->count = 0;
             }
@@ -852,8 +851,7 @@ accept_1d_data_sliding( long         curve,
                 Scaled_Point_T * sp1 = cv->points,
                                * sp2 = sp1 + shift;
                 long count;
-                for ( count = shift; count < cv->count;
-                      sp1++, sp2++, count++ )
+                for ( count = shift; count < cv->count; sp1++, sp2++, count++ )
                     sp1->v = sp2->v;
 
                 for ( count -= shift, sp2 -= shift; count < cv->count;

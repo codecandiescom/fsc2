@@ -73,9 +73,6 @@ int
 main( int    argc,
       char * argv[ ] )
 {
-    char *fname = NULL;
-
-
 #if defined LIBC_MDEBUG
     mcheck( NULL );
     mtrace( );
@@ -87,6 +84,7 @@ main( int    argc,
 
     /* Run a first test of the command line arguments */
 
+    char * fname = NULL;
     Fsc2_Internals.cmdline_flags = scan_args( &argc, argv, &fname );
 
     /* Initialize xforms stuff, quit on error */
@@ -262,7 +260,8 @@ main( int    argc,
  * Initialization of global variables
  *-------------------------------------*/
 
-static void
+static
+void
 globals_init( const char * pname )
 {
     /* As the very first action the effective UID and GID gets stored and
@@ -367,20 +366,19 @@ globals_init( const char * pname )
  * Read in some configuration information
  *----------------------------------------*/
 
-static void
+static
+void
 fsc2_get_conf( void )
 {
-    char *fname;
-    struct passwd *ue;
-
-
     Fsc2_Internals.def_directory = NULL;
 
-    if (    ! ( ue = getpwuid( getuid( ) ) )
+    struct passwd * ue = getpwuid( getuid( ) );
+    if (    ! ue
          || ! ue->pw_dir
          || ! *ue->pw_dir  )
          return;
 
+    char * fname;
     TRY
     {
         fname = get_string( "%s/.fsc2/fsc2_config", ue->pw_dir );
@@ -426,9 +424,6 @@ fsc2_get_conf( void )
 bool
 get_edl_file( const char * fname )
 {
-    struct stat file_stat;
-
-
     TRY
     {
         EDL.files = T_realloc( EDL.files,
@@ -462,6 +457,7 @@ get_edl_file( const char * fname )
             T_free( buf );
         }
 
+        struct stat file_stat;
         if ( stat( EDL.files[ EDL.file_count - 1 ].name, &file_stat ) == -1 )
         {
             TRY_SUCCESS;
@@ -494,7 +490,8 @@ get_edl_file( const char * fname )
  * Function for running an experiment without using any GUI elements
  *-------------------------------------------------------------------*/
 
-static void
+static
+void
 no_gui_run( void )
 {
     /* Read in the EDL file and analyze it */
@@ -535,13 +532,11 @@ no_gui_run( void )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static void
+static
+void
 check_run( void )
 {
     static bool user_break = false;
-    long i;
-    int fd_flags;
-
 
     fl_set_object_callback( GUI.main_form->test_file, NULL, 0 );
     fl_deactivate_object( GUI.main_form->Load );
@@ -560,7 +555,8 @@ check_run( void )
     if ( ! ( In_file_fp = fopen( EDL.files->name, "r" ) )  )
         exit( EXIT_FAILURE );
 
-    if ( ( fd_flags = fcntl( fileno( In_file_fp ), F_GETFD ) ) < 0 )
+    int fd_flags = fcntl( fileno( In_file_fp ), F_GETFD );
+    if ( fd_flags < 0 )
         fd_flags = 0;
     fcntl( fileno( In_file_fp ), F_SETFD, fd_flags | FD_CLOEXEC );
 
@@ -588,7 +584,7 @@ check_run( void )
     fl_activate_object( GUI.main_form->quit );
     fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-    for ( i = 0; i < Fsc2_Internals.num_test_runs; i++ )
+    for ( long i = 0; i < Fsc2_Internals.num_test_runs; i++ )
     {
         if ( ! run( ) )
             exit( EXIT_FAILURE );
@@ -614,19 +610,18 @@ check_run( void )
  * be dealt with earlier.
  *-------------------------------------------------------*/
 
-static int
+static
+int
 scan_args( int   * argc,
            char  * argv[ ],
            char ** fname )
 {
     int flags = getenv( "FSC2_LOCAL_EXEC" ) ? LOCAL_EXEC : 0;
-    int cur_arg = 1;
-    int i;
-
 
     if ( *argc == 1 )
         return flags;
 
+    int cur_arg = 1;
     while ( cur_arg < *argc )
     {
         /* Check for option that's mostly used for debugging when everything
@@ -637,7 +632,7 @@ scan_args( int   * argc,
              && ! strcmp( argv[ cur_arg ], "-local_exec" ) )
         {
             flags |= LOCAL_EXEC;
-            for ( i = cur_arg; i < *argc; i++ )
+            for ( int i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
             continue;
@@ -769,7 +764,7 @@ scan_args( int   * argc,
              && ! strcmp( argv[ cur_arg ], "-s" ) )
         {
             flags |= DO_SIGNAL;
-            for ( i = cur_arg; i < *argc; i++ )
+            for ( int i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
             continue;
@@ -782,7 +777,7 @@ scan_args( int   * argc,
         if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
         {
             flags |= DO_DELETE;
-            for ( i = cur_arg; i < *argc; i++ )
+            for ( int i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
             continue;
@@ -795,7 +790,7 @@ scan_args( int   * argc,
         if ( ! strcmp( argv[ cur_arg ], "-noBalloons" ) )
         {
             flags |= NO_BALLOON;
-            for ( i = cur_arg; i < *argc; i++ )
+            for ( int i = cur_arg; i < *argc; i++ )
                 argv[ i ] = argv[ i + 1 ];
             *argc -= 1;
             continue;
@@ -844,14 +839,14 @@ scan_args( int   * argc,
             if ( argv[ cur_arg ][ 2 ] != '\0' )
             {
                 *fname = argv[ cur_arg ] + 2;
-                for ( i = cur_arg; i < *argc; i++ )
+                for ( int i = cur_arg; i < *argc; i++ )
                     argv[ i ] = argv[ i + 1 ];
                 *argc -= 1;
             }
             else
             {
                 *fname = argv[ cur_arg + 1 ];
-                for ( i = cur_arg; i < *argc - 1; i++ )
+                for ( int i = cur_arg; i < *argc - 1; i++ )
                     argv[ i ] = argv[ i + 2 ];
                 *argc -= 2;
             }
@@ -896,14 +891,14 @@ scan_args( int   * argc,
             if ( argv[ cur_arg ][ 2 ] != '\0' )
             {
                 *fname = argv[ cur_arg ] + 2;
-                for ( i = cur_arg; i < *argc; i++ )
+                for ( int i = cur_arg; i < *argc; i++ )
                     argv[ i ] = argv[ i + 1 ];
                 *argc -= 1;
             }
             else
             {
                 *fname = argv[ cur_arg + 1 ];
-                for ( i = cur_arg; i < *argc - 1; i++ )
+                for ( int i = cur_arg; i < *argc - 1; i++ )
                     argv[ i ] = argv[ i + 2 ];
                 *argc -= 2;
             }
@@ -950,14 +945,14 @@ scan_args( int   * argc,
             if ( argv[ cur_arg ][ 2 ] != '\0' )
             {
                 *fname = argv[ cur_arg ] + 2;
-                for ( i = cur_arg; i < *argc; i++ )
+                for ( int i = cur_arg; i < *argc; i++ )
                     argv[ i ] = argv[ i + 1 ];
                 *argc -= 1;
             }
             else
             {
                 *fname = argv[ cur_arg + 1 ];
-                for ( i = cur_arg; i < *argc - 1; i++ )
+                for ( int i = cur_arg; i < *argc - 1; i++ )
                     argv[ i ] = argv[ i + 2 ];
                 *argc -= 2;
             }
@@ -1011,14 +1006,14 @@ scan_args( int   * argc,
             if ( argv[ cur_arg ][ 2 ] != '\0' )
             {
                 *fname = argv[ cur_arg ] + 2;
-                for ( i = cur_arg; i < *argc; i++ )
+                for ( int i = cur_arg; i < *argc; i++ )
                     argv[ i ] = argv[ i + 1 ];
                 *argc -= 1;
             }
             else
             {
                 *fname = argv[ cur_arg + 1 ];
-                for ( i = cur_arg; i < *argc - 1; i++ )
+                for ( int i = cur_arg; i < *argc - 1; i++ )
                     argv[ i ] = argv[ i + 2 ];
                 *argc -= 2;
             }
@@ -1072,8 +1067,9 @@ scan_args( int   * argc,
             if ( argv[ cur_arg ][ 2 ] == '\0' )
                 Fsc2_Internals.num_test_runs = 1;
             else
-                for ( Fsc2_Internals.num_test_runs = 0, i = 2;
-                      argv[ cur_arg ][ i ] != '\0'; i++ )
+            {
+                Fsc2_Internals.num_test_runs = 0;
+                for ( int i = 2; argv[ cur_arg ][ i ] != '\0'; i++ )
                     if ( isdigit( ( unsigned char ) argv[ cur_arg ][ i ] ) )
                         Fsc2_Internals.num_test_runs =
                                              Fsc2_Internals.num_test_runs * 10
@@ -1085,6 +1081,7 @@ scan_args( int   * argc,
                                  argv[ cur_arg ] + 2);
                         usage( EXIT_FAILURE );
                     }
+            }
 
             if ( *argc == cur_arg + 1 )
             {
@@ -1094,7 +1091,7 @@ scan_args( int   * argc,
             else
             {
                 *fname = argv[ cur_arg + 1 ];
-                for ( i = cur_arg; i < *argc - 1; i++ )
+                for ( int i = cur_arg; i < *argc - 1; i++ )
                     argv[ i ] = argv[ i + 2 ];
                 *argc -= 2;
             }
@@ -1129,7 +1126,8 @@ scan_args( int   * argc,
  * doing the experiment are finished!
  *----------------------------------------------------------*/
 
-static void
+static
+void
 final_exit_handler( void )
 {
     /* Stop the child process and the HTTP server */
@@ -1202,22 +1200,16 @@ void
 load_file( FL_OBJECT * a  UNUSED_ARG,
            long        reload )
 {
-    const char * fn;
-    EDL_Files_T * old_list = EDL.files;
-    size_t volatile old_count = EDL.file_count;
-    FILE * fp;
-    int fd_flags;
-    char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
-    int c;
-    int tmp_fd;
-    FILE *tmp_fp;
-
-
     /* If new file is to be loaded get its name and store it, otherwise use
        the previous name */
 
+    EDL_Files_T * old_list = EDL.files;
+    size_t volatile old_count = EDL.file_count;
+
     if ( ! reload )
     {
+        const char * fn;
+
         if (    ! GUI.main_form->Load->u_ldata
              && ! GUI.main_form->Load->u_cdata )
         {
@@ -1334,7 +1326,10 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
        file pointer 'fp' of this temporary file even though the file name
        'EDL.files->name' shown to the user still refers to the original file */
 
-    if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
+    char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
+    int tmp_fd = mkstemp( tmp_file );
+
+    if ( tmp_fd < 0 )
     {
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
         {
@@ -1383,13 +1378,15 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         return;
     }
 
-    if ( ( fd_flags = fcntl( tmp_fd, F_GETFD ) ) < 0 )
+    int fd_flags = fcntl( tmp_fd, F_GETFD );
+    if ( fd_flags < 0 )
         fd_flags = 0;
     fcntl( tmp_fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
     unlink( tmp_file );
 
-    if ( ( tmp_fp = fdopen( tmp_fd, "w+" ) ) == 0 )
+    FILE * tmp_fp = fdopen( tmp_fd, "w+" ); 
+    if ( ! tmp_fp )
     {
         close( tmp_fd );
 
@@ -1441,7 +1438,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         return;
     }
 
-    if ( ! ( fp = fopen( EDL.files->name, "r" ) ) )
+    FILE * fp = fopen( EDL.files->name, "r" );
+    if ( ! fp )
     {
         fclose( tmp_fp );
 
@@ -1495,6 +1493,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
     /* Copy the contents of the EDL file into our temporary file */
 
+    int c;
     while ( ( c = fgetc( fp ) ) != EOF )
         fputc( c, tmp_fp );
 
@@ -1577,10 +1576,8 @@ test_file( FL_OBJECT * a,
            long        b  UNUSED_ARG )
 {
     static bool running_test = false;
-    static bool user_break = false;
-    struct stat file_stat;
-    static bool in_test = false;
-
+    static bool user_break   = false;
+    static bool in_test      = false;
 
     a->u_ldata = 0;
 
@@ -1629,6 +1626,7 @@ test_file( FL_OBJECT * a,
        that only happens during testing) on disk has changed in between and
        the user wants the new version - quit if file can't be read again. */
 
+    struct stat file_stat;
     stat( EDL.files->name, &file_stat );
 
     if (    EDL.files->mod_date != file_stat.st_mtime
@@ -1723,11 +1721,6 @@ void
 run_file( FL_OBJECT * a  UNUSED_ARG,
           long        b  UNUSED_ARG )
 {
-    struct stat file_stat;
-    char str1[ 128 ],
-         str2[ 128 ];
-
-
     if ( ! Is_loaded )              /* check that there is a file loaded */
     {
         fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
@@ -1742,15 +1735,14 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
     }
     else
     {
-        size_t i;
-
         /* Test the files making up the EDL progam aren't newer than what
            we tested, otherwise ask user if (s)he want a reload (and a new
            test) first */
 
-        for ( i = 0; i < EDL.file_count; i++ )
+        for ( size_t i = 0; i < EDL.file_count; i++ )
         {
 
+            struct stat file_stat;
             if ( stat( EDL.files[ i ].name, &file_stat ) == -1 )
                 continue;
 
@@ -1797,6 +1789,9 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
          && (    EDL.compilation.error[ SEVERE ] != 0
               || EDL.compilation.error[ WARN ] != 0 ) )
     {
+        char str1[ 128 ],
+             str2[ 128 ];
+
         if ( EDL.compilation.error[ SEVERE ] != 0 )
         {
             if ( EDL.compilation.error[ WARN ] != 0 )
@@ -1848,19 +1843,16 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
  *--------------------------------------------------------------------*/
 
 static
-bool display_file( char * name,
-                   FILE * fp )
+bool
+display_file( char * name,
+              FILE * fp )
 {
-    int len, key;
-    long lc, cc, i;                         /* line and char counter */
-    char line[ FL_BROWSER_LINELENGTH ];
-    char *lp;
-
-
     /* Determine number of lines (and maximum number of digits) in order to
        find out about proper formating of line numbers */
 
-    if ( ( lc = get_file_length( fp, &len ) ) <= 0 )  /* error ? */
+    int digits;
+    long lc = get_file_length( fp, &digits );
+    if ( lc <= 0 )                          /* error ? */
     {
         switch ( ( int ) lc )
         {
@@ -1887,14 +1879,18 @@ bool display_file( char * name,
     fl_clear_browser( GUI.main_form->error_browser );
     fl_freeze_form( GUI.main_form->browser->form );
 
-    for ( i = 1; i <= lc; ++i )
+    for ( long i = 1; i <= lc; ++i )
     {
-        sprintf( line, "%*ld: ", len, i );
-        lp = line + len + 2;
-        cc = 0;
+        char line[ FL_BROWSER_LINELENGTH ];
+        sprintf( line, "%*ld: ", digits, i );
+
+        char * lp = line + digits + 2;
+        long cc = 0;
+        int key;
+
         while (    ( key = fgetc( fp ) ) != '\n'
                 && key != EOF
-                && ++cc < FL_BROWSER_LINELENGTH - len - 9 )
+                && ++cc < FL_BROWSER_LINELENGTH - digits - 9 )
         {
             if ( ( char ) key != '\t' )
                 *lp++ = ( char ) key;
@@ -1903,7 +1899,7 @@ bool display_file( char * name,
                 do
                     *lp++ = ' ';
                 while (    cc++ % TAB_LENGTH
-                        && cc < FL_BROWSER_LINELENGTH - len - 3 )
+                        && cc < FL_BROWSER_LINELENGTH - digits - 3 )
                     /* empty */ ;
                 cc--;
             }
@@ -1912,7 +1908,7 @@ bool display_file( char * name,
 
         /* Color section headings */
 
-        lp = line + len + 2;
+        lp = line + digits + 2;
         if (    ! strncmp( lp, "DEVICES:", 8 )
              || ! strncmp( lp, "DEVICE:", 7 )
              || ! strncmp( lp, "DEVS:\n", 7 )
@@ -1969,20 +1965,17 @@ bool display_file( char * name,
 void
 clean_up( void )
 {
-    int i;
-
-
     /* Store some settings of the program */
 
     fsc2_save_conf( );
 
     /* Get rid of the last remains of graphics */
 
-    for ( i = X; i <= Y; i++ )
+    for ( int i = X; i <= Y; i++ )
         if ( G_1d.label_orig[ i ] )
             G_1d.label_orig[ i ] = T_free( G_1d.label_orig[ i ] );
 
-    for ( i = X; i <= Z; i++ )
+    for ( int i = X; i <= Z; i++ )
         if ( G_2d.label_orig[ i ] )
             G_2d.label_orig[ i ] = T_free( G_2d.label_orig[ i ] );
 
@@ -1991,9 +1984,9 @@ clean_up( void )
 
     /* Clear up the compilation structure */
 
-    for ( i = 0; i < 3; ++i )
+    for ( int i = 0; i < 3; ++i )
         EDL.compilation.error[ i ] = 0;
-    for ( i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
+    for ( int i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
         EDL.compilation.sections[ i ] = false;
 
     /* Deallocate memory used for file names */
@@ -2048,7 +2041,8 @@ clean_up( void )
  * to try to get rid of shared memory and kill the other processes etc.
  *-----------------------------------------------------------------------*/
 
-static void
+static
+void
 set_main_signals( void )
 {
     struct sigaction sact;
@@ -2056,10 +2050,8 @@ set_main_signals( void )
                         SIGFPE, SIGALRM, SIGSEGV, SIGPIPE, SIGTERM,
                         SIGUSR1, SIGUSR2, SIGCHLD, SIGCONT, SIGTTIN,
                         SIGTTOU, SIGBUS, SIGVTALRM };
-    size_t i;
 
-
-    for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
+    for ( size_t i = 0; i < NUM_ELEMS( sig_list ); i++ )
     {
         sact.sa_handler = main_sig_handler;
         sigemptyset( &sact.sa_mask );
@@ -2077,13 +2069,13 @@ set_main_signals( void )
  * Signal handler for the main program
  *-------------------------------------*/
 
-static void
+static
+void
 main_sig_handler( int signo )
 {
     int errno_saved;
     pid_t pid;
     int status;
-
 
     switch ( signo )
     {

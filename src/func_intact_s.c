@@ -42,20 +42,10 @@ static Var_T *f_schanged_child( Var_T * v );
 Var_T *
 f_screate( Var_T * var )
 {
-    Var_T * volatile v = var;
-    Iobject_T * volatile new_io = NULL;
-    Iobject_T *ioi;
-    volatile Iobject_Type_T type;
-    volatile double start_val,
-                    end_val;
-    volatile double step = 0.0;
-    char * volatile label = NULL;
-    char * volatile help_text = NULL;
-
-
     /* We need at least the type of the slider and the minimum and maximum
        value */
 
+    Var_T * volatile v = var;
     if ( v == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
@@ -67,6 +57,7 @@ f_screate( Var_T * var )
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
+    volatile Iobject_Type_T type;
     if ( v->type == INT_VAR || v->type == FLOAT_VAR )
     {
         type = get_strict_long( v, "slider type" ) + FIRST_SLIDER_TYPE;
@@ -104,7 +95,7 @@ f_screate( Var_T * var )
     }
 
     vars_check( v, INT_VAR | FLOAT_VAR );
-    start_val = VALUE( v );
+    double volatile start_val = VALUE( v );
 
     if ( ( v = vars_pop( v ) ) == NULL )
     {
@@ -115,7 +106,7 @@ f_screate( Var_T * var )
     /* Get the maximum value and make sure it's larger than the minimum */
 
     vars_check( v, INT_VAR | FLOAT_VAR );
-    end_val = VALUE( v );
+    double volatile end_val = VALUE( v );
 
     if ( end_val <= start_val )
     {
@@ -123,16 +114,12 @@ f_screate( Var_T * var )
         THROW( EXCEPTION );
     }
 
+    double volatile step = 0.0;
     if ( v->next != NULL && v->next->type & ( INT_VAR | FLOAT_VAR ) )
     {
         v = vars_pop( v );
         vars_check( v, INT_VAR | FLOAT_VAR );
         step = fabs( VALUE( v ) );
-        if ( step < 0.0 )
-        {
-            print( FATAL, "Negative slider step width.\n" );
-            THROW( EXCEPTION );
-        }
 
         if ( step > end_val - start_val )
         {
@@ -148,6 +135,7 @@ f_screate( Var_T * var )
     if ( Fsc2_Internals.I_am == CHILD )
         return f_screate_child( v, type, start_val, end_val, step );
 
+    char * volatile label = NULL;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         vars_check( v, STR_VAR );
@@ -169,6 +157,7 @@ f_screate( Var_T * var )
         }
     }
 
+    char * volatile help_text = NULL;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         TRY
@@ -191,6 +180,7 @@ f_screate( Var_T * var )
     /* Now that we're done with checking the parameters we can create the new
        slider - if the Toolbox doesn't exist yet we've got to create it now */
 
+    Iobject_T * volatile new_io = NULL;
     TRY
     {
         if ( Toolbox == NULL )
@@ -214,6 +204,8 @@ f_screate( Var_T * var )
     }
     else
     {
+        Iobject_T * ioi;
+
         for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
             /* empty */ ;
         ioi->next = new_io;
@@ -252,22 +244,16 @@ f_screate( Var_T * var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_screate_child( Var_T          * v,
                  Iobject_Type_T   type,
                  double           start_val,
                  double           end_val,
                  double           step )
 {
-    char *buffer,
-         *pos;
-    long new_ID;
-    long *result;
-    size_t len;
-    char *label = NULL;
-    char *help_text = NULL;
-
-
+    char * label = NULL;
+    char * help_text = NULL;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         vars_check( v, STR_VAR );
@@ -284,8 +270,8 @@ f_screate_child( Var_T          * v,
         }
     }
 
-    len =   sizeof EDL.Lc + sizeof type
-          + sizeof start_val + sizeof end_val + sizeof step;
+    size_t len =   sizeof EDL.Lc + sizeof type
+                 + sizeof start_val + sizeof end_val + sizeof step;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
@@ -300,7 +286,8 @@ f_screate_child( Var_T          * v,
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* store current line number */
     pos += sizeof EDL.Lc;
@@ -345,7 +332,7 @@ f_screate_child( Var_T          * v,
        elements, the first indicating if it was successful, the second being
        the sliders ID */
 
-    result = exp_screate( buffer, pos - buffer );
+    long * result = exp_screate( buffer, pos - buffer );
 
     /* Bomb out if parent returns failure */
 
@@ -355,7 +342,7 @@ f_screate_child( Var_T          * v,
         THROW( EXCEPTION );
     }
 
-    new_ID = result[ 1 ];
+    long new_ID = result[ 1 ];
     T_free( result );
 
     return vars_push( INT_VAR, new_ID );
@@ -407,32 +394,28 @@ f_sdelete( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void
+static
+void
 f_sdelete_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    long ID;
-
-
     /* Very basic sanity check */
 
-    ID = get_strict_long( v, "slider ID" );
+    long ID = get_strict_long( v, "slider ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid slider identifier.\n" );
         THROW( EXCEPTION );
     }
 
-    len = sizeof EDL.Lc + sizeof v->val.lval;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -460,12 +443,10 @@ f_sdelete_child( Var_T * v )
  * process, which actually removes the slider.
  *---------------------------------------------------------*/
 
-static void
+static
+void
 f_sdelete_parent( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* No tool box -> no sliders to delete */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -476,7 +457,7 @@ f_sdelete_parent( Var_T * v )
 
     /* Check that slider with the ID exists */
 
-    io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
     if ( io == NULL || ! IS_SLIDER( io->type ) )
     {
@@ -527,9 +508,6 @@ f_sdelete_parent( Var_T * v )
 Var_T *
 f_svalue( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* We need at least the sliders ID */
 
     if ( v == NULL )
@@ -554,7 +532,7 @@ f_svalue( Var_T * v )
 
     /* Check that ID is ID of a slider */
 
-    io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
     if ( io == NULL || ! IS_SLIDER( io->type ) )
     {
@@ -611,21 +589,13 @@ f_svalue( Var_T * v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_svalue_child( Var_T * v )
 {
-    long ID;
-    long state = 0;
-    double val = 0.0;
-    char *buffer,
-         *pos;
-    double *res;
-    size_t len;
-
-
     /* Very basic sanity check... */
 
-    ID = get_strict_long( v, "slider ID" );
+    long ID = get_strict_long( v, "slider ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid slider identifier.\n" );
@@ -634,6 +604,8 @@ f_svalue_child( Var_T * v )
 
     /* Another arguments means that the slider value is to be set */
 
+    long state = 0;
+    double val = 0.0;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         vars_check( v, INT_VAR | FLOAT_VAR );
@@ -643,14 +615,15 @@ f_svalue_child( Var_T * v )
 
     too_many_arguments( v );
 
-    len = sizeof EDL.Lc + sizeof ID + sizeof state + sizeof val;
+    size_t len = sizeof EDL.Lc + sizeof ID + sizeof state + sizeof val;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -676,7 +649,7 @@ f_svalue_child( Var_T * v )
        with two doubles, the first indicating if it was successful (when the
        value is positive) the second is the slider value */
 
-    res = exp_sstate( buffer, pos - buffer );
+    double * res = exp_sstate( buffer, pos - buffer );
 
     /* Bomb out on failure */
 
@@ -700,9 +673,6 @@ f_svalue_child( Var_T * v )
 Var_T *
 f_schanged( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* We need the sliders ID */
 
     if ( v == NULL )
@@ -727,7 +697,7 @@ f_schanged( Var_T * v )
 
     /* Check that ID is ID of a slider */
 
-    io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
     if ( io == NULL || ! IS_SLIDER( io->type ) )
     {
@@ -745,34 +715,28 @@ f_schanged( Var_T * v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_schanged_child( Var_T * v )
 {
-    long ID;
-    char *buffer,
-         *pos;
-    long *res;
-    long val;
-    size_t len;
-
-
     /* Very basic sanity check... */
 
-    ID = get_strict_long( v, "slider ID" );
+    long ID = get_strict_long( v, "slider ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid slider identifier.\n" );
         THROW( EXCEPTION );
     }
 
-    len = sizeof EDL.Lc + sizeof ID;
+    size_t len = sizeof EDL.Lc + sizeof ID;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -792,7 +756,7 @@ f_schanged_child( Var_T * v )
        longs, the first indicating if it was successful (when the value is
        positive) and the second indicated if the slider got changed. */
 
-    res = exp_schanged( buffer, pos - buffer );
+    long * res = exp_schanged( buffer, pos - buffer );
 
     /* Bomb out on failure */
 
@@ -802,7 +766,7 @@ f_schanged_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    val = res[ 1 ];
+    long val = res[ 1 ];
     T_free( res );
 
     return vars_push( INT_VAR, val );

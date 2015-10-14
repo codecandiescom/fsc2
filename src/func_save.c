@@ -78,11 +78,7 @@ static const char * get_name( Var_T * v );
 Var_T *
 f_is_file( Var_T * v )
 {
-    long fn;
-    File_List_T *fl;
-
-
-    fn = get_long( v, "file number" );
+    long fn = get_long( v, "file number" );
 
     if ( STD_Is_Open && ( fn == 1 || fn == 2 ) )
         return vars_push( INT_VAR, 1L );
@@ -95,7 +91,7 @@ f_is_file( Var_T * v )
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
 
-    fl = EDL.File_List + fn;
+    File_List_T * fl = EDL.File_List + fn;
     return vars_push( INT_VAR, (    (   fl->gzip && fl->gp )
                                  || ( ! fl->gzip && fl->fp ) ) ? 1L : 0L );
 }
@@ -110,9 +106,9 @@ Var_T *
 f_file_name( Var_T * v )
 {
     const char *name = get_name( v );
-    const char *n;
+    char * n = strrchr( name, '/' );
 
-    if ( ( n = strrchr( name, '/' ) ) )
+    if ( n )
         return vars_push( STR_VAR, n + 1 );
     else
         return vars_push( STR_VAR, name );
@@ -135,12 +131,10 @@ f_path_name( Var_T * v )
  * Utility function for finding the file name for a file number
  *--------------------------------------------------------------*/
 
-static const char *
+static
+const char *
 get_name( Var_T * v )
 {
-    long fn;
-
-
     /* The function can be called without an argument when we're in
        automatical file open mode, i.e. 'No_File_Numbers' is set */
 
@@ -166,7 +160,7 @@ get_name( Var_T * v )
 
     /* Otherwise we need a correct file number */
 
-    fn = get_long( v, "file number" );
+    long fn = get_long( v, "file number" );
 
     /* Check for standard output and error */
 
@@ -226,14 +220,8 @@ Var_T *
 f_openf_int( Var_T         * v,
              volatile bool   do_compress )
 {
-    Var_T *cur;
-    long i;
-    char *m;
-    struct stat stat_buf;
     FILE * volatile fp = NULL;
     gzFile volatile gp = NULL;
-    File_List_T * volatile old_File_List = NULL;
-
 
     /* If there was a call of 'f_save()' etc. without a previous call to
        'f_getf()' or 'f_openf()' then 'f_save()' (or one of its brethrens)
@@ -275,7 +263,8 @@ f_openf_int( Var_T         * v,
 
     if ( Fsc2_Internals.mode == TEST )
     {
-        for ( i = 0, cur = v; i < 6 && cur; i++, cur = cur->next )
+        Var_T * cur = v;
+        for ( int i = 0; i < 6 && cur; i++, cur = cur->next )
             vars_check( cur, STR_VAR );
 
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -283,7 +272,8 @@ f_openf_int( Var_T         * v,
 
     /* Check the arguments and supply default values if necessary */
 
-    for ( i = 0, cur = v; i < 6 && cur; i++, cur = cur->next )
+        Var_T * cur = v;
+    for ( int i = 0; i < 6 && cur; i++, cur = cur->next )
         vars_check( cur, STR_VAR );
 
     char * volatile fn = v->val.sptr;
@@ -303,11 +293,12 @@ f_openf_int( Var_T         * v,
 
     /* Check if the file is already open */
 
-    for ( i = 0; i < EDL.File_List_Len; i++ )
+    for ( int i = 0; i < EDL.File_List_Len; i++ )
+    {
         if ( ! strcmp( EDL.File_List[ i ].name, fn ) )
         {
-            m = get_string( "The specified file is already open:\n%s\n"
-                            "\nOpen another file instead?", fn );
+            char * m = get_string( "The specified file is already open:\n%s\n"
+                                   "\nOpen another file instead?", fn );
 
             if ( 1 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
             {
@@ -318,14 +309,16 @@ f_openf_int( Var_T         * v,
             T_free( m );
             return vars_push( INT_VAR, i + FILE_NUMBER_OFFSET );
         }
+    }
 
     /* Now ask for confirmation if the file already exists and try to open
        it for writing */
 
-    if  ( 0 == stat( fn, &stat_buf ) )
+    struct stat stat_buf;
+    if  ( stat( fn, &stat_buf ) == 0 )
     {
-        m = get_string( "The specified file already exists:\n%s\n"
-                        "\nDo you really want to overwrite it?", fn );
+        char * m = get_string( "The specified file already exists:\n%s\n"
+                               "\nDo you really want to overwrite it?", fn );
 
         if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
         {
@@ -339,7 +332,7 @@ f_openf_int( Var_T         * v,
     if (    ( ! do_compress && ! ( fp = fopen( fn, "w"    ) ) )
          || (   do_compress && ! ( gp = gzopen( fn, "wb9" ) ) ) )
     {
-        switch( errno )
+        switch ( errno )
         {
             case EMFILE :
                 show_message( "You have too many open files!\n"
@@ -374,6 +367,8 @@ f_openf_int( Var_T         * v,
 
         return f_getf_int( v->next, do_compress );
     }
+
+    File_List_T * volatile old_File_List = NULL;
 
  got_file:
 
@@ -487,16 +482,8 @@ Var_T *
 f_getf_int( Var_T        * v,
            volatile bool   do_compress )
 {
-    Var_T *cur;
-    long i;
-    char *s[ ] = { NULL, NULL, NULL, NULL, NULL };
     FILE * volatile fp = NULL;
     gzFile volatile gp = NULL;
-    struct stat stat_buf;
-    char * volatile r = NULL;
-    char * new_r;
-    char *m;
-    File_List_T * volatile old_File_List = NULL;
 
 
     /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
@@ -518,14 +505,17 @@ f_getf_int( Var_T        * v,
 
     if ( Fsc2_Internals.mode == TEST )
     {
-        for ( i = 0, cur = v; i < 5 && cur; i++, cur = cur->next )
+        Var_T * cur = v;
+        for ( int i = 0; i < 5 && cur; i++, cur = cur->next )
             vars_check( cur, STR_VAR );
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
     }
 
     /* Check the arguments and supply default values if necessary */
 
-    for ( i = 0, cur = v; i < 5 && cur;  i++, cur = cur->next )
+    char *s[ ] = { NULL, NULL, NULL, NULL, NULL };
+    Var_T * cur = v;
+    for ( int i = 0; i < 5 && cur;  i++, cur = cur->next )
     {
         vars_check( cur, STR_VAR );
         s[ i ] = cur->val.sptr;
@@ -575,6 +565,8 @@ f_getf_int( Var_T        * v,
     else
         s[ 4 ] = T_strdup( s[ 4 ] );
 
+    char * volatile r = NULL;
+
  getfile_retry:
 
     /* Try to get a filename - on 'Cancel' request confirmation (unless a
@@ -595,7 +587,7 @@ f_getf_int( Var_T        * v,
     if ( ! r || ! *r )                    /* on 'Cancel' with confirmation */
     {
         T_free( r );
-        for ( i = 0; i < 5; i++ )
+        for ( int i = 0; i < 5; i++ )
             T_free( s[ i ] );
         Dont_Save = true;
         return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
@@ -608,18 +600,18 @@ f_getf_int( Var_T        * v,
          && (    ! strrchr( r, '.' )
               || strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
     {
-        new_r = get_string( "%s.%s", r, s[ 4 ] );
+        char * new_r = get_string( "%s.%s", r, s[ 4 ] );
         T_free( r );
         r = new_r;
     }
 
     /* Check if the file is already open */
 
-    for ( i = 0; i < EDL.File_List_Len; i++ )
+    for ( int i = 0; i < EDL.File_List_Len; i++ )
         if ( ! strcmp( EDL.File_List[ i ].name, r ) )
         {
-            m = get_string( "The specified file is already open:\n%s\n"
-                            "\nOpen another file instead?", r );
+            char * m = get_string( "The specified file is already open:\n%s\n"
+                                   "\nOpen another file instead?", r );
 
             if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
             {
@@ -631,7 +623,7 @@ f_getf_int( Var_T        * v,
             goto getfile_retry;
         }
 
-    for ( i = 0; i < EDL.File_List_Len; i++ )
+    for ( int i = 0; i < EDL.File_List_Len; i++ )
         if ( ! strcmp( EDL.File_List[ i ].name, r ) )
         {
             print( SEVERE, "File '%s' is already open.\n", r );
@@ -641,10 +633,11 @@ f_getf_int( Var_T        * v,
     /* Now ask for confirmation if the file already exists and try to open
        it for writing */
 
+    struct stat stat_buf;
     if  ( 0 == stat( r, &stat_buf ) )
     {
-        m = get_string( "The selected file does already exist:\n%s\n"
-                        "\nDo you really want to overwrite it?", r );
+        char * m = get_string( "The selected file does already exist:\n%s\n"
+                               "\nDo you really want to overwrite it?", r );
         if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
         {
             T_free( m );
@@ -695,9 +688,11 @@ f_getf_int( Var_T        * v,
         goto getfile_retry;
     }
 
+    File_List_T * volatile old_File_List = NULL;
+
  got_file:
 
-    for ( i = 0; i < 5; i++ )
+    for ( int i = 0; i < 5; i++ )
         T_free( s[ i ] );
 
     /* The reallocation for the EDL.File_List may fail but we still need to
@@ -782,14 +777,6 @@ Var_T *
 f_clonef_int( Var_T * v,
               bool    do_compress )
 {
-    char *fn;
-    char *n;
-    Var_T *new_v,
-          *arg[ 6 ];
-    int i;
-    long file_num;
-
-
     /* Neither stdout nor stderr an be "cloned" */
 
     if (    v->type == INT_VAR
@@ -819,7 +806,7 @@ f_clonef_int( Var_T * v,
          THROW( EXCEPTION );
     }
 
-    file_num = v->val.lval - FILE_NUMBER_OFFSET;
+    long file_num = v->val.lval - FILE_NUMBER_OFFSET;
 
     if ( v->next->type != STR_VAR )
     {
@@ -837,11 +824,11 @@ f_clonef_int( Var_T * v,
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
-    fn = T_malloc(   strlen( EDL.File_List[ file_num ].name )
-                   + strlen( v->next->next->val.sptr ) + 2 );
+    char * fn = T_malloc(   strlen( EDL.File_List[ file_num ].name )
+                            + strlen( v->next->next->val.sptr ) + 2 );
     strcpy( fn, EDL.File_List[ file_num ].name );
 
-    n = fn + strlen( fn ) - strlen( v->next->val.sptr );
+    char * n = fn + strlen( fn ) - strlen( v->next->val.sptr );
     if ( n > fn + 1 && *( n - 1 ) == '.' && ! strcmp( n, v->next->val.sptr ) )
         strcpy( n, v->next->next->val.sptr );
     else
@@ -849,6 +836,8 @@ f_clonef_int( Var_T * v,
         strcat( n, "." );
         strcat( n, v->next->next->val.sptr );
     }
+
+    Var_T * arg[ 6 ];
 
     arg[ 0 ] = vars_push( STR_VAR, fn );
     T_free( fn );
@@ -863,9 +852,9 @@ f_clonef_int( Var_T * v,
     arg[ 4 ] = vars_push( STR_VAR, "" );
     arg[ 5 ] = vars_push( STR_VAR, v->next->next->val.sptr );
 
-    new_v = f_openf_int( arg[ 0 ], do_compress );
+    Var_T * new_v = f_openf_int( arg[ 0 ], do_compress );
 
-    for ( i = 5; i >= 0; i-- )
+    for ( int i = 5; i >= 0; i-- )
         vars_pop( arg[ i ] );
 
     return new_v;
@@ -880,10 +869,6 @@ f_clonef_int( Var_T * v,
 Var_T *
 f_resetf( Var_T * v )
 {
-    long file_num;
-    File_List_T * fl;
-
-
     /* Neither stdout nor stderr an be "cloned" */
 
     if (    v
@@ -914,6 +899,8 @@ f_resetf( Var_T * v )
         }
     }
 
+    long file_num;
+
     if ( v )
         file_num = v->val.lval - FILE_NUMBER_OFFSET;
     else if ( ! No_File_Numbers && EDL.File_List_Len > 2 )
@@ -934,7 +921,7 @@ f_resetf( Var_T * v )
     /* Truncate the file - do it both for the standard C API (which allows
        just setting the position) and the UNIX API */
 
-    fl = EDL.File_List + file_num;
+    File_List_T * fl = EDL.File_List + file_num;
 
     if ( ! fl->gzip )
     {
@@ -972,16 +959,13 @@ f_resetf( Var_T * v )
  * Function for opening a file when running in batch mode
  *--------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 batch_mode_file_open( char * name,
                       bool   do_compress )
 {
-    unsigned long cn = 0;
-    char * volatile new_name = NULL;
-    struct stat stat_buf;
     FILE * volatile fp = NULL;
     gzFile volatile gp = NULL;
-    File_List_T * volatile old_File_List = NULL;
 
 
     /* If no prefered file name is given (e.g. if we came here from f_getf())
@@ -992,8 +976,12 @@ batch_mode_file_open( char * name,
        Otherwise, when a prefered name was given we try to use it, but if it
        already exists we also append an additional extension the same way. */
 
+    unsigned long cn = 0;
+    char * volatile new_name = NULL;
+
     if ( ! name )
     {
+        struct stat stat_buf;
         do
         {
             if ( cn % 10 == 0 )
@@ -1010,6 +998,7 @@ batch_mode_file_open( char * name,
     }
     else
     {
+        struct stat stat_buf;
         if ( 0 == stat( name, &stat_buf ) )
         {
             do
@@ -1074,6 +1063,8 @@ batch_mode_file_open( char * name,
        close all files and get rid of memory for the file names, thus we save
        the current EDL.File_List before we try to reallocate */
 
+    File_List_T * volatile old_File_List = NULL;
+
     if ( EDL.File_List )
     {
         old_File_List = T_malloc( EDL.File_List_Len * sizeof *old_File_List );
@@ -1124,10 +1115,6 @@ batch_mode_file_open( char * name,
 Var_T *
 f_delf( Var_T * v )
 {
-    long file_num;
-    File_List_T * fl;
-
-
     /* Neither stdout nor stderr an be deleted */
 
     if (    v
@@ -1158,6 +1145,8 @@ f_delf( Var_T * v )
         }
     }
 
+    long file_num;
+
     if ( v )
         file_num = v->val.lval - FILE_NUMBER_OFFSET;
     else if ( ! No_File_Numbers && EDL.File_List_Len > 2 )
@@ -1175,7 +1164,7 @@ f_delf( Var_T * v )
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
 
-    fl = EDL.File_List + file_num;
+    File_List_T * fl = EDL.File_List + file_num;
 
     if ( ! fl->gzip && fl->fp )
     {
@@ -1201,19 +1190,16 @@ f_delf( Var_T * v )
  * family of functions.
  *---------------------------------------------------------------------*/
 
-static int
+static
+int
 get_save_file( Var_T ** v )
 {
-    Var_T *get_file_ptr;
-    Var_T *file;
-    long file_num;
-    int acc;
-
-
     /* If the first argument is an integer variable and has the value 1
        or 2 return the index for stdout or stderr - but only if they have
        been "opened" either via an explicit call of f_openf() with 1 or 2
        as the single argument. */
+
+    long file_num;
 
     if (    *v
          && ( *v )->type == INT_VAR
@@ -1248,8 +1234,8 @@ get_save_file( Var_T ** v )
 
         No_File_Numbers = false;
 
-        get_file_ptr = func_get( "get_file", &acc );
-        file = func_call( get_file_ptr );         /* get the file name */
+        Var_T *get_file_ptr = func_get( "get_file", NULL );
+        Var_T * file = func_call( get_file_ptr );      /* get the file name */
 
         No_File_Numbers = true;
 
@@ -1314,16 +1300,13 @@ get_save_file( Var_T ** v )
 void
 close_all_files( void )
 {
-    int i;
-
-
     /* Return immediately if only the file entries for stdout and stderr
        are in the list */
 
     if ( EDL.File_List_Len == 2 )
         return;
 
-    for ( i = 2; i < EDL.File_List_Len; i++ )
+    for ( int i = 2; i < EDL.File_List_Len; i++ )
     {
         if ( ! EDL.File_List[ i ].gzip && EDL.File_List[ i ].fp )
             fclose( EDL.File_List[ i ].fp );
@@ -1353,14 +1336,10 @@ close_all_files( void )
 Var_T *
 f_save( Var_T * v )
 {
-    long file_num;
-    long count = 0;
-    char *sep = NULL;
-
-
     /* Check if there's a separator character for arrays as the very
        first argument */
 
+    char *sep = NULL;
     if ( v->type == STR_VAR )
     {
         sep = T_strdup( v->val.sptr );
@@ -1369,7 +1348,8 @@ f_save( Var_T * v )
 
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( ! v )
@@ -1377,6 +1357,8 @@ f_save( Var_T * v )
         print( WARN, "Missing arguments.\n" );
         return vars_push( INT_VAR, 0L );
     }
+
+    long count = 0;
 
     do
     {
@@ -1426,14 +1408,14 @@ f_save( Var_T * v )
  * a line and the newline character only gets appended to the end.
  *-------------------------------------------------------------------------*/
 
-static long
+static
+long
 arr_save( const char * sep,
           long         file_num,
           Var_T      * v )
 {
-    ssize_t i;
     long count = 0;
-
+    ssize_t i;
 
     switch ( v->type )
     {
@@ -1493,12 +1475,10 @@ arr_save( const char * sep,
 Var_T *
 f_fsave( Var_T * v )
 {
-    long file_num;
-
-
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( ! v )
@@ -1526,19 +1506,18 @@ f_fsave( Var_T * v )
  * a format string that can be passed to fprintf()'s format string.
  *-------------------------------------------------------------------------*/
 
-static void
+static
+void
 f_format_check( Var_T * v )
 {
-    char *cp;
-    Var_T *cv;
-    ptrdiff_t s2c;
-
-
     /* Clean up the format string, especially replace the '#' characters with
        the appropriate conversion specifiers */
 
-    for ( cp = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
+    Var_T * cv = v->next;
+    for ( char * cp = v->val.sptr; *cp != '\0'; cp++ )
     {
+        ptrdiff_t s2c;
+
         if ( *cp == '%' )                 /* '%' must be replaced by "%%" */
         {
             s2c = cp - v->val.sptr;
@@ -1644,12 +1623,10 @@ f_format_check( Var_T * v )
 Var_T *
 f_ffsave( Var_T * v )
 {
-    long file_num;
-
-
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( ! v )
@@ -1679,12 +1656,12 @@ f_ffsave( Var_T * v )
  * superfluous arguments are discarded).
  *--------------------------------------------------------------------------*/
 
-static void
+static
+void
 ff_format_check( Var_T * v )
 {
     const char *sptr = v->val.sptr;
     Var_T *vptr = v->next;
-
 
     /* Replace escape characters in the format string */
 
@@ -1885,24 +1862,17 @@ ff_format_check( Var_T * v )
  * the number of character written.
  *-----------------------------------------------------------------------*/
 
-static long
+static
+long
 do_printf( long    file_num,
            Var_T * v )
 {
-    char * fmt_start;
-    char * volatile fmt_end;
-    char * volatile sptr;
-    Var_T * volatile cv;
     long volatile count = 0;
-    char store;
-    int need_vars;
-    int need_type;
-
-
-    sptr = v->val.sptr;
-    fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
+    char * volatile sptr = v->val.sptr;
+    char * fmt_start = T_malloc( strlen( sptr ) + 2 );
+    char * volatile fmt_end = fmt_start;
     strcpy( fmt_start, sptr );
-    cv = v->next;
+    Var_T * volatile cv = v->next;
 
     TRY
     {
@@ -1924,7 +1894,7 @@ do_printf( long    file_num,
             fmt_end++;
         }
 
-        store = *fmt_end;
+        char store = *fmt_end;
         *fmt_end = '\0';
 
         if ( fmt_start != fmt_end )
@@ -1945,10 +1915,10 @@ do_printf( long    file_num,
            and ending just before the next one until the end of the format
            string has been reached */
 
-        while ( 1 )
+        while ( true )
         {
-            need_vars = 0;                  /* how many arguments are needed */
-            need_type = -1;                 /* type of the argument to print */
+            int need_vars = 0;              /* how many arguments are needed */
+            int need_type = -1;             /* type of the argument to print */
 
             /* Skip over flags */
 
@@ -2195,12 +2165,10 @@ do_printf( long    file_num,
 Var_T *
 f_save_p( Var_T * v )
 {
-    long file_num;
-
-
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( v )
@@ -2228,12 +2196,10 @@ f_save_p( Var_T * v )
 Var_T *
 f_save_o( Var_T * v )
 {
-    long file_num;
-
-
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( v )
@@ -2257,25 +2223,24 @@ f_save_o( Var_T * v )
  * 3. Comment string to prepend to each line
  *---------------------------------------------------------------------*/
 
-static long
+static
+long
 print_browser( int          browser,
                int          fid,
                const char * comment )
 {
-    char *line;
-    char *lp, *cp;
-    long count;
-
-
     writer( browser ==  0 ? C_PROG : C_OUTPUT );
     if ( ! comment )
         comment = "";
-    count = T_fprintf( fid, "%s\n", comment );
 
-    while ( 1 )
+    long count = T_fprintf( fid, "%s\n", comment );
+
+    while ( true )
     {
+        char *line;
         reader( &line );
-        lp = line;
+
+        char * lp = line;
         if ( line )
         {
             if ( browser == 0 )
@@ -2283,7 +2248,7 @@ print_browser( int          browser,
                 while ( *lp++ != ':' )
                     /* empty */ ;
 
-                cp = lp++;
+                char * cp = lp++;
                 while ( *cp == ' ' || *cp == '\t' )
                     cp++;
                 if ( ! strncmp( cp, "#INCLUDE", 8 ) )
@@ -2322,21 +2287,15 @@ print_browser( int          browser,
                                         value in fsc2_clean.l */
 #define PRINT_BUF_SIZE 1025
 
-static long
+static
+long
 print_include( int          fid,
                char       * volatile cp,
                const char * volatile   comment,
                const char  * cur_file )
 {
-    char volatile delim = '\0';
-    char * ep;
-    FILE * finc = NULL;
-    char buf[ PRINT_BUF_SIZE ];
     static long count;
     static int level;
-    char * volatile file_name = NULL;
-    struct passwd *pwe;
-
 
     if ( ! strcmp( cur_file, EDL.files->name ) )
     {
@@ -2358,8 +2317,8 @@ print_include( int          fid,
 
     /* Try to extract the file name */
 
-    ep = cp++;
-    delim = *ep++;
+    char * ep = cp++;
+    char volatile delim = *ep++;
 
     if ( delim != '"' && delim != '<' )
     {
@@ -2391,6 +2350,8 @@ print_include( int          fid,
        a name or a relative path we prepend the name of the directory the
        EDL file is from in which we found the '#INCLUDE' directive. */
 
+    char * volatile file_name = NULL;
+
     TRY
     {
         if ( delim == '"' )
@@ -2399,7 +2360,7 @@ print_include( int          fid,
                 file_name = T_strdup( cp );
             else if ( *cp == '~' && cp[ 1 ] == '/' )
             {
-                pwe = getpwuid( getuid( ) );
+                struct passwd *pwe = getpwuid( getuid( ) );
                 file_name = T_malloc( strlen( pwe->pw_dir ) + strlen( cp ) );
                 strcpy( file_name, pwe->pw_dir );
                 strcat( file_name, cp + 1 );
@@ -2439,7 +2400,8 @@ print_include( int          fid,
 
     /* Try to open the include file, give up on failure */
 
-    if ( ! ( finc = fopen( file_name, "r" ) ) )
+    FILE * finc = fopen( file_name, "r" );
+    if ( ! finc )
     {
         level--;
         T_free( file_name );
@@ -2454,6 +2416,7 @@ print_include( int          fid,
         count = T_fprintf( fid, "%s// --- %c%s%c starts here --------------\n",
                            comment, delim == '"' ? '"' : '<', cp, delim );
 
+        char buf[ PRINT_BUF_SIZE ];
         while ( fgets( buf, PRINT_BUF_SIZE, finc ) )
         {
             count += T_fprintf( fid, "%s%s", comment, buf );
@@ -2498,7 +2461,6 @@ print_include( int          fid,
 Var_T *
 f_save_c( Var_T * v )
 {
-    long file_num;
     const char *cc = NULL;
     char *c = NULL,
          *l = NULL,
@@ -2508,7 +2470,8 @@ f_save_c( Var_T * v )
 
     /* Determine the file identifier */
 
-    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+    long file_num = get_save_file( &v );
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, 0L );
 
     if ( Fsc2_Internals.mode == TEST )
@@ -2593,23 +2556,17 @@ f_save_c( Var_T * v )
 
 #define BUFFER_SIZE_GUESS 128       /* guess for number of characters needed */
 
-static long
+static
+long
 T_fprintf( long         fn,
            const char * fmt,
            ... )
 {
-    long to_write;                       /* number of bytes we need to write */
     long size = BUFFER_SIZE_GUESS;
     char initial_buffer[ BUFFER_SIZE_GUESS ];
     char *p = initial_buffer;
     long file_num = fn;
-    va_list ap;
-    struct stat stat_buf;
-    char *mess;
-    long count;
-    long written = 0;
     File_List_T *fl = EDL.File_List  + file_num - FILE_NUMBER_OFFSET;
-
 
     /* If the file has been closed because of insufficient space just don't
        print */
@@ -2642,10 +2599,13 @@ T_fprintf( long         fn,
        that is local to the function and only start calling memory allocation
        functions if the original buffer isn't large enough. */
 
-    while ( 1 )
+    long to_write;
+
+    while ( true )
     {
         /* Try to print into the allocated space */
 
+        va_list ap;
         va_start( ap, fmt );
         to_write = vsnprintf( p, size, fmt, ap );
         va_end( ap );
@@ -2685,6 +2645,9 @@ T_fprintf( long         fn,
 
     /* Now we try to write the string to the file */
 
+    long count;
+    long written = 0;
+
  get_repeat_write:
 
     count = fl->gzip ? gzwrite( fl->gp, p + written, to_write - written)
@@ -2720,13 +2683,14 @@ T_fprintf( long         fn,
     /* Couldn't write as many bytes as needed, disk is probably full.
        Ask the user to elete some files and try again. */
 
-    mess = get_string( "Disk full while writing to file\n%s\n"
-                       "Please delete some files.", fl->name );
+    char * mess = get_string( "Disk full while writing to file\n%s\n"
+                              "Please delete some files.", fl->name );
     show_message( mess );
     T_free( mess );
 
     /* If the user deleted the file we're currently writing to delete it */
 
+    struct stat stat_buf;
     if ( stat( fl->name, &stat_buf ) == -1 )
     {
         if ( p != initial_buffer )

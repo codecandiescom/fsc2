@@ -44,24 +44,18 @@ static Var_T * f_mchanged_child( Var_T * v );
 Var_T *
 f_mcreate( Var_T * volatile var )
 {
-    Var_T * volatile v = var;
-    Var_T * lv;
-    volatile long num_strs = 0;
-    size_t len = 0;
-    Iobject_T * volatile new_io = NULL;
-    Iobject_T * volatile ioi = NULL;
-    long i;
-
-
     /* At least a label and one menu entry must be specified */
 
+    Var_T * volatile v = var;
     if ( v == NULL || v->next == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
         THROW( EXCEPTION );
     }
 
-    for ( lv = v; lv != NULL; num_strs++, lv = lv->next )
+    size_t len = 0;
+    volatile long num_strs = 0;
+    for ( Var_T * lv = v; lv != NULL; num_strs++, lv = lv->next )
     {
         if ( lv->type != STR_VAR )
         {
@@ -81,6 +75,8 @@ f_mcreate( Var_T * volatile var )
     if ( Toolbox == NULL )
         toolbox_create( VERT );
 
+    Iobject_T * volatile new_io = NULL;
+    Iobject_T * volatile ioi = NULL;
     TRY
     {
         new_io = T_malloc( sizeof *new_io );
@@ -121,10 +117,9 @@ f_mcreate( Var_T * volatile var )
         new_io->menu_items = T_malloc(   new_io->num_items
                                        * sizeof *new_io->menu_items );
 
-        for  ( i = 0; i < new_io->num_items; i++ )
+        for  ( long i = 0; i < new_io->num_items; i++ )
             new_io->menu_items[ i ] = NULL;
-        for ( i = 0; v != NULL && i < new_io->num_items;
-              i++, v = vars_pop( v ) )
+        for ( long i = 0; v && i < new_io->num_items; i++, v = vars_pop( v ) )
             new_io->menu_items[ i ] = T_strdup( v->val.sptr );
 
         TRY_SUCCESS;
@@ -136,7 +131,7 @@ f_mcreate( Var_T * volatile var )
             T_free( new_io->label );
             if ( new_io->menu_items != NULL )
             {
-                for ( i = 0; i < new_io->num_items; i++ )
+                for ( long i = 0; i < new_io->num_items; i++ )
                     T_free( new_io->menu_items[ i ] );
                 T_free( new_io->menu_items );
             }
@@ -166,26 +161,20 @@ f_mcreate( Var_T * volatile var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_mcreate_child( Var_T  * v,
                  size_t   len,
                  long     num_strs )
 {
-    char *buffer,
-         *pos;
-    long new_ID;
-    long *result;
-    size_t l;
-
-
     len += sizeof EDL.Lc + sizeof num_strs;
-
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -195,7 +184,7 @@ f_mcreate_child( Var_T  * v,
 
     if ( EDL.Fname )
     {
-        l = strlen( EDL.Fname ) + 1;
+        size_t l = strlen( EDL.Fname ) + 1;
         memcpy( pos, EDL.Fname, l );           /* current file name */
         pos += l;
     }
@@ -204,7 +193,7 @@ f_mcreate_child( Var_T  * v,
 
     for ( ; v != NULL; v = v->next )
     {
-        l = strlen( v->val.sptr ) + 1;
+        size_t l = strlen( v->val.sptr ) + 1;
         memcpy( pos, v->val.sptr, l );
         pos += l;
     }
@@ -213,7 +202,7 @@ f_mcreate_child( Var_T  * v,
        a buffer with two longs, the first one indicating success or failure (1
        or 0), the second being the new objects ID */
 
-    result = exp_mcreate( buffer, pos - buffer );
+    long * result = exp_mcreate( buffer, pos - buffer );
 
     if ( result[ 0 ] == 0 )      /* failure -> bomb out */
     {
@@ -221,7 +210,7 @@ f_mcreate_child( Var_T  * v,
         THROW( EXCEPTION );
     }
 
-    new_ID = result[ 1 ];
+    long new_ID = result[ 1 ];
     T_free( result );           /* free result buffer */
 
     return vars_push( INT_VAR, new_ID );
@@ -255,37 +244,28 @@ f_madd( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void
+static
+void
 f_madd_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    size_t l;
-    long ID;
-    long add_count;
-    Var_T *ev;
-
-
     /* Very basic sanity check */
 
-    ID = get_strict_long( v, "menu ID" );
-
+    long ID = get_strict_long( v, "menu ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid menu identifier.\n" );
         THROW( EXCEPTION );
     }
 
-    len = sizeof EDL.Lc + sizeof v->val.lval + sizeof add_count;
+    long add_count = 0;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval + sizeof add_count;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    for ( add_count = 0, ev = v = vars_pop( v ); ev != NULL;
-          ev = ev->next, add_count++ )
+    for ( Var_T * ev = v = vars_pop( v ); ev; ev = ev->next, add_count++ )
     {
         if ( ev->type != STR_VAR )
         {
@@ -297,7 +277,8 @@ f_madd_child( Var_T * v )
         len += strlen( ev->val.sptr ) + 1;
     }
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -318,7 +299,7 @@ f_madd_child( Var_T * v )
 
     for ( ; v != NULL; v = v->next )
     {
-        l = strlen( v->val.sptr ) + 1;
+        size_t l = strlen( v->val.sptr ) + 1;
         memcpy( pos, v->val.sptr, l );
         pos += l;
     }
@@ -333,15 +314,10 @@ f_madd_child( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void
+static
+void
 f_madd_parent( Var_T * v )
 {
-    Iobject_T *io;
-    long i;
-    long add_count = 0;
-    Var_T *ev;
-
-
     /* No tool box -> no menu we could add entries to */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -352,7 +328,7 @@ f_madd_parent( Var_T * v )
 
     /* Check that menu with the ID exists */
 
-    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
     if ( io == NULL || io->type != MENU )
     {
@@ -360,8 +336,8 @@ f_madd_parent( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    for ( add_count = 0, ev = v = vars_pop( v ); ev != NULL;
-          add_count++, ev = ev->next )
+    long add_count = 0;
+    for ( Var_T  * ev = v = vars_pop( v ); ev; add_count++, ev = ev->next )
         if ( ev->type != STR_VAR )
         {
             print( FATAL, "Invalid argument, new entries to be added must "
@@ -373,10 +349,10 @@ f_madd_parent( Var_T * v )
     io->menu_items = T_realloc( io->menu_items,
                                 io->num_items * sizeof *io->menu_items );
 
-    for  ( i = io->num_items - add_count; i < io->num_items; i++ )
+    for  ( long i = io->num_items - add_count; i < io->num_items; i++ )
         io->menu_items[ i ] = NULL;
 
-    for ( i = io->num_items - add_count; v != NULL && i < io->num_items;
+    for ( long i = io->num_items - add_count; v && i < io->num_items;
           i++, v = vars_pop( v ) )
     {
         io->menu_items[ i ] = T_strdup( v->val.sptr );
@@ -431,21 +407,13 @@ f_mtext( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_mtext_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    long ID;
-    long item;
-    char *result;
-
-
     /* Basic check of menu identifier - always the first parameter */
 
-    ID = get_strict_long( v, "menu ID" );
-
+    long ID = get_strict_long( v, "menu ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid menu identifier.\n" );
@@ -456,7 +424,7 @@ f_mtext_child( Var_T * v )
 
     /* Get and rudimentarily check the second required argument */
 
-    item = get_strict_long( v, "menu item number" );
+    long item = get_strict_long( v, "menu item number" );
 
     if ( item <= 0 )
     {
@@ -466,7 +434,7 @@ f_mtext_child( Var_T * v )
 
     v = vars_pop( v );
 
-    len = sizeof EDL.Lc + 2 * sizeof( long );
+    size_t len = sizeof EDL.Lc + 2 * sizeof( long );
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
@@ -478,7 +446,8 @@ f_mtext_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char *buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -508,7 +477,7 @@ f_mtext_child( Var_T * v )
     /* Ask parent process to return or set the menu items text - bomb out if
        it returns NULL, indicating a severe error */
 
-    result = exp_mtext( buffer, pos - buffer );
+    char * result = exp_mtext( buffer, pos - buffer );
 
     if ( result == NULL )                       /* failure -> bomb out */
     {
@@ -526,13 +495,10 @@ f_mtext_child( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_mtext_parent( Var_T *v )
 {
-    Iobject_T *io;
-    long item;
-
-
     /* No tool box -> no menu we could add entries to */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -543,7 +509,7 @@ f_mtext_parent( Var_T *v )
 
     /* Check that menu with the ID exists */
 
-    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
     if ( io == NULL || io->type != MENU )
     {
@@ -555,7 +521,7 @@ f_mtext_parent( Var_T *v )
 
     /* Get the item number and check for validity */
 
-    item = get_strict_long( v, "menu item number" );
+    long item = get_strict_long( v, "menu item number" );
 
     if ( item <= 0 )
     {
@@ -632,18 +598,13 @@ f_mdelete( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void
+static
+void
 f_mdelete_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    long ID;
-
-
     /* Very basic sanity check */
 
-    ID = get_strict_long( v, "menu ID" );
+    long ID = get_strict_long( v, "menu ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -651,14 +612,15 @@ f_mdelete_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    len = sizeof EDL.Lc + sizeof v->val.lval;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -686,13 +648,10 @@ f_mdelete_child( Var_T * v )
  * process, which actually removes the menu.
  *---------------------------------------------------------*/
 
-static void
+static
+void
 f_mdelete_parent( Var_T * v )
 {
-    Iobject_T *io;
-    long i;
-
-
     /* No tool box -> no menu to delete */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -703,7 +662,7 @@ f_mdelete_parent( Var_T * v )
 
     /* Check that menu with the ID exists */
 
-    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
     if ( io == NULL || io->type != MENU )
     {
@@ -729,7 +688,7 @@ f_mdelete_parent( Var_T * v )
     }
 
     T_free( ( void * ) io->label );
-    for ( i = 0; i < io->num_items; i++ )
+    for ( long i = 0; i < io->num_items; i++ )
         T_free( ( void * ) io->menu_items[ i ] );
     T_free( io->menu_items );
     T_free( io );
@@ -756,10 +715,6 @@ f_mdelete_parent( Var_T * v )
 Var_T *
 f_mchoice( Var_T * v )
 {
-    Iobject_T *io;
-    long select_item = 0;
-
-
     /* We need at least the ID of the menu */
 
     if ( v == NULL )
@@ -784,7 +739,7 @@ f_mchoice( Var_T * v )
 
     /* Check the menu ID parameter */
 
-    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
     if ( io == NULL || io->type != MENU )
     {
@@ -802,7 +757,7 @@ f_mchoice( Var_T * v )
 
     /* The optional second argument is the menu item to be set */
 
-    select_item = get_strict_long( v, "menu item number" );
+    long select_item  = get_strict_long( v, "menu item number" );
 
     /* A number less than 1 can only happen during the testing stage and
        we bomb out */
@@ -849,21 +804,13 @@ f_mchoice( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_mchoice_child( Var_T * v )
 {
-    long ID;
-    char *buffer,
-         *pos;
-    size_t len;
-    long *result;
-    long select_item = 0;
-
-
     /* Basic check of menu identifier - always the first parameter */
 
-    ID = get_strict_long( v, "menu ID" );
-
+    long ID = get_strict_long( v, "menu ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid menu identifier.\n" );
@@ -872,6 +819,7 @@ f_mchoice_child( Var_T * v )
 
     /* If there's a second parameter it's the item in the menu to set */
 
+    long select_item = 0;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         select_item = get_strict_long( v, "menu item number" );
@@ -893,14 +841,15 @@ f_mchoice_child( Var_T * v )
 
     /* Make up buffer to send to parent process */
 
-    len = sizeof EDL.Lc + sizeof ID + sizeof select_item;
+    size_t len = sizeof EDL.Lc + sizeof ID + sizeof select_item;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -923,7 +872,7 @@ f_mchoice_child( Var_T * v )
     /* Ask parent process to return or set the menu item - bomb out if it
        returns a non-positive value, indicating a severe error */
 
-    result = exp_mchoice( buffer, pos - buffer );
+    long * result = exp_mchoice( buffer, pos - buffer );
 
     if ( result[ 0 ] == 0 )      /* failure -> bomb out */
     {
@@ -945,9 +894,6 @@ f_mchoice_child( Var_T * v )
 Var_T *
 f_mchanged( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* We need at least the ID of the menu */
 
     if ( v == NULL )
@@ -972,7 +918,7 @@ f_mchanged( Var_T * v )
 
     /* Check the menu ID parameter */
 
-    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
     if ( io == NULL || io->type != MENU )
     {
@@ -990,20 +936,13 @@ f_mchanged( Var_T * v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_mchanged_child( Var_T * v )
 {
-    long ID;
-    char *buffer,
-         *pos;
-    size_t len;
-    long *result;
-    long changed;
-
-
     /* Basic check of menu identifier - always the first parameter */
 
-    ID = get_strict_long( v, "menu ID" );
+    long ID = get_strict_long( v, "menu ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -1013,12 +952,13 @@ f_mchanged_child( Var_T * v )
 
     /* Make up buffer to send to parent process */
 
-    len = sizeof EDL.Lc + sizeof ID + 1;
+    size_t len = sizeof EDL.Lc + sizeof ID + 1;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
-    pos = buffer = T_malloc( len );
+    char *buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -1037,7 +977,7 @@ f_mchanged_child( Var_T * v )
     /* Ask parent process if the selected item changed - bomb out if it
        returns a non-positive value, indicating a severe error */
 
-    result = exp_mchanged( buffer, pos - buffer );
+    long * result = exp_mchanged( buffer, pos - buffer );
 
     if ( result[ 0 ] == 0 )      /* failure -> bomb out */
     {
@@ -1045,7 +985,7 @@ f_mchanged_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    changed = result[ 1 ];
+    long changed = result[ 1 ];
     T_free( result );           /* free result buffer */
 
     return vars_push( INT_VAR, changed );

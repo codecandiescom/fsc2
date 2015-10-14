@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -42,20 +42,9 @@ static Var_T *f_ochanged_child( Var_T * v );
 Var_T *
 f_ocreate( Var_T * var )
 {
-    Var_T * volatile v = var;
-    volatile Iobject_Type_T type;
-    char * volatile label = NULL;
-    char * volatile help_text = NULL;
-    char * volatile form_str = NULL;
-    Iobject_T * volatile new_io = NULL;
-    Iobject_T * ioi;
-    long volatile lval = 0;
-    double volatile dval = 0.0;
-    char * volatile sptr = NULL;
-
-
     /* At least the type of the input or output object must be specified */
 
+    Var_T * volatile v = var;
     if ( v == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
@@ -67,6 +56,7 @@ f_ocreate( Var_T * var )
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
+    volatile Iobject_Type_T type;
     if ( v->type == INT_VAR || v->type == FLOAT_VAR )
     {
         type = get_strict_long( v, "input or output object type" )
@@ -102,6 +92,9 @@ f_ocreate( Var_T * var )
     /* Next argument could be a value to be set in the input or output
        object */
 
+    long   volatile lval = 0;
+    double volatile dval = 0.0;
+    char * volatile sptr = NULL;
     if ( ( v = vars_pop( v ) ) != NULL )
     {
         switch ( v->type )
@@ -173,6 +166,7 @@ f_ocreate( Var_T * var )
 
     /* Next argument is the label string */
 
+    char * volatile label = NULL;
     if ( v != NULL )
     {
         vars_check( v, STR_VAR );
@@ -196,6 +190,7 @@ f_ocreate( Var_T * var )
 
     /* Next argument can be a help text */
 
+    char * volatile help_text = NULL;
     if ( v != NULL )
     {
         TRY
@@ -218,6 +213,7 @@ f_ocreate( Var_T * var )
 
     /* Final argument can be a C format string */
 
+    char * volatile form_str = NULL;
     if ( v != NULL )
     {
         TRY
@@ -257,6 +253,8 @@ f_ocreate( Var_T * var )
     /* Now that we're done with checking the parameters we can create the new
        input or output field - if the Toolbox doesn't exist yet we've got to
        create it now */
+
+    Iobject_T * volatile new_io = NULL;
 
     TRY
     {
@@ -301,7 +299,8 @@ f_ocreate( Var_T * var )
     }
     else
     {
-        for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
+        Iobject_T * ioi;
+        for ( ioi = Toolbox->objs; ioi->next; ioi = ioi->next )
             /* empty */ ;
         ioi->next = new_io;
         new_io->prev = ioi;
@@ -340,24 +339,19 @@ f_ocreate( Var_T * var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_ocreate_child( Var_T          * v,
                  Iobject_Type_T   type,
                  long             lval,
                  double           dval,
                  char           * sptr )
 {
-    char *buffer,
-         *pos;
-    long new_ID;
-    long *result;
-    size_t len;
+    /* First argument is the label string */
+
     char *label = NULL;
     char *help_text = NULL;
     char *form_str = NULL;
-
-
-    /* Next argument is the label string */
 
     if ( v != NULL )
     {
@@ -394,7 +388,7 @@ f_ocreate_child( Var_T          * v,
 
     /* Calculate length of buffer needed */
 
-    len = sizeof EDL.Lc + sizeof type;
+    size_t len = sizeof EDL.Lc + sizeof type;
 
     if ( type == INT_INPUT || type == INT_OUTPUT )
         len += sizeof lval;
@@ -423,7 +417,8 @@ f_ocreate_child( Var_T          * v,
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -491,15 +486,14 @@ f_ocreate_child( Var_T          * v,
        object. It returns a buffer with two longs, the first one indicating
        success or failure (1 or 0), the second being the objects ID */
 
-    result = exp_icreate( buffer, pos - buffer );
-
+    long * result = exp_icreate( buffer, pos - buffer );
     if ( result[ 0 ] == 0 )      /* failure -> bomb out */
     {
         T_free( result );
         THROW( EXCEPTION );
     }
 
-    new_ID = result[ 1 ];
+    long new_ID = result[ 1 ];
     T_free( result );           /* free result buffer */
 
     return vars_push( INT_VAR, new_ID );
@@ -556,18 +550,13 @@ f_odelete( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void
+static
+void
 f_odelete_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    long ID;
-
-
     /* Do all possible checks on the parameter */
 
-    ID = get_strict_long( v, "input or output object ID" );
+    long ID = get_strict_long( v, "input or output object ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -577,14 +566,15 @@ f_odelete_child( Var_T * v )
 
     /* Get a bufer long enough and write data */
 
-    len = sizeof EDL.Lc + sizeof v->val.lval;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
     pos += sizeof EDL.Lc;
@@ -612,12 +602,10 @@ f_odelete_child( Var_T * v )
  * which actually removes the input or output object.
  *------------------------------------------------------------------*/
 
-static void
+static
+void
 f_odelete_parent( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* No tool box -> no objects -> no objects to delete... */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -628,8 +616,9 @@ f_odelete_parent( Var_T * v )
 
     /* Do checks on parameters */
 
-    io = find_object_from_ID( get_strict_long( v,
-                                               "input or output object ID" ) );
+    Iobject_T * io =
+        find_object_from_ID( get_strict_long( v,
+                                              "input or output object ID" ) );
 
     if ( io == NULL || ! IS_INOUTPUT( io->type ) )
     {
@@ -684,10 +673,6 @@ f_odelete_parent( Var_T * v )
 Var_T *
 f_ovalue( Var_T * v )
 {
-    Iobject_T *io;
-    char buf[ MAX_INPUT_CHARS + 1 ];
-
-
     /* We need at least the objects ID */
 
     if ( v == NULL )
@@ -712,8 +697,9 @@ f_ovalue( Var_T * v )
 
     /* Check that ID is ID of an input or output object */
 
-    io = find_object_from_ID( get_strict_long( v,
-                                               "input or output object ID" ) );
+    Iobject_T *io =
+        find_object_from_ID( get_strict_long( v,
+                                              "input or output object ID" ) );
 
     if ( io == NULL || ! IS_INOUTPUT( io->type ) )
     {
@@ -783,6 +769,8 @@ f_ovalue( Var_T * v )
 
     if ( Fsc2_Internals.mode != TEST )
     {
+        char buf[ MAX_INPUT_CHARS + 1 ];
+
         if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
             snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
         else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
@@ -810,23 +798,13 @@ f_ovalue( Var_T * v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_ovalue_child( Var_T * v )
 {
-    long ID;
-    long state = 0;
-    long lval = 0;
-    double dval = 0.0;
-    char *sptr = NULL;
-    char *buffer,
-         *pos;
-    Input_Res_T *input_res;
-    size_t len;
-
-
     /* Very basic sanity check... */
 
-    ID = get_strict_long( v, "input or output object ID" );
+    long ID = get_strict_long( v, "input or output object ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -836,6 +814,10 @@ f_ovalue_child( Var_T * v )
 
     /* Another argument means that the objects value is to be set */
 
+    long state = 0;
+    long lval = 0;
+    double dval = 0.0;
+    char * sptr = NULL;
     if ( ( v = vars_pop( v ) ) != NULL )
         switch ( v->type )
         {
@@ -862,7 +844,7 @@ f_ovalue_child( Var_T * v )
 
     too_many_arguments( v );
 
-    len = sizeof EDL.Lc + sizeof ID + sizeof state;
+    size_t len = sizeof EDL.Lc + sizeof ID + sizeof state;
     if ( state == 0 || state == INT_VAR )
         len += sizeof lval;
     else if ( state == FLOAT_VAR )
@@ -875,7 +857,8 @@ f_ovalue_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -917,7 +900,7 @@ f_ovalue_child( Var_T * v )
        union for the return value, i.e. the objects value or a pointer to
        a string. */
 
-    input_res = exp_istate( buffer, pos - buffer );
+    Input_Res_T * input_res = exp_istate( buffer, pos - buffer );
 
     /* Bomb out on failure */
 
@@ -955,9 +938,6 @@ f_ovalue_child( Var_T * v )
 Var_T *
 f_ochanged( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* We need at least the objects ID */
 
     if ( v == NULL )
@@ -982,8 +962,9 @@ f_ochanged( Var_T * v )
 
     /* Check that the ID is one of an input or output object */
 
-    io = find_object_from_ID( get_strict_long( v,
-                                               "input or output object ID" ) );
+    Iobject_T * io =
+        find_object_from_ID( get_strict_long( v,
+                                              "input or output object ID" ) );
 
     if ( io == NULL || ! IS_INOUTPUT( io->type ) )
     {
@@ -1001,32 +982,26 @@ f_ochanged( Var_T * v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_ochanged_child( Var_T * v )
 {
-    long ID;
-    long changed;
-    char *buffer,
-         *pos;
-    long *res;
-    size_t len;
-
-
     /* Very basic sanity check... */
 
-    ID = get_strict_long( v, "input or output object ID" );
+    long ID = get_strict_long( v, "input or output object ID" );
     if ( ID < ID_OFFSET )
     {
         print( FATAL, "Invalid input or output object identifier.\n" );
         THROW( EXCEPTION );
     }
 
-    len = sizeof EDL.Lc + sizeof ID + 1;
+    size_t len = sizeof EDL.Lc + sizeof ID + 1;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -1042,7 +1017,7 @@ f_ochanged_child( Var_T * v )
     else
         *pos++ = '\0';
 
-    res = exp_ichanged( buffer, pos - buffer );
+    long * res = exp_ichanged( buffer, pos - buffer );
 
     /* Bomb out on failure */
 
@@ -1052,7 +1027,7 @@ f_ochanged_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    changed = res[ 1 ];
+    long changed = res[ 1 ];
     T_free( res );
 
     return vars_push( INT_VAR, changed );

@@ -22,46 +22,45 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include "fsc2_config.h"
-
-
-#define MAX_FILE_LEN 256
-#define MAX_ADDR_LEN 20
-#define MAX_BUF      1024
 
 
 static char *get_string( const char * /* fmt */,
 						 ... );
 
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+#define MAX_FILE_LEN 256
+#define MAX_ADDR_LEN 20
+#define MAX_BUF      1024
+
 int
 main( void )
 {
-	FILE *fp;
-	char file[ MAX_FILE_LEN ];
-	char addr[ MAX_ADDR_LEN ];
-	char buf[ MAX_BUF ];
-	char *cmd;
-
-
-	while ( 1 )
+	while ( true )
 	{
         /* Read in the filename (with full path!) */
 
-		if ( fgets( file, MAX_FILE_LEN, stdin ) == NULL )
+        char file[ MAX_FILE_LEN ];
+		if ( ! fgets( file, MAX_FILE_LEN, stdin ) )
 			return EXIT_SUCCESS;
 		file[ strlen( file ) - 1 ] = '\0';
 
         /* Read in the address */
 
-		if ( fgets( addr, MAX_ADDR_LEN, stdin ) == NULL )
+        char addr[ MAX_ADDR_LEN ];
+		if ( ! fgets( addr, MAX_ADDR_LEN, stdin ) )
 			return EXIT_FAILURE;
 		addr[ strlen( addr ) - 1 ] = '\0';
 
         /* Construct command line to start addr2line and pass it to popen() */
 
-        cmd = get_string( ADDR2LINE " -C -f -e %s %s", file, addr );
+        char * cmd = get_string( ADDR2LINE " -C -f -e %s %s", file, addr );
 
-		if ( ( fp = popen( cmd, "r" ) ) == NULL )
+        FILE *fp = popen( cmd, "r" );
+		if ( ! fp )
 		{
 			free( cmd );
 			return EXIT_FAILURE;
@@ -71,7 +70,8 @@ main( void )
 
         /* Read the output of addr2line and pass it on to the parent */
 
-		if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
+        char buf[ MAX_BUF ];
+		if ( ! fgets( buf, MAX_FILE_LEN, fp ) )
         {
             pclose( fp );
 			return EXIT_FAILURE;
@@ -79,7 +79,7 @@ main( void )
 
 		fprintf( stdout, "%s", buf );
 
-        if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
+        if ( ! fgets( buf, MAX_FILE_LEN, fp ) )
         {
             pclose( fp );
             return EXIT_FAILURE;
@@ -95,22 +95,22 @@ main( void )
 }
 
 
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
 #define GET_STRING_TRY_LENGTH 128
 
-static char *
+static
+char *
 get_string( const char * fmt,
             ... )
 {
-    char *c = NULL;
-	char *tmp;
+    char * c = NULL;
     size_t len = GET_STRING_TRY_LENGTH;
-    va_list ap;
-    int wr;
 
-
-    while ( 1 )
+    while ( true )
     {
-		tmp = c;
+		char * tmp = c;
         c = realloc( c, len );
 		if ( c == NULL )
 		{
@@ -119,8 +119,9 @@ get_string( const char * fmt,
 			exit( EXIT_FAILURE );
 		}
 
+        va_list ap;
         va_start( ap, fmt );
-        wr = vsnprintf( c, len, fmt, ap );
+        int wr = vsnprintf( c, len, fmt, ap );
         va_end( ap );
 
         if ( wr < 0 )         /* indicates not enough space with older glibs */

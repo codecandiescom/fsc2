@@ -22,7 +22,6 @@
 
 
 static double gauss_random( void );
-static double datanh( double arg );
 static void avg_data_check( Var_T * avg,
                             Var_T * data,
                             long    count );
@@ -77,32 +76,33 @@ f_stopsim( Var_T * v  UNUSED_ARG )
 
 
 /*-------------------------------------------------*
- * Conversion float to integer (result is integer)
+ * Conversion from float to integer (result is integer)
  *-------------------------------------------------*/
 
 Var_T *
 f_int( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *dest;
-    double *src;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( INT_VAR, v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval );
 
         case FLOAT_VAR :
-            if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
+            if (    v->val.dval >= LONG_MAX + 0.5
+                 || v->val.dval < LONG_MIN - 0.5 )
+            {
                 print( SEVERE, "Integer argument overflow.\n" );
-            new_var = vars_push( INT_VAR, ( long ) v->val.dval );
-            break;
+                if ( v->val.dval >= 0 )
+                    return vars_push( INT_VAR, LONG_MAX );
+                else
+                    return vars_push( INT_VAR, LONG_MIN );
+            }
+            return vars_push( INT_VAR, ( long ) v->val.dval );
 
         case INT_ARR :
             new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
@@ -111,18 +111,27 @@ f_int( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( INT_ARR, v );
-            for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, src++, dest++ )
+            double * restrict src = v->val.dpnt;
+            long * restrict dest = new_var->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *src > LONG_MAX || *src < LONG_MIN )
+                if ( *src >= LONG_MAX + 0.5 || *src < LONG_MIN - 0.5 )
+                {
                     print( SEVERE, "Integer argument overflow.\n" );
-                *dest = ( long ) *src;
+                    if ( *src++ > 0 )
+                        *dest++ = LONG_MAX;
+                    else
+                        *dest++ = LONG_MIN;
+                }
+                else
+                    *dest++ = *src++;
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -141,36 +150,31 @@ f_int( Var_T * v )
 
 
 /*----------------------------------------------------*
- * Conversion int to floating point (result is float)
+ * Conversion from integer to floating point (result is float)
  *----------------------------------------------------*/
 
 Var_T *
 f_float( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    double *dest;
-    long *src;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, ( double ) v->val.lval );
-            break;
+            return vars_push( FLOAT_VAR, ( double ) v->val.lval );
 
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, v->val.dval );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( src = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, src++, dest++ )
-                *dest = ( double ) *src;
+            long * restrict src = v->val.lpnt;
+            double * restrict dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = *src++;
             break;
 
         case FLOAT_ARR :
@@ -178,9 +182,10 @@ f_float( Var_T * v )
             new_var->flags = v->flags;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -205,27 +210,27 @@ f_float( Var_T * v )
 Var_T *
 f_round( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *dest;
-    double *src;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( INT_VAR, v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval );
 
         case FLOAT_VAR :
             if (    v->val.dval >= LONG_MAX - 0.5
                  || v->val.dval <= LONG_MIN + 0.5 )
+            {
                 print( SEVERE, "Integer argument overflow.\n" );
-            new_var = vars_push( INT_VAR, lrnd( v->val.dval ) );
-            break;
+                if (  v->val.dval >= 0 )
+                    return vars_push( INT_VAR, LONG_MAX );
+                else
+                    return vars_push( INT_VAR, LONG_MIN );
+            }
+            return vars_push( INT_VAR, lrnd( v->val.dval ) );
 
         case INT_ARR :
             new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
@@ -234,18 +239,27 @@ f_round( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( INT_ARR, v );
-            for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, src++, dest++ )
+            double * restrict src = v->val.dpnt;
+            long * restrict dest = new_var->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *src >= LONG_MAX - 0.5 || *src <= LONG_MIN + 0.5 )
+                {
                     print( SEVERE, "Integer argument overflow.\n" );
-                *dest = lrnd( *src );
+                    if ( *src++ >= 0 )
+                        *dest++ = LONG_MAX;
+                    else
+                        *dest++ = LONG_MIN;
+                }
+                else
+                    *dest++ = lrnd( *src++ );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -270,26 +284,23 @@ f_round( Var_T * v )
 Var_T *
 f_floor( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *dest;
-    double *src;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( INT_VAR, v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval );
 
         case FLOAT_VAR :
-            if ( v->val.dval < LONG_MIN )
+            if ( v->val.dval < LONG_MIN - 0.5 )
+            {
                 print( SEVERE, "Integer argument overflow.\n" );
-            new_var = vars_push( INT_VAR, lrnd( floor( v->val.dval )  ) );
-            break;
+                return vars_push( INT_VAR, LONG_MIN );
+            }
+            return vars_push( INT_VAR, lrnd( floor( v->val.dval ) ) );
 
         case INT_ARR :
             new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
@@ -298,18 +309,25 @@ f_floor( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( INT_ARR, v );
-            for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, src++, dest++ )
+            double * restrict src = v->val.dpnt;
+            long * restrict dest = new_var->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *src < LONG_MIN )
+                if ( *src < LONG_MIN - 0.5 )
+                {
                     print( SEVERE, "Integer argument overflow.\n" );
-                *dest = lrnd( floor( *src ) );
+                    *dest++ = LONG_MIN;
+                    src++;
+                }
+                else
+                    *dest++ = floor( *src++ );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -334,26 +352,23 @@ f_floor( Var_T * v )
 Var_T *
 f_ceil( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *dest;
-    double *src;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( INT_VAR, v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval );
 
         case FLOAT_VAR :
             if ( v->val.dval > LONG_MAX )
+            {
                 print( SEVERE, "Integer argument overflow.\n" );
-            new_var = vars_push( INT_VAR, lrnd( ceil( v->val.dval ) ) );
-            break;
+                return vars_push( INT_VAR, LONG_MAX );
+            }
+            return vars_push( INT_VAR, lrnd( ceil( v->val.dval ) ) );
 
         case INT_ARR :
             new_var = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
@@ -362,18 +377,25 @@ f_ceil( Var_T * v )
 
         case FLOAT_ARR :
             new_var = vars_make( INT_ARR, v );
-            for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
-                  i < v->len; i++, src++, dest++ )
+            double * restrict src = v->val.dpnt;
+            long * restrict dest = new_var->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *src > LONG_MAX )
+                {
                     print( SEVERE, "Integer argument overflow.\n" );
-                *dest = lrnd( ceil( *src ) );
+                    *dest++ = LONG_MAX;
+                    src++;
+                }
+                else
+                    *dest++ = ceil( *src++ );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -398,52 +420,53 @@ f_ceil( Var_T * v )
 Var_T *
 f_abs( Var_T * v )
 {
-    Var_T * new_var = NULL;
-    ssize_t i;
-    long * restrict lsrc,
-         * restrict ldest;
-    double * restrict dsrc,
-           * restrict ddest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    bool may_fail = LONG_MAX + LONG_MIN != 0;
 
     switch ( v->type )
     {
         case INT_VAR :
-            if ( v->val.lval == LONG_MIN )
+            if ( may_fail && v->val.lval == LONG_MIN )
+            {
                 print( SEVERE, "Integer argument overflow.\n" );
-            new_var = vars_push( INT_VAR, labs( v->val.lval ) );
-            break;
+                return vars_push( INT_VAR, LONG_MAX );
+            }
+            return vars_push( INT_VAR, labs( v->val.lval ) );
 
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, fabs( v->val.dval ) );
-            break;
+            return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
 
         case INT_ARR :
             new_var = vars_make( INT_ARR, v );
-            lsrc  = v->val.lpnt;
-            ldest = new_var->val.lpnt;
-            for ( i = 0; i < v->len; i++ )
+            long * restrict lsrc  = v->val.lpnt;
+            long * ldest = new_var->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *lsrc == LONG_MIN )
+                if ( may_fail && *lsrc == LONG_MIN )
+                {
                     print( SEVERE, "Integer argument overflow.\n" );
-                *ldest++ = labs( *lsrc++ );
+                    *ldest++ = LONG_MAX;
+                    lsrc++;
+                }
+                else
+                    *ldest++ = labs( *lsrc++ );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            dsrc  = v->val.dpnt;
-            ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            double * restrict dsrc  = v->val.dpnt;
+            double * restrict ddest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = fabs( *dsrc++ );
             break;
 
         case INT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -455,7 +478,7 @@ f_abs( Var_T * v )
 
         case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -483,9 +506,7 @@ f_lmax( Var_T * v )
 {
     double m = - HUGE_VAL;
     bool all_int = true;
-    ssize_t i;
     void *gp;
-
 
     if ( v == NULL )
     {
@@ -512,13 +533,13 @@ f_lmax( Var_T * v )
                 break;
 
             case INT_ARR :
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.lpnt[ i ] > m )
                         m = v->val.lpnt[ i ];
                 break;
 
             case FLOAT_ARR :
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.dpnt[ i ] > m )
                         m = v->val.dpnt[ i ];
                 all_int = false;
@@ -542,7 +563,7 @@ f_lmax( Var_T * v )
         }
     }
 
-    if ( all_int && m <= LONG_MAX && m >= LONG_MIN )
+    if ( all_int && m >= LONG_MIN && m <= LONG_MAX )
         return vars_push( INT_VAR, ( long ) m );
     return vars_push( FLOAT_VAR, m );
 }
@@ -558,9 +579,7 @@ f_lmin( Var_T * v )
 {
     double m = HUGE_VAL;
     bool all_int = true;
-    ssize_t i;
     void *gp;
-
 
     if ( v == NULL )
     {
@@ -587,13 +606,13 @@ f_lmin( Var_T * v )
                 break;
 
             case INT_ARR :
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.lpnt[ i ] < m )
                         m = v->val.lpnt[ i ];
                 break;
 
             case FLOAT_ARR :
-                for ( i = 0; i < v->len; i++ )
+                for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.dpnt[ i ] < m )
                         m = v->val.dpnt[ i ];
                 all_int = false;
@@ -617,7 +636,7 @@ f_lmin( Var_T * v )
         }
     }
 
-    if ( all_int && m <= LONG_MAX && m >= LONG_MIN )
+    if ( all_int && m >= LONG_MIN && m <= LONG_MAX )
         return vars_push( INT_VAR, ( long ) m );
     return vars_push( FLOAT_VAR, m );
 }
@@ -630,42 +649,38 @@ f_lmin( Var_T * v )
 Var_T *
 f_sin( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dest, *dsrc;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    double * restrict dest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, sin( v->val.dval ) );
-            break;
+            return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-                *dest = sin( ( double ) *lsrc );
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = sin( *lsrc++ );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-                *dest = sin( *dsrc );
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = sin( *dsrc++ );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -690,42 +705,38 @@ f_sin( Var_T * v )
 Var_T *
 f_cos( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dest, *dsrc;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
+
+    Var_T * new_var = NULL;
+    double * restrict dest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, cos( v->val.dval ) );
-            break;
+            return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-                *dest = cos( ( double ) *lsrc );
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = cos( *lsrc++ );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-                *dest = cos( *dsrc );
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = cos( *dsrc++ );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -750,52 +761,58 @@ f_cos( Var_T * v )
 Var_T *
 f_tan( Var_T * v )
 {
-    double res;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            res = tan( VALUE( v ) );
-            if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, tan( VALUE( v ) ) );
+            if ( errno == ERANGE )
                 print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++, dest++ )
             {
-                res = tan( ( double ) *lsrc );
-                if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+                *dest = tan( *lsrc++ );
+                if ( errno == ERANGE )
+                {
                     print( SEVERE, "Result overflow.\n" );
-                *dest = res;
+                    errno = 0;
+                }
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++, dest++ )
             {
-                res = tan( *dsrc );
-                if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+                *dest = tan( *dsrc++ );
+                if ( errno == ERANGE )
+                {
                     print( SEVERE, "Result overflow.\n" );
-                *dest = res;
+                    errno = 0;
+                }
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -820,59 +837,62 @@ f_tan( Var_T * v )
 Var_T *
 f_asin( Var_T * v )
 {
-    double arg;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( fabs( arg ) > 1.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, asin( VALUE( v ) ) );
+            if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, asin( arg ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            dest = new_var->val.dpnt;
+            long * restrict lsrc = v->val.lpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( labs( *lsrc ) > 1 )
+                *dest++ = asin( *lsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = asin( ( double ) *lsrc );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            dest = new_var->val.dpnt;
+            double * restrict dsrc = v->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( fabs( *dsrc ) > 1.0 )
+                *dest++ = asin( *dsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+                    print( FATAL, "Argument (%f) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = asin( *dsrc );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -897,59 +917,62 @@ f_asin( Var_T * v )
 Var_T *
 f_acos( Var_T * v )
 {
-    double arg;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( fabs( arg ) > 1.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, acos( VALUE( v ) ) );
+            if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, acos( arg ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( labs( *lsrc ) > 1 )
+                *dest++ = acos( *lsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+                    print( FATAL, "Argument (%fd) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = acos( ( double ) *lsrc );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( fabs( *dsrc ) > 1.0 )
+                *dest++ = acos( *dsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+                    print( FATAL, "Argument (%f) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = acos( *dsrc );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -974,38 +997,39 @@ f_acos( Var_T * v )
 Var_T *
 f_atan( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
+        case INT_VAR :
+        case FLOAT_VAR :
             new_var = vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-                *dest = atan( ( double ) *lsrc );
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = atan( *lsrc++ );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-                *dest = atan( *dsrc );
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = atan( *dsrc++ );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1030,50 +1054,48 @@ f_atan( Var_T * v )
 Var_T *
 f_sinh( Var_T * v )
 {
-    double res;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            res = sinh( VALUE ( v ) );
-            if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, sinh( VALUE ( v ) ) );
+            if ( errno == ERANGE )
                 print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-            {
-                *dest = sinh( ( double ) *lsrc );
-                if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
-            }
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = sinh( *lsrc++ );
+            if (  errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-            {
-                *dest = sinh( *dsrc );
-                if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
-            }
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = sinh( *dsrc++ );
+            if ( errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1098,50 +1120,47 @@ f_sinh( Var_T * v )
 Var_T *
 f_cosh( Var_T * v )
 {
-    double res;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            res = cosh( VALUE ( v ) );
-            if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, cosh( VALUE ( v ) ) );
+            if ( errno == ERANGE )
                 print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-            {
-                *dest = cosh( ( double ) *lsrc );
-                if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
-            }
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = cosh( *lsrc++ );
+            if ( errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-            {
-                *dest = cosh( *dsrc );
-                if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
-            }
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = cosh( *dsrc++ );
+            if ( errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1166,38 +1185,39 @@ f_cosh( Var_T * v )
 Var_T *
 f_tanh( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
+        case INT_VAR :
+        case FLOAT_VAR :
             new_var = vars_push( FLOAT_VAR, tanh( VALUE( v ) ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-                *dest = tanh( ( double ) *lsrc );
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = tanh( *lsrc++ );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-                *dest = tanh( *dsrc );
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = tanh( *dsrc++ );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1222,72 +1242,39 @@ f_tanh( Var_T * v )
 Var_T *
 f_asinh( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-    double arg, new_arg;
-    int sgn;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            sgn = arg >= 0.0 ? 1 : -1;
-            new_arg = arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
-            if ( new_arg >= 1.0 )
-            {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
-                THROW( EXCEPTION );
-            }
-            new_var = vars_push( FLOAT_VAR, sgn * datanh( new_arg ) );
+        case INT_VAR :
+        case FLOAT_VAR :
+            new_var = vars_push( FLOAT_VAR, VALUE( v ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
-            {
-                arg = ( double ) *lsrc;
-                sgn = arg >= 0.0 ? 1 : -1;
-                new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
-
-                if ( new_arg >= 1.0 )
-                {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
-                    THROW( EXCEPTION );
-                }
-
-                *dest = sgn * datanh( new_arg );
-            }
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = asinh( *lsrc++ );
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
-            {
-                arg = *dsrc;
-                sgn = arg >= 0.0 ? 1 : -1;
-                new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
-
-                if ( new_arg >= 1.0 )
-                {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
-                    THROW( EXCEPTION );
-                }
-
-                *dest = sgn * datanh( new_arg );
-            }
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
+                *dest++ = asinh( *dsrc++ );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1312,66 +1299,62 @@ f_asinh( Var_T * v )
 Var_T *
 f_acosh( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-    double arg, new_arg;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if (    arg < 1.0
-                 || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, acosh( VALUE( v ) ) );
+            if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, datanh( new_arg ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                arg = ( double ) *lsrc;
-                if (    arg < 1.0
-                     || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >=
-                                                                          1.0 )
+                *dest++ = acosh( *lsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = datanh( new_arg );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                arg = *dsrc;
-                if (    arg < 1.0
-                     || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >=
-                                                                          1.0 )
+                *dest++ = acosh( *dsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
+                    print( FATAL, "Argument (%f) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = datanh( new_arg );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1396,62 +1379,74 @@ f_acosh( Var_T * v )
 Var_T *
 f_atanh( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-    double arg;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T *new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( arg >= 1.0 || arg <= -1.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, atanh( VALUE( v ) ) );
+            if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, datanh( arg ) );
+            else if (  errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                arg = ( double ) *lsrc;
-                if ( arg >= 1.0 || arg <= -1.0 )
+                *dest = atanh( *lsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-
-                *dest = datanh( arg );
+                else if (  errno == ERANGE )
+                {
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                arg = *dsrc;
-                if ( arg >= 1.0 || arg <= -1.0 )
+                *dest++ = atanh( *dsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", arg );
+                    print( FATAL, "Argument (%f) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = datanh( arg );
+                else if (  errno == ERANGE )
+                {
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1476,56 +1471,68 @@ f_atanh( Var_T * v )
 Var_T *
 f_exp( Var_T * v )
 {
-    Var_T *new_var = NULL;
-    double res;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            res = exp( VALUE( v ) );
-            if ( res == 0.0 && errno == ERANGE )
-                print( WARN, "Result underflow - result is set to 0.\n" );
-            if ( res == HUGE_VAL && errno == ERANGE )
-                print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, exp( VALUE( v ) ) );
+            if ( errno == ERANGE )
+            {
+                if ( new_var->val.dval == 0.0 )
+                    print( WARN, "Result underflow, result set to 0.\n" );
+                else
+                    print( SEVERE, "Result overflow.\n" );
+            }
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++, dest++ )
             {
-                *dest = exp( ( double ) *lsrc );
-                if ( *dest == 0.0 && errno == ERANGE )
-                    print( WARN, "Result underflow - result is set to 0.\n" );
-                if ( *dest == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
+                *dest = exp( *lsrc++ );
+                if ( errno == ERANGE )
+                {
+                    if ( *dest == 0.0 )
+                        print( WARN, "Result underflow, result set to 0.\n" );
+                    else
+                        print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++, dest++ )
             {
-                *dest = exp( *dsrc );
-                if ( *dest == 0.0 && errno == ERANGE )
-                    print( WARN, "Result underflow - result is set to 0.\n" );
-                if ( *dest == HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
+                *dest = exp( *dsrc++ );
+                if ( errno == ERANGE )
+                {
+                    if ( *dest == 0.0 )
+                        print( WARN, "Result underflow, result set to 0.\n" );
+                    else
+                        print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1550,68 +1557,74 @@ f_exp( Var_T * v )
 Var_T *
 f_ln( Var_T * v )
 {
-    double arg, res;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( arg <= 0.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, log( VALUE( v ) ) );
+            if ( errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
+            else if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            res = log( arg );
-            if ( res == - HUGE_VAL && errno == ERANGE )
-                print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *lsrc <= 0 )
+                *dest++ = log( *lsrc++ );
+                if ( errno == ERANGE )
                 {
-                    print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
+                else if ( errno == EDOM )
+                {
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-
-                *dest = log( ( double ) *lsrc );
-                if ( *dest == - HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *dsrc <= 0.0 )
+                *dest++ = log( *dsrc++ );
+                if ( errno == ERANGE )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
+                else if ( errno == EDOM )
+                {
+                    print( FATAL, "Argument (%ld) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-
-                *dest = log( *dsrc );
-                if ( *dest == - HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1636,68 +1649,74 @@ f_ln( Var_T * v )
 Var_T *
 f_log( Var_T * v )
 {
-    double arg, res;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( arg <= 0.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, log10( VALUE( v ) ) );
+            if ( errno == ERANGE )
+                print( SEVERE, "Result overflow.\n" );
+            else if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            res = log10( arg );
-            if ( res == - HUGE_VAL && errno == ERANGE )
-                print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, res );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *lsrc <= 0 )
+                *dest++ = log10( *lsrc++ );
+                if ( errno == ERANGE )
                 {
-                    print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
+                else if ( errno == EDOM )
+                {
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-
-                *dest = log10( ( double ) *lsrc );
-                if ( *dest == - HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
             }
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *dsrc <= 0.0 )
+                *dest++ = log10( *dsrc++ );
+                if ( errno == ERANGE )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+                    print( SEVERE, "Result overflow.\n" );
+                    errno = 0;
+                }
+                else if ( errno == EDOM )
+                {
+                    print( FATAL, "Argument (%ld) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-
-                *dest = log10( *dsrc );
-                if ( *dest == - HUGE_VAL && errno == ERANGE )
-                    print( SEVERE, "Result overflow.\n" );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1722,60 +1741,63 @@ f_log( Var_T * v )
 Var_T *
 f_sqrt( Var_T * v )
 {
-    double arg;
-    Var_T *new_var = NULL;
-    ssize_t i;
-    long *lsrc;
-    double *dsrc, *dest;
-
-
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
+    Var_T * new_var = NULL;
+    double * restrict dest;
+
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
-            arg = VALUE( v );
-            if ( arg < 0.0 )
+        case INT_VAR :
+        case FLOAT_VAR :
+            errno = 0;
+            new_var = vars_push( FLOAT_VAR, sqrt( VALUE( v ) ) );
+            if ( errno == EDOM )
             {
-                print( FATAL, "Argument (%f) out of range.\n", arg );
+                print( FATAL, "Argument (%f) out of range.\n",
+                       ( double ) VALUE( v ) );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, sqrt( arg ) );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, lsrc++, dest++ )
+            long * restrict lsrc = v->val.lpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *lsrc < 0 )
+                *dest++ = sqrt( *lsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+                    print( FATAL, "Argument (%ld) out of range.\n", *--lsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = sqrt( ( double ) *lsrc );
             }
             break;
 
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
-                  i < v->len; i++, dsrc++, dest++ )
+            double * restrict dsrc = v->val.dpnt;
+            dest = new_var->val.dpnt;
+            errno = 0;
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
-                if ( *dsrc < 0.0 )
+                *dest++ = sqrt( *dsrc++ );
+                if ( errno == EDOM )
                 {
-                    print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+                    print( FATAL, "Argument (%f) out of range.\n", *--dsrc );
                     THROW( EXCEPTION );
                 }
-                *dest = sqrt( *dsrc );
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -1801,15 +1823,10 @@ f_sqrt( Var_T * v )
 Var_T *
 f_random( Var_T * v )
 {
-    long len;
-    long i;
-    Var_T *new_var = NULL;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, random( ) / ( double ) RAND_MAX );
 
-    len = get_long( v, "number of points" );
+    long len = get_long( v, "number of points" );
 
     if ( len <= 0 )
     {
@@ -1818,9 +1835,10 @@ f_random( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    new_var = vars_push( FLOAT_ARR, NULL, len );
-    for ( i = 0; i < len; i++ )
-        new_var->val.dpnt[ i ] = random( ) / ( double ) RAND_MAX;
+    Var_T * new_var = vars_push( FLOAT_ARR, NULL, len );
+    double * dest = new_var->val.dpnt;
+    for ( long i = 0; i < len; i++ )
+        *dest++ = random( ) / ( double ) RAND_MAX;
 
     return new_var;
 }
@@ -1834,15 +1852,10 @@ f_random( Var_T * v )
 Var_T *
 f_random2( Var_T * v )
 {
-    long len;
-    long i;
-    Var_T *new_var = NULL;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, random( ) / ( RAND_MAX + 1.0 ) );
 
-    len = get_long( v, "number of points" );
+    long len = get_long( v, "number of points" );
 
     if ( len <= 0 )
     {
@@ -1851,9 +1864,10 @@ f_random2( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    new_var = vars_push( FLOAT_ARR, NULL, len );
-    for ( i = 0; i < len; i++ )
-        new_var->val.dpnt[ i ] = random( ) / ( RAND_MAX + 1.0 );
+    Var_T * new_var = vars_push( FLOAT_ARR, NULL, len );
+    double * dest = new_var->val.dpnt;
+    for ( long i = 0; i < len; i++ )
+        *dest++ = random( ) / ( RAND_MAX + 1.0 );
 
     return new_var;
 }
@@ -1867,8 +1881,6 @@ Var_T *
 f_shuffle( Var_T * v )
 {
     Var_T * nv = NULL;
-    long n;
-
 
     vars_check( v, INT_ARR | FLOAT_ARR );
 
@@ -1876,7 +1888,7 @@ f_shuffle( Var_T * v )
     {
         nv = vars_push( INT_ARR, v->val.lpnt, ( long ) v->len );
 
-        for ( n = v->len - 1; n > 0; n-- )
+        for ( long n = v->len - 1; n > 0; n-- )
         {
             long k = ( n + 1 ) * ( random( ) / ( RAND_MAX + 1.0 ) );
             long tmp = nv->val.lpnt[ n ];
@@ -1889,7 +1901,7 @@ f_shuffle( Var_T * v )
     {
         nv = vars_push( FLOAT_ARR, v->val.lpnt, ( long ) v->len );
 
-        for ( n = v->len - 1; n > 0; n-- )
+        for ( long n = v->len - 1; n > 0; n-- )
         {
             long k = ( n + 1 ) * ( random( ) / ( RAND_MAX + 1.0 ) );
             double tmp = nv->val.dpnt[ n ];
@@ -1911,16 +1923,10 @@ static bool grand_is_old = false;
 Var_T *
 f_grand( Var_T * v )
 {
-    long len;
-    long i;
-    double *arr;
-    Var_T *new_var = NULL;
-
-
     if ( v == NULL )
         return vars_push( FLOAT_VAR, gauss_random( ) );
 
-    len = get_long( v, "number of points" );
+    long len = get_long( v, "number of points" );
 
     if ( len <= 0 )
     {
@@ -1929,12 +1935,10 @@ f_grand( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    arr = T_malloc( len * sizeof *arr );
-    for ( i = 0; i < len; i++ )
-        *( arr + i ) = gauss_random( );
-
-    new_var = vars_push( FLOAT_ARR, arr, len );
-    T_free( arr );
+    Var_T * new_var = vars_push( FLOAT_ARR, NULL, len );
+    double *dest = new_var->val.dpnt;
+    for ( long i = 0; i < len; i++ )
+        *dest++ = gauss_random( );
 
     return new_var;
 }
@@ -1942,27 +1946,29 @@ f_grand( Var_T * v )
 
 /*----------------------------------------------------------------------*
  * Returns random numbers with Gaussian distribution, zero mean value
- * and variance of 1. See W. H. Press, S. A. Teukolsky, W, T. Vettering
- * and B. P. Flannery, "Numerical Recipes in C", 2nd ed., Cambridge
- * University Press 1992, pp. 288-290, for all the gory details.
+ * and variance of 1. See Press et al., "Numerical Recipes in C", 2nd
+ * ed., Cambridge University Press 1992, pp. 288-290, for all the gory
+ * details.
  *----------------------------------------------------------------------*/
 
-static double
+static
+double
 gauss_random( void )
 {
     static double next_val;
-    double factor, radius, val_1, val_2;
-
 
     if ( ! grand_is_old )
     {
-        do {
+        double radius, val_1, val_2;
+
+        do
+        {
             val_1 = 2.0 * random( ) / ( double ) RAND_MAX - 1.0;
             val_2 = 2.0 * random( ) / ( double ) RAND_MAX - 1.0;
             radius = val_1 * val_1 + val_2 * val_2;
         } while ( radius < 0.0 || radius >= 1.0 );
 
-        factor = sqrt( - 2.0 * log( radius ) / radius );
+        double factor = sqrt( - 2.0 * log( radius ) / radius );
         next_val = val_1 * factor;
         grand_is_old = true;
         return val_2 * factor;
@@ -1983,7 +1989,6 @@ Var_T *
 f_setseed( Var_T * v )
 {
     unsigned int arg;
-
 
     if ( v != NULL )
     {
@@ -2035,13 +2040,10 @@ f_setseed( Var_T * v )
 Var_T *
 f_time( Var_T * v )
 {
-    time_t tp;
     char ts[ 100 ];
     char sep[ 2 ] = { ':', ':' };
     char *sp;
     char *str = NULL;
-    size_t i;
-
 
     if ( v != NULL )
     {
@@ -2082,14 +2084,17 @@ f_time( Var_T * v )
         }
     }
 
+    time_t tp;
     time( &tp );
+
     if ( strftime( ts, 100, "%H:%M:%S", localtime( &tp ) ) == 0 )
     {
         print( SEVERE, "Returning invalid time string.\n" );
         strcat( ts, "(Unknown time)" );
     }
 
-    for ( i = 0, sp = ts; i < 2; i++ )
+    sp = ts;
+    for ( int i = 0; i < 2; i++ )
     {
         sp = strchr( sp, ':' );
         *sp = sep[ i ];
@@ -2111,13 +2116,10 @@ f_time( Var_T * v )
 Var_T *
 f_dtime( Var_T * v  UNUSED_ARG )
 {
-    double new_time;
     static double old_time = 0.0;
-    double diff_time;
 
-
-    new_time = experiment_time( );
-    diff_time = new_time - old_time;
+    double new_time = experiment_time( );
+    double diff_time = new_time - old_time;
     old_time = new_time;
     return vars_push( FLOAT_VAR, diff_time );
 }
@@ -2263,28 +2265,28 @@ f_size( Var_T * v )
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR |
                    INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
-    Var_T *new_var = NULL;
-
     switch ( v->type )
     {
-        case INT_VAR : case FLOAT_VAR :
+        case INT_VAR :
+        case FLOAT_VAR :
             print( WARN, "Argument is a number.\n" );
-            new_var = vars_push( INT_VAR, 1L );
-            break;
+            return vars_push( INT_VAR, 1L );
 
         case STR_VAR :
-            new_var = vars_push( INT_VAR, ( long ) strlen( v->val.sptr ) );
-            break;
+            return vars_push( INT_VAR, ( long ) strlen( v->val.sptr ) );
 
-        case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
-            new_var = vars_push( INT_VAR, ( long ) v->len );
-            break;
+        case INT_ARR :
+        case FLOAT_ARR :
+        case INT_REF :
+        case FLOAT_REF :
+            return vars_push( INT_VAR, ( long ) v->len );
 
         default :
             fsc2_impossible( );
     }
 
-    return new_var;
+    fsc2_impossible( );
+    return NULL;
 }
 
 
@@ -2634,7 +2636,8 @@ f_slice( Var_T * v )
             new_var = vars_push( FLOAT_ARR, v->val.dpnt + start, ( long ) len );
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             old_len  = v->len;
             old_vptr = v->val.vptr;
 
@@ -2675,28 +2678,25 @@ f_square( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
 
     switch ( v->type )
     {
         case INT_VAR :
-            if ( labs( v->val.lval ) >= sqrt( ( double ) LONG_MAX ) )
+            if ( labs( v->val.lval ) >= sqrt( LONG_MAX ) )
                 print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( INT_VAR, v->val.lval * v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval * v->val.lval );
 
         case FLOAT_VAR :
             if ( fabs( v->val.dval ) > sqrt( HUGE_VAL ) )
                 print( SEVERE, "Result overflow.\n" );
-            new_var = vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
 
         case INT_ARR :
             new_var = vars_make( INT_ARR, v );
             long lmax = sqrt( ( double ) LONG_MAX );
             long * restrict lsrc  = v->val.lpnt;
             long * restrict ldest = new_var->val.lpnt;
-            for ( i = 0; i < v->len; i++, lsrc++ )
+            for ( ssize_t i = 0; i < v->len; i++, lsrc++ )
             {
                 if ( labs( *lsrc ) > lmax )
                     print( SEVERE, "Result overflow.\n" );
@@ -2709,7 +2709,7 @@ f_square( Var_T * v )
             double dmax = sqrt( HUGE_VAL );
             double * restrict dsrc  = v->val.dpnt;
             double * restrict ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++, dsrc++ )
+            for ( ssize_t i = 0; i < v->len; i++, dsrc++ )
             {
                 if ( fabs( *dsrc ) > dmax )
                     print( SEVERE, "Result overflow.\n" );
@@ -2719,7 +2719,7 @@ f_square( Var_T * v )
 
         case INT_REF :
             new_var = vars_make( INT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -2731,7 +2731,7 @@ f_square( Var_T * v )
 
         case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -2760,38 +2760,34 @@ f_G2T( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, ( double ) v->val.lval * 1.0e-4 );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval * 1.0e-4 );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) * 1.0e-4 );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            long * restrict lsrc = v->val.lpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *lsrc++ * 1.0e-4;
             break;
 
         case FLOAT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
-            double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            double * restrict dsrc = v->val.dpnt;
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * 1.0e-4;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -2820,25 +2816,21 @@ f_T2G( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, ( double ) v->val.lval * 1.0e4 );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval * 1.0e4 );
+            return vars_push( FLOAT_VAR, VALUE( v ) * 1.0e4 );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *lsrc++ * 1.0e4;
             break;
 
@@ -2846,13 +2838,14 @@ f_T2G( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * 1.0e4;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -2881,25 +2874,20 @@ f_C2K( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T *new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR,
-                                 ( double ) v->val.lval + C2K_OFFSET );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval + C2K_OFFSET );
+            return vars_push( FLOAT_VAR, VALUE( v ) + C2K_OFFSET );
             break;
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *lsrc++ + C2K_OFFSET;
             break;
 
@@ -2907,13 +2895,14 @@ f_C2K( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ + C2K_OFFSET;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -2942,25 +2931,19 @@ f_K2C( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR,
-                                 ( double ) v->val.lval - C2K_OFFSET );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval - C2K_OFFSET );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) - C2K_OFFSET );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ - C2K_OFFSET;
             break;
 
@@ -2968,13 +2951,14 @@ f_K2C( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ - C2K_OFFSET;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3003,25 +2987,19 @@ f_D2R( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR,
-                                 ( double ) v->val.lval * D2R_FACTOR );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval * D2R_FACTOR );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) * D2R_FACTOR );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ * D2R_FACTOR;
             break;
 
@@ -3029,13 +3007,14 @@ f_D2R( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * D2R_FACTOR;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3064,25 +3043,19 @@ f_R2D( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR,
-                                 ( double ) v->val.lval * R2D_FACTOR );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval * R2D_FACTOR );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) * R2D_FACTOR );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ * R2D_FACTOR;
             break;
 
@@ -3090,13 +3063,14 @@ f_R2D( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ * R2D_FACTOR;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3125,34 +3099,24 @@ f_WL2WN( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            if ( v->val.lval == 0 )
-            {
-                print( FATAL, "Can't convert 0 m to a wave number.\n" );
-                THROW( EXCEPTION );
-            }
-            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.lval );
-            break;
-
         case FLOAT_VAR :
-            if ( v->val.dval == 0.0 )
+            if ( VALUE( v ) == 0.0 )
             {
                 print( FATAL, "Can't convert 0 m to a wave number.\n" );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, 0.01 / VALUE( v ) );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *lsrc == 0 )
                 {
@@ -3167,7 +3131,7 @@ f_WL2WN( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *dsrc == 0.0 )
                 {
@@ -3178,9 +3142,10 @@ f_WL2WN( Var_T * v )
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3209,34 +3174,24 @@ f_WN2WL( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            if ( v->val.lval == 0 )
-            {
-                print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
-                THROW( EXCEPTION );
-            }
-            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.lval );
-            break;
-
         case FLOAT_VAR :
-            if ( v->val.dval == 0.0 )
+            if ( VALUE( v ) == 0.0 )
             {
                 print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
                 THROW( EXCEPTION );
             }
-            new_var = vars_push( FLOAT_VAR, 0.01 / v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, 0.01 / VALUE( v ) );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *lsrc == 0 )
                 {
@@ -3251,7 +3206,7 @@ f_WN2WL( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
             {
                 if ( *dsrc == 0.0 )
                 {
@@ -3262,9 +3217,10 @@ f_WN2WL( Var_T * v )
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3293,24 +3249,19 @@ f_F2WN( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.lval / WN2F_FACTOR );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval / WN2F_FACTOR );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) / WN2F_FACTOR );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = ( double ) *lsrc++ / WN2F_FACTOR;
             break;
 
@@ -3318,13 +3269,14 @@ f_F2WN( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = *dsrc++ / WN2F_FACTOR;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3353,25 +3305,20 @@ f_WN2F( Var_T * v )
                    INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
     double * restrict ddest;
 
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( FLOAT_VAR, WN2F_FACTOR * v->val.lval );
-            break;
-
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, WN2F_FACTOR * v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, VALUE( v ) * WN2F_FACTOR );
 
         case INT_ARR :
             new_var = vars_make( FLOAT_ARR, v );
             long * restrict lsrc = v->val.lpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = WN2F_FACTOR * ( double ) *lsrc++;
             break;
 
@@ -3379,13 +3326,14 @@ f_WN2F( Var_T * v )
             new_var = vars_make( FLOAT_ARR, v );
             double * restrict dsrc = v->val.dpnt;
             ddest = new_var->val.dpnt;
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 *ddest++ = WN2F_FACTOR *  *dsrc++;
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3455,18 +3403,9 @@ f_fslice( Var_T * v )
 Var_T *
 f_lspace( Var_T * v )
 {
-    Var_T *nv;
-    ssize_t i;
-    double start;
-    double end;
-    double incr;
-    long num;
-    double * d, cv;
-
-
-    start = get_double( v, NULL );
-    end = get_double( v = vars_pop( v ), NULL );
-    num = get_long( v = vars_pop( v ), "number of points" );
+    double start = get_double( v, NULL );
+    double end = get_double( v = vars_pop( v ), NULL );
+    long num = get_long( v = vars_pop( v ), "number of points" );
 
     if ( num < 2 )
     {
@@ -3474,12 +3413,12 @@ f_lspace( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    incr = ( end - start ) / ( num - 1 );
+    double incr = ( end - start ) / ( num - 1 );
 
-    nv = vars_push( FLOAT_ARR, NULL, num );
-    for ( d = nv->val.dpnt, cv = start, i = 0; i < num;
-          d++, cv += incr, i++ )
-        *d = cv;
+    Var_T * nv = vars_push( FLOAT_ARR, NULL, num );
+    double * d = nv->val.dpnt;
+    for ( long i = 0; i < num; start += incr, i++ )
+        *d++ = start;
 
     return nv;
 }
@@ -3495,17 +3434,14 @@ f_reverse( Var_T * v )
                    INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
     Var_T * new_var = NULL;
-    ssize_t i;
 
     switch ( v->type )
     {
         case INT_VAR :
-            new_var = vars_push( INT_VAR, v->val.lval );
-            break;
+            return vars_push( INT_VAR, v->val.lval );
 
         case FLOAT_VAR :
-            new_var = vars_push( FLOAT_VAR, v->val.dval );
-            break;
+            return vars_push( FLOAT_VAR, v->val.dval );
 
 
         case STR_VAR :
@@ -3544,9 +3480,10 @@ f_reverse( Var_T * v )
             }
             break;
 
-        case INT_REF : case FLOAT_REF :
+        case INT_REF :
+        case FLOAT_REF :
             new_var = vars_make( FLOAT_REF, v );
-            for ( i = 0; i < v->len; i++ )
+            for ( ssize_t i = 0; i < v->len; i++ )
                 if ( v->val.vptr[ i ] == NULL )
                     new_var->val.vptr[ i ] = NULL;
                 else
@@ -3567,7 +3504,8 @@ f_reverse( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int
+static
+int
 sort_long_up( const void * a,
               const void * b )
 {
@@ -3581,7 +3519,8 @@ sort_long_up( const void * a,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int
+static
+int
 sort_long_down( const void * a,
                 const void * b )
 {
@@ -3595,7 +3534,8 @@ sort_long_down( const void * a,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int
+static
+int
 sort_double_up( const void * a,
                 const void * b )
 {
@@ -3609,7 +3549,8 @@ sort_double_up( const void * a,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int
+static
+int
 sort_double_down( const void * a,
                   const void * b )
 {
@@ -3629,7 +3570,6 @@ f_sort( Var_T * v )
     Var_T *new_var = NULL;
     bool dir = 0;
 
-
     if ( v == NULL )
     {
         print( FATAL, "Missing argument.\n" );
@@ -3638,7 +3578,7 @@ f_sort( Var_T * v )
 
     if ( v->type & ( INT_VAR | FLOAT_VAR | STR_VAR | INT_REF | FLOAT_REF ) )
     {
-        print( FATAL, "Argument isn't a one-dimensiobal array.\n" );
+        print( FATAL, "Argument isn't a 1-dimensiobal array.\n" );
         THROW( EXCEPTION );
     }
 
@@ -3690,29 +3630,6 @@ f_sort( Var_T * v )
 }
 
 
-/*--------------------------------------------*
- * Function is used in the calculation of the
- * asinh(), acosh() and atanh() functions.
- *--------------------------------------------*/
-
-static double
-datanh( double arg )
-{
-    int sgn;
-
-    sgn = arg >= 0 ? 1 : -1;
-    arg = fabs( arg );
-
-    if ( 1.0 - arg < DBL_EPSILON )
-    {
-        print( SEVERE, "Argument overflow.\n" );
-        arg = 1.0 - DBL_EPSILON;
-    }
-
-    return sgn * 0.5 * log( ( 1.0 + arg ) / ( 1.0 - arg ) );
-}
-
-
 /*------------------------------------------------------------------------*
  * Function for adding a new value (or array or matrix) to an average so
  * that the new average (always as a float number or array) gets returned
@@ -3759,17 +3676,15 @@ f_add2avg( Var_T * v )
 /*------------------------------------------------------------------------*
  * Function for checking that the sizes of the data and average used in
  * f_add2avg() are set up correctly (if necessary and possible extending
- * tthe size(s) of the average and initializing to zero)
+ * the size(s) of the average and initializing it to zero)
  *------------------------------------------------------------------------*/
 
-static void
+static
+void
 avg_data_check( Var_T * avg,
                 Var_T * data,
                 long    count )
 {
-    ssize_t i;
-
-
     vars_check( data, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                       INT_REF | FLOAT_REF );
 
@@ -3803,7 +3718,7 @@ avg_data_check( Var_T * avg,
         /* If the average is a matrix do the checks recursively */
 
         if ( avg->type == FLOAT_REF )
-            for ( i = 0; i < avg->len; i++ )
+            for ( ssize_t i = 0; i < avg->len; i++ )
                 avg_data_check( avg->val.vptr[ i ], data, count );
 
         /* If we got this far everything should be fine */
@@ -3843,7 +3758,7 @@ avg_data_check( Var_T * avg,
                 }
 
                 avg->val.dpnt = T_malloc( data->len * sizeof *avg->val.dpnt );
-                for ( i = 0; i < data->len; i++ )
+                for ( ssize_t i = 0; i < data->len; i++ )
                     avg->val.dpnt[ i ] = 0.0;
 
                 avg->len = data->len;
@@ -3855,7 +3770,7 @@ avg_data_check( Var_T * avg,
 
                 avg->val.dpnt = T_realloc( avg->val.dpnt,
                                            data->len * sizeof *avg->val.dpnt );
-                for ( i = avg->len; i < data->len; i++ )
+                for ( ssize_t i = avg->len; i < data->len; i++ )
                     avg->val.dpnt[ i ] = 0.0;
             }
             else if ( avg->len > data->len )
@@ -3879,7 +3794,7 @@ avg_data_check( Var_T * avg,
 
         /* Check recursively for each of the subarrays */
 
-        for ( i = 0; i < avg->len; i++ )
+        for ( ssize_t i = 0; i < avg->len; i++ )
             avg_data_check( avg->val.vptr[ i ], data, count );
 
         return;
@@ -3897,7 +3812,7 @@ avg_data_check( Var_T * avg,
             THROW( EXCEPTION );
         }
 
-        for ( i = 0; i < avg->len; i++ )
+        for ( ssize_t i = 0; i < avg->len; i++ )
             avg_data_check( avg->val.vptr[ i ], data, count );
 
         return;
@@ -3947,7 +3862,7 @@ avg_data_check( Var_T * avg,
         for ( ; avg->len < data->len; avg->len++ )
             avg->val.vptr[ avg->len ] = NULL;
 
-        for ( i = start; i < avg->len; i++ )
+        for ( ssize_t i = start; i < avg->len; i++ )
         {
             Var_T *v = avg->val.vptr[ i ] = vars_new( NULL );
 
@@ -3970,7 +3885,7 @@ avg_data_check( Var_T * avg,
 
     /* Now everything is set up for a further recursive check */
 
-    for ( i = 0; i < avg->len; i++ )
+    for ( ssize_t i = 0; i < avg->len; i++ )
         avg_data_check( avg->val.vptr[ i ], data->val.vptr[ i ], count );
 }
 

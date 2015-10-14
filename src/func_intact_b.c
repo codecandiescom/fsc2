@@ -40,17 +40,9 @@ static Var_T *f_bchanged_child( Var_T * v );
 Var_T *
 f_bcreate( Var_T * var )
 {
-    Var_T * volatile v = var;
-    Iobject_Type_T volatile type;
-    long volatile coll = -1;
-    char * volatile label = NULL;
-    char * volatile help_text = NULL;
-    Iobject_T * volatile new_io = NULL;
-    Iobject_T * ioi, *cio;
-
-
     /* At least the type of the button must be specified */
 
+    Var_T * volatile v = var;
     if ( v == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
@@ -62,6 +54,7 @@ f_bcreate( Var_T * var )
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
+    Iobject_Type_T volatile type;
     if ( v->type == INT_VAR || v->type == FLOAT_VAR )
     {
         type = get_strict_long( v, "button type" ) + FIRST_BUTTON_TYPE;
@@ -95,6 +88,7 @@ f_bcreate( Var_T * var )
     /* For radio buttons the next argument is the ID of the first button
        belonging to the group (except for the first button itself) */
 
+    long volatile coll = -1;
     if ( type == RADIO_BUTTON )
     {
         if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
@@ -108,7 +102,8 @@ f_bcreate( Var_T * var )
             {
                 /* Check that other group member exists at all */
 
-                if ( ( cio = find_object_from_ID( coll ) ) == NULL )
+                Iobject_T * cio = find_object_from_ID( coll );
+                if ( ! cio )
                 {
                     print( FATAL, "Specified group leader button does not "
                            "exist.\n", coll );
@@ -137,6 +132,7 @@ f_bcreate( Var_T * var )
 
     /* Next argument got to be the label string */
 
+    char * volatile label = NULL;
     if ( v != NULL )
     {
         vars_check( v, STR_VAR );
@@ -159,6 +155,7 @@ f_bcreate( Var_T * var )
 
     /* Final argument can be a help text */
 
+    char * volatile help_text = NULL;
     if ( v != NULL )
     {
         TRY
@@ -185,6 +182,7 @@ f_bcreate( Var_T * var )
     /* Now that we're done with checking the parameters we can create the new
        button - if the Toolbox doesn't exist yet we've got to create it now */
 
+    Iobject_T * volatile new_io = NULL;
     TRY
     {
         if ( Toolbox == NULL )
@@ -209,6 +207,7 @@ f_bcreate( Var_T * var )
     }
     else
     {
+        Iobject_T * ioi;
         for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
             /* empty */ ;
         ioi->next    = new_io;
@@ -246,23 +245,17 @@ f_bcreate( Var_T * var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_bcreate_child( Var_T          * v,
                  Iobject_Type_T   type,
                  long             coll )
 {
-    char *buffer,
-         *pos;
-    long new_ID;
-    long *result;
-    size_t len;
-    char *label = NULL;
-    char *help_text = NULL;
-
-
     /* We already got the type and the 'colleague' buttons number, the next
        argument is the label string */
 
+    char * label = NULL;
+    char * help_text = NULL;
     if ( v != NULL )
     {
         vars_check( v, STR_VAR );
@@ -285,7 +278,7 @@ f_bcreate_child( Var_T          * v,
 
     /* Calculate length of buffer needed */
 
-    len = sizeof EDL.Lc + sizeof type + sizeof coll;
+    size_t len = sizeof EDL.Lc + sizeof type + sizeof coll;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
@@ -300,7 +293,8 @@ f_bcreate_child( Var_T          * v,
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
     pos += sizeof EDL.Lc;
@@ -339,7 +333,7 @@ f_bcreate_child( Var_T          * v,
        buffer with two longs, the first indicating success or failure (value
        is 1 or 0), the second being the buttons ID */
 
-    result = exp_bcreate( buffer, pos - buffer );
+    long * result = exp_bcreate( buffer, pos - buffer );
 
     if ( result[ 0 ] == 0 )      /* failure -> bomb out */
     {
@@ -347,7 +341,7 @@ f_bcreate_child( Var_T          * v,
         THROW( EXCEPTION );
     }
 
-    new_ID = result[ 1 ];
+    long new_ID = result[ 1 ];
     T_free( result );           /* free result buffer */
 
     return vars_push( INT_VAR, new_ID );
@@ -404,18 +398,13 @@ f_bdelete( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void
+static
+void
 f_bdelete_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    size_t len;
-    long ID;
-
-
     /* Do all possible checking of the parameter */
 
-    ID = get_strict_long( v, "button ID" );
+    long ID = get_strict_long( v, "button ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -425,14 +414,15 @@ f_bdelete_child( Var_T * v )
 
     /* Get a long enough buffer and write data */
 
-    len = sizeof EDL.Lc + sizeof v->val.lval;
+    size_t len = sizeof EDL.Lc + sizeof v->val.lval;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -460,14 +450,10 @@ f_bdelete_child( Var_T * v )
  * process, which actually removes the button.
  *---------------------------------------------------------*/
 
-static void
+static
+void
 f_bdelete_parent( Var_T * v )
 {
-    Iobject_T *io,
-              *nio;
-    long new_anchor = 0;
-
-
     /* No tool box -> no buttons -> no buttons to delete... */
 
     if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -478,7 +464,7 @@ f_bdelete_parent( Var_T * v )
 
     /* Check the parameters */
 
-    io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
     if ( io == NULL || ! IS_BUTTON( io->type ) )
     {
@@ -510,6 +496,9 @@ f_bdelete_parent( Var_T * v )
 
     if ( io->type == RADIO_BUTTON && io->partner == -1 )
     {
+        long new_anchor = 0;
+        Iobject_T * nio;
+
         for ( nio = io->next; nio != NULL; nio = nio->next )
             if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
             {
@@ -551,11 +540,6 @@ f_bdelete_parent( Var_T * v )
 Var_T *
 f_bstate( Var_T * v )
 {
-    Iobject_T *io,
-              *oio;
-    int state;
-
-
     /* We need at least the ID of the button */
 
     if ( v == NULL )
@@ -580,7 +564,7 @@ f_bstate( Var_T * v )
 
     /* Check the button ID parameter */
 
-    io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
     if ( io == NULL || ! IS_BUTTON( io->type ) )
     {
@@ -594,13 +578,14 @@ f_bstate( Var_T * v )
        NORMAL_BUTTONs return the number it was pressed since the last call
        and reset the counter to zero */
 
+    long state;
     if ( ( v = vars_pop( v ) ) == NULL )
     {
         if ( io->type == NORMAL_BUTTON )
         {
             state = io->state;
             io->state = 0;
-            return vars_push( INT_VAR, ( long ) state );
+            return vars_push( INT_VAR, state );
         }
 
         return vars_push( INT_VAR, io->state != 0 ? 1L : 0L );
@@ -636,7 +621,7 @@ f_bstate( Var_T * v )
        to the group must become unset */
 
     if ( io->type == RADIO_BUTTON && io->state == 1 )
-        for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
+        for ( Iobject_T * oio = Toolbox->objs; oio != NULL; oio = oio->next )
         {
             if (    oio == io
                  || oio->type != RADIO_BUTTON
@@ -660,20 +645,13 @@ f_bstate( Var_T * v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_bstate_child( Var_T * v )
 {
-    long ID;
-    long chld_state = -1;
-    char *buffer,
-         *pos;
-    size_t len;
-    long *result;
-
-
     /* Basic check of button identifier - always the first parameter */
 
-    ID = get_strict_long( v, "button ID" );
+    long ID = get_strict_long( v, "button ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -683,7 +661,8 @@ f_bstate_child( Var_T * v )
 
     /* If there's a second parameter it's the state of button to set */
 
-    if ( ( v = vars_pop( v ) ) != NULL )
+    long chld_state = -1;
+    if ( ( v = vars_pop( v ) ) )
         chld_state = get_boolean( v );
 
     /* No more parameters accepted... */
@@ -692,14 +671,15 @@ f_bstate_child( Var_T * v )
 
     /* Make up buffer to send to parent process */
 
-    len = sizeof EDL.Lc + sizeof ID + sizeof chld_state;
+    size_t len = sizeof EDL.Lc + sizeof ID + sizeof chld_state;
 
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
     else
         len++;
 
-    pos = buffer = T_malloc( len );
+    char * buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
     pos += sizeof EDL.Lc;
@@ -721,7 +701,7 @@ f_bstate_child( Var_T * v )
 
     /* Ask parent process to return or set the state */
 
-    result = exp_bstate( buffer, pos - buffer );
+    long * result = exp_bstate( buffer, pos - buffer );
 
     /* Bomb out if parent returns failure */
 
@@ -745,9 +725,6 @@ f_bstate_child( Var_T * v )
 Var_T *
 f_bchanged( Var_T * v )
 {
-    Iobject_T *io;
-
-
     /* We need at least the ID of the button */
 
     if ( v == NULL )
@@ -772,7 +749,7 @@ f_bchanged( Var_T * v )
 
     /* Check the button ID parameter */
 
-    io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+    Iobject_T * io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
     if ( io == NULL || ! IS_BUTTON( io->type ) )
     {
@@ -790,20 +767,13 @@ f_bchanged( Var_T * v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *
+static
+Var_T *
 f_bchanged_child( Var_T * v )
 {
-    char *buffer,
-         *pos;
-    long ID;
-    size_t len;
-    long *result;
-    int chld_changed;
-
-
     /* Basic check of button identifier - always the first parameter */
 
-    ID = get_strict_long( v, "button ID" );
+    long ID = get_strict_long( v, "button ID" );
 
     if ( ID < ID_OFFSET )
     {
@@ -813,11 +783,12 @@ f_bchanged_child( Var_T * v )
 
     /* Make up buffer to send to parent process */
 
-    len = sizeof EDL.Lc + sizeof ID + 1;
+    size_t len = sizeof EDL.Lc + sizeof ID + 1;
     if ( EDL.Fname )
         len += strlen( EDL.Fname ) + 1;
 
-    pos = buffer = T_malloc( len );
+    char *buffer = T_malloc( len );
+    char * pos = buffer;
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
     pos += sizeof EDL.Lc;
@@ -835,7 +806,7 @@ f_bchanged_child( Var_T * v )
 
     /* Ask parent process to return the state change indicator */
 
-    result = exp_bchanged( buffer, pos - buffer );
+    long * result = exp_bchanged( buffer, pos - buffer );
 
     /* Bomb out if parent returns failure */
 
@@ -845,7 +816,7 @@ f_bchanged_child( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    chld_changed = result[ 1 ];
+    int chld_changed = result[ 1 ];
     T_free( result );
 
     return vars_push( INT_VAR, chld_changed );
