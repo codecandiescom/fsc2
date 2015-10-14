@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -102,9 +102,9 @@ f_mcreate( Var_T * volatile var )
         new_io->type          = MENU;
         new_io->self          = NULL;
         new_io->state         = 1;
-        new_io->is_changed    = UNSET;
-        new_io->report_change = UNSET;
-        new_io->enabled       = SET;
+        new_io->is_changed    = false;
+        new_io->report_change = false;
+        new_io->enabled       = true;
         new_io->partner       = -1;
         new_io->label         = NULL;
         new_io->menu_items    = NULL;
@@ -792,7 +792,7 @@ f_mchoice( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    io->is_changed = UNSET;
+    io->is_changed = false;
 
     /* If there's no second parameter just return the currently selected menu
        item */

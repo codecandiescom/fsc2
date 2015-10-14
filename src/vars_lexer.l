@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -142,7 +142,7 @@ WS          [\n \t]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", varstext + 2 );
+                eprint( FATAL, false, "%s\n", varstext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -154,7 +154,7 @@ WS          [\n \t]+
 
 {ESTR}      {
                 varstext = strchr( varstext, '\x03' );
-                eprint( FATAL, UNSET, "%s\n", varstext + 2 );
+                eprint( FATAL, false, "%s\n", varstext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -381,7 +381,7 @@ WS          [\n \t]+
 int
 variables_parser( FILE * in )
 {
-    static bool needs_restart = UNSET;
+    static bool needs_restart = false;
 
     /* Don't allow more than one VARIABLES section */
 
@@ -390,7 +390,7 @@ variables_parser( FILE * in )
         print( FATAL, "Multiple instances of VARIABLES section label.\n" );
         THROW( EXCEPTION );
     }
-    EDL.compilation.sections[ VARIABLES_SECTION ] = SET;
+    EDL.compilation.sections[ VARIABLES_SECTION ] = true;
 
     varsin = in;
 
@@ -399,7 +399,7 @@ variables_parser( FILE * in )
     if ( needs_restart )
         varsrestart( varsin );
     else
-        needs_restart = SET;
+        needs_restart = true;
 
     varsparser_init( );
 

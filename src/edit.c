@@ -34,11 +34,9 @@ void
 edit_file( FL_OBJECT * a  UNUSED_ARG,
            long        b  UNUSED_ARG )
 {
-    int res;
-
-
     /* Fork and execute editor in child process */
 
+    int res;
     if ( ( res = fork( ) ) == 0 )
         start_editor( );
 

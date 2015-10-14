@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -32,12 +32,12 @@
 
 /* Locally used global variables */
 
-static bool Is_loaded       = UNSET;    /* set when EDL file is loaded */
-static bool Is_tested       = UNSET;    /* set when EDL file has been tested */
-static bool Parse_result    = UNSET;    /* set when EDL passed the tests */
+static bool Is_loaded       = false;    /* set when EDL file is loaded */
+static bool Is_tested       = false;    /* set when EDL file has been tested */
+static bool Parse_result    = false;    /* set when EDL passed the tests */
 static FILE *In_file_fp     = NULL;
-static bool Delete_file     = UNSET;
-static bool Delete_old_file = UNSET;
+static bool Delete_file     = false;
+static bool Delete_old_file = false;
 
 
 /* Imported global variables */
@@ -129,7 +129,7 @@ main( int    argc,
        the input files needs to be deleted */
 
     if ( fname && Fsc2_Internals.cmdline_flags & DO_DELETE )
-        Delete_file = Delete_old_file = SET;
+        Delete_file = Delete_old_file = true;
 
     /* In batch mode try to get the next file if the first input file
        could not be accessed until we have one. */
@@ -218,7 +218,7 @@ main( int    argc,
 
     if ( Fsc2_Internals.cmdline_flags & BATCH_MODE && argc > 1 )
     {
-        Is_loaded = UNSET;
+        Is_loaded = false;
 
         while ( argc > 1 && ! Is_loaded )
         {
@@ -275,41 +275,41 @@ globals_init( const char * pname )
 
     lower_permissions( );
 
-    Crash.already_crashed = UNSET;
+    Crash.already_crashed = false;
     Crash.signo = 0;
     Crash.trace_length = 0;
 
     Fsc2_Internals.child_pid = 0;
     Fsc2_Internals.fsc2_clean_pid = 0;
-    Fsc2_Internals.fsc2_clean_died = SET;
+    Fsc2_Internals.fsc2_clean_died = true;
     Fsc2_Internals.http_pid = 0;
     Fsc2_Internals.state = STATE_IDLE;
     Fsc2_Internals.mode = PREPARATION;
     Fsc2_Internals.cmdline_flags = 0;
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
     Fsc2_Internals.I_am = PARENT;
-    Fsc2_Internals.exit_hooks_are_run = UNSET;
+    Fsc2_Internals.exit_hooks_are_run = false;
     Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;
     Fsc2_Internals.rsc_handle = NULL;
-    Fsc2_Internals.http_server_died = UNSET;
+    Fsc2_Internals.http_server_died = false;
     Fsc2_Internals.title = NULL;
     Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
-    GUI.win_has_pos = UNSET;
-    GUI.win_has_size = UNSET;
-    GUI.display_1d_has_pos = UNSET;
-    GUI.display_1d_has_size = UNSET;
-    GUI.display_2d_has_pos = UNSET;
-    GUI.display_2d_has_size = UNSET;
-    GUI.cut_win_has_pos = UNSET;
-    GUI.cut_win_has_size = UNSET;
-    GUI.toolbox_has_pos = UNSET;
-    GUI.main_form     = NULL;
-    GUI.run_form_1d   = NULL;
-    GUI.run_form_2d   = NULL;
-    GUI.input_form    = NULL;
-    GUI.cut_form      = NULL;
-    GUI.print_comment = NULL;
+    GUI.win_has_pos         = false;
+    GUI.win_has_size        = false;
+    GUI.display_1d_has_pos  = false;
+    GUI.display_1d_has_size = false;
+    GUI.display_2d_has_pos  = false;
+    GUI.display_2d_has_size = false;
+    GUI.cut_win_has_pos     = false;
+    GUI.cut_win_has_size    = false;
+    GUI.toolbox_has_pos     = false;
+    GUI.main_form           = NULL;
+    GUI.run_form_1d         = NULL;
+    GUI.run_form_2d         = NULL;
+    GUI.input_form          = NULL;
+    GUI.cut_form            = NULL;
+    GUI.print_comment       = NULL;
 
     fsc2_get_conf( );
 
@@ -327,8 +327,8 @@ globals_init( const char * pname )
     EDL.On_Stop_Pos = -1;
     EDL.Var_List = NULL;
     EDL.Var_Stack = NULL;
-    EDL.do_quit = UNSET;
-    EDL.react_to_do_quit = SET;
+    EDL.do_quit = false;
+    EDL.react_to_do_quit = true;
 
     /* Initialize list of open files EDL scripts can write to. Per default
        two are open, one is stdout and the other stderr. */
@@ -357,7 +357,7 @@ globals_init( const char * pname )
     Comm.MQ = NULL;
     Comm.MQ_ID = -1;
 
-    GUI.is_init = UNSET;
+    GUI.is_init = false;
 
     G.color_hash = NULL;
 }
@@ -391,7 +391,7 @@ fsc2_get_conf( void )
 
     fsc2_confin = NULL;
     if (    ! ( fsc2_confin = fopen( fname, "r" ) ) 
-         || ! fsc2_obtain_fcntl_lock( fsc2_confin, F_RDLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fsc2_confin, F_RDLCK, true ) )
     {
         if ( fsc2_confin )
             fclose( fsc2_confin );
@@ -436,7 +436,7 @@ get_edl_file( const char * fname )
         TRY_SUCCESS;
     }
     OTHERWISE
-        return FAIL;
+        return false;
     
     EDL.files[ EDL.file_count ].name = NULL;
     EDL.files[ EDL.file_count++ ].mod_date = 0;
@@ -465,7 +465,7 @@ get_edl_file( const char * fname )
         if ( stat( EDL.files[ EDL.file_count - 1 ].name, &file_stat ) == -1 )
         {
             TRY_SUCCESS;
-            return FAIL;
+            return false;
         }
 
         EDL.files[ EDL.file_count - 1 ].mod_date = file_stat.st_mtime;
@@ -483,10 +483,10 @@ get_edl_file( const char * fname )
             EDL.file_count = 0;
         }
 
-        return FAIL;
+        return false;
     }
 
-    return OK;
+    return true;
 }
 
 
@@ -538,7 +538,7 @@ no_gui_run( void )
 static void
 check_run( void )
 {
-    static bool user_break = UNSET;
+    static bool user_break = false;
     long i;
     int fd_flags;
 
@@ -564,7 +564,7 @@ check_run( void )
         fd_flags = 0;
     fcntl( fileno( In_file_fp ), F_SETFD, fd_flags | FD_CLOEXEC );
 
-    user_break = UNSET;
+    user_break = false;
 
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
@@ -1295,8 +1295,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
                      "File not found" : "Can't open file for reading",
                      EDL.files->name );
 
-            Is_loaded = UNSET;
-            Is_tested = UNSET;
+            Is_loaded = false;
+            Is_tested = false;
 
             if ( old_list && old_list != EDL.files )
             {
@@ -1352,8 +1352,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             fprintf( stderr, "Can't open a temporary file, skipping input "
                      "file '%s'.\n", EDL.files->name );
 
-            Is_loaded = UNSET;
-            Is_tested = UNSET;
+            Is_loaded = false;
+            Is_tested = false;
 
             if ( old_list && old_list != EDL.files )
             {
@@ -1410,8 +1410,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             fprintf( stderr, "Can't open a temporary file, skipping input "
                      "file '%s'.\n", EDL.files->name );
 
-            Is_loaded = UNSET;
-            Is_tested = UNSET;
+            Is_loaded = false;
+            Is_tested = false;
 
             if ( old_list && old_list != EDL.files )
             {
@@ -1462,8 +1462,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             fprintf( stderr, "Can't open input file: '%s'.\n",
                      EDL.files->name );
 
-            Is_loaded = UNSET;
-            Is_tested = UNSET;
+            Is_loaded = false;
+            Is_tested = false;
 
             if ( old_list && old_list != EDL.files )
             {
@@ -1516,7 +1516,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             Delete_old_file = Delete_file;
         }
         else      /* don't delete reloaded files - they may have been edited */
-            Delete_old_file = UNSET;
+            Delete_old_file = false;
 
         while ( old_count > 0 )
             T_free( old_list[ --old_count ].name );
@@ -1528,7 +1528,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
     In_file_fp = fp;
 
-    Delete_file = UNSET;
+    Delete_file = false;
 
     /* Set a new window title */
 
@@ -1562,8 +1562,8 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
     fl_activate_object( GUI.main_form->test_file );
     fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
 
-    Parse_result = FAIL;
-    Is_tested = UNSET;
+    Parse_result = false;
+    Is_tested = false;
 }
 
 
@@ -1576,10 +1576,10 @@ void
 test_file( FL_OBJECT * a,
            long        b  UNUSED_ARG )
 {
-    static bool running_test = UNSET;
-    static bool user_break = UNSET;
+    static bool running_test = false;
+    static bool user_break = false;
     struct stat file_stat;
-    static bool in_test = UNSET;
+    static bool in_test = false;
 
 
     a->u_ldata = 0;
@@ -1590,10 +1590,10 @@ test_file( FL_OBJECT * a,
     if ( running_test )
     {
         fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-        user_break = SET;
-        eprint( FATAL, UNSET,
+        user_break = true;
+        eprint( FATAL, false,
                 "Test of program aborted, received user break.\n" );
-        running_test = UNSET;
+        running_test = false;
         THROW( EXCEPTION );
     }
 
@@ -1606,21 +1606,21 @@ test_file( FL_OBJECT * a,
     if ( in_test )
         return;
     else
-        in_test = SET;
+        in_test = true;
 
     /* Here starts the real action... */
 
     if ( ! Is_loaded )
     {
         fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
-        in_test = UNSET;
+        in_test = false;
         return;
     }
 
     if ( Is_tested )
     {
         fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
-        in_test = UNSET;
+        in_test = false;
         return;
     }
 
@@ -1639,7 +1639,7 @@ test_file( FL_OBJECT * a,
         load_file( GUI.main_form->browser, 1 );
         if ( ! Is_loaded )
         {
-            in_test = UNSET;
+            in_test = false;
             return;
         }
     }
@@ -1663,10 +1663,10 @@ test_file( FL_OBJECT * a,
     fl_set_object_label( GUI.main_form->test_file, "Stop Test" );
     fl_set_button_shortcut( GUI.main_form->test_file, "T", 1 );
 
-    running_test = SET;
+    running_test = true;
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
     XFlush( fl_get_display( ) );
-    user_break = UNSET;
+    user_break = false;
 
     /* Parse the input file and close it when we're done with it, everything
        relevant is now stored in memory (unless the parsing was interrupted
@@ -1680,11 +1680,11 @@ test_file( FL_OBJECT * a,
     }
 
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-    running_test = UNSET;
+    running_test = false;
 
     if ( ! user_break )
     {
-        Is_tested = SET;                  /* show that file has been tested */
+        Is_tested = true;                  /* show that file has been tested */
         a->u_ldata = 0;
         fl_deactivate_object( GUI.main_form->test_file );
         fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE );
@@ -1692,7 +1692,7 @@ test_file( FL_OBJECT * a,
     else
     {
         a->u_ldata = 1;
-        user_break = UNSET;
+        user_break = false;
         fl_activate_object( GUI.main_form->test_file );
         fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
     }
@@ -1710,7 +1710,7 @@ test_file( FL_OBJECT * a,
     fl_activate_object( GUI.main_form->quit );
     fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-    in_test = UNSET;
+    in_test = false;
 }
 
 
@@ -1764,7 +1764,7 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
                 load_file( GUI.main_form->browser, 1 );
                 if ( ! Is_loaded )
                     return;
-                Is_tested = UNSET;
+                Is_tested = false;
                 test_file( GUI.main_form->test_file, 1 );
                 if ( GUI.main_form->test_file->u_ldata == 1 ) /* user break ? */
                     return;
@@ -1866,17 +1866,17 @@ bool display_file( char * name,
         {
             case 0 :                  /* file length is zero */
                 fl_show_alert( "Error", "File is empty.", NULL, 1 );
-                return FAIL;
+                return false;
 
             case -1 :                 /* not enough memory left */
                 fl_show_alert( "Error", "Cannot read file:", name, 1 );
-                return FAIL;
+                return false;
 
             default:
                 fl_show_alert( "Error",
                                "Unexpected error while counting lines.",
                                "Please send a bug report.", 1 );
-                return FAIL;
+                return false;
         }
     }
 
@@ -1956,7 +1956,7 @@ bool display_file( char * name,
     /* Unfreeze and thus redisplay the browser */
 
     fl_unfreeze_form( GUI.main_form->browser->form );
-    return OK;
+    return true;
 }
 
 
@@ -1986,7 +1986,7 @@ clean_up( void )
         if ( G_2d.label_orig[ i ] )
             G_2d.label_orig[ i ] = T_free( G_2d.label_orig[ i ] );
 
-    G.is_init = UNSET;
+    G.is_init = false;
     G.dim = 0;
 
     /* Clear up the compilation structure */
@@ -1994,7 +1994,7 @@ clean_up( void )
     for ( i = 0; i < 3; ++i )
         EDL.compilation.error[ i ] = 0;
     for ( i = DEVICES_SECTION; i <= EXPERIMENT_SECTION; ++i )
-        EDL.compilation.sections[ i ] = UNSET;
+        EDL.compilation.sections[ i ] = false;
 
     /* Deallocate memory used for file names */
 
@@ -2003,9 +2003,9 @@ clean_up( void )
     /* Run exit hook functions and unlink modules */
 
     delete_devices( );
-    Need_GPIB = UNSET;
-    Need_RULBUS = UNSET;
-    Need_LAN = UNSET;
+    Need_GPIB = false;
+    Need_RULBUS = false;
+    Need_LAN = false;
 #if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_final_reset( );
 #endif
@@ -2097,7 +2097,7 @@ main_sig_handler( int signo )
                 if ( pid == Fsc2_Internals.http_pid )
                 {
                     Fsc2_Internals.http_pid = -1;
-                    Fsc2_Internals.http_server_died = SET;
+                    Fsc2_Internals.http_server_died = true;
                 }
 
                 /* Also store the return status of the child process running
@@ -2107,7 +2107,7 @@ main_sig_handler( int signo )
                      && pid == Fsc2_Internals.fsc2_clean_pid )
                 {
                     Fsc2_Internals.fsc2_clean_pid = 0;
-                    Fsc2_Internals.fsc2_clean_died = SET;
+                    Fsc2_Internals.fsc2_clean_died = true;
                     Fsc2_Internals.fsc2_clean_status_ok = WIFEXITED( status );
                     Fsc2_Internals.fsc2_clean_status = WEXITSTATUS( status );
                 }
@@ -2145,12 +2145,12 @@ main_sig_handler( int signo )
             if (    ! Crash.already_crashed
                  && signo != SIGABRT )
             {
-                Crash.already_crashed = SET;
+                Crash.already_crashed = true;
                 Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
             }
 #endif
             Crash.signo = signo;
-            Crash.already_crashed = SET;
+            Crash.already_crashed = true;
             exit( EXIT_FAILURE );
     }
 }
@@ -2237,7 +2237,7 @@ idle_handler( void )
         http_check( );
     else if ( Fsc2_Internals.http_server_died )
     {
-        Fsc2_Internals.http_server_died = UNSET;
+        Fsc2_Internals.http_server_died = false;
         fl_call_object_callback( GUI.main_form->server );
     }
 #endif

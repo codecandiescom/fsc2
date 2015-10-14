@@ -102,7 +102,7 @@ static bool pipe_write( void const * buf,
                         ssize_t      bytes_to_write );
 static bool send_browser( FL_OBJECT * browser );
 
-static bool Comm_is_setup = UNSET;
+static bool Comm_is_setup = false;
 
 
 /*----------------------------------------------------------------*
@@ -113,14 +113,11 @@ static bool Comm_is_setup = UNSET;
 void
 setup_comm( void )
 {
-    int pr;
-    int i;
-
-
     /* Open pipes for passing data between child and parent process - we need
        two pipes, one for the parent process to write to the child process and
        another one for the other way round.*/
 
+    int pr;
     if ( ( pr = pipe( Comm.pd ) ) < 0 || pipe( Comm.pd + 2 ) < 0 )
     {
         if ( pr == 0 )                    /* if first open did succeed */
@@ -129,7 +126,7 @@ setup_comm( void )
             close( Comm.pd[ 1 ] );
         }
 
-        eprint( FATAL, UNSET, "Can't set up internal communication "
+        eprint( FATAL, false, "Can't set up internal communication "
                 "channels.\n" );
         THROW( EXCEPTION );
     }
@@ -142,16 +139,16 @@ setup_comm( void )
                                                   sizeof *Comm.MQ ) ) == NULL )
     {
         Comm.MQ_ID = -1;
-        for ( i = 0; i < 4; i++ )
+        for ( int i = 0; i < 4; i++ )
             close( Comm.pd[ i ] );
 
-        eprint( FATAL, UNSET, "Can't set up internal communication "
+        eprint( FATAL, false, "Can't set up internal communication "
                 "channels.\n" );
         THROW( EXCEPTION );
     }
 
     Comm.MQ->low = Comm.MQ->high = 0;
-    for ( i = 0; i < QUEUE_SIZE; i++ )
+    for ( int i = 0; i < QUEUE_SIZE; i++ )
         Comm.MQ->slot[ i ].shm_id = -1;
 
     /* Beside the pipes and the key buffer we need a semaphore which allows
@@ -163,15 +160,15 @@ setup_comm( void )
     if ( ( Comm.mq_semaphore = sema_create( QUEUE_SIZE - 1 ) ) < 0 )
     {
         delete_all_shm( );
-        for ( i = 0; i < 4; i++ )
+        for ( int i = 0; i < 4; i++ )
             close( Comm.pd[ i ] );
 
-        eprint( FATAL, UNSET, "Can't set up internal communication "
+        eprint( FATAL, false, "Can't set up internal communication "
                 "channels.\n" );
         THROW( EXCEPTION );
     }
 
-    Comm_is_setup = SET;
+    Comm_is_setup = true;
 }
 
 
@@ -186,7 +183,7 @@ end_comm( void )
     if ( ! Comm_is_setup )
         return;
 
-    Comm_is_setup = UNSET;
+    Comm_is_setup = false;
 
     /* Handle remaining messages */
 
@@ -306,7 +303,7 @@ new_data_handler( void )
             http_check( );
         else if ( Fsc2_Internals.http_server_died )
         {
-            Fsc2_Internals.http_server_died = UNSET;
+            Fsc2_Internals.http_server_died = false;
             fl_call_object_callback( GUI.main_form->server );
         }
     }
@@ -363,7 +360,7 @@ reader( void * ret )
         TRY_SUCCESS;
     }
     OTHERWISE
-        return FAIL;
+        return false;
 
     return Fsc2_Internals.I_am == PARENT ?
            parent_reader( &header ) : child_reader( ret, &header );
@@ -373,31 +370,30 @@ reader( void * ret )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-#define HANDLE_READ( func )                    \
-    TRY                                        \
-    {                                          \
-        data = T_malloc( header->data.len );   \
-        pipe_read( data, header->data.len );   \
-        func( data, header->data.len );        \
-        TRY_SUCCESS;                           \
-    }                                          \
-    OTHERWISE                                  \
-    {                                          \
-        T_free( data );                        \
-        return FAIL;                           \
-    }                                          \
-    T_free( data );                            \
-    break;
+#define HANDLE_READ( func )                        \
+    {                                              \
+        char * volatile data = NULL;               \
+        TRY                                        \
+        {                                          \
+            data = T_malloc( header->data.len );   \
+            pipe_read( data, header->data.len );   \
+            func( data, header->data.len );        \
+            TRY_SUCCESS;                           \
+        }                                          \
+        OTHERWISE                                  \
+        {                                          \
+            T_free( data );                        \
+            return false;                          \
+        }                                          \
+        T_free( data );                            \
+        break;                                     \
+    }
 
 
 static bool
 parent_reader( Comm_Struct_T * header )
 {
     char *str[ 4 ] = { NULL, NULL, NULL, NULL };
-    int i;
-    int n1, n2;
-    char * volatile data = NULL;
-
 
     switch ( header->type )
     {
@@ -416,13 +412,13 @@ parent_reader( Comm_Struct_T * header )
                 else if ( header->data.str_len[ 0 ] == 0 )
                     str[ 0 ] = T_strdup( "" );
 
-                eprint( NO_ERROR, UNSET, "%s", str[ 0 ] );
+                eprint( NO_ERROR, false, "%s", str[ 0 ] );
                 TRY_SUCCESS;
             }
             OTHERWISE
             {
                 T_free( str[ 0 ] );
-                return FAIL;
+                return false;
             }
 
             /* Get rid of the string and return */
@@ -451,7 +447,7 @@ parent_reader( Comm_Struct_T * header )
             OTHERWISE
             {
                 T_free( str[ 0 ] );
-                return FAIL;
+                return false;
             }
 
             T_free( str[ 0 ] );
@@ -480,7 +476,7 @@ parent_reader( Comm_Struct_T * header )
             OTHERWISE
             {
                 T_free( str[ 0 ] );
-                return FAIL;
+                return false;
             }
 
             T_free( str[ 0 ] );
@@ -495,10 +491,12 @@ parent_reader( Comm_Struct_T * header )
 
             TRY
             {
+                int n1, n2;
+
                 pipe_read( &n1, sizeof( int ) );
                 pipe_read( &n2, sizeof( int ) );
 
-                for ( i = 0; i < 4; i++ )
+                for ( int i = 0; i < 4; i++ )
                 {
                     if ( header->data.str_len[ i ] > 0 )
                     {
@@ -516,27 +514,27 @@ parent_reader( Comm_Struct_T * header )
 
                 if ( ! writer( C_INT, show_choices( str[ 0 ], n1, str[ 1 ],
                                                     str[ 2 ], str[ 3 ], n2,
-                                                    UNSET ) ) )
+                                                    false ) ) )
                     THROW( EXCEPTION );
                 TRY_SUCCESS;
             }
             OTHERWISE
             {
-                for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+                for ( int i = 0; i < 4 && str[ i ] != NULL; i++ )
                     T_free( str[ i ] );
-                return FAIL;
+                return false;
             }
 
             /* Get rid of the strings and return */
 
-            for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+            for ( int i = 0; i < 4 && str[ i ] != NULL; i++ )
                 T_free( str[ i ] );
             break;
 
         case C_SHOW_FSELECTOR :
             TRY
             {
-                for ( i = 0; i < 4; i++ )
+                for ( int i = 0; i < 4; i++ )
                 {
                     if ( header->data.str_len[ i ] > 0 )
                     {
@@ -561,18 +559,19 @@ parent_reader( Comm_Struct_T * header )
             }
             OTHERWISE
             {
-                for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+                for ( int i = 0; i < 4 && str[ i ] != NULL; i++ )
                     T_free( str[ i ] );
                 Fsc2_Internals.state = STATE_RUNNING;
-                return FAIL;
+                return false;
             }
 
-            for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+            for ( int i = 0; i < 4 && str[ i ] != NULL; i++ )
                 T_free( str[ i ] );
             Fsc2_Internals.state = STATE_RUNNING;
             break;
 
-        case C_PROG : case C_OUTPUT :
+        case C_PROG :
+        case C_OUTPUT :
                 return send_browser( header->type == C_PROG ?
                                      GUI.main_form->browser :
                                      GUI.main_form->error_browser );
@@ -580,7 +579,7 @@ parent_reader( Comm_Struct_T * header )
         case C_INPUT :
             TRY
             {
-                for ( i = 0; i < 2 ; i++ )
+                for ( int i = 0; i < 2 ; i++ )
                     if ( header->data.str_len[ i ] > 0 )
                     {
                         str[ i ] =
@@ -597,9 +596,9 @@ parent_reader( Comm_Struct_T * header )
             }
             OTHERWISE
             {
-                for ( i = 0; i < 2 && str[ i ] != NULL; i++ )
+                for ( int i = 0; i < 2 && str[ i ] != NULL; i++ )
                     T_free( str[ i ] );
-                return FAIL;
+                return false;
             }
             break;
 
@@ -704,7 +703,7 @@ parent_reader( Comm_Struct_T * header )
             fsc2_impossible( );
     }
 
-    return OK;
+    return true;
 }
 
 
@@ -717,18 +716,17 @@ child_reader( void          * ret,
 {
     char * volatile retstr = NULL;
 
-
     switch ( header->type )
     {
         case C_ACK :
-            return OK;
+            return true;
 
         case C_STR :
             if ( header->data.str_len[ 0 ] == -1 )
             {
                 if ( ret != NULL )
                      *( ( char ** ) ret ) = NULL;
-                return OK;
+                return true;
             }
 
             TRY
@@ -743,32 +741,32 @@ child_reader( void          * ret,
             {
                 if ( retstr != NULL )
                     T_free( retstr );
-                return FAIL;
+                return false;
             }
 
             if ( ret != NULL )
                 *( ( char ** ) ret ) = retstr;
-            return OK;
+            return true;
 
         case C_INT :
             if ( ret != NULL )
                 *( ( int * ) ret ) = header->data.int_data;
-            return OK;
+            return true;
 
         case C_LONG :
             if ( ret != NULL )
                 *( ( long * ) ret ) = header->data.long_data;
-            return OK;
+            return true;
 
         case C_FLOAT :
             if ( ret != NULL )
                 *( ( float * ) ret ) = header->data.float_data;
-            return OK;
+            return true;
 
         case C_DOUBLE :
             if ( ret != NULL )
                 *( ( double * ) ret ) = header->data.double_data;
-            return OK;
+            return true;
 
         case C_MTEXT_REPLY :
             * ( char ** ) ret = NULL;
@@ -792,9 +790,9 @@ child_reader( void          * ret,
             {
                 if ( * ( char ** ) ret )
                     T_free( * ( char ** ) ret );
-                return FAIL;
+                return false;
             }
-            return OK;
+            return true;
 
         case C_BCREATE_REPLY   :
         case C_BSTATE_REPLY    :
@@ -819,9 +817,9 @@ child_reader( void          * ret,
                     TRY_SUCCESS;
                 }
                 OTHERWISE
-                    return FAIL;
+                    return false;
             }
-            return OK;
+            return true;
 
         case C_ISTATE_STR_REPLY :
             TRY
@@ -836,7 +834,7 @@ child_reader( void          * ret,
             {
                 if ( retstr != NULL )
                     T_free( retstr );
-                return FAIL;
+                return false;
             }
 
             if ( ret != NULL )
@@ -844,7 +842,7 @@ child_reader( void          * ret,
                 ( ( Input_Res_T * ) ret )->res = STR_VAR;
                 ( ( Input_Res_T * ) ret )->val.sptr = retstr;
             }
-            return OK;
+            return true;
 
         case C_LAYOUT_REPLY  :
         case C_BDELETE_REPLY :
@@ -860,11 +858,11 @@ child_reader( void          * ret,
         case C_ZOOM_1D_REPLY :
         case C_ZOOM_2D_REPLY :
         case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
-            return ( header->data.long_data != 0 ? OK : FAIL );
+            return header->data.long_data;
     }
 
     fsc2_impossible( );            /* this better never gets triggered... */
-    return FAIL;
+    return false;
 }
 
 
@@ -896,12 +894,9 @@ writer( int type,
         ... )
 {
     Comm_Struct_T header = { 0, { 0 } };    /* Initialization for valgrind */
-    va_list ap;
     char *str[ 4 ];
     int n1, n2;
-    int i;
     void *data;
-
 
     /* The child process has to wait for the parent process to become ready to
        accept and then to write to the pipe. The other way round waiting isn't
@@ -912,6 +907,8 @@ writer( int type,
         send_data( REQUEST, -1 );
 
     header.type = type;
+
+    va_list ap;
     va_start( ap, type );
 
     if ( Fsc2_Internals.I_am == CHILD )
@@ -945,7 +942,7 @@ writer( int type,
 
                 n1 = va_arg( ap, int );
 
-                for ( i = 1; i < 4; i++ )
+                for ( int i = 1; i < 4; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
                     header_strlen_setup( &header, i, str[ i ] );
@@ -957,17 +954,17 @@ writer( int type,
                 if (    ! pipe_write( &header, sizeof header )
                      || ! pipe_write( &n1, sizeof( int ) )
                      || ! pipe_write( &n2, sizeof( int ) ) )
-                    return FAIL;
+                    return false;
 
-                for ( i = 0; i < 4; i++ )
+                for ( int i = 0; i < 4; i++ )
                     if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
-                        return FAIL;
+                        return false;
                 break;
 
             case C_SHOW_FSELECTOR :
                 /* Set up header and write it */
 
-                for ( i = 0; i < 4; i++ )
+                for ( int i = 0; i < 4; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
                     header_strlen_setup( &header, i, str[ i ] );
@@ -976,13 +973,13 @@ writer( int type,
                 va_end( ap );
 
                 if ( ! pipe_write( &header, sizeof header ) )
-                    return FAIL;
+                    return false;
 
                 /* Write out all four strings */
 
-                for ( i = 0; i < 4; i++ )
+                for ( int i = 0; i < 4; i++ )
                     if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
-                        return FAIL;
+                        return false;
                 break;
 
             case C_PROG   :
@@ -993,7 +990,7 @@ writer( int type,
             case C_INPUT :
                 /* Set up the two argument strings */
 
-                for ( i = 0; i < 2; i++ )
+                for ( int i = 0; i < 2; i++ )
                 {
                     str[ i ] = va_arg( ap, char * );
                     header_strlen_setup( &header, i, str[ i ] );
@@ -1004,10 +1001,10 @@ writer( int type,
                 /* Send header and the two strings */
 
                 if ( ! pipe_write( &header, sizeof header ) )
-                    return FAIL;
-                for ( i = 0; i < 2; i++ )
+                    return false;
+                for ( int i = 0; i < 2; i++ )
                     if ( ! pipe_write( str[ i ], header.data.str_len[ i ] ) )
-                        return FAIL;
+                        return false;
                 break;
 
             case C_LAYOUT   :
@@ -1152,7 +1149,7 @@ writer( int type,
         }
     }
 
-    return OK;
+    return true;
 }
 
 
@@ -1169,7 +1166,7 @@ send_browser( FL_OBJECT * browser )
 
     while ( ( line = fl_get_browser_line( browser, ++i ) ) != NULL )
         if ( ! writer( C_STR, line ) )
-            return FAIL;
+            return false;
     return writer( C_STR, NULL );
 }
 
@@ -1187,12 +1184,6 @@ static void
 pipe_read( void    * vbuf,
            ssize_t   bytes_to_read )
 {
-    char * buf = vbuf;
-    long bytes_read;
-    long already_read = 0;
-    sigset_t new_mask, old_mask;
-
-
     /* From man 2 read(): POSIX allows a read that is interrupted after
        reading some data to return -1 (with errno set to EINTR) or to return
        the number of bytes already read.  The latter happens on newer Linux
@@ -1201,18 +1192,23 @@ pipe_read( void    * vbuf,
        signals while reading and using this rather lengthy loop tries to
        get it right in both cases. */
 
+    sigset_t new_mask;
     sigemptyset( &new_mask );
     if ( Fsc2_Internals.I_am == CHILD )
         sigaddset( &new_mask, DO_QUIT );
     else
         sigaddset( &new_mask, QUITTING );
 
+    sigset_t old_mask;
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+    char * buf = vbuf;
+    long already_read = 0;
 
     while ( bytes_to_read > 0 )
     {
-        bytes_read = read( Comm.pd[ READ ], buf + already_read,
-                           bytes_to_read );
+        ssize_t bytes_read = read( Comm.pd[ READ ], buf + already_read,
+                                   bytes_to_read );
 
         /* Non-deadly signal has been received */
 
@@ -1246,26 +1242,25 @@ pipe_write( void const * vbuf,
             ssize_t      bytes_to_write )
 {
     if ( bytes_to_write <= 0 )
-        return OK;
+        return true;
 
-    char const * buf = vbuf;
-    long bytes_written;
-    long already_written = 0;
-    sigset_t new_mask, old_mask;
-
-
+    sigset_t new_mask;
     sigemptyset( &new_mask );
     if ( Fsc2_Internals.I_am == CHILD )
         sigaddset( &new_mask, DO_QUIT );
     else
         sigaddset( &new_mask, QUITTING );
 
+    sigset_t old_mask;
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+    char const * buf = vbuf;
+    long already_written = 0;
 
     while ( bytes_to_write > 0 )
     {
-        bytes_written = write( Comm.pd[ WRITE ], buf + already_written,
-                               bytes_to_write );
+        ssize_t bytes_written = write( Comm.pd[ WRITE ], buf + already_written,
+                                       bytes_to_write );
 
         /* Non-deadly signal has been received */
 
@@ -1282,7 +1277,7 @@ pipe_write( void const * vbuf,
     }
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
-    return bytes_to_write == 0 ? OK : FAIL;
+    return bytes_to_write == 0 ? true : false;
 }
 
 

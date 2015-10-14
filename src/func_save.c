@@ -26,7 +26,7 @@
 extern bool No_File_Numbers;           /* defined in func.c */
 extern bool Dont_Save;                 /* defined in func.c */
 
-static bool STD_Is_Open = UNSET;
+static bool STD_Is_Open = false;
 
 
 static Var_T * f_openf_int( Var_T         * /* v */,
@@ -210,14 +210,14 @@ get_name( Var_T * v )
 Var_T *
 f_openf( Var_T * v )
 {
-    return f_openf_int( v, UNSET );
+    return f_openf_int( v, false );
 }
 
 
 Var_T *
 f_opengzf( Var_T * v )
 {
-    return f_openf_int( v, SET );
+    return f_openf_int( v, true );
 }
 
 
@@ -266,7 +266,7 @@ f_openf_int( Var_T         * v,
          && (    v->val.lval == STDOUT_FILENO
               || v->val.lval == STDERR_FILENO ) )
     {
-        STD_Is_Open = SET;
+        STD_Is_Open = true;
         return vars_push( INT_VAR, v->val.lval );
     }
 
@@ -290,7 +290,7 @@ f_openf_int( Var_T         * v,
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
     {
-        do_compress = UNSET;
+        do_compress = false;
         goto got_file;
     }
 
@@ -309,7 +309,7 @@ f_openf_int( Var_T         * v,
             m = get_string( "The specified file is already open:\n%s\n"
                             "\nOpen another file instead?", fn );
 
-            if ( 1 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+            if ( 1 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
             {
                 T_free( m );
                 return f_getf( v->next );
@@ -327,7 +327,7 @@ f_openf_int( Var_T         * v,
         m = get_string( "The specified file already exists:\n%s\n"
                         "\nDo you really want to overwrite it?", fn );
 
-        if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+        if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
         {
             T_free( m );
             return f_getf( v->next );
@@ -446,7 +446,7 @@ f_openf_int( Var_T         * v,
     if ( ! do_compress )
         setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-    STD_Is_Open = SET;
+    STD_Is_Open = true;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
@@ -471,14 +471,14 @@ f_openf_int( Var_T         * v,
 Var_T *
 f_getf( Var_T * v )
 {
-    return f_getf_int( v, UNSET );
+    return f_getf_int( v, false );
 }
 
 
 Var_T *
 f_getgzf( Var_T * v )
 {
-    return f_getf_int( v, SET );
+    return f_getf_int( v, true );
 }
 
 
@@ -533,7 +533,7 @@ f_getf_int( Var_T        * v,
 
     if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
     {
-        do_compress = UNSET;
+        do_compress = false;
         goto got_file;
     }
 
@@ -586,7 +586,7 @@ f_getf_int( Var_T        * v,
     if (    ( ! r || ! *r )
          && show_choices( "Do you really want to cancel saving data?\n"
                           "        Those data will be lost!",
-                          2, "Yes", "No", NULL, 2, SET ) != 1 )
+                          2, "Yes", "No", NULL, 2, true ) != 1 )
     {
         r = T_free( r );
         goto getfile_retry;
@@ -597,7 +597,7 @@ f_getf_int( Var_T        * v,
         T_free( r );
         for ( i = 0; i < 5; i++ )
             T_free( s[ i ] );
-        Dont_Save = SET;
+        Dont_Save = true;
         return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
     }
 
@@ -621,7 +621,7 @@ f_getf_int( Var_T        * v,
             m = get_string( "The specified file is already open:\n%s\n"
                             "\nOpen another file instead?", r );
 
-            if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+            if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
             {
                 T_free( m );
                 return vars_push( INT_VAR, i + FILE_NUMBER_OFFSET );
@@ -645,7 +645,7 @@ f_getf_int( Var_T        * v,
     {
         m = get_string( "The selected file does already exist:\n%s\n"
                         "\nDo you really want to overwrite it?", r );
-        if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+        if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, true ) )
         {
             T_free( m );
             r = T_free( r );
@@ -752,7 +752,7 @@ f_getf_int( Var_T        * v,
     if ( ! do_compress )
         setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-    STD_Is_Open = SET;
+    STD_Is_Open = true;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
@@ -766,14 +766,14 @@ f_getf_int( Var_T        * v,
 Var_T *
 f_clonef( Var_T * v )
 {
-    return f_clonef_int( v, UNSET );
+    return f_clonef_int( v, false );
 }
 
 
 Var_T *
 f_clonegzf( Var_T * v )
 {
-    return f_clonef_int( v, SET );
+    return f_clonef_int( v, true );
 }
 
 
@@ -1246,17 +1246,17 @@ get_save_file( Var_T ** v )
         if ( Dont_Save )
             return FILE_NUMBER_NOT_OPEN;
 
-        No_File_Numbers = UNSET;
+        No_File_Numbers = false;
 
         get_file_ptr = func_get( "get_file", &acc );
         file = func_call( get_file_ptr );         /* get the file name */
 
-        No_File_Numbers = SET;
+        No_File_Numbers = true;
 
         if ( file->val.lval == FILE_NUMBER_NOT_OPEN )
         {
             vars_pop( file );
-            Dont_Save = SET;
+            Dont_Save = true;
             return FILE_NUMBER_NOT_OPEN;
         }
 
@@ -1336,7 +1336,7 @@ close_all_files( void )
 
     EDL.File_List = T_realloc( EDL.File_List, 2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
-    STD_Is_Open = UNSET;
+    STD_Is_Open = false;
 }
 
 

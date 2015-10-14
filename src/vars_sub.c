@@ -76,7 +76,7 @@ vars_sub( Var_T * v1,
             break;
     }
 
-    return vars_sub_i( v1, v2, UNSET );
+    return vars_sub_i( v1, v2, false );
 }
 
 

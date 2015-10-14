@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -80,7 +80,7 @@ int assignlex_destroy(void );
 /* Locally used global variables */
 
 static int Assign_next_section;
-static bool In_phs = UNSET;
+static bool In_phs = false;
 
 /* locally used functions */
 
@@ -204,7 +204,7 @@ WS          [\n=: ]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
+                eprint( FATAL, false, "%s\n", assigntext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -216,7 +216,7 @@ WS          [\n=: ]+
 
 {ESTR}      {
                 assigntext = strchr( assigntext, '\x03' );
-                eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
+                eprint( FATAL, false, "%s\n", assigntext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -258,13 +258,13 @@ WS          [\n=: ]+
 
 {PHS1}      {
                 set_cur_pulser( );
-                In_phs = SET;
+                In_phs = true;
                 assignlval.lval = 0;
                 return PHS_TOK;
             }
 {PHS2}      {
                 set_cur_pulser( );
-                In_phs = SET;
+                In_phs = true;
                 assignlval.lval = 1;
                 return PHS_TOK;
             }
@@ -535,7 +535,7 @@ WS          [\n=: ]+
 {WS}        /* Skip prettifying characters */
 
 ";"         {
-                In_phs = UNSET;
+                In_phs = false;
                 return ';';
             }
 
@@ -563,7 +563,7 @@ WS          [\n=: ]+
 int
 assignments_parser( FILE * in )
 {
-    static bool needs_restart = UNSET;
+    static bool needs_restart = false;
 
 
     if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
@@ -571,7 +571,7 @@ assignments_parser( FILE * in )
         print( FATAL, "Multiple instances of ASSIGNMENTS section label.\n" );
         THROW( EXCEPTION );
     }
-    EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
+    EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = true;
 
     assignin = in;
 
@@ -580,7 +580,7 @@ assignments_parser( FILE * in )
     if ( needs_restart )
         assignrestart( assignin );
     else
-         needs_restart = SET;
+         needs_restart = true;
 
     assignparser_init( );
 

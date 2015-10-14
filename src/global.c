@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -33,11 +33,11 @@ GUI_Info_T GUI;
 Crash_Info_T Crash;
 
 
-bool Need_GPIB     = UNSET;        /* Flag, set if GPIB bus is needed */
-bool Need_RULBUS   = UNSET;        /* Flag, set if RULBUS is needed */
-bool Need_LAN      = UNSET;        /* Flag, set if LAN is needed */
-bool Need_MEDRIVER = UNSET;        /* Flag, set if Meilhaus driver is needed */
-bool Need_USB      = UNSET;        /* Flag, set if libusb driver is needed */
+bool Need_GPIB     = false;        /* Flag, set if GPIB bus is needed */
+bool Need_RULBUS   = false;        /* Flag, set if RULBUS is needed */
+bool Need_LAN      = false;        /* Flag, set if LAN is needed */
+bool Need_MEDRIVER = false;        /* Flag, set if Meilhaus driver is needed */
+bool Need_USB      = false;        /* Flag, set if libusb driver is needed */
 
 
 /* If you change the following always remember to also adjust the

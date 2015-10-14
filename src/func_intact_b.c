@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -223,9 +223,9 @@ f_bcreate( Var_T * var )
     new_io->label         = label;
     new_io->help_text     = help_text;
     new_io->partner       = coll;
-    new_io->is_changed    = UNSET;
-    new_io->report_change = UNSET;
-    new_io->enabled       = SET;
+    new_io->is_changed    = false;
+    new_io->report_change = false;
+    new_io->enabled       = true;
 
     if ( type == RADIO_BUTTON && coll == -1 )
         new_io->state = 1;
@@ -588,7 +588,7 @@ f_bstate( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    io->is_changed = UNSET;
+    io->is_changed = false;
 
     /* If there's no second parameter just return the button state - for
        NORMAL_BUTTONs return the number it was pressed since the last call

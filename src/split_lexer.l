@@ -103,8 +103,8 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 
             /* handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s", splittext + 2 );
-                return FAIL;
+                eprint( FATAL, false, "%s", splittext + 2 );
+                return false;
             }
 
             /* Handling of new file included via #INCLUDE */
@@ -116,43 +116,43 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
             /* Handling of DEVICES: label */
 {DEV}       {
                 if ( ! section_parser( DEVICES_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of ASSIGNMENTS: label */
 {ASS}       {
                 if ( ! section_parser( ASSIGNMENTS_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of VARIABLES: label */
 {VAR}       {
                 if ( ! section_parser( VARIABLES_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of PHASES: label */
 {PHAS}      {
                 if ( ! section_parser( PHASES_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of PREPARATIONS: label */
 {PREP}      {
                 if ( ! section_parser( PREPARATIONS_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of EXPERIMENT: label */
 {EXP}       {
                 if ( ! section_parser( EXPERIMENT_SECTION ) )
-                    return FAIL;
+                    return false;
             }
 
             /* Handling of unknown label */
 .+":"       {
                 print( FATAL, "Unknown label: '%s'.\n", splittext );
-                return FAIL;
+                return false;
             }
 
 [\t \n]+    /* Dump white space */
@@ -160,10 +160,10 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
             /* Handling of invalid input */
 .           {
                 print( FATAL, "Missing section label at start of file.\n" );
-                return FAIL;
+                return false;
             }
 
-<<EOF>>     return OK;
+<<EOF>>     return true;
 
 
         /*----------------------*/
@@ -199,7 +199,7 @@ scan_main( const char * name,
     /* Parse the function and the device name data base */
 
     if ( ! functions_init( ) || ! device_list_parse( ) )
-        return FAIL;
+        return false;
 
     /* A program length of -1 indicates that no EXPERIMENT section has been
        found yet. */
@@ -208,11 +208,11 @@ scan_main( const char * name,
 
     /* Make the lexer read its input from the output of fsc2_clean */
 
-    Fsc2_Internals.fsc2_clean_died = UNSET;
+    Fsc2_Internals.fsc2_clean_died = false;
     if ( ( splitin = filter_edl( name, fp, &d_fd ) ) == NULL )
     {
-        Fsc2_Internals.fsc2_clean_died = SET;
-        return FAIL;
+        Fsc2_Internals.fsc2_clean_died = true;
+        return false;
     }
 
     /* The next rather simple looking line is were the predigested EDL file,
@@ -225,13 +225,13 @@ scan_main( const char * name,
     fclose( splitin );
 
     while ( ! Fsc2_Internals.fsc2_clean_died )
-        fsc2_usleep( 10000, UNSET );
+        fsc2_usleep( 10000, false );
 
-    if ( split_error == OK && ! Fsc2_Internals.fsc2_clean_status_ok )
+    if ( split_error == true && ! Fsc2_Internals.fsc2_clean_status_ok )
     {
         print( FATAL, "Parsing the EDL script '%s' failed due to some "
                "internal problems.\n", name );
-        split_error = FAIL;
+        split_error = false;
     }
 
     close( d_fd );
@@ -244,14 +244,14 @@ scan_main( const char * name,
         TRY_SUCCESS;
     }
     OTHERWISE
-        split_error = FAIL;
+        split_error = false;
 
     /* In case there was an error and the input file wasn't read until the
        end it's sometimes necessary to flush the lexer's input buffer */
 
     YY_FLUSH_BUFFER;
 
-    if ( split_error != OK && Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+    if ( split_error != true && Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
     {
         Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
         fl_raise_form( GUI.main_form->fsc2 );
@@ -320,15 +320,15 @@ section_parser( volatile int section )
         } while ( section != NO_SECTION );
 
         TRY_SUCCESS;
-        return OK;
+        return true;
     }
     CATCH( MISSING_SEMICOLON_EXCEPTION )
     {
         print( FATAL, "Missing semicolon before (or on) this line.\n" );
-        return FAIL;
+        return false;
     }
 
-    return FAIL;
+    return false;
 }
 
 

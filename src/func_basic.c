@@ -71,7 +71,7 @@ f_abort( Var_T * v  UNUSED_ARG )
 Var_T *
 f_stopsim( Var_T * v  UNUSED_ARG )
 {
-    EDL.do_quit = SET;
+    EDL.do_quit = true;
     return NULL;
 }
 
@@ -482,7 +482,7 @@ Var_T *
 f_lmax( Var_T * v )
 {
     double m = - HUGE_VAL;
-    bool all_int = SET;
+    bool all_int = true;
     ssize_t i;
     void *gp;
 
@@ -508,7 +508,7 @@ f_lmax( Var_T * v )
             case FLOAT_VAR :
                 if ( v->val.dval > m )
                     m = v->val.dval;
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             case INT_ARR :
@@ -521,7 +521,7 @@ f_lmax( Var_T * v )
                 for ( i = 0; i < v->len; i++ )
                     if ( v->val.dpnt[ i ] > m )
                         m = v->val.dpnt[ i ];
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             case INT_REF :
@@ -534,7 +534,7 @@ f_lmax( Var_T * v )
                 while ( ( gp = vars_iter( v ) ) != NULL )
                     if ( * ( double * ) gp > m )
                         m = * ( double * ) gp;
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             default :
@@ -557,7 +557,7 @@ Var_T *
 f_lmin( Var_T * v )
 {
     double m = HUGE_VAL;
-    bool all_int = SET;
+    bool all_int = true;
     ssize_t i;
     void *gp;
 
@@ -583,7 +583,7 @@ f_lmin( Var_T * v )
             case FLOAT_VAR :
                 if ( v->val.dval < m )
                     m = v->val.dval;
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             case INT_ARR :
@@ -596,7 +596,7 @@ f_lmin( Var_T * v )
                 for ( i = 0; i < v->len; i++ )
                     if ( v->val.dpnt[ i ] < m )
                         m = v->val.dpnt[ i ];
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             case INT_REF :
@@ -609,7 +609,7 @@ f_lmin( Var_T * v )
                 while ( ( gp = vars_iter( v ) ) != NULL )
                     if ( * ( double * ) gp < m )
                         m = * ( double * ) gp;
-                all_int = UNSET;
+                all_int = false;
                 break;
 
             default :
@@ -1906,7 +1906,7 @@ f_shuffle( Var_T * v )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static bool grand_is_old = UNSET;
+static bool grand_is_old = false;
 
 Var_T *
 f_grand( Var_T * v )
@@ -1964,11 +1964,11 @@ gauss_random( void )
 
         factor = sqrt( - 2.0 * log( radius ) / radius );
         next_val = val_1 * factor;
-        grand_is_old = SET;
+        grand_is_old = true;
         return val_2 * factor;
     }
 
-    grand_is_old = UNSET;
+    grand_is_old = false;
     return next_val;
 }
 
@@ -2017,7 +2017,7 @@ f_setseed( Var_T * v )
             arg >>= 1;
     }
 
-    grand_is_old = UNSET;
+    grand_is_old = false;
     srandom( arg );
     return vars_push( INT_VAR, 1L );
 }
@@ -3649,17 +3649,17 @@ f_sort( Var_T * v )
         vars_check( v->next, INT_VAR | FLOAT_VAR | STR_VAR );
 
         if ( v->next->type == INT_VAR )
-            dir = v->next->val.lval ? SET : UNSET;
+            dir = v->next->val.lval ? true : false;
         else if ( v->next->type == FLOAT_VAR )
-            dir = v->next->val.dval ? SET : UNSET;
+            dir = v->next->val.dval ? true : false;
         else
         {
             if (    ! strcmp( v->next->val.sptr, "UP" )
                  || ! strcmp( v->next->val.sptr, "UPWARDS" ) )
-                dir = UNSET;
+                dir = false;
             else if (    ! strcmp( v->next->val.sptr, "DOWN" )
                  || ! strcmp( v->next->val.sptr, "DOWNWARDS" ) )
-                dir = SET;
+                dir = true;
             else
             {
                 print( FATAL, "Invalid second argument.\n" );

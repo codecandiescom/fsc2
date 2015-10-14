@@ -202,7 +202,7 @@ get_file_length( FILE * restrict fp,
     int fd;
     long i,
          lines = 0;
-    bool is_char = UNSET;
+    bool is_char = false;
     ssize_t bytes_read;
 
 
@@ -219,11 +219,11 @@ get_file_length( FILE * restrict fp,
             if ( *cur++ == '\n' )
             {
                 lines++;
-                is_char = UNSET;
+                is_char = false;
             }
             else
             {
-                is_char = SET;
+                is_char = true;
                 while ( cur < end && *cur != '\n' )
                     cur++;
             }
@@ -1738,7 +1738,7 @@ fsc2_save_conf( void )
         return;
 
     if (    ! ( fp = fopen( fname, "w" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, true ) )
     {
         if ( fp )
             fclose( fp );
@@ -1817,7 +1817,7 @@ get_pathmax( void )
                 pathmax = PATH_MAX_GUESS;
             else
             {
-                eprint( FATAL, UNSET, "Failure to determine the maximum "
+                eprint( FATAL, false, "Failure to determine the maximum "
                         "path length on this system.\n" );
                 THROW( EXCEPTION );
             }

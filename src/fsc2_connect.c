@@ -77,20 +77,18 @@ int
 main( int    argc    UNUSED_ARG,
       char * argv[ ] )
 {
-    char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
     const char *av[ 6 ] = { bindir "fsc2", "--delete", "-s", NULL, NULL, NULL };
-    int ac = 3;
-    char *prog_name;
-    pid_t pid;
 
-
+    char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
     make_tmp_file( fname );
 
-    if ( ( prog_name = strrchr( argv[ 0 ], '/' ) ) != NULL )
+    char *prog_name = strrchr( argv[ 0 ], '/' );
+    if ( prog_name )
         prog_name++;
     else
         prog_name = argv[ 0 ];
 
+    int ac = 3;
     if ( ! strcmp( prog_name, "fsc2_start" ) )
         av[ ac++ ] = "-S";
     else if ( ! strcmp( prog_name, "fsc2_test" ) )
@@ -111,6 +109,7 @@ main( int    argc    UNUSED_ARG,
     signal( SIGUSR1, sig_handler );
     signal( SIGCHLD, sig_handler );
 
+    pid_t pid;
     if ( ( pid = fork( ) ) == 0 )
     {
         execvp( av[ 0 ], ( char ** ) av );
@@ -147,19 +146,18 @@ main( int    argc    UNUSED_ARG,
 static void
 make_tmp_file( char * fname )
 {
-    int tmp;
-    ssize_t bytes_read;
-    char line[ MAXLINE ];
-
-
     /* Try to open a temporary file */
 
-    if ( ( tmp = mkstemp( fname ) ) < 0 )
+    int tmp = mkstemp( fname );
+    if ( tmp < 0 )
         exit( -1 );
 
     fchmod( tmp, S_IRUSR | S_IWUSR );
 
     /* Now read in from stdin and write into the temporary file */
+
+    char line[ MAXLINE ];
+    ssize_t bytes_read;
 
     while ( ( bytes_read = read( 0, line, MAXLINE ) ) != 0 )
     {

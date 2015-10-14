@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -111,7 +111,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 
             /* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-                eprint( FATAL, UNSET, "%s: End of file in comment starting at "
+                eprint( FATAL, false, "%s: End of file in comment starting at "
                         "line %ld.\n", EDL.Fname, Comm_lc );
                 THROW( EXCEPTION );
             }
@@ -127,7 +127,7 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
-                eprint( FATAL, UNSET, "End of comment found at line %ld in "
+                eprint( FATAL, false, "End of comment found at line %ld in "
                         "function data base '%s'.\n", EDL.Lc, EDL.Fname );
                 THROW( EXCEPTION );
             }
@@ -155,7 +155,7 @@ PREP        return PREP_TOKEN;
 ;           return ';';
 
 .           {
-                eprint( FATAL, UNSET, "Syntax error at line %ld in function "
+                eprint( FATAL, false, "Syntax error at line %ld in function "
                                "data base '%s'.\n", EDL.Lc, EDL.Fname );
                 THROW( EXCEPTION );
             }
@@ -176,7 +176,7 @@ size_t
 func_list_parse( Func_T ** fncts,
                  size_t    num_func )
 {
-    static bool is_restart = UNSET;
+    static bool is_restart = false;
     size_t volatile nf = num_func;
     size_t num_predef_func = num_func;
     size_t num;
@@ -231,13 +231,13 @@ func_list_parse( Func_T ** fncts,
 
     if ( EDL.Fname == NULL )
     {
-        eprint( FATAL, UNSET, "Can't open function data base 'Functions'.\n" );
+        eprint( FATAL, false, "Can't open function data base 'Functions'.\n" );
         THROW( EXCEPTION );
     }
 
     if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
+        eprint( FATAL, false, "Can't open function data base '%s'.\n",
                 EDL.Fname );
         EDL.Fname = T_free( EDL.Fname );
         THROW( EXCEPTION );
@@ -248,7 +248,7 @@ func_list_parse( Func_T ** fncts,
     if ( is_restart )
         func_listrestart( func_listin );
     else
-         is_restart = SET;
+         is_restart = true;
 
     /* Count the number of functions defined in the file */
 
@@ -287,7 +287,7 @@ func_list_parse( Func_T ** fncts,
         ( *fncts )[ cur ].nargs = 0;
         ( *fncts )[ cur ].access_flag = ACCESS_EXP;
         ( *fncts )[ cur ].device = NULL;
-        ( *fncts )[ cur ].to_be_loaded = SET;
+        ( *fncts )[ cur ].to_be_loaded = true;
     }
 
     /* Now parse the function database file again */
@@ -338,7 +338,7 @@ fll_count_functions( Func_T * fncts,
                                 sizeof *fncts, ffl_func_cmp2 ) )
                  != NULL )
             {
-                eprint( WARN, UNSET, "Loadable function '%s()' hides "
+                eprint( WARN, false, "Loadable function '%s()' hides "
                         "built-in function (line %ld in function data "
                         "base '%s').\n", f->name, EDL.Lc, EDL.Fname );
 
@@ -347,7 +347,7 @@ fll_count_functions( Func_T * fncts,
                 f->nargs = 0;
                 f->access_flag = ACCESS_EXP;
                 f->device = NULL;
-                f->to_be_loaded = SET;
+                f->to_be_loaded = true;
             }
         }
 
@@ -362,7 +362,7 @@ fll_count_functions( Func_T * fncts,
 
     if ( last_token != ';' )
     {
-        eprint( FATAL, UNSET, "Missing semiciolon at end of function data "
+        eprint( FATAL, false, "Missing semiciolon at end of function data "
                 "base '%s'.\n", EDL.Fname );
         THROW( EXCEPTION );
     }
@@ -410,7 +410,7 @@ fll_get_functions( Func_T * fncts,
             case IDENT_TOKEN :
                 if ( state != 0 )
                 {
-                    eprint( FATAL, UNSET, "Syntax error at line %ld in "
+                    eprint( FATAL, false, "Syntax error at line %ld in "
                             "function data base '%s'.\n", EDL.Lc, EDL.Fname );
                     THROW( EXCEPTION );
                 }
@@ -427,7 +427,7 @@ fll_get_functions( Func_T * fncts,
                             act = i;
                         else
                         {
-                            eprint( FATAL, UNSET, "Function '%s()' is declared"
+                            eprint( FATAL, false, "Function '%s()' is declared"
                                     "more than once in function data base "
                                     "'%s'.\n", func_listtext, EDL.Fname );
                             THROW( EXCEPTION );
@@ -444,7 +444,7 @@ fll_get_functions( Func_T * fncts,
             case INT_TOKEN :
                 if ( state != 1 )
                 {
-                    eprint( FATAL, UNSET, "Syntax error at line %ld of "
+                    eprint( FATAL, false, "Syntax error at line %ld of "
                             "function data base '%s'.\n", EDL.Lc, EDL.Fname );
                     THROW( EXCEPTION );
                 }
@@ -459,7 +459,7 @@ fll_get_functions( Func_T * fncts,
             case ALL_TOKEN : case EXP_TOKEN : case PREP_TOKEN :
                 if ( state != 2 )
                 {
-                    eprint( FATAL, UNSET, "Syntax error at line %ld of "
+                    eprint( FATAL, false, "Syntax error at line %ld of "
                             "function data base '%s'.\n", EDL.Lc, EDL.Fname );
                     THROW( EXCEPTION );
                 }
@@ -485,7 +485,7 @@ fll_get_functions( Func_T * fncts,
             case ';' :
                 if ( state != 0 && state < 2 )
                 {
-                    eprint( FATAL, UNSET, "Missing number of arguments for "
+                    eprint( FATAL, false, "Missing number of arguments for "
                             "function '%s' at line %ld in function data base "
                             "'%s'.\n", fncts[ act ].name, EDL.Lc, EDL.Fname );
                     THROW( EXCEPTION );

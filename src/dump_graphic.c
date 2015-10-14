@@ -356,7 +356,7 @@ create_color_hash( void )
     }
 
     for ( unsigned int i = 0; i < hash_size; i++ )
-        hash[ i ].is_used = UNSET;
+        hash[ i ].is_used = false;
 
     FL_COLOR i = 0;
     for ( i = 0; i < FL_FREE_COL1 + NUM_COLORS + 2; i++ )
@@ -370,7 +370,7 @@ create_color_hash( void )
         while ( hash[ key ].is_used )
             key = ( key + 1 ) % hash_size;
 
-        hash[ key ].is_used = SET;
+        hash[ key ].is_used = true;
         hash[ key ].pixel = pixel;
 
         hash[ key ].rgb[ RED   ] = r;

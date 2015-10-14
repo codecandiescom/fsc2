@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -111,18 +111,18 @@ input:   /* empty */
 
 eol:     ';'
        | '}'
-       |                         { Dont_print_error = SET; }
+       |                         { Dont_print_error = true; }
          error                   { print( FATAL, "Missing semicolon before "
                                           "(or on) this line.\n" );
                                    THROW( EXCEPTION ); }
 ;
 
-cond:    FOR_TOK                 { In_cond = SET; }
+cond:    FOR_TOK                 { In_cond = true; }
          E_VAR_TOKEN '='
-         expr ':' expr fi ls     { In_cond = UNSET; }
+         expr ':' expr fi ls     { In_cond = false; }
        | FOREVER_TOK ls
-       | sc                      { In_cond = SET; }
-         expr ls                 { In_cond = UNSET; }
+       | sc                      { In_cond = true; }
+         expr ls                 { In_cond = false; }
        | ELSE_TOK et
 ;
 
@@ -138,15 +138,15 @@ fi:      /* empty */
 ;
 
 ls:      '{'
-       |                         { Dont_print_error = SET; }
+       |                         { Dont_print_error = true; }
          error                   { print( FATAL, "Syntax error in loop or "
                                           "IF/UNLESS condition.\n" );
                                    THROW( EXCEPTION ); }
 ;
 
 et:      ls
-       | IF_TOK                  { In_cond = SET; }
-         expr ls                 { In_cond = UNSET; }
+       | IF_TOK                  { In_cond = true; }
+         expr ls                 { In_cond = false; }
 ;
 
 line:    E_VAR_TOKEN ass               { }
@@ -269,11 +269,11 @@ exp_testerror( const char * s  UNUSED_ARG )
         else
             print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 
-        In_cond = UNSET;
+        In_cond = false;
         THROW( EXCEPTION );
     }
 
-    Dont_print_error = UNSET;
+    Dont_print_error = false;
 }
 
 
@@ -283,8 +283,8 @@ exp_testerror( const char * s  UNUSED_ARG )
 void
 exp_test_init( void )
 {
-    Dont_print_error = UNSET;
-    In_cond = UNSET;
+    Dont_print_error = false;
+    In_cond = false;
 }
 
 

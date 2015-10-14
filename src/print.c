@@ -45,8 +45,8 @@ static int paper_type = A4_PAPER;
 static double paper_width;
 static double paper_height;
 
-static bool print_with_color = UNSET;
-static bool print_with_comment = UNSET;
+static bool print_with_color = false;
+static bool print_with_comment = false;
 
 static double x_0, y_0, w, h;        /* position and size of print area */
 static double margin = 25.0;         /* margin (in mm) to leave on all sides */
@@ -180,7 +180,7 @@ get_print_command( void )
         return NULL;
 
     if (    ! ( fp = fopen( fname, "r" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, true ) )
     {
         if ( fp )
             fclose( fp );
@@ -240,7 +240,7 @@ save_print_command( void )
         return;
 
     if (    ! ( fp = fopen( fname, "w" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, true ) )
     {
         if ( fp )
             fclose( fp );
@@ -262,7 +262,8 @@ save_print_command( void )
  * and, for printing to file mode, select the file
  *--------------------------------------------------------------*/
 
-static bool
+static
+bool
 get_print_file( FILE ** fp,
                 char ** name,
                 long    data )
@@ -286,7 +287,7 @@ get_print_file( FILE ** fp,
         fl_hide_object( print_form->printer_type_label );
         fl_hide_object( print_form->col_button );
         fl_hide_object( print_form->bw_button );
-        print_with_color = SET;
+        print_with_color = true;
     }
 
     /* If a printer command has already been set put it into the input object,
@@ -404,7 +405,7 @@ get_print_file( FILE ** fp,
         default :
             fl_free_form( print_form->print );
             fl_free( print_form );
-            return FAIL;
+            return false;
     }
 
     /* Let the user fill in the form */
@@ -439,7 +440,7 @@ get_print_file( FILE ** fp,
             fl_hide_form( print_form->print );
             fl_free_form( print_form->print );
             fl_free( print_form );
-            return FAIL;
+            return false;
         }
     }
 
@@ -479,24 +480,24 @@ get_print_file( FILE ** fp,
     if  (    0 == stat( *name, &stat_buf )
           && 1 != show_choices( "The selected file does already exist:\n"
                                 "Are you sure you want to overwrite it?",
-                                2, "Yes", "No", NULL, 2, UNSET ) )
+                                2, "Yes", "No", NULL, 2, false ) )
     {
         *name = T_free( *name );
-        return FAIL;
+        return false;
     }
 
     if ( ( *fp = fopen( *name, "w" ) ) == NULL )
     {
         fl_show_alert( "Error", "Sorry, can't open file:", *name, 1 );
         *name = T_free( *name );
-        return FAIL;
+        return false;
     }
 
     if ( ( fd_flags  = fcntl( fileno( *fp ), F_GETFD ) ) < 0 )
         fd_flags = 0;
     fcntl( fileno( *fp ), F_SETFD, fd_flags | FD_CLOEXEC );
 
-    return SET;
+    return true;
 }
 
 
@@ -582,12 +583,12 @@ print_callback( FL_OBJECT * obj,
         paper_type = Legal_PAPER;
     }
     else if ( obj == print_form->bw_button )
-        print_with_color = UNSET;
+        print_with_color = false;
     else if ( obj == print_form->col_button )
-        print_with_color = SET;
+        print_with_color = true;
     else if ( obj == print_form->add_comment )
         print_with_comment =
-            fl_get_button( print_form->add_comment ) ? SET : UNSET;
+            fl_get_button( print_form->add_comment ) ? true : false;
 }
 
 
@@ -675,7 +676,7 @@ read_print_comment( void )
         return;
 
     if (    ! ( fp = fopen( fname, "r" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_RDLCK, true ) )
     {
         if ( fp )
             fclose( fp );
@@ -739,7 +740,7 @@ write_print_comment( void )
         return;
 
     if (    ! ( fp = fopen( fname, "w" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, SET ) )
+         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, true ) )
     {
         if ( fp )
             fclose( fp );

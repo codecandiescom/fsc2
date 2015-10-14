@@ -54,7 +54,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
         if ( ! *++fn )
         {
             print( FATAL, "Invalid device file name '%s'.\n", name );
-            return FAIL;
+            return false;
         }
 
         name = fn;
@@ -67,7 +67,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
-        return FAIL;
+        return false;
 
     raise_permissions( );
 
@@ -83,7 +83,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
             lower_permissions( );
             print( FATAL, "No permission to access lock file '%s'.\n", fn );
             T_free( fn );
-            return FAIL;
+            return false;
         }
 
         if ( errno != ENOENT )    /* other errors except file does not exist */
@@ -91,7 +91,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
             lower_permissions( );
             print( FATAL, "Can't access lock file '%s'.\n", fn );
             T_free( fn );
-            return FAIL;
+            return false;
         }
 
         mask = umask( 022 );
@@ -101,7 +101,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
             lower_permissions( );
             print( FATAL, "Can't create lock file '%s'.\n", fn );
             T_free( fn );
-            return FAIL;
+            return false;
         }
 
         lower_permissions( );
@@ -112,7 +112,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
         if ( ! check_lock_file( fd, fn ) )
         {
             T_free( fn );
-            return FAIL;
+            return false;
         }
 
         if ( lseek( fd, 0, SEEK_SET ) != 0 )
@@ -120,7 +120,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
             close( fd );
             print( FATAL, "Failed to rewind lock file '%s'.\n", fn );
             T_free( fn );
-            return FAIL;
+            return false;
         }
     }
 
@@ -130,12 +130,12 @@ fsc2_obtain_uucp_lock( const char * volatile name )
         close( fd );
         print( FATAL, "Failed to write to lock file '%s'.\n", fn );
         T_free( fn );
-        return FAIL;
+        return false;
     }
 
     close( fd );
 	T_free( fn );
-    return OK;
+    return true;
 }
 
 
@@ -250,7 +250,7 @@ check_lock_file( int          fd,
         close( fd );
         print( FATAL, "Can't read lock file '%s' - or it has an unknown "
                "format.\n", fn );
-        return FAIL;
+        return false;
     }
 
     buf[ 11 ] = '\0';
@@ -267,7 +267,7 @@ check_lock_file( int          fd,
     {
         close( fd );
         print( FATAL, "Lock file '%s' has unknown format.\n", fn );
-        return FAIL;
+        return false;
     }
 
     /* Check if the lock file belongs to a running process (i.e, if not try
@@ -281,7 +281,7 @@ check_lock_file( int          fd,
         close( fd );
         print( FATAL, "Lock file '%s' is held by another process (%ld).\n ",
                fn, pid );
-        return FAIL;
+        return false;
     }
 
     if ( errno != ESRCH )
@@ -290,11 +290,11 @@ check_lock_file( int          fd,
         close( fd );
         print( FATAL, "Can't determine if lock file '%s' is held by "
                "another process.\n", fn );
-        return FAIL;
+        return false;
     }
 
     lower_permissions( );
-    return OK;
+    return true;
 }
 
 

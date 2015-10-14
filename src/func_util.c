@@ -69,7 +69,7 @@ f_print( Var_T * v )
         on_stack,             /* number of arguments (beside format string ) */
         percs,                /* number of '%' characters */
         n = 0;                /* number of variables printed */
-    bool print_anyway = UNSET;
+    bool print_anyway = false;
 
 
     /* A call to print() without any argument prints nothing */
@@ -87,7 +87,7 @@ f_print( Var_T * v )
     if ( *sptr == '\\' && *( sptr + 1 ) == 'T' )
     {
         sptr += 2;
-        print_anyway = SET;
+        print_anyway = true;
     }
 
     /* Count the number of specifiers '#' in the format string but don't count
@@ -207,17 +207,17 @@ f_print( Var_T * v )
                 {
                     case INT_VAR :
                         strcpy( ep, "%ld" );
-                        eprint( NO_ERROR, UNSET, cp, cv->val.lval );
+                        eprint( NO_ERROR, false, cp, cv->val.lval );
                         break;
 
                     case FLOAT_VAR :
                         strcpy( ep, "%#g" );
-                        eprint( NO_ERROR, UNSET, cp, cv->val.dval );
+                        eprint( NO_ERROR, false, cp, cv->val.dval );
                         break;
 
                     case STR_VAR :
                         strcpy( ep, "%s" );
-                        eprint( NO_ERROR, UNSET, cp, cv->val.sptr );
+                        eprint( NO_ERROR, false, cp, cv->val.sptr );
                         break;
 
                     default :
@@ -231,7 +231,7 @@ f_print( Var_T * v )
     }
 
     if ( Fsc2_Internals.mode != TEST || print_anyway )
-        eprint( NO_ERROR, UNSET, cp );
+        eprint( NO_ERROR, false, cp );
 
     /* Finally free the copy of the format string and return number of
        printed variables */
@@ -662,7 +662,7 @@ f_init_1d( Var_T * v )
     /* Set some default values */
 
     G.dim |= 1;
-    G.is_init = SET;
+    G.is_init = true;
     G.mode = NORMAL_DISPLAY;
 
     G_1d.nc = 1;
@@ -674,7 +674,7 @@ f_init_1d( Var_T * v )
         G_1d.label[ i ] = G_1d.label_orig[ i ] = NULL;
 
     for ( i = 0; i < MAX_CURVES; i++ )
-        G_1d.cb_state[ i ] = SET;
+        G_1d.cb_state[ i ] = true;
 
     /* Now evaluate the arguments */
 
@@ -785,7 +785,7 @@ f_init_2d( Var_T * v )
     /* Set some default values */
 
     G.dim |= 2;
-    G.is_init = SET;
+    G.is_init = true;
     G_2d.nc = 1;
     G_2d.nx = DEFAULT_2D_X_POINTS;
     G_2d.ny = DEFAULT_2D_Y_POINTS;
@@ -796,7 +796,7 @@ f_init_2d( Var_T * v )
         G_2d.label[ i ] = G_2d.label_orig[ i ] = NULL;
 
     for ( i = 0; i < MAX_CURVES; i++ )
-        G_2d.cb_state[ i ] = SET;
+        G_2d.cb_state[ i ] = true;
 
     /* Now evaluate the arguments */
 
@@ -959,7 +959,7 @@ f_dmode( Var_T * v )
         {
             print( SEVERE, "Can't change display mode, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1046,7 +1046,7 @@ f_dmode( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -1101,7 +1101,7 @@ f_cscale( Var_T * v )
         {
             print( SEVERE, "Can't change scale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1152,7 +1152,7 @@ f_cscale_1d( Var_T * v )
         {
             print( SEVERE, "Can't change scale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1206,7 +1206,7 @@ f_cscale_1d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -1276,7 +1276,7 @@ f_cscale_2d( Var_T * v )
         {
             print( SEVERE, "Can't change scale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1343,7 +1343,7 @@ f_cscale_2d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -1405,7 +1405,7 @@ f_vrescale( Var_T * v )
         {
             print( SEVERE, "Can't do vertical rescale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1452,7 +1452,7 @@ f_vrescale_1d( Var_T * v  UNUSED_ARG )
         {
             print( SEVERE, "Can't do vertical rescale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1480,7 +1480,7 @@ f_vrescale_1d( Var_T * v  UNUSED_ARG )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -1535,7 +1535,7 @@ f_vrescale_2d( Var_T * v  UNUSED_ARG )
         {
             print( SEVERE, "Can't do vertical rescale, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1563,7 +1563,7 @@ f_vrescale_2d( Var_T * v  UNUSED_ARG )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -1612,7 +1612,7 @@ f_clabel( Var_T * v )
         {
             print( SEVERE, "Can't change labels, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1664,7 +1664,7 @@ f_clabel_1d( Var_T * v )
         {
             print( SEVERE, "Can't change labels, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1716,7 +1716,7 @@ f_clabel_1d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         T_free( l[ Y ] );
         T_free( l[ X ] );
@@ -1792,7 +1792,7 @@ f_clabel_2d( Var_T * v )
         {
             print( SEVERE, "Can't change labels, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1851,7 +1851,7 @@ f_clabel_2d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         T_free( l[ Z ] );
         T_free( l[ Y ] );
@@ -1918,7 +1918,7 @@ f_rescale( Var_T * v )
         {
             print( SEVERE, "Can't change number of points, missing "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -1968,7 +1968,7 @@ f_rescale_1d( Var_T * v )
         {
             print( SEVERE, "Can't change number of points, missing "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2011,7 +2011,7 @@ f_rescale_1d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -2072,7 +2072,7 @@ f_rescale_2d( Var_T * v )
         {
             print( SEVERE, "Can't change number of points, missing "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2122,7 +2122,7 @@ f_rescale_2d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -2175,7 +2175,7 @@ f_display( Var_T * v )
         if ( ! G.is_warn )                         /* warn only once */
         {
             print( SEVERE, "Can't display data, missing initialization\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2224,7 +2224,7 @@ f_display_1d( Var_T * v )
         if ( ! G.is_warn )                         /* warn only once */
         {
             print( SEVERE, "Can't display data, missing initialization\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2287,7 +2287,7 @@ f_display_1d( Var_T * v )
 
             default :                   /* this better never happens... */
                 T_free( dp );
-                eprint( FATAL, UNSET, "Internal communication error at "
+                eprint( FATAL, false, "Internal communication error at "
                         "%s:%d.\n", __FILE__, __LINE__ );
                 THROW( EXCEPTION );
         }
@@ -2298,7 +2298,7 @@ f_display_1d( Var_T * v )
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
         T_free( dp );
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -2352,7 +2352,7 @@ f_display_1d( Var_T * v )
 
             default :                   /* this better never happens... */
                 T_free( dp );
-                eprint( FATAL, UNSET, "Internal communication error at "
+                eprint( FATAL, false, "Internal communication error at "
                         "%s:%d.\n", __FILE__, __LINE__ );
                 THROW( EXCEPTION );
         }
@@ -2405,7 +2405,7 @@ f_display_2d( Var_T * v )
         if ( ! G.is_warn )                         /* warn only once */
         {
             print( SEVERE, "Can't display data, missing initialization\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2478,7 +2478,7 @@ f_display_2d( Var_T * v )
 
             default :                   /* this better never happens... */
                 T_free( dp );
-                eprint( FATAL, UNSET, "Internal communication error at "
+                eprint( FATAL, false, "Internal communication error at "
                         "%s:%d.\n", __FILE__, __LINE__ );
                 THROW( EXCEPTION );
         }
@@ -2489,7 +2489,7 @@ f_display_2d( Var_T * v )
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
         T_free( dp );
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -2603,7 +2603,7 @@ f_display_2d( Var_T * v )
 
             default :                   /* this better never happens... */
                 T_free( dp );
-                eprint( FATAL, UNSET, "Internal communication error at "
+                eprint( FATAL, false, "Internal communication error at "
                         "%s:%d.\n", __FILE__, __LINE__ );
                 THROW( EXCEPTION );
         }
@@ -2871,7 +2871,7 @@ f_clearcv( Var_T * v )
         {
             print( SEVERE, "Can't clear curve, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -2923,7 +2923,7 @@ f_clearcv_1d( Var_T * v )
         {
             print( SEVERE, "Can't clear curve, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3001,7 +3001,7 @@ f_clearcv_1d( Var_T * v )
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
         T_free( ca );
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3072,7 +3072,7 @@ f_clearcv_2d( Var_T * v )
         {
             print( SEVERE, "Can't clear curve, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3150,7 +3150,7 @@ f_clearcv_2d( Var_T * v )
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
         T_free( ca );
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3208,7 +3208,7 @@ f_setmark( Var_T * v )
         {
             print( SEVERE, "Can't draw marker, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3262,7 +3262,7 @@ f_setmark_1d( Var_T * v )
         {
             print( SEVERE, "Can't set a marker, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3330,7 +3330,7 @@ f_setmark_1d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3401,7 +3401,7 @@ f_setmark_2d( Var_T * v )
         {
             print( SEVERE, "Can't set a marker, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3496,7 +3496,7 @@ f_setmark_2d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3556,7 +3556,7 @@ f_clearmark( Var_T * v )
         {
             print( SEVERE, "Can't clear markers, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3605,7 +3605,7 @@ f_clearmark_1d( Var_T * v )
         {
             print( SEVERE, "Can't clear markers, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3638,7 +3638,7 @@ f_clearmark_1d( Var_T * v )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3698,7 +3698,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
         {
             print( SEVERE, "Can't clear markers, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return vars_push( INT_VAR, 0L );
@@ -3743,7 +3743,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
 
     if ( ( buf = get_shm( &shm_id, len ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
+        eprint( FATAL, false, "Internal communication problem at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
@@ -3819,7 +3819,7 @@ f_get_pos( Var_T * v )
         {
             print( SEVERE, "Can't get mouse position, missing graphics "
                    "initialization.\n" );
-            G.is_warn = SET;
+            G.is_warn = true;
         }
 
         return nv;
@@ -4402,7 +4402,7 @@ Var_T *
 f_zoom_1d( Var_T * v )
 {
     double d[ 4 ];
-    bool keep[ 4 ] = { SET, SET, SET, SET };
+    bool keep[ 4 ] = { true, true, true, true };
     size_t i;
     long len = 0;                    /* total length of message to send */
     char *buffer, *pos;
@@ -4446,7 +4446,7 @@ f_zoom_1d( Var_T * v )
             d[ 2 * i ] = get_double( v, NULL );
             if ( i == X )
                 d[ 2 * i ]--;
-            keep[ 2 * i ] = UNSET;
+            keep[ 2 * i ] = false;
         }
 
         if ( ( v = vars_pop( v ) ) == NULL )
@@ -4470,7 +4470,7 @@ f_zoom_1d( Var_T * v )
                 THROW( EXCEPTION );
             }
 
-            keep[ 2 * i + 1 ] = UNSET;
+            keep[ 2 * i + 1 ] = false;
         }
 
         if ( ( v = vars_pop( v ) ) == NULL )
@@ -4532,7 +4532,7 @@ f_zoom_2d( Var_T * v )
 {
     long curve;
     double d[ 6 ];
-    bool keep[ 6 ] = { SET, SET, SET, SET, SET, SET };
+    bool keep[ 6 ] = { true, true, true, true, true, true };
     size_t i;
     long len = 0;                    /* total length of message to send */
     char *buffer, *pos;
@@ -4598,7 +4598,7 @@ f_zoom_2d( Var_T * v )
             d[ 2 * i ] = get_double( v, NULL );
             if ( i != Z )
                 d[ 2 * i ]--;
-            keep[ 2 * i ] = UNSET;
+            keep[ 2 * i ] = false;
         }
 
         if ( ( v = vars_pop( v ) ) == NULL )
@@ -4622,7 +4622,7 @@ f_zoom_2d( Var_T * v )
                 THROW( EXCEPTION );
             }
 
-            keep[ 2 * i + 1 ] = UNSET;
+            keep[ 2 * i + 1 ] = false;
         }
 
         if ( ( v = vars_pop( v ) ) == NULL )

@@ -321,9 +321,9 @@ f_ocreate( Var_T * var )
     new_io->group         = NULL;
     new_io->label         = label;
     new_io->help_text     = help_text;
-    new_io->is_changed    = UNSET;
-    new_io->report_change = UNSET;
-    new_io->enabled       = SET;
+    new_io->is_changed    = false;
+    new_io->report_change = false;
+    new_io->enabled       = true;
     new_io->partner       = -1;
 
     /* Draw the new object */
@@ -721,7 +721,7 @@ f_ovalue( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    io->is_changed = UNSET;
+    io->is_changed = false;
 
     /* If there are no more arguments just return the objects value */
 

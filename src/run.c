@@ -83,7 +83,7 @@ volatile sig_atomic_t Can_Jmp_Alrm = 0;
 static struct sigaction Sigchld_old_act,
                         Quitting_old_act;
 static volatile sig_atomic_t Child_return_status;
-static bool Graphics_have_been_started = UNSET;
+static bool Graphics_have_been_started = false;
 
 
 /*------------------------------------------------------------------*
@@ -104,7 +104,7 @@ run( void )
     /* We can't run more than one experiment - so quit if child_pid != 0 */
 
     if ( Fsc2_Internals.child_pid != 0 )
-        return FAIL;
+        return false;
 
     /* If there's no EXPERIMENT section at all (indicated by 'prg_length'
        being negative) we're already done */
@@ -118,7 +118,7 @@ run( void )
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
 
-        return FAIL;
+        return false;
     }
 
     /* Initialize libraries for communication with the devices and do some
@@ -128,7 +128,7 @@ run( void )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
-        return FAIL;
+        return false;
     }
 
     /* If there are no commands except an EXPERIMENT section label we just
@@ -147,7 +147,7 @@ run( void )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
-        return FAIL;
+        return false;
     }
 
     /* Setup the signal handlers for signals used for communication between
@@ -195,14 +195,14 @@ run( void )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
         Fsc2_Internals.mode = PREPARATION;
-        return OK;
+        return true;
     }
 
     /* If forking the child failed we end up here */
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     fork_failure( stored_errno );
-    return FAIL;
+    return false;
 }
 
 
@@ -244,7 +244,7 @@ start_comm_libs( void )
 
     if ( Need_GPIB && gpib_init( ) == FAILURE )
     {
-        eprint( FATAL, UNSET, "Failed to initialize GPIB bus: %s\n",
+        eprint( FATAL, false, "Failed to initialize GPIB bus: %s\n",
                 gpib_last_error( ) );
         goto gpib_fail;
     }
@@ -254,9 +254,9 @@ start_comm_libs( void )
 
     if ( Need_RULBUS )
     {
-        if ( fsc2_obtain_uucp_lock( "rulbus" ) == FAIL )
+        if ( fsc2_obtain_uucp_lock( "rulbus" ) == false )
         {
-            eprint( FATAL, UNSET, "RULBUS system is already locked by another "
+            eprint( FATAL, false, "RULBUS system is already locked by another "
                     "process.\n" );
             goto rulbus_fail;
         }
@@ -267,7 +267,7 @@ start_comm_libs( void )
         {
             lower_permissions( );
             fsc2_release_uucp_lock( "rulbus" );
-            eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
+            eprint( FATAL, false, "Failed to initialize RULBUS: %s.\n",
                     rulbus_strerror( ) );
             goto rulbus_fail;
         }
@@ -281,9 +281,9 @@ start_comm_libs( void )
 
     if ( Need_USB )
     {
-        if ( fsc2_obtain_uucp_lock( "libusb" ) == FAIL )
+        if ( fsc2_obtain_uucp_lock( "libusb" ) == false )
         {
-            eprint( FATAL, UNSET, "USB system is already locked by another "
+            eprint( FATAL, false, "USB system is already locked by another "
                     "process.\n" );
             goto libusb_fail;
         }
@@ -299,7 +299,7 @@ start_comm_libs( void )
         {
             lower_permissions( );
             fsc2_release_uucp_lock( "libusb" );
-            eprint( FATAL, UNSET, "Failed to initialize USB.\n" );
+            eprint( FATAL, false, "Failed to initialize USB.\n" );
             goto libusb_fail;
         }
 #endif
@@ -328,7 +328,7 @@ start_comm_libs( void )
 
             meErrorGetMessage( retval, msg, sizeof msg );
             lower_permissions( );
-            eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
+            eprint( FATAL, false, "Failed to initialize Meilhaus driver: "
                     "%s\n", msg );
             goto medriver_fail;
         }
@@ -337,7 +337,7 @@ start_comm_libs( void )
     }
 #endif
 
-    return OK;
+    return true;
 
     /* The following is for de-intialization of all initialzed subsystens
        in case of failures */
@@ -388,7 +388,7 @@ start_comm_libs( void )
     }
 
     Fsc2_Internals.state = STATE_IDLE;
-    return FAIL;
+    return false;
 }
 
 
@@ -402,11 +402,10 @@ no_prog_to_run( void )
 {
     bool ret;
 
-
     TRY
     {
-        EDL.do_quit = UNSET;
-        EDL.react_to_do_quit = SET;
+        EDL.do_quit = false;
+        EDL.react_to_do_quit = true;
 
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
@@ -424,16 +423,16 @@ no_prog_to_run( void )
         vars_pop( f_dtime( NULL ) );
 
         run_exp_hooks( );
-        ret = OK;
+        ret = true;
         TRY_SUCCESS;
     }
     OTHERWISE
     {
         vars_del_stack( );
-        ret = FAIL;
+        ret = false;
     }
 
-    EDL.do_quit = EDL.react_to_do_quit = UNSET;
+    EDL.do_quit = EDL.react_to_do_quit = false;
 
     run_end_of_exp_hooks( );
 
@@ -447,7 +446,7 @@ no_prog_to_run( void )
             char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
             meErrorGetMessage( retval, msg, sizeof msg );
-            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+            eprint( WARN, false, "Failed to close Meilhaus driver: %s\n", msg );
         }
     }
 #endif
@@ -506,18 +505,15 @@ no_prog_to_run( void )
 static bool
 init_devs_and_graphics( void )
 {
-    Compilation_T compile_test;
-
-
     /* Make a copy of the errors found while compiling the program */
 
-    compile_test = EDL.compilation;
-    Graphics_have_been_started = UNSET;
+    Compilation_T compile_test = EDL.compilation;
+    Graphics_have_been_started = false;
 
     TRY
     {
-        EDL.do_quit = UNSET;
-        EDL.react_to_do_quit = SET;
+        EDL.do_quit = false;
+        EDL.react_to_do_quit = true;
 
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
@@ -562,7 +558,7 @@ init_devs_and_graphics( void )
         }
 #endif
 
-        EDL.react_to_do_quit = UNSET;
+        EDL.react_to_do_quit = false;
 
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
@@ -579,7 +575,7 @@ init_devs_and_graphics( void )
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
             start_graphics( );
-            Graphics_have_been_started = SET;
+            Graphics_have_been_started = true;
 
             if ( G.dim & 1 || ! G.is_init )
                 fl_set_object_callback( GUI.run_form_1d->stop_1d,
@@ -595,7 +591,7 @@ init_devs_and_graphics( void )
     }
     OTHERWISE
     {
-        EDL.do_quit = EDL.react_to_do_quit = UNSET;
+        EDL.do_quit = EDL.react_to_do_quit = false;
 
         end_comm( );
 
@@ -612,7 +608,7 @@ init_devs_and_graphics( void )
                 char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
                 meErrorGetMessage( retval, msg, sizeof msg );
-                eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n",
+                eprint( WARN, false, "Failed to close Meilhaus driver: %s\n",
                         msg );
             }
         }
@@ -659,7 +655,7 @@ init_devs_and_graphics( void )
             XFlush( fl_get_display( ) );
         }
 
-        return FAIL;
+        return false;
     }
 
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
@@ -667,7 +663,7 @@ init_devs_and_graphics( void )
 
     Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
-    return OK;
+    return true;
 }
 
 
@@ -682,7 +678,6 @@ static void
 setup_signal_handlers( void )
 {
     struct sigaction sact;
-
 
     sact.sa_handler = quitting_handler;
     sigemptyset( &sact.sa_mask );
@@ -706,7 +701,7 @@ static void
 stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
                      long        b  UNUSED_ARG )
 {
-    EDL.do_quit = EDL.react_to_do_quit = SET;
+    EDL.do_quit = EDL.react_to_do_quit = true;
 }
 
 
@@ -726,7 +721,7 @@ fork_failure( int stored_errno )
     switch ( stored_errno )
     {
         case EAGAIN :
-            eprint( FATAL, UNSET, "Not enough system resources left to run "
+            eprint( FATAL, false, "Not enough system resources left to run "
                     "the experiment.\n" );
             if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
                 exit( EXIT_FAILURE );
@@ -735,7 +730,7 @@ fork_failure( int stored_errno )
             break;
 
         case ENOMEM :
-            eprint( FATAL, UNSET, "Not enough memory left to run the "
+            eprint( FATAL, false, "Not enough memory left to run the "
                     "experiment.\n" );
             if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
                 exit( EXIT_FAILURE );
@@ -744,7 +739,7 @@ fork_failure( int stored_errno )
             break;
 
         default :
-            eprint( FATAL, UNSET, "System error \"%s\" when trying to "
+            eprint( FATAL, false, "System error \"%s\" when trying to "
                     "start experiment.\n", strerror( stored_errno ) );
             if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
                 exit( EXIT_FAILURE );
@@ -754,7 +749,7 @@ fork_failure( int stored_errno )
     }
 
     Fsc2_Internals.child_pid = 0;
-    EDL.do_quit = EDL.react_to_do_quit = UNSET;
+    EDL.do_quit = EDL.react_to_do_quit = false;
 
     end_comm( );
 
@@ -770,7 +765,7 @@ fork_failure( int stored_errno )
             char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
             meErrorGetMessage( retval, msg, sizeof msg );
-            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+            eprint( WARN, false, "Failed to close Meilhaus driver: %s\n", msg );
         }
     }
 #endif
@@ -822,11 +817,11 @@ static void
 check_for_further_errors( Compilation_T * c_old,
                           Compilation_T * c_all )
 {
-    Compilation_T diff;
     char str1[ 128 ],
          str2[ 128 ];
     const char *mess = "During start of the experiment there where";
 
+    Compilation_T diff;
     for ( int i = FATAL; i < NO_ERROR; i++ )
         diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
@@ -963,7 +958,7 @@ run_sigchld_handler( int signo )
         if ( pid == Fsc2_Internals.http_pid )
         {
             Fsc2_Internals.http_pid = -1;
-            Fsc2_Internals.http_server_died = SET;
+            Fsc2_Internals.http_server_died = true;
             continue;
         }
 
@@ -981,7 +976,7 @@ run_sigchld_handler( int signo )
 
         /* Disable use of the 'Stop' button */
 
-        EDL.do_quit = EDL.react_to_do_quit = UNSET;
+        EDL.do_quit = EDL.react_to_do_quit = false;
 
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
@@ -1089,7 +1084,7 @@ run_sigchld_callback( FL_OBJECT * a,
             char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
             meErrorGetMessage( retval, msg, sizeof msg );
-            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+            eprint( WARN, false, "Failed to close Meilhaus driver: %s\n", msg );
         }
     }
 #endif
@@ -1131,14 +1126,14 @@ run_sigchld_callback( FL_OBJECT * a,
     secs %= 60;
 
     if ( hours > 0 )
-        eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+        eprint( NO_ERROR, false, "%s %d h, %d m and %d s.\n",
                 mess, hours, mins, secs );
     else
     {
         if ( mins > 0 )
-            eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n", mess, mins, secs );
+            eprint( NO_ERROR, false, "%s %d m and %d s.\n", mess, mins, secs );
         else
-            eprint( NO_ERROR, UNSET, "%s %d s.\n", mess, secs );
+            eprint( NO_ERROR, false, "%s %d s.\n", mess, secs );
     }
 
     /* Re-enable the stop button (which was disabled when the DO_QUIT
@@ -1201,7 +1196,7 @@ run_close_button_callback( FL_OBJECT * a  UNUSED_ARG,
     if ( Graphics_have_been_started )
     {
         stop_graphics( );
-        Graphics_have_been_started = UNSET;
+        Graphics_have_been_started = false;
     }
 
     set_buttons_for_run( 0 );
@@ -1313,9 +1308,9 @@ run_child( void )
 
     /* Set up pointers, global variables and signal handlers */
 
-    Child_return_status = OK;
+    Child_return_status = true;
     EDL.cur_prg_token = EDL.prg_token;
-    EDL.do_quit = UNSET;
+    EDL.do_quit = false;
     setup_child_signals( );
 
 #ifndef NDEBUG
@@ -1323,8 +1318,8 @@ run_child( void )
        string will induce the child to stop, making it possible to attach
        with a debugger at this point. */
 
-    const char * fcd;
-    if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
+    const char * fcd = getenv( "FSC2_CHILD_DEBUG" );
+    if ( fcd && *fcd != '\0' )
     {
         fprintf( stderr, "Child process pid = %d\n", getpid( ) );
         raise( SIGSTOP );
@@ -1336,11 +1331,11 @@ run_child( void )
     TRY
     {
         do_measurement( );               /* run the experiment */
-        Child_return_status = OK;
+        Child_return_status = true;
         TRY_SUCCESS;
     }
     OTHERWISE                            /* catch all exceptions */
-        Child_return_status = FAIL;
+        Child_return_status = false;
 
     run_child_exit_hooks( );
 
@@ -1419,7 +1414,7 @@ child_sig_handler( int signo )
         case DO_QUIT :                          /* aka SIGUSR2 */
             if ( ! EDL.react_to_do_quit )
                 return;
-            EDL.do_quit = SET;
+            EDL.do_quit = true;
             /* fall through */
 
         case SIGALRM :
@@ -1458,12 +1453,12 @@ child_sig_handler( int signo )
          && Crash.signo != SIGABRT
          && Crash.signo != SIGTERM )
     {
-        Crash.already_crashed = SET;
+        Crash.already_crashed = true;
         Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
         crash_report( );
     }
 #else
-    Crash.already_crashed = SET;
+    Crash.already_crashed = true;
 #endif
 
     close_all_files( );
@@ -1543,7 +1538,7 @@ child_confirmation_handler( int signo )
 static void
 do_measurement( void )
 {
-    EDL.react_to_do_quit = SET;
+    EDL.react_to_do_quit = true;
 
     exp_runparser_init( );
 
@@ -1562,7 +1557,7 @@ do_measurement( void )
                     return;
 
                 EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
-                EDL.do_quit = EDL.react_to_do_quit = UNSET;
+                EDL.do_quit = EDL.react_to_do_quit = false;
                 continue;
             }
 
@@ -1570,7 +1565,7 @@ do_measurement( void )
                reached */
 
             if ( EDL.cur_prg_token == EDL.prg_token + EDL.On_Stop_Pos )
-                EDL.react_to_do_quit = EDL.do_quit = UNSET;
+                EDL.react_to_do_quit = EDL.do_quit = false;
 
             /* Do whatever is necessary to do for the program token */
 
@@ -1688,7 +1683,8 @@ deal_with_program_tokens( void )
             EDL.cur_prg_token = cur->start;
             break;
 
-        case IF_TOK : case UNLESS_TOK :
+        case IF_TOK :
+        case UNLESS_TOK :
             EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
             break;
 

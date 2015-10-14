@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -46,8 +46,8 @@ static void ass_func( int function );
 static int Channel_type;
 static int Cur_PHS = -1;
 static int Cur_PHST = -1;
-static bool is_p_phs_setup = UNSET;
-static bool Func_is_set = UNSET;
+static bool is_p_phs_setup = false;
+static bool Func_is_set = false;
 static int Dont_exec = 0;
 
 %}
@@ -150,23 +150,23 @@ input:   /* empty */
        | input line ';'            { Channel_type = PULSER_CHANNEL_NO_TYPE;
                                      Cur_PHS = -1;
                                      Cur_PHST = -1;
-                                     is_p_phs_setup = UNSET;
-                                     Func_is_set = UNSET;
+                                     is_p_phs_setup = false;
+                                     Func_is_set = false;
                                      fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
        | input SECTION_LABEL       { Channel_type = PULSER_CHANNEL_NO_TYPE;
                                      Cur_PHS = -1;
                                      Cur_PHST = -1;
-                                     is_p_phs_setup = UNSET;
+                                     is_p_phs_setup = false;
                                      fsc2_assert( EDL.Var_Stack == NULL );
                                      fsc2_assert( Dont_exec == 0 );
-                                     Func_is_set = UNSET;
+                                     Func_is_set = false;
                                      YYACCEPT; }
        | input ';'                 { Channel_type = PULSER_CHANNEL_NO_TYPE;
                                      Cur_PHS = -1;
                                      Cur_PHST = -1;
-                                     is_p_phs_setup = UNSET;
-                                     Func_is_set = UNSET;
+                                     is_p_phs_setup = false;
+                                     Func_is_set = false;
                                      fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
 ;
@@ -176,7 +176,7 @@ input:   /* empty */
    TRIGGERMODE, the phase-setup keyword, GRACE_PERIOD, MAXIMUM_PATTERN_LEN,
    PHASE_SWITCH_DELAY or KEEP_ALL_PULSES */
 
-line:    func                      { Func_is_set = SET; }
+line:    func                      { Func_is_set = true; }
          pcd af
        | tb atb
        | tm atm
@@ -589,7 +589,7 @@ mpl:      MPL_TOKEN expr           { p_set_max_seq_len( $2 ); }
 phs:      PHS_TOK                  { p_phs_check( );
                                      Cur_PHS = $1;
                                      Cur_PHST = -1;
-                                     Func_is_set = SET; }
+                                     Func_is_set = true; }
           phsl
 ;
 
@@ -602,24 +602,24 @@ phsl:     /* empty */
 
 phsp:     /* empty */
         | phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
-                                                  -1, $2, UNSET );
-                                     is_p_phs_setup = SET; }
+                                                  -1, $2, false );
+                                     is_p_phs_setup = true; }
         | phsp POD1_TOK sep1
           phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-                                                  0, $4, SET );
-                                     is_p_phs_setup = SET; }
+                                                  0, $4, true );
+                                     is_p_phs_setup = true; }
         | phsp POD2_TOK sep1
           phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-                                                  1, $4, SET );
-                                     is_p_phs_setup = SET; }
+                                                  1, $4, true );
+                                     is_p_phs_setup = true; }
         | POD_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-                                                  0, $3, SET );
-                                     is_p_phs_setup = SET; }
+                                                  0, $3, true );
+                                     is_p_phs_setup = true; }
         | CH_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-                                                  0, $3, UNSET );
-                                     is_p_phs_setup = SET; }
+                                                  0, $3, false );
+                                     is_p_phs_setup = true; }
 ;
 
 phsv:     INT_TOKEN                { $$ = $1; }
@@ -696,8 +696,7 @@ ass_func( int function )
        phase switches. In this case Cur_PHS must be set to the number of
        the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-    if (    ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses
-         && Cur_PHS != -1 )
+    if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses && Cur_PHS != -1 )
         p_phase_ref( Cur_PHS, function );
     else
     {

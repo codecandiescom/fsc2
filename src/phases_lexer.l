@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -131,7 +131,7 @@ WS          [\n=,:. ]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", phasestext + 2 );
+                eprint( FATAL, false, "%s\n", phasestext + 2 );
                 return 0;
             }
 
@@ -280,7 +280,7 @@ WS          [\n=,:. ]+
 int
 phases_parser( FILE * in )
 {
-    static bool is_restart = UNSET;
+    static bool is_restart = false;
 
 
     if ( EDL.compilation.sections[ PHASES_SECTION ] )
@@ -288,7 +288,7 @@ phases_parser( FILE * in )
         print( FATAL, "Multiple instances of PHASES section label.\n" );
         THROW( EXCEPTION );
     }
-    EDL.compilation.sections[ PHASES_SECTION ] = SET;
+    EDL.compilation.sections[ PHASES_SECTION ] = true;
 
     phasesin = in;
 
@@ -297,7 +297,7 @@ phases_parser( FILE * in )
     if ( is_restart )
         phasesrestart( phasesin );
     else
-         is_restart = SET;
+         is_restart = true;
 
     TRY
     {

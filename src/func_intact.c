@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -52,8 +52,8 @@ static struct {
 
 extern FL_resource Xresources[ ];        /* defined in xinit.c */
 
-static bool Is_frozen = UNSET;
-static bool Has_been_shown = UNSET;
+static bool Is_frozen      = false;
+static bool Has_been_shown = false;
 
 static Var_T *f_layout_child( long layout );
 static void f_objdel_child( Var_T * v );
@@ -231,7 +231,7 @@ parent_freeze( int freeze )
 
     if ( Toolbox == NULL || Toolbox->Tools == NULL )
     {
-        Is_frozen = freeze ? SET : UNSET;
+        Is_frozen = freeze ? true : false;
         return;
     }
 
@@ -256,7 +256,7 @@ parent_freeze( int freeze )
 
         fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-        Has_been_shown = SET;
+        Has_been_shown = true;
 
         /* The following shouldn't be necessary, but there seems to be
            some bug that keeps some of the objects from getting disabled
@@ -285,7 +285,7 @@ parent_freeze( int freeze )
         fl_hide_form( Toolbox->Tools );
     }
 
-    Is_frozen = freeze ? SET : UNSET;
+    Is_frozen = freeze ? true : false;
 }
 
 
@@ -665,8 +665,6 @@ f_obj_clabel_child( long   ID,
 {
     char *buffer, *pos;
     size_t len;
-    bool result;
-
 
     len = sizeof EDL.Lc + sizeof ID + strlen( label ) + 1;
 
@@ -696,9 +694,7 @@ f_obj_clabel_child( long   ID,
 
     /* Ask the parent to change the label */
 
-    result = exp_clabel( buffer, pos - buffer );
-
-    if ( result == FAIL )      /* failure -> bomb out */
+    if ( ! exp_clabel( buffer, pos - buffer ) )       /* failure -> bomb out */
         THROW( EXCEPTION );
 
     return vars_push( INT_VAR, 1 );
@@ -768,13 +764,13 @@ f_obj_xable( Var_T * v )
         {
             fl_activate_object( io->self );
             fl_set_object_lcol( io->self, FL_BLACK );
-            io->enabled = SET;
+            io->enabled = true;
         }
         else
         {
             fl_deactivate_object( io->self );
             fl_set_object_lcol( io->self, FL_INACTIVE_COL );
-            io->enabled = UNSET;
+            io->enabled = false;
         }
     }
 
@@ -794,8 +790,6 @@ f_obj_xable_child( long ID,
 {
     char *buffer, *pos;
     size_t len;
-    bool result;
-
 
     len = sizeof EDL.Lc + sizeof ID + sizeof state;
 
@@ -825,9 +819,7 @@ f_obj_xable_child( long ID,
 
     /* Ask the parent to change the label */
 
-    result = exp_xable( buffer, pos - buffer );
-
-    if ( result == FAIL )      /* failure -> bomb out */
+    if ( ! exp_xable( buffer, pos - buffer ) )      /* failure -> bomb out */
         THROW( EXCEPTION );
 
     return vars_push( INT_VAR, state ? 1L : 0L );
@@ -872,7 +864,7 @@ tools_clear( void )
     long i;
 
 
-    Is_frozen = UNSET;
+    Is_frozen = false;
 
     if ( Toolbox == NULL )
         return;
@@ -976,7 +968,7 @@ recreate_Toolbox( void )
             {
                 GUI.toolbox_x = tool_x;
                 GUI.toolbox_y = tool_y;
-                GUI.toolbox_has_pos = SET;
+                GUI.toolbox_has_pos = true;
             }
         }
     }
@@ -1015,7 +1007,7 @@ recreate_Toolbox( void )
 
         fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-        Has_been_shown = SET;
+        Has_been_shown = true;
     }
 }
 
@@ -1774,14 +1766,14 @@ tools_callback( FL_OBJECT * obj,
     {
         case NORMAL_BUTTON :
             io->state += 1;
-            io->is_changed = SET;
+            io->is_changed = true;
             if ( io->report_change )
                 tb_wait_handler( io->ID );
             break;
 
         case PUSH_BUTTON :
             io->state = fl_get_button( obj );
-            io->is_changed = SET;
+            io->is_changed = true;
             if ( io->report_change )
                 tb_wait_handler( io->ID );
             break;
@@ -1801,7 +1793,7 @@ tools_callback( FL_OBJECT * obj,
                     oio->state = 0;
                 }
 
-                io->is_changed = SET;
+                io->is_changed = true;
                 if ( io->report_change )
                     tb_wait_handler( io->ID );
             }
@@ -1810,7 +1802,7 @@ tools_callback( FL_OBJECT * obj,
         case NORMAL_SLIDER : case VALUE_SLIDER :
         case SLOW_NORMAL_SLIDER : case SLOW_VALUE_SLIDER :
             io->value = fl_get_slider_value( obj );
-            io->is_changed = SET;
+            io->is_changed = true;
             if ( io->report_change )
                 tb_wait_handler( io->ID );
             break;
@@ -1838,7 +1830,7 @@ tools_callback( FL_OBJECT * obj,
             if ( lval != io->val.lval )
             {
                 io->val.lval = lval;
-                io->is_changed = SET;
+                io->is_changed = true;
                 if ( io->report_change )
                     tb_wait_handler( io->ID );
             }
@@ -1873,7 +1865,7 @@ tools_callback( FL_OBJECT * obj,
             if ( strcasecmp( obuf, fl_get_input( io->self ) ) )
             {
                 io->val.dval = dval;
-                io->is_changed = SET;
+                io->is_changed = true;
                 if ( io->report_change )
                     tb_wait_handler( io->ID );
             }
@@ -1900,7 +1892,7 @@ tools_callback( FL_OBJECT * obj,
             io->state = fl_get_choice( io->self );
             if ( io->state != old_state )
             {
-                io->is_changed = SET;
+                io->is_changed = true;
                 if ( io->report_change )
                     tb_wait_handler( io->ID );
             }
@@ -1925,15 +1917,14 @@ check_format_string( const char * buf )
     const char *bp = buf;
     const char *lcp;
 
-
     if ( *bp != '%' )     /* format must start with '%' */
-        return FAIL;
+        return false;
 
     lcp = bp + strlen( bp ) - 1;      /* last char must be g, f or e */
     if (    toupper( ( int ) *lcp ) != 'G'
          && toupper( ( int ) *lcp ) != 'F'
          && toupper( ( int ) *lcp ) != 'E' )
-        return FAIL;
+        return false;
 
 
     if ( *++bp != '.' )                 /* test for width parameter */
@@ -1941,18 +1932,18 @@ check_format_string( const char * buf )
             bp++;
 
     if ( bp == lcp )                    /* no precision ? */
-        return OK;
+        return true;
 
     if ( *bp++ != '.' )
-        return FAIL;
+        return false;
 
     if ( bp == lcp )
-        return OK;
+        return true;
 
     while ( isdigit( ( unsigned char ) *bp ) )
         bp++;
 
-    return lcp == bp ? OK : FAIL;
+    return lcp == bp;
 }
 
 
@@ -2003,7 +1994,7 @@ check_label( const char * str )
                            "DnLine", "UpArrow", "DnArrow" };
     const char *p = str;
     unsigned int i;
-    bool is_ar = UNSET;
+    bool is_ar = false;
 
 
     /* If the label string does not start with a '@' character or with two of
@@ -2019,7 +2010,7 @@ check_label( const char * str )
     p++;
     if ( *p == '#' )
     {
-        is_ar = SET;
+        is_ar = true;
         p++;
     }
 
@@ -2098,7 +2089,7 @@ static void
 store_toolbox_position( void )
 {
     get_form_position( Toolbox->Tools, &GUI.toolbox_x, &GUI.toolbox_y );
-    GUI.toolbox_has_pos = SET;
+    GUI.toolbox_has_pos = true;
 }
 
 
@@ -2333,7 +2324,7 @@ f_tb_wait( Var_T * v )
             }
 
             if ( ! IS_OUTPUT( io->type ) )
-                io->report_change = SET;
+                io->report_change = true;
         }
     }
     else    /* if there were no arguments loop over all objects */
@@ -2341,7 +2332,7 @@ f_tb_wait( Var_T * v )
         for ( io = Toolbox->objs; io != NULL; io = io->next )
         {
             if ( ! IS_OUTPUT( io->type ) )
-                io->report_change = SET;
+                io->report_change = true;
         }
     }
 
@@ -2496,7 +2487,7 @@ tb_wait_handler( long ID )
     result[ 1 ] = ID >= 0 ? ID : 0;
 
     for ( io = Toolbox->objs; io != NULL; io = io->next )
-        io->report_change = UNSET;
+        io->report_change = false;
 
     Fsc2_Internals.tb_wait = TB_WAIT_NOT_RUNNING;
 

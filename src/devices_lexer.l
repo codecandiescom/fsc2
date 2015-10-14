@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -121,7 +121,7 @@ WS          [\n\t ]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", devicestext + 2 );
+                eprint( FATAL, false, "%s\n", devicestext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -133,7 +133,7 @@ WS          [\n\t ]+
 
 {ESTR}      {
                 devicestext = strchr( devicestext, '\x03' );
-                eprint( FATAL, UNSET, "%s\n", devicestext + 2 );
+                eprint( FATAL, false, "%s\n", devicestext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -206,9 +206,6 @@ WS          [\n\t ]+
 int
 devices_parser( FILE * in )
 {
-    int i;
-
-
     /* Make sure there is only one DEVICES section and that it is the very
        first section */
 
@@ -218,9 +215,9 @@ devices_parser( FILE * in )
         THROW( EXCEPTION );
     }
 
-    for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; i++ )
+    for ( int i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; i++ )
     {
-        if ( EDL.compilation.sections[ i ] == UNSET )
+        if ( EDL.compilation.sections[ i ] == false )
             continue;
 
         print( FATAL, "Sorry, DEVICES section must be the very first "
@@ -228,7 +225,7 @@ devices_parser( FILE * in )
         THROW( EXCEPTION );
     }
 
-    EDL.compilation.sections[ DEVICES_SECTION ] = SET;
+    EDL.compilation.sections[ DEVICES_SECTION ] = true;
 
     devicesin = in;
 

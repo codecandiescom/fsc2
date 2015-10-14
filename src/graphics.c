@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -58,7 +58,7 @@ static Graphics_T *G_stored = NULL;
 static Graphics_1d_T *G_1d_stored = NULL;
 static Graphics_2d_T *G_2d_stored = NULL;
 
-static bool display_has_been_shown = UNSET;
+static bool display_has_been_shown = false;
 
 static struct {
     unsigned int   win_min_1d_width;
@@ -99,7 +99,7 @@ start_graphics( void )
     G.coord_display = 0;
     G.dist_display  = 0;
 
-    G_cut.is_shown = UNSET;
+    G_cut.is_shown = false;
     G_cut.curve = -1;
     G_cut.index = 0;
 
@@ -189,7 +189,7 @@ start_graphics( void )
                                   form_event_handler );
     }
 
-    display_has_been_shown = SET;
+    display_has_been_shown = true;
 
     /* Set minimum sizes for display windows and switch on full scale button */
 
@@ -273,7 +273,7 @@ start_graphics( void )
     else
         fl_raise_form( GUI.run_form_2d->run_2d );
 
-    G.is_fully_drawn = SET;
+    G.is_fully_drawn = true;
 }
 
 
@@ -347,8 +347,8 @@ set_default_sizes( void )
 {
     int flags;
     unsigned diff;
-    bool has_pos = UNSET;
-    bool has_size = UNSET;
+    bool has_pos = false;
+    bool has_size = false;
     int x, y;
     unsigned int w, h;
 
@@ -366,10 +366,10 @@ set_default_sizes( void )
                                 &GI.display_w, &GI.display_h );
 
             if ( WidthValue & flags && HeightValue & flags )
-                has_size = SET;
+                has_size = true;
 
             if ( XValue & flags && YValue & flags )
-                has_pos = SET;
+                has_pos = true;
         }
 
         if ( * ( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
@@ -382,14 +382,14 @@ set_default_sizes( void )
             {
                 GUI.display_1d_width    = w;
                 GUI.display_1d_height   = h;
-                GUI.display_1d_has_size = SET;
+                GUI.display_1d_has_size = true;
             }
 
             if ( XValue & flags && YValue & flags )
             {
                 GUI.display_1d_x       = x;
                 GUI.display_1d_y       = y;
-                GUI.display_1d_has_pos = SET;
+                GUI.display_1d_has_pos = true;
             }
         }
 
@@ -403,14 +403,14 @@ set_default_sizes( void )
             {
                 GUI.display_2d_width    = w;
                 GUI.display_2d_height   = h;
-                GUI.display_2d_has_size = SET;
+                GUI.display_2d_has_size = true;
             }
 
             if ( XValue & flags && YValue & flags )
             {
                 GUI.display_2d_x       = x;
                 GUI.display_2d_y       = y;
-                GUI.display_2d_has_pos = SET;
+                GUI.display_2d_has_pos = true;
             }
         }
     }
@@ -421,14 +421,14 @@ set_default_sizes( void )
         {
             GUI.display_1d_x       = GI.display_x;
             GUI.display_1d_y       = GI.display_y;
-            GUI.display_1d_has_pos = SET;
+            GUI.display_1d_has_pos = true;
         }
 
         if ( G.dim & 2 && ! GUI.display_2d_has_pos )
         {
             GUI.display_2d_x       = GI.display_x;
             GUI.display_2d_y       = GI.display_y;
-            GUI.display_2d_has_pos = SET;
+            GUI.display_2d_has_pos = true;
         }
     }
 
@@ -852,7 +852,7 @@ run_form_close_handler( FL_FORM * a  UNUSED_ARG,
 static void
 G_struct_init( void )
 {
-    static bool first_time = SET;
+    static bool first_time = true;
     static int cursor_1d[ 8 ];
     static int cursor_2d[ 8 ];
     int i, x, y;
@@ -955,16 +955,16 @@ G_struct_init( void )
             G_2d.cursor[ i ] = cursor_2d[ i ];
         }
 
-    G_1d.is_fs = SET;
-    G_2d.is_fs = SET;
+    G_1d.is_fs = true;
+    G_2d.is_fs = true;
 
     G_1d.rw_min = HUGE_VAL;
     G_1d.rw_max = - HUGE_VAL;
-    G_1d.is_scale_set = UNSET;
+    G_1d.is_scale_set = false;
 
     G_2d.rw_min = HUGE_VAL;
     G_2d.rw_max = - HUGE_VAL;
-    G_2d.is_scale_set = UNSET;
+    G_2d.is_scale_set = false;
 
     /* Create pixmaps for labels that need to be rotated by 90 degrees */
 
@@ -985,7 +985,7 @@ G_struct_init( void )
     if ( G.dim & 2 )
         G_init_curves_2d( );
 
-    first_time = UNSET;
+    first_time = false;
 }
 
 
@@ -1068,15 +1068,15 @@ G_init_curves_1d( void )
         cv->shift[ X ] = cv->shift[ Y ] = 0.0;
 
         cv->count = 0;
-        cv->active = SET;
-        cv->can_undo = UNSET;
+        cv->active = true;
+        cv->can_undo = false;
 
         /* Finally get memory for the data */
 
         cv->points = T_malloc( G_1d.nx * sizeof *cv->points );
 
         for ( j = 0; j < G_1d.nx; j++ )          /* no points are known yet */
-            cv->points[ j ].exist = UNSET;
+            cv->points[ j ].exist = false;
 
         cv->xpoints = T_malloc( G_1d.nx * sizeof *cv->xpoints );
     }
@@ -1124,9 +1124,9 @@ G_init_curves_2d( void )
         cv->marker_2d  = NULL;
         cv->cut_marker = NULL;
 
-        cv->active = UNSET;
+        cv->active = false;
 
-        cv->needs_recalc = UNSET;
+        cv->needs_recalc = false;
         cv->w = cv->h = 0;
 
         /* Create a GC for drawing the curve and set its color */
@@ -1187,25 +1187,25 @@ G_init_curves_2d( void )
         cv->rwc_delta[ Y ] = G_2d.rwc_delta[ Y ];
 
         cv->count = 0;
-        cv->can_undo = UNSET;
+        cv->can_undo = false;
 
-        cv->is_fs = SET;
+        cv->is_fs = true;
 
         cv->rw_min = HUGE_VAL;
         cv->rw_max = - HUGE_VAL;
-        cv->is_scale_set = UNSET;
+        cv->is_scale_set = false;
 
         /* Now get also memory for the data */
 
         cv->points = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->points );
 
         for ( sp = cv->points, j = 0; j < G_2d.nx * G_2d.ny; sp++, j++ )
-            sp->exist = UNSET;
+            sp->exist = false;
 
         cv->xpoints = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->xpoints );
     }
 
-    G_2d.curve_2d[ 0 ]->active = SET;       /* first curve is the active one */
+    G_2d.curve_2d[ 0 ]->active = true;      /* first curve is the active one */
 }
 
 
@@ -1310,7 +1310,7 @@ stop_graphics( void )
     Marker_1d_T *m, *mn;
 
 
-    G.is_fully_drawn = UNSET;
+    G.is_fully_drawn = false;
 
     if ( G.is_init )
     {
@@ -1384,12 +1384,12 @@ stop_graphics( void )
     {
         get_form_position( GUI.run_form_1d->run_1d, &GUI.display_1d_x,
                            &GUI.display_1d_y );
-        GUI.display_1d_has_pos = SET;
+        GUI.display_1d_has_pos = true;
 
         GUI.display_1d_width = GUI.run_form_1d->run_1d->w;
         GUI.display_1d_height = GUI.run_form_1d->run_1d->h;
 
-        GUI.display_1d_has_pos = GUI.display_1d_has_size = SET;
+        GUI.display_1d_has_pos = GUI.display_1d_has_size = true;
 
         fl_hide_form( GUI.run_form_1d->run_1d );
         fl_free_form( GUI.run_form_1d->run_1d );
@@ -1401,12 +1401,12 @@ stop_graphics( void )
     {
         get_form_position( GUI.run_form_2d->run_2d, &GUI.display_2d_x,
                            &GUI.display_2d_y );
-        GUI.display_2d_has_pos = SET;
+        GUI.display_2d_has_pos = true;
 
         GUI.display_2d_width = GUI.run_form_2d->run_2d->w;
         GUI.display_2d_height = GUI.run_form_2d->run_2d->h;
 
-        GUI.display_2d_has_pos = GUI.display_2d_has_size = SET;
+        GUI.display_2d_has_pos = GUI.display_2d_has_size = true;
 
         fl_hide_form( GUI.run_form_2d->run_2d );
         fl_free_form( GUI.run_form_2d->run_2d );
@@ -1602,7 +1602,7 @@ setup_canvas( Canvas_T  * c,
     XChangeWindowAttributes( G.d, FL_ObjWin( c->obj ),
                              CWBackingStore | CWBackPixmap,
                              &attributes );
-    c->is_box = UNSET;
+    c->is_box = false;
 
     fl_add_canvas_handler( c->obj, ConfigureNotify, ch, c );
 
@@ -1869,49 +1869,49 @@ switch_off_special_cursors( void )
         if ( G.drag_canvas == DRAG_1D_X )         /* 1D x-axis window */
         {
             fl_reset_cursor( FL_ObjWin( G_1d.x_axis.obj ) );
-            G_1d.x_axis.is_box = UNSET;
+            G_1d.x_axis.is_box = false;
             repaint_canvas_1d( &G_1d.x_axis );
         }
 
         if ( G.drag_canvas == DRAG_1D_Y )         /* 1D y-axis window */
         {
             fl_reset_cursor( FL_ObjWin( G_1d.y_axis.obj ) );
-            G_1d.y_axis.is_box = UNSET;
+            G_1d.y_axis.is_box = false;
             repaint_canvas_1d( &G_1d.y_axis );
         }
 
         if ( G.drag_canvas == DRAG_1D_C )         /* 1D canvas window */
         {
             fl_reset_cursor( FL_ObjWin( G_1d.canvas.obj ) );
-            G_1d.canvas.is_box = UNSET;
+            G_1d.canvas.is_box = false;
             repaint_canvas_1d( &G_1d.canvas );
         }
 
         if ( G.drag_canvas == DRAG_2D_X )         /* 2D x-axis window */
         {
             fl_reset_cursor( FL_ObjWin( G_2d.x_axis.obj ) );
-            G_2d.x_axis.is_box = UNSET;
+            G_2d.x_axis.is_box = false;
             repaint_canvas_2d( &G_2d.x_axis );
         }
 
         if ( G.drag_canvas == DRAG_2D_Y )         /* 2D y-axis window */
         {
             fl_reset_cursor( FL_ObjWin( G_2d.y_axis.obj ) );
-            G_2d.y_axis.is_box = UNSET;
+            G_2d.y_axis.is_box = false;
             repaint_canvas_2d( &G_1d.y_axis );
         }
 
         if ( G.drag_canvas == DRAG_2D_Z )         /* 2D z-axis window */
         {
             fl_reset_cursor( FL_ObjWin( G_2d.z_axis.obj ) );
-            G_2d.z_axis.is_box = UNSET;
+            G_2d.z_axis.is_box = false;
             repaint_canvas_2d( &G_2d.z_axis );
         }
 
         if ( G.drag_canvas == DRAG_2D_C )         /* 2D canvas window */
         {
             fl_reset_cursor( FL_ObjWin( G_2d.canvas.obj ) );
-            G_2d.canvas.is_box = UNSET;
+            G_2d.canvas.is_box = false;
             repaint_canvas_2d( &G_2d.canvas );
         }
     }
@@ -1927,7 +1927,7 @@ undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
                          long        b  UNUSED_ARG )
 {
     long i;
-    bool is_undo = UNSET;
+    bool is_undo = false;
     Curve_1d_T *cv;
     double temp_s2d,
            temp_shift;
@@ -1953,14 +1953,14 @@ undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
             cv->old_shift[ j ] = temp_shift;
         }
 
-        is_undo = SET;
+        is_undo = true;
 
         recalc_XPoints_of_curve_1d( cv );
     }
 
     if ( is_undo && G_1d.is_fs )
     {
-        G_1d.is_fs = UNSET;
+        G_1d.is_fs = false;
         fl_set_button( GUI.run_form_1d->full_scale_button_1d, 0 );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
@@ -2013,7 +2013,7 @@ undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
 
     if ( cv2->is_fs )
     {
-        cv2->is_fs = UNSET;
+        cv2->is_fs = false;
         fl_set_button( GUI.run_form_2d->full_scale_button_2d, 0 );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
@@ -2021,7 +2021,7 @@ undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
                                   "and switch on automatic rescaling" );
     }
 
-    cv2->needs_recalc = SET;
+    cv2->needs_recalc = true;
     redraw_all_2d( );
 }
 
@@ -2044,7 +2044,7 @@ fs_vert_rescale_1d( void )
 
     /* ... and rescale to full scale */
 
-    fs_rescale_1d( SET );
+    fs_rescale_1d( true );
     redraw_all_1d( );
 }
 
@@ -2060,7 +2060,7 @@ fs_vert_rescale_2d( void )
     if ( G_2d.active_curve != -1 )
     {
         save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
-        fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], SET );
+        fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], true );
         redraw_all_2d( );
     }
 }
@@ -2089,7 +2089,7 @@ fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
 
     if ( state == 1 )        /* full scale got switched on */
     {
-        G_1d.is_fs = SET;
+        G_1d.is_fs = true;
 
         /* Store data of previous state... */
 
@@ -2098,7 +2098,7 @@ fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
 
         /* ... and rescale to full scale */
 
-        fs_rescale_1d( UNSET );
+        fs_rescale_1d( false );
         redraw_all_1d( );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
@@ -2106,7 +2106,7 @@ fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
     }
     else        /* full scale got switched off */
     {
-        G_1d.is_fs = UNSET;
+        G_1d.is_fs = false;
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
                                   "Rescale curves to fit into the window\n"
@@ -2144,8 +2144,8 @@ fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
         if ( G_2d.active_curve != -1 )
         {
             save_scale_state_2d( G_2d.curve_2d[ G_2d.active_curve ] );
-            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = SET;
-            fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], UNSET );
+            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = true;
+            fs_rescale_2d( G_2d.curve_2d[ G_2d.active_curve ], false );
             redraw_all_2d( );
         }
     }
@@ -2156,7 +2156,7 @@ fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
                                   "Rescale curves to fit into the window\n"
                                   "and switch on automatic rescaling" );
         if ( G_2d.active_curve != -1 )
-            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = UNSET;
+            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = false;
     }
 }
 
@@ -2299,7 +2299,7 @@ curve_button_callback_2d( FL_OBJECT * obj,
 
     if ( data - 1 == G_2d.active_curve )      /* curve is to be switched off */
     {
-        G_2d.curve_2d[ G_2d.active_curve ]->active = UNSET;
+        G_2d.curve_2d[ G_2d.active_curve ]->active = false;
         G_2d.active_curve = -1;
         sprintf( hstr, "Show curve %ld", data );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
@@ -2308,7 +2308,7 @@ curve_button_callback_2d( FL_OBJECT * obj,
     else
     {
         if ( G_2d.active_curve != -1 )
-            G_2d.curve_2d[ G_2d.active_curve ]->active = UNSET;
+            G_2d.curve_2d[ G_2d.active_curve ]->active = false;
 
         switch ( G_2d.active_curve )
         {
@@ -2346,7 +2346,7 @@ curve_button_callback_2d( FL_OBJECT * obj,
             fl_set_object_helper( obj, hstr );
 
         G_2d.active_curve = ( int ) ( data - 1 );
-        G_2d.curve_2d[ G_2d.active_curve ]->active = SET;
+        G_2d.curve_2d[ G_2d.active_curve ]->active = true;
 
         fl_set_button( GUI.run_form_2d->full_scale_button_2d,
                        G_2d.curve_2d[ G_2d.active_curve ]->is_fs );

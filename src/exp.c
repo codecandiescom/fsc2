@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -38,7 +38,7 @@
 Token_Val_T Exp_Val;                      /* also used by exp_lexer.l */
 
 
-static bool In_for_lex = UNSET;           /* set while handling for loop
+static bool In_for_lex = false;           /* set while handling for loop
                                              condition part */
 static int In_cond = 0;                   /* counts conditional construts in
                                              conditionals */
@@ -127,7 +127,7 @@ static const char *get_construct_name( int token_type );
 void
 store_exp( FILE * in )
 {
-    static bool is_restart = UNSET;
+    static bool is_restart = false;
     long parenthesis_count = 0;
     long square_brace_count = 0;
     long i;
@@ -142,7 +142,7 @@ store_exp( FILE * in )
     if ( is_restart )
         exprestart( expin );
     else
-        is_restart = SET;
+        is_restart = true;
 
     EDL.prg_token = NULL;
     Cb_stack = NULL;
@@ -168,14 +168,14 @@ store_exp( FILE * in )
 
     if ( parenthesis_count > 0 )
     {
-        eprint( FATAL, UNSET, "'(' without closing ')' detected at end of "
+        eprint( FATAL, false, "'(' without closing ')' detected at end of "
                 "program.\n" );
         THROW( EXCEPTION );
     }
 
     if ( Cb_stack != NULL  )
     {
-        eprint( FATAL, UNSET, "Block starting with '{' at %s:%ld has no "
+        eprint( FATAL, false, "Block starting with '{' at %s:%ld has no "
                 "closing '}'.\n",
                 Cb_stack->where->Fname, Cb_stack->where->Lc );
         THROW( EXCEPTION );
@@ -183,7 +183,7 @@ store_exp( FILE * in )
 
     if ( square_brace_count > 0 )
     {
-        eprint( FATAL, UNSET, "'[' without closing ']' detected at end of "
+        eprint( FATAL, false, "'[' without closing ']' detected at end of "
                 "program.\n" );
         THROW( EXCEPTION );
     }
@@ -216,7 +216,7 @@ get_and_store_tokens( long * parenthesis_count,
     Prg_Token_T *cur;
     char *cur_Fname = NULL;
     long curly_brace_in_loop_count = 0;
-    bool in_loop = UNSET;
+    bool in_loop = false;
 
 
     while ( ( token = explex( ) ) != 0 )
@@ -291,7 +291,7 @@ get_and_store_tokens( long * parenthesis_count,
         {
             case FOR_TOK : case WHILE_TOK : case UNLESS_TOK :
             case REPEAT_TOK : case FOREVER_TOK :
-                in_loop = SET;
+                in_loop = true;
                 break;
 
             case '(' :
@@ -345,7 +345,7 @@ get_and_store_tokens( long * parenthesis_count,
                 }
 
                 if ( in_loop && --curly_brace_in_loop_count == 0 )
-                    in_loop = UNSET;
+                    in_loop = false;
 
                 break;
 
@@ -469,13 +469,13 @@ pop_curly_brace( void )
 
 
     if ( Cb_stack == NULL )
-        return FAIL;
+        return false;
 
     old_cb = Cb_stack;
     Cb_stack = old_cb->next;
     T_free( old_cb );
 
-    return OK;
+    return true;
 }
 
 
@@ -607,7 +607,7 @@ setup_while_or_repeat( int    type,
 
     if ( i == EDL.prg_length )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
+        eprint( FATAL, false, "%s:%ld: Unexpected end of file in EXPERIMENT "
                 "section.\n", EDL.prg_token[ i - 1 ].Fname,
                 EDL.prg_token[ i - 1 ].Lc );
         THROW( EXCEPTION );
@@ -615,14 +615,14 @@ setup_while_or_repeat( int    type,
 
     if ( type != FOREVER_TOK && EDL.prg_token[ i ].token == '{' )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Missing loop condition.\n",
+        eprint( FATAL, false, "%s:%ld: Missing loop condition.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
         THROW( EXCEPTION );
     }
 
     if ( type == FOREVER_TOK && EDL.prg_token[ i ].token != '{' )
     {
-        eprint( FATAL, UNSET, "%s:%ld: No condition can be used for a FOREVER "
+        eprint( FATAL, false, "%s:%ld: No condition can be used for a FOREVER "
                 "loop.\n", EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
         THROW( EXCEPTION );
     }
@@ -653,7 +653,7 @@ setup_while_or_repeat( int    type,
                 break;
 
             case ELSE_TOK :
-                eprint( FATAL, UNSET, "%s:%ld: ELSE without IF/UNLESS in "
+                eprint( FATAL, false, "%s:%ld: ELSE without IF/UNLESS in "
                         "current block.\n", EDL.prg_token[ i ].Fname,
                         EDL.prg_token[ i ].Lc );
                 THROW( EXCEPTION );
@@ -661,7 +661,7 @@ setup_while_or_repeat( int    type,
             case '{' :
                 if ( i + 1 == EDL.prg_length )
                 {
-                    eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
+                    eprint( FATAL, false, "%s:%ld: Unexpected end of file in "
                             "EXPERIMENT section.\n", EDL.prg_token[ i ].Fname,
                             EDL.prg_token[ i ].Lc );
                     THROW( EXCEPTION );
@@ -677,7 +677,7 @@ setup_while_or_repeat( int    type,
         }
     }
 
-    eprint( FATAL, UNSET, "Missing '}' for %s starting at %s:%ld.\n",
+    eprint( FATAL, false, "Missing '}' for %s starting at %s:%ld.\n",
             get_construct_name( type ), cur->Fname, cur->Lc );
     THROW( EXCEPTION );
 }
@@ -698,15 +698,15 @@ setup_if_else( long        *  pos,
 {
     Prg_Token_T *cur = EDL.prg_token + *pos;
     long i = *pos + 1;
-    bool in_if = SET;
-    bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and
+    bool in_if = true;
+    bool dont_need_close_parens = false;           /* set for IF-ELSE and
                                                       UNLESS-ELSE constructs */
 
     /* Start with some sanity checks */
 
     if ( i == EDL.prg_length )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
+        eprint( FATAL, false, "%s:%ld: Unexpected end of file in EXPERIMENT "
                 "section.\n", EDL.prg_token[ i - 1 ].Fname,
                 EDL.prg_token[ i - 1 ].Lc );
         THROW( EXCEPTION );
@@ -714,7 +714,7 @@ setup_if_else( long        *  pos,
 
     if ( EDL.prg_token[ i ].token == '{' )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF/UNLESS.\n",
+        eprint( FATAL, false, "%s:%ld: Missing condition after IF/UNLESS.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
     }
 
@@ -732,7 +732,7 @@ setup_if_else( long        *  pos,
             case NEXT_TOK : case BREAK_TOK :
                 if ( cur_wr == NULL )
                 {
-                    eprint( FATAL, UNSET, "%s:%ld: %s statement not within "
+                    eprint( FATAL, false, "%s:%ld: %s statement not within "
                             "a loop.\n", EDL.prg_token[ i ].token == NEXT_TOK ?
                             "NEXT" : "BREAK",
                             EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
@@ -768,7 +768,7 @@ setup_if_else( long        *  pos,
                     return;
         }
 
-    eprint( FATAL, UNSET, "Missing '}' for %s starting at %s:%ld.\n",
+    eprint( FATAL, false, "Missing '}' for %s starting at %s:%ld.\n",
             in_if ? "IF/UNLESS" : "ELSE", cur->Fname, cur->Lc );
     THROW( EXCEPTION );
 }
@@ -786,7 +786,7 @@ setup_else( Prg_Token_T * cur,
 {
     if ( i + 1 == EDL.prg_length )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
+        eprint( FATAL, false, "%s:%ld: Unexpected end of file in "
                 "EXPERIMENT section.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
         THROW( EXCEPTION );
@@ -796,14 +796,14 @@ setup_else( Prg_Token_T * cur,
          && EDL.prg_token[ i + 1 ].token != IF_TOK
          && EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
+        eprint( FATAL, false, "%s:%ld: Missing '{' after ELSE.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
         THROW( EXCEPTION );
     }
 
     if ( in_if )
     {
-        eprint( FATAL, UNSET, "Missing '}' for ELSE block "
+        eprint( FATAL, false, "Missing '}' for ELSE block "
                 "belonging to IF-ELSE construct starting at "
                 "%s:%ld.\n", cur->Fname, cur->Lc );
         THROW( EXCEPTION );
@@ -813,7 +813,7 @@ setup_else( Prg_Token_T * cur,
           || EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
     {
         cur->end = EDL.prg_token + i;
-        *dont_need_close_parens = SET;
+        *dont_need_close_parens = true;
     }
 }
 
@@ -829,7 +829,7 @@ setup_open_brace_in_if_else( Prg_Token_T * cur,
 {
     if ( i + 1 == EDL.prg_length )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
+        eprint( FATAL, false, "%s:%ld: Unexpected end of file in "
                 "EXPERIMENT section.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
         THROW( EXCEPTION );
@@ -854,7 +854,7 @@ setup_close_brace_in_if_else( long        * pos,
 {
     if ( *in_if )
     {
-        *in_if = UNSET;
+        *in_if = false;
         if (    i + 1 < EDL.prg_length
              && EDL.prg_token[ i + 1 ].token == ELSE_TOK )
             return FALSE;
@@ -945,7 +945,7 @@ exp_test_run( void )
 
 
     EDL.Fname = T_free( EDL.Fname );
-    In_for_lex = UNSET;
+    In_for_lex = false;
     In_cond = 0;
 
     TRY
@@ -959,7 +959,7 @@ exp_test_run( void )
         */
 
         Fsc2_Internals.mode = TEST;
-        vars_save_restore( SET );
+        vars_save_restore( true );
 
         experiment_time( );
         EDL.experiment_time = 0.0;
@@ -1000,7 +1000,7 @@ exp_test_run( void )
                 else                                  /* goto ON_STOP part */
                     EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
 
-                EDL.do_quit = UNSET;
+                EDL.do_quit = false;
             }
 
             /* Now deal with the token at hand - the function only returns
@@ -1020,7 +1020,7 @@ exp_test_run( void )
         EDL.Fname = NULL;
         vars_del_stack( );
         delete_devices( );                       /* run the exit hooks ! */
-        vars_save_restore( UNSET );
+        vars_save_restore( false );
 
         EDL.File_List_Len = old_FLL;
         close_all_files( );
@@ -1031,7 +1031,7 @@ exp_test_run( void )
 
     Fsc2_Internals.mode = PREPARATION;
     EDL.Fname = NULL;
-    vars_save_restore( UNSET );
+    vars_save_restore( false );
     EDL.File_List_Len = old_FLL;
 }
 
@@ -1333,7 +1333,7 @@ test_condition( Prg_Token_T * cur )
 
     if ( EDL.cur_prg_token->token != '{' )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Missing block (enclosed by '{' and "
+        eprint( FATAL, false, "%s:%ld: Missing block (enclosed by '{' and "
                 "'}') after %s.\n",
                 cur->Fname, cur->Lc, get_construct_name( cur->token ) );
         THROW( EXCEPTION );
@@ -1343,7 +1343,7 @@ test_condition( Prg_Token_T * cur )
 
     if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR | STR_VAR ) ) )
     {
-        eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
+        eprint( FATAL, false, "%s:%ld: Invalid condition for %s.\n",
                 cur->Fname, cur->Lc, get_construct_name( cur->token ) );
         THROW( EXCEPTION );
     }
@@ -1351,11 +1351,11 @@ test_condition( Prg_Token_T * cur )
     /* Test the result - everything nonzero returns OK */
 
     if ( EDL.Var_Stack->type == INT_VAR )
-        condition = EDL.Var_Stack->val.lval ? OK : FAIL;
+        condition = EDL.Var_Stack->val.lval;
     else if ( EDL.Var_Stack->type == FLOAT_VAR )
-        condition = EDL.Var_Stack->val.dval ? OK : FAIL;
+        condition = EDL.Var_Stack->val.dval;
     else                            /* if ( EDL.Var_Stack->type == STR_VAR ) */
-        condition = ( EDL.Var_Stack->val.sptr[ 0 ] != '\0') ? OK : FAIL;
+        condition = EDL.Var_Stack->val.sptr[ 0 ] != '\0';
 
     vars_pop( EDL.Var_Stack );
     return ( cur->token != UNLESS_TOK ) ? condition : ! condition;
@@ -1378,7 +1378,7 @@ get_max_repeat_count( Prg_Token_T * cur )
     if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
     {
         cur++;
-        eprint( FATAL, UNSET, "%s:%ld: Invalid counter for REPEAT loop.\n",
+        eprint( FATAL, false, "%s:%ld: Invalid counter for REPEAT loop.\n",
                 cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1389,7 +1389,7 @@ get_max_repeat_count( Prg_Token_T * cur )
         cur->count.repl.max = EDL.Var_Stack->val.lval;
     else
     {
-        eprint( WARN, UNSET, "%s:%ld: WARNING: Floating point value used as "
+        eprint( WARN, false, "%s:%ld: WARNING: Floating point value used as "
                 "maximum count in REPEAT loop.\n",
                 ( cur + 1 )->Fname, ( cur + 1 )->Lc );
         cur->count.repl.max = lrnd( EDL.Var_Stack->val.dval );
@@ -1422,7 +1422,7 @@ get_for_cond( Prg_Token_T * cur )
          || ( EDL.cur_prg_token + 1 )->token != '=' )
     {
         cur++;
-        eprint( FATAL, UNSET, "%s:%ld: Syntax error in condition of FOR "
+        eprint( FATAL, false, "%s:%ld: Syntax error in condition of FOR "
                 "loop.\n", cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1441,7 +1441,7 @@ get_for_cond( Prg_Token_T * cur )
     if ( ! ( EDL.cur_prg_token->tv.vptr->type & ( INT_VAR | FLOAT_VAR ) ) )
     {
         cur++;
-        eprint( FATAL, UNSET, "%s:%ld: FOR loop variable must be integer or "
+        eprint( FATAL, false, "%s:%ld: FOR loop variable must be integer or "
                 "float variable.\n", cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1453,7 +1453,7 @@ get_for_cond( Prg_Token_T * cur )
     /* Now get start value to be assigned to loop variable */
 
     EDL.cur_prg_token +=2;                    /* skip variable and '=' token */
-    In_for_lex = SET;                         /* allow ':' as separator */
+    In_for_lex = true;                        /* allow ':' as separator */
     conditionparse( );                        /* get start value */
     fsc2_assert( EDL.Var_Stack->next == NULL );   /* Paranoia as usual... */
 
@@ -1462,8 +1462,8 @@ get_for_cond( Prg_Token_T * cur )
     if ( EDL.cur_prg_token->token != ':' )
     {
         cur++;
-        In_for_lex = UNSET;
-        eprint( FATAL, UNSET, "%s:%ld: Missing end value in FOR loop.\n",
+        In_for_lex = false;
+        eprint( FATAL, false, "%s:%ld: Missing end value in FOR loop.\n",
                 cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1473,8 +1473,8 @@ get_for_cond( Prg_Token_T * cur )
     if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
     {
         cur++;
-        In_for_lex = UNSET;
-        eprint( FATAL, UNSET, "%s:%ld: Invalid start value in FOR loop.\n",
+        In_for_lex = false;
+        eprint( FATAL, false, "%s:%ld: Invalid start value in FOR loop.\n",
                 cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1492,7 +1492,7 @@ get_for_cond( Prg_Token_T * cur )
     {
         if ( cur->count.forl.act->type == INT_VAR )
         {
-            eprint( WARN, UNSET, "%s:%ld: Using floating point value in "
+            eprint( WARN, false, "%s:%ld: Using floating point value in "
                     "assignment to integer FOR loop variable %s.\n",
                     ( cur + 1 )->Fname,
                     ( cur + 1 )->Lc, cur->count.forl.act->name );
@@ -1515,8 +1515,8 @@ get_for_cond( Prg_Token_T * cur )
     if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
     {
         cur++;
-        In_for_lex = UNSET;
-        eprint( FATAL, UNSET, "%s:%ld: Invalid end value in FOR loop.\n",
+        In_for_lex = false;
+        eprint( FATAL, false, "%s:%ld: Invalid end value in FOR loop.\n",
                 cur->Fname, cur->Lc );
         THROW( EXCEPTION );
     }
@@ -1527,8 +1527,8 @@ get_for_cond( Prg_Token_T * cur )
          && EDL.Var_Stack->type == FLOAT_VAR )
     {
         cur++;
-        In_for_lex = UNSET;
-        eprint( FATAL, UNSET, "%s:%ld: End value in FOR loop is floating "
+        In_for_lex = false;
+        eprint( FATAL, false, "%s:%ld: End value in FOR loop is floating "
                 "point value while loop variable is an integer.\n",
                 cur->Fname, cur->Lc );
         THROW( EXCEPTION );
@@ -1564,7 +1564,7 @@ get_for_cond( Prg_Token_T * cur )
     {
         EDL.cur_prg_token++;                    /* skip the ':' */
         conditionparse( );                      /* get end value */
-        In_for_lex = UNSET;
+        In_for_lex = false;
         fsc2_assert( EDL.Var_Stack->next == NULL ); /* Paranoia as usual... */
 
         /* Make sure the increment is either an integer or a float */
@@ -1572,7 +1572,7 @@ get_for_cond( Prg_Token_T * cur )
         if ( ! ( EDL.Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
         {
             cur++;
-            eprint( FATAL, UNSET, "%s:%ld: Invalid increment for FOR loop.\n",
+            eprint( FATAL, false, "%s:%ld: Invalid increment for FOR loop.\n",
                     cur->Fname, cur->Lc );
             THROW( EXCEPTION );
         }
@@ -1583,8 +1583,8 @@ get_for_cond( Prg_Token_T * cur )
              && EDL.Var_Stack->type == FLOAT_VAR )
         {
             cur++;
-            In_for_lex = UNSET;
-            eprint( FATAL, UNSET, "%s:%ld: FOR loop increment is floating "
+            In_for_lex = false;
+            eprint( FATAL, false, "%s:%ld: FOR loop increment is floating "
                     "point value while loop variable is an integer.\n",
                     cur->Fname, cur->Lc );
             THROW( EXCEPTION );
@@ -1599,7 +1599,7 @@ get_for_cond( Prg_Token_T * cur )
             if ( EDL.Var_Stack->val.lval == 0 )
             {
                 cur++;
-                eprint( FATAL, UNSET, "%s:%ld: Zero increment in FOR loop.\n",
+                eprint( FATAL, false, "%s:%ld: Zero increment in FOR loop.\n",
                         cur->Fname, cur->Lc );
                 THROW( EXCEPTION );
             }
@@ -1610,7 +1610,7 @@ get_for_cond( Prg_Token_T * cur )
             if ( EDL.Var_Stack->val.dval == 0 )
             {
                 cur++;
-                eprint( FATAL, UNSET, "%s:%ld: Zero increment for FOR loop.\n",
+                eprint( FATAL, false, "%s:%ld: Zero increment for FOR loop.\n",
                         cur->Fname, cur->Lc );
                 THROW( EXCEPTION );
             }
@@ -1620,7 +1620,7 @@ get_for_cond( Prg_Token_T * cur )
         vars_pop( EDL.Var_Stack );
     }
 
-    In_for_lex = UNSET;
+    In_for_lex = false;
     EDL.cur_prg_token++;                /* skip the '{' */
     return;
 
@@ -1634,7 +1634,7 @@ get_for_cond( Prg_Token_T * cur )
 bool
 test_for_cond( Prg_Token_T * cur )
 {
-    bool sign = UNSET;
+    bool sign = false;
 
 
     /* If this isn't the very first call, increment the loop variable */
@@ -1655,7 +1655,7 @@ test_for_cond( Prg_Token_T * cur )
               && cur->count.forl.incr.lval < 0 )
          || (    cur->count.forl.incr.type == FLOAT_VAR
               && cur->count.forl.incr.dval < 0 ) )
-        sign = SET;
+        sign = true;
 
     /* If the increment is positive test if loop variable is less or equal to
        the end value, if increment is negative if loop variable is larger or
@@ -1683,11 +1683,11 @@ test_for_cond( Prg_Token_T * cur )
     /* We can't end up here... */
 
 #ifndef NDEBUG
-    eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
+    eprint( FATAL, false, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
 #endif
 
     THROW( EXCEPTION );
-    return FAIL;
+    return false;
 }
 
 
@@ -1707,9 +1707,9 @@ check_result( Var_T * v )
     /* Test the result - everything nonzero returns OK */
 
     if ( v->type == INT_VAR )
-        return v->val.lval ? OK : FAIL;
+        return v->val.lval;
     else
-        return v->val.dval != 0.0 ? OK : FAIL;
+        return v->val.dval != 0.0;
 }
 
 
@@ -1743,7 +1743,7 @@ static const char *get_construct_name( int token_type )
     }
 
 #ifndef NDEBUG
-    eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+    eprint( FATAL, false, "Internal error at %s:%d.\n",
             __FILE__, __LINE__ );
 #endif
 

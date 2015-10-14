@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -30,8 +30,8 @@ void * get_shm( int * /* shm_id */,
 
 void * attach_shm( int /* key */ );
 
-void detach_shm( void * /* buf */,
-                 int *  /* key */  );
+void detach_shm( const void * /* buf */,
+                 int        *  /* key */  );
 
 void delete_all_shm( void );
 

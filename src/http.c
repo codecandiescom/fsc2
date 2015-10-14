@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -66,7 +66,7 @@ server_callback( FL_OBJECT * obj,
         OTHERWISE
         {
             fl_set_button( obj, 0 );
-            eprint( WARN, UNSET, "Failed to start HTTP server.\n" );
+            eprint( WARN, false, "Failed to start HTTP server.\n" );
             return;
         }
 

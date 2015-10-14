@@ -21,7 +21,7 @@
 #include "fsc2.h"
 
 
-PA_Seq_T PA_Seq = { NULL, { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } } };
+PA_Seq_T PA_Seq = { NULL, { { false, NULL, 0 }, { false, NULL, 0 } } };
 
 
 static long cur_aseq;
@@ -50,7 +50,7 @@ acq_seq_start( long acq_num,
 
     /* Initialize the acquisition sequence */
 
-    PA_Seq.acq_seq[ acq_num ].defined = SET;
+    PA_Seq.acq_seq[ acq_num ].defined = true;
     PA_Seq.acq_seq[ acq_num ].sequence =
                       T_malloc( sizeof *PA_Seq.acq_seq[ acq_num ].sequence );
 
@@ -211,7 +211,7 @@ phases_clear( void )
 
     for ( i = 0; i < 2; i++ )
     {
-        PA_Seq.acq_seq[ i ].defined = UNSET;
+        PA_Seq.acq_seq[ i ].defined = false;
         PA_Seq.acq_seq[ i ].sequence = T_free( PA_Seq.acq_seq[ i ].sequence );
     }
 
@@ -250,7 +250,7 @@ phases_end( void )
     if (    ( PA_Seq.acq_seq[ 0 ].defined || PA_Seq.acq_seq[ 1 ].defined )
          && PA_Seq.phs_seq == NULL )
     {
-        eprint( FATAL, UNSET, "Aquisition sequence(s) defined but no phase "
+        eprint( FATAL, false, "Aquisition sequence(s) defined but no phase "
                 "sequences in PHASES section.\n" );
         THROW( EXCEPTION );
     }
@@ -266,7 +266,7 @@ phases_end( void )
     for ( p = PA_Seq.phs_seq->next; p != NULL; p = p->next )
         if ( p->len != PA_Seq.phs_seq->len )
         {
-            eprint( FATAL, UNSET, "Lengths of phase sequences defined in "
+            eprint( FATAL, false, "Lengths of phase sequences defined in "
                     "PHASES section differ.\n" );
             THROW( EXCEPTION );
         }
@@ -278,7 +278,7 @@ phases_end( void )
          || (    PA_Seq.acq_seq[ 1 ].defined
               && PA_Seq.acq_seq[ 1 ].len != PA_Seq.phs_seq->len ) )
     {
-        eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
+        eprint( FATAL, false, "Lengths of phase and acquisition sequences "
                 "defined in PHASES section differ.\n" );
         THROW( EXCEPTION );
     }

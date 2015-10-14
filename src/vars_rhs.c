@@ -329,7 +329,7 @@ vars_arr_rhs_slice_prune( Var_T * nv,
                           Var_T * a,
                           Var_T * end )
 {
-    bool needs_stage_2 = UNSET;
+    bool needs_stage_2 = false;
     prune_stage_1( nv, v, a, end, &needs_stage_2 );
 
     if ( needs_stage_2 )
@@ -423,15 +423,15 @@ prune_stage_1( Var_T * nv,
 
         nv->len = range;
         if ( range == 1 )
-            *needs_stage_2 = SET;
+            *needs_stage_2 = true;
         return range == 1;
     }
 
     for ( ssize_t i = 0; i < range_start; i++ )
-        vars_free( nv->val.vptr[ i ], SET );
+        vars_free( nv->val.vptr[ i ], true );
 
     for ( ssize_t i = range_end + 1; i < nv->len; i++ )
-        vars_free( nv->val.vptr[ i ], SET );
+        vars_free( nv->val.vptr[ i ], true );
 
     if ( range_start > 0 )
         memmove( nv->val.vptr, nv->val.vptr + range_start,
@@ -445,14 +445,14 @@ prune_stage_1( Var_T * nv,
     }
 
     if ( v == end )
-        return UNSET;
+        return false;
 
-    bool keep = UNSET;
+    bool keep = false;
     for ( ssize_t i = 0; i < nv->len; i++ )
         keep = prune_stage_1( nv->val.vptr[ i ], v, a, end, needs_stage_2 );
 
     if ( keep )
-        return UNSET;
+        return false;
 
     if ( nv->val.vptr[ 0 ]->len == 1 )
     {
@@ -466,7 +466,7 @@ prune_stage_1( Var_T * nv,
             nv->val.vptr[ i ]->from = nv;
             old_vptr->flags |= DONT_RECURSE;
             if ( ! vars_pop( old_vptr ) )
-                vars_free( old_vptr, SET );
+                vars_free( old_vptr, true );
         }
     }
 
@@ -497,7 +497,7 @@ prune_stage_2( Var_T * nv )
         for ( ssize_t i = 0; i < nv->len; i++ )
         {
             nv->val.lpnt[ i ] = old_vptr_list[ i ]->val.lpnt[ 0 ];
-            vars_free( old_vptr_list[ i ], SET );
+            vars_free( old_vptr_list[ i ], true );
         }
     }
     else
@@ -508,7 +508,7 @@ prune_stage_2( Var_T * nv )
         for ( ssize_t i = 0; i < nv->len; i++ )
         {
             nv->val.dpnt[ i ] = old_vptr_list[ i ]->val.dpnt[ 0 ];
-            vars_free( old_vptr_list[ i ], SET );
+            vars_free( old_vptr_list[ i ], true );
         }
     }
 

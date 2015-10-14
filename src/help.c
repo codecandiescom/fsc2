@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -41,11 +41,11 @@ run_help( FL_OBJECT * a,
     bn = fl_get_button_numb( a );
     if ( bn != FL_SHORTCUT + 'S' && bn == FL_RIGHT_MOUSE )
     {
-        eprint( NO_ERROR, UNSET,
+        eprint( NO_ERROR, false,
                 ( GUI.G_Funcs.size == ( bool ) LOW ) ?
                 "@n-------------------------------------------\n" :
                 "@n-----------------------------------------------\n" );
-        eprint( NO_ERROR, UNSET,
+        eprint( NO_ERROR, false,
                 "@nLeft mouse button (LMB):   Zoom after drawing box\n"
                 "@nMiddle mouse button (MMB): Move curves\n"
                 "@nRight mouse button (RMB):  Zoom in or out by moving mouse\n"
@@ -53,7 +53,7 @@ run_help( FL_OBJECT * a,
                 "@nLMB + RMB: Show differences of data values\n"
                 "@n<Shift> LMB: Show cross section (2D only)\n"
                 "@nLMB + MMB + <Space>: Switch between x/y cross section\n" );
-        eprint( NO_ERROR, UNSET,
+        eprint( NO_ERROR, false,
                 ( GUI.G_Funcs.size == ( bool ) LOW ) ?
                 "@n-------------------------------------------\n" :
                 "@n-----------------------------------------------\n" );

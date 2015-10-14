@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -28,12 +28,9 @@
 void
 clear_curve_1d( long curve )
 {
-    long i;
-    Scaled_Point_T *sp;
-
-
-    for ( sp = G_1d.curve[ curve ]->points, i = 0; i < G_1d.nx; sp++, i++ )
-        sp->exist = UNSET;
+    Scaled_Point_T *sp = G_1d.curve[ curve ]->points;
+    for ( long i = 0; i < G_1d.nx; sp++, i++ )
+        sp->exist = false;
     G_1d.curve[ curve ]->count = 0;
 }
 
@@ -45,13 +42,9 @@ clear_curve_1d( long curve )
 void
 clear_curve_2d( long curve )
 {
-    long i;
-    Scaled_Point_T *sp;
-
-
-    for ( sp = G_2d.curve_2d[ curve ]->points, i = 0; i < G_2d.nx * G_2d.ny;
-          sp++, i++ )
-        sp->exist = UNSET;
+    Scaled_Point_T *sp = G_2d.curve_2d[ curve ]->points;
+    for ( long i = 0; i < G_2d.nx * G_2d.ny; sp++, i++ )
+        sp->exist = false;
     G_2d.curve_2d[ curve ]->count = 0;
 }
 
@@ -65,8 +58,6 @@ change_scale_1d( int    is_set,
                  void * ptr )
 {
     double vals[ 4 ];
-
-
     memcpy( vals, ptr, sizeof vals );
 
     if ( is_set & 1 )
@@ -84,37 +75,34 @@ void
 change_scale_2d( int    is_set,
                  void * ptr )
 {
-    long i;
     double vals[ 4 ];
-
-
     memcpy( vals, ptr, sizeof vals );
 
     if ( is_set & 1 )
     {
         G_2d.rwc_start[ X ] = vals[ 0 ];
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
             G_2d.curve_2d[ i ]->rwc_start[ X ] = vals[ 0 ];
     }
 
     if ( is_set & 2 )
     {
         G_2d.rwc_delta[ X ] = vals[ 1 ];
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
             G_2d.curve_2d[ i ]->rwc_delta[ X ] = vals[ 1 ];
     }
 
     if ( is_set & 4 )
     {
         G_2d.rwc_start[ Y ] = vals[ 2 ];
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
             G_2d.curve_2d[ i ]->rwc_start[ Y ] = vals[ 2 ];
     }
 
     if ( is_set & 8 )
     {
         G_2d.rwc_delta[ Y ] = vals[ 3 ];
-        for ( i = 0; i < G_2d.nc; i++ )
+        for ( long i = 0; i < G_2d.nc; i++ )
             G_2d.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
     }
 }
@@ -160,9 +148,6 @@ change_label_1d( char ** label )
 void
 change_label_2d( char ** label )
 {
-    int coord;
-
-
     if ( *label[ X ] != '\0' )
     {
         if ( G_2d.label[ X ] != NULL )
@@ -189,7 +174,7 @@ change_label_2d( char ** label )
         }
     }
 
-    for ( coord = Y; coord <= Z; coord++ )
+    for ( int coord = Y; coord <= Z; coord++ )
         if ( *label[ coord ] != '\0' )
         {
             if ( G_2d.label[ coord ] != NULL )
@@ -245,12 +230,6 @@ change_label_2d( char ** label )
 void
 rescale_1d( long new_nx )
 {
-    long i, k, count;
-    long max_x = 0;
-    Scaled_Point_T *sp;
-    Marker_1d_T *m;
-
-
     /* Return immediately on negative values, they're silently ignored */
 
     if ( new_nx < 0 )
@@ -258,17 +237,21 @@ rescale_1d( long new_nx )
 
     /* Find the maximum x-index currently used by a point or a marker */
 
-    for ( k = 0; k < G_1d.nc; k++ )
-        for ( count = G_1d.curve[ k ]->count, sp = G_1d.curve[ k ]->points,
-              i = 0; count > 0; sp++, i++ )
+    long max_x = 0;
+    for ( long k = 0; k < G_1d.nc; k++ )
+    {
+        Scaled_Point_T * sp = G_1d.curve[ k ]->points;
+        long count = G_1d.curve[ k ]->count;
+        for ( long i = 0; count > 0; sp++, i++ )
             if ( sp->exist )
             {
                 if( i > max_x )
                     max_x = i;
                 count--;
             }
+    }
 
-    for ( m = G_1d.marker_1d; m != NULL; m = m->next )
+    for ( Marker_1d_T * m = G_1d.marker_1d; m != NULL; m = m->next )
         if ( m->x_pos > max_x )
             max_x = m->x_pos;
 
@@ -288,21 +271,21 @@ rescale_1d( long new_nx )
     else if ( new_nx > max_x )
         max_x = new_nx;
 
-    for ( k = 0; k < G_1d.nc; k++ )
+    for ( long k = 0; k < G_1d.nc; k++ )
     {
         G_1d.curve[ k ]->points = T_realloc( G_1d.curve[ k ]->points,
                                      max_x * sizeof *G_1d.curve[ k ]->points );
         G_1d.curve[ k ]->xpoints = T_realloc( G_1d.curve[ k ]->xpoints,
                                     max_x * sizeof *G_1d.curve[ k ]->xpoints );
 
-        for ( i = G_1d.nx, sp = G_1d.curve[ k ]->points + i; i < max_x;
-              sp++, i++ )
-            sp->exist = UNSET;
+        Scaled_Point_T * sp = G_1d.curve[ k ]->points + G_1d.nx;
+        for ( long i = G_1d.nx; i < max_x; sp++, i++ )
+            sp->exist = false;
     }
 
     G_1d.nx = max_x;
 
-    for ( k = 0; k < G_1d.nc; k++ )
+    for ( long k = 0; k < G_1d.nc; k++ )
     {
         if ( G_1d.is_fs )
         {
@@ -322,26 +305,24 @@ rescale_1d( long new_nx )
 void
 rescale_2d( long * new_dims )
 {
-    long i, j, k, l, count;
-    long max_x = 0,
-         max_y = 0;
-    Scaled_Point_T *sp, *old_sp, *osp;
-    bool need_cut_redraw = UNSET;
-    long new_nx, new_ny;
-
-
-    new_nx = new_dims[ X ];
-    new_ny = new_dims[ Y ];
+    long new_nx = new_dims[ X ];
+    long new_ny = new_dims[ Y ];
 
     if ( new_nx < 0 && new_ny < 0 )
         return;
 
     /* Find the maximum x and y index used until now */
 
-    for ( k = 0; k < G_2d.nc; k++ )
-        for ( j = 0, count = G_2d.curve_2d[ k ]->count,
-              sp = G_2d.curve_2d[ k ]->points; count > 0; j++ )
-            for ( i = 0; i < G_2d.nx && count > 0; sp++, i++ )
+    long max_x = 0,
+         max_y = 0;
+    for ( long k = 0; k < G_2d.nc; k++ )
+    {
+        Scaled_Point_T * sp = G_2d.curve_2d[ k ]->points;
+        long count = G_2d.curve_2d[ k ]->count;
+
+        for ( long j = 0; count > 0; j++ )
+        {
+            for ( long i = 0; i < G_2d.nx && count > 0; sp++, i++ )
                 if ( sp->exist )
                 {
                     max_y = j;
@@ -349,6 +330,8 @@ rescale_2d( long * new_dims )
                         max_x = i;
                     count--;
                 }
+        }
+    }
 
     if ( max_x != 0 )
         max_x++;
@@ -375,28 +358,33 @@ rescale_2d( long * new_dims )
 
     /* Now we're in for the real fun... */
 
-    for ( k = 0; k < G_2d.nc; k++ )
+    for ( long k = 0; k < G_2d.nc; k++ )
     {
         /* Reorganize the old elements to fit into the new array and clear
            the the new elements in the already existing rows */
 
-        old_sp = osp = G_2d.curve_2d[ k ]->points;
-        sp = G_2d.curve_2d[ k ]->points = T_malloc(   new_nx * new_ny
-                                                    * sizeof *sp );
+        Scaled_Point_T * old_sp = G_2d.curve_2d[ k ]->points;
+        Scaled_Point_T * osp = old_sp;
+        Scaled_Point_T * sp = G_2d.curve_2d[ k ]->points
+                                  = T_malloc(   new_nx * new_ny * sizeof *sp );
 
+        long j;
         for ( j = 0; j < l_min( G_2d.ny, new_ny ); j++, osp += G_2d.nx )
         {
             memcpy( sp, osp, l_min( G_2d.nx, new_nx ) * sizeof *sp );
             if ( G_2d.nx < new_nx )
-                for ( l = G_2d.nx, sp += G_2d.nx; l < new_nx; l++, sp++ )
-                    sp->exist = UNSET;
+            {
+                sp += G_2d.nx;
+                for ( long l = G_2d.nx; l < new_nx; l++, sp++ )
+                    sp->exist = false;
+            }
             else
                 sp += new_nx;
         }
 
         for ( ; j < new_ny; j++ )
-            for ( l = 0; l < new_nx; l++, sp++ )
-                sp->exist = UNSET;
+            for ( long l = 0; l < new_nx; l++, sp++ )
+                sp->exist = false;
 
         T_free( old_sp );
 
@@ -414,14 +402,14 @@ rescale_2d( long * new_dims )
     }
 
     if ( G_2d.nx != new_nx )
-         need_cut_redraw = cut_num_points_changed( X, new_nx );
+         cut_num_points_changed( X, new_nx );
     if ( G_2d.ny != new_ny )
-        need_cut_redraw |= cut_num_points_changed( Y, new_ny );
+        cut_num_points_changed( Y, new_ny );
 
     G_2d.nx = new_nx;
     G_2d.ny = new_ny;
 
-    for ( k = 0; k < G_2d.nc; k++ )
+    for ( long k = 0; k < G_2d.nc; k++ )
         recalc_XPoints_of_curve_2d( G_2d.curve_2d[ k ] );
 
     /* Update the cut window if necessary */
@@ -438,13 +426,6 @@ void
 change_mode( long mode,
              long width )
 {
-    long curves;
-    long i;
-    Scaled_Point_T *sp;
-    Marker_1d_T *m, *mn;
-    Curve_1d_T *cv;
-
-
     if ( G.mode == mode )
     {
         print( WARN, "Display is already in \"%s\" mode.\n",
@@ -454,9 +435,9 @@ change_mode( long mode,
 
     /* Clear all curves and markers */
 
-    for ( curves = 0; curves < G_1d.nc; curves++ )
+    for ( long curves = 0; curves < G_1d.nc; curves++ )
     {
-        cv = G_1d.curve[ curves ];
+        Curve_1d_T * cv = G_1d.curve[ curves ];
 
         if ( width != G_1d.nx )
         {
@@ -464,21 +445,24 @@ change_mode( long mode,
             cv->xpoints = T_realloc( cv->xpoints, width * sizeof *cv->xpoints );
         }
 
-        for ( sp = cv->points, i = 0; i < width; sp++, i++ )
-            sp->exist = UNSET;
+        Scaled_Point_T *sp = cv->points;
+        for ( long i = 0; i < width; sp++, i++ )
+            sp->exist = false;
 
-        cv->can_undo = UNSET;
+        cv->can_undo = false;
         cv->shift[ X ] = 0.0;
         cv->count = 0;
         cv->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 )
                        / ( double ) ( width - 1 );
     }
 
-    for ( m = G_1d.marker_1d; m != NULL; m = mn )
+    Marker_1d_T * m = G_1d.marker_1d;
+    while ( m )
     {
+        Marker_1d_T * mn = m->next;
         XFreeGC( G.d, m->gc );
-        mn = m->next;
-        m = T_free( m );
+        T_free( m );
+        m = mn;
     }
 
     G_1d.marker_1d = NULL;

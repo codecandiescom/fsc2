@@ -52,37 +52,36 @@ enum {
 void
 dump_stack( FILE * fp )
 {
-    int pipe_fd[ 4 ];
-    pid_t pid;
-    size_t i;
-    struct sigaction sact;
-
-
     /* Childs death signal isn't needed anymore */
 
+    struct sigaction sact;
     sact.sa_handler = ( void ( * )( int ) ) SIG_DFL;
     sact.sa_flags = 0;
     sigaction( SIGCHLD, &sact, NULL );
 
     /* Don't crash on SIGPIPE if child process dies unexpectedly */
 
-    sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
+    sact.sa_handler = SIG_IGN;
     sact.sa_flags = 0;
     sigaction( SIGPIPE, &sact, NULL );
 
     /* Set up two pipes for communication with child process */
 
+    int pipe_fd[ 4 ];
+
     if ( pipe( pipe_fd ) < 0 )
         return;
+
     if ( pipe( pipe_fd + 2 ) < 0 )
     {
-        for ( i = 0; i < 2; i++ )
+        for ( int i = 0; i < 2; i++ )
             close( pipe_fd[ i ] );
         return;
     }
 
     /* Create child running ADDR2LINE with input and output redirected */
 
+    pid_t pid;
     if ( ( pid = fork( ) ) == 0 )
     {
         close( pipe_fd[ DUMP_PARENT_READ ] );
@@ -103,7 +102,7 @@ dump_stack( FILE * fp )
     }
     else if ( pid < 0 )               /* fork failed */
     {
-        for ( i = 0; i < 4; i++ )
+        for ( int i = 0; i < 4; i++ )
             close( pipe_fd[ i ] );
         return;
     }
@@ -113,7 +112,7 @@ dump_stack( FILE * fp )
 
     /* Now we're ready to write the backtrace into the file we got passed */
 
-    for ( i = 2; i < Crash.trace_length - 2; i++ )
+    for ( size_t i = 2; i < Crash.trace_length - 2; i++ )
         if ( write_dump( pipe_fd, fp, i - 2, Crash.trace[ i ] ) == -1 )
             break;
 
@@ -140,19 +139,15 @@ write_dump( int  * pipe_fd,
             void * addr )
 {
     char buf[ MAX_STR_BUF ] = "";
-    ssize_t ret;
-    char c;
+
     Dl_info info;
-    void *start_addr = addr;
-    int dont_print = 0;
-
-
     if ( addr == NULL || ! dladdr( addr, &info ) )
     {
         fprintf( fp, "#%-3d Address unknown\n", k );
         return 0;
     }
 
+    void * start_addr = addr;
     if ( info.dli_fname[ 0 ] == '/' )
     {
         /* For fsc2 itself we need the address as it is, for libraries we
@@ -177,7 +172,7 @@ write_dump( int  * pipe_fd,
             sprintf( buf, bindir "%s\n", info.dli_fname );
     }
 
-    ret = write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
+    ssize_t ret = write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
     sprintf( buf, "%p\n", start_addr );
     ret = write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
@@ -185,7 +180,7 @@ write_dump( int  * pipe_fd,
 
     /* Copy reply to the answer pipe */
 
-    c = '\0';
+    char c = '\0';
 
     while ( c != '\n' )
     {
@@ -201,6 +196,7 @@ write_dump( int  * pipe_fd,
 
     fputs( "() at ", fp );
 
+    bool dont_print_again = false;
     do
     {
         if ( ( ret = read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) ) == -1 )
@@ -209,13 +205,13 @@ write_dump( int  * pipe_fd,
             return -1;
         }
 
-        if ( ret && ! dont_print && c == '?' )
+        if ( ret && ! dont_print_again && c == '?' )
         {
             fprintf( fp, "unknown line in %s\n", info.dli_fname );
-            dont_print = 1;
+            dont_print_again = true;
         }
 
-        if ( ret && ! dont_print )
+        if ( ret && ! dont_print_again )
             fputc( c, fp );
     } while ( c != '\n' );
 

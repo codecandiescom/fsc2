@@ -51,9 +51,6 @@ typedef enum
 #endif
 
 
-#define UNSET   false
-#define SET     true
-
 #include "exceptions.h"
 
 #if defined FSC2_MDEBUG
@@ -220,7 +217,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 \n          {
                 Lc++;
-                Eol = SET;
+                Eol = true;
             }
 
 [^"\\\n]+   output( "%s", yytext );
@@ -234,7 +231,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
                 if ( Lc == 1 )
                 {
                     Lc++;
-                    Eol = SET;
+                    Eol = true;
                 }
                 else
                     THROW( MISPLACED_SHEBANG );
@@ -243,13 +240,13 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* Handling of C++ style comment spanning a whole line */
 {REM1}      {
                 Lc++;
-                Eol = SET;
+                Eol = true;
             }
 
             /* Handling of C++ style comment not spanning a whole line */
 {REM2}      {
                 Lc++;
-                Eol = SET;
+                Eol = true;
                 output( "\n" );
             }
 
@@ -267,7 +264,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* End of line character in a comment */
 \n          {
                 Lc++;
-                Eol = SET;
+                Eol = true;
             }
 
             /* Handling of EOF within a comment -> fatal error */
@@ -283,7 +280,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
                 if ( yy_top_state( ) == incl )
                    unput( '\n' );
 
-                Eol = SET;
+                Eol = true;
                 Lc++;
                 yy_pop_state( );
             }
@@ -299,7 +296,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* Dumps trailing white space */
 {TWS}       {
                 Lc++;
-                Eol = SET;
+                Eol = true;
                 output( "\n" );
             }
 
@@ -309,7 +306,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* Increment line count and write out EOL character */
 \n          {
                 Lc++;
-                Eol = SET;
+                Eol = true;
                 output( "\n" );
             }
 
@@ -341,7 +338,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
                 if ( *q == '\n' )
                 {
-                    Eol = SET;
+                    Eol = true;
                     Lc++;
                     --q;
                 }
@@ -407,7 +404,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
                 if ( Eol )
                 {
                     output( "\x02\n%ld\n", Lc );
-                    Eol = UNSET;
+                    Eol = false;
                 }
                 output( "%s", yytext );
             }
@@ -416,7 +413,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
                 if ( Eol )
                 {
                     output( "\x02\n%ld\n", Lc );
-                    Eol = UNSET;
+                    Eol = false;
                 }
                 output( "%s", yytext );
             }
@@ -447,9 +444,6 @@ int
 main( int    argc,
       char * argv[ ] )
 {
-    struct passwd *pwe;
-
-
 #if defined FSC2_MDEBUG
     mcheck( NULL );
 #endif
@@ -492,7 +486,7 @@ main( int    argc,
 
         if ( argv[ 1 ][ 0 ] == '~' && argv[ 1 ][ 1 ] == '/' )
         {
-            pwe = getpwuid( getuid( ) );
+            struct passwd * pwe = getpwuid( getuid( ) );
             Fname = T_malloc( strlen( pwe->pw_dir ) + strlen( argv[ 1 ] ) );
             strcpy( Fname, pwe->pw_dir );
             strcat( Fname, &argv[ 1 ][ 1 ] );
@@ -507,7 +501,7 @@ main( int    argc,
     }
 
     Lc = 1;
-    Eol = SET;
+    Eol = true;
 
     /* Now try to clean up the input, output appropriate error messages if
        there should be problems */
@@ -555,9 +549,6 @@ include_handler( char * file )
     static long lc[ MAX_INCLUDE_DEPTH ];
     static char *fname[ MAX_INCLUDE_DEPTH ];
     static bool eol_state[ MAX_INCLUDE_DEPTH ];
-    char *incl_file;
-    struct passwd *pwe;
-
 
     if ( file != NULL )           /* we're at the start of an include file */
     {
@@ -571,6 +562,7 @@ include_handler( char * file )
         /* Now check if file name is enclosed by '"' or '<' and '>' - in the
            later case prepend the default directory */
 
+        char * incl_file;
         if ( *file == '"' )
         {
             *( file + strlen( file ) - 1 ) = '\0';
@@ -587,7 +579,7 @@ include_handler( char * file )
                 incl_file = T_strdup( file + 1 );
             else if ( file[ 1 ] == '~' && file[ 2 ] == '/' )
             {
-                pwe = getpwuid( getuid( ) );
+                struct passwd *pwe = getpwuid( getuid( ) );
                 incl_file = T_malloc(   strlen( pwe->pw_dir )
                                       + strlen( file ) - 1 );
                 strcpy( incl_file, pwe->pw_dir );
@@ -648,7 +640,7 @@ include_handler( char * file )
         eol_state[ incl_depth ] = Eol;
         Fname = incl_file;
         Lc = 1;
-        Eol = SET;
+        Eol = true;
         output( "\x01\n%s\n", Fname );
 
         /* ...and switch to the new file after allocating a buffer for it */
@@ -718,10 +710,7 @@ static void
 unit_spec( char * text,
            int    power )
 {
-    double dval;
-
-
-    dval = strtod( text, NULL );
+    double dval = strtod( text, NULL );
     if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
     {
         output( "\x03\n%s:%ld: Overflow or underflow occurred while "
@@ -788,10 +777,9 @@ unit_spec( char * text,
 
 static void *T_malloc( size_t size )
 {
-    void *mem;
+    void * mem = malloc( size );
 
-
-    if ( ( mem = malloc( size ) ) == NULL )
+    if ( ! mem )
         THROW( OUT_OF_MEMORY_EXCEPTION );
 
 #if defined FSC2_MDEBUG
@@ -825,15 +813,12 @@ static void *
 T_realloc( void * ptr,
            size_t size )
 {
-    void *new_ptr;
-
 #if defined FSC2_MDEBUG
     fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
 #endif
 
-    new_ptr = realloc( ptr, size );
-
-    if ( new_ptr == NULL )
+    void * new_ptr = realloc( ptr, size );
+    if ( ! new_ptr )
         THROW( OUT_OF_MEMORY_EXCEPTION );
 
     return new_ptr;
@@ -847,15 +832,12 @@ static void *
 T_realloc_or_free( void * ptr,
                    size_t size )
 {
-    void *new_ptr;
-
 #if defined FSC2_MDEBUG
     fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
 #endif
 
-    new_ptr = realloc( ptr, size );
-
-    if ( new_ptr == NULL )
+    void * new_ptr = realloc( ptr, size );
+    if ( ! new_ptr )
     {
         if ( ptr != NULL )
             T_free( ptr );
@@ -872,13 +854,13 @@ T_realloc_or_free( void * ptr,
 static char *
 T_strdup( const char * string )
 {
-    char *new_mem;
-
     if ( string == NULL )
         return NULL;
 
-    if ( ( new_mem = malloc( strlen( string ) + 1 ) ) == NULL )
+    char *new_mem = malloc( strlen( string ) + 1 );
+    if ( ! new_mem )
         THROW( OUT_OF_MEMORY_EXCEPTION );
+
     strcpy( new_mem, string );
 
 #if defined FSC2_MDEBUG
@@ -915,10 +897,6 @@ output( const char * fmt,
 {
     static char *c = NULL;
     static size_t len = OUTPUT_TRY_LENGTH;
-    size_t bytes_to_write;
-    ssize_t last_written;
-    size_t total_bytes_written = 0;
-
 
     if ( c == NULL )
         c = T_malloc( len );
@@ -926,12 +904,8 @@ output( const char * fmt,
     while ( 1 )
     {
         va_list ap;
-        int wr;
-        size_t new_len;
-
-
         va_start( ap, fmt );
-        wr = vsnprintf( c, len, fmt, ap );
+        int wr = vsnprintf( c, len, fmt, ap );
         va_end( ap );
 
         /* Older versions of glibc (up to 2.0.6) return a negativ value when
@@ -947,7 +921,7 @@ output( const char * fmt,
            otherwise it would be wrong when we're running out of memory in
            the realloc call. */
 
-        new_len = 2 * len;
+        size_t new_len = 2 * len;
         if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
             new_len = ( size_t ) wr + 1;
 
@@ -955,12 +929,14 @@ output( const char * fmt,
         len = new_len;
     }
 
-    bytes_to_write = strlen( c );
+    size_t bytes_to_write = strlen( c );
+    size_t total_bytes_written = 0;
 
     while ( bytes_to_write > 0 )
     {
-        if ( ( last_written = write( STDOUT_FILENO, c + total_bytes_written,
-                                     bytes_to_write ) ) < 0 )
+        ssize_t last_written = write( STDOUT_FILENO, c + total_bytes_written,
+                                      bytes_to_write ); 
+        if ( last_written < 0 )
         {
             if ( errno == EINTR )   /* non-deadly signal has been received ? */
                 continue;

@@ -285,7 +285,7 @@ vars_free( Var_T * v,
             if ( ! ( v->flags & DONT_RECURSE ) )
                 for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.vptr[ i ] != NULL )
-                        vars_free( v->val.vptr[ i ], SET );
+                        vars_free( v->val.vptr[ i ], true );
             v->val.vptr = T_free( v->val.vptr );
             break;
 
@@ -318,7 +318,7 @@ static void
 free_all_vars( void )
 {
     for ( Var_T * v = EDL.Var_List; v != NULL; )
-        v = vars_free( v, UNSET );
+        v = vars_free( v, false );
 }
 
 
@@ -448,7 +448,7 @@ vars_push_matrix( Var_Type_T type,
     OTHERWISE
     {
         for ( ssize_t i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
-            vars_free( nv->val.vptr[ i ], SET );
+            vars_free( nv->val.vptr[ i ], true );
         T_free( sizes );
         RETHROW;
     }
@@ -631,7 +631,7 @@ vars_push( Var_Type_T type,
             {
                 Var_T * src = va_arg( ap, Var_T * );
                 if ( src != NULL )
-                    vars_ref_copy( nsv, src, UNSET );
+                    vars_ref_copy( nsv, src, false );
             }
             break;
 
@@ -960,7 +960,7 @@ vars_pop( Var_T * v )
             {
                 for ( ssize_t i = 0; i < v->len; i++ )
                     if ( v->val.vptr[ i ] != NULL )
-                        vars_free( v->val.vptr[ i ], SET );
+                        vars_free( v->val.vptr[ i ], true );
             }
             T_free( v->val.vptr );
             break;
@@ -1185,7 +1185,7 @@ void
 vars_save_restore( bool flag )
 {
     static Var_T *cpy_area = NULL;
-    static bool exists_copy = UNSET;
+    static bool exists_copy = false;
     Var_T *src;
     Var_T *cpy;
 
@@ -1195,7 +1195,7 @@ vars_save_restore( bool flag )
 
         if ( EDL.Var_List == NULL )
         {
-            exists_copy = SET;
+            exists_copy = true;
             return;
         }
 
@@ -1249,7 +1249,7 @@ vars_save_restore( bool flag )
             src->flags |= EXISTS_BEFORE_TEST;
         }
 
-        exists_copy = SET;
+        exists_copy = true;
     }
     else
     {
@@ -1266,7 +1266,7 @@ vars_save_restore( bool flag )
             for ( ssize_t i = 0; i < cpy->len; i++ )
                 if (    cpy->val.vptr != NULL
                      && ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
-                    vars_free( cpy->val.vptr[ i ], SET );
+                    vars_free( cpy->val.vptr[ i ], true );
         }
 
         /* Reset all variables to what they were before the rest run */
@@ -1302,7 +1302,7 @@ vars_save_restore( bool flag )
         }
 
         cpy_area = T_free( cpy_area );
-        exists_copy = UNSET;
+        exists_copy = false;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -321,7 +321,7 @@ fsc2_lan_open( const char * dev_name,
        set yet, i.e. the default timeout of the system is going to be used. */
 
     ll->us_read_timeout = ll->us_write_timeout = 0;
-    ll->so_timeo_avail = SET;
+    ll->so_timeo_avail = true;
 
     ll->address = dev_addr.sin_addr;
     ll->port    = port;
@@ -333,7 +333,7 @@ fsc2_lan_open( const char * dev_name,
                         &wait_for_connect.it_value, &len ) == -1
          || getsockopt( sock_fd, SOL_SOCKET, SO_SNDTIMEO,
                         &wait_for_connect.it_value, &len ) == -1 )
-        ll->so_timeo_avail = UNSET;
+        ll->so_timeo_avail = false;
 
     if ( lan_log_level == LL_ALL )
         fsc2_lan_log_message( log_fp, "Opened connection to device %s: "
@@ -1192,7 +1192,7 @@ timeout_reset( int                dir,
     /* If no timeout is set simply return, resuming is possible */
 
     if ( *us_timeout == 0 )
-        return SET;
+        return true;
 
     /* Figure out the current time and how long we still may wait */
 
@@ -1211,12 +1211,12 @@ timeout_reset( int                dir,
     if ( *us_timeout <= 0 )
     {
         *us_timeout = 0;
-        return UNSET;
+        return false;
     }
 
     timeout_init( dir, ll, us_timeout, old_sact, before );
 
-    return SET;
+    return true;
 }
 
 

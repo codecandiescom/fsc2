@@ -254,7 +254,7 @@ vars_setup_new_array( Var_T * v,
     Var_T * a = v->from;
     a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
 
-    vars_arr_create( a, v->next, dim, UNSET );
+    vars_arr_create( a, v->next, dim, false );
 
     /* Get rid of variables specifying the sizes that aren't needed anymore */
 
@@ -712,7 +712,7 @@ vars_do_init( Var_T * src,
             return;
 
         default :
-            eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+            eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                     __FILE__, __LINE__ );
             THROW( EXCEPTION );
     }
@@ -792,7 +792,7 @@ vars_lhs_pointer( Var_T * v,
 #else
         if ( ( v = vars_pop( v ) ) != NULL )
         {
-            eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+            eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                     __FILE__, __LINE__ );
             THROW( EXCEPTION );
         }
@@ -935,7 +935,7 @@ vars_lhs_simple_pointer( Var_T * a,
                     break;
 
                 default :
-                    eprint( FATAL, UNSET, "Internal error detected at "
+                    eprint( FATAL, false, "Internal error detected at "
                             "%s:%d.\n", __FILE__, __LINE__ );
                     THROW( EXCEPTION );
             }
@@ -957,7 +957,7 @@ vars_lhs_simple_pointer( Var_T * a,
                 return vars_push( REF_PTR, cv->val.vptr[ ind ] );
 
             default :
-                eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                         __FILE__, __LINE__ );
                 THROW( EXCEPTION );
         }
@@ -1043,7 +1043,7 @@ vars_lhs_range_pointer( Var_T * a,
                     break;
 
                 default :
-                    eprint( FATAL, UNSET, "Internal error detected at "
+                    eprint( FATAL, false, "Internal error detected at "
                             "%s:%d.\n", __FILE__, __LINE__ );
                     THROW( EXCEPTION );
             }

@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -140,7 +140,7 @@ FUNC        {IDENT}"#"[0-9]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", exptext + 2 );
+                eprint( FATAL, false, "%s\n", exptext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -152,7 +152,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 {ESTR}      {
                 exptext = strchr( exptext, '\x03' );
-                eprint( FATAL, UNSET, "%s\n", exptext + 2 );
+                eprint( FATAL, false, "%s\n", exptext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -401,7 +401,7 @@ experiment_parser( FILE * in )
         print( FATAL, "Multiple instances of EXPERIMENT section label.\n" );
         THROW( EXCEPTION );
     }
-    EDL.compilation.sections[ EXPERIMENT_SECTION ] = SET;
+    EDL.compilation.sections[ EXPERIMENT_SECTION ] = true;
 
     EDL.prg_length = 0;
     store_exp( in );

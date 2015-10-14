@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -95,7 +95,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
             /* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-                eprint( FATAL, UNSET, "%s: End of device data base '%s' in "
+                eprint( FATAL, false, "%s: End of device data base '%s' in "
                                "comment starting at line %ld.\n",
                                EDL.Fname, Comm_lc );
                 THROW( EXCEPTION );
@@ -112,7 +112,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
-                eprint( FATAL, UNSET, "End of comment found at line %ld in "
+                eprint( FATAL, false, "End of comment found at line %ld in "
                                "device data base '%s'.\n", EDL.Lc, EDL.Fname );
                 THROW( EXCEPTION );
             }
@@ -136,7 +136,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {IDENT}     return 1;
 
 .           {
-                eprint( FATAL, UNSET, "Syntax error in devices data base '%s' "
+                eprint( FATAL, false, "Syntax error in devices data base '%s' "
                                "at line %ld.\n", EDL.Fname, EDL.Lc );
                 THROW( EXCEPTION );
             }
@@ -156,7 +156,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 bool
 device_list_parse( void )
 {
-    static bool is_restart = UNSET;
+    static bool is_restart = false;
     Device_Name_T *new_device_name;
     struct stat buf;
     char *ld_path;
@@ -208,16 +208,16 @@ device_list_parse( void )
 
     if ( EDL.Fname == NULL )
     {
-        eprint( FATAL, UNSET, "Can't open device data base 'Devices'.\n" );
-        return FAIL;
+        eprint( FATAL, false, "Can't open device data base 'Devices'.\n" );
+        return false;
     }
 
     if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
     {
-        eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
+        eprint( FATAL, false, "Can't open device data base '%s'.\n",
                        EDL.Fname );
         EDL.Fname = T_free( EDL.Fname );
-        return FAIL;
+        return false;
     }
 
     /* Keep the lexer happy... */
@@ -225,7 +225,7 @@ device_list_parse( void )
     if ( is_restart )
         devices_listrestart( devices_listin );
     else
-         is_restart = SET;
+         is_restart = true;
 
     EDL.Lc = 1;
 
@@ -249,7 +249,7 @@ device_list_parse( void )
 
     fclose( devices_listin );
 
-    return OK;
+    return true;
 }
 
 

@@ -77,7 +77,7 @@ vars_div( Var_T * v1,
             break;
     }
 
-    return vars_div_i( v1, v2, UNSET );
+    return vars_div_i( v1, v2, false );
 }
 
 

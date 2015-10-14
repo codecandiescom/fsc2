@@ -99,7 +99,7 @@ push_exception_frame( const char * file,
                 Prog_Name, file, line );
 #ifdef FSC2_HEADER
         if ( Fsc2_Internals.I_am == CHILD )
-            _exit( FAIL );
+            _exit( false );
 #endif
         exit( EXIT_FAILURE );
     }
@@ -130,7 +130,7 @@ pop_exception_frame( const char * file,
                 Prog_Name, file, line );
 #ifdef FSC2_HEADER
         if ( Fsc2_Internals.I_am == CHILD )
-            _exit( FAIL );
+            _exit( false );
 #endif
         exit( EXIT_FAILURE );
     }
@@ -157,7 +157,7 @@ throw_exception( Exception_Types_T type )
     {
 #ifdef FSC2_HEADER
         if ( Fsc2_Internals.I_am == CHILD )
-            _exit( FAIL );
+            _exit( false );
 #endif
         exit( EXIT_FAILURE );
     }
@@ -194,7 +194,7 @@ get_exception_type( const char * file,
                 "been thrown at %s:%d.\n", Prog_Name, file, line );
 #ifdef FSC2_HEADER
         if ( Fsc2_Internals.I_am == CHILD )
-            _exit( FAIL );
+            _exit( false );
 #endif
         exit( EXIT_FAILURE );
     }
@@ -207,7 +207,7 @@ get_exception_type( const char * file,
                 Prog_Name, file, line );
 #ifdef FSC2_HEADER
         if ( Fsc2_Internals.I_am == CHILD )
-            _exit( FAIL );
+            _exit( false );
 #endif
         exit( EXIT_FAILURE );
     }

@@ -505,6 +505,8 @@ CFLAGS           := -std=c99                            \
 					-Waggregate-return                     \
 					-Wnested-externs                       \
 					-Wcast-align                           \
+	                -Wstrict-aliasing                      \
+	                -fstrict-aliasing                      \
 	                $(shell pkg-config --cflags freetype2) \
 					$(OPTIMIZATION)                        \
 					$(DEBUG_FLAGS)

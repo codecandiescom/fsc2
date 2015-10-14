@@ -1,5 +1,5 @@
 /* -*-C-*-
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -162,7 +162,7 @@ FUNC        {IDENT}"#"[0-9]+
 
             /* Handling of error messages from the cleaner */
 {ERR}       {
-                eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
+                eprint( FATAL, false, "%s\n", prepstext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -174,7 +174,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 {ESTR}      {
                 prepstext = strchr( prepstext, '\x03' );
-                eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
+                eprint( FATAL, false, "%s\n", prepstext + 2 );
                 THROW( EXCEPTION );
             }
 
@@ -512,7 +512,7 @@ FUNC        {IDENT}"#"[0-9]+
 int
 preparations_parser( FILE * in )
 {
-    static bool needs_restart = UNSET;
+    static bool needs_restart = false;
 
 
     if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
@@ -520,7 +520,7 @@ preparations_parser( FILE * in )
         print( FATAL, "Multiple instances of PREPARATIONS section label.\n" );
         THROW( EXCEPTION );
     }
-    EDL.compilation.sections[ PREPARATIONS_SECTION ] = SET;
+    EDL.compilation.sections[ PREPARATIONS_SECTION ] = true;
 
     EDL.Cur_Pulse = -1;
     prepsin = in;
@@ -530,7 +530,7 @@ preparations_parser( FILE * in )
     if ( needs_restart )
         prepsrestart( prepsin );
     else
-         needs_restart = SET;
+         needs_restart = true;
 
     prepsparser_init( );
 

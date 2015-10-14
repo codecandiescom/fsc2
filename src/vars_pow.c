@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -78,7 +78,7 @@ vars_pow( Var_T * v1,
             break;
     }
 
-    return vars_pow_i( v1, v2, UNSET );
+    return vars_pow_i( v1, v2, false );
 }
 
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -39,23 +39,22 @@
 void *
 T_malloc( size_t size )
 {
-    void *mem;
 #if defined FSC2_MDEBUG
     void *trace_buf[ 2 ];
 #endif
 
-
 #ifndef NDEBUG
     if ( size == 0 )
     {
-        eprint( FATAL, UNSET,
+        eprint( FATAL, false,
                 "Internal error detected at %s:%d (malloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    if ( ( mem = malloc( size ) ) == NULL )
+    void *mem = malloc( size );
+    if ( ! mem )
     {
         print( FATAL, "Running out of memory.\n" );
         THROW( OUT_OF_MEMORY_EXCEPTION );
@@ -89,7 +88,6 @@ void *
 T_calloc( size_t nmemb,
           size_t size )
 {
-    void *mem;
 #if defined FSC2_MDEBUG
     void *trace_buf[ 2 ];
 #endif
@@ -98,7 +96,7 @@ T_calloc( size_t nmemb,
 #ifndef NDEBUG
     if ( nmemb == 0 )
     {
-        eprint( FATAL, UNSET,
+        eprint( FATAL, false,
                 "Internal error detected at %s:%d (calloc with nmemb 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
@@ -107,14 +105,15 @@ T_calloc( size_t nmemb,
 
     if ( size == 0 )
     {
-        eprint( FATAL, UNSET,
+        eprint( FATAL, false,
                 "Internal error detected at %s:%d (calloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    if ( ( mem = calloc( nmemb, size ) ) == NULL )
+    void * mem = calloc( nmemb, size );
+    if ( ! mem )
     {
         print( FATAL, "Running out of memory.\n" );
         THROW( OUT_OF_MEMORY_EXCEPTION );
@@ -150,23 +149,22 @@ void *
 T_realloc( void   * ptr,
            size_t   size )
 {
-    void *new_ptr;
 #if defined FSC2_MDEBUG
     void *trace_buf[ 2 ];
 #endif
 
-
 #ifndef NDEBUG
     if ( size == 0 )
     {
-        eprint( FATAL, UNSET,
+        eprint( FATAL, false,
                 "Internal error detected at %s:%d (realloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
+    void * new_ptr = realloc( ptr, size );
+    if ( ! new_ptr )
     {
         print( FATAL, "Running out of memory.\n" );
         THROW( OUT_OF_MEMORY_EXCEPTION );
@@ -203,25 +201,24 @@ void *
 T_realloc_or_free( void   * ptr,
                    size_t   size )
 {
-    void *new_ptr;
 #if defined FSC2_MDEBUG
     void *trace_buf[ 2 ];
 #endif
-
 
 #ifndef NDEBUG
     if ( size == 0 )
     {
         if ( ptr != NULL )
             T_free( ptr );
-        eprint( FATAL, UNSET,
+        eprint( FATAL, false,
                 "Internal error detected at %s:%d (realloc with size 0).\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
+    void * new_ptr = realloc( ptr, size );
+    if ( ! new_ptr )
     {
         if ( ptr != NULL )
             T_free( ptr );
@@ -259,7 +256,7 @@ T_free( void * ptr )
     void *trace_buf[ 2 ];
 #endif
 
-    if ( ptr == NULL )
+    if ( ! ptr )
         return NULL;
 
 #if defined FSC2_MDEBUG
@@ -290,25 +287,16 @@ T_free( void * ptr )
 char *
 T_strdup( const char * str )
 {
-    char *new_str;
-    size_t len;
-
 #if defined FSC2_MDEBUG
     void *trace_buf[ 2 ];
 #endif
 
-
     if ( str == NULL )
         return NULL;
 
-    len = strlen( str );
+    size_t len = strlen( str );
 
-    if ( ( new_str = malloc( len + 1 ) ) == NULL )
-    {
-        print( FATAL, "Running out of memory.\n" );
-        THROW( OUT_OF_MEMORY_EXCEPTION );
-    }
-
+    char * new_str = T_malloc( len + 1 );
     strcpy( new_str, str );
 
 #if defined FSC2_MDEBUG
@@ -338,20 +326,17 @@ T_strdup( const char * str )
 long
 T_atol( const char * txt )
 {
-    long ret;
-    char *end_p;
-
-
 #ifndef NDEBUG
     if ( txt == NULL || *txt == '\0' )
     {
-        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+        eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    ret = strtol( txt, &end_p, 10 );
+    char * end_p;
+    long ret = strtol( txt, &end_p, 10 );
 
     if ( ( ret == LONG_MIN || ret == LONG_MAX ) && errno == ERANGE )
     {
@@ -403,20 +388,17 @@ T_atoi( const char * txt )
 double
 T_atod( const char * txt )
 {
-    double ret;
-    char *end_p;
-
-
 #ifndef NDEBUG
     if ( txt == NULL || *txt == '\0' )
     {
-        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+        eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                 __FILE__, __LINE__ );
         THROW( EXCEPTION );
     }
 #endif
 
-    ret = strtod( txt, &end_p );
+    char * end_p;
+    double ret = strtod( txt, &end_p );
 
     if ( errno == ERANGE )
     {

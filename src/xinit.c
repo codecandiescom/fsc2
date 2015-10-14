@@ -190,7 +190,6 @@ xforms_init( int  * argc,
     Display *display;
     FL_Coord h, H;
     FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
-    size_t i;
     int flags;
     XFontStruct *font;
     FL_CMD_OPT app_opt[ NUM_ELEMS( Xresources ) ];
@@ -209,9 +208,9 @@ xforms_init( int  * argc,
 
     if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt,
                                     NUM_ELEMS( Xresources ) ) ) == NULL )
-        return FAIL;
+        return false;
 
-    GUI.is_init = SET;
+    GUI.is_init = true;
     GUI.d = display;
 
     /* Set the close-on-exec flag for the connection to the display */
@@ -234,7 +233,7 @@ xforms_init( int  * argc,
 
     fl_get_app_resources( Xresources, NUM_ELEMS( Xresources ) );
 
-    for ( i = 0; i < NUM_ELEMS( Xresources ); i++ )
+    for ( size_t i = 0; i < NUM_ELEMS( Xresources ); i++ )
     {
         T_free( app_opt[ i ].option );
         T_free( app_opt[ i ].specifier );
@@ -356,11 +355,11 @@ xforms_init( int  * argc,
     TRY
     {
         if ( ! dl_fsc2_rsc( ) )
-            return FAIL;
+            return false;
         TRY_SUCCESS;
     }
     OTHERWISE
-        return FAIL;
+        return false;
 
     /* Create and display the main form */
 
@@ -499,7 +498,7 @@ xforms_init( int  * argc,
     /* Unset a flag that should only be set when the display window has been
        drawn completely */
 
-    G.is_fully_drawn = UNSET;
+    G.is_fully_drawn = false;
 
     /* Set a default directory for the file selector but only when it's not
        either obviously invalid (i.e. just an empty string, which shouldn't
@@ -524,7 +523,7 @@ xforms_init( int  * argc,
         Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
     }
 
-    return OK;
+    return true;
 }
 
 
@@ -660,7 +659,7 @@ dl_fsc2_rsc( void )
     if ( Fsc2_Internals.rsc_handle == NULL )
     {
         fprintf( stderr, "Can't open graphics library '%s'.\n", lib_name );
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the main form */
@@ -671,7 +670,7 @@ dl_fsc2_rsc( void )
     if ( dlerror( ) != NULL )
     {
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the 1D display window */
@@ -684,7 +683,7 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the 2D display window */
@@ -697,7 +696,7 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the form for entering comments
@@ -711,7 +710,7 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the form for printing during
@@ -725,7 +724,7 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the cur section window */
@@ -738,7 +737,7 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
     /* Try to find the function for creating the form for entering comments
@@ -752,10 +751,10 @@ dl_fsc2_rsc( void )
         fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
         dlclose( Fsc2_Internals.rsc_handle );
         Fsc2_Internals.rsc_handle = NULL;
-        return FAIL;
+        return false;
     }
 
-    return OK;
+    return true;
 }
 
 

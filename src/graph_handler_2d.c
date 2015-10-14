@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -184,7 +184,7 @@ press_handler_2d( FL_OBJECT * obj,
                     c->box_w = 0;
                     c->box_y = G.x_scale_offset + 1;
                     c->box_h = G.enlarge_box_width;
-                    c->is_box = SET;
+                    c->is_box = true;
                     break;
 
                 case DRAG_2D_Y :                       /* in y-axis window */
@@ -203,7 +203,7 @@ press_handler_2d( FL_OBJECT * obj,
                     c->box_y = c->ppos[ Y ];
                     c->box_w = G.enlarge_box_width;
                     c->box_h = 0;
-                    c->is_box = SET;
+                    c->is_box = true;
                     break;
 
                 case DRAG_2D_Z :                       /* in z-axis window */
@@ -213,7 +213,7 @@ press_handler_2d( FL_OBJECT * obj,
                     c->box_y = c->ppos[ Y ];
                     c->box_w = G.enlarge_box_width;
                     c->box_h = 0;
-                    c->is_box = SET;
+                    c->is_box = true;
                     break;
 
                 case DRAG_2D_C :                       /* in canvas window */
@@ -222,7 +222,7 @@ press_handler_2d( FL_OBJECT * obj,
                     c->box_x = c->ppos[ X ];
                     c->box_y = c->ppos[ Y ];
                     c->box_w = c->box_h = 0;
-                    c->is_box = SET;
+                    c->is_box = true;
                     break;
             }
 
@@ -244,7 +244,7 @@ press_handler_2d( FL_OBJECT * obj,
                 if ( cv->active )
                     save_scale_state_2d( cv );
                 else
-                    cv->can_undo = UNSET;
+                    cv->can_undo = false;
             }
             break;
 
@@ -254,7 +254,7 @@ press_handler_2d( FL_OBJECT * obj,
 
             /* Don't draw the box anymore */
 
-            G_2d.canvas.is_box = UNSET;
+            G_2d.canvas.is_box = false;
             repaint_canvas_2d( &G_2d.canvas );
             break;
 
@@ -269,13 +269,13 @@ press_handler_2d( FL_OBJECT * obj,
             fl_set_cursor( window, G_2d.cursor[ TARGET_CURSOR ] );
             G.dist_display = 2;
 
-            if ( G_2d.canvas.is_box == UNSET && old_button_state != 4 )
+            if ( G_2d.canvas.is_box == false && old_button_state != 4 )
             {
                 G.start[ X ] = c->ppos[ X ];
                 G.start[ Y ] = c->ppos[ Y ];
             }
             else
-                G_2d.canvas.is_box = UNSET;
+                G_2d.canvas.is_box = false;
 
             repaint_canvas_2d( &G_2d.canvas );
             break;
@@ -298,7 +298,7 @@ press_handler_2d( FL_OBJECT * obj,
                 if ( cv->active )
                     save_scale_state_2d( cv );
                 else
-                    cv->can_undo = UNSET;
+                    cv->can_undo = false;
             }
             break;
     }
@@ -316,7 +316,7 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                     Canvas_T  * c )
 {
     unsigned int keymask;
-    bool scale_changed = UNSET;
+    bool scale_changed = false;
 
 
     /* If the released button didn't has a meaning just clear it from the
@@ -396,7 +396,7 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                     }
                     break;
             }
-            c->is_box = UNSET;
+            c->is_box = false;
             break;
 
         case 2 :                               /* middle mouse button */
@@ -524,7 +524,7 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
     {
         if ( G_2d.curve_2d[ G_2d.active_curve ]->is_fs )
         {
-            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = UNSET;
+            G_2d.curve_2d[ G_2d.active_curve ]->is_fs = false;
             fl_set_button( GUI.run_form_2d->full_scale_button_2d, 0 );
             if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
                 fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
@@ -552,7 +552,7 @@ motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
 {
     XEvent new_ev;
     unsigned int keymask;
-    bool scale_changed = UNSET;
+    bool scale_changed = false;
 
 
     if ( G_2d.active_curve == -1 )
@@ -642,7 +642,7 @@ motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
 
             if ( G_2d.curve_2d[ G_2d.active_curve ]->is_fs && scale_changed )
             {
-                G_2d.curve_2d[ G_2d.active_curve ]->is_fs = UNSET;
+                G_2d.curve_2d[ G_2d.active_curve ]->is_fs = false;
                 fl_set_button( GUI.run_form_2d->full_scale_button_2d, 0 );
                 if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
                     fl_set_object_helper(
@@ -689,7 +689,7 @@ save_scale_state_2d( Curve_2d_T * cv )
 
     cv->old_z_factor = cv->z_factor;
 
-    cv->can_undo = SET;
+    cv->can_undo = true;
 }
 
 
@@ -706,7 +706,7 @@ change_x_range_2d( Canvas_T * c )
     if (    abs( G.start[ X ] - c->ppos[ X ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -718,9 +718,9 @@ change_x_range_2d( Canvas_T * c )
     cv->s2d[ X ] = ( G_2d.canvas.w - 1 ) / fabs( x1 - x2 );
     cv->shift[ X ] = - d_min( x1, x2 );
 
-    cv->needs_recalc = SET;
+    cv->needs_recalc = true;
 
-    return SET;
+    return true;
 }
 
 
@@ -738,7 +738,7 @@ change_y_range_2d( Canvas_T * c )
     if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -753,16 +753,16 @@ change_y_range_2d( Canvas_T * c )
        only can deal with short ints */
 
     if ( new_s2d_y >= SHRT_MAX_HALF || new_s2d_y <= SHRT_MIN_HALF )
-        return UNSET;
+        return false;
 
     save_scale_state_2d( cv );
 
     cv->s2d[ Y ] = new_s2d_y;
     cv->shift[ Y ] = - d_min( cy1, cy2 );
 
-    cv->needs_recalc = SET;
+    cv->needs_recalc = true;
 
-    return SET;
+    return true;
 }
 
 
@@ -790,10 +790,10 @@ user_zoom_2d( long   curve,
     cv = G_2d.curve_2d[ curve ];
 
     if ( ! cv->is_scale_set )
-        return FAIL;
+        return false;
 
     save_scale_state_2d( cv );
-    cv->can_undo = SET;
+    cv->can_undo = true;
 
     if ( ! ( keep_x && keep_xw ) )
     {
@@ -845,12 +845,12 @@ user_zoom_2d( long   curve,
                                   "and switch on automatic rescaling" );
     }
 
-    cv->is_fs = UNSET;
+    cv->is_fs = false;
 
     if ( cv == G_2d.curve_2d[ G_2d.active_curve ] )
         redraw_canvas_2d( &G_2d.canvas );
 
-    return OK;
+    return true;
 }
 
 
@@ -860,31 +860,31 @@ user_zoom_2d( long   curve,
 static bool
 change_xy_range_2d( Canvas_T * c )
 {
-    bool scale_changed = UNSET;
+    bool scale_changed = false;
     Curve_2d_T *cv;
     double cx1, cx2, cy1, cy2;
 
 
     if (    G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
     save_scale_state_2d( cv );
-    cv->can_undo = UNSET;
+    cv->can_undo = false;
 
     if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
     {
         cx1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
         cx2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
-        cv->can_undo = SET;
+        cv->can_undo = true;
 
         cv->s2d[ X ] = ( G_2d.canvas.w - 1 ) / fabs( cx1 - cx2 );
         cv->shift[ X ] = - d_min( cx1, cx2 );
 
-        scale_changed = SET;
+        scale_changed = true;
     }
 
     if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
@@ -894,12 +894,12 @@ change_xy_range_2d( Canvas_T * c )
         cy2 = ( G_2d.canvas.h - 1.0 - c->ppos[ Y ] ) / cv->s2d[ Y ]
               - cv->shift[ Y ];
 
-        cv->can_undo = SET;
+        cv->can_undo = true;
 
         cv->s2d[ Y ] = ( G_2d.canvas.h - 1 ) / fabs( cy1 - cy2 );
         cv->shift[ Y ] = - d_min( cy1, cy2 );
 
-        scale_changed = SET;
+        scale_changed = true;
     }
 
     cv->needs_recalc |= scale_changed;
@@ -921,7 +921,7 @@ change_z_range_2d( Canvas_T * c )
     if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -936,7 +936,7 @@ change_z_range_2d( Canvas_T * c )
     cv->z_factor = 1.0 / fabs( z1 - z2 );
     cv->s2d[ Z ] = ( G_2d.z_axis.h - 1 ) * cv->z_factor;
 
-    return SET;
+    return true;
 }
 
 
@@ -953,7 +953,7 @@ zoom_x_2d( Canvas_T * c )
     if (    abs( G.start[ X ] - c->ppos[ X ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -978,9 +978,9 @@ zoom_x_2d( Canvas_T * c )
 
     cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
-    cv->needs_recalc = SET;
+    cv->needs_recalc = true;
 
-    return SET;
+    return true;
 }
 
 
@@ -997,7 +997,7 @@ zoom_y_2d( Canvas_T * c )
     if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -1027,9 +1027,9 @@ zoom_y_2d( Canvas_T * c )
     cv->shift[ Y ] = ( G_2d.canvas.h - 1.0 - G.start[ Y ] )
                      / cv->s2d[ Y ] - py;
 
-    cv->needs_recalc = SET;
+    cv->needs_recalc = true;
 
-    return SET;
+    return true;
 }
 
 
@@ -1039,23 +1039,23 @@ zoom_y_2d( Canvas_T * c )
 static bool
 zoom_xy_2d( Canvas_T * c )
 {
-    bool scale_changed = UNSET;
+    bool scale_changed = false;
     Curve_2d_T *cv;
     double px, py;
 
 
     if (    G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
     save_scale_state_2d( cv );
-    cv->can_undo = UNSET;
+    cv->can_undo = false;
 
     if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
     {
-        cv->can_undo = SET;
+        cv->can_undo = true;
 
         px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
@@ -1070,12 +1070,12 @@ zoom_xy_2d( Canvas_T * c )
 
         cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
-        scale_changed = SET;
+        scale_changed = true;
     }
 
     if ( abs( G.start[ Y ] - c->ppos[ Y ] ) > 4 )
     {
-        cv->can_undo = SET;
+        cv->can_undo = true;
 
         py = ( G_2d.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
              - cv->shift[ Y ];
@@ -1092,7 +1092,7 @@ zoom_xy_2d( Canvas_T * c )
         cv->shift[ Y ] = ( G_2d.canvas.h - 1.0 - G.start[ Y ] )
                          / cv->s2d[ Y ] - py;
 
-        scale_changed = SET;
+        scale_changed = true;
     }
 
     cv->needs_recalc |= scale_changed;
@@ -1115,7 +1115,7 @@ zoom_z_2d( Canvas_T * c )
     if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
          || G_2d.active_curve == -1
          || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
-        return UNSET;
+        return false;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -1150,7 +1150,7 @@ zoom_z_2d( Canvas_T * c )
     cv->shift[ Z ] = ( G_2d.z_axis.h - 1.0 - G.start[ Y ] )
                      / cv->s2d[ Z ] - pz;
 
-    return SET;
+    return true;
 }
 
 
@@ -1198,7 +1198,7 @@ shift_XPoints_of_curve_2d( Canvas_T *   c,
         {
             dz = factor * ( c->ppos[ Y ] - G.start[ Y ] );
             cv->shift[ Z ] -= dz / cv->s2d[ Z ];
-            return SET;
+            return true;
         }
     }
 
@@ -1221,7 +1221,7 @@ shift_XPoints_of_curve_2d( Canvas_T *   c,
             cv->down  &= xp->y >= ( int ) G_2d.canvas.h;
     }
 
-    return SET;
+    return true;
 }
 
 
@@ -1236,8 +1236,8 @@ reconfigure_window_2d( Canvas_T * c,
 {
     long i;
     Curve_2d_T *cv;
-    static bool is_reconf[ 3 ] = { UNSET, UNSET, UNSET };
-    static bool need_redraw[ 3 ] = { UNSET, UNSET, UNSET };
+    static bool is_reconf[ 3 ] = { false, false, false };
+    static bool need_redraw[ 3 ] = { false, false, false };
     int old_w = c->w,
         old_h = c->h;
 
@@ -1266,7 +1266,7 @@ reconfigure_window_2d( Canvas_T * c,
                 cv->old_s2d[ Y ] *= ( h - 1.0 ) / ( old_h - 1 );
             }
 
-            cv->needs_recalc = SET;
+            cv->needs_recalc = true;
         }
 
         /* Recalculate data for drawing (has to be done after setting of
@@ -1308,26 +1308,26 @@ reconfigure_window_2d( Canvas_T * c,
         if ( need_redraw[ X ] )
         {
             redraw_canvas_2d( &G_2d.x_axis );
-            need_redraw[ X ] = UNSET;
+            need_redraw[ X ] = false;
         }
         else if ( w != old_w )
-            is_reconf[ X ] = SET;
+            is_reconf[ X ] = true;
 
         if ( need_redraw[ Y ] )
         {
             redraw_canvas_2d( &G_2d.y_axis );
-            need_redraw[ Y ] = UNSET;
+            need_redraw[ Y ] = false;
         }
         else if ( h != old_h )
-            is_reconf[ Y ] = SET;
+            is_reconf[ Y ] = true;
 
         if ( need_redraw[ Z ] )
         {
             redraw_canvas_2d( &G_2d.z_axis );
-            need_redraw[ Z ] = UNSET;
+            need_redraw[ Z ] = false;
         }
         else if ( h != old_h )
-            is_reconf[ Z ] = SET;
+            is_reconf[ Z ] = true;
     }
 
     if ( c == &G_2d.x_axis )
@@ -1335,10 +1335,10 @@ reconfigure_window_2d( Canvas_T * c,
         if ( is_reconf[ X ] )
         {
             redraw_canvas_2d( c );
-            is_reconf[ X ] = UNSET;
+            is_reconf[ X ] = false;
         }
         else
-            need_redraw[ X ] = SET;
+            need_redraw[ X ] = true;
     }
 
     if ( c == &G_2d.y_axis )
@@ -1346,10 +1346,10 @@ reconfigure_window_2d( Canvas_T * c,
         if ( is_reconf[ Y ] )
         {
             redraw_canvas_2d( c );
-            is_reconf[ Y ] = UNSET;
+            is_reconf[ Y ] = false;
         }
         else
-            need_redraw[ Y ] = SET;
+            need_redraw[ Y ] = true;
     }
 
     if ( c == &G_2d.z_axis )
@@ -1357,10 +1357,10 @@ reconfigure_window_2d( Canvas_T * c,
         if ( is_reconf[ Z ] )
         {
             redraw_canvas_2d( c );
-            is_reconf[ Z ] = UNSET;
+            is_reconf[ Z ] = false;
         }
         else
-            need_redraw[ Z ] = SET;
+            need_redraw[ Z ] = true;
     }
 }
 
@@ -1420,7 +1420,7 @@ recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
                 cv->down  &= xp->y >= ( int ) G_2d.canvas.h;
             }
 
-    cv->needs_recalc = UNSET;
+    cv->needs_recalc = false;
 }
 
 
@@ -1996,7 +1996,7 @@ fs_rescale_2d( Curve_2d_T * cv,
     {
         cv->rw_min = HUGE_VAL;
         cv->rw_max = - HUGE_VAL;
-        cv->is_scale_set = UNSET;
+        cv->is_scale_set = false;
         return;
     }
 
@@ -2020,14 +2020,14 @@ fs_rescale_2d( Curve_2d_T * cv,
         cv->s2d[ Y ] = ( G_2d.canvas.h - 1.0 ) / ( G_2d.ny - 1 );
     }
 
-    cv->up = cv->down = cv->left = cv->right = UNSET;
+    cv->up = cv->down = cv->left = cv->right = false;
 
     for ( sp = cv->points, i = 0; i < G_2d.nx * G_2d.ny; sp++, i++ )
         if ( sp->exist )
             sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min - rw_min )
                     / new_rwc_delta_z;
 
-    cv->needs_recalc = SET;
+    cv->needs_recalc = true;
 
     /* Store new minimum and maximum and the new scale factor */
 
@@ -2508,7 +2508,7 @@ remove_markers_2d( long * curves )
             repaint_canvas_2d( &G_2d.canvas );
 
         if ( G_2d.is_cut && curves[ j ] == G_cut.curve )
-            delete_all_cut_markers( SET );
+            delete_all_cut_markers( true );
     }
 
 }

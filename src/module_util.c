@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -104,8 +104,7 @@ too_many_arguments( Var_T * v )
     if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
         return;
 
-    print( WARN, "Too many arguments, discarding superfluous argument%s.\n",
-           v->next != NULL ? "s" : "" );
+    print( WARN, "Too many arguments, discarding superfluous ones.\n" );
 
     while ( ( v = vars_pop( v ) ) != NULL )
         /* empty */ ;
@@ -215,8 +214,6 @@ bool
 get_boolean( Var_T * v )
 {
     const char *alt[ 2 ] = { "OFF", "ON" };
-    int res;
-
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -235,8 +232,9 @@ get_boolean( Var_T * v )
     }
     else if ( v->type == STR_VAR )
     {
-        if ( ( res = is_in( v->val.sptr, alt, 2 ) ) >= 0 )
-            return res != 0 ? SET : UNSET;
+        int res = is_in( v->val.sptr, alt, 2 );
+        if ( res >= 0 )
+            return res;
 
         print( FATAL, "Invalid boolean argument (\"%s\").\n",  v->val.sptr );
         THROW( EXCEPTION );
@@ -258,11 +256,9 @@ double
 is_mult_ns( double       val,
             const char * text )
 {
-    double ip, fp;
-
-
     val *= 1.0e9;
-    fp = modf( val , &ip );
+    double ip;
+    double fp = modf( val , &ip );
 
     if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
     {
@@ -308,14 +304,13 @@ translate_escape_sequences( char * str )
 double
 experiment_time( void )
 {
-    struct timeval t_new;
     static struct timeval t_old = { 0, 0 };
-    double delta;
 
-
+    struct timeval t_new;
     gettimeofday( &t_new, NULL );
-    delta = t_new.tv_sec  - t_old.tv_sec
-            + 1.0e-6 * ( t_new.tv_usec - t_old.tv_usec );
+
+    double delta =   t_new.tv_sec  - t_old.tv_sec
+                   + 1.0e-6 * ( t_new.tv_usec - t_old.tv_usec );
     t_old  = t_new;
 
     return EDL.experiment_time += delta;
@@ -332,11 +327,11 @@ fsc2_fopen( const char * restrict path,
             const char * restrict mode )
 {
     raise_permissions( );
-    FILE * fp = fopen( path, mode );
 
     /* Probably rarely necessary, but make sure the close-on-exec flag is
-       se for the file */
+       set for the file */
 
+    FILE * fp = fopen( path, mode );
     if ( fp )
     {
         int fd_flags = fcntl( fileno( fp ), F_GETFD );
@@ -362,12 +357,9 @@ fsc2_fscanf( FILE       * restrict stream,
              ... )
 {
     va_list ap;
-    int num;
-
-
     va_start( ap, format );
     raise_permissions( );
-    num = vfscanf( stream, format, ap );
+    int num = vfscanf( stream, format, ap );
     lower_permissions( );
     va_end( ap );
     return num;
@@ -385,11 +377,8 @@ fsc2_fread( void   * restrict ptr,
             size_t            nmemb,
             FILE   * restrict stream )
 {
-    size_t num;
-
-
     raise_permissions( );
-    num = fread( ptr, size, nmemb, stream );
+    size_t num = fread( ptr, size, nmemb, stream );
     lower_permissions( );
     return num;
 }
@@ -406,12 +395,9 @@ fsc2_fprintf( FILE       * restrict stream,
               ... )
 {
     va_list ap;
-    int num;
-
-
     va_start( ap, format );
     raise_permissions( );
-    num = vfprintf( stream, format, ap );
+    int num = vfprintf( stream, format, ap );
     fflush( stream );
     lower_permissions( );
     va_end( ap );
@@ -430,11 +416,8 @@ fsc2_fwrite( const void * restrict ptr,
              size_t                nmemb,
              FILE       * restrict stream )
 {
-    size_t num;
-
-
     raise_permissions( );
-    num = fwrite( ptr, size, nmemb, stream );
+    size_t num = fwrite( ptr, size, nmemb, stream );
     fflush( stream );
     lower_permissions( );
     return num;
@@ -449,11 +432,8 @@ fsc2_fwrite( const void * restrict ptr,
 int
 fsc2_fgetc( FILE * stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = fgetc( stream );
+    int num = fgetc( stream );
     lower_permissions( );
     return num;
 }
@@ -467,10 +447,8 @@ fsc2_fgetc( FILE * stream )
 int
 fsc2_getc( FILE * stream )
 {
-    int num;
-
     raise_permissions( );
-    num = getc( stream );
+    int num = getc( stream );
     lower_permissions( );
     return num;
 }
@@ -486,11 +464,8 @@ fsc2_fgets( char * restrict s,
             int             size,
             FILE * restrict stream )
 {
-    char *p;
-
-
     raise_permissions( );
-    p = fgets( s, size, stream );
+    char * p = fgets( s, size, stream );
     lower_permissions( );
     return p;
 }
@@ -505,11 +480,8 @@ int
 fsc2_ungetc( int    c,
              FILE * stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = ungetc( c, stream );
+    int num = ungetc( c, stream );
     lower_permissions( );
     return num;
 }
@@ -525,10 +497,8 @@ fsc2_fseek( FILE * stream,
             long   offset,
             int    whence )
 {
-    int num;
-
     raise_permissions( );
-    num = fseek( stream, offset, whence );
+    int num = fseek( stream, offset, whence );
     lower_permissions( );
     return num;
 }
@@ -542,11 +512,8 @@ fsc2_fseek( FILE * stream,
 long
 fsc2_ftell( FILE * stream )
 {
-    long num;
-
-
     raise_permissions( );
-    num = ftell( stream );
+    long num = ftell( stream );
     lower_permissions( );
     return num;
 }
@@ -561,11 +528,8 @@ int
 fsc2_fputc( int    c,
             FILE * stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = fputc( c, stream );
+    int num = fputc( c, stream );
     fflush( stream );
     lower_permissions( );
     return num;
@@ -581,11 +545,8 @@ int
 fsc2_fputs( const char * restrict s,
             FILE       * restrict stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = fputs( s, stream );
+    int num = fputs( s, stream );
     fflush( stream );
     lower_permissions( );
     return num;
@@ -601,11 +562,8 @@ int
 fsc2_putc( int    c,
            FILE * stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = putc( c, stream );
+    int num = putc( c, stream );
     fflush( stream );
     lower_permissions( );
     return num;
@@ -619,11 +577,8 @@ fsc2_putc( int    c,
 int
 fsc2_fclose( FILE * stream )
 {
-    int num;
-
-
     raise_permissions( );
-    num = fclose( stream );
+    int num = fclose( stream );
     lower_permissions( );
     return num;
 }

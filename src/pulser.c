@@ -45,62 +45,60 @@ static P_List_T *plist;
 void
 pulser_struct_init( void )
 {
-    long i;
-    Device_T *cd = EDL.Device_List;
-
-
     if ( EDL.Num_Pulsers == 0 )
         return;
 
     Pulser_Struct = T_malloc( EDL.Num_Pulsers * sizeof *Pulser_Struct );
+    Device_T * cd = EDL.Device_List;
 
-    for ( i = 0; i < EDL.Num_Pulsers; i++ )
+    for ( long i = 0; i < EDL.Num_Pulsers; i++ )
     {
-        Pulser_Struct[ i ].name                       = NULL;
+        Pulser_Struct_T * ps = Pulser_Struct + i;
 
         while (    ! cd->generic_type
                 || strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             cd = cd->next;
-        Pulser_Struct[ i ].device                     = cd;
+        ps->device                     = cd;
 
-        Pulser_Struct[ i ].needs_phase_pulses         = UNSET;
-        Pulser_Struct[ i ].has_pods                   = UNSET;
+        ps->name                       = NULL;
+        ps->needs_phase_pulses         = false;
+        ps->has_pods                   = false;
 
-        Pulser_Struct[ i ].assign_function            = NULL;
-        Pulser_Struct[ i ].assign_channel_to_function = NULL;
-        Pulser_Struct[ i ].invert_function            = NULL;
-        Pulser_Struct[ i ].set_function_delay         = NULL;
-        Pulser_Struct[ i ].set_function_high_level    = NULL;
-        Pulser_Struct[ i ].set_function_low_level     = NULL;
-        Pulser_Struct[ i ].set_timebase               = NULL;
-        Pulser_Struct[ i ].set_timebase_level         = NULL;
-        Pulser_Struct[ i ].set_trigger_mode           = NULL;
-        Pulser_Struct[ i ].set_repeat_time            = NULL;
-        Pulser_Struct[ i ].set_trig_in_level          = NULL;
-        Pulser_Struct[ i ].set_trig_in_slope          = NULL;
-        Pulser_Struct[ i ].set_trig_in_impedance      = NULL;
-        Pulser_Struct[ i ].set_max_seq_len            = NULL;
-        Pulser_Struct[ i ].set_phase_reference        = NULL;
-        Pulser_Struct[ i ].new_pulse                  = NULL;
-        Pulser_Struct[ i ].set_pulse_function         = NULL;
-        Pulser_Struct[ i ].set_pulse_position         = NULL;
-        Pulser_Struct[ i ].set_pulse_length           = NULL;
-        Pulser_Struct[ i ].set_pulse_position_change  = NULL;
-        Pulser_Struct[ i ].set_pulse_length_change    = NULL;
-        Pulser_Struct[ i ].set_pulse_phase_cycle      = NULL;
-        Pulser_Struct[ i ].get_pulse_function         = NULL;
-        Pulser_Struct[ i ].get_pulse_position         = NULL;
-        Pulser_Struct[ i ].get_pulse_length           = NULL;
-        Pulser_Struct[ i ].get_pulse_position_change  = NULL;
-        Pulser_Struct[ i ].get_pulse_length_change    = NULL;
-        Pulser_Struct[ i ].get_pulse_phase_cycle      = NULL;
-        Pulser_Struct[ i ].ch_to_num                  = NULL;
+        ps->assign_function            = NULL;
+        ps->assign_channel_to_function = NULL;
+        ps->invert_function            = NULL;
+        ps->set_function_delay         = NULL;
+        ps->set_function_high_level    = NULL;
+        ps->set_function_low_level     = NULL;
+        ps->set_timebase               = NULL;
+        ps->set_timebase_level         = NULL;
+        ps->set_trigger_mode           = NULL;
+        ps->set_repeat_time            = NULL;
+        ps->set_trig_in_level          = NULL;
+        ps->set_trig_in_slope          = NULL;
+        ps->set_trig_in_impedance      = NULL;
+        ps->set_max_seq_len            = NULL;
+        ps->set_phase_reference        = NULL;
+        ps->new_pulse                  = NULL;
+        ps->set_pulse_function         = NULL;
+        ps->set_pulse_position         = NULL;
+        ps->set_pulse_length           = NULL;
+        ps->set_pulse_position_change  = NULL;
+        ps->set_pulse_length_change    = NULL;
+        ps->set_pulse_phase_cycle      = NULL;
+        ps->get_pulse_function         = NULL;
+        ps->get_pulse_position         = NULL;
+        ps->get_pulse_length           = NULL;
+        ps->get_pulse_position_change  = NULL;
+        ps->get_pulse_length_change    = NULL;
+        ps->get_pulse_phase_cycle      = NULL;
+        ps->ch_to_num                  = NULL;
 
-        Pulser_Struct[ i ].phase_setup_prep           = NULL;
-        Pulser_Struct[ i ].phase_setup                = NULL;
-        Pulser_Struct[ i ].set_phase_switch_delay     = NULL;
-        Pulser_Struct[ i ].set_grace_period           = NULL;
-        Pulser_Struct[ i ].keep_all_pulses            = NULL;
+        ps->phase_setup_prep           = NULL;
+        ps->phase_setup                = NULL;
+        ps->set_phase_switch_delay     = NULL;
+        ps->set_grace_period           = NULL;
+        ps->keep_all_pulses            = NULL;
     }
 }
 
@@ -110,14 +108,12 @@ pulser_struct_init( void )
 
 void pulser_cleanup( void )
 {
-    P_List_T *cur_p;
-    P_List_T *next_p;
-
-
-    for ( cur_p = plist; cur_p != NULL; cur_p = next_p )
+    P_List_T *cur_p  = plist;
+    while ( cur_p )
     {
-        next_p = cur_p->next;
+        P_List_T * next_p = cur_p->next;
         T_free( cur_p );
+        cur_p = next_p;
     }
 
     plist = NULL;
@@ -211,9 +207,6 @@ void
 p_assign_pod( long    func,
               Var_T * v )
 {
-    long pod;
-
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
@@ -230,7 +223,7 @@ p_assign_pod( long    func,
 
     /* Check the variable and get its value */
 
-    pod = get_long( v, "pod number" );
+    long pod = get_long( v, "pod number" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -272,16 +265,13 @@ void
 p_assign_channel( long    func,
                   Var_T * v )
 {
-    long channel;
-
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
     /* Check the variable and get its value */
 
-    channel = get_long( v, "channel number" );
+    long channel = get_long( v, "channel number" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -412,16 +402,13 @@ void
 p_set_v_high( long    func,
               Var_T * v )
 {
-    double voltage;
-
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
     /* Check the variable and get its value */
 
-    voltage = get_double( v, "high voltage level" );
+    double voltage = get_double( v, "high voltage level" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -460,16 +447,13 @@ void
 p_set_v_low( long    func,
              Var_T * v )
 {
-    double voltage;
-
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
     /* Check the variable and get its value */
 
-    voltage = get_double( v, "low voltage level" );
+    double voltage = get_double( v, "low voltage level" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -588,14 +572,11 @@ p_set_timebase_level( int level_type )
 void
 p_set_trigger_mode( Var_T * v )
 {
-    int mode;
-
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    mode = ( int ) get_long( v, "trigger mode" );
+    long mode = get_long( v, "trigger mode" );
     vars_pop( v );
 
     if ( mode != INTERNAL && mode != EXTERNAL )
@@ -637,14 +618,11 @@ p_set_trigger_mode( Var_T * v )
 void
 p_set_trigger_slope( Var_T * v )
 {
-    int slope;
-
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    slope = ( int ) get_long( v, "trigger slope" );
+    long slope = get_long( v, "trigger slope" );
     vars_pop( v );
 
     if ( slope != POSITIVE && slope != NEGATIVE )
@@ -687,14 +665,11 @@ p_set_trigger_slope( Var_T * v )
 void
 p_set_trigger_level( Var_T * v )
 {
-    double level;
-
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    level = get_double( v, "trigger level" );
+    double level = get_double( v, "trigger level" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -731,14 +706,11 @@ p_set_trigger_level( Var_T * v )
 void
 p_set_trigger_impedance( Var_T * v )
 {
-    int state;
-
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    state = ( int ) get_strict_long( v, "trigger impedance" );
+    long state = get_strict_long( v, "trigger impedance" );
     vars_pop( v );
 
     /* Finally call the function (if it exists...) */
@@ -824,14 +796,11 @@ p_set_rep_time( Var_T * v )
 void
 p_set_rep_freq( Var_T * v )
 {
-    double freq, rep_time;
-
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
 
-    freq = get_double( v, "repetition frequency" );
+    double freq = get_double( v, "repetition frequency" );
     vars_pop( v );
 
     if ( freq > 1.01e9 || freq <= 0.0 )
@@ -849,7 +818,7 @@ p_set_rep_freq( Var_T * v )
 
     /* Make sure we get a repeat time that's a multiple of 1 ns */
 
-    rep_time = lrnd( 1.0 / freq * 1.0e9 ) * 1.0e-9;
+    double rep_time = lrnd( 1.0 / freq * 1.0e9 ) * 1.0e-9;
 
     /* Finally call the function (if it exists) */
 
@@ -906,7 +875,7 @@ p_phase_ref( int func,
 #ifndef NDEBUG
             if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
             {
-                eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                eprint( FATAL, false, "Internal error detected at %s:%d.\n",
                         __FILE__, __LINE__ );
                 THROW( EXCEPTION );
             }
@@ -934,7 +903,7 @@ p_phase_ref( int func,
                  || ref < 0
                  || ref >= PULSER_CHANNEL_NUM_FUNC )
             {
-                eprint( FATAL, UNSET, "Internal error detected at s:%d.\n",
+                eprint( FATAL, false, "Internal error detected at s:%d.\n",
                         __FILE__, __LINE__ );
                 THROW( EXCEPTION );
             }
@@ -969,10 +938,6 @@ p_phase_ref( int func,
 long
 p_new( long pnum )
 {
-    P_List_T *cur_p;
-    P_List_T *new_plist;
-
-
     is_pulser_driver( );
     is_pulser_func( Pulser_Struct[ Cur_Pulser ].new_pulse,
                     "creating a new pulse" );
@@ -980,15 +945,17 @@ p_new( long pnum )
     /* First check that the pulse does not already exist, the include it
        into our private list of pulses. */
 
-    for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
+    for ( P_List_T * cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
+    {
         if ( cur_p->num == pnum )
         {
             print( FATAL, "A pulse #%ld has already been defined.\n",
                    pnum );
             THROW( EXCEPTION );
         }
+    }
 
-    new_plist = T_malloc( sizeof *new_plist );
+    P_List_T * new_plist = T_malloc( sizeof *new_plist );
     new_plist->next    = plist;
     new_plist->num     = pnum;
     new_plist->dev_num = Cur_Pulser;
@@ -1027,14 +994,8 @@ p_set( long    pnum,
        int     type,
        Var_T * v )
 {
-    long func, phase;
-    double pos, len, dpos, dlen;
     long dev_num = -1;
-    P_List_T *cur_p;
-    long stored_Cur_Pulser;
-
-
-    for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
+    for ( P_List_T * cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
         if ( cur_p->num == pnum )
         {
             dev_num = cur_p->dev_num;
@@ -1049,7 +1010,7 @@ p_set( long    pnum,
     }
 
     fsc2_assert( dev_num >= 0 && dev_num < EDL.Num_Pulsers );
-    stored_Cur_Pulser = Cur_Pulser;
+    long stored_Cur_Pulser = Cur_Pulser;
     Cur_Pulser = dev_num;
 
     /* Now the correct driver function is called. All switches just check that
@@ -1064,6 +1025,9 @@ p_set( long    pnum,
 
     TRY
     {
+        long func, phase;
+        double pos, len, dpos, dlen;
+
         switch ( type )
         {
             case P_FUNC :
@@ -1166,16 +1130,8 @@ Var_T *
 p_get_by_num( long pnum,
               int  type )
 {
-    int function;
-    double ptime;
-    long cycle;
-    Var_T * volatile v = NULL;
-    long volatile dev_num = -1;
-    P_List_T *cur_p;
-    long stored_Cur_Pulser;
-
-
-    for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
+    long dev_num = -1;
+    for ( P_List_T * cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
         if ( cur_p->num == pnum )
         {
             dev_num = cur_p->dev_num;
@@ -1189,7 +1145,7 @@ p_get_by_num( long pnum,
     }
 
     fsc2_assert( dev_num >= 0 && dev_num < EDL.Num_Pulsers );
-    stored_Cur_Pulser = Cur_Pulser;
+    long volatile stored_Cur_Pulser = Cur_Pulser;
     Cur_Pulser = dev_num;
 
     TRY
@@ -1199,8 +1155,14 @@ p_get_by_num( long pnum,
         TRY_SUCCESS;
     }
 
+        Var_T * volatile v = NULL;
+
     TRY
     {
+        int function;
+        double ptime;
+        long cycle;
+
         switch ( type )
         {
             case P_FUNC :
@@ -1417,12 +1379,9 @@ void
 p_set_psd( int     func,
            Var_T * v )
 {
-    double psd;
-
-
     fsc2_assert( func == 0 || func == 1 );
 
-    psd = get_double( v, "phase switch delay" );
+    double psd = get_double( v, "phase switch delay" );
     vars_pop( v );
     is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_phase_switch_delay,
                     "setting a phase switch delay" );
@@ -1461,13 +1420,9 @@ p_set_psd( int     func,
 void
 p_set_gp( Var_T * v )
 {
-    double gp;
-
-
     is_pulser_driver( );
 
-
-    gp = get_double( v, "grace period" );
+    double gp = get_double( v, "grace period" );
     vars_pop( v );
     is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_grace_period,
                     "setting a grace period" );
@@ -1595,9 +1550,6 @@ keep_all_pulses( void )
 long
 p_ch2num( long channel )
 {
-    long num;
-
-
     is_pulser_driver( );
 
     is_pulser_func( Pulser_Struct[ Cur_Pulser ].ch_to_num,
@@ -1611,6 +1563,7 @@ p_ch2num( long channel )
         TRY_SUCCESS;
     }
 
+    long num;
     TRY
     {
         num = Pulser_Struct[ Cur_Pulser ].ch_to_num( channel );
@@ -1623,7 +1576,6 @@ p_ch2num( long channel )
     }
 
     call_pop( );
-
     return num;
 }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -25,7 +25,7 @@
 /* Variables imported from func.c */
 
 extern size_t Num_Func;       /* number of built-in and listed functions */
-extern Func_T *Fncts;         /* structure for list of functions */
+extern Func_T * Fncts;        /* structure for list of functions */
 
 
 static size_t num_func;
@@ -35,7 +35,7 @@ static void resolve_hook_functions( Device_T * dev );
 static void load_functions( Device_T * dev );
 static void resolve_functions( Device_T * dev );
 static void add_function( size_t     num,
-                          void *     new_func,
+                          void     * new_func,
                           Device_T * new_dev );
 static int func_cmp( const void * a,
                      const void * b );
@@ -63,11 +63,11 @@ load_all_drivers( void )
     bool saved_need_MEDRIVER;
 #endif
 
-    Need_GPIB     = UNSET;
-    Need_RULBUS   = UNSET;
-    Need_LAN      = UNSET;
-    Need_MEDRIVER = UNSET;
-    Need_USB      = UNSET;
+    Need_GPIB     = false;
+    Need_RULBUS   = false;
+    Need_LAN      = false;
+    Need_MEDRIVER = false;
+    Need_USB      = false;
 
     /* Treat "User_Functions" also as a kind of device driver and append
        the device structure to the end of the list of devices */
@@ -89,7 +89,7 @@ load_all_drivers( void )
         TRY_SUCCESS;
     }
 
-    /* Because some multiple defined functions may have been added resort
+    /* Because some multiple defined functions may have been added re-sort
        the function list to make searching via bsearch() possible */
 
     qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp );
@@ -101,12 +101,12 @@ load_all_drivers( void )
 
     /* This done run the init hooks (if they exist) and warn if they don't
        return successfully (if an init hook thinks it should kill the whole
-       program it is supposed to throw an exception). To keep modules writers
+       program it is supposed to throw an exception). To keep module writers
        from erroneously unsetting the global variable 'Need_GPIB' it's stored
        before each init_hook() function is called and is restored to its
        previous values if necessary. */
 
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     TRY
     {
@@ -135,14 +135,14 @@ load_all_drivers( void )
                     TRY
                     {
                         if ( ! cd->driver.init_hook( ) )
-                            eprint( WARN, UNSET, "Initialisation of module "
+                            eprint( WARN, false, "Initialisation of module "
                                     "'%s.fsc2_so' did not return "
                                     "successfully.\n", cd->name );
                         TRY_SUCCESS;
                     }
                     OTHERWISE
                     {
-                        eprint( FATAL, UNSET, "Failed to initialize module "
+                        eprint( FATAL, false, "Failed to initialize module "
                                 "'%s'.\n", cd->name );
                         call_pop( );
                         vars_del_stack( );
@@ -153,48 +153,48 @@ load_all_drivers( void )
                     call_pop( );
                     vars_del_stack( );
 
-                    cd->driver.init_hook_is_run = SET;
+                    cd->driver.init_hook_is_run = true;
                 }
             }
 
             if ( ! Need_GPIB && saved_need_GPIB )
-                Need_GPIB = SET;
+                Need_GPIB = true;
 
 #if defined WITH_RULBUS
             if ( ! Need_RULBUS && saved_need_RULBUS )
-                Need_RULBUS = SET;
+                Need_RULBUS = true;
 #else
             if ( Need_RULBUS )
             {
-                eprint( FATAL, UNSET, "Module '%s' requires RULBUS but fsc2 "
+                eprint( FATAL, false, "Module '%s' requires RULBUS but fsc2 "
                         "hasn't been built with RULBUS support.\n", cd->name );
                 THROW( EXCEPTION );
             }
 #endif
 
             if ( ! Need_LAN && saved_need_LAN )
-                Need_LAN = SET;
+                Need_LAN = true;
 
 
 #if defined WITH_MEDRIVER
             if ( ! Need_MEDRIVER && saved_need_MEDRIVER )
-                Need_MEDRIVER = SET;
+                Need_MEDRIVER = true;
 #else
             if ( Need_MEDRIVER )
             {
-                eprint( FATAL, UNSET, "Module '%s' requires MEDRIVER but fsc2 "
+                eprint( FATAL, false, "Module '%s' requires MEDRIVER but fsc2 "
                         "hasn't been built with MEDRIVER support.\n",
                         cd->name );
                 THROW( EXCEPTION );
             }
 #endif
             if ( ! Need_USB && saved_need_USB )
-                Need_USB = SET;
+                Need_USB = true;
 
 #if ! defined WITH_LIBUSB_1_0 && ! defined WITH_LIBUSB_0_1
             if ( Need_USB )
             {
-                eprint( FATAL, UNSET, "Module '%s' requires LIBUSB but fsc2 "
+                eprint( FATAL, false, "Module '%s' requires LIBUSB but fsc2 "
                         "hasn't been built with LIBUSB (0.1 or 1.0) support.\n",
                         cd->name );
                 THROW( EXCEPTION );
@@ -206,12 +206,12 @@ load_all_drivers( void )
     }
     OTHERWISE
     {
-        Fsc2_Internals.in_hook = UNSET;
+        Fsc2_Internals.in_hook = false;
         delete_devices( );
         RETHROW;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -264,9 +264,9 @@ exists_device_type( const char * type )
     for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
         if (    cd->is_loaded
              && ! strcasecmp( strip_path( cd->generic_type ), type ) )
-            return OK;
+            return true;
 
-    return FAIL;
+    return false;
 }
 
 /*-------------------------------------------------------------------*
@@ -283,9 +283,9 @@ exists_function( const char * name )
         if (    Fncts[ i ].name != NULL
              && ! strcmp( Fncts[ i ].name, name )
              && Fncts[ i ].fnct != NULL )
-            return OK;
+            return true;
 
-    return FAIL;
+    return false;
 }
 
 
@@ -352,13 +352,13 @@ load_functions( Device_T * dev )
 
     if ( dev->driver.handle == NULL )
     {
-        eprint( FATAL, UNSET, "Can't open module for device '%s': %s.\n",
+        eprint( FATAL, false, "Can't open module for device '%s': %s.\n",
                 dev->name[ 0 ] != '/' ?
                 dev->name : strrchr( dev->name, '/' ) + 1, dlerror( ) );
         THROW( EXCEPTION );
     }
 
-    dev->is_loaded = SET;
+    dev->is_loaded = true;
 
     /* Now that we know that the module exists and can be used try to resolve
        all functions we may need */
@@ -398,7 +398,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.init_hook =
              ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_init_hook = SET;
+        dev->driver.is_init_hook = true;
 
     /* Get the test hook function if available */
 
@@ -407,7 +407,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.test_hook =
              ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_test_hook = SET;
+        dev->driver.is_test_hook = true;
 
     /* Get the end-of-test hook function if available */
 
@@ -416,7 +416,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.end_of_test_hook =
              ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_end_of_test_hook = SET;
+        dev->driver.is_end_of_test_hook = true;
 
     /* Get the pre-experiment hook function if available */
 
@@ -425,7 +425,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.exp_hook =
              ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_exp_hook = SET;
+        dev->driver.is_exp_hook = true;
 
     /* Get the end-of-experiment hook function if available */
 
@@ -434,7 +434,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.end_of_exp_hook =
              ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_end_of_exp_hook = SET;
+        dev->driver.is_end_of_exp_hook = true;
 
     /* Get the exit hook function if available */
 
@@ -443,9 +443,9 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.exit_hook =
             ( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_exit_hook = SET;
+        dev->driver.is_exit_hook = true;
 
-    Fsc2_Internals.exit_hooks_are_run = UNSET;
+    Fsc2_Internals.exit_hooks_are_run = false;
 
     /* Finally check if there's also an exit hook function for the child */
 
@@ -454,7 +454,7 @@ resolve_hook_functions( Device_T * dev )
     dev->driver.child_exit_hook =
             ( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
     if ( dlerror( ) == NULL )
-        dev->driver.is_child_exit_hook = SET;
+        dev->driver.is_child_exit_hook = true;
 
     T_free( hook_func_name );
 }
@@ -468,11 +468,7 @@ resolve_hook_functions( Device_T * dev )
 static void
 resolve_functions( Device_T * dev )
 {
-    size_t num;
-    void *cur;
-
-
-    for ( num = 0; num < num_func; num++ )
+    for ( size_t num = 0; num < num_func; num++ )
     {
         /* Don't try to load functions that are not listed in 'Functions' */
 
@@ -481,7 +477,7 @@ resolve_functions( Device_T * dev )
 
         dlerror( );                /* make sure it's NULL before we continue */
 
-        cur = dlsym( dev->driver.handle, Fncts[ num ].name );
+        void * cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
         if ( cur == NULL || dlerror( ) != NULL )
             continue;
@@ -498,7 +494,7 @@ resolve_functions( Device_T * dev )
             Fncts[ num ].device = dev;
             if ( dev->count != 1 )
             {
-                eprint( NO_ERROR, UNSET, "Functions %s() and %s#%d() are both "
+                eprint( NO_ERROR, false, "Functions %s() and %s#%d() are both "
                         "defined by module '%s'.\n", Fncts[ num ].name,
                         Fncts[ num ].name, dev->count, dev->name );
                 add_function( num, cur, dev );
@@ -524,16 +520,13 @@ add_function( size_t     num,
               void *     new_func,
               Device_T * new_dev )
 {
-    Func_T *f;
-
-
     if (    new_dev->count == 1
          || (    new_dev->generic_type != NULL
               && Fncts[ num ].device->generic_type != NULL
               && strcasecmp( new_dev->generic_type,
                              Fncts[ num ].device->generic_type ) != 0 ) )
     {
-        eprint( FATAL, UNSET, "Functions with name %s() are defined in "
+        eprint( FATAL, false, "Functions with name %s() are defined in "
                 "modules of different types, '%s' and '%s'.\n",
                 Fncts[ num ].name, Fncts[ num ].device->name, new_dev->name );
         THROW( EXCEPTION );
@@ -542,7 +535,7 @@ add_function( size_t     num,
     /* Add an entry for the new function to the list of functions */
 
     Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof *Fncts );
-    f = Fncts + Num_Func++;
+    Func_T * f = Fncts + Num_Func++;
     memcpy( f, Fncts + num, sizeof *f );
 
     f->fnct   = ( Var_T * ( * )( Var_T * ) ) new_func;
@@ -583,9 +576,6 @@ resolve_device_name( Device_T * dev )
 static void
 resolve_generic_type( Device_T * dev )
 {
-    Device_T *cd;
-
-
     dev->count = 1;
     dlerror( );
     dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
@@ -597,7 +587,7 @@ resolve_generic_type( Device_T * dev )
         return;
     }
 
-    for ( cd = EDL.Device_List; cd != dev; cd = cd->next )
+    for ( Device_T * cd = EDL.Device_List; cd != dev; cd = cd->next )
         if (    cd->generic_type != NULL
              && ! strcasecmp( cd->generic_type, dev->generic_type ) )
             dev->count++;
@@ -617,15 +607,12 @@ resolve_generic_type( Device_T * dev )
 void
 run_test_hooks( void )
 {
-    Device_T *cd;
-
-
     Cur_Pulser = -1;
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     TRY
     {
-        for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+        for ( Device_T * cd = EDL.Device_List; cd != NULL; cd = cd->next )
         {
 
             fsc2_assert( EDL.Call_Stack == NULL );
@@ -639,7 +626,7 @@ run_test_hooks( void )
                 call_push( NULL, cd, cd->device_name, cd->count );
 
                 if ( ! cd->driver.test_hook( ) )
-                    eprint( SEVERE, UNSET, "Initialisation of test run failed "
+                    eprint( SEVERE, false, "Initialisation of test run failed "
                             "for module '%s'.\n", cd->name );
                 call_pop( );
                 vars_del_stack( );
@@ -652,11 +639,11 @@ run_test_hooks( void )
     {
         call_pop( );
         vars_del_stack( );
-        Fsc2_Internals.in_hook = UNSET;
+        Fsc2_Internals.in_hook = false;
         RETHROW;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -667,15 +654,12 @@ run_test_hooks( void )
 void
 run_end_of_test_hooks( void )
 {
-    Device_T *cd;
-
-
     Cur_Pulser = -1;
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     TRY
     {
-        for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+        for ( Device_T * cd = EDL.Device_List; cd != NULL; cd = cd->next )
         {
             fsc2_assert( EDL.Call_Stack == NULL );
 
@@ -688,7 +672,7 @@ run_end_of_test_hooks( void )
                 call_push( NULL, cd, cd->device_name, cd->count );
 
                 if ( ! cd->driver.end_of_test_hook( ) )
-                    eprint( SEVERE, UNSET, "Final checks after test run "
+                    eprint( SEVERE, false, "Final checks after test run "
                             "failed for module '%s'.\n", cd->name );
                 call_pop( );
                 vars_del_stack( );
@@ -701,11 +685,11 @@ run_end_of_test_hooks( void )
     {
         call_pop( );
         vars_del_stack( );
-        Fsc2_Internals.in_hook = UNSET;
+        Fsc2_Internals.in_hook = false;
         RETHROW;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -716,15 +700,12 @@ run_end_of_test_hooks( void )
 void
 run_exp_hooks( void )
 {
-    Device_T *cd;
-
-
     Cur_Pulser = -1;
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     TRY
     {
-        for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+        for ( Device_T * cd = EDL.Device_List; cd != NULL; cd = cd->next )
         {
             fsc2_assert( EDL.Call_Stack == NULL );
 
@@ -737,16 +718,16 @@ run_exp_hooks( void )
                 call_push( NULL, cd, cd->device_name, cd->count );
 
                 if ( ! cd->driver.exp_hook( ) )
-                    eprint( SEVERE, UNSET, "Initialization of experiment "
+                    eprint( SEVERE, false, "Initialization of experiment "
                             "failed for module '%s'.\n", cd->name );
                 else
-                    cd->driver.exp_hook_is_run = SET;
+                    cd->driver.exp_hook_is_run = true;
 
                 call_pop( );
                 vars_del_stack( );
             }
             else
-                cd->driver.exp_hook_is_run = SET;
+                cd->driver.exp_hook_is_run = true;
 
             /* Give user a chance to stop while running the experiment hooks */
 
@@ -764,11 +745,11 @@ run_exp_hooks( void )
     {
         call_pop( );
         vars_del_stack( );
-        Fsc2_Internals.in_hook = UNSET;
+        Fsc2_Internals.in_hook = false;
         RETHROW;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -791,7 +772,7 @@ run_end_of_exp_hooks( void )
        end_of_exp hooks run first! */
 
     Cur_Pulser = -1;
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     Device_T * volatile cd;
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
@@ -808,7 +789,7 @@ run_end_of_exp_hooks( void )
         if ( ! cd->driver.exp_hook_is_run )
             continue;
 
-        cd->driver.exp_hook_is_run = UNSET;
+        cd->driver.exp_hook_is_run = false;
 
         if ( ! cd->is_loaded || ! cd->driver.is_end_of_exp_hook )
             continue;
@@ -817,7 +798,7 @@ run_end_of_exp_hooks( void )
         {
             call_push( NULL, cd, cd->device_name, cd->count );
             if ( ! cd->driver.end_of_exp_hook( ) )
-                eprint( SEVERE, UNSET, "Resetting module '%s' after "
+                eprint( SEVERE, false, "Resetting module '%s' after "
                         "experiment failed.\n", cd->name );
             call_pop( );
             vars_del_stack( );
@@ -830,7 +811,7 @@ run_end_of_exp_hooks( void )
         }
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -852,7 +833,7 @@ run_exit_hooks( void )
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     for ( ; cd != NULL; cd = cd->prev )
     {
@@ -884,11 +865,11 @@ run_exit_hooks( void )
             EDL.Num_Pulsers--;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 
     /* Set global variable to show that exit hooks already have been run */
 
-    Fsc2_Internals.exit_hooks_are_run = SET;
+    Fsc2_Internals.exit_hooks_are_run = true;
 }
 
 
@@ -910,7 +891,7 @@ run_child_exit_hooks( void )
     for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
         /* empty */ ;
 
-    Fsc2_Internals.in_hook = SET;
+    Fsc2_Internals.in_hook = true;
 
     for ( ; cd != NULL; cd = cd->prev )
     {
@@ -942,7 +923,7 @@ run_child_exit_hooks( void )
             EDL.Num_Pulsers--;
     }
 
-    Fsc2_Internals.in_hook = UNSET;
+    Fsc2_Internals.in_hook = false;
 }
 
 
@@ -970,8 +951,7 @@ get_lib_symbol( const char * from,
                 const char * symbol,
                 void **      symbol_ptr )
 {
-    Device_T *cd;
-
+    Device_T * cd;
 
     /* Try to find the library fitting the name */
 
@@ -1015,7 +995,7 @@ unload_device( Device_T * dev )
              && ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
             Cur_Pulser = EDL.Num_Pulsers - 1;
 
-        Fsc2_Internals.in_hook = SET;
+        Fsc2_Internals.in_hook = true;
         TRY
         {
             call_push( NULL, dev, dev->device_name, dev->count );
@@ -1033,7 +1013,7 @@ unload_device( Device_T * dev )
         if (    dev->generic_type != NULL
              && ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
             EDL.Num_Pulsers--;
-        Fsc2_Internals.in_hook = UNSET;
+        Fsc2_Internals.in_hook = false;
     }
 
     dlclose( dev->driver.handle );
