@@ -178,9 +178,9 @@ vars_get( const char * name )
 {
     /* Try to find the variable with the name passed to the function */
 
-    for ( Var_T * v = EDL.Var_List; v != NULL; v = v->next )
+    for ( Var_T * v = EDL.Var_List; v; v = v->next )
     {
-        if ( v->name == NULL )
+        if ( ! v->name )
             continue;
         if ( ! strcmp( v->name, name ) )
             return v;
@@ -212,13 +212,13 @@ vars_new( const char * name )
     Var_T * vp = T_malloc( sizeof *vp );
     *vp = template;
 
-    if ( name != NULL )
-        vp->name    = T_strdup( name );
+    if ( name )
+        vp->name = T_strdup( name );
 
     /* Make the new variable the first element of the variable list */
 
     vp->next = EDL.Var_List;
-    if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
+    if ( EDL.Var_List )              /* set previous pointer in successor */
         EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
     EDL.Var_List = vp;               /* make it the head of the list */
 
@@ -259,7 +259,7 @@ vars_free( Var_T * v,
 {
     fsc2_assert( ! ( v->flags & ON_STACK ) );
 
-    if ( v->name == NULL && ! also_nameless )
+    if ( ! v->name && ! also_nameless )
         return v->next;
 
     switch ( v->type )
@@ -275,7 +275,7 @@ vars_free( Var_T * v,
             break;
 
         case STR_VAR :
-            if ( v->val.sptr != NULL )
+            if ( v->val.sptr )
                 v->val.sptr = T_free( v->val.sptr );
                 break;
 
@@ -284,7 +284,7 @@ vars_free( Var_T * v,
                 break;
             if ( ! ( v->flags & DONT_RECURSE ) )
                 for ( ssize_t i = 0; i < v->len; i++ )
-                    if ( v->val.vptr[ i ] != NULL )
+                    if ( v->val.vptr[ i ] )
                         vars_free( v->val.vptr[ i ], true );
             v->val.vptr = T_free( v->val.vptr );
             break;
@@ -293,15 +293,15 @@ vars_free( Var_T * v,
             break;
     }
 
-    if ( v->name != NULL )
+    if ( v->name )
         v->name = T_free( v->name );
 
-    if ( v->prev == NULL )
+    if ( v->prev )
         EDL.Var_List = v->next;
     else
         v->prev->next = v->next;
 
-    if ( v->next != NULL )
+    if ( v->next )
         v->next->prev = v->prev;
 
     Var_T * ret = v->next;
@@ -317,7 +317,7 @@ vars_free( Var_T * v,
 static void
 free_all_vars( void )
 {
-    for ( Var_T * v = EDL.Var_List; v != NULL; )
+    for ( Var_T * v = EDL.Var_List; v; )
         v = vars_free( v, false );
 }
 
@@ -447,7 +447,7 @@ vars_push_matrix( Var_Type_T type,
     }
     OTHERWISE
     {
-        for ( ssize_t i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
+        for ( ssize_t i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ]; i++ )
             vars_free( nv->val.vptr[ i ], true );
         T_free( sizes );
         RETHROW;
@@ -566,7 +566,7 @@ vars_push( Var_Type_T type,
         case STR_VAR :
             {
                 const char * str = va_arg( ap, const char * );
-                if ( str != NULL )
+                if ( str )
                     nsv->val.sptr = T_strdup( str );
                 else
                     nsv->val.sptr = NULL;
@@ -584,7 +584,7 @@ vars_push( Var_Type_T type,
                 nsv->val.lpnt = NULL;
             else
             {
-                if ( nsv->val.lpnt != NULL )
+                if ( nsv->val.lpnt )
                     nsv->val.lpnt = get_memcpy( nsv->val.lpnt,
                                                   nsv->len
                                                 * sizeof *nsv->val.lpnt );
@@ -604,7 +604,7 @@ vars_push( Var_Type_T type,
                 nsv->val.dpnt = NULL;
             else
             {
-                if ( nsv->val.dpnt != NULL )
+                if ( nsv->val.dpnt )
                     nsv->val.dpnt = get_memcpy( nsv->val.dpnt,
                                                   nsv->len
                                                 * sizeof *nsv->val.dpnt );
@@ -630,7 +630,7 @@ vars_push( Var_Type_T type,
         case FLOAT_REF :
             {
                 Var_T * src = va_arg( ap, Var_T * );
-                if ( src != NULL )
+                if ( src )
                     vars_ref_copy( nsv, src, false );
             }
             break;
@@ -657,14 +657,14 @@ vars_push( Var_Type_T type,
     /* Finally append the new variable to the stack */
 
     Var_T * stack= EDL.Var_Stack;
-    if ( stack == NULL )
+    if ( ! stack )
     {
         EDL.Var_Stack = nsv;
         nsv->prev = NULL;
     }
     else
     {
-        while ( stack->next != NULL )
+        while ( stack->next )
             stack = stack->next;
         stack->next = nsv;
         nsv->prev = stack;
@@ -693,14 +693,14 @@ vars_make( Var_Type_T type,
         nv->flags = ON_STACK;
 
         Var_T * stack = EDL.Var_Stack;
-        if ( stack == NULL )
+        if ( ! stack )
         {
             EDL.Var_Stack = nv;
             nv->prev = NULL;
         }
         else
         {
-            while ( stack->next != NULL )
+            while ( stack->next )
                 stack = stack->next;
             stack->next = nv;
             nv->prev = stack;
@@ -905,7 +905,7 @@ vars_pop( Var_T * v )
 {
     /* Check that this is a variable that can be popped from the stack */
 
-    if ( v == NULL || ! ( v->flags & ON_STACK ) )
+    if ( ! v || ! ( v->flags & ON_STACK ) )
         return NULL;
 
 #ifndef NDEBUG
@@ -916,7 +916,7 @@ vars_pop( Var_T * v )
     for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
         /* empty */ ;
 
-    if ( stack == NULL )
+    if ( ! stack )
         fsc2_impossible( );
 #endif
 
@@ -924,16 +924,16 @@ vars_pop( Var_T * v )
 
     Var_T * ret = v->next;
 
-    if ( v->prev != NULL )
+    if ( v->prev )
     {
         v->prev->next = v->next;
-        if ( v->next != NULL )
+        if ( v->next )
             v->next->prev = v->prev;
     }
     else
     {
         EDL.Var_Stack = v->next;
-        if ( v->next != NULL )
+        if ( v->next )
             v->next->prev = NULL;
     }
 
@@ -944,7 +944,6 @@ vars_pop( Var_T * v )
             break;
 
         case FUNC :
-            T_free( v->name );
             break;
 
         case INT_ARR :
@@ -959,7 +958,7 @@ vars_pop( Var_T * v )
             if ( ! ( v->flags & DONT_RECURSE ) )
             {
                 for ( ssize_t i = 0; i < v->len; i++ )
-                    if ( v->val.vptr[ i ] != NULL )
+                    if ( v->val.vptr[ i ] )
                         vars_free( v->val.vptr[ i ], true );
             }
             T_free( v->val.vptr );
@@ -973,6 +972,8 @@ vars_pop( Var_T * v )
             break;
     }
 
+    if ( v->name )
+        T_free( v->name );
     T_free( v );
     return ret;
 }
@@ -1006,7 +1007,7 @@ vars_check( Var_T * v,
        gracefully, i.e. by throwing an exception and don't crash (even
        though this clearly is a bug) */
 
-    if ( v == NULL )
+    if ( ! v )
         fsc2_impossible( );
 
     /* Being real paranoid we check that the variable exists at all -
@@ -1034,7 +1035,7 @@ vars_check( Var_T * v,
         int i = 0;
         for ( int t = v->type; ! ( t & 1 ); t >>= 1, i++ )
             /* empty */ ;
-        if ( v->name != NULL )
+        if ( v->name )
             print( FATAL, "The variable '%s' of type %s can't be used in "
                    "this context.\n", v->name, type_names[ i ] );
         else
@@ -1043,7 +1044,7 @@ vars_check( Var_T * v,
         THROW( EXCEPTION );
     }
 
-    if ( v->name != NULL && v->flags & NEW_VARIABLE )
+    if ( v->name && v->flags & NEW_VARIABLE )
     {
         print( WARN, "Variable '%s' has not been assigned a value.\n",
                v->name );
@@ -1066,10 +1067,10 @@ vars_exist( Var_T * v )
     Var_T *lp;
 
     if ( v->flags & ON_STACK )
-        for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
+        for ( lp = EDL.Var_Stack; lp && lp != v; lp = lp->next )
             /* empty */ ;
     else
-        for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
+        for ( lp = EDL.Var_List; lp && lp != v; lp = lp->next )
             /* empty */ ;
 
     return lp == v;
@@ -1093,16 +1094,16 @@ vars_iter( Var_T * v )
 
     /* If called with a NULL argument just reset the iter array */
 
-    if ( v == NULL )
+    if ( ! v )
     {
-        if ( iter != NULL )
+        if ( iter )
             iter = T_free( iter );
         return NULL;
     }
 
     /* If this is the first call of a sequence set up the iter array */
 
-    if ( iter == NULL )
+    if ( ! iter )
     {
         iter = T_malloc( v->dim * sizeof *iter );
         for ( ssize_t i = 0; i < v->dim - 1; i++ )
@@ -1118,7 +1119,7 @@ vars_iter( Var_T * v )
        array when there were no more elements */
 
     void * ret;
-    if ( ( ret = vars_get_pointer( iter, 0, v ) ) == NULL )
+    if ( ! ( ret = vars_get_pointer( iter, 0, v ) ) )
     {
         iter = T_free( iter );
         return NULL;
@@ -1193,19 +1194,19 @@ vars_save_restore( bool flag )
     {
         fsc2_assert( ! exists_copy );                  /* don't save twice ! */
 
-        if ( EDL.Var_List == NULL )
+        if ( ! EDL.Var_List )
         {
             exists_copy = true;
             return;
         }
 
         ssize_t var_count;
-        for ( var_count = 0, src = EDL.Var_List; src != NULL; src = src->next )
+        for ( var_count = 0, src = EDL.Var_List; src; src = src->next )
             var_count++;
 
         cpy_area = T_malloc( var_count * sizeof *cpy_area );
 
-        for ( cpy = cpy_area, src = EDL.Var_List; src != NULL;
+        for ( cpy = cpy_area, src = EDL.Var_List; src;
               src = src->next, cpy++ )
         {
             memcpy( cpy, src, sizeof *src );
@@ -1257,22 +1258,21 @@ vars_save_restore( bool flag )
 
         /* Remove all sub-matrices that got created during the test run */
 
-        for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
+        for ( cpy = EDL.Var_List; cpy; cpy = cpy->next )
         {
-            if (    cpy->name == NULL
+            if (    ! cpy->name
                  || ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
                 continue;
 
             for ( ssize_t i = 0; i < cpy->len; i++ )
-                if (    cpy->val.vptr != NULL
+                if (    cpy->val.vptr
                      && ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
                     vars_free( cpy->val.vptr[ i ], true );
         }
 
         /* Reset all variables to what they were before the rest run */
 
-        for ( cpy = EDL.Var_List, src = cpy_area; cpy != NULL;
-              cpy = cpy->next, src++ )
+        for ( cpy = EDL.Var_List, src = cpy_area; cpy; cpy = cpy->next, src++ )
         {
             switch ( src->type )
             {

@@ -431,12 +431,12 @@
 # Set the optimization level
 
 OPTIMIZATION     ?= -O3 -march=native
-#OPTIMIZATION     := -O0 -march=native     # for release build
+#OPTIMIZATION     := -O0 -march=native    # for release build
 
 # Set the debug flags
 
 DEBUG_FLAGS      ?= -ggdb3
-#DEBUG_FLAGS      := -DNDEGUG               # for debug build
+#DEBUG_FLAGS      := -DNDEGUG             # for releasse build (typically avoid)
 
 
 

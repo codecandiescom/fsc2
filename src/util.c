@@ -48,18 +48,21 @@ char *
 get_string( const char * restrict fmt,
             ... )
 {
-    char *c = NULL;
+    char * str = NULL;
     size_t len = GET_STRING_TRY_LENGTH;
-    va_list ap;
     int wr;
 
+    va_list ap;
+    va_start( ap, fmt );
 
-    while ( 1 )
+    while ( true )
     {
-        c = T_realloc_or_free( c, len );
-        va_start( ap, fmt );
-        wr = vsnprintf( c, len, fmt, ap );
-        va_end( ap );
+        str = T_realloc_or_free( str, len );
+
+        va_list ap_cpy;
+        va_copy( ap_cpy, ap );
+        wr = vsnprintf( str, len, fmt, ap_cpy );
+        va_end( ap_cpy );
 
         if ( wr < 0 )         /* indicates not enough space with older glibs */
         {
@@ -76,12 +79,14 @@ get_string( const char * restrict fmt,
         break;
     }
 
+    va_end( ap );
+
     /* Trim the string down to the number of required characters */
 
     if ( ( size_t ) wr + 1 < len )
-        T_realloc_or_free( c, ( size_t ) wr + 1 );
+        str = T_realloc_or_free( str, wr + 1 );
 
-    return c;
+    return str;
 }
 
 
