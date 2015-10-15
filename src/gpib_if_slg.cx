@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 
 
 /*----------------------------------------------------------------*
@@ -78,20 +79,24 @@ static void  gpib_log_function_end( const char * function,
 static char *gpib_get_dev_name( int device );
 
 
-/*------------------------------------------------------------------------*/
-/* Local global variables                                                 */
-/*------------------------------------------------------------------------*/
+#define LOG_FUNCTION_START( x ) gpib_log_function_start( __func__, x )
+#define LOG_FUNCTION_END( x )   gpib_log_function_end( __func__, x )
 
 
-static int ll;                         /* log level                       */
-static int gpib_is_active = 0;         /* flag, set after initialization
-                                          of bus                          */
-static int controller;                 /* device number assigned to
-                                          controller                      */
-static int timeout;                    /* stores actual timeout period    */
-static FILE *gpib_log;                 /* file pointer of GPIB log file   */
+/*-------------------------------------------------------------------------*/
+/* Local global variables                                                  */
+/*-------------------------------------------------------------------------*/
+
+
+static int ll;                           /* log level                      */
+static int gpib_is_active = 0;           /* flag, set after initialization
+                                            of bus                         */
+static int controller;                   /* device number assigned to
+                                            controller                     */
+static int timeout;                      /* stores actual timeout period   */
+static FILE *gpib_log;                   /* file pointer of GPIB log file  */
 static GPIB_Dev_T *gpib_dev_list = NULL; /* list of symbolic names of
-                                            devices etc.                  */
+                                            devices etc.                   */
 
 
 /*-------------------------------------------------------------------------*
@@ -118,9 +123,6 @@ int
 gpib_init( const char * log_file_name,
            int          log_level )
 {
-    GPIB_Dev_T *cur_dev;
-
-
     if ( gpib_is_active )
         return SUCCESS;
 
@@ -150,13 +152,15 @@ gpib_init( const char * log_file_name,
 
         /* Get rid of the device list if it has already been created */
 
-        if ( gpib_dev_list != NULL )
+        if ( gpib_dev_list )
         {
+            GPIB_Dev_T * cur_dev;
+
             for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
                   cur_dev = cur_dev->next )
                 /* empty */ ;
 
-            while ( 1 )
+            while ( true )
             {
                 free( cur_dev->name );
                 if ( cur_dev->prev != NULL )
@@ -213,16 +217,13 @@ gpib_init_controller( void )
 int
 gpib_shutdown( void )
 {
-    GPIB_Dev_T *cur_dev;
-
-
     TEST_BUS_STATE;
 
-    for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
-          cur_dev = cur_dev->next )
+    GPIB_Dev_T * cur_dev;
+    for ( cur_dev = gpib_dev_list; cur_dev->next; cur_dev = cur_dev->next )
         /* empty */ ;
 
-    while ( 1 )
+    while ( true )
     {
         free( cur_dev->name );
         if ( cur_dev->prev != NULL )
@@ -265,9 +266,6 @@ gpib_shutdown( void )
 static void
 gpib_init_log( const char * log_file_name )
 {
-    const char *name;
-
-
     if ( ll == LL_NONE )
         return;
 
@@ -279,7 +277,7 @@ gpib_init_log( const char * log_file_name )
     }
     else
     {
-        name = log_file_name;
+        const char * name = log_file_name;
 
         if ( ( gpib_log = fopen( name, "w" ) ) == NULL )     /* open fails ? */
         {
@@ -309,11 +307,8 @@ int
 gpib_init_device( const char * device_name,
                   int        * dev )
 {
-    GPIB_Dev_T *cur_dev;
-
-
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_init_device", device_name );
+        LOG_FUNCTION_START( device_name );
 
     if ( ! gpib_is_active && strcmp( device_name, GPIB_CARD_NAME ) )
     {
@@ -322,13 +317,14 @@ gpib_init_device( const char * device_name,
         {
             gpib_log_date( );
             fprintf( gpib_log, "GPIB bus is not yet initialized\n" );
-            gpib_log_function_end( "gpib_init_device", device_name );
+            LOG_FUNCTION_END( device_name );
         }
         return FAILURE;
     }
 
     /* Append a new entry to the device list */
 
+    GPIB_Dev_T * cur_dev;
     if ( gpib_dev_list == NULL )
     {
         gpib_dev_list = cur_dev = malloc( sizeof *cur_dev );
@@ -342,7 +338,7 @@ gpib_init_device( const char * device_name,
                 gpib_log_date( );
                 fprintf( gpib_log, "Running out of memory in "
                          "gpib_init_device()\n" );
-                gpib_log_function_end( "gpib_init_device", device_name );
+                LOG_FUNCTION_END( device_name );
             }
 
             return FAILURE;
@@ -367,7 +363,7 @@ gpib_init_device( const char * device_name,
                 gpib_log_date( );
                 fprintf( gpib_log, "Running out of memory in "
                          "gpib_init_device()\n" );
-                gpib_log_function_end( "gpib_init_device", device_name );
+                LOG_FUNCTION_END( device_name );
             }
 
             return FAILURE;
@@ -391,7 +387,7 @@ gpib_init_device( const char * device_name,
             gpib_log_date( );
             fprintf( gpib_log, "Running out of memory in "
                      "gpib_init_device()\n" );
-            gpib_log_function_end( "gpib_init_device", device_name );
+            LOG_FUNCTION_END( device_name );
         }
 
         return FAILURE;
@@ -424,7 +420,7 @@ gpib_init_device( const char * device_name,
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_init_device", device_name );
+        LOG_FUNCTION_END( device_name );
 
     *dev = cur_dev->number;
     return SUCCESS;
@@ -437,14 +433,12 @@ gpib_init_device( const char * device_name,
 int
 gpib_remove_device( int device )
 {
-    GPIB_Dev_T *cur_dev = gpib_dev_list;
-
-
+    GPIB_Dev_T * cur_dev = gpib_dev_list;
     while ( cur_dev != NULL && cur_dev->number != device )
         cur_dev = cur_dev->next;
 
-    if ( ll > LL_NONE )
-        gpib_log_function_start( "gpib_remove_device", cur_dev->name );
+    if ( ll > LL_NONE && cur_dev )
+        LOG_FUNCTION_START( cur_dev->name );
 
     if ( ! cur_dev )
     {
@@ -456,7 +450,6 @@ gpib_remove_device( int device )
             gpib_log_date( );
             fprintf( gpib_log, "Call of gpib_remove_device() for unknown "
                      "device (device number %d)\n", device );
-            gpib_log_function_end( "gpib_remove_device", NULL );
         }
 
         return FAILURE;
@@ -466,13 +459,14 @@ gpib_remove_device( int device )
         cur_dev->prev->next = cur_dev->next;
     if ( cur_dev->next )
         cur_dev->next->prev = cur_dev->prev;
+
+    if ( ll > LL_NONE )
+        LOG_FUNCTION_END( cur_dev->name );
+
     free( cur_dev->name );
     free( cur_dev );
 
     ibsta &= ~IBERR;
-
-    if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_remove_device", NULL );
 
     return SUCCESS;
 }
@@ -484,10 +478,8 @@ gpib_remove_device( int device )
 int
 gpib_local( int device )
 {
-    char *dev_name;
-
-
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_local() for unknown device "
                  "(device number %d)", device );
@@ -504,7 +496,7 @@ gpib_local( int device )
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_start( "gpib_local", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     ibloc( device );
 
@@ -518,14 +510,14 @@ gpib_local( int device )
             gpib_log_date( );
             fprintf( gpib_log, "Can't bring device %s into local mode, "
                      "ibsta = 0x%x\n", dev_name, ibsta );
-            gpib_log_function_end( "gpib_local", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_local", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -554,16 +546,15 @@ int
 gpib_timeout( int device,
               int period )
 {
-    char *dev_name;
     const char tc[ ][ 9 ] = { "infinity", "10us", "30us", "100us",
                               "300us", "1ms", "3ms", "10ms", "30ms",
                               "100ms", "300ms", "1s", "3s", "10s",
                               "30s", "100s", "300s", "1000s" };
 
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_timeout() for unknown device "
                  "(device number %d)", device );
@@ -580,7 +571,7 @@ gpib_timeout( int device,
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_timeout", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     if ( period < TNONE )        /* check validity of parameter */
         period = TNONE;
@@ -607,7 +598,7 @@ gpib_timeout( int device,
             gpib_log_date( );
             fprintf( gpib_log, "Can't set timeout period for device %s, "
                      "ibsta = 0x%x\n", dev_name, ibsta );
-            gpib_log_function_end( "gpib_timeout", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
@@ -616,7 +607,7 @@ gpib_timeout( int device,
     timeout = period;          /* store actual value of timeout period */
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_timeout", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -634,12 +625,10 @@ gpib_timeout( int device,
 int
 gpib_clear_device( int device )
 {
-    char *dev_name;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_clear_device() for unknown "
                  "device (device number %d)", device );
@@ -656,7 +645,7 @@ gpib_clear_device( int device )
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_clear_device", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     ibclr( device );
 
@@ -670,14 +659,14 @@ gpib_clear_device( int device )
             gpib_log_date( );
             fprintf( gpib_log, "Can't clear device %s, ibsta = 0x%x\n",
                      dev_name, ibsta );
-            gpib_log_function_end( "gpib_clear_device", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_clear_device", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -695,12 +684,10 @@ gpib_clear_device( int device )
 int
 gpib_trigger( int device )
 {
-    char *dev_name;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_trigger() for unknown device "
                  "(device number %d)", device );
@@ -717,7 +704,7 @@ gpib_trigger( int device )
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_trigger", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     ibtrg( device );
 
@@ -731,14 +718,14 @@ gpib_trigger( int device )
             gpib_log_date( );
             fprintf( gpib_log, "Can't trigger device %s, ibsta = 0x%x\n",
                      dev_name, ibsta );
-            gpib_log_function_end( "gpib_trigger", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_trigger", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -768,13 +755,10 @@ gpib_wait( int   device,
            int   mask,
            int * status )
 {
-    int old_timeout = timeout;
-    char *dev_name;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_wait() for unknown device "
                  "(device number %d)", device );
@@ -791,7 +775,7 @@ gpib_wait( int   device,
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_wait", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     if ( ll > LL_ERR )
     {
@@ -813,6 +797,7 @@ gpib_wait( int   device,
     if ( status != NULL )
         *status = ibsta;
 
+    int old_timeout = timeout;
     if ( ! ( mask & TIMO ) && old_timeout != TNONE )
         gpib_timeout( device, old_timeout );
 
@@ -826,7 +811,7 @@ gpib_wait( int   device,
             gpib_log_date( );
             fprintf( gpib_log, "Can't wait for device %s, ibsta = 0x%x\n",
                      dev_name, ibsta );
-            gpib_log_function_end( "gpib_wait", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
         return FAILURE;
     }
@@ -835,7 +820,7 @@ gpib_wait( int   device,
     {
         gpib_log_date( );
         fprintf( gpib_log, "wait return status = 0x0%X\n", ibsta );
-        gpib_log_function_end( "gpib_wait", dev_name );
+        LOG_FUNCTION_END( dev_name );
     }
 
     return SUCCESS;
@@ -857,13 +842,10 @@ gpib_write( int          device,
             const char * buffer,
             long         length )
 {
-    char     * dev_name;
-    char     * buf;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char     * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_write() for unknown device "
                  "(device number %d)", device );
@@ -880,7 +862,7 @@ gpib_write( int          device,
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_write", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     if ( length <= 0 )           /* check validity of length parameter */
     {
@@ -891,13 +873,14 @@ gpib_write( int          device,
             gpib_log_date( );
             fprintf( gpib_log, "Error in in call of gpib_write(): "
                                "Invalid parameter: %ld bytes\n", length );
-            gpib_log_function_end( "gpib_write", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
-    if ( ( buf = malloc( length + 1 ) ) == NULL )
+    char * buf = malloc( length + 1 );
+    if ( ! buf )
     {
         strcpy( gpib_error_msg, "Running out of memory in gpib_write()" );
 
@@ -905,7 +888,7 @@ gpib_write( int          device,
         {
             gpib_log_date( );
             fprintf( gpib_log, "Running out of memory in gpib_write()\n" );
-            gpib_log_function_end( "gpib_write", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
@@ -931,14 +914,14 @@ gpib_write( int          device,
             gpib_log_date( );
             fprintf( gpib_log, "Can't send data to device %s, ibsta = 0x%x\n",
                      dev_name, ibsta );
-            gpib_log_function_end( "gpib_write", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_write", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -984,13 +967,10 @@ gpib_read( int    device,
            char * buffer,
            long * length )
 {
-    long       expected = *length;
-    char     * dev_name;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_read() for unknown device "
                  "(device number %d)", device );
@@ -1008,7 +988,7 @@ gpib_read( int    device,
 
     if ( ll > LL_ERR )
     {
-        gpib_log_function_start( "gpib_read", dev_name );
+        LOG_FUNCTION_START( dev_name );
         fprintf( gpib_log, "-> Expecting up to %ld bytes\n", *length );
         fflush( gpib_log );
     }
@@ -1022,12 +1002,13 @@ gpib_read( int    device,
             gpib_log_date( );
             fprintf( gpib_log, "Error in call of gpib_read(): "
                                "Invalid parameter: %ld bytes\n", *length );
-            gpib_log_function_end( "gpib_read", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
     }
 
+    long expected = *length;
     ibrd( device, buffer, expected );
     *length = ibcnt;
 
@@ -1041,7 +1022,7 @@ gpib_read( int    device,
             gpib_log_date( );
             fprintf( gpib_log, "Can't read data from device %s, ibsta = "
                      "0x%x\n", dev_name, ibsta );
-            gpib_log_function_end( "gpib_read", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
@@ -1082,7 +1063,7 @@ gpib_read_end( const char * dev_name,
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_end( "gpib_read", dev_name );
+        LOG_FUNCTION_END( dev_name );
 }
 
 
@@ -1093,12 +1074,10 @@ int
 gpib_serial_poll( int             device,
                   unsigned char * stb )
 {
-    char     * dev_name;
-
-
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    char * dev_name = gpib_get_dev_name( device );
+    if ( ! dev_name )
     {
         sprintf( gpib_error_msg, "Call of gpib_serial_poll() for unknown "
                  "device (device number %d)", device );
@@ -1115,7 +1094,7 @@ gpib_serial_poll( int             device,
     }
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_serial_poll", dev_name );
+        LOG_FUNCTION_START( dev_name );
 
     ibrsp( device, ( char * ) stb );
 
@@ -1129,7 +1108,7 @@ gpib_serial_poll( int             device,
             gpib_log_date( );
             fprintf( gpib_log, "Can't serial poll device %s, "
                      "gpib_status = 0x%x\n", dev_name, ibsta );
-            gpib_log_function_end( "gpib_serial_poll", dev_name );
+            LOG_FUNCTION_END( dev_name );
         }
 
         return FAILURE;
@@ -1142,7 +1121,7 @@ gpib_serial_poll( int             device,
     }
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_serial_poll", dev_name );
+        LOG_FUNCTION_END( dev_name );
 
     return SUCCESS;
 }
@@ -1155,16 +1134,15 @@ gpib_serial_poll( int             device,
 static void
 gpib_log_date( void )
 {
+    time_t t = time( NULL );
+
     char tc[ 26 ];
-    struct timeb mt;
-    time_t t;
-
-
-    t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
     tc[ 10 ] = '\0';
     tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
+
+    struct timeb mt;
     ftime( &mt );
     fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
 }
@@ -1190,7 +1168,6 @@ gpib_log_error( const char * type )
                                  "EDMA", "",     "EOIP", "ECAP",
                                  "EFSO", "",     "EBUS", "ESTB",
                                  "ESRQ" };
-
 
     gpib_log_date( );
     fprintf( gpib_log, "Error in function %s(): <", type );
@@ -1257,9 +1234,7 @@ gpib_log_function_end( const char * function,
 static char *
 gpib_get_dev_name( int device )
 {
-    GPIB_Dev_T *cur_dev = gpib_dev_list;
-
-
+    GPIB_Dev_T * cur_dev = gpib_dev_list;
     while ( cur_dev != NULL && cur_dev->number != device )
         cur_dev = cur_dev->next;
 
@@ -1274,13 +1249,11 @@ void
 gpib_log_message( const char * fmt,
                   ... )
 {
-    va_list ap;
-
-
     if ( gpib_log == NULL || ll == LL_NONE )
         return;
 
     gpib_log_date( );
+    va_list ap;
     va_start( ap, fmt );
     vfprintf( gpib_log, fmt, ap );
     va_end( ap );

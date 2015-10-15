@@ -59,6 +59,9 @@ static void open_serial_log( int sn );
 
 static void close_serial_log( int sn );
 
+#define LOG_FUNCTION_START( x ) fsc2_serial_log_function_start( x, __func__ )
+#define LOG_FUNCTION_END( x )   fsc2_serial_log_function_end( x, __func__ )
+
 
 /*-------------------------------------------------------------------*
  * This function must be called by device modules that need a serial
@@ -340,7 +343,7 @@ fail_on_open( int          sn,
                              "%s in function fsc2_serial_open()\n", mess,
                              Serial_Ports[ sn ].dev_file,
                              Serial_Ports[ sn ].dev_name );
-    fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+    LOG_FUNCTION_END( sn );
 
     errno = stored_errno;
     return NULL;
@@ -389,7 +392,7 @@ fsc2_serial_open( int sn,
         THROW( EXCEPTION );
     }
 
-    fsc2_serial_log_function_start( sn, "fsc2_serial_open" );
+    LOG_FUNCTION_START( sn );
 
     /* First make sure we have a lock for the device file */
 
@@ -397,7 +400,7 @@ fsc2_serial_open( int sn,
     {
         fsc2_serial_log_message( sn, "Don't hold lock Serial port '%s' for "
                                  "module\n", Serial_Ports[ sn ].dev_file );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+        LOG_FUNCTION_END( sn );
 
         print( FATAL, "Not holding a lock for serial port '%s' of module\n",
                Serial_Ports[ sn ].dev_file );
@@ -418,7 +421,7 @@ fsc2_serial_open( int sn,
             lower_permissions( );
             fsc2_serial_log_message( sn, "Serial port for module is already "
                                      "open\n" );
-            fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+            LOG_FUNCTION_END( sn );
             return &Serial_Ports[ sn ].new_tio;
         }
         else
@@ -487,7 +490,7 @@ fsc2_serial_open( int sn,
     fsc2_serial_log_message( sn, "Successfully opened serial port '%s' for "
                              "device %s\n", Serial_Ports[ sn ].dev_file,
                              Serial_Ports[ sn ].dev_name );
-    fsc2_serial_log_function_end( sn, "fsc2_serial_open" );
+    LOG_FUNCTION_END( sn );
 
     return &Serial_Ports[ sn ].new_tio;
 }
@@ -517,7 +520,7 @@ fsc2_serial_close( int sn )
         THROW( EXCEPTION );
     }
 
-    fsc2_serial_log_function_start( sn, "fsc2_serial_close" );
+    LOG_FUNCTION_START( sn );
 
     /* If device file is open flush the port, reset the settings back to the
        original state and close the device file */
@@ -533,7 +536,7 @@ fsc2_serial_close( int sn )
         Serial_Ports[ sn ].is_open = false;
         fsc2_serial_log_message( sn, "Closed serial port '%s'\n",
                                  Serial_Ports[ sn ].dev_file );
-        fsc2_serial_log_function_end( sn, "fsc2_serial_close" );
+        LOG_FUNCTION_END( sn );
     }
 
     /* Relase the lock on the device file */
@@ -605,19 +608,19 @@ fsc2_serial_write( int          sn,
         THROW( EXCEPTION );
     }
 
-    fsc2_serial_log_function_start( sn, "fsc2_serial_write" );
+    LOG_FUNCTION_START( sn );
 
     if ( ll == LL_ALL )
     {
         if ( us_wait == 0 )
-            fsc2_serial_log_message( sn, "Expect to write %ld bytes without "
+            fsc2_serial_log_message( sn, "%ld bytes to write without "
                                      "delay:\n%.*s\n", ( long int ) count,
                                      ( int ) count, buf );
         else if ( us_wait < 0 )
-            fsc2_serial_log_message( sn, "Expect to write %ld bytes:\n%.*s\n",
+            fsc2_serial_log_message( sn, "%ld bytes to write:\n%.*s\n",
                                      ( long int ) count, ( int ) count, buf );
         else
-            fsc2_serial_log_message( sn, "Expect to write %ld bytes within %ld "
+            fsc2_serial_log_message( sn, "%ld bytes to write within %ld "
                                      "ms:\n%.*s\n", ( long int ) count,
                                      us_wait / 1000, ( int ) count, buf );
     }
@@ -650,7 +653,7 @@ fsc2_serial_write( int          sn,
                 {
                     fsc2_serial_log_message( sn, "Error: select() returned "
                                              "value indicating an error\n" );
-                    fsc2_serial_log_function_end( sn, "fsc2_serial_write" );
+                    LOG_FUNCTION_END( sn );
                     lower_permissions( );
                     return -1;
                 }
@@ -667,14 +670,14 @@ fsc2_serial_write( int          sn,
 
                 fsc2_serial_log_message( sn, "Error: select() aborted due to "
                                          "the receipt of a signal\n" );
-                fsc2_serial_log_function_end( sn, "fsc2_serial_write" );
+                LOG_FUNCTION_END( sn );
                 lower_permissions( );
                 return 0;
 
             case 0 :
                 fsc2_serial_log_message( sn, "Error: writing aborted due to "
                                          "timeout\n" );
-                fsc2_serial_log_function_end( sn, "fsc2_serial_write" );
+                LOG_FUNCTION_END( sn );
                 lower_permissions( );
                 return 0;
         }
@@ -701,7 +704,7 @@ fsc2_serial_write( int          sn,
 
     lower_permissions( );
 
-    fsc2_serial_log_function_end( sn, "fsc2_serial_write" );
+    LOG_FUNCTION_END( sn );
 
     return write_count;
 }
@@ -769,7 +772,7 @@ fsc2_serial_read( int          sn,
         THROW( EXCEPTION );
     }
 
-    fsc2_serial_log_function_start( sn, "fsc2_serial_read" );
+    LOG_FUNCTION_START( sn );
 
     size_t term_len = term ? strlen( term ) : 0;
 
@@ -778,29 +781,29 @@ fsc2_serial_read( int          sn,
         if ( ! term_len )
         {
             if ( still_to_wait == 0 )
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "without delay\n", ( long ) count,
                                          sn );
             else if ( still_to_wait < 0 )
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes\n",
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read\n",
                                          ( long ) count, sn );
             else
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "within %ld ms\n", ( long ) count,
                                          still_to_wait / 1000, sn );
         }
         else
         {
             if ( still_to_wait == 0 )
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "or until '%s' is received without "
                                          "delay\n", ( long ) count, term, sn );
             else if ( still_to_wait < 0 )
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "or until '%s' is received\n",
                                          ( long ) count, term, sn );
             else
-                fsc2_serial_log_message( sn, "Expect to read up to %ld bytes "
+                fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "within %ld ms or until '%s' is "
                                          "received\n", ( long ) count,
                                          still_to_wait / 1000, term, sn );
@@ -848,7 +851,7 @@ fsc2_serial_read( int          sn,
                     fsc2_serial_log_message( sn, "Error: select() returned "
                                              "value indicating error in "
                                              "fsc2_serial_read()\n" );
-                    fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
+                    LOG_FUNCTION_END( sn );
                     return -1;
                 }
 
@@ -871,7 +874,7 @@ fsc2_serial_read( int          sn,
 
                 fsc2_serial_log_message( sn, "Error: select() call aborted "
                                          "due to receipt of signal\n" );
-                fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
+                LOG_FUNCTION_END( sn );
                 return 0;
             }
             else if ( ret == 0 )
@@ -880,7 +883,7 @@ fsc2_serial_read( int          sn,
                 {
                     fsc2_serial_log_message( sn, "Error: reading aborted due "
                                              "to timeout\n" );
-                    fsc2_serial_log_function_end( sn, "fsc2_serial_write" );
+                    LOG_FUNCTION_END( sn );
                     return 0;
                 }
                 else
@@ -942,8 +945,7 @@ fsc2_serial_read( int          sn,
                                          "indicating error in "
                                          "fsc2_serial_read()\n" );
 
-            fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
-
+            LOG_FUNCTION_END( sn );
             return errno == EINTR ? 0 : -1;
         }
 
@@ -979,7 +981,7 @@ fsc2_serial_read( int          sn,
             fsc2_serial_log_message( sn, "Read 0 bytes\n" );
     }
 
-    fsc2_serial_log_function_end( sn, "fsc2_serial_read" );
+    LOG_FUNCTION_END( sn );
 
     return total_count;
 }

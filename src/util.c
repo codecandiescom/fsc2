@@ -121,10 +121,7 @@ void *
 get_memcpy( const void * array,
             size_t       size )
 {
-    void *new_mem;
-
-
-    new_mem = T_malloc( size );
+    void * new_mem = T_malloc( size );
     memcpy( new_mem, array, size );
     return new_mem;
 }
@@ -140,16 +137,11 @@ get_memcpy( const void * array,
 char *
 correct_line_breaks( char * str )
 {
-    char *p1 = str,
-         *p2;
-
-
-    while ( ( p1 = strstr( p1, "\\n" ) ) )
+    char * p = str;
+    while ( ( p = strstr( p, "\\n" ) ) )
     {
-        p2 = p1++;
-        *p2 = '\n';
-        while ( *++p2 )
-            *p2 = *( p2 + 1 );
+        *p++ = '\n';
+        memmove( p, p + 1, strlen( p ) );
     }
 
     return str;
@@ -164,9 +156,7 @@ correct_line_breaks( char * str )
 const char *
 strip_path( const char * path )
 {
-    char *cp;
-
-
+    char * cp;
     if ( ! ( cp = strrchr( path, '/' ) ) )
         return path;
     else
@@ -201,23 +191,19 @@ long
 get_file_length( FILE * restrict fp,
                  int  * restrict len )
 {
-    char *cur,
-         *end,
-         buffer[ 4096 ];
-    int fd;
-    long i,
-         lines = 0;
-    bool is_char = false;
-    ssize_t bytes_read;
-
-
-    if ( ( fd = fileno( fp ) ) == -1 )
+    int fd = fileno( fp );
+    if ( fd == -1 )
          return -1;
+
+    ssize_t bytes_read;
+    char buffer[ 4096 ];
+    long lines = 0;
+    bool is_char = false;
 
     while ( ( bytes_read = read( fd, buffer, 4096 ) ) > 0 )
     {
-        cur = buffer;
-        end = buffer + bytes_read;
+        char * cur = buffer;
+        char * end = buffer + bytes_read;
 
         while ( cur < end )
         {
@@ -244,7 +230,8 @@ get_file_length( FILE * restrict fp,
 
     /* Count number of digits of number of lines */
 
-    for ( i = lines, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
+    *len = 1;
+    for ( long i = lines; ( i /= 10 ) > 0; ++*len )
         /* empty */ ;
 
     return lines;
@@ -278,18 +265,15 @@ eprint( int          severity,
         const char * fmt,
         ... )
 {
-    char buffer[ FL_BROWSER_LINELENGTH + 1 ];
-    char *cp = buffer;
-    int space_left = FL_BROWSER_LINELENGTH;
-    int count;
-    va_list ap;
-
-
     if ( severity != NO_ERROR )
         EDL.compilation.error[ severity ] += 1;
 
     if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
     {
+        char buffer[ FL_BROWSER_LINELENGTH + 1 ];
+        char * cp = buffer;
+        int space_left = FL_BROWSER_LINELENGTH;
+
         if ( severity == FATAL )
         {
             strcpy( buffer, "@C1@f" );
@@ -311,8 +295,8 @@ eprint( int          severity,
 
         if ( space_left > 0 && print_fl && EDL.Fname )
         {
-            count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-                              EDL.Fname, EDL.Lc );
+            int count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+                                  EDL.Fname, EDL.Lc );
             space_left -= count;
             cp += count;
         }
@@ -321,6 +305,7 @@ eprint( int          severity,
             strcpy( buffer, "Message too long to be displayed!\n" );
         else
         {
+            va_list ap;
             va_start( ap, fmt );
             vsnprintf( cp, ( size_t ) space_left, fmt, ap );
             va_end( ap );
@@ -354,6 +339,7 @@ eprint( int          severity,
             fprintf( severity == NO_ERROR ? stdout : stderr,
                      "%s:%ld: ", EDL.Fname, EDL.Lc );
 
+        va_list ap;
         va_start( ap, fmt );
         vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
         va_end( ap );
@@ -376,18 +362,15 @@ print( int          severity,
        const char * fmt,
        ... )
 {
-    char buffer[ FL_BROWSER_LINELENGTH + 1 ];
-    char *cp = buffer;
-    int space_left = FL_BROWSER_LINELENGTH;
-    int count;
-    va_list ap;
-
-
     if ( severity != NO_ERROR )
         EDL.compilation.error[ severity ] += 1;
 
     if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
     {
+        char buffer[ FL_BROWSER_LINELENGTH + 1 ];
+        char *cp = buffer;
+        int space_left = FL_BROWSER_LINELENGTH;
+
         if ( severity == FATAL )
         {
             strcpy( buffer, "@C1@f" );
@@ -412,8 +395,8 @@ print( int          severity,
 
         if ( space_left > 0 && ! Fsc2_Internals.in_hook && EDL.Fname )
         {
-            count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-                              EDL.Fname, EDL.Lc );
+            int count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+                                  EDL.Fname, EDL.Lc );
             space_left -= count;
             cp += count;
         }
@@ -426,8 +409,8 @@ print( int          severity,
             {
                 if ( EDL.Call_Stack->dev_name )
                 {
-                    count = snprintf( cp, ( size_t ) space_left, "%s: ",
-                                      EDL.Call_Stack->dev_name );
+                    int count = snprintf( cp, ( size_t ) space_left, "%s: ",
+                                          EDL.Call_Stack->dev_name );
                     space_left -= count;
                     cp += count;
                 }
@@ -436,16 +419,16 @@ print( int          severity,
             {
                 if ( EDL.Call_Stack->f->device )
                 {
-                    count = snprintf( cp, ( size_t ) space_left, "%s: ",
-                                      EDL.Call_Stack->f->device->name );
+                    int count = snprintf( cp, ( size_t ) space_left, "%s: ",
+                                          EDL.Call_Stack->f->device->name );
                     space_left -= count;
                     cp += count;
                 }
 
                 if ( EDL.Call_Stack->f->name )
                 {
-                    count = snprintf( cp, ( size_t ) space_left, "%s(): ",
-                                      EDL.Call_Stack->f->name );
+                    int count = snprintf( cp, ( size_t ) space_left, "%s(): ",
+                                          EDL.Call_Stack->f->name );
                     space_left -= count;
                     cp += count;
                 }
@@ -456,6 +439,7 @@ print( int          severity,
             strcpy( buffer, "Message too long to be printed!\n" );
         else
         {
+            va_list ap;
             va_start( ap, fmt );
             vsnprintf( cp, ( size_t ) space_left, fmt, ap );
             va_end( ap );
@@ -509,6 +493,7 @@ print( int          severity,
             }
         }
 
+        va_list ap;
         va_start( ap, fmt );
         vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
         va_end( ap );
@@ -530,7 +515,7 @@ void
 raise_permissions( void )
 {
     if (    seteuid( Fsc2_Internals.EUID )
-            || setegid( Fsc2_Internals.EGID ) )
+         || setegid( Fsc2_Internals.EGID ) )
     {
         print( FATAL, "Failed to raise permissions as required.\n" );
         THROW( EXCEPTION );
@@ -563,13 +548,13 @@ lower_permissions( void )
 char *
 handle_escape( char * str )
 {
-    char *cp = str;
-    size_t esc_len;
-
-
     fsc2_assert( str != NULL );
 
+    char * cp = str;
     while ( ( cp = strchr( cp, '\\' ) ) )
+    {
+        size_t esc_len;
+
         switch ( *( cp + 1 ) )
         {
             case '\0' :
@@ -687,6 +672,7 @@ handle_escape( char * str )
                 memmove( cp, cp + esc_len, strlen( cp + esc_len ) + 1 );
                 break;
         }
+    }
 
     return str;
 }
@@ -706,16 +692,9 @@ filter_edl( const char * restrict name,
             FILE       * restrict fp,
             int        * restrict serr )
 {
-    int pd[ 2 ];
-    int ed[ 2 ];
-    int pdt[ 2 ];
-    fd_set rfds;
-    int rs;
-    char c = '\0';
-
-
     /* The first set of pipes is needed to read the output of 'fsc2_clean' */
 
+    int pd[ 2 ];
     if ( pipe( pd ) == -1 )
     {
         if ( errno == EMFILE || errno == ENFILE )
@@ -724,6 +703,7 @@ filter_edl( const char * restrict name,
         return NULL;
     }
 
+    int ed[ 2 ];
     if ( pipe( ed ) == -1 )
     {
         close( pd[ 0 ] );
@@ -744,6 +724,7 @@ filter_edl( const char * restrict name,
        return value which we still need to figure out if 'fsc2_clean' did
        exit successfully. */
 
+    int pdt[ 2 ];
     if ( pipe( pdt ) == -1 )
     {
         close( pd[ 0 ] );
@@ -774,11 +755,13 @@ filter_edl( const char * restrict name,
 
     if ( Fsc2_Internals.fsc2_clean_pid == 0 )
     {
-        /* First of all things wait for a single char from the parent, it
-           doesn't matter what get written, we need just to know that the
-           parent has run and thus knows about the childs PID. */
+        /* First of all wait for a single char from the parent, it doesn't
+           matter which, we need just to know that the parent has run and
+           thus knows about the childs PID. */
 
         close( pdt[ 1 ] );
+
+        char c;
         while ( read( pdt[ 0 ], &c, 1 ) < 1 )
             /* empty */ ;
         close( pdt[ 0 ] );
@@ -852,6 +835,7 @@ filter_edl( const char * restrict name,
        single byte to the child so it knows we have its PID. */
 
     close( pdt[ 0 ] );
+    char c = '0';
     ssize_t dummy = write( pdt[ 1 ], &c, 1 );
     close( pdt[ 1 ] );
 
@@ -865,8 +849,11 @@ filter_edl( const char * restrict name,
     /* Wait until the child process had a chance to write to the pipe. If the
        parent is too fast in trying to read on it it only may see an EOF. */
 
+    fd_set rfds;
     FD_ZERO( &rfds );
     FD_SET( pd[ 0 ], &rfds );
+    int rs;
+
     while (    ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
             && errno == EINTR )
         /* empty */ ;
@@ -903,15 +890,14 @@ int
 fsc2_usleep( unsigned long us_dur,
              bool          quit_on_signal )
 {
-    struct timespec req, rem;
-    int ret;
-
-
+    struct timespec req;
     req.tv_sec = ( time_t ) us_dur / 1000000L;
     req.tv_nsec = ( us_dur % 1000000L ) * 1000;
 
+    int ret;
     do
     {
+        struct timespec rem;
         ret = nanosleep( &req, &rem );
         req = rem;
     } while ( ! quit_on_signal && ret == -1 && errno == EINTR );
@@ -982,16 +968,13 @@ is_in( const char  * restrict supplied_in,
  *------------------------------------------------------------------------*/
 
 void
-i2rgb( double    h,
+i2rgb( double   h,
        int    * rgb )
 {
-    int i, j;
-    double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
-    int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },     /* RED   */
-                        {   0,  32, 233, 255, 233,  32,   0 },     /* GREEN */
-                        { 191, 255, 233,  32,   0,   0,   0 } };   /* BLUE  */
-    double scale;
-
+    static double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
+    static int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },   // RED
+                               {   0,  32, 233, 255, 233,  32,   0 },   // GREEN
+                               { 191, 255, 233,  32,   0,   0,   0 } }; // BLUE
 
     if ( h < p[ 0 ] )           /* return very dark blue for values below 0 */
     {
@@ -1001,13 +984,13 @@ i2rgb( double    h,
         return;
     }
 
-    for ( i = 0; i < 6; i++ )
+    for ( int i = 0; i < 6; i++ )
     {
         if ( p[ i ] == p[ i + 1 ] || h > p[ i + 1 ] )
             continue;
 
-        scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
-        for ( j = RED; j <= BLUE; j++ )
+        double scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
+        for ( int j = RED; j <= BLUE; j++ )
             rgb[ j ] = irnd( v[ j ][ i ]
                              + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
         return;
@@ -1027,13 +1010,11 @@ i2rgb( double    h,
 void
 create_colors( void )
 {
-    FL_COLOR i;
-    int rgb[ 3 ];
-
-
     /* Create the colours between blue and red */
 
-    for ( i = 0; i < NUM_COLORS; i++ )
+    int rgb[ 3 ];
+
+    for ( FL_COLOR i = 0; i < NUM_COLORS; i++ )
     {
         i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
         fl_mapcolor( i + FL_FREE_COL1,
@@ -1060,8 +1041,6 @@ Var_T *
 convert_to_channel_number( const char * channel_name )
 {
     long channel;
-
-
     for ( channel = 0; channel < NUM_CHANNEL_NAMES; channel++ )
         if ( ! strcmp( channel_name, Channel_Names[ channel ] ) )
             break;
@@ -1331,19 +1310,18 @@ fsc2_simplex_is_minimum( int      n,
                          double * y,
                          double   epsilon )
 {
-    int i;                      /* counter */
-    double yq,                  /* sum of function values */
-           yq_2,                /* Sum of squares of function values */
-           dev;                 /* standard error of fucntion values */
+    double yq   = 0.0,          /* sum of function values */
+           yq_2 = 0.0;          /* Sum of squares of function values */
 
-
-    for ( yq = 0.0, yq_2 = 0.0, i = 0; i < n; i++ )
+    for ( int i = 0; i < n; i++ )
     {
         yq += y[ i ];
         yq_2 += y[ i ] * y[ i ];
     }
 
-    dev = sqrt( ( yq_2 - yq * yq / n ) /  ( n - 1 ) );
+    /* standard error of fucntion values */
+
+    double dev = sqrt( ( yq_2 - yq * yq / n ) /  ( n - 1 ) );
 
     return dev * n / fabs( yq ) < epsilon;
 }
@@ -1359,14 +1337,13 @@ read_line( int    fd,
            void * vptr,
            size_t max_len )
 {
-    ssize_t n,
-            rc;
-    char c,
-         *ptr = vptr;
-
+    ssize_t n;
+    char *ptr = vptr;
 
     for ( n = 1; n < ( ssize_t ) max_len; n++ )
     {
+        char c;
+        ssize_t rc;
         if ( ( rc = do_read( fd, &c ) ) == 1 )
         {
             *ptr++ = c;
@@ -1401,7 +1378,6 @@ do_read( int    fd,
     static char *read_ptr;
     static char read_buf[ MAX_LINE_LENGTH ];
 
-
     if ( read_cnt <= 0 )
     {
       again:
@@ -1433,13 +1409,13 @@ writen( int          fd,
         const void * vptr,
         size_t       n )
 {
-    size_t nleft = n;
-    ssize_t nwritten;
     const char *ptr = vptr;
-
+    size_t nleft = n;
 
     while ( nleft > 0 )
     {
+        ssize_t nwritten;
+
         if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
         {
             if ( errno == EINTR )
@@ -1467,13 +1443,10 @@ fsc2_show_fselector( const char * message,
                      const char * pattern,
                      const char * def_name )
 {
-    const char *ret;
-
-
     if ( dir && ! *dir )
         dir = NULL;
 
-    ret = fl_show_fselector( message, dir, pattern, def_name );
+    const char * ret = fl_show_fselector( message, dir, pattern, def_name );
 
     /* Save the possibly new setting to the configuration file */
 
@@ -1491,27 +1464,24 @@ fsc2_show_fselector( const char * message,
 char *
 fsc2_fline( FILE * fp )
 {
-    char * volatile line;
-    char * volatile p;
-    size_t volatile buf_len;
-    size_t volatile rem_len;
-    size_t len = 0;
-    size_t offset;
 
 
     if ( ! fp )
         THROW( EXCEPTION );
 
-    line = p = T_malloc( FGETS_START_LEN );
+    char * volatile line = T_malloc( FGETS_START_LEN );
+    char * volatile p = line;
     *line = '\0';
-    buf_len = rem_len = FGETS_START_LEN;
 
-    while ( 1 )
+    size_t volatile  buf_len = FGETS_START_LEN;
+    size_t volatile rem_len = buf_len;
+
+    while ( true )
     {
         if ( ! fgets( p, rem_len, fp ) || ! *p )
             break;
 
-        len = strlen( p );
+        size_t len = strlen( p );
 
         if ( p[ len - 1 ] == '\n' && p[ len - 2 ] != '\\' )
             break;
@@ -1522,7 +1492,7 @@ fsc2_fline( FILE * fp )
         rem_len -= len;
         p += len;
 
-        offset = p - line;
+        size_t offset = p - line;
 
         TRY
         {
@@ -1690,11 +1660,10 @@ get_form_position( FL_FORM * form,
 {
     int w,
         h;
-    int top = 0,
-        right = 0,
-        bottom = 0,
-        left = 0;
-
+    int top,
+        right,
+        bottom,
+        left;
 
     fl_get_wingeometry( form->window, x, y, &w, &h );
     get_decoration_sizes( form, &top, &right, &bottom, &left );
@@ -1723,17 +1692,14 @@ get_form_position( FL_FORM * form,
 void
 fsc2_save_conf( void )
 {
-    char *fname;
-    struct passwd *ue;
-    FILE *fp = NULL;
-
-
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return;
 
-    if ( ! ( ue = getpwuid( getuid( ) ) ) || ! ue->pw_dir || ! *ue->pw_dir )
+    struct passwd *ue = getpwuid( getuid( ) );
+    if ( ! ue || ! ue->pw_dir || ! *ue->pw_dir )
          return;
 
+    char * fname;
     TRY
     {
         fname = get_string( "%s/.fsc2/fsc2_config", ue->pw_dir );
@@ -1742,8 +1708,8 @@ fsc2_save_conf( void )
     OTHERWISE
         return;
 
-    if (    ! ( fp = fopen( fname, "w" ) )
-         || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, true ) )
+    FILE * fp = fopen( fname, "w" );
+    if ( ! fp || ! fsc2_obtain_fcntl_lock( fp, F_WRLCK, true ) )
     {
         if ( fp )
             fclose( fp );
@@ -1812,7 +1778,6 @@ get_pathmax( void )
 #else
     static long pathmax = 0;
 #endif
-
 
     if ( pathmax == 0 )
     {

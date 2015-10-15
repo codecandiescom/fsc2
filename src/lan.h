@@ -46,7 +46,7 @@
 typedef struct LAN_List LAN_List_T;
 
 struct LAN_List {
-    const char     * name;
+    char           * name;
     int              fd;
     struct in_addr   address;
     int              port;

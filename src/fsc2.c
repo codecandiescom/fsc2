@@ -497,9 +497,9 @@ no_gui_run( void )
     /* Read in the EDL file and analyze it */
 
     if (    ! scan_main( EDL.files->name, In_file_fp )
-         || EDL.compilation.error[ FATAL ]  != 0
+         || EDL.compilation.error[ FATAL  ] != 0
          || EDL.compilation.error[ SEVERE ] != 0
-         || EDL.compilation.error[ WARN ]   != 0 )
+         || EDL.compilation.error[ WARN   ] != 0 )
         exit( EXIT_FAILURE );
 
     /* Start the child process for running the experiment */

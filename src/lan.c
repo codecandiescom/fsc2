@@ -31,7 +31,7 @@
 
 /* Local variables */
 
-static LAN_List_T *lan_list = NULL;
+static LAN_List_T * lan_list = NULL;
 static volatile sig_atomic_t got_sigalrm;
 static int lan_log_level = LAN_LOG_LEVEL;
 
@@ -62,6 +62,8 @@ static void get_ip_address( const char     * address,
 
 static void fsc2_lan_log_date( FILE * fp );
 
+#define LOG_FUNCTION_START( x ) fsc2_lan_log_function_start( x, __func__ )
+#define LOG_FUNCTION_END( x )   fsc2_lan_log_function_end( x, __func__ )
 
 
 /*-----------------------------------------------------------*
@@ -77,19 +79,6 @@ fsc2_lan_open( const char * dev_name,
                long         us_timeout,
                bool         quit_on_signal )
 {
-    LAN_List_T *ll = lan_list;
-    FILE *log_fp;
-    int sock_fd;
-    struct sockaddr_in dev_addr;
-    int switch_on;
-    struct sigaction sact,
-                     old_sact;
-    struct itimerval wait_for_connect;
-    int conn_ret;
-    int ret;
-    socklen_t len;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -111,18 +100,20 @@ fsc2_lan_open( const char * dev_name,
 
     /* Try to open the log file */
 
-    log_fp = fsc2_lan_open_log( dev_name );
-    fsc2_lan_log_function_start( log_fp, "fsc2_lan_open" );
+    FILE * log_fp = fsc2_lan_open_log( dev_name );
+    LOG_FUNCTION_START( log_fp );
 
     /* Try to resolve the address we got from the caller */
 
+    struct sockaddr_in dev_addr;
     memset( &dev_addr, 0, sizeof dev_addr );
     get_ip_address( address, &dev_addr.sin_addr );
+
     if ( dev_addr.sin_addr.s_addr == 0 )
     {
-        fsc2_lan_log_message( log_fp,
-                              "Error: invalid IP address: %s\n", address );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        fsc2_lan_log_message( log_fp, "Error: invalid IP address: %s\n",
+                              address );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -134,7 +125,7 @@ fsc2_lan_open( const char * dev_name,
     {
         fsc2_lan_log_message( log_fp, "Error: invalid port number: %d\n",
                               port );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -142,11 +133,12 @@ fsc2_lan_open( const char * dev_name,
 
     /* Try to create a socket for a TCP connection */
 
-    if ( ( sock_fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
+    int sock_fd  = socket( AF_INET, SOCK_STREAM, 0 );
+    if ( sock_fd == -1 )
     {
         fsc2_lan_log_message( log_fp, "Error: failed to create a socket: %s\n",
                               strerror( errno ) );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -155,7 +147,7 @@ fsc2_lan_open( const char * dev_name,
     /* Set the SO_KEEPALIVE option to have a keepalive probe sent after
        two hours of inactivity */
 
-    switch_on = 1;
+    int switch_on = 1;
     if ( setsockopt( sock_fd, SOL_SOCKET, SO_KEEPALIVE,
                      &switch_on, sizeof switch_on ) == -1 )
     {
@@ -163,7 +155,7 @@ fsc2_lan_open( const char * dev_name,
         close( sock_fd );
         fsc2_lan_log_message( log_fp, "Error: failed to set SO_KEEPALIVE "
                               "option for socket\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -181,7 +173,7 @@ fsc2_lan_open( const char * dev_name,
         close( sock_fd );
         fsc2_lan_log_message( log_fp, "Error: failed to set TCP_NODELAY "
                               "option for socket\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -197,8 +189,12 @@ fsc2_lan_open( const char * dev_name,
        up the handler for the SIGALRM signal or starting the timer failed,
        in which case we silently drop the request for a timeout) */
 
+    struct sigaction sact,
+                     old_sact;
+
     if ( us_timeout > 0 )
     {
+        struct itimerval wait_for_connect;
         wait_for_connect.it_value.tv_sec     = us_timeout / 1000000;
         wait_for_connect.it_value.tv_usec    = us_timeout % 1000000;
         wait_for_connect.it_interval.tv_sec  = 0;
@@ -214,7 +210,7 @@ fsc2_lan_open( const char * dev_name,
             us_timeout = 0;
         else if ( setitimer( ITIMER_REAL, &wait_for_connect, NULL ) == -1 )
         {
-            ret = sigaction( SIGALRM, &old_sact, NULL );
+            int ret = sigaction( SIGALRM, &old_sact, NULL );
             fsc2_assert( ret != -1 );      /* this better doesn't happen */
             us_timeout = 0;
         }
@@ -223,6 +219,8 @@ fsc2_lan_open( const char * dev_name,
     /* Try to connect to the other side - if connect fails due to a signal
        other than SIGALRM and we are not supposed to return on such signals
        retry the connect() call */
+
+    int conn_ret;
     do
     {
         conn_ret = connect( sock_fd, ( const struct sockaddr * ) &dev_addr,
@@ -236,13 +234,13 @@ fsc2_lan_open( const char * dev_name,
 
     if ( us_timeout > 0 )
     {
-        wait_for_connect.it_value.tv_sec    =
-        wait_for_connect.it_value.tv_usec   =
-        wait_for_connect.it_interval.tv_sec =
+        struct itimerval wait_for_connect;
+        wait_for_connect.it_value.tv_sec     = 0;
+        wait_for_connect.it_value.tv_usec    = 0;
+        wait_for_connect.it_interval.tv_sec  = 0;
         wait_for_connect.it_interval.tv_usec = 0;
 
-        ret = setitimer( ITIMER_REAL, &wait_for_connect, NULL );
-
+        int ret = setitimer( ITIMER_REAL, &wait_for_connect, NULL );
         fsc2_assert( ret != -1 );              /* this better doesn't happen */
         ret = sigaction( SIGALRM, &old_sact, NULL );
         fsc2_assert( ret != -1 );              /* this neither... */
@@ -265,7 +263,7 @@ fsc2_lan_open( const char * dev_name,
             fsc2_lan_log_message( log_fp, "Error: connect() to socket "
                                   "failed: %s\n", strerror( errno ) );
 
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_close_log( dev_name, log_fp );
         fsc2_release_uucp_lock( dev_name );
         return -1;
@@ -275,6 +273,8 @@ fsc2_lan_open( const char * dev_name,
        to the list of connections, beginning by adding an entry to the end.
        If this fails due to runnning out of memory there's nothing left we can
        do except closing all open connections and throwing an exception. */
+
+    LAN_List_T * ll = lan_list;
 
     TRY
     {
@@ -304,7 +304,7 @@ fsc2_lan_open( const char * dev_name,
         bool need_close = ll->name == NULL;
 
         fsc2_lan_log_message( log_fp, "Error: Running out of memory\n" );
-        fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+        LOG_FUNCTION_END( log_fp );
         fsc2_lan_cleanup( );
         if ( need_close )
         {
@@ -329,10 +329,10 @@ fsc2_lan_open( const char * dev_name,
     /* Check if we really can set a timeout for sending and receiving -
        this only became possible with 2.3.41 kernels */
 
-    if (    getsockopt( sock_fd, SOL_SOCKET, SO_RCVTIMEO,
-                        &wait_for_connect.it_value, &len ) == -1
-         || getsockopt( sock_fd, SOL_SOCKET, SO_SNDTIMEO,
-                        &wait_for_connect.it_value, &len ) == -1 )
+    struct timeval tv;
+    socklen_t len;
+    if (    getsockopt( sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, &len ) == -1
+         || getsockopt( sock_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, &len ) == -1 )
         ll->so_timeo_avail = false;
 
     if ( lan_log_level == LL_ALL )
@@ -340,7 +340,7 @@ fsc2_lan_open( const char * dev_name,
                               "IP = \"%s\", port = %d\n", dev_name,
                               address, port );
 
-    fsc2_lan_log_function_end( log_fp, "fsc2_lan_open" );
+    LOG_FUNCTION_END( log_fp );
 
     return ll->fd;
 }
@@ -353,9 +353,6 @@ fsc2_lan_open( const char * dev_name,
 int
 fsc2_lan_close( int handle )
 {
-    LAN_List_T * ll;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -366,13 +363,14 @@ fsc2_lan_close( int handle )
 
     /* Figure out which device connection it's meant for */
 
-    if ( ( ll = find_lan_entry( handle ) ) == NULL )
+    LAN_List_T * ll = find_lan_entry( handle );
+    if ( ! ll )
     {
         print( SEVERE, "Invalid handle passed to fsc2_lan_close().\n" );
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_close" );
+    LOG_FUNCTION_START( ll->log_fp );
 
     /* Try to close the socket - if it fails give the cleanup routine
        that gets automatically called at the end of the experiment
@@ -386,7 +384,7 @@ fsc2_lan_close( int handle )
         return -1;
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_close" );
+    LOG_FUNCTION_END( ll->log_fp );
 
     if ( ll->prev != NULL )
         ll->prev->next = ll->next;
@@ -425,12 +423,6 @@ fsc2_lan_write( int          handle,
                 long         us_timeout,
                 bool         quit_on_signal )
 {
-    LAN_List_T *ll;
-    ssize_t bytes_written;
-    struct timeval   before;
-    struct sigaction old_sact;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -441,19 +433,20 @@ fsc2_lan_write( int          handle,
 
     /* Figure out which device connection it's meant for */
 
-    if ( ( ll = find_lan_entry( handle ) ) == NULL )
+    LAN_List_T * ll = find_lan_entry( handle );
+    if ( ! ll )
     {
         print( SEVERE, "Invalid handle passed to fsc2_lan_write().\n" );
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_write" );
+    LOG_FUNCTION_START( ll->log_fp );
 
     if ( length < 0 )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer length: %ld\n",
                               length );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
@@ -462,41 +455,41 @@ fsc2_lan_write( int          handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end since "
                                   "no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
     if ( buffer == NULL )
     {
-        fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer "
-                                 "argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
+        fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer argument\n" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( ll->log_fp, "Expect to write %ld byte(s) "
-                                  "to LAN device %s:\n",
-                                  ( long ) length, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "%ld bytes to write:\n",
+                                  ( long ) length );
         else
-            fsc2_lan_log_message( ll->log_fp, "Expect to write %ld byte(s) "
-                                  "within %ld ms to LAN device %s:\n",
-                                  ( long ) length, us_timeout / 1000,
-                                  ll->name );
+            fsc2_lan_log_message( ll->log_fp, " %ld bytes to write "
+                                  "within %ld ms to:\n",
+                                  ( long ) length, us_timeout / 1000 );
         fsc2_lan_log_data( ll->log_fp, length, buffer );
     }
 
     /* Deal with setting a timeout - if possible a socket option is used,
        otherwise a timer is started */
 
+    struct sigaction old_sact;
+    struct timeval   before;
     timeout_init( WRITE, ll, &us_timeout, &old_sact, &before );
 
     /* Start writting - if it's interrupted by a signal other than SIGALRM
        and we're supposed to continue on such signals and the timeout time
        hasn't already been reached retry the write() */
 
+    ssize_t bytes_written;
     do
     {
         if ( ll->so_timeo_avail )
@@ -535,10 +528,10 @@ fsc2_lan_write( int          handle,
                                   "socket: %s\n", strerror( errno ) );
     }
     else if ( lan_log_level == LL_ALL )
-        fsc2_lan_log_message( ll->log_fp, "Wrote %ld byte(s) to LAN "
-                              "device %s\n", ( long ) bytes_written, ll->name );
+        fsc2_lan_log_message( ll->log_fp, "Wrote %ld bytes\n",
+                              ( long ) bytes_written );
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_write" );
+    LOG_FUNCTION_END( ll->log_fp );
 
     return bytes_written;
 }
@@ -558,14 +551,6 @@ fsc2_lan_writev( int                  handle,
                  long                 us_timeout,
                  bool                 quit_on_signal )
 {
-    LAN_List_T *ll;
-    ssize_t bytes_written;
-    struct timeval before;
-    struct sigaction old_sact;
-    int i;
-    size_t length;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -576,20 +561,21 @@ fsc2_lan_writev( int                  handle,
 
     /* Figure out which device connection it's meant for */
 
-    if ( ( ll = find_lan_entry( handle ) ) == NULL )
+    LAN_List_T * ll = find_lan_entry( handle );
+    if ( ! ll )
     {
         print( SEVERE, "Invalid handle passed to fsc2_lan_writev().\n" );
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_writev" );
+    LOG_FUNCTION_START( ll->log_fp );
 
     if ( count == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
@@ -598,24 +584,25 @@ fsc2_lan_writev( int                  handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Error: invalid number of "
                                   "data buffers\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
     if ( data == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid data argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
-    for ( length = 0, i = 0; i < count; i++ )
+    size_t length = 0;
+    for ( int i = 0; i < count; i++ )
     {
         if ( data[ i ].iov_base == NULL )
         {
             fsc2_lan_log_message( ll->log_fp, "Error: invalid data "
                                   "chunk %d\n", count );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+            LOG_FUNCTION_END( ll->log_fp );
             return -1;
         }
 
@@ -627,23 +614,21 @@ fsc2_lan_writev( int                  handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be written\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( ll->log_fp, "Expect to write %ld byte(s) "
-                                  "(from %d buffers) to LAN device %s:\n",
-                                  ( long ) length, count, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "%ld bytes to write (from %d "
+                                  "buffers):\n", ( long ) length, count );
         else
-            fsc2_lan_log_message( ll->log_fp, "Expect to write %ld byte(s) "
-                                  "(from %d buffers) within %ld ms to LAN "
-                                  "device %s:\n", ( long ) length, count,
-                                  us_timeout / 1000, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "%ld bytes to write (from %d "
+                                  "buffers) within %ld ms:\n",
+                                  ( long ) length, count, us_timeout / 1000 );
 
-        for ( i = 0; i < count; i++ )
+        for ( int i = 0; i < count; i++ )
             fsc2_lan_log_data( ll->log_fp, data[ i ].iov_len,
                                data[ i ].iov_base );
     }
@@ -651,12 +636,15 @@ fsc2_lan_writev( int                  handle,
     /* Deal with setting a timeout - if possible a socket option is used,
        otherwise a timer is started */
 
+    struct sigaction old_sact;
+    struct timeval before;
     timeout_init( WRITE, ll, &us_timeout, &old_sact, &before );
 
     /* Start writting - if it's interrupted by a signal other than SIGALRM
        and we are supposed to continue on such signals and the timeout time
        hasn't already been reached retry the write() */
 
+    ssize_t bytes_written;
     do
     {
         if ( ll->so_timeo_avail )
@@ -695,10 +683,10 @@ fsc2_lan_writev( int                  handle,
                                   "socket: %s\n", strerror( errno ) );
     }
     else if ( lan_log_level == LL_ALL )
-        fsc2_lan_log_message( ll->log_fp, "Wrote %ld byte(s) to LAN device "
-                              "%s\n", ( long ) bytes_written, ll->name );
+        fsc2_lan_log_message( ll->log_fp, "Wrote %ld bytes\n",
+                              ( long ) bytes_written );
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_writev" );
+    LOG_FUNCTION_END( ll->log_fp );
 
     return bytes_written;
 }
@@ -718,12 +706,6 @@ fsc2_lan_read( int    handle,
                long   us_timeout,
                bool   quit_on_signal )
 {
-    LAN_List_T *ll;
-    ssize_t bytes_read;
-    struct timeval before;
-    struct sigaction old_sact;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -734,20 +716,21 @@ fsc2_lan_read( int    handle,
 
     /* Figure out which device connection it's meant for */
 
-    if ( ( ll = find_lan_entry( handle ) ) == NULL )
+    LAN_List_T * ll = find_lan_entry( handle );
+    if ( ! ll )
     {
         print( SEVERE, "Invalid handle passed to fsc2_lan_read().\n" );
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_read" );
+    LOG_FUNCTION_START( ll->log_fp );
 
     if ( length == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                      "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
@@ -755,39 +738,40 @@ fsc2_lan_read( int    handle,
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer length: "
                               "%ld\n", length );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
     if ( buffer == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid buffer argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( ll->log_fp, "Expect to read up to %ld "
-                                  "byte(s) from LAN device %s\n",
-                                  ( long ) length, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "Up to %ld bytes to read\n",
+                                  ( long ) length );
         else
-            fsc2_lan_log_message( ll->log_fp, "Expect to read up to %ld "
-                                  "byte(s) within %ld ms from LAN device "
-                                  "%s\n", ( long ) length, us_timeout / 1000,
-                                  ll->name );
+            fsc2_lan_log_message( ll->log_fp, "Up to %ld bytes to read "
+                                  "within %ld ms\n",
+                                  ( long ) length, us_timeout / 1000 );
     }
 
     /* Deal with setting a timeout - if possible a socket option is used,
        otherwise a timer is started */
 
+    struct sigaction old_sact;
+    struct timeval before;
     timeout_init( READ, ll, &us_timeout, &old_sact, &before );
 
     /* Start reading - if interrupted by a signal other than SIGALRM
        and we're supposed to continue on such signals and the timeout
        time hasn't already been reached retry the read(2) */
 
+    ssize_t bytes_read;
     do
     {
         if ( ll->so_timeo_avail )
@@ -827,12 +811,12 @@ fsc2_lan_read( int    handle,
     }
     else if ( lan_log_level == LL_ALL )
     {
-        fsc2_lan_log_message( ll->log_fp, "Read %ld byte(s) from LAN "
-                              "device %s:\n", ( long ) bytes_read, ll->name );
+        fsc2_lan_log_message( ll->log_fp, "Read %ld bytes:\n",
+                              ( long ) bytes_read );
         fsc2_lan_log_data( ll->log_fp, bytes_read, buffer );
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_read" );
+    LOG_FUNCTION_END( ll->log_fp );
 
     return bytes_read;
 }
@@ -856,14 +840,6 @@ fsc2_lan_readv( int            handle,
                 long           us_timeout,
                 bool           quit_on_signal )
 {
-    LAN_List_T *ll;
-    ssize_t bytes_read;
-    struct timeval before;
-    struct sigaction old_sact;
-    int i;
-    size_t length;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -874,20 +850,21 @@ fsc2_lan_readv( int            handle,
 
     /* Figure out which device connection it's meant for */
 
-    if ( ( ll = find_lan_entry( handle ) ) == NULL )
+    LAN_List_T * ll = find_lan_entry( handle );
+    if ( ! ll )
     {
         print( SEVERE, "Invalid handle passed to fsc2_lan_readv().\n" );
         return -1;
     }
 
-    fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_readv" );
+    LOG_FUNCTION_START( ll->log_fp );
 
     if ( count == 0 )
     {
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
@@ -896,24 +873,25 @@ fsc2_lan_readv( int            handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Error: invalid number of "
                                   "data buffers\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
     if ( data == NULL )
     {
         fsc2_lan_log_message( ll->log_fp, "Error: invalid data argument\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+        LOG_FUNCTION_END( ll->log_fp );
         return -1;
     }
 
-    for ( length = 0, i = 0; i < count; i++ )
+    size_t length = 0;
+    for ( int i = 0; i < count; i++ )
     {
         if ( data[ i ].iov_base == NULL )
         {
             fsc2_lan_log_message( ll->log_fp, "Error: invalid data buffer %d\n",
                                   count );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+            LOG_FUNCTION_END( ll->log_fp );
             return -1;
         }
 
@@ -925,33 +903,33 @@ fsc2_lan_readv( int            handle,
         if ( lan_log_level == LL_ALL )
             fsc2_lan_log_message( ll->log_fp, "Warning: premature end "
                                   "since no bytes are to be read\n" );
-        fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+        LOG_FUNCTION_END( ll->log_fp );
         return 0;
     }
 
     if ( lan_log_level == LL_ALL )
     {
         if ( us_timeout <= 0 )
-            fsc2_lan_log_message( ll->log_fp, "Expect to read up to %ld "
-                                  "byte(s) (into %d buffers) from LAN "
-                                  "device %s\n",
-                                  ( long ) length, count, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "Up to %ld bytes to read (into "
+                                  "%d buffers)\n", ( long ) length, count );
         else
-            fsc2_lan_log_message( ll->log_fp, "Expect to read up to %ld "
-                                  "byte(s) (into %d buffer) within %ld ms "
-                                  "from LAN device %s\n", ( long ) length,
-                                  count, us_timeout / 1000, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "Up to %ld bytes to read (into "
+                                  "%d buffer) within %ld ms\n",
+                                  ( long ) length, count, us_timeout / 1000 );
     }
 
     /* Deal with setting a timeout - if possible a socket option is used,
        otherwise a timer is started */
 
+    struct sigaction old_sact;
+    struct timeval before;
     timeout_init( READ, ll, &us_timeout, &old_sact, &before );
 
     /* Start writting - if it's interrupted by a signal other than SIGALRM
        and we're supposed to continue on such signals and the timeout time
        hasn't already been reached retry the read() */
 
+    ssize_t bytes_read;
     do
     {
         if ( ll->so_timeo_avail )
@@ -997,6 +975,7 @@ fsc2_lan_readv( int            handle,
         if ( length > ( unsigned long ) bytes_read )
             length = bytes_read;
 
+        int i;
         for ( i = 0; i < count; i++ )
         {
             if ( data[ i ].iov_len > length )
@@ -1009,9 +988,8 @@ fsc2_lan_readv( int            handle,
 
         if ( bytes_read > 0 && lan_log_level == LL_ALL )
         {
-            fsc2_lan_log_message( ll->log_fp, "Read %ld byte(s) from LAN "
-                                  "device %s:\n",
-                                  ( long ) bytes_read, ll->name );
+            fsc2_lan_log_message( ll->log_fp, "Read %ld bytes:\n",
+                                  ( long ) bytes_read );
 
             for ( i = 0; i < count && data[ i ].iov_len != 0; i++ )
                 fsc2_lan_log_data( ll->log_fp, data[ i ].iov_len,
@@ -1019,7 +997,7 @@ fsc2_lan_readv( int            handle,
         }
     }
 
-    fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_readv" );
+    LOG_FUNCTION_END( ll->log_fp );
 
     return bytes_read;
 }
@@ -1033,14 +1011,12 @@ fsc2_lan_readv( int            handle,
 void
 fsc2_lan_cleanup( void )
 {
-    LAN_List_T *ll;
-
-
+    LAN_List_T * ll;
     while ( ( ll = lan_list ) != NULL )
     {
         if ( ll->fd != 0 )
         {
-            fsc2_lan_log_function_start( ll->log_fp, "fsc2_lan_cleanup()" );
+            LOG_FUNCTION_START( ll->log_fp );
 
             shutdown( ll->fd, SHUT_RDWR );
             if ( close( ll->fd ) == -1 )
@@ -1052,7 +1028,7 @@ fsc2_lan_cleanup( void )
                 fsc2_lan_log_message( ll->log_fp, "Closed connection to "
                                       "device %s\n",
                                       ll->name ? ll->name : "?" );
-            fsc2_lan_log_function_end( ll->log_fp, "fsc2_lan_cleanup()" );
+            LOG_FUNCTION_END( ll->log_fp );
 
             fsc2_lan_close_log( ll->name ? ll->name : "?", ll->log_fp );
 
@@ -1063,10 +1039,7 @@ fsc2_lan_cleanup( void )
         }
 
         lan_list = ll->next;
-
-        if ( ll->name )
-            T_free( ( char * ) ll->name );
-
+        T_free( ll->name );
         T_free( ll );
     }
 }
@@ -1090,11 +1063,6 @@ timeout_init( int                dir,
               struct sigaction * old_sact,
               struct timeval   * now )
 {
-    struct sigaction sact;
-    struct itimerval iwait;
-    int ret;
-
-
     /* Negative (as well as zero) values for the timeout are interpreted
        to mean no timeout */
 
@@ -1112,6 +1080,7 @@ timeout_init( int                dir,
 
     got_sigalrm = 0;
 
+    struct itimerval iwait;
     iwait.it_value.tv_sec     = *us_timeout / 1000000;
     iwait.it_value.tv_usec    = *us_timeout % 1000000;
     iwait.it_interval.tv_sec  =
@@ -1154,6 +1123,7 @@ timeout_init( int                dir,
         /* Try to set handler for SIGALRM signals and then to start a timer,
            on failures the timeout will be disregarded */
 
+        struct sigaction sact;
         sact.sa_handler = wait_alarm_handler;
         sigemptyset( &sact.sa_mask );
         sact.sa_flags = 0;
@@ -1164,7 +1134,7 @@ timeout_init( int                dir,
         {
             if ( setitimer( ITIMER_REAL, &iwait, NULL ) == -1 )
             {
-                ret = sigaction( SIGALRM, old_sact, NULL );
+                int ret = sigaction( SIGALRM, old_sact, NULL );
                 fsc2_assert( ret != -1 );  /* this better doesn't happen */
                 *us_timeout = 0;
             }
@@ -1186,9 +1156,6 @@ timeout_reset( int                dir,
                struct sigaction * old_sact,
                struct timeval   * before )
 {
-    struct timeval now;
-
-
     /* If no timeout is set simply return, resuming is possible */
 
     if ( *us_timeout == 0 )
@@ -1196,6 +1163,7 @@ timeout_reset( int                dir,
 
     /* Figure out the current time and how long we still may wait */
 
+    struct timeval now;
     gettimeofday( &now, NULL );
 
     *us_timeout -=   ( now.tv_sec     * 1000000 + now.tv_usec     )
@@ -1231,17 +1199,16 @@ void
 timeout_exit( LAN_List_T       * ll,
               struct sigaction * old_sact )
 {
-    struct itimerval iwait = { { 0, 0 }, { 0, 0 } };
-    int ret;
-
-
     /* Nothing to be done if timeouts are dealt with by socket options */
 
     if ( ll->so_timeo_avail )
         return;
 
-    ret = setitimer( ITIMER_REAL, &iwait, NULL );
+    struct itimerval iwait = { { 0, 0 },
+                               { 0, 0 } };
+    int ret = setitimer( ITIMER_REAL, &iwait, NULL );
     fsc2_assert( ret != -1 );              /* this better doesn't happen */
+
     ret = sigaction( SIGALRM, old_sact, NULL );
     fsc2_assert( ret != -1 );              /* this neither... */
 }
@@ -1269,9 +1236,7 @@ static
 LAN_List_T *
 find_lan_entry( int handle )
 {
-    LAN_List_T *ll = lan_list;
-
-
+    LAN_List_T * ll = lan_list;
     while ( ll != NULL )
         if ( ll->fd == handle )
             return ll;
@@ -1294,9 +1259,6 @@ void
 get_ip_address( const char     * address,
                 struct in_addr * ip_addr )
 {
-    struct hostent *he;
-
-
     /* For the time being we only deal with IPv4 addresses */
 
     fsc2_assert( sizeof ip_addr->s_addr == 4 );
@@ -1308,7 +1270,8 @@ get_ip_address( const char     * address,
 
     /* If this didn't do the trick try to resolve the name via a DNS query */
 
-    if (    ( he = gethostbyname( address ) ) == NULL
+    struct hostent * he = gethostbyname( address );
+    if (    ! he
          || he->h_addrtype != AF_INET
          || *he->h_addr_list == NULL )
         ip_addr->s_addr = 0;
@@ -1330,10 +1293,6 @@ get_ip_address( const char     * address,
 FILE *
 fsc2_lan_open_log( const char * dev_name )
 {
-    FILE *fp;
-    char * volatile fname = NULL;
-
-
     if ( lan_log_level <= LL_NONE )
     {
         lan_log_level = LL_NONE;
@@ -1343,6 +1302,7 @@ fsc2_lan_open_log( const char * dev_name )
     if ( lan_log_level > LL_ALL )
         lan_log_level = LL_ALL;
 
+    char * volatile fname = NULL;
     TRY
     {
 #if defined LAN_LOG_DIR
@@ -1358,7 +1318,8 @@ fsc2_lan_open_log( const char * dev_name )
 
     raise_permissions( );
 
-    if ( ( fp = fopen( fname, "w" ) ) == NULL )
+    FILE * fp = fopen( fname, "w" );
+    if ( ! fp )
     {
         fp = stderr;
         fprintf( stderr, "Can't open log file %s for device %s, using "
@@ -1376,7 +1337,8 @@ fsc2_lan_open_log( const char * dev_name )
 
     lower_permissions( );
 
-    fsc2_lan_log_message( fp, "Starting logging for device %s\n", dev_name );
+    fsc2_lan_log_message( fp, "Starting logging for LAN device %s\n",
+                          dev_name );
 
     return fp;
 }
@@ -1408,20 +1370,21 @@ static
 void
 fsc2_lan_log_date( FILE * fp )
 {
-    char tc[ 26 ];
-    struct timeb mt;
-    time_t t;
-
-
     if ( fp == NULL )
         return;
 
-    t = time( NULL );
+    time_t t = time( NULL );
+
+    char tc[ 26 ];
     strcpy( tc, asctime( localtime( &t ) ) );
+
     tc[ 10 ] = '\0';
     tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
+
+    struct timeb mt;
     ftime( &mt );
+
     fprintf( fp, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
 }
 
@@ -1481,9 +1444,6 @@ fsc2_lan_log_message( FILE       * fp,
                       const char * fmt,
                       ... )
 {
-    va_list ap;
-
-
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
@@ -1497,6 +1457,8 @@ fsc2_lan_log_message( FILE       * fp,
 
     raise_permissions( );
     fsc2_lan_log_date( fp );
+
+    va_list ap;
     va_start( ap, fmt );
     vfprintf( fp, fmt, ap );
     va_end( ap );

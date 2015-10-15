@@ -732,7 +732,7 @@ vxi11_write( const char * buffer,
 
     if ( fsc2_lan_log_level( ) >= LL_ALL )
     {
-        fsc2_lan_log_message( log_fp, "Expect to write %zu byte(s) within "
+        fsc2_lan_log_message( log_fp, "%zu bytes  to write within "
                               "%lu ms:\n", *length, write_timeout );
         fsc2_lan_log_data( log_fp, *length, buffer );
     }
@@ -873,7 +873,7 @@ vxi11_read( char   * buffer,
     read_parms.io_timeout   = read_timeout;
 
     if ( fsc2_lan_log_level( ) >= LL_ALL )
-        fsc2_lan_log_message( log_fp, "Expect to read up to %zu byte(s) within "
+        fsc2_lan_log_message( log_fp, "Up to %zu bytes to read within "
                               "%lu ms\n", *length, read_timeout );
 
     /* Keep reading until either as many bytes have been transmitted as
