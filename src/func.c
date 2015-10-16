@@ -59,8 +59,8 @@
 /* The following variables are shared with loader.c which adds the functions
    from the loaded modules to the list of built-in functions */
 
-size_t Num_Func;     /* number of built-in and listed functions */
-Func_T *Fncts;       /* array with list of functions structures */
+size_t Num_Func = 0;      /* number of built-in and listed functions */
+Func_T * Fncts = NULL;    /* array with list of functions structures */
 
 
 /* Both these variables are shared with 'func_util.c' */
@@ -293,13 +293,13 @@ int func_cmp1( const void * a,
 void
 functions_exit( void )
 {
-    if ( Fncts == NULL )
+    if ( ! Fncts )
         return;
 
     /* Get rid of the names of loaded functions (but not the built-in ones) */
 
     for ( size_t i = 0; i < Num_Func; i++ )
-        if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
+        if ( Fncts[ i ].to_be_loaded )
             T_free( ( char * ) Fncts[ i ].name );
 
     Fncts = T_free( Fncts );

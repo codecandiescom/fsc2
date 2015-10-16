@@ -220,9 +220,11 @@ scan_main( const char * name,
        syntactical correctness. The code of the EXPERIMENT section is stored
        in memory when the splitlex() function returns successfully. */
 
-    split_error = ( bool ) splitlex( );
+    split_error = splitlex( );
 
     fclose( splitin );
+
+    splitlex_destroy( );
 
     while ( ! Fsc2_Internals.fsc2_clean_died )
         fsc2_usleep( 10000, false );

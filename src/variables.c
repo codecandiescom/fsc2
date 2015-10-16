@@ -296,7 +296,7 @@ vars_free( Var_T * v,
     if ( v->name )
         v->name = T_free( v->name );
 
-    if ( v->prev )
+    if ( ! v->prev )
         EDL.Var_List = v->next;
     else
         v->prev->next = v->next;
@@ -975,6 +975,7 @@ vars_pop( Var_T * v )
     if ( v->name )
         T_free( v->name );
     T_free( v );
+
     return ret;
 }
 

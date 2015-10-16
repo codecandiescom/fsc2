@@ -512,9 +512,6 @@ FUNC        {IDENT}"#"[0-9]+
 int
 preparations_parser( FILE * in )
 {
-    static bool needs_restart = false;
-
-
     if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
     {
         print( FATAL, "Multiple instances of PREPARATIONS section label.\n" );
@@ -525,16 +522,9 @@ preparations_parser( FILE * in )
     EDL.Cur_Pulse = -1;
     prepsin = in;
 
-    /* Keep the lexer happy... */
-
-    if ( needs_restart )
-        prepsrestart( prepsin );
-    else
-         needs_restart = true;
-
     prepsparser_init( );
-
     prepsparse( );
+    prepslex_destroy( );
 
     return Preps_next_section;
 }

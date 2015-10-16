@@ -92,20 +92,25 @@ vars_assign( Var_T * src,
         fsc2_impossible( );
 #endif
 
-    /* First we distinguish between the different possible types of variables
-       on the left hand side */
+    /* Distinguish between the different possible types of variables on
+       the left hand side */
 
     switch ( dest->type )
     {
         case UNDEF_VAR :
-        case INT_VAR : case FLOAT_VAR :
-        case INT_PTR : case FLOAT_PTR :
+        case INT_VAR :
+        case FLOAT_VAR :
+        case INT_PTR :
+        case FLOAT_PTR :
             vars_assign_to_1d( src, dest );
             break;
 
-        case INT_ARR :    case FLOAT_ARR :
-        case INT_REF :    case FLOAT_REF :
-        case SUB_REF_PTR: case REF_PTR :
+        case INT_ARR :
+        case FLOAT_ARR :
+        case INT_REF :
+        case FLOAT_REF :
+        case SUB_REF_PTR:
+        case REF_PTR :
             vars_assign_to_nd( src, dest );
             break;
 
@@ -160,11 +165,11 @@ vars_assign_to_1d( Var_T * src,
                     break;
 
                 case FLOAT_VAR :
-                    dest->val.dval = ( double ) src->val.lval;
+                    dest->val.dval = src->val.lval;
                     break;
 
                 case FLOAT_PTR :
-                    *dest->val.dpnt = ( double ) src->val.lval;
+                    *dest->val.dpnt = src->val.lval;
                     break;
 
                 default :
@@ -178,13 +183,13 @@ vars_assign_to_1d( Var_T * src,
                 case INT_VAR :
                     print( WARN, "Floating point value used in assignment to "
                            "integer variable.\n" );
-                    dest->val.lval = ( long ) src->val.dval;
+                    dest->val.lval = src->val.dval;
                     break;
 
                 case INT_PTR :
                     print( WARN, "Floating point value used in assignment to "
                            "integer variable.\n" );
-                    *dest->val.lpnt = ( long ) src->val.dval;
+                    *dest->val.lpnt = src->val.dval;
                     break;
 
                 case FLOAT_VAR :
@@ -217,7 +222,6 @@ vars_assign_to_nd( Var_T * src,
                    Var_T * dest )
 {
     long count = 0;
-
 
     switch ( src->type )
     {
@@ -283,11 +287,10 @@ static long
 vars_assign_to_nd_from_1d( Var_T * src,
                            Var_T * dest )
 {
-    long lval = 0;
-    double dval = 0.0;
-
-
     /* Determine the value to be assigned */
+
+    long  lval  = 0;
+    double dval = 0.0;
 
     if ( src->type == INT_VAR )
     {
@@ -329,20 +332,18 @@ vars_set_all( Var_T * v,
               long    l,
               double  d )
 {
-    long count = 0;
-    ssize_t i;
-
-
     /* When we're at the lowest level (i.e. one-dimensional array) set
        all of its elements, otherwise loop and recurse over all referenced
        sub-arrays */
 
+    long count = 0;
+
     if ( v->type & ( INT_REF | FLOAT_REF ) )
-        for ( i = 0; i < v->len; i++ )
+        for ( ssize_t i = 0; i < v->len; i++ )
             count += vars_set_all( v->val.vptr[ i ], l, d );
     else
     {
-        for ( count = 0; count < v->len; count++ )
+        for ( ; count < v->len; count++ )
             if ( v->type == INT_ARR )
                 v->val.lpnt[ count ] = l;
             else
@@ -363,11 +364,10 @@ vars_assign_to_snd_from_1d( Var_T * src,
                             Var_T * dest,
                             Var_T * sub )
 {
-    long lval = 0;
-    double dval = 0.0;
-
-
     /* Determine the value to be assigned */
+
+    long   lval = 0;
+    double dval = 0.0;
 
     if ( src->type == INT_VAR )
     {
@@ -403,13 +403,6 @@ vars_assign_to_snd_range_from_1d( Var_T * dest,
                                   long    l,
                                   double  d )
 {
-    long count = 0;
-    ssize_t i,
-            ind,
-            range_start,
-            range_end;
-
-
     /* Descend into the submatrices of the destination matrix while there
        are non-negative indices and we're not at the last one */
 
@@ -418,9 +411,11 @@ vars_assign_to_snd_range_from_1d( Var_T * dest,
 
     /* If we're at the last index the assignment must be done */
 
+    long count = 0;
+
     if ( cur == sub->len - 1 )
     {
-        ind = sub->val.index[ cur ];
+        size_t ind = sub->val.index[ cur ];
 
         if ( dest->type & ( INT_REF | FLOAT_REF ) )
             count += vars_set_all( dest->val.vptr[ ind ], l, d );
@@ -437,12 +432,12 @@ vars_assign_to_snd_range_from_1d( Var_T * dest,
         return count;
     }
 
-    range_start = - sub->val.index[ cur++ ] - 1;
-    range_end = sub->val.index[ cur++ ];
+    size_t range_start = - sub->val.index[ cur++ ] - 1;
+    size_t range_end = sub->val.index[ cur++ ];
 
     if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
     {
-        for ( i = range_start; i <= range_end; i++ )
+        for ( size_t i = range_start; i <= range_end; i++ )
             if ( dest->type == INT_ARR )
                 dest->val.lpnt[ i ] = l;
             else
@@ -451,7 +446,7 @@ vars_assign_to_snd_range_from_1d( Var_T * dest,
         count = range_end - range_start + 1;
     }
     else
-        for ( i = range_start; i <= range_end; i++ )
+        for ( size_t i = range_start; i <= range_end; i++ )
             count += vars_assign_to_snd_range_from_1d( dest->val.vptr[ i ],
                                                        sub, cur, l, d );
 
@@ -467,10 +462,6 @@ static long
 vars_assign_to_nd_from_nd( Var_T * src,
                            Var_T * dest )
 {
-    ssize_t i;
-    long count = 0;
-
-
     /* The dimensions of the destination array must be at least as large as
        the one of the source array */
 
@@ -483,7 +474,9 @@ vars_assign_to_nd_from_nd( Var_T * src,
 
     if ( dest->dim > src->dim )
     {
-        for ( i = 0; i < dest->len; i++ )
+        long count = 0;
+
+        for ( ssize_t i = 0; i < dest->len; i++ )
             if ( dest->val.vptr[ i ] != NULL )
                 count += vars_assign_to_nd_from_nd( src, dest->val.vptr[ i ] );
         return count;
@@ -505,9 +498,6 @@ static void
 vars_size_check( Var_T * src,
                  Var_T * dest )
 {
-    ssize_t i;
-
-
     if ( dest->flags & IS_DYNAMIC )
         return;
 
@@ -520,7 +510,7 @@ vars_size_check( Var_T * src,
     /* If this isn't an 1-dimensional array also do checks on the sub-arrays */
 
     if ( dest->type & ( INT_REF | FLOAT_REF ) )
-        for( i = 0; i < dest->len; i++ )
+        for( ssize_t i = 0; i < dest->len; i++ )
             if ( dest->val.vptr[ i ] != NULL )
                 vars_size_check( src->val.vptr[ i ], dest->val.vptr[ i ] );
 }
@@ -545,9 +535,6 @@ static long
 vars_arr_assign_1d( Var_T * src,
                     Var_T * dest )
 {
-    ssize_t i;
-
-
     /* If necessary resize the destination array */
 
     if ( dest->flags & IS_DYNAMIC && dest->len != src->len )
@@ -580,13 +567,13 @@ vars_arr_assign_1d( Var_T * src,
             memcpy( dest->val.lpnt, src->val.lpnt,
                     dest->len * sizeof *dest->val.lpnt );
         else
-            for ( i = 0; i < dest->len; i++ )
+            for ( ssize_t i = 0; i < dest->len; i++ )
                 dest->val.lpnt[ i ] = lrnd( src->val.dpnt[ i ] );
     }
     else
     {
         if ( INT_TYPE( src ) )
-            for ( i = 0; i < dest->len; i++ )
+            for ( ssize_t i = 0; i < dest->len; i++ )
                 dest->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
         else
             memcpy( dest->val.dpnt, src->val.dpnt,
@@ -604,17 +591,13 @@ static long
 vars_arr_assign_nd( Var_T * src,
                     Var_T * dest )
 {
-    ssize_t i;
-    long count = 0;
-
-
     /* If necessary resize the array of references of the destination array */
 
     if ( dest->flags & IS_DYNAMIC )
     {
         if ( dest->len > src->len )
         {
-            for ( i = dest->len - 1; i >= src->len; dest->len--, i-- )
+            for ( ssize_t i = dest->len - 1; i >= src->len; dest->len--, i-- )
                 vars_free( dest->val.vptr[ i ], SET );
 
             if ( src->len > 0 )
@@ -645,7 +628,9 @@ vars_arr_assign_nd( Var_T * src,
 
     /* Now copy the sub-arrays by calling the function recursively */
 
-    for ( i = 0; i < dest->len; i++ )
+    long count = 0;
+
+    for ( ssize_t i = 0; i < dest->len; i++ )
         count += vars_arr_assign( src->val.vptr[ i ], dest->val.vptr[ i ] );
 
     return count;
@@ -662,15 +647,12 @@ vars_assign_to_snd_from_nd( Var_T * src,
                             Var_T * sub )
 {
     ssize_t cur = 0;
-    ssize_t single_indices = 0;
-    ssize_t i;
-
-
     while ( sub->val.index[ cur ] >= 0 )
         dest = dest->val.vptr[ sub->val.index[ cur++ ] ];
 
-    i = cur + 2;
+    ssize_t i = cur + 2;
 
+    ssize_t single_indices = 0;
     while ( i < sub->len )
         if ( sub->val.index[ i++ ] < 0 )
             i++;
@@ -700,14 +682,7 @@ vars_assign_snd_range_from_nd( Var_T * dest,
                                ssize_t cur,
                                Var_T * src )
 {
-    ssize_t ind,
-            start,
-            end,
-            i;
-    long count = 0;
-
-
-    ind = sub->val.index[ cur++ ];
+    ssize_t ind = sub->val.index[ cur++ ];
 
     if ( ind >= 0 )
     {
@@ -718,8 +693,10 @@ vars_assign_snd_range_from_nd( Var_T * dest,
                                                   sub, cur, src );
     }
 
-    start = - ind - 1;
-    end = sub->val.index[ cur++ ];
+    ssize_t start = - ind - 1;
+    ssize_t end = sub->val.index[ cur++ ];
+
+    long count = 0;
 
     switch( src->type )
     {
@@ -734,7 +711,7 @@ vars_assign_snd_range_from_nd( Var_T * dest,
             break;
 
         default :
-            for ( i = start; i <= end; i++ )
+            for ( ssize_t i = start; i <= end; i++ )
                 count += vars_assign_snd_range_from_nd( dest->val.vptr[ i ],
                                                         sub, cur, src );
             break;
@@ -756,9 +733,6 @@ vars_assign_snd_range_from_nd_1( Var_T * dest,
                                  ssize_t cur )
 {
     ssize_t range = end - start + 1;
-    ssize_t i;
-    long count = 0;
-
 
     if ( src->len != range )
     {
@@ -766,30 +740,32 @@ vars_assign_snd_range_from_nd_1( Var_T * dest,
         THROW( EXCEPTION );
     }
 
+    long count = 0;
+
     switch ( dest->type )
     {
         case INT_ARR :
             if ( src->type == INT_REF )
-                for ( i = start; i <= end; i++ )
+                for ( ssize_t i = start; i <= end; i++ )
                     dest->val.lpnt[ i ] = *src->val.lpnt;
             else
-                for ( i = start; i <= end; i++ )
+                for ( ssize_t i = start; i <= end; i++ )
                     dest->val.lpnt[ i ] = lrnd( *src->val.dpnt );
             count = 1;
             break;
 
         case FLOAT_ARR :
             if ( src->type == INT_REF )
-                for ( i = start; i <= end; i++ )
+                for ( ssize_t i = start; i <= end; i++ )
                     dest->val.dpnt[ i ] = *src->val.lpnt;
             else
-                for ( i = start; i <= end; i++ )
+                for ( ssize_t i = start; i <= end; i++ )
                     dest->val.dpnt[ i ] = *src->val.dpnt;
             count = 1;
             break;
 
         default :
-            for ( i = 0; i < range; i++ )
+            for ( ssize_t i = 0; i < range; i++ )
                 count += vars_assign_snd_range_from_nd(
                                                 dest->val.vptr[ i + start ],
                                                 sub, cur, src->val.vptr[ i ] );
@@ -812,16 +788,14 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
                                  ssize_t cur )
 {
     ssize_t range = end - start + 1;
-    ssize_t i;
-    ssize_t idx;
-    long count = 0;
-
 
     if ( src->len != range )
     {
         print( FATAL, "Sizes of array slices don't fit in assignment.\n" );
         THROW( EXCEPTION );
     }
+
+    long count = 0;
 
     switch ( dest->type )
     {
@@ -830,14 +804,14 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
                 memcpy( dest->val.lpnt + start, src->val.lpnt,
                         range * sizeof *dest->val.lpnt );
             else
-                for ( i = 0; i < range; i++ )
+                for ( ssize_t i = 0; i < range; i++ )
                     dest->val.lpnt[ i + start ] = lrnd( src->val.dpnt[ i ] );
             count = range;
             break;
 
         case FLOAT_ARR :
             if ( src->type == INT_ARR )
-                for ( i = 0; i < range; i++ )
+                for ( ssize_t i = 0; i < range; i++ )
                     dest->val.lpnt[ i + start ] = src->val.lpnt[ i ];
             else
                 memcpy( dest->val.dpnt + start, src->val.dpnt,
@@ -848,11 +822,11 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
         default :
             if ( sub->val.index[ cur ] >= 0 )
             {
-                idx = sub->val.index[ cur ];
+                ssize_t idx = sub->val.index[ cur ];
 
                 if ( src->type == INT_ARR )
                 {
-                    for ( i = 0; i < range; i++ )
+                    for ( ssize_t i = 0; i < range; i++ )
                         if ( dest->type == INT_REF )
                             dest->val.vptr[ i + start ]->val.lpnt[ idx ] =
                                                              src->val.lpnt[ i ];
@@ -862,7 +836,7 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
                 }
                 else if ( src->type == FLOAT_ARR )
                 {
-                    for ( i = 0; i < range; i++ )
+                    for ( ssize_t i = 0; i < range; i++ )
                         if ( dest->type == INT_REF )
                             dest->val.vptr[ i + start ]->val.lpnt[ idx ] =
                                                      lrnd( src->val.dpnt[ i ] );
@@ -876,7 +850,7 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
                 count = range;
             }
             else
-                for ( i = start; i <= end; i++ )
+                for ( ssize_t i = start; i <= end; i++ )
                     count += vars_assign_snd_range_from_nd( dest->val.vptr[ i ],
                                                             sub, cur, src );
             break;

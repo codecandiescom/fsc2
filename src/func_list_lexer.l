@@ -30,7 +30,7 @@
 
 static size_t fll_count_functions( Func_T * fncts,
                                    size_t   num_predef_func );
-static int ffl_func_cmp2( const void * a,
+static int fll_func_cmp2( const void * a,
                           const void * b );
 static void fll_get_functions( Func_T * fncts,
                                size_t   num_predef_func );
@@ -176,16 +176,9 @@ size_t
 func_list_parse( Func_T ** fncts,
                  size_t    num_func )
 {
-    static bool is_restart = false;
     size_t volatile nf = num_func;
     size_t num_predef_func = num_func;
     size_t num;
-    size_t cur;
-    struct stat buf;
-    char * ld_path;
-    char * ld = NULL;
-    char * ldc;
-
 
     EDL.Fname = T_free( EDL.Fname );
 
@@ -195,6 +188,7 @@ func_list_parse( Func_T ** fncts,
     if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
     {
         EDL.Fname = T_strdup( confdir "Functions" );
+        struct stat buf;
         if ( lstat( EDL.Fname, &buf ) < 0 )
             EDL.Fname = T_free( EDL.Fname );
     }
@@ -204,14 +198,16 @@ func_list_parse( Func_T ** fncts,
            'LD_LIBRARY_PATH' and then the compiled-in path (except when this
            is a check run). */
 
-        if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+        char * ld_path = getenv( "LD_LIBRARY_PATH" );
+        if ( ld_path )
         {
-            ld = T_strdup( ld_path );
+            char * ld = T_strdup( ld_path );
 
-            for ( ldc = strtok( ld, ":" ); ldc != NULL;
-                  ldc = strtok( NULL, ":" ) )
+            char * ldc;
+            for ( ldc = strtok( ld, ":" ); ldc; ldc = strtok( NULL, ":" ) )
             {
                 EDL.Fname = get_string( "%s%sFunctions", ldc, slash( ldc ) );
+                struct stat buf;
                 if ( lstat( EDL.Fname, &buf ) == 0 )
                     break;
                 EDL.Fname = T_free( EDL.Fname );
@@ -224,6 +220,7 @@ func_list_parse( Func_T ** fncts,
              && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
         {
             EDL.Fname = T_strdup( libdir "Functions" );
+            struct stat buf;
             if ( lstat( EDL.Fname, &buf ) < 0 )
                 EDL.Fname = T_free( EDL.Fname );
         }
@@ -243,15 +240,6 @@ func_list_parse( Func_T ** fncts,
         THROW( EXCEPTION );
     }
 
-    /* Keep the lexer happy... */
-
-    if ( is_restart )
-        func_listrestart( func_listin );
-    else
-         is_restart = true;
-
-    /* Count the number of functions defined in the file */
-
     TRY
     {
         num = fll_count_functions( *fncts, num_predef_func );
@@ -260,6 +248,7 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         RETHROW;
     }
 
@@ -268,6 +257,7 @@ func_list_parse( Func_T ** fncts,
     if ( num == 0 )
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         return num_predef_func;
     }
 
@@ -277,10 +267,9 @@ func_list_parse( Func_T ** fncts,
     rewind( func_listin );
     nf = num + num_predef_func;
 
-    if ( num != 0 )
-        *fncts = T_realloc( *fncts, nf * sizeof **fncts );
+    *fncts = T_realloc( *fncts, nf * sizeof **fncts );
 
-    for ( cur = num_predef_func; cur < nf; cur++ )
+    for ( size_t cur = num_predef_func; cur < nf; cur++ )
     {
         ( *fncts )[ cur ].name = NULL;
         ( *fncts )[ cur ].fnct = NULL;
@@ -300,10 +289,13 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         RETHROW;
     }
 
     fclose( func_listin );
+
+    func_listlex_destroy( );
 
     return nf;
 }
@@ -314,20 +306,21 @@ func_list_parse( Func_T ** fncts,
  * file and counts the number of defined functions
  *---------------------------------------------------*/
 
-static size_t
+static
+size_t
 fll_count_functions( Func_T * fncts,
                      size_t   num_predef_func )
 {
-    int ret_token;
+    EDL.Lc = 1;
+
     int last_token = 0;
     size_t num = 0;
-    Func_T *f = NULL;
-
-
-    EDL.Lc = 1;
+    int ret_token;
 
     while ( ( ret_token = func_listlex( ) ) != 0 )
     {
+        Func_T * f = NULL;
+
         /* If the name of a loadable function conflicts with the name of a
            built-in function the loadable function will replace the built-in
            function completely (even if it doesn't get loaded!) */
@@ -335,8 +328,7 @@ fll_count_functions( Func_T * fncts,
         if ( ret_token == IDENT_TOKEN )
         {
             if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
-                                sizeof *fncts, ffl_func_cmp2 ) )
-                 != NULL )
+                                sizeof *fncts, fll_func_cmp2 ) ) )
             {
                 eprint( WARN, false, "Loadable function '%s()' hides "
                         "built-in function (line %ld in function data "
@@ -375,8 +367,9 @@ fll_count_functions( Func_T * fncts,
  * Function for comparing function names, used in sorting the function list
  *--------------------------------------------------------------------------*/
 
-static int
-ffl_func_cmp2( const void * a,
+static
+int
+fll_func_cmp2( const void * a,
                const void * b )
 {
     return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
@@ -388,20 +381,16 @@ ffl_func_cmp2( const void * a,
  * and tries to make sense from the entries
  *------------------------------------------------------------*/
 
-static void
+static
+void
 fll_get_functions( Func_T * fncts,
                    size_t   num_predef_func )
 {
+    EDL.Lc     = 1;
+    int state  = 0;
+    size_t act = num_predef_func;
+    size_t cur = act;
     int ret_token;
-    int state;
-    size_t cur;
-    size_t act;
-    size_t i;
-
-
-    EDL.Lc = 1;
-    state = 0;
-    act = cur = num_predef_func;
 
     while ( ( ret_token = func_listlex( ) ) != 0 )
     {
@@ -420,7 +409,7 @@ fll_get_functions( Func_T * fncts,
                    modules defining the same function, because here we only
                    care about the declarations in 'Functions') */
 
-                for ( i = 0; i < cur; i++ )
+                for ( size_t i = 0; i < cur; i++ )
                     if ( ! strcmp( fncts[ i ].name, func_listtext ) )
                     {
                         if ( i < num_predef_func )

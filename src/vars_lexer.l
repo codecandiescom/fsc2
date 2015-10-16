@@ -381,8 +381,6 @@ WS          [\n \t]+
 int
 variables_parser( FILE * in )
 {
-    static bool needs_restart = false;
-
     /* Don't allow more than one VARIABLES section */
 
     if ( EDL.compilation.sections[ VARIABLES_SECTION ] )
@@ -390,20 +388,13 @@ variables_parser( FILE * in )
         print( FATAL, "Multiple instances of VARIABLES section label.\n" );
         THROW( EXCEPTION );
     }
+
     EDL.compilation.sections[ VARIABLES_SECTION ] = true;
 
     varsin = in;
-
-    /* Keep the lexer happy... */
-
-    if ( needs_restart )
-        varsrestart( varsin );
-    else
-        needs_restart = true;
-
     varsparser_init( );
-
     varsparse( );
+    varslex_destroy( );
 
     return Vars_next_section;
 }

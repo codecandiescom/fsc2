@@ -230,6 +230,7 @@ devices_parser( FILE * in )
     devicesin = in;
 
     devicesparse( );
+    deviceslex_destroy( );
     load_all_drivers( );
 
     return Devices_next_section;

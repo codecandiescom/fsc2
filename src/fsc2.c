@@ -30,6 +30,9 @@
 #include <sys/un.h>
 
 
+extern int fsc2_conflex_destroy( void );
+
+
 /* Locally used global variables */
 
 static bool Is_loaded       = false;    /* set when EDL file is loaded */
@@ -230,7 +233,6 @@ main( int    argc,
             }
 
             fname = argv[ 1 ];
-
             if ( ! get_edl_file( fname ) )
                 break;
 
@@ -387,8 +389,8 @@ fsc2_get_conf( void )
     OTHERWISE
         return;
 
-    fsc2_confin = NULL;
-    if (    ! ( fsc2_confin = fopen( fname, "r" ) ) 
+    fsc2_confin = fopen( fname, "r" );
+    if (    ! fsc2_confin
          || ! fsc2_obtain_fcntl_lock( fsc2_confin, F_RDLCK, true ) )
     {
         if ( fsc2_confin )
@@ -404,12 +406,15 @@ fsc2_get_conf( void )
         fsc2_confparse( );
         fsc2_release_fcntl_lock( fsc2_confin );
         fclose( fsc2_confin );
+        fsc2_conflex_destroy( );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
+        fsc2_conflex_destroy( );
         fsc2_release_fcntl_lock( fsc2_confin );
         fclose( fsc2_confin );
+        fsc2_conflex_destroy( );
         if ( Fsc2_Internals.def_directory )
             Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );
@@ -448,9 +453,9 @@ get_edl_file( const char * fname )
         else
         {
             size_t size;
-            char *buf;
+            char * buf;
 
-            size = ( size_t ) pathconf( ".", _PC_PATH_MAX );
+            size = pathconf( ".", _PC_PATH_MAX );
             buf = T_malloc( size );
             EDL.files[ EDL.file_count - 1 ].name =
                             get_string( "%s/%s", getcwd( buf, size ), fname );
@@ -460,6 +465,8 @@ get_edl_file( const char * fname )
         struct stat file_stat;
         if ( stat( EDL.files[ EDL.file_count - 1 ].name, &file_stat ) == -1 )
         {
+            EDL.files[ EDL.file_count - 1 ].name =
+                                T_free( EDL.files[ EDL.file_count - 1 ].name );
             TRY_SUCCESS;
             return false;
         }
@@ -470,6 +477,8 @@ get_edl_file( const char * fname )
     }
     OTHERWISE
     {
+        if ( EDL.files[ EDL.file_count - 1 ].name )
+            T_free( EDL.files[ EDL.file_count - 1 ].name );
         if ( EDL.file_count > 1 )
             EDL.files = T_realloc( EDL.files,
                                    --EDL.file_count * sizeof *EDL.files );
@@ -505,7 +514,13 @@ no_gui_run( void )
     /* Start the child process for running the experiment */
 
     if ( ! run( ) )
+    {
+        run_sigchld_callback( NULL, Fsc2_Internals.check_return );
+        if ( Fsc2_Internals.def_directory )
+            Fsc2_Internals.def_directory =
+                                        T_free( Fsc2_Internals.def_directory );
         exit( EXIT_FAILURE );
+    }
 
     /* Wait until the child process raised the QUITTING signal, then run
        the handler for new data (which sends a confirmation to the child
@@ -524,6 +539,9 @@ no_gui_run( void )
         pause( );
 
     run_sigchld_callback( NULL, Fsc2_Internals.check_return );
+
+    if ( Fsc2_Internals.def_directory )
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
     exit( Fsc2_Internals.check_return );
 }
@@ -1164,10 +1182,18 @@ final_exit_handler( void )
     if ( Comm.mq_semaphore >= 0 )
         sema_destroy( Comm.mq_semaphore );
 
+
+    delete_devices( );
+    delete_device_name_list( );
+    pulser_cleanup( );
+    phases_clear( );
+    vars_clean_up( );
+    forget_prg( );
+    functions_exit( );
+
     /* If the program was killed by a signal indicating an unrecoverable
        error print out a message and (if this feature isn't switched off)
        send an email */
-
     if ( Crash.signo != 0 && Crash.signo != SIGTERM )
     {
         crash_report( );

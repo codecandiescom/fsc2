@@ -368,7 +368,7 @@ print( int          severity,
     if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
     {
         char buffer[ FL_BROWSER_LINELENGTH + 1 ];
-        char *cp = buffer;
+        char * cp = buffer;
         int space_left = FL_BROWSER_LINELENGTH;
 
         if ( severity == FATAL )

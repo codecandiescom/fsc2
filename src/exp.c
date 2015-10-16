@@ -22,6 +22,9 @@
 #include "exp_parser_common.h"
 
 
+extern int explex_destroy( void );
+
+
 /* Number of program token structures to be allocated as a chunk */
 
 #define PRG_CHUNK_SIZE 16384
@@ -59,8 +62,6 @@ extern void conditionparser_init( void ); /* from condition_parser.y */
 
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
-
-extern void exprestart( FILE * fp );
 
 extern Token_Val_T exp_runlval;           /* from exp_run_parser.y */
 extern Token_Val_T exp_testlval;          /* from exp_test_parser.y */
@@ -127,22 +128,9 @@ static const char *get_construct_name( int token_type );
 void
 store_exp( FILE * in )
 {
-    static bool is_restart = false;
-    long parenthesis_count = 0;
-    long square_brace_count = 0;
-    long i;
-
-
     /* Set input file */
 
     expin = in;
-
-    /* Let's try to keep the lexer happy... */
-
-    if ( is_restart )
-        exprestart( expin );
-    else
-        is_restart = true;
 
     EDL.prg_token = NULL;
     Cb_stack = NULL;
@@ -150,6 +138,8 @@ store_exp( FILE * in )
     /* Get and store all tokens (if there are no program tokens at all return
        immediately, then there's nothing left to be done or checked). */
 
+    long parenthesis_count = 0;
+    long square_brace_count = 0;
     get_and_store_tokens( &parenthesis_count, &square_brace_count );
 
     if ( EDL.prg_length <= 0 )
@@ -159,10 +149,10 @@ store_exp( FILE * in )
 
     EDL.prg_token->end = EDL.prg_token + 1;
 
-    for ( i = 1; i < EDL.prg_length - 1; i++ )
-        EDL.prg_token[ i ].end   = EDL.prg_token + i + 1;
+    for ( long i = 1; i < EDL.prg_length - 1; i++ )
+        EDL.prg_token[ i ].end = EDL.prg_token + i + 1;
 
-    EDL.prg_token[ i ].end = NULL;
+    EDL.prg_token[ EDL.prg_length - 1 ].end = NULL;
 
     /* Check that all parentheses and braces are balanced */
 
@@ -212,12 +202,10 @@ static void
 get_and_store_tokens( long * parenthesis_count,
                       long * square_brace_count )
 {
-    int token;
-    Prg_Token_T *cur;
-    char *cur_Fname = NULL;
+    char * cur_Fname = NULL;
     long curly_brace_in_loop_count = 0;
     bool in_loop = false;
-
+    int token;
 
     while ( ( token = explex( ) ) != 0 )
     {
@@ -227,6 +215,7 @@ get_and_store_tokens( long * parenthesis_count,
             {
                 print( FATAL, "Unbalanced parentheses before ON_STOP "
                        "label.\n" );
+                explex_destroy( );
                 THROW( EXCEPTION );
             }
 
@@ -234,12 +223,14 @@ get_and_store_tokens( long * parenthesis_count,
             {
                 print( FATAL, "Unbalanced square braces before ON_STOP "
                         "label.\n" );
+                explex_destroy( );
                 THROW( EXCEPTION );
             }
 
             if ( Cb_stack != NULL )
             {
                 print( FATAL, "ON_STOP label found within a block.\n" );
+                explex_destroy( );
                 THROW( EXCEPTION );
             }
 
@@ -255,7 +246,7 @@ get_and_store_tokens( long * parenthesis_count,
                                          ( EDL.prg_length + PRG_CHUNK_SIZE )
                                        * sizeof *EDL.prg_token );
 
-        cur = EDL.prg_token + EDL.prg_length;
+        Prg_Token_T * cur = EDL.prg_token + EDL.prg_length;
         cur->token = token;
 
         /* If the file name changed get a copy of the new file name. Then set
@@ -289,8 +280,11 @@ get_and_store_tokens( long * parenthesis_count,
 
         switch( cur->token )
         {
-            case FOR_TOK : case WHILE_TOK : case UNLESS_TOK :
-            case REPEAT_TOK : case FOREVER_TOK :
+            case FOR_TOK :
+            case WHILE_TOK :
+            case UNLESS_TOK :
+            case REPEAT_TOK :
+            case FOREVER_TOK :
                 in_loop = true;
                 break;
 
@@ -303,6 +297,7 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( *parenthesis_count < 0 )
                 {
                     print( FATAL, "Found ')' without matching '('.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
                 break;
@@ -311,12 +306,14 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( *parenthesis_count != 0 )
                 {
                     print( FATAL, "More '(' than ')' found before a '{'.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
                 if ( *square_brace_count != 0 )
                 {
                     print( FATAL, "More '[' than ']' found before a '{'.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
@@ -329,18 +326,21 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( *parenthesis_count != 0 )
                 {
                     print( FATAL, "More '(' than ')' found before a '}'.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
                 if ( *square_brace_count != 0 )
                 {
                     print( FATAL, "More '[' than ']' found before a '}'.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
                 if ( ! pop_curly_brace( ) )
                 {
                     print( FATAL, "Found '}' without matching '{'.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
@@ -358,6 +358,7 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( *square_brace_count < 0 )
                 {
                     print( FATAL, "Found ']' without matching '['.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
                 break;
@@ -388,6 +389,7 @@ get_and_store_tokens( long * parenthesis_count,
                 {
                     print( FATAL, "More '(' than ')' found at end of "
                             "statement.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
 
@@ -395,6 +397,7 @@ get_and_store_tokens( long * parenthesis_count,
                 {
                     print( FATAL, "More '[' than ']' found at end of of "
                            "statement.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
                 break;
@@ -403,6 +406,7 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( ! in_loop )
                 {
                     print( FATAL, "BREAK statement not within a loop.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
                 break;
@@ -411,6 +415,7 @@ get_and_store_tokens( long * parenthesis_count,
                 if ( ! in_loop )
                 {
                     print( FATAL, "NEXT statement not within a loop.\n" );
+                    explex_destroy( );
                     THROW( EXCEPTION );
                 }
                 break;
@@ -422,6 +427,8 @@ get_and_store_tokens( long * parenthesis_count,
 
         EDL.prg_length++;
     }
+
+    explex_destroy( );
 
     /* Now that we know how many tokens there are cut back the length of the
        array for tokens to the required length */
@@ -443,10 +450,7 @@ get_and_store_tokens( long * parenthesis_count,
 static void
 push_curly_brace( Prg_Token_T * where )
 {
-    struct CB_Stack *new_cb;
-
-
-    new_cb = T_malloc( sizeof *new_cb );
+    struct CB_Stack *new_cb = T_malloc( sizeof *new_cb );
     new_cb->next = Cb_stack;
     new_cb->where = where;
     Cb_stack = new_cb;
@@ -465,13 +469,10 @@ push_curly_brace( Prg_Token_T * where )
 static bool
 pop_curly_brace( void )
 {
-    struct CB_Stack *old_cb;
-
-
     if ( Cb_stack == NULL )
         return false;
 
-    old_cb = Cb_stack;
+    struct CB_Stack * old_cb = Cb_stack;
     Cb_stack = old_cb->next;
     T_free( old_cb );
 
@@ -487,10 +488,6 @@ pop_curly_brace( void )
 void
 forget_prg( void )
 {
-    char *cur_Fname;
-    long i;
-
-
     EDL.On_Stop_Pos = -1;
 
     /* Check if anything has to be done at all */
@@ -505,32 +502,37 @@ forget_prg( void )
        free the string, then free memory allocated in the program token
        structures. */
 
-    cur_Fname = EDL.prg_token[ 0 ].Fname;
-    T_free( cur_Fname );
+    char * cur_Fname = EDL.prg_token[ 0 ].Fname;
 
-    for ( i = 0; i < EDL.prg_length; ++i )
+    Prg_Token_T * cur = EDL.prg_token;
+    for ( long i = 0; i < EDL.prg_length; i++, cur++ )
     {
-        switch( EDL.prg_token[ i ].token )
+        switch( cur->token )
         {
             case E_STR_TOKEN :
-                T_free( EDL.prg_token[ i ].tv.sptr );
+                T_free( cur->tv.sptr );
                 break;
 
             case E_FUNC_TOKEN :       /* get rid of string for function name */
-                T_free( EDL.prg_token[ i ].tv.vptr->name );
+                T_free( cur->tv.vptr->name );
                 /* fall through */
 
             case E_VAR_REF :          /* get rid of copy of stack variable */
-                T_free( EDL.prg_token[ i ].tv.vptr );
+                T_free( cur->tv.vptr );
                 break;
         }
 
         /* If the file name changed we store the pointer to the new name and
            free the string */
 
-        if ( EDL.prg_token[ i ].Fname != cur_Fname )
-            T_free( cur_Fname = EDL.prg_token[ i ].Fname );
+        if ( cur->Fname != cur_Fname )
+        {
+            T_free( cur_Fname );
+            cur_Fname = cur->Fname;
+        }
     }
+
+    T_free( cur_Fname );
 
     /* Get rid of the memory used for storing the tokens */
 
@@ -553,14 +555,13 @@ forget_prg( void )
  * between a matching pair of curly braces.
  *----------------------------------------------------------------*/
 
-static void
+static
+void
 loop_setup( void )
 {
-    long i;
     long cur_pos;
 
-
-    for ( i = 0; i < EDL.prg_length; ++i )
+    for ( long i = 0; i < EDL.prg_length; ++i )
     {
         switch( EDL.prg_token[ i ].token )
         {
@@ -601,7 +602,6 @@ setup_while_or_repeat( int    type,
 {
     Prg_Token_T *cur = EDL.prg_token + *pos;
     long i = *pos + 1;
-
 
     /* Start of with some sanity checks */
 
@@ -701,7 +701,6 @@ setup_if_else( long        *  pos,
     bool in_if = true;
     bool dont_need_close_parens = false;           /* set for IF-ELSE and
                                                       UNLESS-ELSE constructs */
-
     /* Start with some sanity checks */
 
     if ( i == EDL.prg_length )
@@ -942,8 +941,6 @@ void
 exp_test_run( void )
 {
     int old_FLL = EDL.File_List_Len;
-
-
     EDL.Fname = T_free( EDL.Fname );
     In_for_lex = false;
     In_cond = 0;
@@ -1042,8 +1039,7 @@ exp_test_run( void )
 static void
 deal_with_token_in_test( void )
 {
-    Prg_Token_T *cur = EDL.cur_prg_token;
-
+    Prg_Token_T * cur = EDL.cur_prg_token;
 
     switch ( cur->token )
     {
@@ -1095,6 +1091,7 @@ deal_with_token_in_test( void )
         case FOR_TOK :
             if ( cur->counter == 0 )
                 get_for_cond( cur );
+
             if ( test_for_cond( cur ) )
             {
                 cur->counter = 1;
@@ -1157,67 +1154,70 @@ deal_with_token_in_test( void )
 int
 exp_runlex( void )
 {
+    if (    ! EDL.cur_prg_token
+         || EDL.cur_prg_token >= EDL.prg_token + EDL.prg_length )
+        return 0;
+
+    Token_count++;
+
+    EDL.Fname = EDL.cur_prg_token->Fname;
+    EDL.Lc    = EDL.cur_prg_token->Lc;
+
     Var_T *ret, *from, *next, *prev;
 
-
-    if (    EDL.cur_prg_token != NULL
-         && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    switch ( EDL.cur_prg_token->token )
     {
-        Token_count++;
+        case WHILE_TOK :
+        case REPEAT_TOK :
+        case BREAK_TOK :
+        case NEXT_TOK :
+        case FOR_TOK :
+        case FOREVER_TOK :
+        case UNTIL_TOK :
+        case IF_TOK :
+        case UNLESS_TOK :
+        case ELSE_TOK :
+            return 0;
 
-        EDL.Fname = EDL.cur_prg_token->Fname;
-        EDL.Lc    = EDL.cur_prg_token->Lc;
+        case '}' :
+            return '}';
 
-        switch( EDL.cur_prg_token->token )
-        {
-            case WHILE_TOK : case REPEAT_TOK : case BREAK_TOK   :
-            case NEXT_TOK  : case FOR_TOK    : case FOREVER_TOK :
-            case UNTIL_TOK : case IF_TOK     : case UNLESS_TOK  :
-            case ELSE_TOK  :
-                return 0;
+        case E_STR_TOKEN :
+            exp_runlval.sptr = EDL.cur_prg_token->tv.sptr;
+            break;
 
-            case '}' :
-                return '}';
+        case E_FUNC_TOKEN :
+            ret = vars_push( INT_VAR, 0L );
+            from = ret->from;
+            next = ret->next;
+            prev = ret->prev;
+            memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
+            ret->name = T_strdup( ret->name );
+            ret->from = from;
+            ret->next = next;
+            ret->prev = prev;
+            exp_runlval.vptr = ret;
+            break;
 
-            case E_STR_TOKEN :
-                exp_runlval.sptr = EDL.cur_prg_token->tv.sptr;
-                break;
+        case E_VAR_REF :
+            ret = vars_push( INT_VAR, 0L );
+            from = ret->from;
+            next = ret->next;
+            prev = ret->prev;
+            memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
+            ret->from = from;
+            ret->next = next;
+            ret->prev = prev;
+            exp_runlval.vptr = ret;
+            break;
 
-            case E_FUNC_TOKEN :
-                ret = vars_push( INT_VAR, 0L );
-                from = ret->from;
-                next = ret->next;
-                prev = ret->prev;
-                memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
-                ret->name = T_strdup( ret->name );
-                ret->from = from;
-                ret->next = next;
-                ret->prev = prev;
-                exp_runlval.vptr = ret;
-                break;
-
-            case E_VAR_REF :
-                ret = vars_push( INT_VAR, 0L );
-                from = ret->from;
-                next = ret->next;
-                prev = ret->prev;
-                memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
-                ret->from = from;
-                ret->next = next;
-                ret->prev = prev;
-                exp_runlval.vptr = ret;
-                break;
-
-            default :
-                memcpy( &exp_runlval, &EDL.cur_prg_token->tv,
-                        sizeof exp_runlval );
-                break;
-        }
-
-        return EDL.cur_prg_token++->token;
+        default :
+            memcpy( &exp_runlval, &EDL.cur_prg_token->tv,
+                    sizeof exp_runlval );
+            break;
     }
 
-    return 0;
+    return EDL.cur_prg_token++->token;
 }
 
 
@@ -1229,87 +1229,87 @@ exp_runlex( void )
 int
 conditionlex( void )
 {
+    if (    ! EDL.cur_prg_token
+         || EDL.cur_prg_token >= EDL.prg_token + EDL.prg_length )
+        return 0;
+
+    Token_count++;
+
+    EDL.Fname = EDL.cur_prg_token->Fname;
+    EDL.Lc    = EDL.cur_prg_token->Lc;
+
     int token;
-    Var_T *ret, *from, *next, *prev;
+    Var_T *ret,
+          *from,
+          *next,
+          *prev;
 
-
-    if (    EDL.cur_prg_token != NULL
-         && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    switch ( EDL.cur_prg_token->token )
     {
-        Token_count++;
+        case '{' :                 /* always signifies end of condition */
+            return 0;
 
-        EDL.Fname = EDL.cur_prg_token->Fname;
-        EDL.Lc    = EDL.cur_prg_token->Lc;
+        case '?' :
+            In_cond++;
+            EDL.cur_prg_token++;
+            return '?';
 
-        switch( EDL.cur_prg_token->token )
-        {
-            case '{' :                 /* always signifies end of condition */
+        case ':' :                 /* separator in for loop condition */
+            if ( In_cond > 0 )
+            {
+                In_cond--;
+                EDL.cur_prg_token++;
+                return ':';
+            }
+            if ( In_for_lex )
                 return 0;
+            print( FATAL, "Syntax error in condition at token ':'.\n" );
+            THROW( EXCEPTION );
 
-            case '?' :
-                In_cond++;
-                EDL.cur_prg_token++;
-                return '?';
+        case E_STR_TOKEN :
+            conditionlval.sptr = EDL.cur_prg_token->tv.sptr;
+            EDL.cur_prg_token++;
+            return E_STR_TOKEN;
 
-            case ':' :                 /* separator in for loop condition */
-                if ( In_cond > 0 )
-                {
-                    In_cond--;
-                    EDL.cur_prg_token++;
-                    return ':';
-                }
-                if ( In_for_lex )
-                    return 0;
-                print( FATAL, "Syntax error in condition at token ':'.\n" );
-                THROW( EXCEPTION );
+        case E_FUNC_TOKEN :
+            ret = vars_push( INT_VAR, 0L );
+            from = ret->from;
+            next = ret->next;
+            prev = ret->prev;
+            memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
+            ret->name = T_strdup( ret->name );
+            ret->from = from;
+            ret->next = next;
+            ret->prev = prev;
+            conditionlval.vptr = ret;
+            EDL.cur_prg_token++;
+            return E_FUNC_TOKEN;
 
-            case E_STR_TOKEN :
-                conditionlval.sptr = EDL.cur_prg_token->tv.sptr;
-                EDL.cur_prg_token++;
-                return E_STR_TOKEN;
+        case E_VAR_REF :
+            ret = vars_push( INT_VAR, 0L );
+            from = ret->from;
+            next = ret->next;
+            prev = ret->prev;
+            memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
+            ret->from = from;
+            ret->next = next;
+            ret->prev = prev;
+            conditionlval.vptr = ret;
+            EDL.cur_prg_token++;
+            return E_VAR_REF;
 
-            case E_FUNC_TOKEN :
-                ret = vars_push( INT_VAR, 0L );
-                from = ret->from;
-                next = ret->next;
-                prev = ret->prev;
-                memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
-                ret->name = T_strdup( ret->name );
-                ret->from = from;
-                ret->next = next;
-                ret->prev = prev;
-                conditionlval.vptr = ret;
-                EDL.cur_prg_token++;
-                return E_FUNC_TOKEN;
+        case '=' :
+            print( FATAL, "For comparisons '==' must be used ('=' is for "
+                   "assignments only).\n", EDL.Fname, EDL.Lc );
+            THROW( EXCEPTION );
 
-            case E_VAR_REF :
-                ret = vars_push( INT_VAR, 0L );
-                from = ret->from;
-                next = ret->next;
-                prev = ret->prev;
-                memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
-                ret->from = from;
-                ret->next = next;
-                ret->prev = prev;
-                conditionlval.vptr = ret;
-                EDL.cur_prg_token++;
-                return E_VAR_REF;
-
-            case '=' :
-                print( FATAL, "For comparisons '==' must be used ('=' is for "
-                       "assignments only).\n", EDL.Fname, EDL.Lc );
-                THROW( EXCEPTION );
-
-            default :
-                memcpy( &conditionlval, &EDL.cur_prg_token->tv,
-                        sizeof conditionlval );
-                token = EDL.cur_prg_token->token;
-                EDL.cur_prg_token++;
-                return token;
-        }
+        default :
+            memcpy( &conditionlval, &EDL.cur_prg_token->tv,
+                    sizeof conditionlval );
+            token = EDL.cur_prg_token->token;
+            EDL.cur_prg_token++;
+            return token;
     }
-
-    return 0;
 }
 
 
@@ -1321,9 +1321,6 @@ conditionlex( void )
 bool
 test_condition( Prg_Token_T * cur )
 {
-    bool condition;
-
-
     EDL.cur_prg_token++;                        /* skip the WHILE or IF etc. */
     conditionparser_init( );
     conditionparse( );                          /* get the value */
@@ -1349,6 +1346,8 @@ test_condition( Prg_Token_T * cur )
     }
 
     /* Test the result - everything nonzero returns OK */
+
+    bool condition;
 
     if ( EDL.Var_Stack->type == INT_VAR )
         condition = EDL.Var_Stack->val.lval;

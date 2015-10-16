@@ -280,9 +280,6 @@ WS          [\n=,:. ]+
 int
 phases_parser( FILE * in )
 {
-    static bool is_restart = false;
-
-
     if ( EDL.compilation.sections[ PHASES_SECTION ] )
     {
         print( FATAL, "Multiple instances of PHASES section label.\n" );
@@ -291,13 +288,6 @@ phases_parser( FILE * in )
     EDL.compilation.sections[ PHASES_SECTION ] = true;
 
     phasesin = in;
-
-    /* Keep the lexer happy... */
-
-    if ( is_restart )
-        phasesrestart( phasesin );
-    else
-         is_restart = true;
 
     TRY
     {
@@ -308,8 +298,11 @@ phases_parser( FILE * in )
     CATCH( INVALID_INPUT_EXCEPTION )
     {
         print( FATAL, "Invalid input near '%s'.\n", phasestext );
+        phaseslex_destroy( );
         THROW( EXCEPTION );
     }
+
+    phaseslex_destroy( );
 
     return Phases_next_section;
 }

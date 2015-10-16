@@ -62,12 +62,12 @@ T_malloc( size_t size )
 
 #if defined FSC2_MDEBUG
     if ( backtrace( trace_buf, 2 ) == 2 )
-        fprintf( stderr, "(%d) malloc:  %p (%lu) at %s\n",
-                 Fsc2_Internals.I_am == CHILD, mem, ( unsigned long ) size,
+        fprintf( stderr, "(%d) malloc:  %p (%zu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, mem, size,
                  backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) calloc:  %p (%lu)\n",
-                 Fsc2_Internals.I_am == CHILD, mem, ( unsigned long ) size );
+        fprintf( stderr, "(%d) calloc:  %p (%zu)\n",
+                 Fsc2_Internals.I_am == CHILD, mem, size );
 #endif
 
     return mem;
@@ -121,14 +121,12 @@ T_calloc( size_t nmemb,
 
 #if defined FSC2_MDEBUG
     if ( backtrace( trace_buf, 2 ) == 2 )
-        fprintf( stderr, "(%d) calloc:  %p (%lu) at %s\n",
-                 Fsc2_Internals.I_am == CHILD, mem,
-                 ( unsigned long ) ( nmemb * size ),
+        fprintf( stderr, "(%d) calloc:  %p (%zu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, mem, nmemb * size,
                  backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) calloc:  %p (%lu)\n",
-                 Fsc2_Internals.I_am == CHILD, mem,
-                 ( unsigned long ) ( nmemb * size ) );
+        fprintf( stderr, "(%d) calloc:  %p (%zu)\n",
+                 Fsc2_Internals.I_am == CHILD, mem, nmemb * size );
 #endif
 
     return mem;
@@ -172,14 +170,12 @@ T_realloc( void   * ptr,
 
 #if defined FSC2_MDEBUG
     if ( backtrace( trace_buf, 2 ) == 2 )
-        fprintf( stderr, "(%d) realloc: %p -> %p (%lu) at %s\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
-                 ( unsigned long )size,
+        fprintf( stderr, "(%d) realloc: %p -> %p (%zu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
                  backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) realloc: %p -> %p (%lu)\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
-                 ( unsigned long ) size );
+        fprintf( stderr, "(%d) realloc: %p -> %p (%zu)\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
 #endif
 
     return new_ptr;
@@ -228,14 +224,12 @@ T_realloc_or_free( void   * ptr,
 
 #if defined FSC2_MDEBUG
     if ( backtrace( trace_buf, 2 ) == 2 )
-        fprintf( stderr, "(%d) realloc: %p -> %p (%lu) at %s\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
-                 ( unsigned long ) size,
+        fprintf( stderr, "(%d) realloc: %p -> %p (%zu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
                  backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) realloc: %p -> %p (%lu)\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
-                 ( unsigned long ) size );
+        fprintf( stderr, "(%d) realloc: %p -> %p (%zu)\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
 #endif
 
     return new_ptr;
@@ -294,21 +288,23 @@ T_strdup( const char * str )
     if ( str == NULL )
         return NULL;
 
-    size_t len = strlen( str );
-
-    char * new_str = T_malloc( len + 1 );
-    strcpy( new_str, str );
+    char * new_str = strdup( str );
+    if ( ! new_str )
+    {
+        print( FATAL, "Running out of memory.\n" );
+        THROW( OUT_OF_MEMORY_EXCEPTION );
+    }
 
 #if defined FSC2_MDEBUG
     if ( backtrace( trace_buf, 2 ) == 2 )
-        fprintf( stderr, "(%d) strdup:  %p (%lu) at %s\n",
+        fprintf( stderr, "(%d) strdup:  %p (%zu) at %s\n",
                  Fsc2_Internals.I_am == CHILD, ( void * ) new_str,
-                 ( unsigned long ) ( len + 1 ),
+                 srlen( str ) + 1,
                  backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) strdup:  %p (%lu)\n",
+        fprintf( stderr, "(%d) strdup:  %p (%zu)\n",
                  Fsc2_Internals.I_am == CHILD, ( void * ) new_str,
-                 ( unsigned long ) ( len + 1 ) );
+                 strlen( str ) + 1 );
 #endif
 
     return new_str;

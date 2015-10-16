@@ -563,9 +563,6 @@ WS          [\n=: ]+
 int
 assignments_parser( FILE * in )
 {
-    static bool needs_restart = false;
-
-
     if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
     {
         print( FATAL, "Multiple instances of ASSIGNMENTS section label.\n" );
@@ -574,19 +571,10 @@ assignments_parser( FILE * in )
     EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = true;
 
     assignin = in;
-
-    /* Keep the lexer happy... */
-
-    if ( needs_restart )
-        assignrestart( assignin );
-    else
-         needs_restart = true;
-
     assignparser_init( );
-
     Cur_Pulser = 0;
-
     assignparse( );
+    assignlex_destroy( );
 
     return Assign_next_section;
 }
