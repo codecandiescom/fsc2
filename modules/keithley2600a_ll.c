@@ -101,15 +101,13 @@ keithley2600a_close( void )
  * Sends a command to the device
  *--------------------------------------------------------------*/
 
-bool
+void
 keithley2600a_cmd( const char * cmd )
 {
 	size_t len = strlen( cmd );
 
     if ( vxi11_write( cmd, &len, false ) != VXI11_SUCCESS )
 		keithley2600a_comm_failure( );
-
-	return true;
 }
 
 
