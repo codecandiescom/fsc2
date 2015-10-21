@@ -380,7 +380,7 @@ sourcemeter_output_state( Var_T * v )
                    "combination of voltage level (%s), range (%s) and "
                    "compliance current (%s) is not possible.\n",
                    ppc( ch, "" ), pp_v( k26->source[ ch ].levelv, bufs[ 0 ] ),
-                   pp_v( k26->source[ ch ].rangev, bufs[ 2 ] ),
+                   pp_v( k26->source[ ch ].rangev, bufs[ 1 ] ),
                    pp_a( k26->source[ ch ].leveli, bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
@@ -2614,11 +2614,11 @@ default_settings( void )
         k26->source[ ch ].autorangei = true;
 
 #if defined _2601A || defined _2602A
-        k26->source[ ch ].limitv = 1;
-        k26->source[ ch ].limiti = 40;
+        k26->source[ ch ].limitv = 40;
+        k26->source[ ch ].limiti = 1;
 #else
-        k26->source[ ch ].limitv = 100.0e-3;
-        k26->source[ ch ].limiti = 20;
+        k26->source[ ch ].limitv = 20;
+        k26->source[ ch ].limiti = 100.0e-3;
 #endif
 
 #if defined _2601A || defined _2602A || defined _2611A || defined _2612A
