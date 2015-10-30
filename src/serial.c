@@ -825,9 +825,10 @@ fsc2_serial_read( int          sn,
 
         if ( us_wait != 0 )
         {
+            fd_set rfds;
+
           read_retry:
 
-            fd_set rfds;
             FD_ZERO( &rfds );
             FD_SET( Serial_Ports[ sn ].fd, &rfds );
 
