@@ -470,7 +470,7 @@ fsc2_serial_open( int sn,
 
     /* Set the close-on-exec flag for the file descriptor */
 
-    int fd_flags =  = fcntl( fd, F_GETFD );
+    int fd_flags = fcntl( fd, F_GETFD );
     if (    fd_flags == -1
          || fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC ) == -1 )
         return fail_on_open( sn, fd, "Failed to set CLOSE_ON_EXEC flag on" );
@@ -633,9 +633,10 @@ fsc2_serial_write( int          sn,
         FD_ZERO( &wrds );
         FD_SET( Serial_Ports[ sn ].fd, &wrds );
 
+        struct timeval timeout;
+
     write_retry:
 
-        struct timeval timeout;
         if ( us_wait > 0 )
         {
             timeout.tv_sec  = us_wait / 1000000;
@@ -718,7 +719,9 @@ fsc2_serial_write( int          sn,
  *   count          :  length of the buffer
  *   term           :  (optional) string with the character(s) that act as
  *                     termination for the data send by the device (can be
- *                     empty string or a NULL pointer)
+ *                     empty string or a NULL pointer, which has the conse-
+ *                     quence that '\0' can't be part of the terminating
+ *                     string)
  *   us_wait        :  timeout in us we're supposed to wait for data to
  *                     be read from the serial port
  *   quit_on_signal :  flag that tells if the function is to return
@@ -774,31 +777,31 @@ fsc2_serial_read( int          sn,
 
     LOG_FUNCTION_START( sn );
 
-    size_t term_len = term ? strlen( term ) : 0;
+    size_t term_len == term ? strlen( term ) : 0;
 
     if ( ll == LL_ALL )
     {
         if ( ! term_len )
         {
-            if ( still_to_wait == 0 )
+            if ( us_wait == 0 )
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "without delay\n", ( long ) count,
                                          sn );
-            else if ( still_to_wait < 0 )
+            else if ( us_wait < 0 )
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read\n",
                                          ( long ) count, sn );
             else
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "within %ld ms\n", ( long ) count,
-                                         still_to_wait / 1000, sn );
+                                         us_wait / 1000, sn );
         }
         else
         {
-            if ( still_to_wait == 0 )
+            if ( us_wait == 0 )
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "or until '%s' is received without "
                                          "delay\n", ( long ) count, term, sn );
-            else if ( still_to_wait < 0 )
+            else if ( us_wait < 0 )
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "or until '%s' is received\n",
                                          ( long ) count, term, sn );
@@ -806,13 +809,14 @@ fsc2_serial_read( int          sn,
                 fsc2_serial_log_message( sn, "Up to %ld bytes to read "
                                          "within %ld ms or until '%s' is "
                                          "received\n", ( long ) count,
-                                         still_to_wait / 1000, term, sn );
+                                         us_wait / 1000, term, sn );
         }
     }
 
+    long still_to_wait = us_wait;
     unsigned char * p = buf;  // pointer to next position for data to be read
     size_t total_count = 0;
-    long still_to_wait = us_wait;
+    bool is_term = false;
 
     do {
 
@@ -954,11 +958,10 @@ fsc2_serial_read( int          sn,
 
         /* Check if we read in the termination sequence */
 
-        bool is_term = false;
         if (    term
              && term_len
              && total_count >= term_len
-                && ! strncmp( ( char * ) p - term_len, term, term_len ) )
+             && ! strncmp( ( char * ) p - term_len, term, term_len ) )
             is_term = true;
 
         if ( us_wait > 0 )
@@ -1359,7 +1362,8 @@ open_serial_log( int sn )
     TRY
     {
         dev_name = T_strdup( Serial_Ports[ sn ].dev_name );
-        while ( ( char * cp = strchr( dev_name, '/' ) ) )
+        char * cp;
+        while ( ( cp = strchr( dev_name, '/' ) ) )
             *cp = '_';
 
 #if defined SERIAL_LOG_DIR
