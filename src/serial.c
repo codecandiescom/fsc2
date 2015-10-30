@@ -818,8 +818,11 @@ fsc2_serial_read( int          sn,
     size_t total_count = 0;
     bool is_term = false;
 
-    do {
+    struct timeval before;
+    gettimeofday( &before, NULL );
 
+    do
+    {
         /* If there is a non-zero timeout wait using select() for data to
            become readable (negative timeout means wait forever). */
 
@@ -832,14 +835,12 @@ fsc2_serial_read( int          sn,
             FD_ZERO( &rfds );
             FD_SET( Serial_Ports[ sn ].fd, &rfds );
 
-            struct timeval before;
             struct timeval timeout;
 
             if ( us_wait > 0 )
             {
                 timeout.tv_sec  = still_to_wait / 1000000;
                 timeout.tv_usec = still_to_wait % 1000000;
-                gettimeofday( &before, NULL );
             }
 
             raise_permissions( );
@@ -897,6 +898,7 @@ fsc2_serial_read( int          sn,
 
             if ( us_wait > 0 )
             {
+                struct timeval after;
                 gettimeofday( &after, NULL );
                 still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
                                  - ( before.tv_sec * 1000000 + before.tv_usec );
