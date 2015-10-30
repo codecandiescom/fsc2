@@ -817,7 +817,6 @@ fsc2_serial_read( int          sn,
     unsigned char * p = buf;  // pointer to next position for data to be read
     size_t total_count = 0;
     bool is_term = false;
-
     struct timeval before;
     gettimeofday( &before, NULL );
 
@@ -906,7 +905,7 @@ fsc2_serial_read( int          sn,
             }
         }
 
-        /* Now try to read */
+        /* Now ready for trying to read */
 
         raise_permissions( );
 
@@ -969,6 +968,7 @@ fsc2_serial_read( int          sn,
 
         if ( us_wait > 0 )
         {
+            struct timeval after;
             gettimeofday( &after, NULL );
             still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
                              - ( before.tv_sec * 1000000 + before.tv_usec );
