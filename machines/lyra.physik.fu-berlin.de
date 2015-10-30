@@ -1,16 +1,12 @@
 # -*-Makefile-*-
 
 prefix                  := /usr/local
-OWNER                   := fsc2
 GPIB_LIBRARY            := SLG
 GPIB_CONF_FILE          := /etc/gpib.conf
 GPIB_LOG_LEVEL          := HIGH
-GPIB_HEADER_DIR         := /usr/local/include/gpib
 SERIAL_LOG_LEVEL        := LOW
 LAN_LOG_LEVEL           := LOW
-FLEX_NEEDS_DECLARATIONS := yes
-EDITOR                  := vim
+EDITOR                  := nano
 BROWSER                 := firefox
 WITH_HTTP_SERVER        := yes
 DEFAULT_HTTP_PORT       := 8080
-FLEX_NEEDS_BISON_DECLARATIONS := yes
