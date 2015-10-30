@@ -906,15 +906,14 @@ fsc2_serial_read( int          sn,
             }
         }
 
-        /* Now ready for trying to read */
-
-        raise_permissions( );
 
         /* We've finally arrived at really trying to read from the serial port.
-           If there's no termination string be prepaired to read as many bytes
+           If there's no termination string we try to read as many bytes
            as fit into the buffer. Otherwise we can read only one byte to be
            able to check if, with this byte, we got the the termination string
-           and not read past that... */
+           and don't read past its end... */
+
+        raise_permissions( );
 
         ssize_t read_count;
         while (    ( read_count = read( Serial_Ports[ sn ].fd, p,
@@ -925,10 +924,10 @@ fsc2_serial_read( int          sn,
 
         lower_permissions( );
 
-        /* Getting no bytes is possible if we were asked to read without
-           waiting and then it's ok, but under strange circumstances it could
-           also happen despite select() telling us there's something to read,
-           in which case this has to be considered an error */
+        /* Getting nothing is possible if we were asked to read without
+           waiting and then it's ok, but under strange circumstances it
+           could also happen despite select() telling us there's something
+           to read, in which case this has to be considered an error */
 
         if ( read_count == 0 )
         {
