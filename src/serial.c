@@ -870,6 +870,7 @@ fsc2_serial_read( int          sn,
                     still_to_wait -=
                                   ( after.tv_sec  * 1000000 + after.tv_usec  )
                                 - ( before.tv_sec * 1000000 + before.tv_usec );
+                    gettimeofday( &before, NULL );
 
                     if ( still_to_wait > 0 )
                         goto read_retry;
@@ -972,6 +973,7 @@ fsc2_serial_read( int          sn,
             gettimeofday( &after, NULL );
             still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
                              - ( before.tv_sec * 1000000 + before.tv_usec );
+            gettimeofday( &before, NULL );
         }
     } while (    ! is_term
               && total_count < count
