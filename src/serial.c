@@ -777,7 +777,7 @@ fsc2_serial_read( int          sn,
 
     LOG_FUNCTION_START( sn );
 
-    size_t term_len == term ? strlen( term ) : 0;
+    size_t term_len = term ? strlen( term ) : 0;
 
     if ( ll == LL_ALL )
     {
