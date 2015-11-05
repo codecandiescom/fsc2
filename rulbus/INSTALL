@@ -129,7 +129,7 @@ device number." 12 70 "$MAJOR" 2> /tmp/RULBUS_reply
 You selected the following settings for the driver:\n\n\
       Major device number:     $MAJOR\n\
       Install directory:       $PREFIX\n\n\
-           Create 'include/autoconf.h'?\n" 11 57
+           Create 'driver/rulbus_epp_autoconf.h'?\n" 11 57
 
 	return $?
 
@@ -137,15 +137,15 @@ You selected the following settings for the driver:\n\n\
 
 
 ################################################################
-# Create the autoconf.h file
+# Create the driver/rulbus_epp_autoconf.h file
 
 function make_auto() {
 
-echo "/* Automatically created - change carefully */" > include/autoconf.h
-echo "" >> include/autoconf.h
-echo "#define RULBUS_EPP_MAJOR    $MAJOR" >> include/autoconf.h
-echo "#define RULBUS_EPP_BASE     $BASE"  >> include/autoconf.h
-echo "#define RULBUS_EPP_PREFIX   \"$PREFIX\"" >> include/autoconf.h
+echo "/* Automatically created - change carefully */" > driver/rulbus_epp_autoconf.h
+echo "" >> driver/rulbus_epp_autoconf.h
+echo "#define RULBUS_EPP_MAJOR    $MAJOR" >> driver/rulbus_epp_autoconf.h
+echo "#define RULBUS_EPP_BASE     $BASE"  >> driver/rulbus_epp_autoconf.h
+echo "#define RULBUS_EPP_PREFIX   \"$PREFIX\"" >> driver/rulbus_epp_autoconf.h
 
 } # end of make_auto()
 
@@ -309,8 +309,8 @@ function do_install() {
 
 	# Ask user if he wants to install the library, driver and include files etc.
 
-	PREFIX=`grep RULBUS_EPP_PREFIX include/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
-	MAJOR=`grep RULBUS_EPP_MAJOR include/autoconf.h | awk '{print $3}'`;
+	PREFIX=`grep RULBUS_EPP_PREFIX driver/rulbus_epp_autoconf.h | sed 's/[^\"]*//' | tr -d \"`
+	MAJOR=`grep RULBUS_EPP_MAJOR driver/rulbus_epp_autoconf.h | awk '{print $3}'`;
 	if [ $IS_NEW_KERNEL ]
 	then
 		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/rulbus_epp.ko";
@@ -321,14 +321,13 @@ function do_install() {
 	fi
 
 	dialog --yesno \
-"Now we're ready to install everything. This starts with\n\
+"Now we're ready to install the library. This involves\n\
 copying the following files, if necessary creating\n\
 directories that don't exist:\n\n\
  include/rulbus.h     => $PREFIX/include/rulbus.h\n\
  lib/librulbus.a      => $PREFIX/lib/librulbus.a\n\
- lib/librulbus.so     => $PREFIX/lib/librulbus.so\n\
- $LOCAL_NAME => $MOD_INST_AS\n\n\
-		Do you want to continue ?" 14 74
+ lib/librulbus.so     => $PREFIX/lib/librulbus.so\n\n\
+		Do you want to continue ?" 13 74
 
 	test $? -eq 0 || exit 0
 
@@ -338,18 +337,36 @@ directories that don't exist:\n\n\
 	then
 		dialog --msgbox \
 "Sorry, you need root privileges to install\n\
- the driver and the library etc. Please\n\
+the driver and the library etc. Please\n\
     become root and then try again.\n" 7 48
 		exit 1;
 	fi
 
 	# Do the basic installation (covered by the makefile)
 
-	make install >> makelog 2>&1
+	make install_lib >> makelog 2>&1
 	if [ $? -ne 0 ]
 	then
 		dialog --msgbox \
-"Sorry, installation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
+"Sorry, installation of libarary failed.\n\
+See \"makelog\" for the reasons.\n" 7 45;
+    	exit 1
+	fi
+
+	dialog --yesno \
+"Do you want to install the device driver (you can\n\
+also use dkms instead)? We'll copy the following\n\
+files, if necessary creating directories that\n\
+don't exist:\n\n\
+$LOCAL_NAME => $MOD_INST_AS\n\n\
+		Do you want to continue ?" 14 75
+
+	make install_driver >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+		dialog --msgbox \
+"Sorry, installation of the driver failed.\n\
+See \"makelog\" for the reasons.\n" 7 50;
     	exit 1
 	fi
 
@@ -443,7 +460,7 @@ function mod_update() {
 
 	cp $MODULECONF $MODULECONF.bak
 
-	MAJOR=`grep RULBUS_EPP_MAJOR include/autoconf.h | awk '{print $3}'`
+	MAJOR=`grep RULBUS_EPP_MAJOR driver/rulbus_epp_autoconf.h | awk '{print $3}'`
 	PATTERN="^[[:space:]]*alias[[:space:]+]char-major-$MAJOR[[:space:]+]"
 	PATTERN2="^[[:space:]]*pre-install[[:space:]+]rulbus_epp[[:space:]+]"
 
@@ -492,7 +509,7 @@ using the command 'depmod'?" 8 55
 
 ################################################################
 # Chooses either compiling or installing (called at the start
-# when the include/autoconf.h file exists)
+# when the driver/rulbus_epp_autoconf.h file exists)
 
 function pref_comp() {
 
@@ -513,8 +530,8 @@ test $MTYPE != "Setup" || setup_loop 1
 
 ################################################################
 # Chooses between setup, compilation or installation (called at
-# the start when include/autoconf.h file  as well as the compiled
-# library and driver exist)
+# the start when driver/rulbus_epp_autoconf.h file  as well as
+# the compiled library and driver exist)
 
 function pref_inst() {
 
@@ -651,7 +668,7 @@ kernels. There could be problems with other kernels.\n\n\
     test $? -eq 0 || exit 0
 fi
 
-if [ ! -e include/autoconf.h ]
+if [ ! -e driver/rulbus_epp_autoconf.h ]
 then
    setup_loop 0
    do_compile 0

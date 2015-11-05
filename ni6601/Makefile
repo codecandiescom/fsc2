@@ -25,8 +25,8 @@ INSTALL := install
 RM      := -rm
 RMFLAGS := -f
 
-prefix  = $(shell if [ -e driver/autoconf.h ]; then           \
-                      grep NI6601_PREFIX driver/autoconf.h |  \
+prefix  = $(shell if [ -e driver/ni6601_autoconf.h ]; then           \
+                      grep NI6601_PREFIX driver/ni6601_autoconf.h |  \
                       sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/';    \
                   else                                        \
                       echo "/usr/local";                      \
@@ -36,18 +36,18 @@ export
 
 
 .SUFFIXES:
-.PHONY: all driver lib install cleanup clean
+.PHONY: all driver lib install install_lib install_driver cleanup clean
 
 all:
 	$(MAKE) driver
 	$(MAKE) lib
 
 driver:
-	@if [ ! -e driver/autoconf.h ]; then                        \
-		echo "**********************************************";  \
-		echo "*   The file driver/autoconf.h is missing.   *";  \
-		echo "*    Please run './INSTALL' to create it.    *";  \
-		echo "**********************************************";  \
+	@if [ ! -e driver/ni6601_autoconf.h ]; then                        \
+		echo "***************************************************";  \
+		echo "*   The file driver/ni6601_autoconf.h is missing. *";  \
+		echo "*    Please run './INSTALL' to create it.         *";  \
+		echo "***************************************************";  \
 		exit 2;                                                 \
 	fi
 	$(MAKE) -C driver
@@ -56,7 +56,13 @@ lib:
 	$(MAKE) -C lib
 
 install:
+	$(MAKE) install_lib
+	$(MAKE) install_driver
+
+install_lib:
 	$(MAKE) -C driver install
+
+install_driver:
 	$(MAKE) -C lib install
 
 cleanup:
@@ -67,4 +73,4 @@ cleanup:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) autoconf.h makelog *~
+	$(RM) $(RMFLAGS) driver/ni6601_autoconf.h makelog *~

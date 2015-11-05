@@ -23,7 +23,7 @@
 
 
 #include "rulbus_lib.h"
-#include "rulbus_epp.h"
+#include "../driver/rulbus_epp.h"
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>

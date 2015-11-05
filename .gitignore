@@ -36,7 +36,7 @@ fsc2_config.h
 .tmp_versions/
 Module.markers
 Module.symvers
-autoconf.h
+*/driver/*_autoconf.h
 */driver/*mod.c
 */driver/modules.order
 rulbus/lib/lexer.c

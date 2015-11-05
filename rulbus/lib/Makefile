@@ -26,11 +26,10 @@ LEX       = flex
 LFLAGS    = -B -P
 YACC      = bison
 YFLAGS    = -d -v -t -p
-INCLUDES  = ../include
 
 lib_sources   = rulbus_lib.c parser.c lexer.c rb8509.c rb8510.c \
 				rb8514.c rb8515.c rb_generic.c
-lib_headers   = $(INCLUDES)/rulbus.h $(INCLUDES)/rulbus_lib.h
+lib_headers   = rulbus.h rulbus_lib.h
 
 
 .SUFFIXES:                    # don't use implicit rules
@@ -46,7 +45,7 @@ librulbus.a: ${lib_sources:.c=.o} $(lib_headers)
 	ar crs $@ ${lib_sources:.c=.o}
 
 %.o: %.c $(lib_headers) parser.h
-	$(CC) $(CFLAGS) -I$(INCLUDES) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.c %.h: %.y $(lib_headers)
 	$(YACC) $(YFLAGS) rulbus_ -o $*.c $<
@@ -62,7 +61,7 @@ install:
 	install -d $(incl_dir)
 	install -m 755 librulbus.so $(lib_dir)
 	install -m 644 librulbus.a $(lib_dir)
-	install -m 644 ../include/rulbus.h $(incl_dir)
+	install -m 644 rulbus.h $(incl_dir)
 
 
 cleanup:

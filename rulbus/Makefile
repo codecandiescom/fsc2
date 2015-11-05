@@ -25,8 +25,8 @@ INSTALL = install
 RM      = -rm
 RMFLAGS = -f
 
-prefix  = $(shell if [ -e include/autoconf.h ]; then \
-					  grep RULBUS_EPP_PREFIX include/autoconf.h | \
+prefix  = $(shell if [ -e driver/rulbus_epp_autoconf.h ]; then \
+					  grep RULBUS_EPP_PREFIX driver/rulbus_epp_autoconf.h | \
 					  sed 's/^[^"]*"\([^"]*\)".*$$/\1/'; \
 				  else \
 					  echo "/usr/local"; \
@@ -39,7 +39,7 @@ export
 
 
 .SUFFIXES:
-.PHONY: all driver lib install cleanup clean
+.PHONY: all driver lib install install_lib install_driver clean
 
 
 all:
@@ -48,11 +48,11 @@ all:
 
 
 driver:
-	@if [ ! -e include/autoconf.h ]; then \
-		echo "*******************************************"; \
-		echo "* The file include/autoconf.h is missing. *"; \
-		echo "*  Please run './INSTALL' to create it.   *"; \
-		echo "*******************************************"; \
+	@if [ ! -e driver/rulbus_epp_autoconf.h ]; then \
+		echo "*************************************************"; \
+		echo "* The file driver/rulbus_epp_autoconf.h is mis- *"; \
+		echo "* sing. Please run './INSTALL' to create it.    *"; \
+		echo "*************************************************"; \
 		exit 2; \
 	fi
 	$(MAKE) -C driver
@@ -63,19 +63,21 @@ lib:
 
 
 install:
+	$(MAKE) install_lib
+	$(MAKE) install_driver
+
+
+install_lib:
 	$(INSTALL) -d $(incl_dir)
-	$(INSTALL) -m 644 include/rulbus.h $(incl_dir)
-	$(MAKE) -C driver install
+	$(INSTALL) -m 644 lib/rulbus.h $(incl_dir)
 	$(MAKE) -C lib install
 
 
-cleanup:
-	$(MAKE) -C driver cleanup
-	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ include/*~ util/*~
+install_driver:
+	$(MAKE) -C driver install
 
 
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) makelog include/autoconf.h include/*~ *~
+	$(RM) $(RMFLAGS) makelog driver/rulbus_epp_autoconf.h */*~ *~

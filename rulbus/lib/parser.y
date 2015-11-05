@@ -802,20 +802,12 @@ static void rulbus_error( const char * s )
 
 void rulbus_parser_init( void )
 {
-	static int needs_restart = 0;
 	int i;
 	extern int rulbus_lineno;
 	extern int rulbus_column;
-	extern FILE * rulbus_in;
-
 
 	rulbus_lineno = 1;
 	rulbus_column = 0;
-
-	if ( needs_restart )
-		rulbus_restart( rulbus_in );
-	else
-		needs_restart = 1;
 
 	for ( i = 0; i <= RULBUS_DEF_RACK_ADDR; i++ )
 		rulbus_rack_addrs[ i ] = UNSET;

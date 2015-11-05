@@ -253,7 +253,7 @@ typedef struct {
 # define init_MUTEX_LOCKED( sem ) sema_init( sem, 0 )
 #endif
 
-#include "autoconf.h"
+#include "ni6601_autoconf.h"
 
 
 #define NI6601_NAME "ni6601"

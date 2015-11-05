@@ -21,6 +21,7 @@
 
 MODULE   := ni6601.o
 SOURCES  := ni6601_drv.c fops.c ioctl.c utils.c
+OBJECTS  := $(SOURCES:.c=.o)
 PWD      := $(shell pwd)
 
 
@@ -84,43 +85,28 @@ else      # if KERNEL_VER is set
 
 # First handle the case that we're building for a 2.6 or 3.xkernel
 
-ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.' 2>/dev/null),)
+ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.\|4\.' 2>/dev/null),)
 
-ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
-	obj-m       := $(MODULE)
-	ni6601-objs := $(OBJECTS)
-
-else                         # otherwise make kernel build system available
-
-EXTRA_CFLAGS := -I$(PWD)/../include
-
-OBJECTS  := $(SOURCES:.c=.o)
-export OBJECTS
+obj-m       := $(MODULE)
+ni6601-objs := $(OBJECTS)
 
 all:
-	echo "1 $(KERNELDIR) $(KERNEL_VER)"
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)"
 
-check:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
-
-install:
+modules_install install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
 	$(INSTALL) -d $(prefix)/include
 	$(INSTALL) -m 644 ni6601_drv.h $(prefix)/include
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) autoconf.h Module.symvers Module.markers \
-					 modules.order *~
-
-endif
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
 
 else
 
 # Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
 
-HEADERS  = ni6601_drv.h autoconf.h
+HEADERS  = ni6601_drv.h ni6601_autoconf.h
 INCLUDES = -I$(KERNELDIR)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
@@ -130,7 +116,6 @@ CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 .PHONY: all install cleanup clean pack
 
 all:
-	echo "2 $(KERNELDIR) $(KERNEL_VER)"
 	$(MAKE) $(MODULE)
 
 $(MODULE): $(SOURCES:.c=.o)
@@ -160,7 +145,7 @@ cleanup:
 	$(RM) $(RMFLAGS) ni6601_drv.o util.o *~
 
 clean:
-	$(RM) $(RMFLAGS) autoconf.h *.o Module.symvers *~
+	$(RM) $(RMFLAGS) ni6601_autoconf.h *.o Module.symvers *~
 
 endif
 endif

@@ -52,10 +52,10 @@ int rulbus_get_card_info( const char *       /* name      */,
 extern int rulbus_errno;
 
 struct RULBUS_CARD_INFO {
-        int type;
-        int num_channels;
-        int has_ext_trigger;
-        int bipolar;
+        int    type;
+        int    num_channels;
+        int    has_ext_trigger;
+        int    bipolar;
         double volt_per_bit;
         double intr_delay;
 };

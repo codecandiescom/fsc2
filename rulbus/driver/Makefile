@@ -21,8 +21,7 @@
 
 MODULE   := rulbus_epp.o
 SOURCES  := rulbus_epp.c
-PWD      := $(shell pwd)
-HEADERS  := $(PWD)/../include/rulbus_epp.h $(PWD)/../include/autoconf.h
+HEADERS  := rulbus_epp.h rulbus_epp_autoconf.h
 
 
 # Unless the user set the environment variable RULBUS_EPP_KERNEL_SOURCE
@@ -84,36 +83,21 @@ all $(MODULE) install check clean:
 
 else      # if KERNEL_VER is set
 
-# First handle the case that we're building for a 2.6 kernel
+# First handle the case that we're building for a 2.6 kernel or newer
 
-ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.' 2>/dev/null),)
+ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.\|4\.' 2>/dev/null),)
 
-ifneq ($(KERNELRELEASE),)    # if we can use the kernel build system
 	obj-m := $(MODULE)
 
-else                         # otherwise make kernel build system available
-
-
-PWD          := $(shell pwd)
-SOURCES      := $(shell ls *.c)
-OBJECTS      := $(SOURCES:.c=.o)
-EXTRA_CFLAGS := -I$(PWD)/../include
-export OBJECTS
-
 all:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules
 
-check:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
-
-install:
+modules_install install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
 	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
-
-endif
 
 else
 
@@ -121,7 +105,7 @@ else
 # (the -fno-strict-aliasing in CFLAGS is set because of some problems with
 # the 2.4 kernel header files withh gcc 3.3.3 on Debian)
 
-INCLUDES := -I$(KERNELDIR)/include -I$(PWD)/../include
+INCLUDES := -I$(KERNELDIR)/include
 
 CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes  \
             -fno-strict-aliasing

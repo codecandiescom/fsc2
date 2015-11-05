@@ -92,8 +92,8 @@
 
 
 
+#include "rulbus_epp_autoconf.h"
 #include "rulbus_epp.h"
-#include "autoconf.h"
 
 
 /*****************************************
