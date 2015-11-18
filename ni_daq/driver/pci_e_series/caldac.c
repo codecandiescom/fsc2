@@ -137,31 +137,30 @@ static void caldac_write( Board *      board,
 					       1,  9,  5, 13,
 					       3, 11,  7, 15 };
 
-	switch ( type )
-	{
-		case mb88341:
-			caldac_send( board, ser_dac,
-				     ( rev_nibble[ addr & 0x0F ] << 8 ) |
-				     ( val & 0xFF ), 12 );
+	switch ( type ) {
+	case mb88341:
+		caldac_send( board, ser_dac,
+			       ( rev_nibble[ addr & 0x0F ] << 8 )
+			     | ( val & 0xFF ), 12 );
+		break;
+
+	case dac8800 :
+		caldac_send( board, ser_dac,
+			     ( addr & 0x07 ) | ( val & 0xFF ), 11 );
+		break;
+
+	case dac8043 :
+		caldac_send( board, ser_dac, val & 0xFFF, 12 );
 			break;
 
-		case dac8800 :
-			caldac_send( board, ser_dac,
-				     ( addr & 0x07 ) | ( val & 0xFF ), 11 );
-			break;
+	case ad8522 :
+		caldac_send( board, ser_dac,
+			       0x8000 | ( ( addr ? 1 : 2 ) << 13 )
+			     | ( val & 0xFFF ), 16 );
+		break;
 
-		case dac8043 :
-			caldac_send( board, ser_dac, val & 0xFFF, 12 );
-			break;
-
-		case ad8522 :
-			caldac_send( board, ser_dac,
-				     0x8000 | ( ( addr ? 1 : 2 ) << 13 ) |
-				     ( val & 0xFFF ), 16 );
-			break;
-
-		case caldac_none :
-			break;
+	case caldac_none :
+		break;
 	}
 }
 

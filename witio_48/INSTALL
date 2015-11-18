@@ -29,6 +29,34 @@ function get_reply() {
 
 
 ################################################################
+
+function get_module_conf()
+{
+	if [ -e /etc/modules ]
+	then
+		echo "/etc/modules";
+	elif [ -e /etc/modules.conf ]
+	then
+		echo "/etc/modules.conf"
+	elif [ -e /etc/conf.modules ]
+	then
+		echo "/etc/conf.modules"
+	elif [ -e /etc/modules.conf.local ]
+	then
+	    echo "/etc/modules.conf.local"
+	fi
+}
+
+
+################################################################
+
+function get_major()
+{
+	echo `grep WITIO_48_MAJOR driver/autoconf.h | awk '{print $3}'`
+}
+
+
+################################################################
 # Ask the user for the module paramters
 
 function do_setup() {
@@ -151,7 +179,7 @@ You selected the following settings for the driver:\n\n\
           Create 'driver/autoconf.h'?\n" 12 57
 
 	return $?
-} # end of do_setup()
+}
 
 
 ################################################################
@@ -164,13 +192,13 @@ function make_auto() {
 	echo "#define WITIO_48_MAJOR    $MAJOR" >> driver/autoconf.h
 	test $DEBUG -ne 0 || echo "#define WITIO_48_DEBUG" >> driver/autoconf.h
 	echo "#define WITIO_48_PREFIX   \"$PREFIX\"" >> driver/autoconf.h
-} # end of make_auto()
+}
 
 
 ################################################################
 # Run setup of parameter until the user is satisfied
 
-function setup_loop() {
+function do_setup_loop() {
     do_setup $1
     while [ $? -ne  0 ]
 	do
@@ -202,7 +230,7 @@ function do_compile() {
 		 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]
 	then
 		dialog --msgbox \
-"To create the driver for NI DAQ boards the file\n\
+"To create the driver for the board the file\n\
 $KERNEL_DIR/include/linux/autoconf.h,\n\
 $KERNEL_DIR/include/generated/autoconf.h,\n\
 or /usr/include/linux/autoconf.h, depending on how old\n\
@@ -235,7 +263,7 @@ Unfortunately, the installation can't proceed.\n" 13 62;
 See \"makelog\" for the reasons.\n" 7 45;
     	exit 1;
 	fi
-} # end of do_compile()
+}
 
 
 ################################################################
@@ -318,14 +346,137 @@ please run the command\n\
 ################################################################
 # Does everything needed for the installation
 
-function do_install() {
-	# Ask user if he wants to install the library, driver and include files etc.
+function do_install()
+{
+	# Check that user has the necessary permissions for installation
+
+	if [ `id -u` != "0" ]
+	then
+		dialog --msgbox \
+"For installation you need root privileges.\n\
+Please become root (or run 'INSTALL' with\n\
+'sudo') to continue with the installation.\n" 7 48
+		exit 0;
+	fi
+
+	MAJOR=$(get_major)
+	MODULECONF=$(get_module_conf)
+
+	install_lib
+	install_driver
+	install_device_files
+	install_modules_conf
+	install_init_script
+	update_dep
+	load_module
+}
+
+
+################################################################
+
+function install_lib()
+{
+	# Ask user if he wants to install the library
 
 	PREFIX=`grep WITIO_48_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
-	MAJOR=`grep WITIO_48_MAJOR driver/autoconf.h | awk '{print $3}'`;
+
+	dialog --yesno \
+"Do you want to install the library? This involves\n\
+copying the following files, if necessary creating\n\
+directories that don't exist:\n\n\
+ driver/witio_48_drv.h => $PREFIX/include/witio_48_drv.h\n\
+ lib/witio_48.h        => $PREFIX/include/witio_48.h\n\
+ driver/witio_48_drv.h => $PREFIX/include/witio_48_drv.h\n\
+ lib/libwitio_48.a     => $PREFIX/lib/libwitio_48.a\n\
+ lib/libwitio_48.so    => $PREFIX/lib/libwitio_48.so" 13 74
+
+	test $? -eq 0 || return
+
+	# Do the basic installation (covered by the makefile)
+
+	make install_lib >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+		dialog --msgbox \
+"Sorry, installation of libarary failed.\n\
+See \"makelog\" for the reasons.\n" 7 45;
+    	exit 1
+	fi
+}
+
+
+################################################################
+# Installs the kernel module
+
+function install_driver()
+{
+	dkms > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+		dialog --yesno \
+"Do you want to install the device driver using dkms?" 5 60
+        if [ $? -eq 0 ]
+		then
+			install_dkms
+		else
+			install_driver_mech
+		fi
+	else
+		install_driver_mech
+	fi
+}
+
+
+################################################################
+# Installs the kernel module using dkms
+
+function install_dkms()
+{
+	if [ -n "`dkms status -m witio_48 -v 1.0`" ]
+	then
+		dkms uninstall -m witio_48 -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
+		rm -rf /usr/src/witio_48-1.0 >> makelog 2>&1
+		cp -r driver /usr/src/witio_48-1.0
+	else
+		dkms add driver >> makelog 2>&1
+	fi
+
+	if [ $? -ne 0 ]
+	then
+		dialog --msgbox \
+"Sorry, Failed to add module to dkms.\n\
+See \"makelog\" for the reasons.\n" 7 45;
+        exit 1
+	fi
+
+	dkms build -m witio_48 -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+"Sorry, Failed to build module with dkms.\n\
+See \"makelog\" for the reasons.\n" 7 45;
+        exit 1
+	fi
+
+	dkms install -m witio_48 -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+"Sorry, Failed to unstall module with dkms.\n\
+See \"makelog\" for the reasons.\n" 7 45;
+        exit 1
+	fi
+
+	DKMS_INSTALL=1
+}
+
+
+################################################################
+# Installs the kernel module "manually"
+
+function install_driver_mech()
+{
 	if [ $IS_NEW_KERNEL ]
 	then
-		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/witio_48.ko";
+		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/kernel/extra/witio_48.ko";
 		LOCAL_NAME="driver/witio_48.ko";
 	else
 		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/witio_48.o";
@@ -333,134 +484,120 @@ function do_install() {
 	fi
 
 	dialog --yesno \
-"Now we're ready to install everything. This starts with\n\
-copying the following files, if necessary creating\n\
+"Do you want to install the device driver manually?\n\
+We'll copy the following file, if necessary creating\n\
 directories that don't exist:\n\n\
- driver/witio_48_drv.h  => $PREFIX/include/witio_48_drv.h\n\
- lib/witio_48.h         => $PREFIX/include/witio_48.h\n\
- lib/libwitio_48.a      => $PREFIX/lib/libwitio_48.a\n\
- lib/libwitio_48.so     => $PREFIX/lib/libwitio_48.so\n\
- $LOCAL_NAME     => $MOD_INST_AS\n\n\
-		Do you want to continue ?" 15 74
+$LOCAL_NAME => $MOD_INST_AS" 12 75
 
-	test $? -eq 0 || exit 0
-
-	# Check that user has root privileges
-
-	if [ `id -u` != "0" ]
+    if [ $? -ne 0 ]
 	then
-		dialog --msgbox \
-"Sorry, you need root privileges to install\n\
- the driver and the library etc. Please\n\
-    become root and then try again.\n" 7 48
-		exit 1;
+		NO_DRIVER_INSTALL=1
+		return
 	fi
 
-	# Do the basic installation (covered by the makefile)
+	make install_driver >> makelog 2>&1
 
-	make install >> makelog 2>&1
 	if [ $? -ne 0 ]
 	then
 		dialog --msgbox \
-"  Sorry, installation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
+"Sorry, installation of the driver failed.\n\
+See \"makelog\" for the reasons.\n" 7 50;
     	exit 1
 	fi
-
-	# Find out if user wants to create the device file for the board, but only
-	# if the major device number isn't set to 0.
-
-	if [ $MAJOR -ne 0 ]
-	then
-		dialog --yesno \
-"Do you want to create the device files\n\
-      /dev/witio_48\n\n\
-     for the board now?"  9 46
-
-		if [ $? -eq 0 ]
-		then
-			if [ -e /dev/witio_48 ]; then 
-				dialog --yesno \
-"A device file /dev/witio_48 already exists.\n\
-Delete existing file and replace with a new one?" 7 54;
-				if [ $? -eq 0 ]
-				then
-					rm -f /dev/witio_48
-					mknod -m 666 /dev/witio_48 c $MAJOR 0
-				fi
-			else
-				mknod -m 666 /dev/witio_48 c $MAJOR 0
-			fi
-		fi
-
-		# Ask user if the module should be included in /etc/modules.conf (or,
-		# on older installations, in /etc/conf.modules, or, on newer
-		# installations, in /etc/modules.conf.local) and find out if the user
-		# wants to update the modules dependency file
-
-		MODULECONF="/etc/modules.conf";
-		if [ ! -e $MODULECONF -a -e /etc/conf.modules ]
-		then
-			MODULECONF="/etc/conf.modules"
-		fi
-		if [ -e $MODULECONF -a -e /etc/modules.conf.local ]
-		then
-			MODULECONF="/etc/modules.conf.local"
-		fi
-
-		dialog --yesno \
-" Update $MODULECONF to include the new driver?\n\
-(Old version will be copied to $MODULECONF.bak.)" 7 62
-		test $? -ne 0 || mod_update
-
-	else              # dynamically assigned major device number
-
-		# Try to install the init.d script
-
-		if [    -d /etc/init.d           \
-		 -a -e /lib/lsb/init-functions ]
-		then
-			if [     \(    -e /lib/lsb/install_initd         \
-				        -o -e /usr/lib/lsb/install_initd \)  \
-				 -a \(    -e /lib/lsb/remove_initd          \
-				       -o -e /usr/lib/lsb/remove_initd \) ]
-			then
-				install_lsb
-			elif [ -e /usr/sbin/update-rc.d ]
-			then
-				install_update_rc
-			else
-				dialog --msgbox "\
-Sorry, don't know how to install a script that automatically\n\
-loads the WITIO_48 module loaded at boot time and creates the\n\
-device file. Please change the script 'witio_48' in the\n\
-'util' subdirectory to fit your needs and install it\n\
-in the directory for init scripts yourself." 12 70
-			fi
-		fi
-	fi
-
-	update_dep
-
-} # end of do_install()
+}
 
 
 ################################################################
-# Removes entries for drivers with the same major number device
-# number from /etc/modules.conf (or, if this is still used,
-# /etc/conf.modules) and adds the WITIO-48 driver instead. The old
-# configuration file is saved with the extension .bak
 
-function mod_update() {
+function install_device_files()
+{
+	# Find out if user wants to create the device file for the board, but only
+	# if the major device number isn't assigned dynamically (isn't set to 0).
+
+	test $MAJOR -ne 0 || return
+
+	dialog --yesno \
+"Do you want to create the device file\n\n\
+        /dev/witio_48\n\n\
+   for the RULBUS interface?"  9 46
+
+    test $? -eq 0 || return
+
+    if [ -e /dev/witio_48 ]
+	then 
+		dialog --yesno \
+"A device file /dev/witio_48 already exists.\n\
+Delete existing file and replace with a new one?" 7 54;
+
+        if [ $? -eq 0 ]
+		then
+			rm -f /dev/witio_48
+			mknod /dev/witio_48 c $MAJOR 0
+			chmod 666 /dev/witio_48
+		fi
+	else
+		mknod /dev/witio_48 c $MAJOR 0
+		chmod 666 /dev/witio_48
+	fi
+}
+
+
+################################################################
+# In the olden times we needed to set up /etc/modules.conf or
+# /etc/modules/conf.modules or /etc/modules.conf.local if the
+# device major number was set staticatlly (i.e. set to non-zero)
+# to get the module loaded at boot time.  And in modern times
+# (with /etc/modules) we can request the same (independent of
+# the major device number) by simply putting the driver's name
+# into /etc/modules.
+
+function install_modules_conf()
+{
+	if [    -z $MODULECONF \
+		 -o \( $MAJOR -eq 0 -a $MODULECONF != "/etc/modules" \) ]
+	then
+		return
+	fi
+
+	if [ $MODULECONF = "/etc/modules" ]
+	then
+		dialog --yesno \
+"Add witio_48 to /etc/modules to have\n\
+the driver loaded on reboots?" 7 50
+        test $? -eq 0 || return
+
+		grep '^[ \t]*witio_48[ \t]*\(#.*\)*$' $MODULECONF 2<&1 > /dev/null;
+		if [ $? -ne 0 ]
+		then
+			cp $MODULECONF $MODULECONF.bak
+			echo "witio_48" >> $MODULECONF
+		fi
+		return
+	fi
+
+	dialog --yesno \
+"Update $MODULECONF to include the driver? (Old\n\
+version will be saved as $MODULECONF.bak.)" 7 62
+    test $? -eq 0 || return
+
 	cp $MODULECONF $MODULECONF.bak
 
-	MAJOR=`grep WITIO_48_MAJOR driver/autoconf.h | awk '{print $3}'`
 	PATTERN="^[[:space:]]*alias[[:space:]+]char-major-$MAJOR[[:space:]+]"
-	LINE=`grep $PATTERN $MODULECONF`
+	PATTERN2="^[[:space:]]*pre-install[[:space:]+]witio_48[[:space:]+]"
 
+	LINE=`grep $PATTERN $MODULECONF`
 	if [ $? -eq 0 ]
 	then
-		grep -v $PATTERN $MODULECONF > /tmp/`basename $MODULECONF`
-		echo "#$LINE" >> /tmp/`basename $MODULECONF`
+		LINE2=`grep $PATTERN2 $MODULECONF`
+		if [ $? -eq 0 ]
+		then
+			grep -v $PATTERN $MODULECONF | grep -v $PATTERN2 > /tmp/`basename $MODULECONF`
+			echo "#$LINE2" >> /tmp/`basename $MODULECONF`
+			echo "#$LINE" >> /tmp/`basename $MODULECONF`
+		else
+			grep -v $PATTERN $MODULECONF > /tmp/`basename $MODULECONF`
+			echo "#$LINE" >> /tmp/`basename $MODULECONF`
+		fi
 
 		LINE=`grep "^[[:space:]]*options[[:space:]+]witio_48" /tmp/\`basename $MODULECONF\``;
 		if [ $? -eq 0 ]
@@ -472,20 +609,118 @@ function mod_update() {
 		fi
 
 		mv /tmp/`basename $MODULECONF` $MODULECONF
-		fi
+	fi
 
-		echo "alias char-major-$MAJOR witio_48" >> $MODULECONF
+	echo "pre-install witio_48 modprobe \"-k\" \"parport\"" >> $MODULECONF
+	echo "alias char-major-$MAJOR witio_48" >> $MODULECONF
 }
 
 
 ################################################################
+# In case the major device number is selected dynamically and
+# we're not on a newer system with an /etc/modules file a script
+# can be installed for loading the device driver and creating the
+# devide file at boot time. Ask the user if this should be done
+# and then try to install the script.
 
-function update_dep() {
+function install_init_script()
+{
+	if [ $MAJOR -ne 0 -o $MODULECONF = "/etc/modules" ]
+	then
+		return
+	fi
+
+	dialog --yesno \
+"Should a script be installed to load the driver\n\
+and recreate the device file on reboot?" 7 65
+
+	test $? -eq 0 || return
+
+	# Try to install the init.d script
+
+	if [    -d /etc/init.d \
+		-a -e /lib/lsb/init-functions ]
+	then
+		if [    \(    -e /lib/lsb/install_initd \
+			 -o -e /usr/lib/lsb/install_initd \) \
+			 -a \(    -e /lib/lsb/remove_initd \
+			       -o -e /usr/lib/lsb/remove_initd \) ]
+		then
+			install_lsb
+		elif [ -e /usr/sbin/update-rc.d ]
+		then
+			install_update_rc
+		else
+			dialog --msgbox "\
+Sorry, don't know how to install a script that automatically\n\
+loads the RULBUS module loaded at boot time and creates the\n\
+device file. Please change the script 'witio_48' in the\n\
+'util' subdirectory to fit your needs and install it\n\
+in the directory for init scripts yourself." 12 70
+		fi
+	fi
+}
+
+
+################################################################
+# Updates the modules.dep file for the currently run kernel
+
+function update_dep()
+{
+	if [ -n "$NO_DRIVER_INSTALL" -o -n "$DKMS_INSTALL" ]
+	then
+		return
+	fi
+
 	dialog --yesno \
 "Do you want to update the modules dependency\n\
 file /lib/modules/$KERNEL_VERSION/modules.dep\n\
-using the command 'depmod -a'?" 8 55
-	test $? -ne 0 || depmod $KERNEL_VERSION -a >/dev/null
+using the command 'depmod'?" 8 55
+   test $? -ne 0 || depmod $KERNEL_VERSION -a >/dev/null
+}
+
+
+################################################################
+# Tries to load the module
+
+function load_module()
+{
+	if [ -n "$NO_DRIVER_INSTALL" ]
+	then
+		return
+	fi
+
+	dialog --yesno \
+"Do you want to load the modules into the\n\
+kernel? Make sure no program is using it!" 6 50
+	test $? -eq 0 || return
+
+	# Check if the module is already loaded and try to unload it
+
+	lsmod | grep '^witio_48[ \t]' > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+		rmmod witio_48 >> makelog 2>&1
+		if [ $? -ne 0 ]
+		then
+			dialog --msgbox \
+"Failed to unload running module, so the\n\
+new module could not be loaded. See\n\
+\"makelog\" for the reasons." 8 45
+			return
+		fi
+    fi
+
+	# Now try to load it
+
+	echo "modprobe witio_48" >> makelog
+	modprobe witio_48 >> makelog 2>&1
+	if [ $? -ne 0 ]
+	then
+		dialog --msgbox \
+"Failed to load module into the kernel.\n\
+See \"makelog\" for the reasons." 7 42
+   fi
 }
 
 
@@ -504,8 +739,8 @@ function pref_comp() {
 
 	get_reply MTYPE
 
-	test $MTYPE != "Setup" || setup_loop 1
-} # end of pref_comp()
+	test $MTYPE != "Setup" || do_setup_loop 1
+}
 
 
 ################################################################
@@ -527,7 +762,7 @@ function pref_inst() {
 
 	case $MTYPE in
 		Setup  )
-			setup_loop 1
+			do_setup_loop 1
 			do_compile 0
 			do_install
 			;;
@@ -632,13 +867,13 @@ then
 fi
 
 
-# Check if this is a 2.4 or 2.6 kernel
+# Get the kernel version
 
 get_kernel_version;
-
-if [    $KV_MAJOR -eq 3                                           \
-	 -o \(    $KV_MAJOR -eq 2                                     \
-           -a \( $KV_MINOR -eq 4 -o $KV_MINOR -e 4 \) \) ]
+if [    $KV_MAJOR -ne 3 \
+	 -a $KV_MAJOR -ne 4 \
+	 -a \(    $KV_MAJOR -ne 2 \
+           -o \( $KV_MINOR -ne 4 -a $KV_MINOR -ne 6 \) \) ]
 then
     dialog --yesno \
 "This package is only tested with 2.4, 2.6 and 3.x\n\
@@ -647,9 +882,11 @@ kernels. There could be problems with other kernels.\n\n\
     test $? -eq 0 || exit 0
 fi
 
+rm -f makelog > /dev/null 2>&1
+
 if [ ! -e driver/autoconf.h ]
 then
-   setup_loop 0
+   do_setup_loop 0
    do_compile 0
    do_install
 else
@@ -667,7 +904,7 @@ else
 fi
 
 dialog --msgbox "\
-Ok, you're hopefully done with creating and \n\
+Ok, you're hopefully done with creating and\n\
 installing the driver and the library." 7 50;
 
 exit 0

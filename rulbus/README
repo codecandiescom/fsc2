@@ -69,12 +69,12 @@ Here are some comments concerning the questions you'll get asked by the
 script:
 
 1. Default parallel port base address: The Rulbus interface is going
-   to be connected to one of the parallel ports of your computer. To
-   tell the module on which port to look for the Rulbus interface
+   to be connected to (one of the) parallel port(s) of your computer.
+   To tell the module on which port to look for the Rulbus interface
    you have to tell it the base address of the port. For nomal PCs
    this usually is 0x378 for LPT1 and 0x278 for LPT2, but on some
    it may also be at address 0x3BC. If in doubt load the parport module
-   (use the command "modprobe -k parport" if it's not already loaded),
+   (use the command "modprobe parport" if it's not already loaded),
    make sure the required lower level module is also loaded by e.g.
    using the command "cat /dev/lp0" (don't worry about error messages)
    and then look in /proc/ioports for lines with 'parportX' (where X
@@ -85,17 +85,18 @@ script:
    can tell the module to use a different base address by loading it
    with the "base" option, i.e. use e.g. 
 
-	   modprobe -k rulbus_epp base=0x378
+	   modprobe rulbus_epp base=0x378
 
 2. Major device number: Each and every device has a major device number
-   (which gets associated with the device driver name via an entry in
-   '/etc/modules.conf'). Actually, two devices may share a device number
-   if one of them is a character device (like the Rulbus interface) and
-   the other one is a block device (e.g. a hard disk). The major device
-   number can't be choosen at random or conflicts with other devices may
-   result!
+   (which, with older systems, got associated with the device driver name
+   via an entry in '/etc/modules.conf'). Actually, two devices may share
+   a device number if one of them is a character device (like the Rulbus
+   interface) and the other one is a block device (e.g. a hard disk). The
+   major device number can't be choosen at random or conflicts with other
+   devices may result!
 
-   Major device numbers must be in the range between 1 and 254. The file
+   Major device numbers had to be in the range between 1 and 254 in
+   2.4 kernels and has to be 1 and 4094 with newer kernels. The file
    '/proc/devices' is a list of all currently used devices and their
    major numbers, so never pick one of these. It's best to choose a
    number that's completely unused yet - a list of the numbers already
@@ -104,34 +105,32 @@ script:
    number from the ranges that are either unassigned or marked for local
    and experimental use (e.g. 60 to 63, 120 to 127 and 240 to 254).
 
-   As a (perhaps better) alternative to specifying a fixed major device
-   number you can also use a dynamically assigned major device number.
-   This happens when you specify a major device number of 0. The only
-   disadvantage is that then the device files associated with the boards
-   can't be created in advance because the major device number may not
-   always be the same. But, fortunately, the creation (and deletion) of
-   the device files can be done automatically, e.g. by an init script that
-   loads the module for the NI DAQ cards and creates device files when the
-   computer is booted and deletes the device files at shutdown. (The init
-   script supplied with the driver expects your system to conform to the
-   Linux Standard Base Specifications version 1.1.0 (LSB) or higher, if it
-   doesn't you may have to apply a few changes to the script and install
-   it as well as the links in the runlevel directories manually.)
+   A (perhaps better) alternative to specifying a fixed major device
+   number is to use a dynamically assigned major device number. This
+   happens when you specify a major device number of 0. There used
+   to to be a disadvantage in that the device files associated with
+   the device could not be created in advance because the major device
+   number may not always be the same. But, fortunately, this isn't an
+   issue anymore with newer kernels, a device file with the assigned
+   major device number gets created automatically when the module is
+   loaded into the kernel. And on older systems you could get around
+   that issue of creation (and deletion) of the device files by using
+   an init script that loads the module for the device cards and creates
+   the device file when the computer is booted (and deletes the device
+   files at shutdown). The init script supplied with the driver expects
+   your system to conform to the Linux Standard Base Specifications version
+   1.1.0 (LSB) or higher, if it doesn't you may have to apply a few changes
+   to the script and install it as well as the links in the runlevel
+   directories manually.)
 
    If you should decide later to use a different major device number for
    the module you can overrule the compiled in default value by using
    the "major" option, i.e. to make the module use a major device number
    of 88 load the module using e.g.
 
-       modprobe -k rulbus_epp major=88
+       modprobe rulbus_epp major=88
 
-3. Debugging code: When debugging code is included into the driver internal
-   function calls as well as some additional information will be added to
-   the kernel messages (e.g. '/var/log/messages' or '/var/log/debug' on
-   some systems). Don't forget to regularly check that your root file
-   system isn't running out of space!
-
-4. Installation directory: Include files will be installed in the 'include'
+3. Installation directory: Include files will be installed in the 'include'
    subdirectory of the install directory, the library in the 'lib'
    subdirectory. Please choose something reasonable or use the default
    '/usr/local'.
@@ -145,29 +144,47 @@ It is possible that after installing the libraries the linker still has
 problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.
 
-When you're done with installing program you will still have to write
-a configuration file for the Rulbus, listing which devices are sitting
-in which racks. Please see the rulbus_lib.txt file in the 'lib' sub-
-directory for more information.
+During installation you may get asked how to install the module if DKMS
+is installed on your machine. DKMS is a framework that automatically
+updates modules for newly installed kernel versions, thus relieving
+you of the additional work of manually recompiling and installing
+drivers for hardware that are not part of the official Linux kernel
+for each new kernel you install (or that gets installed by your
+distributions mechanisms). So it's normally preferable to use DKMS,
+but if you don't want to use it the INSTALL script will give you the
+option to install the module in the "classic" way.
+
+Once you're done with installing the library and driver you still have
+to write a configuration file for the Rulbus device, listing which
+devices are sitting in which racks. Please see the rulbus_lib.txt file
+in the 'lib' subdirectory for more information.
 
 Please note: For the parallel port (EPP) driver to function it is required
-that the parallel port of your computer the interface is connected to is
+that the parallel port of your computer (the interface is connected to) is
 able to use the EPP protocol. You may have to enable this in the BIOS.
+
+Once your done you can clean up everything by simply invoking
+
+  make clean
+
+from within the main directory of the package.
 
 
 IV. Documentation
 =================
 
-In the 'driver' subdirectory you will find a file named 'rulbus_epp.txt'
-with the documentation of the module.
+In the 'driver' subdirectory there's a file named 'rulbus_epp.txt'
+with the documentation of the kernel module. This is only of interest
+(except when you're curious'-) if you choose not to use the supplied
+library.
 
 In the 'lib' subdirectory a file named 'rulbus_lib.txt' describes the
 functionality supplied by the library.
 
 For questions concerning the Rulbus system as well as the parallel
 port interface itself please contact either Martin J. Moene
-(m.j.moene@eld.physics.leidenuniv.nl) or Arno van Amersfoort
-(arnova@molphys.leidenuniv.nl).
+(m.j.moene@eld.physics.leidenuniv.nl)) or Arno van Amersfoort
+(a.c.j.van.amersfoort@eld.physics.leidenuniv.nl).
 
 
 V. Acknowledgments
@@ -175,18 +192,19 @@ V. Acknowledgments
 
 Martin J. Moene (m.j.moene@eld.physics.leidenuniv.nl) and Arno van
 Amersfoort (a.c.j.van.amersfoort@eld.physics.leidenuniv.nl) from the
-Physics department of the Rijksuniversiteit Leiden, who developed the
-interface, were extremely helpful by supplying all kinds of information,
-sending me very well-documented Windows code, answering all my stupid
-questions and even reading and pointing out errors in my code. Martin
-also took it onto himself to get parts of his Windows version of the
-library in sync with the Linux version, finding several bugs in my code
-in the process, and made lots very helpful suggestions for other improve-
-ments.
+Physics department of the Rijksuniversiteit Leiden developed the
+interface and were extremely helpful by supplying all kinds of
+information, sending me very well-documented Windows code, answering
+all my stupid questions and even reading and pointing out errors in
+my code. Martin also took it onto himself to get parts of his Windows
+version of the library in sync with the Linux version, finding several
+bugs in my code in the process, and made lots very helpful suggestions
+for other improvements.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
 the driver and library as part of extending my fsc2 program to make
-it work with their 275 GHz and W-band EPR and ENDOR spectrometers.
+it work with their 275 GHz (J-band) and 90 GHz (W-band) EPR and ENDOR
+spectrometers.
 
 
-     12.11.2011     Jens Thoms Törring       <jt@toerring.de>
+     7.11.2015     Jens Thoms Törring       <jt@toerring.de>

@@ -97,7 +97,7 @@ case "$1" in
 		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
 		if [ $? != 0 -a -e /dev/witio_48 ]
 		then
-			rm -f /dev/witio
+			rm -f /dev/witio_48
 				if [ $? != 0 ]
 				then
 					log_failure_msg "Deleting device files for WITIO-48 cards failed."

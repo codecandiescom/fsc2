@@ -20,8 +20,7 @@
 
 
 MODULE   := rulbus_epp.o
-SOURCES  := rulbus_epp.c
-HEADERS  := rulbus_epp.h rulbus_epp_autoconf.h
+PWD      := $(shell pwd)
 
 
 # Unless the user set the environment variable RULBUS_EPP_KERNEL_SOURCE
@@ -32,14 +31,19 @@ HEADERS  := rulbus_epp.h rulbus_epp_autoconf.h
 # to the wrong kernel code or may even not exist...
 
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)
-    KERNELDIR := $(RULBUS_EPP_KERNEL_SOURCE)
+KERNEL_DIR := $(RULBUS_EPP_KERNEL_SOURCE)
 endif
 
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-					     echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+ifneq ($(KERNELRELEASE),)
+KERNEL_DIR := /lib/modules/$(KERNELRELEASE)/build
+KERNEL_VER := $(KERNELRELEASE)
+else
+KERNEL_DIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+					      echo "/lib/modules/`uname -r`/build";     \
+					  else                                          \
+						  echo "/usr/src/linux";                    \
+					  fi )
+endif
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
@@ -48,38 +52,34 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 # not be found out that way print an error message and bail out.
 
 ifndef KERNEL_VER
-
 KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'          \
-                            $(KERNELDIR)/include/linux/utsrelease.h     \
+                            $(KERNEL_DIR)/include/linux/utsrelease.h    \
 				            2>/dev/null |                               \
 	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+endif
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'           \
-	                            $(KERNELDIR)/include/generated/utsrelease.h  \
-					            2>/dev/null |                                \
+	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
+	                            $(KERNEL_DIR)/include/generated/utsrelease.h  \
+					            2>/dev/null |                                 \
 		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
 ifeq ($(KERNEL_VER),)
 	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'          \
-		                        $(KERNELDIR)/include/linux/version.h        \
+		                        $(KERNEL_DIR)/include/linux/version.h       \
 					            2>/dev/null |                               \
 	        	    	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
-
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell make --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null )
+	KERNEL_VER := $(shell make --quiet -C $(KERNEL_DIR) kernelrelease 2>/dev/null )
 endif
 
-
+ifeq ($(KERNEL_VER),)
 all $(MODULE) install check clean:
-	@if [ -z "$(KERNEL_VER)" ]; then \
-		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
-		exit 2; \
-	fi
-	$(MAKE) $@ KERNEL_VER=$(KERNEL_VER)
+	@echo "Error: Can't figure out kernel version under the assumption that the kernel headers (or sources) are at $(KERNEL_DIR)"
+	exit 2
 
 else      # if KERNEL_VER is set
 
@@ -87,27 +87,31 @@ else      # if KERNEL_VER is set
 
 ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.\|4\.' 2>/dev/null),)
 
-	obj-m := $(MODULE)
+ifneq ($(KERNELRELEASE),)    # if invoked from dkms
+obj-m := $(MODULE)
+endif
 
 all:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules
 
 modules_install install:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules_install
 
 clean:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
+	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) clean
 	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
 
-else
 
-# Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
-# (the -fno-strict-aliasing in CFLAGS is set because of some problems with
-# the 2.4 kernel header files withh gcc 3.3.3 on Debian)
+else   # pre 2.6 kernels (hopefully 2.4)
 
-INCLUDES := -I$(KERNELDIR)/include
+# The -fno-strict-aliasing in CFLAGS is set because of some problems with
+# the 2.4 kernel header files with gcc 3.3.3 on Debian
 
-CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes  \
+SOURCES  := rulbus_epp.c
+HEADERS  := rulbus_epp.h rulbus_epp_autoconf.h
+INCLUDES := -I$(KERNEL_DIR)/include
+
+CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes \
             -fno-strict-aliasing
 
 all: $(MODULE)
@@ -128,10 +132,9 @@ ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
 		fi;                                                           \
 		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;                \
 	fi
-endif
 
 clean:
 	$(RM) $(RMFLAGS) *.o svn- Module.symvers *~
-
+endif
 endif
 endif

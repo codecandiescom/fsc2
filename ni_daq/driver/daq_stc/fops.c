@@ -243,17 +243,19 @@ static unsigned int ni_daq_poll( struct file              * file_p,
 /*-----------------------------------------------------------------------*
  * Function for reading from the device file associated with the board.
  * Reading the device file only works for data from the AI subsystem.
- * 1. If no valid acquisition set up has been done return -EINVAL
+ * 1. If no valid acquisition set up has been done return -EINVAL.
  * 2. If there's an acquisition set up but the acquisition hasn't been
- *    started, trying to read from the file automatically starts it
+ *    started, trying to read from the file automatically starts an
+ *    acquisition.
  * 3. If the file wasn't opened in non-blocking mode wait until data
- *    are available
- * 4. Return as many data as are available (or as many as requested)
+ *    are available.
+ * 4. Return as many data as are available (but not more than requested).
  * 5. If the acquisition is finished and all data to be expected are
  *    getting passed on to the user a reset of the AI subsystem is
- *    done, i.e. tarnsfer of data from the DAQ to the data buffer
+ *    done, i.e. transfer of data from the DAQ to the data buffer
  *    (possibly via DMA) is automatically disabled, buffers are de-
- *    allocated and trigger input lines are released back into the pool
+ *    allocated and trigger input lines are released back into the
+ *    pool.
  *-----------------------------------------------------------------------*/
 
 static ssize_t ni_daq_read( struct file * file_p,
@@ -286,8 +288,8 @@ static ssize_t ni_daq_read( struct file * file_p,
 	} else if ( down_interruptible( &board->use_mutex ) )
 		return -ERESTARTSYS;
 
-	/* It's a fatal error if there can't be any data because no valid
-	   acquisition setup has been done */
+	/* It's a fatal error if there can't be any data because no
+	   valid acquisition setup has been done */
 
 	if ( ! board->AI.is_acq_setup ) {
 		up( &board->use_mutex );
@@ -304,8 +306,8 @@ static ssize_t ni_daq_read( struct file * file_p,
 		return ret;
 	}
 
-	/* If the device file was opened in blocking mode make sure there are
-	   data: if no data are available immediately enable the STOP
+	/* If the device file was opened in blocking mode make sure there
+	   are data: if no data are available immediately enable the STOP
 	   interrupt (which gets raised when a scan is finished) and then
 	   wait for it (or for the SC TC interrupt, which is raised at the
 	   end of the acquisition). */
@@ -339,11 +341,11 @@ static ssize_t ni_daq_read( struct file * file_p,
 		return -EAGAIN;
 	}
 
-	/* If all points to be expected from the acquisition have been fetched
-	   or if there was an unrecoverable error disable AI SC_TC interrupt
-	   and release all AI trigger inputs as well as switching off data
-	   transfer from the DAQ to the bufers (possibly via DMA) and releasing
-	   the associated buffers. */
+	/* If all points to be expected from the acquisition have been
+	   fetched or if there was an unrecoverable error disable AI SC_TC
+	   interrupt and release all AI trigger inputs as well as switching
+	   off data transfer from the DAQ to the bufers (possibly via DMA)
+	   and releasing the associated buffers. */
 
 	if ( ret != 0 && board->AI.is_running ) {
 		board->AI.is_running = 0;

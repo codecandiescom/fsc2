@@ -1,6 +1,6 @@
 # Makefile for ME-6000 and ME-6100 driver
 #
-# Copyright (C) 2002-2014 Jens Thoms Toerring
+# Copyright (C) 2002-2015 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,14 +31,19 @@ PWD      := $(shell pwd)
 # to the wrong kernel code or may even not exist...
 
 ifneq ($(ME6X00_KERNEL_SOURCE),)
-    KERNELDIR := $(ME6X00_KERNEL_SOURCE)
+KERNEL_DIR := $(ME6X00_KERNEL_SOURCE)
 endif
 
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then  \
-					     echo "/lib/modules/`uname -r`/build";      \
-					 else                                           \
-						 echo "/usr/src/linux";                     \
-					 fi)
+ifneq ($(KERNELRELEASE),)
+KERNEL_DIR := /lib/modules/$(KERNELRELEASE)/build
+KERNEL_VER := $(KERNELRELEASE)
+else
+KERNEL_DIR := $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+					     echo "/lib/modules/`uname -r`/build"; \
+					 else \
+						 echo "/usr/src/linux"; \
+					 fi )
+endif
 
 # If KERNEL_VER isn't set determine it from the the kernel headers (it used
 # to be defined in linux/version.h but on new systems its' now in its own
@@ -47,78 +52,62 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then  \
 # not be found out that way print an error message and bail out.
 
 ifndef KERNEL_VER
-
 KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
-                            $(KERNELDIR)/include/generated/utsrelease.h \
-				            2>/dev/null |                               \
+                            $(KERNEL_DIR)/include/generated/utsrelease.h \
+				            2>/dev/null |                                \
 	            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
-
-ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
-	                            $(KERNELDIR)/include/linux/utsrelease.h     \
-					            2>/dev/null |                               \
-		            	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'            \
-		                        $(KERNELDIR)/include/linux/version.h        \
-					            2>/dev/null |                               \
-	        	    	  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
+KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'           \
+                            $(KERNEL_DIR)/include/linux/utsrelease.h     \
+				            2>/dev/null |                                \
+					  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
 ifeq ($(KERNEL_VER),)
-	KERNEL_VER := $(shell $(MAKE) --quiet -C $(KERNELDIR) kernelrelease 2>/dev/null | grep -v make)
+KERNEL_VER := $(shell grep 'define[ \t]\+UTS_RELEASE[ \t]\+\"'          \
+	                        $(KERNEL_DIR)/include/linux/version.h       \
+				            2>/dev/null |                               \
+					  sed 's/^[^"]\+"\([^"]\+\)".*$$/\1/' 2>/dev/null )
 endif
 
+ifeq ($(KERNEL_VER),)
+	KERNEL_VER := $(shell $(MAKE) --quiet -C $(KERNEL_DIR) kernelrelease 2>/dev/null | grep -v make)
+endif
 
+ifeq ($(KERNEL_VER),)
 all $(MODULE) install check clean:
-	@if [ -z "$(KERNEL_VER)" ]; then \
-		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
-		exit 2; \
-	fi
-	$(MAKE) KERNEL_VER=$(KERNEL_VER) $@
+	@echo "Error: Can't figure out kernel version under the assumption that the kernel headers (or sources) are at $(KERNEL_DIR)"
+	exit 2
 
 else      # if KERNEL_VER is set
 
 # First handle the case that we're building for a 2.6 or 3.x kernel
 
-ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.' 2>/dev/null),)
+ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.\|4\.' 2>/dev/null),)
 
-ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
-	obj-m := $(MODULE)
-
-else                         # otherwise make kernel build system available
-
-EXTRA_CFLAGS := -I$(PWD)
-
-all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS)
-
-check:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) C=1 EXTRA_CFLAGS=$(EXTRA_CFLAGS)
-
-install:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
-	$(INSTALL) -d $(prefix)/include
-	$(INSTALL) -m 644 me6x00_drv.h $(prefix)/include
-
-clean:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
-
+ifneq ($(KERNELRELEASE),)    # if invoked from dkms
+obj-m := $(MODULE)
 endif
 
-else
+all:
+	$(MAKE) -C $(KERNEL_DIR) M="$(PWD)"
 
-# Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
+modules_install install:
+	$(MAKE) -C $(KERNEL_DIR) M="$(PWD)" modules_install
+
+clean:
+	$(MAKE) -C $(KERNEL_DIR) M="$(PWD)" clean
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order *~
+
+else   # pre 2.6 kernels (hopefully 2.4)
 
 SOURCES  = me6x00.c
 HEADERS  = pci-compat.h sysdep.h me6x00_drv.h me6x00_brd.h autoconf.h
-INCLUDES = -I$(KERNELDIR)/include -I.
+INCLUDES = -I$(KERNEL_DIR)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
-
 
 all:
 	$(MAKE) $(SOURCES:.c=.o)

@@ -381,11 +381,12 @@ static int AI_channel_setup( Board *                  board,
 
 	board->func->clear_configuration_memory( board );
 
-	/* Set up the high and low part of the configuration register with the
-	   channel parameter. A non-negative return value from the function
-	   for setting the Configuration Memory High Register tells if a data
-	   point is going to be written to the FIFO for the channel during a
-	   scan (not all channels necessarily deliver a data point). */
+	/* Set up the high and low part of the configuration register with
+	   the channel parameter. A non-negative return value from the
+	   function for setting the Configuration Memory High Register
+	   tells if a data point is going to be written to the FIFO for
+	   the channel during a scan (not all channels necessarily deliver
+	   a data point). */
 
 	board->AI.num_channels = 0;
 	board->AI.num_data_per_scan = 0;
@@ -427,9 +428,9 @@ static int AI_channel_setup( Board *                  board,
 	}
 
 	/* Check that the channel associated with a channel with differential
-	   coupling is not used - channels with differential coupling can only
-	   be in the ranges i = 0..7,16..23,32..39,48..55 and the channel
-	   associated to it has to have the number (i + 8) */
+	   coupling is not used - channels with differential coupling can
+	   only be in the ranges i = 0..7, 16..23, 32..39, 48..55 and the
+	   channel associated to it has to have the number (i + 8) */
 
 	for ( i = 0; i < board->type->ai_num_channels; i++ ) {
 		if ( ch_types[ i ] == NI_DAQ_AI_TYPE_UNASSIGNED )

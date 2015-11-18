@@ -36,7 +36,7 @@ export
 
 
 .SUFFIXES:
-.PHONY: all driver lib install cleanup clean
+.PHONY: all driver lib install install_lib install_driver clean
 
 all:
 	$(MAKE) driver
@@ -56,15 +56,16 @@ lib:
 	$(MAKE) -C lib
 
 install:
-	$(MAKE) -C driver install
+	$(MAKE) install_lib
+	$(MAKE) install_driver
+
+install_lib:
 	$(MAKE) -C lib install
 
-cleanup:
-	$(MAKE) -C driver cleanup
-	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ makelog
+install_driver:
+	$(MAKE) -C driver install
 
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) driver/autoconf.h makelog *~
+	$(RM) $(RMFLAGS) driver/autoconf.h makelog *~ */*~

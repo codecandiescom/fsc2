@@ -1,6 +1,6 @@
 #  Makefile for ME-6000 and ME-6100 driver and library
 #
-#  Copyright (C) 2002-2014 Jens Thoms Toerring
+#  Copyright (C) 2002-2015 Jens Thoms Toerring
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ install:
 	$(INSTALL) -m 644 libme6x00.a  $(lib_dir)
 	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 me6x00.h $(incl_dir)
+	$(INSTALL) -m 644 ../driver/me6x00_drv.h $(incl_dir)
 
 cleanup:
 	$(RM) $(RMFLAGS) *.o me_test *~

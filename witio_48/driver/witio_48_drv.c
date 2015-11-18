@@ -312,7 +312,7 @@ static int __init witio_48_init( void )
 	board.in_use = 0;
 
 	/* Deactivate all outputs by switching to mode 0 with all ports
-	   being set as input ports. Also set up a default mode to 1x24
+	   being set as input ports. Also set up the default mode to 1x24
 	   (two single 24-bit DIOs) and set the structure with the current
 	   state accordingly. */
 

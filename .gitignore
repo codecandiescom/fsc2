@@ -37,6 +37,8 @@ fsc2_config.h
 Module.markers
 Module.symvers
 */driver/*_autoconf.h
+*/driver/autoconf.h
+*/driver/include/autoconf.h
 */driver/*mod.c
 */driver/modules.order
 rulbus/lib/lexer.c
@@ -177,3 +179,4 @@ modules/rs_rto/vxi11_clnt.c
 modules/rs_rto/vxi11_svc.c
 modules/rs_rto/vxi11_xdr.c
 FcntlLock/MYMETA.json
+modules.order

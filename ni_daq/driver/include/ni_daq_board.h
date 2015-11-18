@@ -216,42 +216,42 @@ struct Board_Functions {
 
 
 struct AI_Subsystem {
-	unsigned int num_channels;
-	unsigned int num_data_per_scan;
+	unsigned int  num_channels;
+	unsigned int  num_data_per_scan;
 	unsigned long num_scans;
-	int is_acq_setup;
-	int is_running;
+	int           is_acq_setup;
+	int           is_running;
 
-	NI_DAQ_INPUT START_source;
-	NI_DAQ_INPUT START1_source;
-	NI_DAQ_INPUT CONVERT_source;
-	NI_DAQ_INPUT SI_source;
+	NI_DAQ_INPUT      START_source;
+	NI_DAQ_INPUT      START1_source;
+	NI_DAQ_INPUT      CONVERT_source;
+	NI_DAQ_INPUT      SI_source;
 
-	unsigned int timebase1;
+	unsigned int      timebase1;
 
 	wait_queue_head_t waitqueue;
 };
 
 
 struct AO_Subsystem {
-	unsigned int is_channel_setup[ 2 ];
+	unsigned int       is_channel_setup[ 2 ];
 	NI_DAQ_BU_POLARITY polarity;
-	unsigned int timebase1;
-	wait_queue_head_t waitqueue;
+	unsigned int       timebase1;
+	wait_queue_head_t  waitqueue;
 };
 
 
 struct GPCT_Subsystem {
 	wait_queue_head_t waitqueue;
-	unsigned int timebase1;
+	unsigned int      timebase1;
 };
 
 
 struct MSC_Subsystem {
-	NI_DAQ_CLOCK_TYPE clock;
+	NI_DAQ_CLOCK_TYPE        clock;
 	NI_DAQ_CLOCK_SPEED_VALUE speed;
-	NI_DAQ_STATE output_state;
-	unsigned int divider;
+	NI_DAQ_STATE             output_state;
+	unsigned int             divider;
 };
 
 
@@ -267,8 +267,8 @@ struct IRQ_Handling {
 
 
 struct Critical_Section {
-	unsigned long count;
-	spinlock_t spinlock;
+	unsigned      long count;
+	spinlock_t    spinlock;
 	unsigned long flags;
 };
 
@@ -280,7 +280,7 @@ typedef struct {
 	unsigned long order;
 	size_t        transfered; /* size of buffer that's already transfered
 				     to the user or to the buffer */
-	int    is_mapped;         /* set while buffer is PCI-mapped */
+	int           is_mapped;  /* set while buffer is PCI-mapped */
 	struct {                  /* this structure gets read in by the MITE */
 		u32 tcr;          /* size of buffer */
 		u32 mar;          /* bus address of buffer */
@@ -394,7 +394,7 @@ struct Board {
 
 /* Some global variables */
 
-extern int board_count;
+extern int   board_count;
 extern Board boards[ ];
 
 

@@ -111,16 +111,33 @@ It is possible that after installing the libraries the linker still has
 problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.
 
+During installation you may get asked how to install the module if DKMS
+is installed on your machine. DKMS is a framework that automatically
+updates modules for newly installed kernel versions, thus relieving
+you of the additional work of manually recompiling and installing
+drivers for hardware that are not part of the official Linux kernel
+for each new kernel you install (or that gets installed by your
+distributions mechanisms). So it's normally preferable to use DKMS,
+but if you don't want to use it the INSTALL script will give you the
+option to install the module in the "classic" way.
+
+Once your done you can clean up everything by simply invoking
+
+  make clean
+
+from within the main directory of the package.
+
 
 IV. Documentation
 =================
 
 In the 'driver' subdirectory you will find a file named 'ni6601_drv.txt',
 describing in detail the ioctl() calls that can used to deal with the
-card.
+card. This is only of interest (except when you're curious'-) if you
+choose not to use the supplied library.
 
 In the 'lib' subdirectory a file named 'ni6601_lib.txt' describes the
 functionality supplied by the library.
 
 
-       12.11.2011   Jens Thoms Törring <jt@toerring.de>
+       7.11.2015   Jens Thoms Törring <jt@toerring.de>
