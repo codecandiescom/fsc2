@@ -24,7 +24,8 @@ run fsc2:
  6) sed
  7) grep
  8) libz (the library for compressing used with gzip)
- 9) The XFORMS (shared) library and the properly installed header
+ 9) libXft-dev
+10) The XFORMS (shared) library and the properly installed header
     file. You can download all of it from
 
        http://savannah.nongnu.org/projects/xforms/.
@@ -36,17 +37,17 @@ run fsc2:
     the development version, otherwise the required header will be
     missing!)
 
-10) GPIB library (fsc2 can also be compiled and run without it but
+11) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
 
 
 Optionally, you should have
 
-11) addr2line
-12) perl (version 5.6 or higher) with the pTk (Tk support) package
-13) pnmtopng
-14) pnmtojpeg
-15) If you want to compile fsc2 with the FFT module you also need
+12) addr2line
+13) perl (version 5.6 or higher) with the pTk (Tk support) package
+14) pnmtopng
+15) pnmtojpeg
+16) If you want to compile fsc2 with the FFT module you also need
     the FFTW library, version 3, which can be downloaded e.g. from
     http://www.fftw.org/
 
@@ -58,16 +59,16 @@ won't work (which also requires the next two utilities).
 
 To create the complete documentation beside Perl you also need
 
-16) makeinfo
-17) install-info (see GNU texinfo)
-18) texi2html (at least version 1.78)
-19)
-20) TeX (if missing no PostScript and PDF documentation is created)
-21) convert and identify from the ImageMagick package (or no PostScript
+17) makeinfo
+18) install-info (see GNU texinfo)
+19) texi2html (at least version 1.78)
+20)
+21) TeX (if missing no PostScript and PDF documentation is created)
+22) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
-22) dvips (if missing no PostScript documentation is created)
-23) pdftex (if missing no PDF documentation will be created)
-24) gzip
+23) dvips (if missing no PostScript documentation is created)
+24) pdftex (if missing no PDF documentation will be created)
+25) gzip
 
 
 
@@ -572,10 +573,9 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    September 4, 2015                   Much luck, Jens
+    December 1, 2015              Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de
    \__________________________    http://www.toerring.de
-                                  Hertzbergstr. 28, 12055 Berlin, Germany
                                   Tel.: +49 (0)30 691 64 54
