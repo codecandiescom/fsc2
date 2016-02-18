@@ -117,13 +117,16 @@ rs_smb100a      := rs_smb100a.c rs_smb100a_base.c rs_smb100a_outp.c        \
 keithley2600a   := keithley2600a.c keithley2600a_limits.c keithley2600a_ll.c \
                    keithley2600a_source.c keithley2600a_measure.c \
 				   $(vxi11_list) vxi11_user.c
+keithley2612b   := keithley2612b.c keithley2612b_limits.c keithley2612b_ll.c \
+                   keithley2612b_source.c keithley2612b_measure.c \
+				   $(vxi11_list) vxi11_user.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
 # pre-installed software or extra hardware
 
 comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l ag54830b_l rs_smb100a \
-                   keithley2600a
+                   keithley2600a keithley2612b
 
 
 # Now follow modules that only get created on demand (they require either

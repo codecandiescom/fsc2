@@ -24,11 +24,11 @@
 
 
 #include "fsc2_module.h"
-#include "keithley2600a.conf"
-#include "keithley2600a_limits.h"
-#include "keithley2600a_ll.h"
-#include "keithley2600a_source.h"
-#include "keithley2600a_measure.h"
+#include "keithley2612b.conf"
+#include "keithley2612b_limits.h"
+#include "keithley2612b_ll.h"
+#include "keithley2612b_source.h"
+#include "keithley2612b_measure.h"
 
 
 /* Define the maximum number of points to be returned from a sweep - the
@@ -265,10 +265,10 @@ extern Keithley2600A_T * k26;
 
 /* Hook functions */
 
-int keithley2600a_init_hook( void );
-int keithley2600a_test_hook( void );
-int keithley2600a_exp_hook( void );
-int keithley2600a_end_of_exp_hook( void );
+int keithley2612b_init_hook( void );
+int keithley2612b_test_hook( void );
+int keithley2612b_exp_hook( void );
+int keithley2612b_end_of_exp_hook( void );
 
 
 /* EDL functions */

@@ -9657,25 +9657,27 @@ Uncorrected Value
 A single module for a source-meter exists:
 @table @code
 @item @ref{keithley2600a}
-Keithley2600A SourceMeter series (2601A, 2602A, 2611A, 2612A, 2635A, 2636A)
+Keithley 2600A and 2600B SourceMeter series (2601A, 2601B, 2602A,
+2602B, 2604B, 2611A, 2611B, 2612A, 2612B, 2614B, 2634B, 2635A, 2635B,
+2636A, 2636B)
 @end table
 @noindent
 @noindent
-This module can be compiled for any of the sourcemeters of that series
-(2601A, 2602A, 2611A, 2612A, 2635A or 2636A). To use the module in an
-experiment put its name into the @code{DEVICES} section of the
-@code{EDL} script.
+This module can be compiled for any of the sourcemeters of that
+series. To use the module in an experiment put its name into the
+@code{DEVICES} section of the @code{EDL} script.
 
 Please note: Most of the @code{EDL} functions take at least a single
 argument, the number of the channel the function is to operate on.
 This is an integer, either @code{1} or @code{2}. If the module is
-compiled for a module that only has a single channel (2601A, 2611A or
-2635A) this may seem superfluous and it is possible for these models
-to compile the module so that no channel number has to be passed to
-the @code{EDL} functions, see the configuration file for the module
-for details. Unless that is the case and it's not explicitly
-mentioned in the description of the EDL functions assume that they all
-expect a channel number as their first argument.
+compiled for a module that only has a single channel (2601A, 2601B,
+2611A, 2611B, 2635A or 2635B) this may seem superfluous and it is
+possible for these models to compile the module so that no channel
+number has to be passed to the @code{EDL} functions, see the
+configuration file for the module for details. Unless that is the case
+and it's not explicitly mentioned in the description of the EDL
+functions assume that they all expect a channel number as their first
+argument.
 
 Unless explicitly stated otherwise the @code{EDL} functions can only
 be called within the @code{EXPERIMENT} section of an @code{EDL} script.
@@ -10800,12 +10802,15 @@ before the sweep was started.
 The device allows to do some checks on the connection to the circuitry
 under test by testing for excessive resistances. By calling this
 function such a test is done and it returns @code{1} if the test
-succeeded (the connection seems to be ok) and @code{0} if it
-failed (there's too high a resistance). The function takes no
-arguments (except the channel number). The resistances measured
-during the test are compared to a threshold value, which is
-per default @w{50 Ohm} but which can be modified using the function
+succeeded (the connection seems to be ok) and @code{0} if it failed
+(there's too high a resistance). The function takes no arguments
+(except the channel number). The resistances measured during the test
+are compared to a threshold value, which is per default @w{50 Ohm} but
+which can be modified using the function
 @code{@ref{sourcemeter_contact_threshold()}}.
+
+Note that this function is not available for the 2604B, 2614B, and
+2634B.
 
 Tests can be done even when the channel's output is off, though the
 off-mode may not be the HIGH-Z state (in that state the test circuitry
@@ -10823,6 +10828,9 @@ elements, of which the first one is the lowest resistance measured and
 the second the highest. The function takes no arguments beside the
 channel number.
 
+Note that this function is not available for the 2604B, 2614B, and
+2634B.
+
 The function can called even when the channel's output is off, though
 the off-mode may not be the HIGH-Z state (in that state the test
 circuitry is completely disconnected from the device by a relay). It
@@ -10837,10 +10845,12 @@ This function allows to query or set the resistance threshold used in
 contact checks, as done by the
 @code{@ref{sourcemeter_contact_check()}} function. If called without
 arguments (beside the channel number) it returns the currently set
-threshold resistance. If called with another argument this is set as
+threshold resistance. aIf called with another argument this is set as
 the threshold resistance (in Ohm) to be used in future tests. The
 resistance may not be lower than @w{0 Ohm}.
 
+Note that this function is not available for the 2604B, 2614B, and
+2634B.
 
 @anchor{sourcemeter_contact_speed()}
 @findex sourcemeter_contact_speed()
@@ -10858,6 +10868,8 @@ which is one of these integers or one of the strings @code{"FAST"},
 @code{"MEDIUM"} or @code{"SLOW"} the speed setting for future contact
 checks is set accordingly.
 
+Note that this function is not available for the 2604B, 2614B, and
+2634B.
 
 @end table
 

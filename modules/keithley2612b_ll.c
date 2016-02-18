@@ -18,7 +18,7 @@
  */
 
 
-#include "keithley2600a.h"
+#include "keithley2612b.h"
 #include "vxi11_user.h"
 
 
@@ -38,7 +38,7 @@ static const char *smu[ ] = { "smua", "smub" };
  *--------------------------------------------------------------*/
 
 bool
-keithley2600a_open( void )
+keithley2612b_open( void )
 {
     /* Never try to open the device more than once */
 
@@ -74,14 +74,14 @@ keithley2600a_open( void )
  *--------------------------------------------------------------*/
 
 bool
-keithley2600a_close( void )
+keithley2612b_close( void )
 {
     if ( ! k26->is_open )
         return true;
 
     /* Clean up: remove functions we may have created */
 
-    keithley2600a_cmd( "fsc2_list = nil fsc2_lin = nil" );
+    keithley2612b_cmd( "fsc2_list = nil fsc2_lin = nil" );
 
     /* Unlock the keyboard */
 
@@ -102,12 +102,12 @@ keithley2600a_close( void )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_cmd( const char * cmd )
+keithley2612b_cmd( const char * cmd )
 {
 	size_t len = strlen( cmd );
 
     if ( vxi11_write( cmd, &len, false ) != VXI11_SUCCESS )
-		keithley2600a_comm_failure( );
+		keithley2612b_comm_failure( );
 }
 
 
@@ -120,19 +120,19 @@ keithley2600a_cmd( const char * cmd )
  *--------------------------------------------------------------*/
 
 size_t
-keithley2600a_talk( const char * cmd,
+keithley2612b_talk( const char * cmd,
                     char       * reply,
                     size_t       length,
                     bool         allow_abort )
 {
     fsc2_assert( length > 1 );
 
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     length--;
     if (    vxi11_read( reply, &length, allow_abort ) != VXI11_SUCCESS
          || length < 1 )
-        keithley2600a_comm_failure( );
+        keithley2612b_comm_failure( );
 
     reply[ length ] = '\0';
 	return length;
@@ -144,7 +144,7 @@ keithley2600a_talk( const char * cmd,
  *---------------------------------------------------------------*/
 
 void
-keithley2600a_get_state( void )
+keithley2612b_get_state( void )
 {
     /* Clear out the error queue */
 
@@ -158,10 +158,10 @@ keithley2600a_get_state( void )
        for extracting the data and set up endian-ness as needed. */
 
 #if ! defined BINARY_TRANSFER
-    keithley2600a_cmd( "format.data=format.ASCII" );
-    keithley2600a_cmd( "format.asciiprecision=6" );
+    keithley2612b_cmd( "format.data=format.ASCII" );
+    keithley2612b_cmd( "format.asciiprecision=6" );
 #else
-    keithley2600a_cmd( "format.data=format.REAL32" );
+    keithley2612b_cmd( "format.data=format.REAL32" );
 
     if ( sizeof( float ) == 4 )
     {
@@ -171,20 +171,20 @@ keithley2600a_get_state( void )
 
         * ( unsigned char * ) &tst = 1;
         if ( tst == 1 )
-            keithley2600a_cmd( "format.byteorder = format.LITTLEENDIAN" );
+            keithley2612b_cmd( "format.byteorder = format.LITTLEENDIAN" );
         else
-            keithley2600a_cmd( "format.byteorder=format.BIGENDIAN" );
+            keithley2612b_cmd( "format.byteorder=format.BIGENDIAN" );
     }
     else
     {
         to_double = to_double_hard;
-        keithley2600a_cmd( "format.byteorder=format.LITTLEENDIAN" );
+        keithley2612b_cmd( "format.byteorder=format.LITTLEENDIAN" );
     }
 #endif
 
-    keithley2600a_get_line_frequency( );
+    keithley2612b_get_line_frequency( );
 
-    const char * model = keithley2600a_get_model( );
+    const char * model = keithley2612b_get_model( );
 
 #if defined _2601A
     if ( strcmp( model, "2601A\n" ) )
@@ -250,60 +250,60 @@ keithley2600a_get_state( void )
 
     for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
     {
-        keithley2600a_get_sense( ch );
+        keithley2612b_get_sense( ch );
         
-        keithley2600a_get_source_output( ch );
-        keithley2600a_get_source_highc( ch );
-        keithley2600a_get_source_offmode( ch );
-        keithley2600a_get_source_func( ch );
-        keithley2600a_get_source_delay( ch );
+        keithley2612b_get_source_output( ch );
+        keithley2612b_get_source_highc( ch );
+        keithley2612b_get_source_offmode( ch );
+        keithley2612b_get_source_func( ch );
+        keithley2612b_get_source_delay( ch );
 
-        keithley2600a_get_source_autorangev( ch );
-        keithley2600a_get_source_autorangei( ch );
+        keithley2612b_get_source_autorangev( ch );
+        keithley2612b_get_source_autorangei( ch );
 
-        keithley2600a_get_source_limitv( ch );
-        keithley2600a_get_source_limiti( ch );
+        keithley2612b_get_source_limitv( ch );
+        keithley2612b_get_source_limiti( ch );
 
-        keithley2600a_get_source_rangev( ch );
-        keithley2600a_get_source_rangei( ch );
+        keithley2612b_get_source_rangev( ch );
+        keithley2612b_get_source_rangei( ch );
 
-        keithley2600a_get_source_lowrangev( ch );
-        keithley2600a_get_source_lowrangei( ch );
+        keithley2612b_get_source_lowrangev( ch );
+        keithley2612b_get_source_lowrangei( ch );
 
-        keithley2600a_get_source_levelv( ch );
-        keithley2600a_get_source_leveli( ch );
+        keithley2612b_get_source_levelv( ch );
+        keithley2612b_get_source_leveli( ch );
 
-        keithley2600a_get_source_offlimiti( ch );
+        keithley2612b_get_source_offlimiti( ch );
 
-        keithley2600a_get_source_settling( ch );
+        keithley2612b_get_source_settling( ch );
 
-        keithley2600a_get_source_sink( ch );
+        keithley2612b_get_source_sink( ch );
 
-        keithley2600a_get_measure_autorangev( ch );
-        keithley2600a_get_measure_autorangei( ch );
+        keithley2612b_get_measure_autorangev( ch );
+        keithley2612b_get_measure_autorangei( ch );
 
-        keithley2600a_get_measure_autozero( ch );
+        keithley2612b_get_measure_autozero( ch );
 
         /* Sefault to not doing single measurements */
 
-        if ( keithley2600a_get_measure_count( ch ) != 1 )
-            keithley2600a_set_measure_count( ch, 1 );
+        if ( keithley2612b_get_measure_count( ch ) != 1 )
+            keithley2612b_set_measure_count( ch, 1 );
 
-        keithley2600a_get_measure_time( ch );
-        keithley2600a_get_measure_delay( ch );
+        keithley2612b_get_measure_time( ch );
+        keithley2612b_get_measure_delay( ch );
 
-        keithley2600a_get_measure_rel_levelv( ch );
-        keithley2600a_get_measure_rel_levelv_enabled( ch );
+        keithley2612b_get_measure_rel_levelv( ch );
+        keithley2612b_get_measure_rel_levelv_enabled( ch );
 
-        keithley2600a_get_measure_rel_leveli( ch );
-        keithley2600a_get_measure_rel_leveli_enabled( ch );
+        keithley2612b_get_measure_rel_leveli( ch );
+        keithley2612b_get_measure_rel_leveli_enabled( ch );
 
-        keithley2600a_get_measure_filter_type( ch );
-        keithley2600a_get_measure_filter_count( ch );
-        keithley2600a_get_measure_filter_enabled( ch );
+        keithley2612b_get_measure_filter_type( ch );
+        keithley2612b_get_measure_filter_count( ch );
+        keithley2612b_get_measure_filter_enabled( ch );
 
-        keithley2600a_get_contact_threshold( ch );
-        keithley2600a_get_contact_speed( ch );
+        keithley2612b_get_contact_threshold( ch );
+        keithley2612b_get_contact_speed( ch );
     }
 
     k26->lin_sweeps_prepared  = false;
@@ -316,10 +316,10 @@ keithley2600a_get_state( void )
  *---------------------------------------------------------------*/
 
 void
-keithley2600a_reset( void )
+keithley2612b_reset( void )
 {
-    keithley2600a_cmd( "reset()" );
-    keithley2600a_get_state( );
+    keithley2612b_cmd( "reset()" );
+    keithley2612b_get_state( );
 }
 
 
@@ -328,7 +328,7 @@ keithley2600a_reset( void )
  *---------------------------------------------------------------*/
 
 const char *
-keithley2600a_get_model( void )
+keithley2612b_get_model( void )
 {
     static char buf[ 50 ];
 
@@ -345,7 +345,7 @@ static
 void
 clear_errors( void )
 {
-    keithley2600a_cmd( "errorqueue.clear()" );
+    keithley2612b_cmd( "errorqueue.clear()" );
 }
 
 
@@ -354,7 +354,7 @@ clear_errors( void )
  *---------------------------------------------------------------*/
 
 int
-keithley2600a_get_sense( unsigned int ch )
+keithley2612b_get_sense( unsigned int ch )
 {
     fsc2_assert( ch < NUM_CHANNELS );
 
@@ -363,11 +363,11 @@ keithley2600a_get_sense( unsigned int ch )
     sprintf( buf, "printnumber(%s.sense)", smu[ ch ] );
     TALK( buf, buf, sizeof buf, false, 7 );
 
-    k26->sense[ ch ] = keithley2600a_line_to_int( buf );
+    k26->sense[ ch ] = keithley2612b_line_to_int( buf );
     if (    k26->sense[ ch ] != SENSE_LOCAL
 		 && k26->sense[ ch ] != SENSE_REMOTE
 		 && k26->sense[ ch ] != SENSE_CALA )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return k26->sense[ ch ];
 }
@@ -378,7 +378,7 @@ keithley2600a_get_sense( unsigned int ch )
  *---------------------------------------------------------------*/
 
 int
-keithley2600a_set_sense( unsigned int ch,
+keithley2612b_set_sense( unsigned int ch,
 						 int          sense )
 {
     fsc2_assert( ch < NUM_CHANNELS );
@@ -389,11 +389,11 @@ keithley2600a_set_sense( unsigned int ch,
 	/* Calibration mode can only be switched to when output is off */
 
 	fsc2_assert(    sense != SENSE_CALA
-				 || keithley2600a_get_source_output( ch ) == OUTPUT_OFF );
+				 || keithley2612b_get_source_output( ch ) == OUTPUT_OFF );
 
     char buf[ 50 ];
     sprintf( buf, "%s.sense=%d", smu[ ch ], sense );
-	keithley2600a_cmd( buf );
+	keithley2612b_cmd( buf );
 
     return k26->sense[ ch ] = sense;
 }
@@ -404,7 +404,7 @@ keithley2600a_set_sense( unsigned int ch,
  *--------------------------------------------------------------*/
 
 double
-keithley2600a_get_line_frequency( void )
+keithley2612b_get_line_frequency( void )
 {
     char buf[ 50 ] = "printnumber(localnode.linefreq)";
 
@@ -412,17 +412,17 @@ keithley2600a_get_line_frequency( void )
        the read timeout considerably (to 5 s to be on the safe side) */
 
     if ( vxi11_set_timeout( VXI11_READ, 5000000 ) != VXI11_SUCCESS )
-        keithley2600a_comm_failure( );
+        keithley2612b_comm_failure( );
 
 	TALK( buf, buf, sizeof buf, false, 7 );
 
-    k26->linefreq = keithley2600a_line_to_double( buf );
+    k26->linefreq = keithley2612b_line_to_double( buf );
 
     if ( vxi11_set_timeout( VXI11_READ, READ_TIMEOUT ) != VXI11_SUCCESS )
-        keithley2600a_comm_failure( );
+        keithley2612b_comm_failure( );
 
     if ( k26->linefreq != 50 && k26->linefreq != 60 )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return k26->linefreq;
 }
@@ -438,13 +438,13 @@ keithley2600a_get_line_frequency( void )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_prep_lin_sweeps( void )
+keithley2612b_prep_lin_sweeps( void )
 {
     /* Create an empty LUA table, we're going to put all functions needed
        for linear sweeps into it */
 
     const char * cmd = "fsc2_lin = { }";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* Add LUA function for doing the linear sweep - it first initializes
        the source settings, the allocates memory for the results, sets up
@@ -473,7 +473,7 @@ keithley2600a_prep_lin_sweeps( void )
 "    ch.source.autorangei = ar"
 "  end "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA Function for preparing a linear voltage sweep */
 
@@ -487,7 +487,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  ch.trigger.source.linearv(startl, endl, cnt)"
 "  return f, ar, r "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA Function for preparing a linear current sweep */
 
@@ -501,7 +501,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  ch.trigger.source.lineari(startl, endl, cnt)"
 "  return f, ar, r "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA function for setting up the trigger system and starting the
        linear sweep while measuring (we can already start reading values
@@ -523,7 +523,7 @@ keithley2600a_prep_lin_sweeps( void )
 "  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     k26->lin_sweeps_prepared = true;
 }
@@ -539,13 +539,13 @@ keithley2600a_prep_lin_sweeps( void )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_prep_list_sweeps( void )
+keithley2612b_prep_list_sweeps( void )
 {
     /* Create an empty LUA table, we're going to put all functions needed
        for list sweeps into it */
 
     const char * cmd = "fsc2_list = { }";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* Add LUA function for doing the list sweep - it first initializes
        the source settings, the allocates memory for the results, sets up
@@ -576,7 +576,7 @@ keithley2600a_prep_list_sweeps( void )
 "    ch.source.autorangei = ar"
 "  end "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA Function for preparing a list voltage sweep */
 
@@ -590,7 +590,7 @@ keithley2600a_prep_list_sweeps( void )
 "  ch.trigger.source.listv(fsc2_list.list)"
 "  return f, ar, r "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA Function for preparing a list current sweep */
 
@@ -604,7 +604,7 @@ keithley2600a_prep_list_sweeps( void )
 "  ch.trigger.source.listi(fsc2_list.list)"
 "  return f, ar, r "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA function for setting up the trigger system and starting the
        list sweeping while measuring (we can start reading data while
@@ -626,7 +626,7 @@ keithley2600a_prep_list_sweeps( void )
 "  ch.source.output = ch.ENABLE"
 "  ch.trigger.initiate()"
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     /* LUA function for appending array 'fsc2_list.l' to array
        'fsc2_list.listx' */
@@ -639,7 +639,7 @@ keithley2600a_prep_list_sweeps( void )
 "    fsc2_list.list[i + sa ] = fsc2_list.l[ i ]"
 "  end "
 "end";
-    keithley2600a_cmd( cmd );
+    keithley2612b_cmd( cmd );
 
     k26->list_sweeps_prepared = true;
 }
@@ -651,26 +651,26 @@ keithley2600a_prep_list_sweeps( void )
 
 #if ! defined BINARY_TRANSFER
 bool
-keithley2600a_line_to_bool( const char * line )
+keithley2612b_line_to_bool( const char * line )
 {
     bool res = *line == '1';
 
     if ( ( *line != '0' && *line != '1' ) || *++line != '.' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     while ( *++line == '0' )
         /* empty */ ;
     if ( strcmp( line, "e+00\n" ) )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return res;
 }
 #else
 bool
-keithley2600a_line_to_bool( const char * line )
+keithley2612b_line_to_bool( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return to_double( ( const unsigned char *  ) line ) ? true : false;
 }
@@ -683,29 +683,29 @@ keithley2600a_line_to_bool( const char * line )
 
 #if ! defined BINARY_TRANSFER
 int
-keithley2600a_line_to_int( const char * line )
+keithley2612b_line_to_int( const char * line )
 {
     if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     char *ep;
     double dres = strtod( line, &ep );
 
     if ( *ep != '\n' || *++ep || dres > INT_MAX || dres < INT_MIN )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     long int res = lrnd( dres );
     if ( res > INT_MAX || res < INT_MIN || dres - res != 0 )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return res;
 }
 #else
 int
-keithley2600a_line_to_int( const char * line )
+keithley2612b_line_to_int( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return irnd( to_double( ( const unsigned char *  ) line ) );
 }
@@ -719,10 +719,10 @@ keithley2600a_line_to_int( const char * line )
 
 #if ! defined BINARY_TRANSFER
 double
-keithley2600a_line_to_double( const char * line )
+keithley2612b_line_to_double( const char * line )
 {
     if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     errno = 0;
 
@@ -732,16 +732,16 @@ keithley2600a_line_to_double( const char * line )
     if (    *ep != '\n'
          || *++ep
          || ( ( res == HUGE_VAL || res == - HUGE_VAL ) && errno == ERANGE ) )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return res;
 }
 #else
 double
-keithley2600a_line_to_double( const char * line )
+keithley2612b_line_to_double( const char * line )
 {
     if ( *line++ != '#' || *line++ != '0' || line[ 4 ] != '\n' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     return to_double( ( const unsigned char *  ) line );
 }
@@ -756,7 +756,7 @@ keithley2600a_line_to_double( const char * line )
 
 #if ! defined BINARY_TRANSFER
 double *
-keithley2600a_line_to_doubles( const char * line,
+keithley2612b_line_to_doubles( const char * line,
                                double     * buf,
                                int          cnt )
 {
@@ -770,7 +770,7 @@ keithley2600a_line_to_doubles( const char * line,
     while ( 1 )
     {
         if ( ! isdigit( ( int ) *line ) && *line != '-' && *line != '+' )
-            keithley2600a_bad_data( );
+            keithley2612b_bad_data( );
 
         errno = 0;
 
@@ -783,7 +783,7 @@ keithley2600a_line_to_doubles( const char * line,
                   && *ep != '\t' )
              || (    ( res == HUGE_VAL || res == - HUGE_VAL )
                   && errno == ERANGE ) )
-            keithley2600a_bad_data( );
+            keithley2612b_bad_data( );
 
         buf[ i++ ] = res;
 
@@ -797,14 +797,14 @@ keithley2600a_line_to_doubles( const char * line,
 }
 #else
 double *
-keithley2600a_line_to_doubles( const char * line,
+keithley2612b_line_to_doubles( const char * line,
                                double     * buf,
                                int          cnt )
 {
     fsc2_assert( cnt > 0 && buf );
 
     if ( *line++ != '#' || *line++ != '0' || line[ 4 * cnt ] != '\n' )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     for ( int i = 0; i < cnt; line += 4, i++ )
         buf[ i ] = to_double( ( const unsigned char * ) line );
@@ -853,7 +853,7 @@ to_double_hard( const unsigned char * data )
     unsigned char expo = ( ( ( data[ 3 ] & 0x7F ) << 1 ) | ( data[ 2 ] >> 7 ) );
 
     if ( expo == 0xFF )
-        keithley2600a_bad_data( );
+        keithley2612b_bad_data( );
 
     if ( expo )
     {
@@ -881,14 +881,14 @@ to_double_hard( const unsigned char * data )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_show_errors( void )
+keithley2612b_show_errors( void )
 {
     char buf[ 200 ];
     TALK( "printnumber(errorqueue.count)", buf, sizeof buf, false, 7 );
 
     int error_count;
-    if ( ( error_count = keithley2600a_line_to_int( buf ) ) < 0 )
-        keithley2600a_bad_data( );
+    if ( ( error_count = keithley2612b_line_to_int( buf ) ) < 0 )
+        keithley2612b_bad_data( );
     else if ( error_count == 0 )
         return;
 
@@ -899,7 +899,7 @@ keithley2600a_show_errors( void )
     {
         while ( error_count-- > 0 )
         {
-            keithley2600a_talk( "code,emess,esev,enode=errorqueue.next()\n"
+            keithley2612b_talk( "code,emess,esev,enode=errorqueue.next()\n"
                                 "print(emess)", buf, sizeof buf, false );
             mess = T_realloc( mess, strlen( mess ) + strlen( buf ) + 1 );
             strcat( mess, buf );
@@ -924,7 +924,7 @@ keithley2600a_show_errors( void )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_bad_data( void )
+keithley2612b_bad_data( void )
 {
     print( FATAL, "Devive sent unexpected data.\n" );
     THROW( EXCEPTION );
@@ -936,7 +936,7 @@ keithley2600a_bad_data( void )
  *--------------------------------------------------------------*/
 
 void
-keithley2600a_comm_failure( void )
+keithley2612b_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     k26->comm_failed = true;

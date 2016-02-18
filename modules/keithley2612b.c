@@ -18,7 +18,7 @@
  */
 
 
-#include "keithley2600a.h"
+#include "keithley2612b.h"
 
 
 const char device_name[ ]  = DEVICE_NAME;
@@ -50,9 +50,9 @@ static const char * ppc( unsigned int   ch,
 static void default_settings( void );
 
 
-static Keithley2600A_T keithley2600a;
-static Keithley2600A_T keithley2600a_test;
-Keithley2600A_T * k26 = &keithley2600a;
+static Keithley2600A_T keithley2612b;
+static Keithley2600A_T keithley2612b_test;
+Keithley2600A_T * k26 = &keithley2612b;
 
 
 #define TEST_VOLTAGE         1.0e-3
@@ -72,9 +72,9 @@ Keithley2600A_T * k26 = &keithley2600a;
  *--------------------------------------------------------------*/
 
 int
-keithley2600a_init_hook( void )
+keithley2612b_init_hook( void )
 {
-    k26 = &keithley2600a;
+    k26 = &keithley2612b;
 
     k26->is_open = false;
     k26->comm_failed = false;
@@ -91,10 +91,10 @@ keithley2600a_init_hook( void )
  *--------------------------------------------------------------*/
 
 int
-keithley2600a_test_hook( void )
+keithley2612b_test_hook( void )
 {
-    keithley2600a_test = keithley2600a;
-    k26 = &keithley2600a_test;
+    keithley2612b_test = keithley2612b;
+    k26 = &keithley2612b_test;
 
     /* Set up the structures for both channels with the device's default
        settings */
@@ -112,24 +112,24 @@ keithley2600a_test_hook( void )
  *--------------------------------------------------------------*/
 
 int
-keithley2600a_exp_hook( void )
+keithley2612b_exp_hook( void )
 {
-    k26 = &keithley2600a;
+    k26 = &keithley2612b;
 
-    if ( ! keithley2600a_open( ) )
+    if ( ! keithley2612b_open( ) )
         return false;
 
     TRY
     {
         if ( k26->reset_on_start )
-            keithley2600a_reset( );
+            keithley2612b_reset( );
         else
-            keithley2600a_get_state( );
+            keithley2612b_get_state( );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
-        keithley2600a_close( );
+        keithley2612b_close( );
         RETHROW;
     }
 
@@ -142,7 +142,7 @@ keithley2600a_exp_hook( void )
  *--------------------------------------------------------------*/
 
 int
-keithley2600a_end_of_exp_hook( void )
+keithley2612b_end_of_exp_hook( void )
 {
     /* If there was no communication failure switch off all channels
        unless the user explicitely asked for them to be left on. On
@@ -153,7 +153,7 @@ keithley2600a_end_of_exp_hook( void )
     {
         for ( unsigned int ch = 0; ch < NUM_CHANNELS; ch++ )
             if ( k26->source[ ch ].output && ! k26->keep_on_at_end[ ch ] )
-                keithley2600a_set_source_output( ch, OUTPUT_OFF );
+                keithley2612b_set_source_output( ch, OUTPUT_OFF );
     }
     else
     {
@@ -168,7 +168,7 @@ keithley2600a_end_of_exp_hook( void )
 
     /* Close connection to the device */
 
-    return keithley2600a_close( );
+    return keithley2612b_close( );
 }
 
 
@@ -216,7 +216,7 @@ sourcemeter_reset( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE == TEST )
         default_settings( );
     else if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_reset( );
+        keithley2612b_reset( );
 
     return vars_push( INT_VAR, 1L );
 }
@@ -283,7 +283,7 @@ sourcemeter_sense_mode( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_sense( ch, sense );
+        keithley2612b_set_sense( ch, sense );
     else
         k26->sense[ ch ] = sense;
 
@@ -335,7 +335,7 @@ sourcemeter_source_offmode( Var_T * v )
         return vars_push( INT_VAR, mode );
 
     if (  FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_offmode( ch, mode );
+        keithley2612b_set_source_offmode( ch, mode );
     else
         k26->source[ ch ].offmode = mode;
 
@@ -364,7 +364,7 @@ sourcemeter_output_state( Var_T * v )
 
     /* Before switching the channel on check that settings don't conflict */
 
-    if ( ! keithley2600a_test_toggle_source_output( ch ) )
+    if ( ! keithley2612b_test_toggle_source_output( ch ) )
     {
         pp_buf bufs[ 3 ];
 
@@ -387,7 +387,7 @@ sourcemeter_output_state( Var_T * v )
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_output( ch, on_off );
+        keithley2612b_set_source_output( ch, on_off );
     else
         k26->source[ ch ].output = on_off;
 
@@ -428,7 +428,7 @@ sourcemeter_source_mode( Var_T * v )
     else
         mode = get_strict_long( v, "spurce mode" ) != 0;
 
-    if ( keithley2600a.source[ ch ].func == mode )
+    if ( keithley2612b.source[ ch ].func == mode )
         return vars_push( INT_VAR, mode == OUTPUT_DCAMPS ? 0L : 1L );
 
     too_many_arguments( v );
@@ -439,7 +439,7 @@ sourcemeter_source_mode( Var_T * v )
     /* before switching the source function we need to check that all
        settings for the new mode are correct */
 
-    if ( ! keithley2600a_test_toggle_source_func( ch ) )
+    if ( ! keithley2612b_test_toggle_source_func( ch ) )
     {
         pp_buf bufs[ 3 ];
 
@@ -462,9 +462,9 @@ sourcemeter_source_mode( Var_T * v )
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_func( ch, mode );
+        keithley2612b_set_source_func( ch, mode );
     else
-        keithley2600a.source[ ch ].func = mode;
+        keithley2612b.source[ ch ].func = mode;
 
     return vars_push( INT_VAR,
                       k26->source[ ch ].func == OUTPUT_DCAMPS ? 0L : 1L );
@@ -486,25 +486,25 @@ sourcemeter_source_voltage( Var_T * v )
     double volts = get_double( v, NULL );
     too_many_arguments( v );
 
-    if ( ! keithley2600a_check_source_levelv( ch, volts ) )
+    if ( ! keithley2612b_check_source_levelv( ch, volts ) )
     {
         pp_buf bufs[ 2 ];
         print( FATAL, "Voltage of %s %sis out of currently possible range, "
                "may not exceed +/-%s.\n",
                pp_v( volts, bufs[ 0 ] ),
                ppc( ch, "for" ),
-               pp_v( keithley2600a_max_source_levelv( ch ), bufs[ 1 ] ) );
+               pp_v( keithley2612b_max_source_levelv( ch ), bufs[ 1 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_levelv( ch, volts );
+        keithley2612b_set_source_levelv( ch, volts );
     else
     {
         k26->source[ ch ].levelv = volts;
         if ( k26->source[ ch ].autorangev )
             k26->source[ ch ].rangev =
-                                 keithley2600a_best_source_rangev( ch, volts );
+                                 keithley2612b_best_source_rangev( ch, volts );
     }
 
     return vars_push( FLOAT_VAR, k26->source[ ch ].levelv );
@@ -526,24 +526,24 @@ sourcemeter_source_current( Var_T * v )
     double amps = get_double( v, NULL );
     too_many_arguments( v );
 
-    if ( ! keithley2600a_check_source_leveli( ch, amps ) )
+    if ( ! keithley2612b_check_source_leveli( ch, amps ) )
     {
         pp_buf bufs[ 2 ];
         print( FATAL, "Source current of %s %sis out of currently possible "
                "range, may not exceed +/-%s.\n",
                pp_a( amps, bufs[ 0 ] ), ppc( ch, "for" ),
-               pp_a( keithley2600a_max_source_leveli( ch ), bufs[ 1 ] ) );
+               pp_a( keithley2612b_max_source_leveli( ch ), bufs[ 1 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_leveli( ch, amps );
+        keithley2612b_set_source_leveli( ch, amps );
     else
     {
         k26->source[ ch ].leveli = amps;
         if ( k26->source[ ch ].autorangei )
             k26->source[ ch ].rangei =
-                                  keithley2600a_best_source_rangei( ch, amps );
+                                  keithley2612b_best_source_rangei( ch, amps );
     }
 
     return vars_push( FLOAT_VAR, k26->source[ ch ].leveli );
@@ -574,12 +574,12 @@ sourcemeter_source_voltage_range( Var_T * v )
        the next range that covers the maximum of the requested value and
        the voltage level. */
 
-    range = keithley2600a_best_source_rangev( ch, range );
+    range = keithley2612b_best_source_rangev( ch, range );
 
     /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
-        range = keithley2600a_max_source_rangev( ch );
+        range = keithley2612b_max_source_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -590,7 +590,7 @@ sourcemeter_source_voltage_range( Var_T * v )
              && k26->source[ ch ].func == OUTPUT_DCVOLTS )
             range = d_max( range, k26->source[ ch ].levelv );
 
-        keithley2600a_set_source_rangev( ch, range );
+        keithley2612b_set_source_rangev( ch, range );
     }
     else
     {
@@ -626,12 +626,12 @@ sourcemeter_source_current_range( Var_T * v )
        the next range that covers the maximum of the requested value and
        the current level. */
 
-    range = keithley2600a_best_source_rangei( ch, range );
+    range = keithley2612b_best_source_rangei( ch, range );
 
     /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
-        range = keithley2600a_max_source_rangei( ch );
+        range = keithley2612b_max_source_rangei( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
@@ -642,7 +642,7 @@ sourcemeter_source_current_range( Var_T * v )
              && k26->source[ ch ].func == OUTPUT_DCAMPS )
             range = d_max( range, k26->source[ ch ].leveli );
 
-        keithley2600a_set_source_rangei( ch, range );
+        keithley2612b_set_source_rangei( ch, range );
     }
     else
     {
@@ -674,7 +674,7 @@ sourcemeter_source_voltage_autoranging( Var_T * v )
         return vars_push( INT_VAR, on_off ? 1L : 0L );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_autorangev( ch, on_off );
+        keithley2612b_set_source_autorangev( ch, on_off );
     else
     {
         /* Keep in mind that switching autoranging on may change the range
@@ -683,7 +683,7 @@ sourcemeter_source_voltage_autoranging( Var_T * v )
         k26->source[ ch ].autorangev = on_off;
         if ( on_off )
             k26->source[ ch ].rangev =
-                  keithley2600a_best_source_rangev( ch,
+                  keithley2612b_best_source_rangev( ch,
                                                     k26->source[ ch ].levelv );
     }
 
@@ -711,7 +711,7 @@ sourcemeter_source_current_autoranging( Var_T * v )
         return vars_push( INT_VAR, on_off ? 1L : 0L );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_autorangei( ch, on_off );
+        keithley2612b_set_source_autorangei( ch, on_off );
     else
     {
         /* Keep in mind that switching autoranging on may change the range
@@ -720,7 +720,7 @@ sourcemeter_source_current_autoranging( Var_T * v )
         k26->source[ ch ].autorangei = on_off;
         if ( on_off )
             k26->source[ ch ].rangei =
-                  keithley2600a_best_source_rangei( ch,
+                  keithley2612b_best_source_rangei( ch,
                                                     k26->source[ ch ].leveli );
     }
 
@@ -750,16 +750,16 @@ sourcemeter_source_voltage_autorange_low_limit( Var_T * v )
 
     /* Find nearest possible range */
 
-    lowrange = keithley2600a_best_source_rangev( ch, lowrange );
+    lowrange = keithley2612b_best_source_rangev( ch, lowrange );
 
     /* A negative result indicates that the value was too large and we
        correct it down to the maximum */
 
     if ( lowrange < 0 )
-        lowrange = keithley2600a_max_source_rangev( ch );
+        lowrange = keithley2612b_max_source_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_lowrangev( ch, lowrange );
+        keithley2612b_set_source_lowrangev( ch, lowrange );
     else
     {
         k26->source[ ch ].lowrangev = lowrange;
@@ -794,16 +794,16 @@ sourcemeter_source_current_autorange_low_limit( Var_T * v )
 
     /* Find nearest possible range */
 
-    lowrange = keithley2600a_best_source_rangei( ch, lowrange );
+    lowrange = keithley2612b_best_source_rangei( ch, lowrange );
 
     /* A negative result indicates that the value was too large and we
        correct it down to the maximum */
 
     if ( lowrange < 0 )
-        lowrange = keithley2600a_max_source_rangei( ch );
+        lowrange = keithley2612b_max_source_rangei( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_rangei( ch, lowrange );
+        keithley2612b_set_measure_rangei( ch, lowrange );
     else
     {
         k26->source[ ch ].lowrangei = lowrange;
@@ -836,19 +836,19 @@ sourcemeter_compliance_voltage( Var_T * v )
     if ( limit == k26->source[ ch ].limitv )
         return vars_push( FLOAT_VAR, limit );
 
-    if ( ! keithley2600a_check_source_limitv( ch, limit ) )
+    if ( ! keithley2612b_check_source_limitv( ch, limit ) )
     {
         pp_buf bufs[ 3 ];
         print( FATAL, "Requested compliance voltage %sof %s is out of range, "
                "must be between %s and %s under current circumstances.\n",
                ppc( ch, "for" ), pp_v( limit, bufs[ 0 ] ),
-               pp_v( keithley2600a_min_source_limitv( ch ), bufs[ 1 ] ),
-               pp_v( keithley2600a_max_source_limitv( ch ), bufs[ 2 ] ) );
+               pp_v( keithley2612b_min_source_limitv( ch ), bufs[ 1 ] ),
+               pp_v( keithley2612b_max_source_limitv( ch ), bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_limitv( ch, limit );
+        keithley2612b_set_source_limitv( ch, limit );
     else
         k26->source[ ch ].limitv = limit;
 
@@ -876,20 +876,20 @@ sourcemeter_compliance_current( Var_T * v )
     if ( limit == k26->source[ ch ].limiti )
         return vars_push( FLOAT_VAR, limit );
 
-    if ( ! keithley2600a_check_source_limiti( ch, limit ) )
+    if ( ! keithley2612b_check_source_limiti( ch, limit ) )
     {
         pp_buf bufs[ 3 ];
         print( FATAL, "Requested compliance current %sof %s is out of range, "
                "must be between %s and %s under current circumstances.\n",
                ppc( ch, "for" ), pp_a( limit, bufs[ 0 ] ),
-               pp_a( keithley2600a_min_source_limiti( ch ), bufs[ 1 ] ),
-               pp_a( keithley2600a_max_source_limiti( ch ), bufs[ 2 ] ) );
+               pp_a( keithley2612b_min_source_limiti( ch ), bufs[ 1 ] ),
+               pp_a( keithley2612b_max_source_limiti( ch ), bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_limiti( ch, limit );
+        keithley2612b_set_source_limiti( ch, limit );
     else
         k26->source[ ch ].limiti = limit;
 
@@ -910,7 +910,7 @@ sourcemeter_test_compliance( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
         return vars_push( INT_VAR,
-                          keithley2600a_get_compliance( ch ) ? 1L : 0L );
+                          keithley2612b_get_compliance( ch ) ? 1L : 0L );
 
     return vars_push( INT_VAR, TEST_COMPLIANCE );
 }
@@ -948,7 +948,7 @@ sourcemeter_source_delay( Var_T * v )
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_delay( ch, delay );
+        keithley2612b_set_source_delay( ch, delay );
     else
         k26->source[ ch ].delay = delay;
 
@@ -971,7 +971,7 @@ sourcemeter_source_high_capacity( Var_T * v )
         bool highc = get_boolean( v );
 
         if ( FSC2_MODE == EXPERIMENT )
-            keithley2600a_set_source_highc( ch, highc );
+            keithley2612b_set_source_highc( ch, highc );
         else
         {
             k26->source[ ch ].highc = highc;
@@ -1002,7 +1002,7 @@ sourcemeter_source_sink_mode( Var_T * v )
         return vars_push( INT_VAR, sink ? 1L : 0L );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_sink( ch, sink );
+        keithley2612b_set_source_sink( ch, sink );
     else
         k26->source[ ch ].sink = sink;
 
@@ -1064,7 +1064,7 @@ sourcemeter_source_settling_mode( Var_T * v )
         return vars_push( INT_VAR, settle );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_settling( ch,settle );
+        keithley2612b_set_source_settling( ch,settle );
     else
         k26->source[ ch ].settling = settle;
 
@@ -1090,20 +1090,20 @@ sourcemeter_source_max_off_current( Var_T * v )
     if ( limit == k26->source[ ch ].offlimiti )
          return vars_push( FLOAT_VAR, limit );
 
-    if ( ! keithley2600a_check_source_offlimiti( ch, limit ) )
+    if ( ! keithley2612b_check_source_offlimiti( ch, limit ) )
     {
         pp_buf bufs[ 3 ];
         print( FATAL, "Requested maximum current in normal off state %sof %s "
                "out of range, must be between %s and %s.\n",
                ppc( ch, "for" ), pp_a( limit, bufs[ 0 ] ),
-               pp_a( keithley2600a_min_source_offlimiti( ch ), bufs[ 1 ] ),
-               pp_a( keithley2600a_max_source_offlimiti( ch ), bufs[ 2 ] ) );
+               pp_a( keithley2612b_min_source_offlimiti( ch ), bufs[ 1 ] ),
+               pp_a( keithley2612b_max_source_offlimiti( ch ), bufs[ 2 ] ) );
 
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_source_offlimiti( ch, limit );
+        keithley2612b_set_source_offlimiti( ch, limit );
     else
         k26->source[ ch ].offlimiti = limit;
 
@@ -1126,7 +1126,7 @@ sourcemeter_measure_voltage( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        volts = keithley2600a_measure( ch, VOLTAGE );
+        volts = keithley2612b_measure( ch, VOLTAGE );
 
         if ( fabs( volts ) >= 9.9e37 )
             print( WARN, "Voltage to be measure out of range.\n" );
@@ -1135,7 +1135,7 @@ sourcemeter_measure_voltage( Var_T * v )
     {
         if ( k26->measure[ ch ].autorangev )
             k26->measure[ ch ].rangev =
-                          keithley2600a_best_measure_rangev( ch, TEST_VOLTAGE );
+                          keithley2612b_best_measure_rangev( ch, TEST_VOLTAGE );
 
         volts =   TEST_VOLTAGE
                 - ( k26->measure[ ch ].relv.enabled ?
@@ -1161,7 +1161,7 @@ sourcemeter_measure_current( Var_T * v )
     
     if ( FSC2_MODE == EXPERIMENT )
     {
-        amps = keithley2600a_measure( ch, CURRENT );
+        amps = keithley2612b_measure( ch, CURRENT );
 
         if ( fabs( amps ) >= 9.9e37 )
             print( WARN, "Current to be measure out of range.\n" );
@@ -1170,7 +1170,7 @@ sourcemeter_measure_current( Var_T * v )
     {
         if ( k26->measure[ ch ].autorangei )
             k26->measure[ ch ].rangei =
-                         keithley2600a_best_measure_rangei( ch, TEST_CURRENT );
+                         keithley2612b_best_measure_rangei( ch, TEST_CURRENT );
 
         amps =   TEST_CURRENT
                - ( k26->measure[ ch ].reli.enabled ?
@@ -1196,16 +1196,16 @@ sourcemeter_measure_power( Var_T * v )
     {
         if ( k26->measure[ ch ].autorangev )
             k26->measure[ ch ].rangev =
-                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+                          keithley2612b_best_measure_rangev( ch,TEST_VOLTAGE );
 
         if ( k26->measure[ ch ].autorangei )
             k26->measure[ ch ].rangei =
-                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+                          keithley2612b_best_measure_rangei( ch,TEST_CURRENT );
 
         return vars_push( FLOAT_VAR, TEST_VOLTAGE * TEST_CURRENT );
     }
 
-    double p = keithley2600a_measure( ch, POWER );
+    double p = keithley2612b_measure( ch, POWER );
 
     if ( fabs( p ) >= 9.9e37 )
         print( WARN, "Out of range condition while measuring power.\n" );
@@ -1229,16 +1229,16 @@ sourcemeter_measure_resistance( Var_T * v )
     {
         if ( k26->measure[ ch ].autorangev )
             k26->measure[ ch ].rangev =
-                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+                          keithley2612b_best_measure_rangev( ch,TEST_VOLTAGE );
 
         if ( k26->measure[ ch ].autorangei )
             k26->measure[ ch ].rangei =
-                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+                          keithley2612b_best_measure_rangei( ch,TEST_CURRENT );
 
         return vars_push( FLOAT_VAR, TEST_VOLTAGE / TEST_CURRENT );
     }
 
-    double r = keithley2600a_measure( ch, RESISTANCE );
+    double r = keithley2612b_measure( ch, RESISTANCE );
 
     if ( fabs( r ) > 9.9e37 )
         print( WARN, "Out of range condition while measuring resistance.\n" );
@@ -1263,16 +1263,16 @@ sourcemeter_measure_voltage_and_current( Var_T * v )
     {
         if ( k26->measure[ ch ].autorangev )
             k26->measure[ ch ].rangev =
-                          keithley2600a_best_measure_rangev( ch,TEST_VOLTAGE );
+                          keithley2612b_best_measure_rangev( ch,TEST_VOLTAGE );
         if ( k26->measure[ ch ].autorangei )
             k26->measure[ ch ].rangei =
-                          keithley2600a_best_measure_rangei( ch,TEST_CURRENT );
+                          keithley2612b_best_measure_rangei( ch,TEST_CURRENT );
 
         double vi[ ] = { TEST_VOLTAGE, TEST_CURRENT };
         return vars_push( FLOAT_ARR, vi, 2L );
     }
 
-    const double * r = keithley2600a_measure_iv( ch );
+    const double * r = keithley2612b_measure_iv( ch );
     double vi[ ] = { r[ 1 ], r[ 0 ] };
 
     if ( fabs( vi[ 0 ] ) >= 9.9e37 || fabs( vi[ 1 ] ) >= 9.9e37 )
@@ -1300,7 +1300,7 @@ sourcemeter_measure_voltage_range( Var_T * v )
         if (    FSC2_MODE == EXPERIMENT
              && k26->measure[ ch ].autorangev )
             return vars_push( FLOAT_VAR,
-                              keithley2600a_get_measure_rangev( ch ) );
+                              keithley2612b_get_measure_rangev( ch ) );
 
         if ( k26->source[ ch ].func == OUTPUT_DCVOLTS )
             return vars_push( FLOAT_VAR, k26->source[ ch ].rangev );
@@ -1313,15 +1313,15 @@ sourcemeter_measure_voltage_range( Var_T * v )
 
     /* Get the range setting that's at last as large as the requested value. */
 
-    range = keithley2600a_best_measure_rangev( ch, range );
+    range = keithley2612b_best_measure_rangev( ch, range );
 
     /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
-        range = keithley2600a_max_measure_rangev( ch );
+        range = keithley2612b_max_measure_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_rangev( ch, range );
+        keithley2612b_set_measure_rangev( ch, range );
     else
     {
         k26->measure[ ch ].rangev = range;
@@ -1356,7 +1356,7 @@ sourcemeter_measure_current_range( Var_T * v )
         if (    FSC2_MODE == EXPERIMENT
              && k26->measure[ ch ].autorangei )
             return vars_push( FLOAT_VAR,
-                              keithley2600a_get_measure_rangei( ch ) );
+                              keithley2612b_get_measure_rangei( ch ) );
 
         if ( k26->source[ ch ].func == OUTPUT_DCAMPS )
             return vars_push( FLOAT_VAR, k26->source[ ch ].rangei );
@@ -1369,15 +1369,15 @@ sourcemeter_measure_current_range( Var_T * v )
 
     /* Get the range setting that's at last as large as the requested value. */
 
-    range = keithley2600a_best_measure_rangei( ch, range );
+    range = keithley2612b_best_measure_rangei( ch, range );
 
     /* Check that requested range isn't out of bounds, otherwise correct it */
 
     if ( range < 0 )
-        range = keithley2600a_max_measure_rangei( ch );
+        range = keithley2612b_max_measure_rangei( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_rangei( ch, range );
+        keithley2612b_set_measure_rangei( ch, range );
     else
     {
         k26->measure[ ch ].rangei = range;
@@ -1410,7 +1410,7 @@ sourcemeter_measure_voltage_autoranging( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_autorangev( ch, on_off );
+        keithley2612b_set_measure_autorangev( ch, on_off );
     else
         k26->measure[ ch ].autorangev = on_off;
 
@@ -1434,7 +1434,7 @@ sourcemeter_measure_current_autoranging( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_autorangei( ch, on_off );
+        keithley2612b_set_measure_autorangei( ch, on_off );
     else
         k26->measure[ ch ].autorangei = on_off;
 
@@ -1465,16 +1465,16 @@ sourcemeter_measure_voltage_autorange_low_limit( Var_T * v )
 
     /* Find nearest possible range */
 
-    lowrange = keithley2600a_best_measure_rangev( ch, lowrange );
+    lowrange = keithley2612b_best_measure_rangev( ch, lowrange );
 
     /* A negative result indicates that the value was too large and we
        correct it down to the maximum */
 
     if ( lowrange < 0 )
-        lowrange = keithley2600a_max_measure_rangev( ch );
+        lowrange = keithley2612b_max_measure_rangev( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_lowrangev( ch, lowrange );
+        keithley2612b_set_measure_lowrangev( ch, lowrange );
     else
     {
         k26->measure[ ch ].lowrangev = lowrange;
@@ -1510,16 +1510,16 @@ sourcemeter_measure_current_autorange_low_limit( Var_T * v )
 
     /* Find nearest possible range */
 
-    lowrange = keithley2600a_best_measure_rangei( ch, lowrange );
+    lowrange = keithley2612b_best_measure_rangei( ch, lowrange );
 
     /* A negative result indicates that the value was too large and we
        correct it down to the maximum */
 
     if ( lowrange < 0 )
-        lowrange = keithley2600a_max_measure_rangei( ch );
+        lowrange = keithley2612b_max_measure_rangei( ch );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_lowrangei( ch, lowrange );
+        keithley2612b_set_measure_lowrangei( ch, lowrange );
     else
     {
         k26->measure[ ch ].lowrangei = lowrange;
@@ -1549,19 +1549,19 @@ sourcemeter_measure_time( Var_T * v )
     double t = get_double( v, NULL );
     too_many_arguments( v );
 
-    if ( ! keithley2600a_check_measure_time( t ) )
+    if ( ! keithley2612b_check_measure_time( t ) )
     {
         pp_buf bufs[ 3 ];
         print( FATAL, "Requested measure time of %s %snot possible, must "
                "be between %s and %s.\n", pp_s( t, bufs[ 0 ] ),
                ppc( ch, "for" ),
-               pp_s( keithley2600a_min_measure_time( ), bufs[ 1 ] ),
-               pp_s( keithley2600a_max_measure_time( ), bufs[ 2 ] ) );
+               pp_s( keithley2612b_min_measure_time( ), bufs[ 1 ] ),
+               pp_s( keithley2612b_max_measure_time( ), bufs[ 2 ] ) );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_time( ch, t );
+        keithley2612b_set_measure_time( ch, t );
     else
         k26->measure[ ch ].time = t;
 
@@ -1588,12 +1588,12 @@ sourcemeter_measure_voltage_offset( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
         if ( offset == 0.0 )
-            keithley2600a_set_measure_rel_levelv_enabled( ch, false );
+            keithley2612b_set_measure_rel_levelv_enabled( ch, false );
         else
         {
-            keithley2600a_set_measure_rel_levelv( ch, offset );
+            keithley2612b_set_measure_rel_levelv( ch, offset );
             if ( ! k26->measure[ ch ].relv.enabled )
-                keithley2600a_set_measure_rel_levelv_enabled( ch, true );
+                keithley2612b_set_measure_rel_levelv_enabled( ch, true );
         }
     }
     else
@@ -1631,12 +1631,12 @@ sourcemeter_measure_current_offset( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
         if ( offset == 0.0 )
-            keithley2600a_set_measure_rel_leveli_enabled( ch, false );
+            keithley2612b_set_measure_rel_leveli_enabled( ch, false );
         else
         {
-            keithley2600a_set_measure_rel_leveli( ch, offset );
+            keithley2612b_set_measure_rel_leveli( ch, offset );
             if ( ! k26->measure[ ch ].reli.enabled )
-                keithley2600a_set_measure_rel_leveli_enabled( ch, true );
+                keithley2612b_set_measure_rel_leveli_enabled( ch, true );
         }
     }
     else
@@ -1676,7 +1676,7 @@ sourcemeter_measure_delay( Var_T * v )
         vars_push( FLOAT_VAR, k26->measure[ ch ].delay );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_delay( ch, delay );
+        keithley2612b_set_measure_delay( ch, delay );
     else
         k26->measure[ ch ].delay = delay;
 
@@ -1726,7 +1726,7 @@ sourcemeter_measure_filter_type( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_measure_filter_type( ch, type );
+        keithley2612b_set_measure_filter_type( ch, type );
     else
         k26->measure[ ch ].filter.type = type;
 
@@ -1766,11 +1766,11 @@ sourcemeter_measure_filter_count( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
         if ( count == 0 )
-            keithley2600a_set_measure_filter_enabled( ch, false );
+            keithley2612b_set_measure_filter_enabled( ch, false );
         else
         {
-            keithley2600a_set_measure_filter_count( ch, count );
-            keithley2600a_set_measure_filter_enabled( ch, true );
+            keithley2612b_set_measure_filter_count( ch, count );
+            keithley2612b_set_measure_filter_enabled( ch, true );
         }
     }
     else
@@ -2045,7 +2045,7 @@ sourcemeter_contact_check( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
         return vars_push( INT_VAR,
-                          keithley2600a_contact_check( ch ) ? 1L : 0L );
+                          keithley2612b_contact_check( ch ) ? 1L : 0L );
 
     return vars_push( INT_VAR, 1L );
 }
@@ -2100,7 +2100,7 @@ sourcemeter_contact_resistance( Var_T * v )
         return vars_push( FLOAT_ARR, r12, 2L );
     }
 
-    const double * r = keithley2600a_contact_resistance( ch );
+    const double * r = keithley2612b_contact_resistance( ch );
     double r12[ ] = { r[ 1 ], r[ 0 ] };
 
     return vars_push( FLOAT_ARR, r12, 2L );
@@ -2135,7 +2135,7 @@ sourcemeter_contact_threshold( Var_T * v )
         threshold = 1.0e37;
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_contact_threshold( ch, threshold );
+        keithley2612b_set_contact_threshold( ch, threshold );
     else
         k26->contact[ ch ].threshold = threshold;
 
@@ -2189,7 +2189,7 @@ sourcemeter_contact_speed( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        keithley2600a_set_contact_speed( ch, speed );
+        keithley2612b_set_contact_speed( ch, speed );
     else
         k26->contact[ ch ].speed = speed;
 
@@ -2222,7 +2222,7 @@ do_sweep( Var_T * v,
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        data = keithley2600a_sweep_and_measure( ch, sweep_what, measure_what,
+        data = keithley2612b_sweep_and_measure( ch, sweep_what, measure_what,
                                                 start, end, num_points );
         check_sweep_data( data, num_data_points );
     }
@@ -2293,7 +2293,7 @@ do_list_sweep( Var_T * v,
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        data = keithley2600a_list_sweep_and_measure( ch, sweep_what,
+        data = keithley2612b_list_sweep_and_measure( ch, sweep_what,
                                                      measure_what, v );
         check_sweep_data( data, num_data_points );
     }
@@ -2566,20 +2566,20 @@ correct_for_highc( unsigned int ch )
     if ( ! k26->source[ ch ].highc || !  k26->source[ ch ].output )
         return;
 
-    double low = keithley2600a_min_source_limiti( ch );
+    double low = keithley2612b_min_source_limiti( ch );
 
     if ( k26->source[ ch ].limiti < low )
         k26->source[ ch ].limiti = low;
 
-    low = keithley2600a_min_source_rangei( ch );
+    low = keithley2612b_min_source_rangei( ch );
     if ( k26->source[ ch ].rangei < low )
         k26->source[ ch ].rangei = low;
 
-    low = keithley2600a_min_source_lowrangei( ch );
+    low = keithley2612b_min_source_lowrangei( ch );
     if ( k26->source[ ch ].lowrangei < low )
         k26->source[ ch ].lowrangei = low;
 
-    low = keithley2600a_min_measure_lowrangei( ch );
+    low = keithley2612b_min_measure_lowrangei( ch );
     if ( k26->measure[ ch ].lowrangei < low  )
         k26->measure[ ch ].lowrangei = low;
 }
@@ -2625,7 +2625,7 @@ default_settings( void )
         k26->source[ ch ].autorangev = true;
         k26->source[ ch ].autorangei = true;
 
-#if    defined _2601A || defined _2602A                   \
+#if    defined _2601A || defined _2602A \
     || defined _2601B || defined _2602B || defined _2604B
         k26->source[ ch ].limitv = 40;
         k26->source[ ch ].limiti = 1;

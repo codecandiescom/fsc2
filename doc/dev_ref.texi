@@ -67,7 +67,7 @@ List of devices, sorted by module name:
 * ips120_10_mod::   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
 * itc503::          Oxford Instruments Temperature Controller ITC503
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
-* keithley2600a::   Keithley SourceMeter 2600A series
+* keithley2600a::   Keithley SourceMeter 2600A and 2600B series
 * kontron4060::     Kontron 4060 Multimeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
@@ -168,7 +168,7 @@ List of devices, sorted by module name:
 @item @ref{ips120_10_mod}   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
 @item @ref{itc503}          Oxford Instruments Temperature Controller ITC503
 @item @ref{keithley228a}    Magnet Power Supply Keithley 228A (Berlin W-Band)
-@item @ref{keithley2600a}   Keithley ourceMeter 2600A series
+@item @ref{keithley2600a}   Keithley ourceMeter 2600A and 2600B series
 @item @ref{kontron4060}     Kontron 4060 Multimeter
 @item @ref{lakeshore330}    Lake Shore 330 Temperature Controller
 @item @ref{lecroy9400}      LeCroy Digitizing Oscilloscope 9400
@@ -2267,10 +2267,10 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 
 @node keithley2600a, kontron4060, keithley228a, Device Reference
 @iftex
-@subheading Keithley SourceMeter 2600A series
+@subheading Keithley SourceMeter 2600A and 2600Bseries
 @end iftex
 @ifnottex
-@section Keithley SourceMeter 2600A series
+@section Keithley SourceMeter 2600A and 2600B series
 @end ifnottex
 
 @paragraphindent 0
@@ -2278,12 +2278,14 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 
 @paragraphindent 0
 This module can be compiled to support each of the devices from the
-2600A series of Keithley SourceMeters, i.e.@: 2601A, 2602A, 2611A,
-2612A, 2635A and 2636A. See the configuration file for this module.
+2600A and 2600N series of Keithley SourceMeters, i.e.@: 2601A, 2601B,
+2602A, 2602B, 2611A, 2611B, 2612A, 2612B, 2614B, 2634B, 2635A, 2635B,
+2636A and 2636B. See the configuration file for this module, it
+controls for which type of device the module gets compiled.
 
 @paragraphindent 0
 @strong{Controlled via}: LAN (VXI-11 protocol), IP address must be set
-in configuration file for the module.
+in the configuration file for the module.
 
 
 @paragraphindent 0

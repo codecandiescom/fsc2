@@ -1,0 +1,81 @@
+/*
+ *  Copyright (C) 1999-2015 Jens Thoms Toerring
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+#pragma once
+#if ! defined KEYTHLEY2600A_LL_H_
+#define KEYTHLEY2600A_LL_H_
+
+
+/* Internal functions from keithley2612b_ll.c */
+
+bool keithley2612b_open( void );
+bool keithley2612b_close( void );
+void keithley2612b_cmd( const char * cmd );
+size_t keithley2612b_talk( const char * cmd,
+                           char       * reply,
+                           size_t       length,
+                           bool         allow_abort );
+
+void keithley2612b_get_state( void );
+void keithley2612b_reset( void );
+const char * keithley2612b_get_model( void );
+void keithley2612b_show_errors( void );
+
+int keithley2612b_get_sense( unsigned int ch );
+int keithley2612b_set_sense( unsigned int ch,
+                             int          sense );
+double keithley2612b_get_line_frequency( void );
+
+void keithley2612b_prep_lin_sweeps( void );
+void keithley2612b_prep_list_sweeps( void );
+
+bool keithley2612b_line_to_bool( const char * line );
+int keithley2612b_line_to_int( const char * line );
+double keithley2612b_line_to_double( const char * line );
+double * keithley2612b_line_to_doubles( const char * line,
+                                        double     * buf,
+                                        int          cnt );
+void keithley2612b_bad_data( void );
+void keithley2612b_comm_failure( void );
+
+
+/* If binary transfer is on in most cases we know exactly how many
+   bytes to expect while with ASCII mode it's usually not that simple.
+   To be able to do checks when binary mode is on, but not with ASCII
+   mode we use a macro which we can pass the expected number of bytes
+   but which we simply disregard in ASCII mode. */
+
+#if defined BINARY_TRANSFER
+#define TALK( a, b,c, d, e )                  \
+if ( keithley2612b_talk( a, b, c, d ) != e )  \
+    keithley2612b_bad_data( );
+#else
+#define TALK( a, b,c, d, e )    keithley2612b_talk( a, b, c, d )
+#endif
+
+#endif
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

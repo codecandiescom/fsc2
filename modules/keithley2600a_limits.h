@@ -27,7 +27,9 @@
 
 /* Number of of channels */
 
-#if defined _2601A || defined _2611A || defined _2635A
+#if    defined _2601A || defined _2601B \
+    || defined _2611A || defined _2611B \
+    || defined _2635A || defined _2635B
 #define NUM_CHANNELS 1
 #else
 #define NUM_CHANNELS 2
@@ -37,7 +39,8 @@
  * Maximum source voltages and currents
  *..................................................................*/
 
-#if defined _2601A || defined _2602A
+#if    defined _2601A || defined _2602A \
+    || defined _2601B || defined _2602B || defined _2604B
 #define MAX_SOURCE_LEVELV  40.4
 #define MAX_SOURCE_LEVELI  3.03
 #else

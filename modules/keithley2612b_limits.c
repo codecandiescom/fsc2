@@ -18,7 +18,7 @@
  */
 
 
-#include "keithley2600a.h"
+#include "keithley2612b.h"
 
 
 /* Local functions */
@@ -145,7 +145,7 @@ static size_t Num_Measure_Ranges_I =   sizeof  Measure_Ranges_I
  * Minimum and maximum voltage (compliance) limits
  *..................................................................*/
 
-#if    defined _2601A || defined _2611A                   \
+#if    defined _2601A || defined _2611A \
     || defined _2601B || defined _2602B || defined _2604B
 #define MIN_SOURCE_LIMITV   1.0e-2
 #define MAX_SOURCE_LIMITV   40
@@ -314,7 +314,7 @@ max_compliance_amps_limit( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
+keithley2612b_best_source_rangev( unsigned int ch  UNUSED_ARG,
                                   double       volts )
 {
     volts = fabs( volts );
@@ -333,7 +333,7 @@ keithley2600a_best_source_rangev( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_source_rangei( unsigned int ch,
+keithley2612b_best_source_rangei( unsigned int ch,
                                   double       amps )
 {
     amps = fabs( amps );
@@ -359,7 +359,7 @@ keithley2600a_best_source_rangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_levelv( unsigned int ch )
+keithley2612b_max_source_levelv( unsigned int ch )
 {
 	double max_volts = MAX_SOURCE_LEVELV;
 
@@ -390,7 +390,7 @@ keithley2600a_max_source_levelv( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_leveli( unsigned int ch )
+keithley2612b_max_source_leveli( unsigned int ch )
 {
 	double max_amps = MAX_SOURCE_LEVELI;
 
@@ -420,10 +420,10 @@ keithley2600a_max_source_leveli( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_levelv( unsigned int ch,
+keithley2612b_check_source_levelv( unsigned int ch,
 								   double       volts )
 {
-    return fabs( volts ) <= keithley2600a_max_source_levelv( ch );
+    return fabs( volts ) <= keithley2612b_max_source_levelv( ch );
 }
 
 
@@ -433,9 +433,9 @@ keithley2600a_check_source_levelv( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_levelv( unsigned int ch )
+keithley2612b_test_source_levelv( unsigned int ch )
 {
-    return keithley2600a_check_source_levelv( ch, 
+    return keithley2612b_check_source_levelv( ch, 
                                               k26->source[ ch ].levelv );
 }
 
@@ -445,10 +445,10 @@ keithley2600a_test_source_levelv( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_leveli( unsigned int ch,
+keithley2612b_check_source_leveli( unsigned int ch,
 								   double       amps )
 {
-    return fabs( amps ) <= keithley2600a_max_source_leveli( ch );
+    return fabs( amps ) <= keithley2612b_max_source_leveli( ch );
 }
 
 
@@ -458,9 +458,9 @@ keithley2600a_check_source_leveli( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_leveli( unsigned int ch )
+keithley2612b_test_source_leveli( unsigned int ch )
 {
-    return keithley2600a_check_source_leveli( ch,
+    return keithley2612b_check_source_leveli( ch,
                                               k26->source[ ch ].leveli );
 }
 
@@ -471,7 +471,7 @@ keithley2600a_test_source_leveli( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_rangev( unsigned int ch )
+keithley2612b_min_source_rangev( unsigned int ch )
 {
 	/* If output is off or we're in current sourcing mode all ranges
 	   can be set */
@@ -483,7 +483,7 @@ keithley2600a_min_source_rangev( unsigned int ch )
 	/* Otherwise we're limited by the output voltage set for the channel,
 	   the range must not be smaller */
 
-	return keithley2600a_best_source_rangev( ch,
+	return keithley2612b_best_source_rangev( ch,
                                              k26->source[ ch ].levelv / 1.01 );
 }
 
@@ -495,7 +495,7 @@ keithley2600a_min_source_rangev( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_rangev( unsigned int ch )
+keithley2612b_max_source_rangev( unsigned int ch )
 {
 	/* If output is off or we're in current sourcing mode all ranges
 	   can be set, so return the maximum one */
@@ -517,7 +517,7 @@ keithley2600a_max_source_rangev( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_rangei( unsigned int ch )
+keithley2612b_min_source_rangei( unsigned int ch )
 {
 	/* If output is off or we're in voltage sourcing mode all currenr
 	   ranges can be set, so return the smallest one */
@@ -529,7 +529,7 @@ keithley2600a_min_source_rangei( unsigned int ch )
 	/* Otherwise we're limited by the output current set for the channel,
 	   the range must not be smaller  */
 
-	return keithley2600a_best_source_rangei( ch,
+	return keithley2612b_best_source_rangei( ch,
                                              k26->source[ ch ].leveli / 1.01 );
 }
 
@@ -541,7 +541,7 @@ keithley2600a_min_source_rangei( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_rangei( unsigned int ch )
+keithley2612b_max_source_rangei( unsigned int ch )
 {
 	/* If output is off or we're in voltage sourcing mode all ranges
 	   can be set, so return the maximum one */
@@ -562,13 +562,13 @@ keithley2600a_max_source_rangei( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_rangev( unsigned int ch,
+keithley2612b_check_source_rangev( unsigned int ch,
                                    double       range )
 {
     range = fabs( range );
 
-    double min_range = keithley2600a_min_source_rangev( ch );
-    double max_range = keithley2600a_max_source_rangev( ch );
+    double min_range = keithley2612b_min_source_rangev( ch );
+    double max_range = keithley2612b_max_source_rangev( ch );
 
     size_t i;
     for ( i = 0; i < Num_Source_Ranges_V; i++ )
@@ -589,14 +589,14 @@ keithley2600a_check_source_rangev( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_rangev( unsigned int ch )
+keithley2612b_test_source_rangev( unsigned int ch )
 {
     if ( k26->source[ ch ].autorangev )
         return OK;
 
     double range = k26->source[ ch ].rangev;
 
-    return    keithley2600a_check_source_rangev( ch, range )
+    return    keithley2612b_check_source_rangev( ch, range )
            && 1.01 * range >= fabs( k26->source[ ch ].levelv );
 }
 
@@ -607,11 +607,11 @@ keithley2600a_test_source_rangev( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_rangei( unsigned int ch,
+keithley2612b_check_source_rangei( unsigned int ch,
                                    double       range )
 {
-    double min_range = keithley2600a_min_source_rangei( ch );
-    double max_range = keithley2600a_max_source_rangei( ch );
+    double min_range = keithley2612b_min_source_rangei( ch );
+    double max_range = keithley2612b_max_source_rangei( ch );
 
     size_t i;
     for ( i = 0; i < Num_Source_Ranges_I; i++ )
@@ -632,14 +632,14 @@ keithley2600a_check_source_rangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_rangei( unsigned int ch )
+keithley2612b_test_source_rangei( unsigned int ch )
 {
     if ( k26->source[ ch ].autorangei )
         return OK;
 
     double range = k26->source[ ch ].rangei;
 
-    return    keithley2600a_check_source_rangei( ch, range )
+    return    keithley2612b_check_source_rangei( ch, range )
            && 1.01 * range >= fabs( k26->source[ ch ].leveli );
 }
 
@@ -663,7 +663,7 @@ basic_max_source_limitv( void )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_limitv( unsigned int ch )
+keithley2612b_max_source_limitv( unsigned int ch )
 {
 	/*  If output is off or we're in current sourcing mode the highest
 		possible value can be set */
@@ -697,7 +697,7 @@ basic_max_source_limiti( void )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_limiti( unsigned int ch )
+keithley2612b_max_source_limiti( unsigned int ch )
 {
 	/*  If output is off or we're in current sourcing mode the highest
 		possible value can be set */
@@ -718,7 +718,7 @@ keithley2600a_max_source_limiti( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_limitv( unsigned int ch  UNUSED_ARG )
+keithley2612b_min_source_limitv( unsigned int ch  UNUSED_ARG )
 {
 	return MIN_SOURCE_LIMITV;
 }
@@ -730,7 +730,7 @@ keithley2600a_min_source_limitv( unsigned int ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_limiti( unsigned int ch )
+keithley2612b_min_source_limiti( unsigned int ch )
 {
 	if (    ! k26->source[ ch ].output
 		 || ! k26->source[ ch ].highc )
@@ -746,11 +746,11 @@ keithley2600a_min_source_limiti( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_limitv( unsigned int ch,
+keithley2612b_check_source_limitv( unsigned int ch,
 								   double       limit )
 {
-	return    limit >= keithley2600a_min_source_limitv( ch )
-		   && limit <= keithley2600a_max_source_limitv( ch );
+	return    limit >= keithley2612b_min_source_limitv( ch )
+		   && limit <= keithley2612b_max_source_limitv( ch );
 }
 
 
@@ -760,9 +760,9 @@ keithley2600a_check_source_limitv( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_limitv( unsigned int ch )
+keithley2612b_test_source_limitv( unsigned int ch )
 {
-	return keithley2600a_check_source_limitv( ch,
+	return keithley2612b_check_source_limitv( ch,
                                               k26->source[ ch ].limitv );
 }
 
@@ -773,11 +773,11 @@ keithley2600a_test_source_limitv( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_limiti( unsigned int ch,
+keithley2612b_check_source_limiti( unsigned int ch,
 								   double       limit )
 {
-	return    limit >= keithley2600a_min_source_limiti( ch )
-		   && limit <= keithley2600a_max_source_limiti( ch );
+	return    limit >= keithley2612b_min_source_limiti( ch )
+		   && limit <= keithley2612b_max_source_limiti( ch );
 }
 
 
@@ -787,9 +787,9 @@ keithley2600a_check_source_limiti( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_source_limiti( unsigned int ch )
+keithley2612b_test_source_limiti( unsigned int ch )
 {
-	return keithley2600a_check_source_limiti( ch,
+	return keithley2612b_check_source_limiti( ch,
                                               k26->source[ ch ].limiti );
 }
 
@@ -799,7 +799,7 @@ keithley2600a_test_source_limiti( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_lowrangev( unsigned int ch  UNUSED_ARG )
+keithley2612b_min_source_lowrangev( unsigned int ch  UNUSED_ARG )
 {
 	return Source_Ranges_V[ 0 ];
 }
@@ -810,7 +810,7 @@ keithley2600a_min_source_lowrangev( unsigned int ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_lowrangei( unsigned int ch )
+keithley2612b_min_source_lowrangei( unsigned int ch )
 {
 	if (    ! k26->source[ ch ].output
 		 || ! k26->source[ ch ].highc )
@@ -826,11 +826,11 @@ keithley2600a_min_source_lowrangei( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_lowrangev( unsigned int ch,
+keithley2612b_check_source_lowrangev( unsigned int ch,
 									  double       lowrange )
 {
-	return    lowrange >= keithley2600a_min_source_lowrangev( ch )
-           && lowrange <= keithley2600a_max_source_rangev( ch );
+	return    lowrange >= keithley2612b_min_source_lowrangev( ch )
+           && lowrange <= keithley2612b_max_source_rangev( ch );
 }
 
 
@@ -840,10 +840,10 @@ keithley2600a_check_source_lowrangev( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_lowrangei( unsigned int ch,
+keithley2612b_check_source_lowrangei( unsigned int ch,
 									  double       lowrange )
 {
-	return lowrange >= keithley2600a_min_source_lowrangei( ch );
+	return lowrange >= keithley2612b_min_source_lowrangei( ch );
 }
 
 
@@ -853,7 +853,7 @@ keithley2600a_check_source_lowrangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_source_offlimiti( unsigned int ch  UNUSED_ARG )
+keithley2612b_min_source_offlimiti( unsigned int ch  UNUSED_ARG )
 {
     return 0.1 * Source_Ranges_I[ 0 ];
 }
@@ -865,7 +865,7 @@ keithley2600a_min_source_offlimiti( unsigned int ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_source_offlimiti( unsigned int ch  UNUSED_ARG )
+keithley2612b_max_source_offlimiti( unsigned int ch  UNUSED_ARG )
 {
     return Source_Ranges_I[ Num_Source_Ranges_I - 1 ];
 }
@@ -876,11 +876,11 @@ keithley2600a_max_source_offlimiti( unsigned int ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_source_offlimiti( unsigned int ch,
+keithley2612b_check_source_offlimiti( unsigned int ch,
                                       double       offlimiti )
 {
-    return    offlimiti >= keithley2600a_min_source_offlimiti( ch )
-           && offlimiti <= keithley2600a_max_source_offlimiti( ch );
+    return    offlimiti >= keithley2612b_min_source_offlimiti( ch )
+           && offlimiti <= keithley2612b_max_source_offlimiti( ch );
 }
 
 
@@ -889,7 +889,7 @@ keithley2600a_check_source_offlimiti( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_measure_rangev( unsigned int ch  UNUSED_ARG,
+keithley2612b_check_measure_rangev( unsigned int ch  UNUSED_ARG,
                                     double   range )
 {
     for ( size_t i = 0; i < Num_Measure_Ranges_V; i++ )
@@ -905,7 +905,7 @@ keithley2600a_check_measure_rangev( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
+keithley2612b_check_measure_rangei( unsigned int ch  UNUSED_ARG,
                                     double       range )
 {
     for ( size_t i = 0; i < Num_Measure_Ranges_I; i++ )
@@ -921,7 +921,7 @@ keithley2600a_check_measure_rangei( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_toggle_source_output( unsigned int ch )
+keithley2612b_test_toggle_source_output( unsigned int ch )
 {
     /* Switching the channel off is always possible */
 
@@ -933,13 +933,13 @@ keithley2600a_test_toggle_source_output( unsigned int ch )
     k26->source[ ch ].output = true;
 
     bool res =    (    k26->source[ ch ].output == OUTPUT_DCAMPS
-                    && keithley2600a_test_source_leveli( ch )
-                    && keithley2600a_test_source_rangei( ch )
-                    && keithley2600a_test_source_limitv( ch ) )
+                    && keithley2612b_test_source_leveli( ch )
+                    && keithley2612b_test_source_rangei( ch )
+                    && keithley2612b_test_source_limitv( ch ) )
                || (    k26->source[ ch ].output == OUTPUT_DCVOLTS
-                    && keithley2600a_test_source_levelv( ch )
-                    && keithley2600a_test_source_rangev( ch )
-                    && keithley2600a_test_source_limiti( ch ) );
+                    && keithley2612b_test_source_levelv( ch )
+                    && keithley2612b_test_source_rangev( ch )
+                    && keithley2612b_test_source_limiti( ch ) );
 
     k26->source[ ch ].output = false;
 
@@ -953,7 +953,7 @@ keithley2600a_test_toggle_source_output( unsigned int ch )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_test_toggle_source_func( unsigned int ch )
+keithley2612b_test_toggle_source_func( unsigned int ch )
 {
     /* As long as output is off there's no possible problem */
 
@@ -966,13 +966,13 @@ keithley2600a_test_toggle_source_func( unsigned int ch )
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
     bool res =    (    k26->source[ ch ].func == OUTPUT_DCAMPS
-                    && keithley2600a_test_source_leveli( ch )
-                    && keithley2600a_test_source_rangei( ch )
-                    && keithley2600a_test_source_limitv( ch ) )
+                    && keithley2612b_test_source_leveli( ch )
+                    && keithley2612b_test_source_rangei( ch )
+                    && keithley2612b_test_source_limitv( ch ) )
                || (   k26->source[ ch ].func == OUTPUT_DCVOLTS
-                   && keithley2600a_test_source_levelv( ch )
-                   && keithley2600a_test_source_rangev( ch )
-                   && keithley2600a_test_source_limiti( ch ) );
+                   && keithley2612b_test_source_levelv( ch )
+                   && keithley2612b_test_source_rangev( ch )
+                   && keithley2612b_test_source_limiti( ch ) );
 
     k26->source[ ch ].func = ! k26->source[ ch ].func;
 
@@ -985,7 +985,7 @@ keithley2600a_test_toggle_source_func( unsigned int ch )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_measure_rangev( unsigned ch  UNUSED_ARG )
+keithley2612b_max_measure_rangev( unsigned ch  UNUSED_ARG )
 {
     return Measure_Ranges_V[ Num_Measure_Ranges_V - 1 ];
 }
@@ -996,7 +996,7 @@ keithley2600a_max_measure_rangev( unsigned ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_measure_rangei( unsigned ch  UNUSED_ARG )
+keithley2612b_max_measure_rangei( unsigned ch  UNUSED_ARG )
 {
     return Measure_Ranges_I[ Num_Measure_Ranges_I - 1 ];
 }
@@ -1008,7 +1008,7 @@ keithley2600a_max_measure_rangei( unsigned ch  UNUSED_ARG )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
+keithley2612b_best_measure_rangev( unsigned int ch  UNUSED_ARG,
                                    double       volts )
 {
     volts = fabs( volts );
@@ -1027,7 +1027,7 @@ keithley2600a_best_measure_rangev( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_best_measure_rangei( unsigned int ch,
+keithley2612b_best_measure_rangei( unsigned int ch,
                                    double       amps )
 {
     amps = fabs( amps );
@@ -1056,11 +1056,11 @@ keithley2600a_best_measure_rangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_measure_lowrangev( unsigned int ch  UNUSED_ARG,
+keithley2612b_check_measure_lowrangev( unsigned int ch  UNUSED_ARG,
                                        double       lowrange )
 {
 	return    lowrange >= Measure_Ranges_V[ 0 ]
-           && keithley2600a_max_measure_rangev( ch );;
+           && keithley2612b_max_measure_rangev( ch );;
 }
 
 
@@ -1069,14 +1069,14 @@ keithley2600a_check_measure_lowrangev( unsigned int ch  UNUSED_ARG,
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_measure_lowrangei( unsigned int ch,
+keithley2612b_check_measure_lowrangei( unsigned int ch,
                                        double       lowrange )
 {
     double min = k26->source[ ch ].highc ?
                  MIN_MEASURE_LOWRANGEI_HIGHC : Measure_Ranges_V[ 0 ];
 
 	return    lowrange >= min
-           && keithley2600a_max_measure_rangei( ch );;
+           && keithley2612b_max_measure_rangei( ch );;
 }
 
 
@@ -1085,7 +1085,7 @@ keithley2600a_check_measure_lowrangei( unsigned int ch,
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_min_measure_time( void )
+keithley2612b_min_measure_time( void )
 {
     return MIN_INTEGRATION_FACTOR / k26->linefreq;
 }
@@ -1096,7 +1096,7 @@ keithley2600a_min_measure_time( void )
  *---------------------------------------------------------------*/
 
 double
-keithley2600a_max_measure_time( void )
+keithley2612b_max_measure_time( void )
 {
     return MAX_INTEGRATION_FACTOR / k26->linefreq;
 }
@@ -1107,10 +1107,10 @@ keithley2600a_max_measure_time( void )
  *---------------------------------------------------------------*/
 
 bool
-keithley2600a_check_measure_time( double t )
+keithley2612b_check_measure_time( double t )
 {
-    return    t >= keithley2600a_min_measure_time( )
-           && t <= keithley2600a_max_measure_time( );
+    return    t >= keithley2612b_min_measure_time( )
+           && t <= keithley2612b_max_measure_time( );
 }
 
 

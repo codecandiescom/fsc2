@@ -230,7 +230,9 @@ gentec_maestro             // Gentec Maestro Laser Power and Energy Meter
 
 // SourceMeters
 
-keithley2600a
+keithley2600a              // may be for any of the 2600A or 2600B series,
+                           // depending what it was compiled for
+keithley2612b              // special module for the 2612B model only
 
 
 // Microwave bridges
