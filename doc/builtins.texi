@@ -1314,19 +1314,19 @@ uses for data post-processing expect. In this case the first argument
 should be a string with this separator e.g.@: @code{", "} if the
 elements of a line should be separated by a comma and a space.
 
-The second, also optional argument, is a file handle. This argument
-must be given if somewhere before in the script a file was opened by
-using one of the functions for that purpose (e.g.@
+The second argument must be given if somewhere before in the script
+ file was opened by using one of the functions for that purpose (e.g.@
 @code{@ref{get_file()}} or @code{@ref{open_file()}}). These functions
 all return an integer file handle and that value has to be passed to
 @code{save()}. Alternatively, you can use the numbers @code{1} and
 @code{2} to write out the data to @code{stdout} or @code{stderr}.
-Otherwise the argument must be left out and the user is then asked to
-select the file the data are to be written to when @code{save()} is
-called for the first time.
+If no such function for opening a file was called before and you
+don't pass @code{1} or @code{2} the argument must be left out and
+he user will be asked to select the file the data are to be written
+to.
 
 All arguments (following the file identifier if there's one) are
-data. The types of these data may be
+data. The types of these data can be
 
 @itemize @bullet
 @item
@@ -1393,10 +1393,10 @@ section of an @code{EDL} script.
 This function (the name stands for 'formatted save') can be used to
 write data to a file in a user defined format. The first argument must
 be a file identifier if any of the functions for opening a file has
-been called before, using this functions return vakue (or the numbers
+been called before, using that functions return vakue (or the numbers
 @code{1} and @code{2} can be used to write to @i{stdout} or 
-@i{stderr}). If no such function has been called (or you use
-@code{1} or @code{2}) this argument must be left out and you will
+@i{stderr}). If no such function has been called (and you don't
+use @code{1} or @code{2}) this argument must be left out and you will
 be asked to select a file.
 
 The next argument must be a @i{format string} with a syntax remotely
@@ -1576,7 +1576,7 @@ sequences, starting with a backslash @code{\}, see
 @code{@ref{fsave()}} for the complete list.
 
 
-The function returns the total number of characters that have been written to
+The function returns the total number of characters that were written to
 the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
