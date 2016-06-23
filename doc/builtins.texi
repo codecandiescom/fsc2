@@ -1315,7 +1315,7 @@ should be a string with this separator e.g.@: @code{", "} if the
 elements of a line should be separated by a comma and a space.
 
 The second argument must be given if somewhere before in the script
- file was opened by using one of the functions for that purpose (e.g.@
+a file was opened by using one of the functions for that purpose (e.g.@
 @code{@ref{get_file()}} or @code{@ref{open_file()}}). These functions
 all return an integer file handle and that value has to be passed to
 @code{save()}. Alternatively, you can use the numbers @code{1} and
