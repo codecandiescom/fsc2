@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1999-2014 Jens Thoms Toerring
+ *  Copyright (C) 1999-2016 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -66,34 +66,49 @@ start_editor( void )
        installed, but with modern systems even that isn't a given:-( */
 
     char * term = getenv( "TERM" );
+
     if ( ! term || ! *term )
         term = ( char * ) "xterm";
 
-    /* Try to find content of environment variable "EDITOR" - if it doesn't
-       exist try to use the one compiled into the program, and as a final
-       option use vi as the default editor */
+    /* Try to find content of environment variable "EDITOR", "VISUAL"
+       or "SELECTED_EDITOR" (one of these is  probably the users choice)
+       - if it doesn't exist try to use the        one compiled into the
+       program, and as a final option use either /usr/bin/sensible-editor
+       (if it exists) or vi as the default editor */
 
     char * ed = getenv( "EDITOR" );
 
+    if ( ! ed )
+        ed = getenv( "VISUAL" );
+    if ( ! ed )
+        ed = getenv( "SELECTED_EDITOR" );
+
 #if defined EDITOR
-    if ( ed == NULL )
+    if ( ! ed )
         ed = ( char * ) EDITOR;
 #endif
 
     char * oed = ed;
     ed = T_strdup( ed );
 
-    if ( ed == NULL || *ed == '\0' )
+    if ( ! ed || ! *ed )   /* nothing found, use system default or vi */
     {
         argv = T_malloc( 5 * sizeof *argv );
 
         argv[ 0 ] = term;
         argv[ 1 ] = ( char * ) "-e";
-        argv[ 2 ] = ( char * ) "vi";
+
+        struct stat buf;
+        if (    ! stat( "/usr/bin/sensible-editor", &buf )
+             && buf.st_mode & S_IXOTH )
+            argv[ 2 ] = ( char * ) "/usr/bin/sensible-editor";
+        else
+            argv[ 2 ] = ( char * ) "vi";
+
         argv[ 3 ] = EDL.files->name;
         argv[ 4 ] = NULL;
     }
-    else              /* otherwise use the one given by EDITOR */
+    else                   /* otherwise use the one given by EDITOR etc. */
     {
         char * ep = ed;
         while ( *ep && *ep != ' ' )

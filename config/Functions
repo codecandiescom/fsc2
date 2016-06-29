@@ -181,7 +181,7 @@ lockin_ref_freq, -1, ALL;          // Get/set mod. frequency (SR8x0, ER023M)
 lockin_ref_mode, 0, EXP;           // Get mod. mode (SR8x0, ER023M)
 lockin_ref_level, -1, EXP;         // Get/set mod. level (SR8x0 only)
 lockin_harmonic, -1, EXP;          // Get/set harmonic (SR8x0, ER023M)
-lockin_offset, -1, ALL;            // Check for overload
+lockin_offset, -1, ALL;            // Set offset
 lockin_lock_keyboard, -1, EXP;     // Lock or unlock the keyboard (SRxy0)
 lockin_command, 1, EXP;
 

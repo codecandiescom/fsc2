@@ -122,9 +122,9 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 
 /* Constants for dealing with the resonators */
 
-#define MAX_RESONATOR         2         /* 2nd resonator*/
-#define MIN_RESONATOR         1         /* 1st resonator */
-#define UNDEF_RESONATOR       -1
+#define MIN_RESONATOR         0         /* 1st resonator */
+#define MAX_RESONATOR         1         /* 2nd resonator*/
+#define UNDEF_RESONATOR      -1
 
 
 /* Constants for dealing with mode setting */
