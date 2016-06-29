@@ -1,0 +1,13 @@
+# -*-Makefile-*-
+#
+# Changed by Markus 29.01.2008 - epr.tu-graz.ac.at
+
+OWNER              := root
+GROUP              := dialout
+GPIB_LIBRARY       := SLG
+GPIB_HEADER_DIR    := /usr/local/include/gpib
+GPIB_CARD_NAME     := "gpib0"
+SERIAL_LOCK_DIR    := /var/lock
+BROWSER            := firefox
+DESCRIPTION        := "CIDEP"
+
