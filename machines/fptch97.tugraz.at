@@ -6,8 +6,8 @@ OWNER              := fsc2
 GROUP              := dialout
 GPIB_LIBRARY       := SLG
 GPIB_HEADER_DIR    := /usr/local/include/gpib
-GPIB_CARD_NAME     .= "gpib0"
+GPIB_CARD_NAME     := "gpib0"
 SERIAL_LOCK_DIR    := /var/lock
-BROWSER            := iceweasel
+BROWSER            := firefox
 DESCRIPTION        := "CIDEP"
-FLEX_NEEDS_BISON_DECLARATIONS := yes
+
