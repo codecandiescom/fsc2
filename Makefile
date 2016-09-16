@@ -430,12 +430,11 @@
 
 # Set the optimization level
 
-OPTIMIZATION     ?= -O3 -march=native
-#OPTIMIZATION     := -O0 -march=native    # for release build
+OPTIMIZATION     ?= -O2
 
 # Set the debug flags
 
-DEBUG_FLAGS      ?= -ggdb3
+DEBUG_FLAGS      ?= -ggdb
 #DEBUG_FLAGS      := -DNDEGUG             # for releasse build (typically avoid)
 
 
@@ -490,7 +489,7 @@ mchdir           := $(fdir)/machines
 
 SHELL            := /bin/sh
 CC               ?= gcc
-CFLAGS           := -std=c99                            \
+CFLAGS           := -std=c99                               \
 					-D_XOPEN_SOURCE=700                    \
 					-W                                     \
 					-Wall                                  \

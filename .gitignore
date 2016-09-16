@@ -172,6 +172,7 @@ edl/aiesr6.hmi.de/cw_epr_bruker
 edl/aiesr6.hmi.de/cw_epr_sr
 edl/aiesr6.hmi.de/monitor_bruker
 edl/aiesr6.hmi.de/monitor_sr
+edl/fptch97.tugraz.at/tresr
 .tmp_mc_*
 FcntlLock/MYMETA.yml
 modules/rs_rto/vxi11.h

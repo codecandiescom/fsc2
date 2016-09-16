@@ -460,13 +460,13 @@ gpib_remove_device( int device )
     if ( cur_dev->next )
         cur_dev->next->prev = cur_dev->prev;
 
+    ibsta &= ~IBERR;
+
     if ( ll > LL_NONE )
         LOG_FUNCTION_END( cur_dev->name );
 
     free( cur_dev->name );
     free( cur_dev );
-
-    ibsta &= ~IBERR;
 
     return SUCCESS;
 }

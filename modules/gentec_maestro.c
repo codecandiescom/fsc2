@@ -24,11 +24,11 @@
 #include <float.h>
 
 #if defined USE_SERIAL && defined USE_LAN
-#error "Error in configuration file, on;e one of 'USE_SERIAL' and 'USE_LAN' can defined."
+#error "Error in configuration file, only one of 'USE_SERIAL' and 'USE_LAN' can be defined."
 #endif
 
 #if ! defined USE_SERIAL && ! defined USE_LAN
-#error "Neither 'USE_SERIAL' nor 'USE_LAN' are defined in configuration file."
+#error "Neither 'USE_SERIAL' nor 'USE_LAN' is defined in configuration file."
 #endif
 
 

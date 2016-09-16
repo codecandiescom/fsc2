@@ -65,7 +65,8 @@ typedef struct {
 
     struct timeval last_shutter_open,            /* last time shutter was */
                    last_shutter_close;           /* opened or closed */
-    
+
+    bool comm_failure;
 } Oriel_CS_260;
 
 
@@ -126,6 +127,12 @@ static double Max_Outport_Switch_Delay = 10;
 
 #endif
 
+
+/* Maximum number of retries on communication failures */
+
+#define MAX_RETRIES  3
+
+
 /* Values for test run */
 
 #define TEST_GRATING         0
@@ -176,8 +183,10 @@ static double oriel_cs_260_set_calibration_offset( int    grating,
 static double oriel_cs_260_get_zero( int    gratings );
 static void oriel_cs_260_set_zero( int    gratings,
                                    double zero );
+static double oriel_cs_260_get_wavelength_safe( void );
 static double oriel_cs_260_get_wavelength( void );
 static double oriel_cs_260_set_wavelength( double wl );
+static long int oriel_cs_260_get_position_safe( void );
 static long int oriel_cs_260_get_position( void );
 static bool oriel_cs_260_do_step( long int step );
 static bool oriel_cs_260_get_shutter( void );
@@ -242,6 +251,8 @@ oriel_cs_260_init_hook( void )
     oriel_cs_260.outport = TEST_OUTPORT;
 
     oriel_cs_260.gpib_address = -1;
+
+    oriel_cs_260.comm_failure = false;
 
     return 1;
 }
@@ -976,8 +987,8 @@ oriel_cs_260_set_grating( int grating )
     }
 
     oriel_cs_260.grating = oriel_cs_260_get_grating( );
-    oriel_cs_260_get_wavelength( );
-    oriel_cs_260_get_position( );
+    oriel_cs_260_get_wavelength_safe( );
+    oriel_cs_260_get_position_safe( );
 
     return oriel_cs_260.grating;
 }
@@ -1247,6 +1258,38 @@ oriel_cs_260_set_zero( int    grating,
 
 
 /*--------------------------------*
+ * Returns the eaveength the monocromator is currently set to,
+ * repeating the command on communication errors
+ *--------------------------------*/
+
+static
+double
+oriel_cs_260_get_wavelength_safe( void )
+{
+    double wl;
+    int retries = MAX_RETRIES;
+
+    do
+    {
+        oriel_cs_260.comm_failure = false;
+
+        TRY
+        {
+            wl = oriel_cs_260_get_wavelength( );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( ! oriel_cs_260.comm_failure || ! --retries )
+                RETHROW;
+        }
+    } while (oriel_cs_260.comm_failure);
+
+    return wl;
+}
+
+
+/*--------------------------------*
  * Returns the eaveength the monocromator is currently set to.
  *--------------------------------*/
 
@@ -1308,8 +1351,40 @@ oriel_cs_260_set_wavelength( double wl )
 
     /* Get the exact wavelength and stepper motor position from the device */
 
-    oriel_cs_260_get_position( );
-    return oriel_cs_260_get_wavelength( );
+    oriel_cs_260_get_position_safe( );
+    return oriel_cs_260_get_wavelength_safe( );
+}
+
+
+/*--------------------------------*
+ * Returns the current stepper motor position, repeating
+ * the command on communication errors
+ *--------------------------------*/
+
+static
+long int
+oriel_cs_260_get_position_safe( void )
+{
+    long int pos;
+    int retries = MAX_RETRIES;
+
+    do
+    {
+        oriel_cs_260.comm_failure = false;
+
+        TRY
+        {
+            pos = oriel_cs_260_get_position( );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( ! oriel_cs_260.comm_failure || ! --retries )
+                RETHROW;
+        }
+    } while (oriel_cs_260.comm_failure);
+
+    return pos;
 }
 
 
@@ -1357,17 +1432,17 @@ oriel_cs_260_do_step( long int step )
     {
         if ( oriel_cs_260_get_error( ) == 2 )
         {
-            print( WARN, "Can't change position by %ld, out of range.\n",
+            print( WARN, "Can't change position by %ld steps, out of range.\n",
                    step );
             return false;
         }
         else
-            print( FATAL, "Failed to change position by %ld.\n", step );
+            print( FATAL, "Failed to change position by %ld steps.\n", step );
         THROW( EXCEPTION );
     }
 
     oriel_cs_260.position += step;
-    oriel_cs_260_get_wavelength( );
+    oriel_cs_260_get_wavelength_safe( );
     return true;
 }
 
@@ -1477,7 +1552,7 @@ oriel_cs_260_set_filter( int filter )
 
 /*----------------------------------------------------*
  * Called from the initialization function to determine if a
- * filter wheel exists and what it position it is in. If it's
+ * filter wheel exists and what position it is in. If it's
  * out of positon move it to the default position.
  *----------------------------------------------------*/
 
@@ -1760,6 +1835,7 @@ static void
 oriel_cs_260_failure( void )
 {
     print( FATAL, "Communication with monochromator failed.\n" );
+    oriel_cs_260.comm_failure = true;
     THROW( EXCEPTION );
 }
 
