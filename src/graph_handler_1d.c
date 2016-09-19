@@ -241,7 +241,9 @@ press_handler_1d( FL_OBJECT * obj,
                 G.start[ Y ] = c->ppos[ Y ];
             }
             else
+            {
                 G_1d.canvas.is_box = false;
+            }
 
             repaint_canvas_1d( &G_1d.canvas );
             break;
@@ -1094,11 +1096,13 @@ reconfigure_window_1d( Canvas_T * c,
             recalc_XPoints_1d( );
         }
         else
+        {
             for ( long i = 0; i < G_1d.nc; i++ )
             {
                 G_1d.curve[ i ]->s2d[ X ] *= ( w - 1.0 ) / ( old_w - 1 );
                 G_1d.curve[ i ]->s2d[ Y ] = h - 1;
             }
+        }
     }
 
     /* We can't know the sequence the different canvases are reconfigured
@@ -1121,7 +1125,9 @@ reconfigure_window_1d( Canvas_T * c,
             need_redraw[ X ] = false;
         }
         else if ( w != old_w )
+        {
             is_reconf[ X ] = true;
+        }
 
         if ( need_redraw[ Y ] )
         {
@@ -1129,7 +1135,9 @@ reconfigure_window_1d( Canvas_T * c,
             need_redraw[ Y ] = false;
         }
         else if ( h != old_h )
+        {
             is_reconf[ Y ] = true;
+        }
     }
 
     if ( c == &G_1d.x_axis )
@@ -1140,7 +1148,9 @@ reconfigure_window_1d( Canvas_T * c,
             is_reconf[ X ] = false;
         }
         else
+        {
             need_redraw[ X ] = true;
+        }
     }
 
     if ( c == &G_1d.y_axis )
@@ -1151,7 +1161,9 @@ reconfigure_window_1d( Canvas_T * c,
             is_reconf[ Y ] = false;
         }
         else
+        {
             need_redraw[ Y ] = true;
+        }
     }
 }
 
@@ -1731,11 +1743,15 @@ make_scale_1d( Curve_1d_T * cv,
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.medium_tick_len );
+            }
             else                                       /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.short_tick_len );
+            }
         }
     }
     else
@@ -1768,11 +1784,15 @@ make_scale_1d( Curve_1d_T * cv,
                                    ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.medium_tick_len, y );
+            }
             else                                      /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.short_tick_len, y );
+            }
         }
     }
 }

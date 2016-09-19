@@ -253,10 +253,10 @@ cut_show( int  dir,
                     G_2d.label_h[ Z + 3 ]  = G_2d.label_h[ Y ];
                 }
             }
-            else                                  /* new direction is X ! */
-                if ( G_2d.label[ X ] != NULL )
-                    create_label_pixmap( &G_2d.cut_z_axis, Z,
-                                         G_2d.label[ X ] );
+            else if ( G_2d.label[ X ] != NULL )      /* new direction is X ! */
+            {
+                create_label_pixmap( &G_2d.cut_z_axis, Z, G_2d.label[ X ] );
+            }
         }
         else
         {
@@ -313,17 +313,10 @@ cut_setup_canvas( Canvas_T  * c,
 
     c->obj = obj;
 
-    /* We need to make sure the canvas hasn't a size less than 1 otherwise
-       hell will break loose... */
+    /* Make sure the canvas width and height of at least 1 */
 
-    if ( obj->w > 0 )
-        c->w = obj->w;
-    else
-        c->w = 1;
-    if ( obj->h > 0 )
-        c->h = obj->h;
-    else
-        c->h = 1;
+    c->w = obj->w > 0 ? obj->w : 1;
+    c->h = obj->h > 0 ? obj->h : 1;
 
     create_pixmap( c );
 
@@ -1147,7 +1140,9 @@ cut_integrate_point( long   p_index,
                     cvp->xp_ref++;
         }
         else if ( cv->points[ i ].xp_ref == cv->count - 1 )    /* ...is last */
+        {
             xp_index = cv->points[ p_index ].xp_ref = cv->count;
+        }
         else                                             /* ...is in between */
         {
             xp_index = cv->points[ p_index ].xp_ref =
@@ -1176,7 +1171,9 @@ cut_integrate_point( long   p_index,
         cv->points[ p_index ].exist = true;
     }
     else
+    {
         xp_index = cv->points[ p_index ].xp_ref;
+    }
 
     /* Store the (new) points value */
 
@@ -1324,7 +1321,9 @@ cut_reconfigure_window( Canvas_T * c,
             need_redraw[ X ] = false;
         }
         else if ( w != old_w )
+        {
             is_reconf[ X ] = true;
+        }
 
         if ( need_redraw[ Y ] )
         {
@@ -1332,7 +1331,9 @@ cut_reconfigure_window( Canvas_T * c,
             need_redraw[ Y ] = false;
         }
         else if ( h != old_h )
+        {
             is_reconf[ Y ] = true;
+        }
 
         if ( need_redraw[ Z ] )
         {
@@ -1340,7 +1341,9 @@ cut_reconfigure_window( Canvas_T * c,
             need_redraw[ Z ] = false;
         }
         else if ( h != old_h )
+        {
             is_reconf[ Z ] = true;
+        }
     }
 
     if ( c == &G_2d.cut_x_axis )
@@ -1351,7 +1354,9 @@ cut_reconfigure_window( Canvas_T * c,
             is_reconf[ X ] = false;
         }
         else
+        {
             need_redraw[ X ] = true;
+        }
     }
 
     if ( c == &G_2d.cut_y_axis )
@@ -1362,7 +1367,9 @@ cut_reconfigure_window( Canvas_T * c,
             is_reconf[ Y ] = false;
         }
         else
+        {
             need_redraw[ Y ] = true;
+        }
     }
 
     if ( c == &G_2d.cut_z_axis )
@@ -1373,7 +1380,9 @@ cut_reconfigure_window( Canvas_T * c,
             is_reconf[ Z ] = false;
         }
         else
+        {
             need_redraw[ Z ] = true;
+        }
     }
 }
 
@@ -1528,7 +1537,9 @@ cut_press_handler( FL_OBJECT * obj,
                 G.start[ Y ] = c->ppos[ Y ];
             }
             else
+            {
                 G_2d.cut_canvas.is_box = false;
+            }
 
             repaint_cut_canvas( &G_2d.cut_canvas );
             break;
@@ -1589,7 +1600,9 @@ cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
             c->ppos[ Y ] = G_2d.cut_canvas.h - 1;
     }
     else if ( c->ppos[ Y ] >= ( int ) c->h )         /* in z-axis window */
+    {
         c->ppos[ Y ] = c->h - 1;
+    }
 
     switch ( G.button_state )
     {
@@ -1940,9 +1953,11 @@ cut_fs_button_callback( FL_OBJECT * a  UNUSED_ARG,
         redraw_all_cut_canvases( );
     }
     else if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
+    {
         fl_set_object_helper( GUI.cut_form->cut_full_scale_button,
                               "Rescale curve to fit into the window\n"
                               "and switch on automatic rescaling" );
+    }
 }
 
 
@@ -2481,11 +2496,15 @@ cut_make_scale( Canvas_T * c,
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.medium_tick_len );
+            }
             else                                       /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.short_tick_len );
+            }
         }
     }
     else if ( coord == Y )
@@ -2518,11 +2537,15 @@ cut_make_scale( Canvas_T * c,
                                    ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.medium_tick_len, y );
+            }
             else                                      /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.short_tick_len, y );
+            }
         }
     }
     else
@@ -2554,11 +2577,15 @@ cut_make_scale( Canvas_T * c,
                                    ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x - G.medium_tick_len, y );
+            }
             else                                      /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x - G.short_tick_len, y );
+            }
         }
 
         /* Finally draw the triangle indicating the position of the cut */

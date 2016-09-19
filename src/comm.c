@@ -300,7 +300,9 @@ new_data_handler( void )
          && Comm.MQ->low == Comm.MQ->high )
     {
         if ( Fsc2_Internals.http_pid > 0 )
+        {
             http_check( );
+        }
         else if ( Fsc2_Internals.http_server_died )
         {
             Fsc2_Internals.http_server_died = false;
@@ -410,7 +412,9 @@ parent_reader( Comm_Struct_T * header )
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
+                {
                     str[ 0 ] = T_strdup( "" );
+                }
 
                 eprint( NO_ERROR, false, "%s", str[ 0 ] );
                 TRY_SUCCESS;
@@ -439,7 +443,9 @@ parent_reader( Comm_Struct_T * header )
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
+                {
                     str[ 0 ] = T_strdup( "" );
+                }
 
                 show_message( str[ 0 ] );
                 TRY_SUCCESS;
@@ -468,7 +474,9 @@ parent_reader( Comm_Struct_T * header )
                     str[ 0 ][ header->data.str_len[ 0 ] ] = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
+                {
                     str[ 0 ] = T_strdup( "" );
+                }
 
                 show_alert( str[ 0 ] );
                 TRY_SUCCESS;
@@ -506,7 +514,9 @@ parent_reader( Comm_Struct_T * header )
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
+                    {
                         str[ i ] = T_strdup( "" );
+                    }
                 }
 
                 /* Show the question, get the button number and pass it back to
@@ -544,7 +554,9 @@ parent_reader( Comm_Struct_T * header )
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
+                    {
                         str[ i ] = T_strdup( "" );
+                    }
                 }
 
                 /* Call fsc2_show_fselector() and send the result back to the
@@ -588,7 +600,9 @@ parent_reader( Comm_Struct_T * header )
                         str[ i ][ header->data.str_len[ i ] ] = '\0';
                     }
                     else if ( header->data.str_len[ i ] == 0 )
+                    {
                         str[ i ] = T_strdup( "" );
+                    }
 
                 if ( ! writer( C_STR, show_input( str[ 0 ], str[ 1 ] ) ) )
                     THROW( EXCEPTION );
@@ -782,7 +796,9 @@ child_reader( void          * ret,
                     * ( * ( char ** ) ret +  header->data.str_len[ 0 ] ) = '\0';
                 }
                 else if ( header->data.str_len[ 0 ] == 0 )
+                {
                     * ( char ** ) ret = T_strdup( "" );
+                }
 
                 TRY_SUCCESS;
             }

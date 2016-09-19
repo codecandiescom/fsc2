@@ -164,7 +164,9 @@ start_editor( void )
 
     char const * sed = strip_path( argv[ 2 ] );
     if ( ! strcmp( sed, "xemacs" ) )
+    {
         final_argv = argv + 2;
+    }
     else if ( ! strcmp( sed, "emacs" ) )
     {
         for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )

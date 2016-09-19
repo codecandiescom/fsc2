@@ -72,6 +72,7 @@ device_add( const char * name )
         else
             print( FATAL, "Device '%s' (or its alias '%s') not found in "
                    "device name data base.\n", dev_name, search_name );
+
         T_free( real_name );
         T_free( dev_name );
         THROW( EXCEPTION );

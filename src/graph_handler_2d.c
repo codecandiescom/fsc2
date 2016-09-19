@@ -177,8 +177,10 @@ press_handler_2d( FL_OBJECT * obj,
                         G_2d.cut_select = CUT_SELECT_X;
                     }
                     else
+                    {
                         fl_set_cursor( window,
                                        G_2d.cursor[ ZOOM_BOX_CURSOR ] );
+                    }
 
                     c->box_x = c->ppos[ X ];
                     c->box_w = 0;
@@ -195,8 +197,10 @@ press_handler_2d( FL_OBJECT * obj,
                         G_2d.cut_select = CUT_SELECT_Y;
                     }
                     else
+                    {
                         fl_set_cursor( window,
                                        G_2d.cursor[ ZOOM_BOX_CURSOR ] );
+                    }
 
                     c->box_x = c->w
                               - ( G.y_scale_offset + G.enlarge_box_width + 1 );
@@ -275,7 +279,9 @@ press_handler_2d( FL_OBJECT * obj,
                 G.start[ Y ] = c->ppos[ Y ];
             }
             else
+            {
                 G_2d.canvas.is_box = false;
+            }
 
             repaint_canvas_2d( &G_2d.canvas );
             break;
@@ -348,7 +354,9 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             c->ppos[ Y ] = G_2d.canvas.h - 1;
     }
     else if ( c->ppos[ Y ] >= ( int ) c->h )         /* in z-axis window */
+    {
         c->ppos[ Y ] = c->h - 1;
+    }
 
     switch ( G.button_state )
     {
@@ -377,10 +385,12 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                     }
                     else if (    G_2d.cut_select == CUT_SELECT_Y
                               && keymask & ShiftMask )
+                    {
                         cut_show( Y, lrnd(
-                           ( G_2d.y_axis.h - 1.0 - ( c->box_y + c->box_h ) )
+                             ( G_2d.y_axis.h - 1.0 - ( c->box_y + c->box_h ) )
                            / G_2d.curve_2d[ G_2d.active_curve]->s2d[ Y ]
                            - G_2d.curve_2d[ G_2d.active_curve]->shift[ Y ] ) );
+                    }
                     break;
 
                 case DRAG_2D_Z :                       /* in z-axis window */
@@ -1311,7 +1321,9 @@ reconfigure_window_2d( Canvas_T * c,
             need_redraw[ X ] = false;
         }
         else if ( w != old_w )
+        {
             is_reconf[ X ] = true;
+        }
 
         if ( need_redraw[ Y ] )
         {
@@ -1319,7 +1331,9 @@ reconfigure_window_2d( Canvas_T * c,
             need_redraw[ Y ] = false;
         }
         else if ( h != old_h )
+        {
             is_reconf[ Y ] = true;
+        }
 
         if ( need_redraw[ Z ] )
         {
@@ -1327,7 +1341,9 @@ reconfigure_window_2d( Canvas_T * c,
             need_redraw[ Z ] = false;
         }
         else if ( h != old_h )
+        {
             is_reconf[ Z ] = true;
+        }
     }
 
     if ( c == &G_2d.x_axis )
@@ -1338,7 +1354,9 @@ reconfigure_window_2d( Canvas_T * c,
             is_reconf[ X ] = false;
         }
         else
+        {
             need_redraw[ X ] = true;
+        }
     }
 
     if ( c == &G_2d.y_axis )
@@ -1349,7 +1367,9 @@ reconfigure_window_2d( Canvas_T * c,
             is_reconf[ Y ] = false;
         }
         else
+        {
             need_redraw[ Y ] = true;
+        }
     }
 
     if ( c == &G_2d.z_axis )
@@ -1360,7 +1380,9 @@ reconfigure_window_2d( Canvas_T * c,
             is_reconf[ Z ] = false;
         }
         else
+        {
             need_redraw[ Z ] = true;
+        }
     }
 }
 
@@ -1642,6 +1664,7 @@ draw_2d_points( Canvas_T   * c,
         }
     }
     else
+    {
         for ( sp = cv->points, xp = cv->xpoints, count = cv->count,
               i = 0; i < G_2d.nx * G_2d.ny && count != 0; sp++, xp++, i++ )
         {
@@ -1663,6 +1686,7 @@ draw_2d_points( Canvas_T   * c,
                                           * ( sp->v + cv->shift[ Z ] ) ) ],
                             xp->x, xp->y, cv->w, cv->h );
         }
+    }
 }
 
 
@@ -1833,7 +1857,9 @@ repaint_canvas_2d( Canvas_T * c )
                 if (    x_pos < 0 || floor( x_pos ) >= G_2d.nx
                      || y_pos < 0 || floor( y_pos ) >= G_2d.ny
                      || ! cv->is_scale_set )
+                {
                     index_1 = -1;
+                }
                 else
                 {
                     index_1 = G_2d.nx * lrnd( floor( y_pos ) )
@@ -1854,7 +1880,9 @@ repaint_canvas_2d( Canvas_T * c )
                 if (    x_pos < 0 || floor( x_pos ) >= G_2d.nx
                      || y_pos < 0 || floor( y_pos ) >= G_2d.ny
                      || ! cv->is_scale_set )
+                {
                     index_2 = -1;
+                }
                 else
                 {
                     index_2 = G_2d.nx * lrnd( floor( y_pos ) )
@@ -2203,11 +2231,15 @@ make_scale_2d( Curve_2d_T * cv,
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.medium_tick_len );
+            }
             else                                       /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x, y - G.short_tick_len );
+            }
         }
     }
     else if ( coord == Y )
@@ -2242,11 +2274,15 @@ make_scale_2d( Curve_2d_T * cv,
                                    ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.medium_tick_len, y );
+            }
             else                                      /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x + G.short_tick_len, y );
+            }
         }
     }
     else
@@ -2280,11 +2316,15 @@ make_scale_2d( Curve_2d_T * cv,
                                    ( XftChar8 const * ) lstr, strlen( lstr ) );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x - G.medium_tick_len, y );
+            }
             else                                      /* short line */
+            {
                 XDrawLine( G.d, c->pm, c->axis_gc, x, y,
                            x - G.short_tick_len, y );
+            }
         }
     }
 }
@@ -2312,11 +2352,13 @@ make_color_scale( Canvas_T * c )
                0, G.z_line_offset + G.z_line_width + 1, c->h - 1 );
 
     if ( h_inc > 1.0 )
+    {
         for ( i = 0; i < NUM_COLORS; i++ )
             XFillRectangle( G.d, c->pm, G_2d.gcs[ i ],
                             G.z_line_offset + 1,
                             s15rnd( c->h - ( i + 1 ) * h_inc ),
                             G.z_line_width, h );
+    }
     else
     {
         p[ 0 ].x = G.z_line_offset + 1;
@@ -2381,13 +2423,17 @@ set_marker_2d( long x_pos,
         cv = G_2d.curve_2d[ G_2d.active_curve ];
     }
     else
+    {
         cv = G_2d.curve_2d[ curve ];
+    }
 
     m = T_malloc( sizeof *m );
     m->next = 0;
 
     if ( cv->marker_2d == NULL )
+    {
         cv->marker_2d = m;
+    }
     else
     {
         cm = cv->marker_2d;
@@ -2445,7 +2491,9 @@ delete_marker_2d( long x_pos,
         cv = G_2d.curve_2d[ G_2d.active_curve ];
     }
     else
+    {
         cv = G_2d.curve_2d[ curve ];
+    }
 
     for ( mp = NULL, m = cv->marker_2d; m != NULL; mp = m, m = m->next )
         if ( m->x_pos == x_pos && m->y_pos == y_pos )

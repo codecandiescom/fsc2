@@ -464,7 +464,9 @@ func_get_long( const char * name,
             THROW( EXCEPTION );
         }
         else                     /* some callers do their own error handling */
+        {
             return NULL;
+        }
     }
 
     Var_T * ret = vars_push( FUNC, f );
@@ -696,7 +698,9 @@ call_push( Func_T     * f,
     cs->f = f;
 
     if ( f != NULL )
+    {
         cs->device = f->device;
+    }
     else
     {
         fsc2_assert( device != NULL );
@@ -717,7 +721,9 @@ call_push( Func_T     * f,
             Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
     }
     else
+    {
         cs->Cur_Pulser = Cur_Pulser;
+    }
 
     /* If this is a call of function within one of the modules during the
        test run add an extremely rough estimate for the mean time spend in

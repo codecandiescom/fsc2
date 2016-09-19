@@ -198,6 +198,7 @@ start_graphics( void )
             diff = MAX_CURVES * GI.curve_button_height;
         else
             diff = ( MAX_CURVES - G_1d.nc ) * GI.curve_button_height;
+
         fl_winminsize( GUI.run_form_1d->run_1d->window,
                        GI.win_min_1d_width, GI.win_min_height - diff );
     }
@@ -210,6 +211,7 @@ start_graphics( void )
             diff = MAX_CURVES * GI.curve_button_height;
         else
             diff = ( MAX_CURVES - G_2d.nc ) * GI.curve_button_height;
+
         fl_winminsize( GUI.run_form_2d->run_2d->window,
                        GI.win_min_2d_width, GI.win_min_height - diff );
     }
@@ -301,8 +303,10 @@ fonts_init( void )
                                       ( char * ) Xresources[ AXISFONT ].var );
     }
     else
+    {
         G.font = XftFontOpenName( G.d, DefaultScreen( G.d ),
                                   GI.default_axisfont );
+    }
 
     G.font_asc  = G.font->ascent;
     G.font_desc = G.font->descent;
@@ -944,11 +948,13 @@ G_struct_init( void )
 #endif
     }
     else
+    {
         for ( int i = 0; i < 7; i++ )
         {
             G_1d.cursor[ i ] = cursor_1d[ i ];
             G_2d.cursor[ i ] = cursor_2d[ i ];
         }
+    }
 
     G_1d.is_fs = true;
     G_2d.is_fs = true;
@@ -1553,18 +1559,10 @@ setup_canvas( Canvas_T  * c,
 
     c->obj = obj;
 
-    /* We need to make sure the canvas hasn't a size less than 1 otherwise
-       hell will break loose... */
+    /* Make sure the canvas has a width and height of at least 1 */
 
-    if ( obj->w > 0 )
-        c->w = obj->w;
-    else
-        c->w = 1;
-
-    if ( obj->h > 0 )
-        c->h = obj->h;
-    else
-        c->h = 1;
+    c->w = obj->w > 0 ? obj->w : 1;
+    c->h = obj->h > 0 ? obj->h : 1;
 
     create_pixmap( c );
 
@@ -1624,7 +1622,9 @@ create_pixmap( Canvas_T * c )
             XSetForeground( G.d, c->gc, fl_get_pixel( FL_INACTIVE ) );
     }
     else
+    {
         XSetForeground( G.d, c->gc, fl_get_pixel( FL_LEFT_BCOL ) );
+    }
 
     if ( G.is_init )
     {
@@ -1784,7 +1784,7 @@ make_label_string( char   * lstr,
 {
     if ( num == 0.0 )
     {
-        sprintf( lstr, "0" );
+        snprintf( lstr, MAX_LABEL_LEN, "0" );
         return;
     }
 
@@ -1799,7 +1799,9 @@ make_label_string( char   * lstr,
     int n = i_max( 1, mag - res );
 
     if ( mag > 5 )                              /* num > 10^5 */
+    {
         snprintf( lstr, MAX_LABEL_LEN, "%1.*E", n - 1, num );
+    }
     else if ( mag > 0 )                         /* num >= 1 */
     {
         if ( res >= 0 )
@@ -1807,13 +1809,17 @@ make_label_string( char   * lstr,
         else
             snprintf( lstr, MAX_LABEL_LEN, "%*.*f", n, abs( res ), num );
     }
-    else if ( mag > -4 && res >= - 4 )          /* num > 10^-4 */
+    else if ( mag > -4 && res >= -4 )           /* num > 10^-4 */
+    {
         snprintf( lstr, MAX_LABEL_LEN, "%1.*f", abs( res ), num );
+    }
     else                                        /* num < 10^-4 */
+    {
         if ( mag < res )
             snprintf( lstr, MAX_LABEL_LEN, "0" );
         else
             snprintf(  lstr, MAX_LABEL_LEN, "%1.*E", n, num );
+    }
 }
 
 
@@ -2327,7 +2333,9 @@ form_event_handler( FL_FORM * form,
     else if ( ( ( XEvent * ) xevent )->type == FocusOut )
     {
         if ( G.dim & 1 && form == GUI.run_form_1d->run_1d )
+        {
             G.focus &= ~ WINDOW_1D;
+        }
         else if ( G.dim & 2 ) {
             if ( form == GUI.run_form_2d->run_2d )
                 G.focus &= ~ WINDOW_2D;

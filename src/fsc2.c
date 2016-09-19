@@ -123,7 +123,9 @@ main( int    argc,
             }
         }
         else
+        {
             load_file( GUI.main_form->browser, 1 );
+        }
     }
 
     /* If '--delete' was given on the command line set flags that says that
@@ -157,7 +159,9 @@ main( int    argc,
         if ( ! get_edl_file( fname ) )
         {
             if ( access( fname, R_OK ) == -1 )
+            {
                 fl_show_alert( "Error", "Can't access file", fname, 1 );
+            }
             else
             {
                 fprintf( stderr, "Failed to set up full name of EDL file.\n" );
@@ -165,7 +169,9 @@ main( int    argc,
             }
         }
         else
+        {
             load_file( GUI.main_form->browser, 1 );
+        }
 
         for ( i = 1; i < argc; i++ )
             argv[ i ] = argv[ i + 1 ];
@@ -314,10 +320,7 @@ globals_init( const char * pname )
 
     fsc2_get_conf( );
 
-    if ( pname )
-        Prog_Name = pname;
-    else
-        Prog_Name = "fsc2";
+    Prog_Name = pname ? pname : "fsc2";
 
     EDL.Lc = 0;
     EDL.files = NULL;
@@ -449,7 +452,9 @@ get_edl_file( const char * fname )
            instead of relative to the directory fsc2 was started in. */
 
         if ( *fname == '/' )
+        {
             EDL.files[ EDL.file_count - 1 ].name = T_strdup( fname );
+        }
         else
         {
             size_t size;
@@ -1083,7 +1088,9 @@ scan_args( int   * argc,
             }
 
             if ( argv[ cur_arg ][ 2 ] == '\0' )
+            {
                 Fsc2_Internals.num_test_runs = 1;
+            }
             else
             {
                 Fsc2_Internals.num_test_runs = 0;
@@ -1541,7 +1548,9 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
             Delete_old_file = Delete_file;
         }
         else      /* don't delete reloaded files - they may have been edited */
+        {
             Delete_old_file = false;
+        }
 
         while ( old_count > 0 )
             T_free( old_list[ --old_count ].name );
@@ -1804,7 +1813,10 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
             fl_trigger_object( GUI.main_form->quit );
         }
         else
+        {
             fl_show_alert( "Error", "Test of file failed.", NULL, 1 );
+        }
+
         return;
     }
 
@@ -1919,7 +1931,9 @@ display_file( char * name,
                 && ++cc < FL_BROWSER_LINELENGTH - digits - 9 )
         {
             if ( ( char ) key != '\t' )
+            {
                 *lp++ = ( char ) key;
+            }
             else                         /* handling of tab chars */
             {
                 do
@@ -2252,7 +2266,9 @@ idle_handler( void )
 
 #if defined WITH_HTTP_SERVER
     if ( Fsc2_Internals.http_pid > 0 )
+    {
         http_check( );
+    }
     else if ( Fsc2_Internals.http_server_died )
     {
         Fsc2_Internals.http_server_died = false;

@@ -175,7 +175,9 @@ fsc2_request_serial_port( const char * dev_file,
         }
     }
     else
+    {
         real_name = T_strdup( dev_file );
+    }
 
     /* Check that device file for the serial port hasn't already been claimed
        by another module */
@@ -280,7 +282,9 @@ fsc2_serial_cleanup( void )
     while ( i-- > 0 )
     {
         if ( Serial_Ports[ i ].is_open )
+        {
             fsc2_serial_close( i );
+        }
         else if ( Serial_Ports[ i ].have_lock )
         {
             fsc2_release_uucp_lock( Serial_Ports[ i ].dev_file );
@@ -893,7 +897,9 @@ fsc2_serial_read( int          sn,
                     return 0;
                 }
                 else
+                {
                     break;
+                }
             }
 
             if ( us_wait > 0 )

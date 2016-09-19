@@ -451,8 +451,10 @@ xforms_init( int  * argc,
                           FL_FULLBORDER, "fsc2" );
     }
     else
+    {
         fl_show_form( GUI.main_form->fsc2, FL_PLACE_ICONIC,
                       FL_FULLBORDER, "fsc2" );
+    }
 
     fl_deactivate_object( GUI.main_form->reload );
     fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );

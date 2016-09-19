@@ -307,7 +307,9 @@ get_print_file( FILE ** fp,
             pc_f = T_free( pc_f );
     }
     else
+    {
         fl_set_input( print_form->s2p_input, "lpr -h" );
+    }
 
     fl_set_button( print_form->add_comment, ( int ) print_with_comment );
 
@@ -583,12 +585,18 @@ print_callback( FL_OBJECT * obj,
         paper_type = Legal_PAPER;
     }
     else if ( obj == print_form->bw_button )
+    {
         print_with_color = false;
+    }
     else if ( obj == print_form->col_button )
+    {
         print_with_color = true;
+    }
     else if ( obj == print_form->add_comment )
+    {
         print_with_comment =
-            fl_get_button( print_form->add_comment ) ? true : false;
+                      fl_get_button( print_form->add_comment ) ? true : false;
+    }
 }
 
 
@@ -1009,6 +1017,7 @@ print_header( FILE       * volatile fp,
         tstr = T_strdup( ctime( &d ) );
         tstr[ strlen( tstr ) - 1 ] = '\0';
         if ( uname( &un ) != -1 && pwd != NULL )
+        {
 #if defined DESCRIPTION
             fprintf( fp, "5 8 m (%s %s@%s [%s]) show\n",
                      tstr, pwd->pw_name, un.nodename, DESCRIPTION );
@@ -1016,31 +1025,39 @@ print_header( FILE       * volatile fp,
             fprintf( fp, "5 8 m (%s %s@%s) show\n",
                      tstr, pwd->pw_name, un.nodename );
 #endif
+        }
         else if ( pwd != NULL )
+        {
 #if defined DESCRIPTION
             fprintf( fp, "5 8 m (%s %s [%s]) show\n",
                      tstr, pwd->pw_name, DESCRIPTION );
 #else
             fprintf( fp, "5 8 m (%s %s) show\n", tstr, pwd->pw_name );
 #endif
+        }
+
         T_free( tstr );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
         if ( uname( &un ) != -1 && pwd != NULL )
+        {
 #if defined DESCRIPTION
             fprintf( fp, "5 8 m (%s@%s [%s]) show\n",
                      pwd->pw_name, un.nodename, DESCRIPTION );
 #else
             fprintf( fp, "5 7 m (%s@%s) show\n", pwd->pw_name, un.nodename );
 #endif
+        }
         else if ( pwd != NULL )
+        {
 #if defined DESCRIPTION
             fprintf( fp, "5 8 m (%s [%s]) show\n", pwd->pw_name, DESCRIPTION );
 #else
             fprintf( fp, "5 8 m (%s) show\n", pwd->pw_name );
 #endif
+        }
     }
 }
 
@@ -1110,7 +1127,9 @@ do_1d_printing( FILE * fp,
         print_markers_1d( fp );
     }
     else
+    {
         eps_draw_curve_1d( fp, &G_2d.cut_curve, 0, what );
+    }
 }
 
 
@@ -1384,9 +1403,13 @@ eps_make_scale( FILE * fp,
                          x, lstr, y - 1.0, lstr, lstr, x, lstr );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 fprintf( fp, "%.2f %.2f m 0 -2.5 rl s\n", x, y - 0.5 );
+            }
             else                                       /* short line */
+            {
                 fprintf( fp, "%.2f %.2f m 0 -1.5 rl s\n", x, y - 0.5 );
+            }
         }
 
         fprintf( fp, "pop\n" );
@@ -1432,10 +1455,13 @@ eps_make_scale( FILE * fp,
                          "sub m (%s) show\n", x_0 - 0.5, lstr, y, lstr, lstr );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 fprintf( fp, "%.2f %.2f m -2.5 0 rl s\n", x - 0.5, y );
+            }
             else                                      /* short line */
+            {
                 fprintf( fp, "%.2f %.2f m -1.5 0 rl s\n", x - 0.5, y );
-
+            }
         }
     }
     else
@@ -1484,10 +1510,13 @@ eps_make_scale( FILE * fp,
                          "sub m (%s) show\n", x + 1, y, lstr, lstr );
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
+            {
                 fprintf( fp, "%.2f %.2f m -2.5 0 rl s\n", x - 0.5, y );
+            }
             else                                      /* short line */
+            {
                 fprintf( fp, "%.2f %.2f m -1.5 0 rl s\n", x - 0.5, y );
-
+            }
         }
     }
 }
@@ -2009,7 +2038,9 @@ paren_replace( const char * str )
             fprintf( stderr, "found 0x%x\n", c );
 
             if ( c < 0xc2 )
+            {
                 *cp = ' ';
+            }
             else if ( c < 0xc4 )
             {
                 c =   ( ( c & 3 ) << 6 )
@@ -2024,7 +2055,9 @@ paren_replace( const char * str )
             }
         }
         else
+        {
             *cp = *sp;
+        }
     }
 
     return rp;
@@ -2064,6 +2097,7 @@ print_markers_1d( FILE * fp )
     for ( m = G_1d.marker_1d; m != NULL; m = m->next )
     {
         if ( print_with_color )
+        {
             switch ( m->color )
             {
                 case 0 :
@@ -2090,8 +2124,11 @@ print_markers_1d( FILE * fp )
                     fprintf( fp, "0 0 0 srgb " );          /* black */
                 break;
             }
+        }
         else
+        {
             fprintf( fp, "0 sgr " );
+        }
 
         fprintf( fp, "[ 1 1 ] 0 sd " );
 
@@ -2133,6 +2170,7 @@ print_markers_2d( FILE * fp )
     for ( m = cv->marker_2d; m != NULL; m = m->next )
     {
         if ( print_with_color )
+        {
             switch ( m->color )
             {
                 case 0 :
@@ -2159,8 +2197,11 @@ print_markers_2d( FILE * fp )
                     fprintf( fp, "0 0 0 srgb " );          /* black */
                 break;
             }
+        }
         else
+        {
             fprintf( fp, "0 sgr " );
+        }
 
         fprintf( fp, "1 slw %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 "
                  "rl cp s\n",

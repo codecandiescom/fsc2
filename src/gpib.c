@@ -734,7 +734,9 @@ start_gpibd( void )
 
 	pid_t pid = fork( );
 	if ( pid == -1 )
+    {
 		return FAILED_TO_CONNECT;
+    }
 	else if ( pid == 0 )
 	{
         const char *a[ 2 ] = { NULL, NULL };

@@ -37,7 +37,9 @@ show_message( const char * str )
         if (    Fsc2_Internals.cmdline_flags & DO_CHECK
              || Fsc2_Internals.cmdline_flags &
                                       ( TEST_ONLY | NO_GUI_RUN | BATCH_MODE ) )
+        {
             fprintf( stdout, "%s\n", str );
+        }
         else
         {
             switch_off_special_cursors( );
@@ -77,7 +79,9 @@ show_alert( const char * str )
                 strs[ 2 ] = NULL;
         }
         else
+        {
             strs[ 1 ] = strs[ 2 ] = NULL;
+        }
 
         if (    Fsc2_Internals.cmdline_flags & DO_CHECK
              || Fsc2_Internals.cmdline_flags &
@@ -967,7 +971,9 @@ exp_icreate( char      * buffer,
                 }
             }
             else
+            {
                 pos++;
+            }
 
             if ( *pos != '\0' )                      /* get C format string */
                 vars_push( STR_VAR, pos );

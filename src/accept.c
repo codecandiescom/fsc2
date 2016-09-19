@@ -479,7 +479,9 @@ handle_clear_marker( int          dim,
                      const char * ptr )
 {
     if ( dim == DATA_1D )
+    {
         remove_markers_1d( );
+    }
     else
     {
         long curves[ MAX_CURVES ];

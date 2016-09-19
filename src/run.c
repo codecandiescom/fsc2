@@ -985,7 +985,9 @@ run_sigchld_handler( int signo )
             fl_trigger_object( GUI.main_form->sigchld );
         }
         else
+        {
             Fsc2_Internals.check_return = ! WIFEXITED( return_status );
+        }
     }
 
     errno = errno_saved;
@@ -1052,7 +1054,9 @@ run_sigchld_callback( FL_OBJECT * a,
         state = EXIT_FAILURE;
     }
     else                              /* normal death of child */
+    {
         mess = "Experiment finished after ";
+    }
 
     /* Remove the tool box */
 
@@ -1126,8 +1130,10 @@ run_sigchld_callback( FL_OBJECT * a,
     secs %= 60;
 
     if ( hours > 0 )
+    {
         eprint( NO_ERROR, false, "%s %d h, %d m and %d s.\n",
                 mess, hours, mins, secs );
+    }
     else
     {
         if ( mins > 0 )

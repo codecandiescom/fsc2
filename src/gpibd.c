@@ -261,7 +261,9 @@ main( void )
             new_client( fd );
         }
         else
+        {
             pthread_mutex_lock( &gpib_mutex );
+        }
 
         check_connections( );
         pthread_mutex_unlock( &gpib_mutex );
@@ -330,7 +332,9 @@ new_client( int fd )
         close( cli_fd );
     }
     else
+    {
         thread_count++;
+    }
 
     pthread_attr_destroy( &attr );
 }
@@ -371,7 +375,9 @@ test_connect( void )
         ret = -1;
     }
     else if ( errno != ECONNREFUSED && errno != ENOENT )
+    {
         ret = -1;
+    }
 
     shutdown( sock_fd, SHUT_RDWR );
     close( sock_fd );
@@ -666,7 +672,9 @@ gpibd_timeout( int    fd,
     /* Client should have sent device ID and timeout value */
 
     if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_timeout() with invalid "
@@ -676,7 +684,9 @@ gpibd_timeout( int    fd,
 
     int timeout;
     if ( ( ret = extract_int( &line, '\n', &timeout ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_timeout() with invalid "
@@ -706,7 +716,9 @@ gpibd_clear_device( int    fd,
     /* Client should have sent device ID */
 
     if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_clear_device() with invalid "
@@ -736,7 +748,9 @@ gpibd_local( int    fd,
     /* Client should have sent device ID and timeout value */
 
     if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_local() with invalid device "
@@ -766,7 +780,9 @@ gpibd_local_lockout( int    fd,
     /* Client should have sent device ID and timeout value */
 
     if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_local_lockout() with invalid "
@@ -795,7 +811,9 @@ gpibd_trigger( int    fd,
     /* Client should have sent device ID and timeout value */
 
     if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_trigger() with invalid device "
@@ -825,7 +843,9 @@ gpibd_wait( int    fd,
     /* Client should have sent device ID and mask value */
 
     if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_wait() with invalid device "
@@ -835,7 +855,9 @@ gpibd_wait( int    fd,
         
     int mask;
     if ( ( ret = extract_int( &line, '\n', &mask ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_wait() with invalid mask "
@@ -867,7 +889,9 @@ gpibd_write( int    fd,
     /* Client should have sent device ID and the number of bytes to write */
 
     if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_write() with invalid device "
@@ -877,7 +901,9 @@ gpibd_write( int    fd,
 
     long len;
     if ( ( ret = extract_long( &line, '\n', &len ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_write() with invalid buffer "
@@ -941,7 +967,9 @@ gpibd_read( int    fd,
     /* Client should have sent device ID and the number of bytes to read */
 
     if ( ( ret = extract_int( &line, ' ', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_read() with invalid device "
@@ -951,7 +979,9 @@ gpibd_read( int    fd,
 
     long len;
     if ( ( ret = extract_long( &line, '\n', &len ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_read() with invalid length "
@@ -1010,7 +1040,9 @@ gpibd_serial_poll( int    fd,
     /* Client should have sent device ID and timeout value */
 
     if ( ( ret = extract_int( &line, '\n', &dev_id ) ) < 0 )
+    {
         return -1;
+    }
     else if ( ret )
     {
         sprintf( gpib_error_msg, "Call of gpib_serial_poll() with invalid "
