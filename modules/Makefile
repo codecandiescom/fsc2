@@ -216,12 +216,19 @@ endif
 
 
 # Support for devices that are controlled via USB (not USB-serial converter)
+# and modules that additionally require the HIDAPI library (which in turn
+# requires libusb-1.0)
 
 ifdef WITH_LIBUSB_0_1
 comp_modules    += oriel_matrix
 endif
 ifdef WITH_LIBUSB_1_0
 comp_modules    += oriel_matrix
+
+# ifdef WITH_LIBHIDAPI_HIDRAW
+# comp_modules    += mc_1024ls.c
+# endif
+
 endif
 
 
