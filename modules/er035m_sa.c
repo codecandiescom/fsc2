@@ -270,7 +270,7 @@ er035m_sa_exp_hook( void )
         switch ( *bp )
         {
             case '0' :      /* Probe F0 (S-band) is connected */
-                nmr.probe_type = PROBE_TYPE_F0;
+nmr.probe_type = PROBE_TYPE_F1; /* this is a workaround for a device error!!! */
                 break;
 
             case '1' :      /* Probe F1 (X-band) is connected */

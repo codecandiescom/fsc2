@@ -120,6 +120,7 @@ keithley2600a   := keithley2600a.c keithley2600a_limits.c keithley2600a_ll.c \
 keithley2612b   := keithley2612b.c keithley2612b_limits.c keithley2612b_ll.c \
                    keithley2612b_source.c keithley2612b_measure.c \
 				   $(vxi11_list) vxi11_user.c
+mc_1024ls       := mc_1024ls.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
@@ -225,9 +226,9 @@ endif
 ifdef WITH_LIBUSB_1_0
 comp_modules    += oriel_matrix
 
-# ifdef WITH_LIBHIDAPI_HIDRAW
-# comp_modules    += mc_1024ls.c
-# endif
+ifdef WITH_LIBHIDAPI_HIDRAW
+comp_modules    += mc_1024ls
+endif
 
 endif
 

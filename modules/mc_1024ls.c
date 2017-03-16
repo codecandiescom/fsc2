@@ -2,9 +2,18 @@
 //2017-01-31
 //FSC2 Module
 
+/* Include configuration information for the device */
+
+#include "mc_1024ls.conf"
+
+
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <libusb-1.0/libusb.h>
 #include <hidapi/hidapi.h>
 #include <serial.h>
@@ -20,15 +29,17 @@
 
 
 /* Hook functions */
-int meilhaus1024ls_init_hook( void );
-int meilhaus1024ls_maestro_test_hook( void );
-int meilhaus1024ls_maestro_exp_hook( void );
-int meilhaus1024ls_maestro_end_of_exp_hook( void );
+
+int mc_1024ls_init_hook( void );
+int mc_1024ls_test_hook( void );
+int mc_1024ls_exp_hook( void );
+int mc_1024ls_end_of_exp_hook( void );
+
 
 /* Meilhaus function */
+
 Var_T * pulse( Var_T * v  UNUSED_ARG );
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*-------------------------------------------------------------*
  * Hook function that's run when the module gets loaded - just
@@ -36,7 +47,7 @@ Var_T * pulse( Var_T * v  UNUSED_ARG );
  * lized and set up a few internal variables.
  *-------------------------------------------------------------*/
 
-int meilhaus1024ls_init_hook( void )
+int mc_1024ls_init_hook( void )
 {
     return 1;
 }
@@ -48,7 +59,7 @@ int meilhaus1024ls_init_hook( void )
  * to be set up at the start of the experiment
  *-------------------------------------------------------------*/
 
-int meilhaus1024ls_test_hook( void )
+int mc_1024ls_test_hook( void )
 {
     return 1;
 }
@@ -59,7 +70,7 @@ int meilhaus1024ls_test_hook( void )
  * initialize communication with the device and set it up.
  *------------------------------------------------------------*/
 
-int meilhaus1024ls_exp_hook( void )
+int mc_1024ls_exp_hook( void )
 {
     return 1;
 }
@@ -70,7 +81,7 @@ int meilhaus1024ls_exp_hook( void )
  * the connection to the device.
  *---------------------------------------------------------*/
 
-int meilhaus1024ls_end_of_exp_hook()
+int mc_1024ls_end_of_exp_hook()
 {
     return 1;
 }
