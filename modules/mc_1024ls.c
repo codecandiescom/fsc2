@@ -102,23 +102,23 @@ Var_T * dio_pulse( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, 1);
 
-	// Open hid connection and ports
+	// Open hid connection
 
 	if (! (hid = hid_open( MCC_VID, USB1024LS_PID, NULL ))) {
-		print( FATAL, "Failed to open HID connection.\n" );
+		print( FATAL, "Failed to open connection to device.\n" );
 		THROW( EXCEPTION );
     }
 	fsc2_usleep( 100000, UNSET );
 
-	// Config Ports
+	// Configure Ports
 
-	report.report_id = 0x0;  // always zero
-	report.cmd = DCONFIG;
-	report.port = DIO_PORTA;
+	report.report_id = 0x0;          // always zero
+	report.cmd       = DCONFIG;
+	report.port      = DIO_PORTA;
 	report.direction = DIO_DIR_OUT;
 
 	if (hid_write( hid, (const unsigned char *) &report, sizeof report )) {
-		print( FATAL, "Laied to wrte to device\n" );
+		print( FATAL, "Failed to wrte to device\n" );
 		THROW( EXCEPTION );
 	}
 	fsc2_usleep( 100000, UNSET );
@@ -126,25 +126,24 @@ Var_T * dio_pulse( Var_T * v  UNUSED_ARG )
 	//Send pulse
 	//usbDOut_USB1024LS(hid, DIO_PORTA, 1);
   
-	cmd [  0] = 0;     // report_id always zero
 	cmd[ 0 ] = DOUT;
 	cmd[ 1 ] = DIO_PORTA;
 	cmd[ 2 ] = 1;
 
 	if (hid_write( hid, cmd, sizeof cmd )) {
-		print( FATAL, "Laied to wrte to device\n" );
+		print( FATAL, "Failed to wrte to device\n" );
 		THROW( EXCEPTION );
 	}
 	fsc2_usleep( 200000, UNSET );
 
 	// usbDOut_USB1024LS(hid, DIO_PORTA, 0);
 
-	cmd[ 0 ] = 0;     // report_id always zero
 	cmd[ 0 ] = DOUT;
 	cmd[ 1 ] = DIO_PORTA;
 	cmd[ 2 ] = 0;
+	
 	if (hid_write( hid, cmd, sizeof cmd )) {
-		print( FATAL, "Laied to wrte to device\n" );
+		print( FATAL, "Failed to wrte to device\n" );
 		THROW( EXCEPTION );
 	}
 
