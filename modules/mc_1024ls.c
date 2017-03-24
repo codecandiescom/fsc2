@@ -6,9 +6,9 @@
 
 #include "mc_1024ls.conf"
 
-
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
+
 
 #include "fsc2_module.h"
 #include <libusb-1.0/libusb.h>
@@ -16,11 +16,20 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 #define MCC_VID         0x09db   // Vendor ID for Measurement Computing
-#define USB1024LS_PID   0x0076
+#define USB1024LS_PID   0x0076   // Product ID
+
 #define DIO_PORTA       0x01
 #define DOUT            0x01     // Write digital port
 #define DIO_DIR_OUT     0x00
-#define DCONFIG         0x0D     // Configure digital port
+#define DCONFIG         0x0d     // Configure digital port
+
+
+/* Structure with information about state of the device */
+
+static struct
+{
+	hid_device * hid;
+} mc_1024ls;
 
 
 /* Hook functions */
@@ -31,9 +40,9 @@ int mc_1024ls_exp_hook( void );
 int mc_1024ls_end_of_exp_hook( void );
 
 
-/* Meilhaus function */
+/* EDL functions */
 
-Var_T * dio_pulse( Var_T * v  UNUSED_ARG );
+Var_T * dio_pulse( Var_T * v );
 
 
 /*-------------------------------------------------------------*
@@ -42,10 +51,9 @@ Var_T * dio_pulse( Var_T * v  UNUSED_ARG );
  * lized and set up a few internal variables.
  *-------------------------------------------------------------*/
 
-int mc_1024ls_init_hook( void )
+int
+mc_1024ls_init_hook( void )
 {
-    Need_USB = SET;
-
     return 1;
 }
 
@@ -56,7 +64,8 @@ int mc_1024ls_init_hook( void )
  * to be set up at the start of the experiment
  *-------------------------------------------------------------*/
 
-int mc_1024ls_test_hook( void )
+int
+mc_1024ls_test_hook( void )
 {
     return 1;
 }
@@ -67,8 +76,41 @@ int mc_1024ls_test_hook( void )
  * initialize communication with the device and set it up.
  *------------------------------------------------------------*/
 
-int mc_1024ls_exp_hook( void )
+int
+mc_1024ls_exp_hook( void )
 {
+	struct
+	{
+		uint8_t report_id;
+		uint8_t cmd;
+		uint8_t port;
+		uint8_t direction;
+		uint8_t pad[ 5 ];
+	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };
+ 
+	// Initialize library
+
+	hid_init( );
+
+	// Open hid connection
+	
+	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
+	{
+		print( FATAL, "Failed to open connection to device.\n" );
+		return 0;
+    }
+	fsc2_usleep( 100000, UNSET );
+
+	// Configure ports
+
+	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
+					sizeof report ) == -1 )
+	{
+		print( FATAL, "Failed to write to device\n" );
+		return 0;
+	}
+	fsc2_usleep( 100000, UNSET );
+
     return 1;
 }
 
@@ -78,72 +120,57 @@ int mc_1024ls_exp_hook( void )
  * the connection to the device.
  *---------------------------------------------------------*/
 
-int mc_1024ls_end_of_exp_hook()
+int
+mc_1024ls_end_of_exp_hook( void )
 {
-    return 1;
+	if ( mc_1024ls.hid )
+	{
+		hid_close( mc_1024ls.hid );
+		mc_1024ls.hid = NULL;
+	}
+
+	hid_exit( );
+
+	return 1;
 }
 
 
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T * dio_pulse( Var_T * v  UNUSED_ARG )
+Var_T *
+dio_pulse( Var_T * v  UNUSED_ARG )
 {
-	hid_device * hid = NULL;
-	struct {
-		uint8_t report_id;
-		uint8_t cmd;
-		uint8_t port;
-		uint8_t direction;
-		uint8_t pad[ 5 ];
-	} report;
 	uint8_t cmd[ 8 ];
  
-    if ( FSC2_MODE == TEST )
+	/* Nothing to be done during test run */
+
+	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, 1);
 
-	// Open hid connection
-
-	if (! (hid = hid_open( MCC_VID, USB1024LS_PID, NULL ))) {
-		print( FATAL, "Failed to open connection to device.\n" );
-		THROW( EXCEPTION );
-    }
-	fsc2_usleep( 100000, UNSET );
-
-	// Configure Ports
-
-	report.report_id = 0x0;          // always zero
-	report.cmd       = DCONFIG;
-	report.port      = DIO_PORTA;
-	report.direction = DIO_DIR_OUT;
-
-	if (hid_write( hid, (const unsigned char *) &report, sizeof report )) {
-		print( FATAL, "Failed to wrte to device\n" );
-		THROW( EXCEPTION );
-	}
-	fsc2_usleep( 100000, UNSET );
-
-	//Send pulse
-	//usbDOut_USB1024LS(hid, DIO_PORTA, 1);
+	// Switch output pin on...
+	// usbDOut_USB1024LS(hid, DIO_PORTA, 1);
   
-	cmd[ 0 ] = DOUT;
-	cmd[ 1 ] = DIO_PORTA;
-	cmd[ 2 ] = 1;
+	cmd[ 0 ] = 0;       // Report ID is always 0
+	cmd[ 1 ] = DOUT;
+	cmd[ 2 ] = DIO_PORTA;
+	cmd[ 3 ] = 1;
 
-	if (hid_write( hid, cmd, sizeof cmd )) {
-		print( FATAL, "Failed to wrte to device\n" );
+	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
+	{
+		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
 	fsc2_usleep( 200000, UNSET );
 
-	// usbDOut_USB1024LS(hid, DIO_PORTA, 0);
+	// ...and switch it off again, thus ending the pulse
+	// usbDOut_USB1024LS(hid, DIO_PORTA, 0 );
 
-	cmd[ 0 ] = DOUT;
-	cmd[ 1 ] = DIO_PORTA;
-	cmd[ 2 ] = 0;
+	cmd[ 3 ] = 0;
 	
-	if (hid_write( hid, cmd, sizeof cmd )) {
-		print( FATAL, "Failed to wrte to device\n" );
+	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
+	{
+		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -151,4 +178,10 @@ Var_T * dio_pulse( Var_T * v  UNUSED_ARG )
 }
 
 
-
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */
