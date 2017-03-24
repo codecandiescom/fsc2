@@ -88,10 +88,6 @@ mc_1024ls_exp_hook( void )
 		uint8_t pad[ 5 ];
 	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };
  
-	// Initialize library
-
-	hid_init( );
-
 	// Open hid connection
 	
 	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
@@ -128,8 +124,6 @@ mc_1024ls_end_of_exp_hook( void )
 		hid_close( mc_1024ls.hid );
 		mc_1024ls.hid = NULL;
 	}
-
-	hid_exit( );
 
 	return 1;
 }
