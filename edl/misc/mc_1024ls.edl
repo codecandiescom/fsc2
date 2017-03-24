@@ -2,4 +2,4 @@ DEVICES:
 mc_1024ls;
 
 EXPERIMENT:
-mc_1024ls_pulse();
+dio_pulse();

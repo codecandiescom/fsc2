@@ -10,22 +10,17 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdbool.h>
+#include "fsc2_module.h"
 #include <libusb-1.0/libusb.h>
 #include <hidapi/hidapi.h>
-#include <serial.h>
-#include <fsc2_module.h>
-#include <stdbool.h>
 
-#define MCC_VID         (0x09db)  // Vendor ID for Measurement Computing
-#define USB1024LS_PID  (0x0076)
-#define DIO_PORTA (0x01)
-#define DOUT        (0x01)     // Write digital port
-#define DIO_DIR_OUT (0x00)
-#define DCONFIG     (0x0D)     // Configure digital port
+
+#define MCC_VID         0x09db   // Vendor ID for Measurement Computing
+#define USB1024LS_PID   0x0076
+#define DIO_PORTA       0x01
+#define DOUT            0x01     // Write digital port
+#define DIO_DIR_OUT     0x00
+#define DCONFIG         0x0D     // Configure digital port
 
 
 /* Hook functions */
@@ -38,7 +33,7 @@ int mc_1024ls_end_of_exp_hook( void );
 
 /* Meilhaus function */
 
-Var_T * pulse( Var_T * v  UNUSED_ARG );
+Var_T * dio_pulse( Var_T * v  UNUSED_ARG );
 
 
 /*-------------------------------------------------------------*
@@ -49,6 +44,8 @@ Var_T * pulse( Var_T * v  UNUSED_ARG );
 
 int mc_1024ls_init_hook( void )
 {
+    Need_USB = SET;
+
     return 1;
 }
 
@@ -86,109 +83,73 @@ int mc_1024ls_end_of_exp_hook()
     return 1;
 }
 
-Var_T * pulse( Var_T * v  UNUSED_ARG )
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+Var_T * dio_pulse( Var_T * v  UNUSED_ARG )
 {
-  hid_device* hid = 0x0;
+	hid_device * hid = NULL;
+	struct {
+		uint8_t report_id;
+		uint8_t cmd;
+		uint8_t port;
+		uint8_t direction;
+		uint8_t pad[ 5 ];
+	} report;
+	uint8_t cmd[ 8 ];
  
-  //Open hid connection and ports
-  hid = hid_open(MCC_VID, USB1024LS_PID, NULL);
-  usleep(100000);
+    if ( FSC2_MODE == TEST )
+		return vars_push( INT_VAR, 1);
 
-  //Config Ports
-  struct report_t {
-    uint8_t report_id;
-    uint8_t cmd;
-    uint8_t port;
-    uint8_t direction;
-    uint8_t pad[5];
-  } report;
+	// Open hid connection and ports
 
-  report.report_id = 0x0;  // always zero
-  report.cmd = DCONFIG;
-  report.port = DIO_PORTA;
-  report.direction = DIO_DIR_OUT;
+	if (! (hid = hid_open( MCC_VID, USB1024LS_PID, NULL ))) {
+		print( FATAL, "Failed to open HID connection.\n" );
+		THROW( EXCEPTION );
+    }
+	fsc2_usleep( 100000, UNSET );
 
-  hid_write(hid, (uint8_t*) &report, sizeof(report));
-  usleep(100000);
+	// Config Ports
 
-  //Send pulse
-  //usbDOut_USB1024LS(hid, DIO_PORTA, 1);
-  uint8_t cmd[8];
+	report.report_id = 0x0;  // always zero
+	report.cmd = DCONFIG;
+	report.port = DIO_PORTA;
+	report.direction = DIO_DIR_OUT;
+
+	if (hid_write( hid, (const unsigned char *) &report, sizeof report )) {
+		print( FATAL, "Laied to wrte to device\n" );
+		THROW( EXCEPTION );
+	}
+	fsc2_usleep( 100000, UNSET );
+
+	//Send pulse
+	//usbDOut_USB1024LS(hid, DIO_PORTA, 1);
   
-  cmd[0] = 0;     // report_id always zero
-  cmd[0] = DOUT;
-  cmd[1] = DIO_PORTA;
-  cmd[2] = 1;
-  hid_write(hid, cmd, sizeof(cmd));
-  usleep(200000);
+	cmd [  0] = 0;     // report_id always zero
+	cmd[ 0 ] = DOUT;
+	cmd[ 1 ] = DIO_PORTA;
+	cmd[ 2 ] = 1;
 
-  //usbDOut_USB1024LS(hid, DIO_PORTA, 0);
-  cmd[0] = 0;     // report_id always zero
-  cmd[0] = DOUT;
-  cmd[1] = DIO_PORTA;
-  cmd[2] = 0;
-  hid_write(hid, cmd, sizeof(cmd));
+	if (hid_write( hid, cmd, sizeof cmd )) {
+		print( FATAL, "Laied to wrte to device\n" );
+		THROW( EXCEPTION );
+	}
+	fsc2_usleep( 200000, UNSET );
+
+	// usbDOut_USB1024LS(hid, DIO_PORTA, 0);
+
+	cmd[ 0 ] = 0;     // report_id always zero
+	cmd[ 0 ] = DOUT;
+	cmd[ 1 ] = DIO_PORTA;
+	cmd[ 2 ] = 0;
+	if (hid_write( hid, cmd, sizeof cmd )) {
+		print( FATAL, "Laied to wrte to device\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push(INT_VAR, 1);
 }
 
 
 
-
-/////////////////////////////////////PREVIOUS CODE///////////////////////////////////////
-/*
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <libusb-1.0/libusb.h>
-#include "hidapi/hidapi.h"
-
-#define MCC_VID         (0x09db)  // Vendor ID for Measurement Computing
-#define USB1024LS_PID  (0x0076)
-#define DIO_PORTA (0x01)
-#define DOUT        (0x01)     // Write digital port
-#define DIO_DIR_OUT (0x00)
-#define DCONFIG     (0x0D)     // Configure digital port
-
-void main (int argc, char **argv)
-{
-  hid_device* hid = 0x0;
- 
-  //Open hid connection and ports
-  hid = hid_open(MCC_VID, USB1024LS_PID, NULL);
-  usleep(100000);
-
-  //Config Ports
-  struct report_t {
-    uint8_t report_id;
-    uint8_t cmd;
-    uint8_t port;
-    uint8_t direction;
-    uint8_t pad[5];
-  } report;
-
-  report.report_id = 0x0;  // always zero
-  report.cmd = DCONFIG;
-  report.port = DIO_PORTA;
-  report.direction = DIO_DIR_OUT;
-
-  hid_write(hid, (uint8_t*) &report, sizeof(report));
-  usleep(100000);
-
-  //Send pulse
-  //usbDOut_USB1024LS(hid, DIO_PORTA, 1);
-  uint8_t cmd[8];
-  
-  cmd[0] = 0;     // report_id always zero
-  cmd[0] = DOUT;
-  cmd[1] = DIO_PORTA;
-  cmd[2] = 1;
-  hid_write(hid, cmd, sizeof(cmd));
-  usleep(200000);
-
-  //usbDOut_USB1024LS(hid, DIO_PORTA, 0);
-  cmd[0] = 0;     // report_id always zero
-  cmd[0] = DOUT;
-  cmd[1] = DIO_PORTA;
-  cmd[2] = 0;
-  hid_write(hid, cmd, sizeof(cmd));
-}
-/////////////////// */
