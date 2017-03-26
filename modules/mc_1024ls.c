@@ -133,11 +133,25 @@ mc_1024ls_end_of_exp_hook( void )
  *---------------------------------------------------------*/
 
 Var_T *
-dio_pulse( Var_T * v  UNUSED_ARG )
+dio_pulse( Var_T * v )
 {
 	uint8_t cmd[ 8 ];
- 
-	/* Nothing to be done during test run */
+    double pd = get_double( v, "pulse duration" );
+
+    /* Check the only (and required) argument, the pulse duration. */
+
+    if ( pd <= 0.0 )
+    {
+        print( FATAL, "Invalid negative or zero pulse duration.\n" );
+        THROW( EXCEPTION );
+    }
+    else if ( pd > 1.0e-6 * ULONG_MAX )
+    {
+        print( FATAL, "Pulse duration too long.\n" );
+        THROW( EXCEPTION );
+    }
+
+	/* Nothing further to be done during test run */
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, 1);
@@ -155,9 +169,10 @@ dio_pulse( Var_T * v  UNUSED_ARG )
 		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
-	fsc2_usleep( 200000, UNSET );
 
-	// ...and switch it off again, thus ending the pulse
+    fsc2_usleep( lrnd( 1.0e6 * pd ), UNSET );
+
+	// ...and off again, thus ending the pulse
 	// usbDOut_USB1024LS(hid, DIO_PORTA, 0 );
 
 	cmd[ 3 ] = 0;
@@ -168,7 +183,9 @@ dio_pulse( Var_T * v  UNUSED_ARG )
 		THROW( EXCEPTION );
 	}
 
-	return vars_push(INT_VAR, 1);
+    /* Return the pulse duration */
+
+    return vars_push( FLOAT_VAR, pd );
 }
 
 

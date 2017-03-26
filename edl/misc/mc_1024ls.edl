@@ -2,4 +2,4 @@ DEVICES:
 mc_1024ls;
 
 EXPERIMENT:
-dio_pulse();
+dio_pulse( 200 ms );
