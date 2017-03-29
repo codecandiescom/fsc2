@@ -242,7 +242,7 @@
 
 
 # The next line must be uncommented when, beside the libusb-1.0
-# library also the 'libhidapi-hidraw.so' library is required, see
+# library also the 'hidapi-libusb.so' library is required, see
 # https://github.com/signal11/hidapi for the sources. Note: if you
 # uncommebt this line but the library isn't properly installed an
 # attempt to build fsc2 will fail! In case the library and the
@@ -250,10 +250,10 @@
 # linker will find  them in automatically you can specify that
 # locations via the following variables.
 
-# WITH_LIBHIDAPI_HIDRAW := yes
+# WITH_LIBHIDAPI_LIBUSB := yes
 
-# libhidapi_hidraw_incl_path   := /usr/local/include
-# libhidapi_hidraw_lib_path    := /usr/lib/local
+# libhidapi_libusb_incl_path   := /usr/local/include
+# libhidapi_libusb_lib_path    := /usr/lib/local
 
 
 # If the following is defined the FFT pseudo-module is created. This
@@ -804,18 +804,18 @@ ifdef WITH_LIBUSB_1_0
 	LIBS      += -lusb-1.0
 	CONFFLAGS += -DWITH_LIBUSB_1_0
 
-# Setting for the libhidapi-hidraw libraray (only in conjunction with
+# Setting for the libhidapi-libusb libraray (only in conjunction with
 # libusb-1.0)
 
-ifdef WITH_LIBHIDAPI_HIDRAW
-	ifdef libhidapi_hidraw_incl_path
-		INCLUDES += -I$(libhidapi_hidraw_incl_path)
+ifdef WITH_LIBHIDAPI_LIBUSB
+	ifdef libhidapi-libusb_incl_path
+		INCLUDES += -I$(libhidapi-libusb_incl_path)
 	endif
-	ifdef libhidapi_hidraw_lib_path
-		LIBS += -L$(libhidapi_hidraw_lib_path)
+	ifdef libhidapi-libusb_lib_path
+		LIBS += -L$(libhidapi-libusb_lib_path)
 	endif
-	LIBS      += -lhidapi-hidraw
-	CONFFLAGS += -DWITH_LIBHIDAPI_HIDRAW
+	LIBS      += -lhidapi-libusb
+	CONFFLAGS += -DWITH_LIBHIDAPI_LIBUSB
 endif
 
 endif

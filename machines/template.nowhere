@@ -219,7 +219,7 @@ LAN_LOG_LEVEL   := HIGH
 
 
 # The next line must be uncommented when, beside the libusb-1.0
-# library also the 'libhidapi-hidraw.so' library is required, see
+# library also the 'libhidapi-libusb.so' library is required, see
 # https://github.com/signal11/hidapi for the sources. Note: if you
 # uncommebt this line but the library isn't properly installed an
 # attempt to build fsc2 will fail! In case the library and the
@@ -227,10 +227,10 @@ LAN_LOG_LEVEL   := HIGH
 # linker will find  them in automatically you can specify that
 # locations via the following variables.
 
-# WITH_LIBHIDAPI_HIDRAW := yes
+# WITH_LIBHIDAPI_LIBUSB := yes
 
-# libhidapi_hidraw_incl_path   := /usr/local/include
-# libhidapi_hidraw_lib_path    := /usr/lib/local
+# libhidapi_libusb_incl_path   := /usr/local/include
+# libhidapi_libusb_lib_path    := /usr/lib/local
 
 
 # If the following is defined the FFT pseudo-module is created. This

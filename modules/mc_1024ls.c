@@ -10,9 +10,8 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#include "fsc2_module.h"
-#include <libusb-1.0/libusb.h>
 #include <hidapi/hidapi.h>
+#include "fsc2_module.h"
 
 
 #define MCC_VID         0x09db   // Vendor ID for Measurement Computing
@@ -92,7 +91,8 @@ mc_1024ls_exp_hook( void )
 	
 	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
 	{
-		print( FATAL, "Failed to open connection to device.\n" );
+		print( FATAL, "Failed to open connection to device %s %d.\n",
+               strerror( errno ), errno );
 		return 0;
     }
 	fsc2_usleep( 100000, UNSET );
