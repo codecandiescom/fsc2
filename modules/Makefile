@@ -153,9 +153,10 @@ endif
 
 # Support for devices controlled via the serial port (or USB-serial converter)
 
-ifndef WITHOUT_SERIAL_PORTS
+ifneq ($(WITHOUT_SERIAL_PORTS),yes)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
-				   $(s_band_list) fsps25 smsmotor ffc spectrapro_275
+				   $(s_band_list) fsps25 smsmotor ffc spectrapro_275    \
+	               thorlabs_fw212c
 comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 \
                    lecroy_wr_s bvt3000
 endif

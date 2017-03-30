@@ -733,6 +733,12 @@ trigger_length, -1, EXP;
 trigger_raise, 0, EXP;
 
 
+/* Filter wheel functions */
+
+filterheel_name, 0, ALL;
+filterwheel_position, -1. EXP;
+
+
 /* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */
 
 opo_name, 0, ALL;
