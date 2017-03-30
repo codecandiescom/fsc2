@@ -241,6 +241,10 @@ x_bmwb
 q_bmwb
 
 
+// Filtr wheels
+
+thorslab_fw212c
+
 // FFT pseudo-module
 
 fft;
