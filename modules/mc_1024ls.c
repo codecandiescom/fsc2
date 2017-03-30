@@ -11,6 +11,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 #include <hidapi/hidapi.h>
+#include <stdint.h>
 #include "fsc2_module.h"
 
 

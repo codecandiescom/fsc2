@@ -120,6 +120,7 @@ keithley2600a   := keithley2600a.c keithley2600a_limits.c keithley2600a_ll.c \
 keithley2612b   := keithley2612b.c keithley2612b_limits.c keithley2612b_ll.c \
                    keithley2612b_source.c keithley2612b_measure.c \
 				   $(vxi11_list) vxi11_user.c
+mc_1024ls       := mc_1024ls.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
@@ -152,10 +153,9 @@ endif
 
 # Support for devices controlled via the serial port (or USB-serial converter)
 
-ifneq ($(WITHOUT_SERIAL_PORTS),yes)
+ifndef WITHOUT_SERIAL_PORTS
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
-				   $(s_band_list) fsps25 smsmotor ffc spectrapro_275    \
-	               thorlabs_fw212c
+				   $(s_band_list) fsps25 smsmotor ffc spectrapro_275
 comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 \
                    lecroy_wr_s bvt3000
 endif
@@ -223,12 +223,11 @@ endif
 ifdef WITH_LIBUSB_0_1
 comp_modules    += oriel_matrix
 endif
-
 ifdef WITH_LIBUSB_1_0
 comp_modules    += oriel_matrix
 
-ifdef WITH_LIBHIDAPI_LIBUSB
-simp_modules    += mc_1024ls
+ifdef WITH_LIBHIDAPI_HIDRAW
+comp_modules    += mc_1024ls
 endif
 
 endif
