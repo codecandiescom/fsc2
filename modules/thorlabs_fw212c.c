@@ -208,6 +208,7 @@ static bool
 thorlabs_fw212c_init( void )
 {
     char buf[ 50 ];
+    long length = sizeof buf;
     char *eptr;
 
 
@@ -217,7 +218,13 @@ thorlabs_fw212c_init( void )
         THROW( EXCEPTION );
     }
 
-    /* Ask for the number of positions and make sure it's not smaller
+    /* Try to read something, the device may have some garbage
+       waiting for us. Doesn't matter if and what gets returned. */
+
+    thorlabs_fw212c_serial_comm( SERIAL_READ, buf,
+                                 &length, READ_TIMEOUT );
+
+	/* Ask for the number of positions and make sure it's not smaller
        than the number of occupied positions specified in the configrarion
        file */
 
