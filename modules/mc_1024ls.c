@@ -90,22 +90,28 @@ mc_1024ls_exp_hook( void )
  
 	// Open hid connection
 	
+    raise_permissions( );
 	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
 	{
+        lower_permissions( );
 		print( FATAL, "Failed to open connection to device %s %d.\n",
                strerror( errno ), errno );
 		return 0;
     }
+    lower_permissions( );
 	fsc2_usleep( 100000, UNSET );
 
 	// Configure ports
 
+    raise_permissions( );
 	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
 					sizeof report ) == -1 )
 	{
+        lower_permissions( );
 		print( FATAL, "Failed to write to device\n" );
 		return 0;
 	}
+    lower_permissions( );
 	fsc2_usleep( 100000, UNSET );
 
     return 1;
@@ -122,7 +128,9 @@ mc_1024ls_end_of_exp_hook( void )
 {
 	if ( mc_1024ls.hid )
 	{
+        raise_permissions( );
 		hid_close( mc_1024ls.hid );
+        lower_permissions( );
 		mc_1024ls.hid = NULL;
 	}
 
@@ -155,34 +163,38 @@ dio_pulse( Var_T * v )
 	/* Nothing further to be done during test run */
 
 	if ( FSC2_MODE == TEST )
-		return vars_push( INT_VAR, 1);
+		return vars_push( FLOAT_VAR, pd );
 
 	// Switch output pin on...
-	// usbDOut_USB1024LS(hid, DIO_PORTA, 1);
   
 	cmd[ 0 ] = 0;       // Report ID is always 0
 	cmd[ 1 ] = DOUT;
 	cmd[ 2 ] = DIO_PORTA;
 	cmd[ 3 ] = 1;
 
+    raise_permissions( );
 	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
 	{
+        lower_permissions( );
 		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
+    lower_permissions( );
 
     fsc2_usleep( lrnd( 1.0e6 * pd ), UNSET );
 
 	// ...and off again, thus ending the pulse
-	// usbDOut_USB1024LS(hid, DIO_PORTA, 0 );
 
 	cmd[ 3 ] = 0;
 	
+    raise_permissions( );
 	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
 	{
+        lower_permissions( );
 		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
+    lower_permissions( );
 
     /* Return the pulse duration */
 
