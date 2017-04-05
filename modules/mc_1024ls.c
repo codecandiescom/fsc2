@@ -201,6 +201,45 @@ dio_pulse( Var_T * v )
     return vars_push( FLOAT_VAR, pd );
 }
 
+Var_T *
+dio_level( Var_T * v )
+{
+    uint8_t cmd[ 8 ];
+    double lvl = get_double( v, "1 level high 0 level low" );
+
+    /* Check if valid value. */
+
+    if ( lvl < 0.0 || lvl > 1.0)
+    {
+        print( FATAL, "Invalid value.\n" );
+        THROW( EXCEPTION );
+    }
+
+	/* Nothing further to be done during test run */
+
+	if ( FSC2_MODE == TEST )
+		return vars_push( INT_VAR, 1);
+
+	// Switch output pin on...
+	// usbDOut_USB1024LS(hid, DIO_PORTA, 1);
+  
+	cmd[ 0 ] = 0;       // Report ID is always 0
+	cmd[ 1 ] = DOUT;
+	cmd[ 2 ] = DIO_PORTA;
+	cmd[ 3 ] = lvl;
+
+	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
+	{
+		print( FATAL, "Failed to write to device\n" );
+		THROW( EXCEPTION );
+	}
+
+    fsc2_usleep( lrnd( 1.0e4 ), UNSET );
+
+    /* Return the pulse duration */
+
+    return vars_push( FLOAT_VAR, 1 );
+}
 
 /*
  * Local variables:
