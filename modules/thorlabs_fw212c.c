@@ -210,6 +210,7 @@ thorlabs_fw212c_init( void )
     char buf[ 50 ];
     long length = sizeof buf;
     char *eptr;
+    ssize_t cnt;
 
 
     if ( ! thorlabs_fw212c_serial_comm( SERIAL_INIT ) )
@@ -217,12 +218,6 @@ thorlabs_fw212c_init( void )
         print( FATAL, "failed to connect to device.\n" );
         THROW( EXCEPTION );
     }
-
-    /* Try to read something, the device may have some garbage
-       waiting for us. Doesn't matter if and what gets returned. */
-
-    thorlabs_fw212c_serial_comm( SERIAL_READ, buf,
-                                 &length, READ_TIMEOUT );
 
 	/* Ask for the number of positions and make sure it's not smaller
        than the number of occupied positions specified in the configrarion
@@ -232,7 +227,7 @@ thorlabs_fw212c_init( void )
     thorlabs_fw212c_talk( buf, buf, sizeof buf, READ_TIMEOUT );
 
     errno = 0;
-    tf->positions = strtol( buf, &eptr, 10 );
+    tf->positions = strtol( buf + cnt, &eptr, 10 );
     if ( eptr == buf || errno || tf->positions < 1 )
     {
         print( FATAL, "device sent invalid reply for number of positions.\n" );
@@ -303,7 +298,7 @@ thorlabs_fw212c_set_position( long pos )
     char buf[ 50 ];
 
 
-    fsc2_assert( pos > 1 && pos <= NUM_OCCUPIED_POSITIONS );
+    fsc2_assert( pos >= 1 && pos <= NUM_OCCUPIED_POSITIONS );
 
     /* Gues how long it should take to reach the new position. With slow
        speed it will tale about 2 seconds per position, with fast speed
@@ -330,6 +325,11 @@ thorlabs_fw212c_set_position( long pos )
  *  for the replY (including a carriage return , '>' and
  * space at the end). The trailing stuff is removed and
  * the returned string is nul-terminated.
+ * Take care: the device echos each command you send
+ * it, so this has to be removed from the reply to
+ * queries! Also keep in mind that the 'reply'
+ * buffer must be large enough for the echoed
+ * command.
  *---------------------------------------------------*/
 
 static
@@ -339,7 +339,12 @@ thorlabs_fw212c_talk( const char * cmd,
                       long         length,
                       long         timeout )
 {
+    size_t cnt = strlen( cmd );
+
     fsc2_assert( length >= 3 );
+
+    if (cmd[ cnt - 2 ] != '?')
+        cnt = 0;
 
     if ( ! thorlabs_fw212c_serial_comm( SERIAL_WRITE, cmd ) )
         thorlabs_fw212c_failure( );
@@ -351,6 +356,9 @@ thorlabs_fw212c_talk( const char * cmd,
         thorlabs_fw212c_failure( );
 
     reply[ length -= 3 ] = '\0';
+
+    if (cnt)
+        memcpy(reply, reply + cnt, length -= cnt);
     return length;
 }
 
@@ -399,11 +407,12 @@ thorlabs_fw212c_serial_comm( int type,
             /* Use 8-N-1, ignore flow control and modem lines, enable
                reading and set the baud rate. */
 
+            memset(tf->tio, 0, sizeof *tf->tio);
             tf->tio->c_cflag = CS8 | CLOCAL | CREAD;
-            tf->tio->c_iflag = IGNBRK;
+            tf->tio->c_iflag = 0; //IGNBRK;
             tf->tio->c_oflag = 0;
             tf->tio->c_lflag = 0;
-
+            
             cfsetispeed( tf->tio, SERIAL_BAUDRATE );
             cfsetospeed( tf->tio, SERIAL_BAUDRATE );
 

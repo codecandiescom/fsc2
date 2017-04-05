@@ -5,3 +5,4 @@ EXPERIMENT:
 print( "Filter wheel position is #\n", filterwheel_position( ) );
 filterwheel_position( 1 );
 filterwheel_position( 2 );
+print( "Filter wheel position is #\n", filterwheel_position( ) );
