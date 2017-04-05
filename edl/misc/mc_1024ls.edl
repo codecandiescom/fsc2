@@ -2,4 +2,4 @@ DEVICES:
 mc_1024ls;
 
 EXPERIMENT:
-dio_level( 0 );
+dio_value( "OFF" );

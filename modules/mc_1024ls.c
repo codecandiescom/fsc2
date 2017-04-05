@@ -42,7 +42,9 @@ int mc_1024ls_end_of_exp_hook( void );
 
 /* EDL functions */
 
+Var_T * dio_name( Var_T * v );
 Var_T * dio_pulse( Var_T * v );
+Var_T * dio_value( Var_T * v );
 
 
 /*-------------------------------------------------------------*
@@ -138,6 +140,17 @@ mc_1024ls_end_of_exp_hook( void )
 }
 
 
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
+
+Var_T *
+dio_name( Var_T * v  UNUSED_ARG )
+{
+    return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
@@ -202,43 +215,37 @@ dio_pulse( Var_T * v )
 }
 
 Var_T *
-dio_level( Var_T * v )
+dio_value( Var_T * v )
 {
     uint8_t cmd[ 8 ];
-    double lvl = get_double( v, "1 level high 0 level low" );
+    bool state = get_boolean( v );
 
-    /* Check if valid value. */
-
-    if ( lvl < 0.0 || lvl > 1.0)
-    {
-        print( FATAL, "Invalid value.\n" );
-        THROW( EXCEPTION );
-    }
-
-	/* Nothing further to be done during test run */
+    too_many_arguments( v );
+    
+	/* Lust retiurn new state during test run */
 
 	if ( FSC2_MODE == TEST )
-		return vars_push( INT_VAR, 1);
+		return vars_push( INT_VAR, ( long int ) state );
 
-	// Switch output pin on...
-	// usbDOut_USB1024LS(hid, DIO_PORTA, 1);
+	/* Switch output pin on or off */
   
-	cmd[ 0 ] = 0;       // Report ID is always 0
+	cmd[ 0 ] = 0;          // Report ID is always 0
 	cmd[ 1 ] = DOUT;
 	cmd[ 2 ] = DIO_PORTA;
-	cmd[ 3 ] = lvl;
+	cmd[ 3 ] = state;
 
+    raise_permissions( );
 	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
 	{
+        lower_permissions( );
 		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
+    lower_permissions( );
 
-    fsc2_usleep( lrnd( 1.0e4 ), UNSET );
+    /* Return the new state */
 
-    /* Return the pulse duration */
-
-    return vars_push( FLOAT_VAR, 1 );
+    return vars_push( FLOAT_VAR, ( long int ) state );
 }
 
 /*
