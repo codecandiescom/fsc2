@@ -736,6 +736,7 @@ trigger_raise, 0, EXP;
 
 filterheel_name, 0, ALL;
 filterwheel_position, -1, EXP;
+filterwheel_speed, -1, EXP;
 
 
 /* Functions exported by the OPTA opo (FU Berlin, AG Bittl) */

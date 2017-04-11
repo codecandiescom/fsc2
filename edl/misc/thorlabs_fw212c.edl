@@ -7,9 +7,13 @@ VARIABLES:
   Position = POSITION;
 === STATE button [ 0:1 ]  "Open shutter (red = open)"
   State = STATE;
+=== SPEED button [ 0:1 ]  "Set speed (red = fast)"
+  Speed = SPEED;
 
 
 EXPERIMENT:
+  filterwheel_speed( Speed );
+  print( "Filter wheel speed is #\n", filterwheel_speed( ) );
   print( "Filter wheel position is #\n", filterwheel_position( ) );
   filterwheel_position( Position );
   print( "Filter wheel position is #\n", filterwheel_position( ) );
