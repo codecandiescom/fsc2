@@ -545,7 +545,6 @@ dio_value, -1, EXP;                    // inputs or ouputs a value
 
 dio_pulse, 1, EXP;
 
-
 /* Functions exported by microwave attenuators */
 
 mw_attenuator_name, 0, ALL;

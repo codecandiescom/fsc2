@@ -1,8 +1,17 @@
 DEVICES:
-thorlabs_fw212c;
+  thorlabs_fw212c;
+  mc_1024ls;
+
+VARIABLES:
+=== POSITION int [ 1:12 ] [ 7 ] "Set position"
+  Position = POSITION;
+=== STATE button [ 0:1 ]  "Open shutter (red = open)"
+  State = STATE;
+
 
 EXPERIMENT:
-print( "Filter wheel position is #\n", filterwheel_position( ) );
-filterwheel_position( 1 );
-filterwheel_position( 2 );
-print( "Filter wheel position is #\n", filterwheel_position( ) );
+  print( "Filter wheel position is #\n", filterwheel_position( ) );
+  filterwheel_position( Position );
+  print( "Filter wheel position is #\n", filterwheel_position( ) );
+  dio_value( State );
+  #EXIT

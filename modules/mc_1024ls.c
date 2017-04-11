@@ -81,14 +81,14 @@ mc_1024ls_test_hook( void )
 int
 mc_1024ls_exp_hook( void )
 {
-	struct
+/*	struct
 	{
 		uint8_t report_id;
 		uint8_t cmd;
 		uint8_t port;
 		uint8_t direction;
 		uint8_t pad[ 5 ];
-	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };
+	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };*/
  
 	// Open hid connection
 	
@@ -105,7 +105,7 @@ mc_1024ls_exp_hook( void )
 
 	// Configure ports
 
-    raise_permissions( );
+/*    raise_permissions( );
 	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
 					sizeof report ) == -1 )
 	{
@@ -114,7 +114,7 @@ mc_1024ls_exp_hook( void )
 		return 0;
 	}
     lower_permissions( );
-	fsc2_usleep( 100000, UNSET );
+	fsc2_usleep( 100000, UNSET );*/
 
     return 1;
 }
@@ -220,6 +220,22 @@ dio_value( Var_T * v )
     uint8_t cmd[ 8 ];
     bool state = get_boolean( v );
 
+
+
+
+
+
+	struct
+	{
+		uint8_t report_id;
+		uint8_t cmd;
+		uint8_t port;
+		uint8_t direction;
+		uint8_t pad[ 5 ];
+	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };
+
+
+
     too_many_arguments( v );
     
 	/* Lust retiurn new state during test run */
@@ -242,6 +258,24 @@ dio_value( Var_T * v )
 		THROW( EXCEPTION );
 	}
     lower_permissions( );
+
+
+
+	// Configure ports
+
+    raise_permissions( );
+	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
+					sizeof report ) == -1 )
+	{
+        lower_permissions( );
+		print( FATAL, "Failed to write to device\n" );
+		return 0;
+	}
+    lower_permissions( );
+	fsc2_usleep( 100000, UNSET );
+
+
+
 
     /* Return the new state */
 

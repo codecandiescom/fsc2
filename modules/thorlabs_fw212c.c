@@ -194,7 +194,7 @@ filterwheel_position( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT && pos != thorlabs_fw212c_get_position( ) )
         pos = thorlabs_fw212c_set_position( pos );
 
     return vars_push( INT_VAR, tf->position = pos );
@@ -373,7 +373,7 @@ static
 void
 thorlabs_fw212c_failure( void )
 {
-    print( FATAL, "Communication with powermeter failed.\n" );
+    print( FATAL, "Communication failed.\n" );
     THROW( EXCEPTION );
 }
 
