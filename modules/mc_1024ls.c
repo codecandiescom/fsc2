@@ -2,9 +2,11 @@
 //2017-01-31
 //FSC2 Module
 
+
 /* Include configuration information for the device */
 
 #include "mc_1024ls.conf"
+
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -42,8 +44,7 @@ int mc_1024ls_end_of_exp_hook( void );
 
 /* EDL functions */
 
-Var_T * dio_name( Var_T * v );
-Var_T * dio_pulse( Var_T * v );
+Var_T * dio_name(  Var_T * v );
 Var_T * dio_value( Var_T * v );
 
 
@@ -81,40 +82,17 @@ mc_1024ls_test_hook( void )
 int
 mc_1024ls_exp_hook( void )
 {
-/*	struct
-	{
-		uint8_t report_id;
-		uint8_t cmd;
-		uint8_t port;
-		uint8_t direction;
-		uint8_t pad[ 5 ];
-	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };*/
- 
-	// Open hid connection
+	/* Open HID connection */
 	
     raise_permissions( );
 	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
 	{
         lower_permissions( );
-		print( FATAL, "Failed to open connection to device %s %d.\n",
-               strerror( errno ), errno );
+		print( FATAL, "Failed to open connection to device.\n" );
 		return 0;
     }
     lower_permissions( );
 	fsc2_usleep( 100000, UNSET );
-
-	// Configure ports
-
-/*    raise_permissions( );
-	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
-					sizeof report ) == -1 )
-	{
-        lower_permissions( );
-		print( FATAL, "Failed to write to device\n" );
-		return 0;
-	}
-    lower_permissions( );
-	fsc2_usleep( 100000, UNSET );*/
 
     return 1;
 }
@@ -155,131 +133,41 @@ dio_name( Var_T * v  UNUSED_ARG )
  *---------------------------------------------------------*/
 
 Var_T *
-dio_pulse( Var_T * v )
-{
-	uint8_t cmd[ 8 ];
-    double pd = get_double( v, "pulse duration" );
-
-    /* Check the only (and required) argument, the pulse duration. */
-
-    if ( pd <= 0.0 )
-    {
-        print( FATAL, "Invalid negative or zero pulse duration.\n" );
-        THROW( EXCEPTION );
-    }
-    else if ( pd > 1.0e-6 * ULONG_MAX )
-    {
-        print( FATAL, "Pulse duration too long.\n" );
-        THROW( EXCEPTION );
-    }
-
-	/* Nothing further to be done during test run */
-
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, pd );
-
-	// Switch output pin on...
-  
-	cmd[ 0 ] = 0;       // Report ID is always 0
-	cmd[ 1 ] = DOUT;
-	cmd[ 2 ] = DIO_PORTA;
-	cmd[ 3 ] = 1;
-
-    raise_permissions( );
-	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
-	{
-        lower_permissions( );
-		print( FATAL, "Failed to write to device\n" );
-		THROW( EXCEPTION );
-	}
-    lower_permissions( );
-
-    fsc2_usleep( lrnd( 1.0e6 * pd ), UNSET );
-
-	// ...and off again, thus ending the pulse
-
-	cmd[ 3 ] = 0;
-	
-    raise_permissions( );
-	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
-	{
-        lower_permissions( );
-		print( FATAL, "Failed to write to device\n" );
-		THROW( EXCEPTION );
-	}
-    lower_permissions( );
-
-    /* Return the pulse duration */
-
-    return vars_push( FLOAT_VAR, pd );
-}
-
-Var_T *
 dio_value( Var_T * v )
 {
-    uint8_t cmd[ 8 ];
+    uint8_t set_cmd[ ] = { 0, DOUT,    DIO_PORTA, 0,           0, 0, 0, 0, 0 };
+    uint8_t cfg_cmd[ ] = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, 0, 0, 0, 0, 0 };
     bool state = get_boolean( v );
-
-
-
-
-
-
-	struct
-	{
-		uint8_t report_id;
-		uint8_t cmd;
-		uint8_t port;
-		uint8_t direction;
-		uint8_t pad[ 5 ];
-	} report = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, { 0, 0, 0, 0, 0 } };
-
-
 
     too_many_arguments( v );
     
-	/* Lust retiurn new state during test run */
+	/* Just return the requested new state during test run */
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, ( long int ) state );
 
-	/* Switch output pin on or off */
+	/* Set-up command to switch output pin on or off */
   
-	cmd[ 0 ] = 0;          // Report ID is always 0
-	cmd[ 1 ] = DOUT;
-	cmd[ 2 ] = DIO_PORTA;
-	cmd[ 3 ] = state;
+	set_cmd[ 3 ] = state;
+
+    /* Set the port state and configure it as an output (this is done
+       only afterwards since otherwise the output ay shortly be some-
+       thing we didn't intend it to be!) */
 
     raise_permissions( );
-	if ( hid_write( mc_1024ls.hid, cmd, sizeof cmd ) == -1 )
+	if (    hid_write( mc_1024ls.hid, set_cmd, sizeof set_cmd ) == -1
+         || hid_write( mc_1024ls.hid, cfg_cmd, sizeof cfg_cmd ) == -1 )
 	{
         lower_permissions( );
 		print( FATAL, "Failed to write to device\n" );
 		THROW( EXCEPTION );
 	}
     lower_permissions( );
-
-
-
-	// Configure ports
-
-    raise_permissions( );
-	if ( hid_write( mc_1024ls.hid, ( const unsigned char * ) &report,
-					sizeof report ) == -1 )
-	{
-        lower_permissions( );
-		print( FATAL, "Failed to write to device\n" );
-		return 0;
-	}
-    lower_permissions( );
 	fsc2_usleep( 100000, UNSET );
-
-
-
 
     /* Return the new state */
 
-    return vars_push( FLOAT_VAR, ( long int ) state );
+    return vars_push( INT_VAR, ( long int ) state );
 }
 
 /*

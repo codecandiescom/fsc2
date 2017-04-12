@@ -543,7 +543,6 @@ dio_reserve_dio, -1, ALL;              // get a lock on one of the DIOs
 dio_mode, -1, ALL;                     // sets the DIO mode
 dio_value, -1, EXP;                    // inputs or ouputs a value
 
-dio_pulse, 1, EXP;
 
 /* Functions exported by microwave attenuators */
 

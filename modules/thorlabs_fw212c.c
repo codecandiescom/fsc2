@@ -19,10 +19,15 @@
 
 
 #include "fsc2_module.h"
-#include "thorlabs_fw212c.conf"
 #include <sys/time.h>
 #include <float.h>
 #include "serial.h"
+
+#include "thorlabs_fw212c.conf"
+
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
+
 
 enum {
     SERIAL_INIT,
@@ -31,8 +36,6 @@ enum {
     SERIAL_EXIT
 };
 
-static bool thorlabs_fw212c_serial_comm( int type,
-                                         ... );
 
 /* Hook functions */
 
@@ -47,29 +50,21 @@ int thorlabs_fw212c_end_of_exp_hook( void );
 
 Var_T * filterwheel_name( Var_T * v  UNUSED_ARG );
 Var_T * filterwheel_position( Var_T * v );
-Var_T * filterwheel_speed( Var_T * v );
 
 /* Internal functions */
 
 static bool thorlabs_fw212c_init( void );
-static long thorlabs_fw212c_get_speed( void );
 static long thorlabs_fw212c_get_position( void );
-static long thorlabs_fw212c_set_speed( long speed );
 static long thorlabs_fw212c_set_position( long position );
 static long thorlabs_fw212c_talk( const char * cmd,
                                   char       * reply,
                                   long         length,
                                   long         timeout );
 static void thorlabs_fw212c_failure( void );
-
+static bool thorlabs_fw212c_serial_comm( int type,
+                                         ... );
 
 /* Global variables */
-
-const char device_name[ ]  = DEVICE_NAME;
-const char generic_type[ ] = DEVICE_TYPE;
-
-
-#define TEST_POSITION 0
 
 typedef struct
 {
@@ -88,6 +83,9 @@ static ThorLabs_FW212C * tf;
 
 /* Defines */
 
+#define TEST_POSITION 0
+
+
 /*---------------------------------------------------*
  * Init hook, called when the module is loaded
  *---------------------------------------------------*/
@@ -97,13 +95,7 @@ thorlabs_fw212c_init_hook( void )
 {
     tf = &thorlabs_fw212c;
 
-    /* If communication is via USB request the necessary serial port (throws
-       exception on failure), for communication via LAN set global variable
-       to indicate that the device is controlled via LAN */
-
     tf->handle = fsc2_request_serial_port( DEVICE_FILE, DEVICE_NAME );
-
-
     tf->position = TEST_POSITION;
 
     return 1;
@@ -172,29 +164,8 @@ filterwheel_name( Var_T * v  UNUSED_ARG )
 
 
 /*-------------------------------------------------------*
- * Sets a new scale (note: this switches autoscaling off)
+ * Sets a new position
  *-------------------------------------------------------*/
-
-Var_T *
-filterwheel_speed( Var_T * v )
-{
-    if ( ! v )
-    {
-        if ( FSC2_MODE == PREPARATION )
-            no_query_possible( );
-
-        if ( FSC2_MODE == EXPERIMENT )
-            tf->speed = thorlabs_fw212c_get_speed( );
-        return vars_push( INT_VAR, tf->speed );
-    }
-
-    long spd = get_strict_long( v, "filterwheel speed" );
-    if ( FSC2_MODE == EXPERIMENT && spd != thorlabs_fw212c_get_speed( ) )
-        spd = thorlabs_fw212c_set_speed( spd );
-
-    return vars_push( INT_VAR, tf->speed = spd );
-}
-
 
 Var_T *
 filterwheel_position( Var_T * v )
@@ -218,7 +189,7 @@ filterwheel_position( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT && pos != thorlabs_fw212c_get_position( ) )
+    if ( FSC2_MODE == EXPERIMENT )
         pos = thorlabs_fw212c_set_position( pos );
 
     return vars_push( INT_VAR, tf->position = pos );
@@ -232,9 +203,7 @@ static bool
 thorlabs_fw212c_init( void )
 {
     char buf[ 50 ];
-    long length = sizeof buf;
     char *eptr;
-    ssize_t cnt;
 
 
     if ( ! thorlabs_fw212c_serial_comm( SERIAL_INIT ) )
@@ -251,7 +220,7 @@ thorlabs_fw212c_init( void )
     thorlabs_fw212c_talk( buf, buf, sizeof buf, READ_TIMEOUT );
 
     errno = 0;
-    tf->positions = strtol( buf + cnt, &eptr, 10 );
+    tf->positions = strtol( buf, &eptr, 10 );
     if ( eptr == buf || errno || tf->positions < 1 )
     {
         print( FATAL, "device sent invalid reply for number of positions.\n" );
@@ -340,41 +309,7 @@ thorlabs_fw212c_set_position( long pos )
 
     return pos;
 }
-
-
- /*---------------------------------------------------*
- *---------------------------------------------------*/
-static long
-thorlabs_fw212c_get_speed(void)
-{
-    char buf[ 50 ] = "speed?\r";
-    char *eptr;
-    long spd;
-
-    thorlabs_fw212c_talk(buf, buf, sizeof buf, READ_TIMEOUT );
-
-    errno = 0;
-    spd = strtol( buf, &eptr, 10 );
-    if (    eptr == buf || errno
-         || spd < 0 || spd > 1 )
-    {
-        print( FATAL, "device sent invalid reply for position.\n" );
-        THROW( EXCEPTION );
-    }
-
-    return spd;
-}
-
-static long
-thorlabs_fw212c_set_speed( long spd )
-{
-    char buf[ 50 ];
-
-    sprintf( buf, "speed=%ld\r", spd );
-    thorlabs_fw212c_talk( buf, buf, sizeof buf, READ_TIMEOUT );
-
-    return spd;
-}        
+                         
 
 
 /*---------------------------------------------------*
@@ -431,7 +366,7 @@ static
 void
 thorlabs_fw212c_failure( void )
 {
-    print( FATAL, "Communication failed.\n" );
+    print( FATAL, "Communication with powermeter failed.\n" );
     THROW( EXCEPTION );
 }
 

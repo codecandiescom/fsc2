@@ -18,4 +18,3 @@ EXPERIMENT:
   filterwheel_position( Position );
   print( "Filter wheel position is #\n", filterwheel_position( ) );
   dio_value( State );
-  #EXIT
