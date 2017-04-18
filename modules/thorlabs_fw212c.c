@@ -50,12 +50,15 @@ int thorlabs_fw212c_end_of_exp_hook( void );
 
 Var_T * filterwheel_name( Var_T * v  UNUSED_ARG );
 Var_T * filterwheel_position( Var_T * v );
+Var_T * filterwheel_speed( Var_T * v );
 
 /* Internal functions */
 
 static bool thorlabs_fw212c_init( void );
 static long thorlabs_fw212c_get_position( void );
 static long thorlabs_fw212c_set_position( long position );
+static long thorlabs_fw212c_get_speed( void );
+static long thorlabs_fw212c_set_speed( long spd );
 static long thorlabs_fw212c_talk( const char * cmd,
                                   char       * reply,
                                   long         length,
@@ -196,6 +199,37 @@ filterwheel_position( Var_T * v )
 }
 
 
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
+
+Var_T *
+filterwheel_speed( Var_T * v )
+{
+    if ( ! v )
+    {
+        if ( FSC2_MODE == PREPARATION )
+            no_query_possible( );
+
+        if ( FSC2_MODE == EXPERIMENT )
+            tf->speed = thorlabs_fw212c_get_speed( );
+        return vars_push( INT_VAR, tf->speed );
+    }
+
+    long spd = get_strict_long( v, "filterwheel speed" );
+    if (spd != 0 && spd != 1)
+    {
+        print( FATAL, "Invalid filterwheel speed, only 0 or 1 are "
+                         "allowed\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT && spd != thorlabs_fw212c_get_speed( ) )
+        spd = thorlabs_fw212c_set_speed( spd );
+
+    return vars_push( INT_VAR, tf->speed = spd );
+}
+
+
 /*---------------------------------------------------*
  *---------------------------------------------------*/
 
@@ -310,6 +344,43 @@ thorlabs_fw212c_set_position( long pos )
     return pos;
 }
                          
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static long
+thorlabs_fw212c_get_speed(void)
+{
+    char buf[ 50 ] = "speed?\r";
+    char *eptr;
+    long spd;
+
+    thorlabs_fw212c_talk(buf, buf, sizeof buf, READ_TIMEOUT );
+
+    spd = strtol( buf, &eptr, 10 );
+    if (    eptr == buf || errno || spd < 0 || spd > 1 )
+    {
+        print( FATAL, "device sent invalid reply for position.\n" );
+        THROW( EXCEPTION );
+    }
+
+    return spd;
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static long
+thorlabs_fw212c_set_speed( long spd )
+{
+    char buf[ 50 ];
+
+    sprintf( buf, "speed=%ld\r", spd );
+    thorlabs_fw212c_talk( buf, buf, sizeof buf, READ_TIMEOUT );
+
+    return spd;
+}
 
 
 /*---------------------------------------------------*
