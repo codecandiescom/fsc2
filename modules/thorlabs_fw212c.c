@@ -192,7 +192,7 @@ filterwheel_position( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT &&  thorlabs_fw212c_get_position() != pos)
         pos = thorlabs_fw212c_set_position( pos );
 
     return vars_push( INT_VAR, tf->position = pos );
@@ -246,7 +246,7 @@ thorlabs_fw212c_init( void )
         THROW( EXCEPTION );
     }
 
-	/* Ask for the number of positions and make sure it's not smaller
+    /* Ask for the number of positions and make sure it's not smaller
        than the number of occupied positions specified in the configrarion
        file */
 
@@ -343,7 +343,7 @@ thorlabs_fw212c_set_position( long pos )
 
     return pos;
 }
-                         
+                        
 
 /*---------------------------------------------------*
  *---------------------------------------------------*/
@@ -357,10 +357,11 @@ thorlabs_fw212c_get_speed(void)
 
     thorlabs_fw212c_talk(buf, buf, sizeof buf, READ_TIMEOUT );
 
+    errno = 0;
     spd = strtol( buf, &eptr, 10 );
     if (    eptr == buf || errno || spd < 0 || spd > 1 )
     {
-        print( FATAL, "device sent invalid reply for position.\n" );
+        print( FATAL, "device sent invalid reply for speed.\n" );
         THROW( EXCEPTION );
     }
 
@@ -476,7 +477,7 @@ thorlabs_fw212c_serial_comm( int type,
             tf->tio->c_iflag = 0; //IGNBRK;
             tf->tio->c_oflag = 0;
             tf->tio->c_lflag = 0;
-            
+           
             cfsetispeed( tf->tio, SERIAL_BAUDRATE );
             cfsetospeed( tf->tio, SERIAL_BAUDRATE );
 
