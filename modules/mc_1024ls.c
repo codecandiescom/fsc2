@@ -85,14 +85,16 @@ mc_1024ls_exp_hook( void )
 	/* Open HID connection */
 	
     raise_permissions( );
-	if ( ! ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
+    if ( NULL ==  ( mc_1024ls.hid = hid_open( MCC_VID, USB1024LS_PID, NULL ) ) )
 	{
-        lower_permissions( );
+                fsc2_usleep( 100000, UNSET );
+		lower_permissions( );
 		print( FATAL, "Failed to open connection to device.\n" );
 		return 0;
-    }
+	}
+
+    fsc2_usleep( 100000, UNSET );
     lower_permissions( );
-	fsc2_usleep( 100000, UNSET );
 
     return 1;
 }
@@ -135,7 +137,7 @@ dio_name( Var_T * v  UNUSED_ARG )
 Var_T *
 dio_value( Var_T * v )
 {
-    uint8_t set_cmd[ ] = { 0, DOUT,    DIO_PORTA, 0,           0, 0, 0, 0, 0 };
+    //uint8_t set_cmd[ ] = { 0, DOUT,    DIO_PORTA, 0,           0, 0, 0, 0, 0 };
     uint8_t cfg_cmd[ ] = { 0, DCONFIG, DIO_PORTA, DIO_DIR_OUT, 0, 0, 0, 0, 0 };
     bool state = get_boolean( v );
 
@@ -148,22 +150,27 @@ dio_value( Var_T * v )
 
 	/* Set-up command to switch output pin on or off */
   
-	set_cmd[ 3 ] = state;
+	//set_cmd[ 3 ] = state;
+	cfg_cmd[ 3 ] = state;
 
     /* Set the port state and configure it as an output (this is done
        only afterwards since otherwise the output ay shortly be some-
        thing we didn't intend it to be!) */
 
     raise_permissions( );
-	if (    hid_write( mc_1024ls.hid, set_cmd, sizeof set_cmd ) == -1
-         || hid_write( mc_1024ls.hid, cfg_cmd, sizeof cfg_cmd ) == -1 )
+	if ( hid_write( mc_1024ls.hid, cfg_cmd, sizeof cfg_cmd ) == -1 )
 	{
-        lower_permissions( );
-		print( FATAL, "Failed to write to device\n" );
+		print( FATAL, "Failed to write/configure the device\n" );
 		THROW( EXCEPTION );
 	}
-    lower_permissions( );
-	fsc2_usleep( 100000, UNSET );
+        fsc2_usleep( 100000, UNSET );
+        /*if (    hid_write( mc_1024ls.hid, set_cmd, sizeof set_cmd ) == -1 )
+	{
+		print( FATAL, "Failed to set the ports\n" );
+		THROW( EXCEPTION );
+	}		
+        fsc2_usleep( 100000, UNSET );	*/
+        lower_permissions( );
 
     /* Return the new state */
 
