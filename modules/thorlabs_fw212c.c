@@ -20,7 +20,7 @@
 
 #include "fsc2_module.h"
 #include <sys/time.h>
-#include <float.h>
+//#include <float.h>
 #include "serial.h"
 
 #include "thorlabs_fw212c.conf"
@@ -75,7 +75,7 @@ typedef struct
     long             position;
     long             positions;
     int              speed;
-    struct termios * tio;        /* serial port terminal interface structure */
+    struct termios * tio;
 } ThorLabs_FW212C;
 
 
@@ -114,6 +114,7 @@ thorlabs_fw212c_test_hook( void )
 {
     thorlabs_fw212c_test = thorlabs_fw212c;
     tf = &thorlabs_fw212c_test;
+    tf->position = TEST_POSITION;
 
     return 1;
 }
@@ -192,7 +193,7 @@ filterwheel_position( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT &&  thorlabs_fw212c_get_position() != pos)
+    if ( FSC2_MODE == EXPERIMENT && thorlabs_fw212c_get_position() != pos)
         pos = thorlabs_fw212c_set_position( pos );
 
     return vars_push( INT_VAR, tf->position = pos );
@@ -218,8 +219,7 @@ filterwheel_speed( Var_T * v )
     long spd = get_strict_long( v, "filterwheel speed" );
     if (spd != 0 && spd != 1)
     {
-        print( FATAL, "Invalid filterwheel speed, only 0 or 1 are "
-                         "allowed\n" );
+        print( FATAL, "Invalid filterwheel speed, only 0 or 1 are allowed\n" );
         THROW( EXCEPTION );
     }
 
@@ -274,14 +274,13 @@ thorlabs_fw212c_init( void )
     strcpy( buf, "speed?\r" );
     thorlabs_fw212c_talk( buf, buf, sizeof buf, READ_TIMEOUT );
 
-    errno = 0;
     if ( buf[ 0 ] != '0' && buf[ 0 ] != '1' )
     {
         print( FATAL, "device sent invalid reply for speed.\n" );
         THROW( EXCEPTION );
     }
 
-    tf->speed = buf[ 0 ] = 1;
+    tf->speed = buf[ 0 ];
 
     /* Get the current position */
 
@@ -305,8 +304,10 @@ thorlabs_fw212c_get_position(void)
 
     errno = 0;
     pos = strtol( buf, &eptr, 10 );
-    if (    eptr == buf || errno
-         || pos < 1 || pos > tf->positions )
+    if (    eptr == buf
+         || errno
+         || pos < 1
+         || pos > tf->positions )
     {
         print( FATAL, "device sent invalid reply for position.\n" );
         THROW( EXCEPTION );
@@ -327,8 +328,8 @@ thorlabs_fw212c_set_position( long pos )
 
     fsc2_assert( pos >= 1 && pos <= NUM_OCCUPIED_POSITIONS );
 
-    /* Gues how long it should take to reach the new position. With slow
-       speed it will tale about 2 seconds per position, with fast speed
+    /* Guess how long it will take to reach the new position. With slow
+       speed it takes about 2 seconds per position, with fast speed
        about 1 s. The device automatically picks the shortest direction.
        Add a factor of 2 to be on the safe side. */
 
@@ -387,8 +388,8 @@ thorlabs_fw212c_set_speed( long spd )
 /*---------------------------------------------------*
  * Sends a single string to the device and then reads
  * in the device's reply. The input buffer must have room
- *  for the replY (including a carriage return , '>' and
- * space at the end). The trailing stuff is removed and
+ *  for the reply (including a carriage return , '>' and
+ * a space at the end). The trailing stuff is removed and
  * the returned string is nul-terminated.
  * Take care: the device echos each command you send
  * it, so this has to be removed from the reply to

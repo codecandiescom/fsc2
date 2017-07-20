@@ -3034,7 +3034,7 @@ Fortunatley, there's a simple way to take care of this problem: all
 you need to do is qualify the variables as @code{volatile}. If it's
 a normal variable use e.g.@:
 @example
-int volatile int i = 0;
+int volatile i = 0;
 @end example
 @noindent
 and if it's a pointer use

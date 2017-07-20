@@ -1258,7 +1258,7 @@ oriel_cs_260_set_zero( int    grating,
 
 
 /*--------------------------------*
- * Returns the eaveength the monocromator is currently set to,
+ * Returns the wavelength the monocromator is currently set to,
  * repeating the command on communication errors
  *--------------------------------*/
 
@@ -1267,7 +1267,7 @@ double
 oriel_cs_260_get_wavelength_safe( void )
 {
     double wl;
-    int retries = MAX_RETRIES;
+    volatile int retries = MAX_RETRIES;
 
     do
     {
@@ -1366,7 +1366,7 @@ long int
 oriel_cs_260_get_position_safe( void )
 {
     long int pos;
-    int retries = MAX_RETRIES;
+    volatile int retries = MAX_RETRIES;
 
     do
     {
