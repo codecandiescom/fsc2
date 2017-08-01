@@ -78,12 +78,12 @@ int
 fsc2_request_serial_port( const char * dev_file,
                           const char * dev_name )
 {
-    /* Check that the device name is reasonable */
+    /* Check that the device name and file are reasonable */
 
-    if ( dev_name == NULL || *dev_name == '\0' )
+    if ( ! dev_name || ! *dev_name || ! dev_file || ! *dev_file )
     {
-        eprint( FATAL, false, "Invalid 'dev_name' argument in call "
-                "of function fsc2_request_serial_port()\n" );
+        eprint( FATAL, false, "Invalid argument(s) in call of %s()\n",
+                __func__ );
 		THROW( EXCEPTION );
     }
 
@@ -146,22 +146,16 @@ fsc2_request_serial_port( const char * dev_file,
 
     if ( S_ISLNK( stat_buf.st_mode ) )
     {
-        size_t pathmax = get_pathmax( );
-        ssize_t length;
+        real_name = T_malloc( get_pathmax( ) + 1 );
 
-        /* We need memory for the name of the file the link points to */
-
-        real_name = T_malloc( pathmax + 1 );
-        if (    ( length = readlink( dev_file, real_name, pathmax + 1 ) ) < 0
-             || ( size_t ) length > pathmax )
+        if ( ! realpath( dev_file, real_name ) )
         {
-            eprint( FATAL, false, "%s: Can't follow symbolic link for "
-                    "serial port device file '%s'.\n", dev_name, dev_file );
+            eprint( FATAL, false, "%s: Failed to etermine absolute path for "
+                    "symbolic link to serial port device file '%s'.\n",
+                    dev_name, dev_file );
             T_free( real_name );
             THROW( EXCEPTION );
         }
-
-        real_name[ length ] = '\0';
 
         TRY
         {
