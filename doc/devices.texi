@@ -23,6 +23,7 @@
 
 @menu
 * Overview::            
+* Device configurations::
 * Using two (or more) devices of the same type::
 * Handling of several instances of fsc2::
 * Magnet Functions::
@@ -53,18 +54,19 @@
 @end ifnottex
 
 
-@node Overview, Using two (or more) devices of the same type, Device Functions, Device Functions
+@node Overview, Device configurations, Device Functions, Device Functions
 @section Overview
 
 
 The simple-minded approach to dealing with device-specific functions
-would be to have a set of functions for each individual device, all with
-different names. Then one would have a different function for e.g.@:
-fetching data from each of a series of different digitizing
-oscilloscopes. But this would become a nuisance whenever an oscilloscope
-has to be changed in the experimental setup - one would have to
-carefully check all function calls in the @code{EDL} scripts and adjust
-the names of the functions to fit the new digitizer.
+would be to have a set of functions for each individual device, all
+with different names. Then one would have a different function for
+e.g.@: fetching data from each of a series of different digitizing
+oscilloscopes. But this would become a nuisance since whenever an
+oscilloscope has to be changed in the experimental setupffff72 one
+would have to carefully check all function calls in the @code{EDL}
+scripts and adjust the names of the functions to fit the new
+digitizer.
 
 So it's more useful to have generic functions for similar devices
 that have a lot in common. It's much more convenient just to write
@@ -77,24 +79,96 @@ instead of
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
 @noindent
-and then changing dozens of references to the TDS754A oscilloscope in
+and then change dozens of references to the TDS754A oscilloscope in
 each and every @code{EDL} script when someone else needs your
-oscilloscope for a few days and you have to use a LeCroy9450
+oscilloscope for a few days and you have to do with a LeCroy9450
 oscilloscope in between.
 
 Of course, using generic functions is not the silver bullet for all
-problems - if e.g.@: the new lock-in amplifier has only a single channel
-while the previously used one had two no abstraction will make the new
-lock-in have two channels. This means that while a lot of abstraction
-is possible not all device functions can be completely identical for
-all devices of the same type. Thus, while the names of the functions
-remain identical, the arguments the functions are called with sometimes
-may differ for different devices. But while this can be annoyingly
-enough it at least reduces the amount of changes to be done to an
+problems - if e.g.@: the new lock-in amplifier has only a single
+channel while the previously used one had two no abstraction will make
+the new lock-in have two channels. This means that while a lot of
+abstraction is possible not all device functions can be completely
+identical for all devices of the same type. Thus, while the names of
+the functions remain identical, the arguments the functions are called
+with sometimes may differ for different devices. But while this can be
+annoying it at least reduces the amount of changes to be done to an
 @code{EDL} script considerably.
 
 
-@node Using two (or more) devices of the same type, Handling of several instances of fsc2, Overview, Device Functions
+@node Device configurations, Using two (or more) devices of the same type, Overview, Device Functions
+
+For each device a configuration file exists in the @file{config}
+directory (with the same name as the device and an extension of
+@code{.conf}. The contents of these files are C code as it is
+found in header files. And these files actually get included as
+a header file when the module for a device is compiled.
+
+The minimum such a configuration file should contain is two
+@code{#define}s, one for the the device name and one for the
+device type. So the simplest possible configuration file for
+e.g.@: a lock-in amplifier might be
+@example
+#define DEVICE_NAME  "SR510"
+#define DEVICE_TYPE  "lock-in amplifier"
+@end example
+
+The device name is used in all messages output by @code{fsc2} for
+this device and thus should make immediately clear what this
+device is. It also may represent the name of the device in the
+GPIB configuration file.
+
+The device type describes, as the name indicates, the the type of
+the device. Examples are "lock-in amplifier", "digitizer", "magnet
+power supply" etc. This is an important information since it is
+used when looking up functions that may be available for a device
+and to determine if there is more than a single device of the
+same type. Thus it should be a type name that is identical to
+that of the same type.
+
+Besides these @code{#define}s all kinds of further information
+relevant for the device may be found. This might be IP addresses
+for devices connected via the LAN, or the names of a device file
+the device can be accessed through.
+
+The later is typically found in configuration files for devices
+that are connected via a aserial port or via USB, when the USB
+interface is actually just a USB-to-serial converter. For devices
+connected via a serial port you may find an entry like
+@example
+#define DEVICE_FILE "/dev/ttyS0"
+@end example
+@noindent
+while for a device with a USB-to-serial converter
+@example
+#define DEVICE_FILE "/dev/ttyUSB0"
+@end example
+@noindent
+While devices connected to a serial port typically aren't
+unplugged and replugged the situation is different for devices
+connected via USB. And then the device file that gets used for
+the device depends on the order the devices got connected!
+
+Thus having a device file like @file{/dev/ttyUSB0} hard-coded into the
+module can be rather annoying if you have more than one of them since
+it only will work if such devices got plugged in the "correct" order.
+To get around this problem it's preferable to have a device file name
+that reflects what the device actually is instead. Luckily, there are
+such device files in the directory @file{/dev/serial/by-id}. The files
+in there have names made up from the manufacturer, product and serial
+number strings the kernel requests when a device gets plugged in. And
+these aren't "real" files but symbolic links to the device files the
+device can be controlled by. If a devices get unplugged and replugged
+these links are automatically updated to reflect the new situation.
+And @code{fsc2} has no problem dealing with these symbolic links, so
+they can be used in the configuration file for a device. E.g.@: for
+the Gentec Maestro energy meter you may find in its configuration file
+@example
+#define DEVICE_FILE "/dev/serial/by-id/usb-Gentec-eo_Maestro_A7WLGZEY-if00-port0"
+@end example
+
+
+@node Using two (or more) devices of the same type, Handling of several instances of fsc2, Device configurations, Device Functions
 @section Using two (or more) devices of the same type
 @cindex Using two (or more) devices of the same type
 
