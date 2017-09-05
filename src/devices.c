@@ -84,9 +84,9 @@ device_add( const char * name )
         if (    ! strcmp( cd->name, dev_name )
              || ( real_name && ! strcmp( cd->name, real_name ) ) )
         {
-        if ( search_name == NULL )
-            print( FATAL, "Device '%s' is listed twice in the DEVICES "
-                   "section.\n", dev_name);
+            if ( search_name == NULL )
+                print( FATAL, "Device '%s' is listed twice in the DEVICES "
+                       "section.\n", dev_name);
             print( FATAL, "Device '%s' is listed twice in the DEVICES "
                    "section, possibly also using the name '%s'.\n",
                    dev_name, search_name );

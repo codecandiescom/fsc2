@@ -48,6 +48,15 @@ Var_T * dio_name(  Var_T * v );
 Var_T * dio_value( Var_T * v );
 
 
+int
+mc_1024ls_init_hook( void )
+{
+    Need_USB = SET;
+
+    return 1;
+}
+
+
 /*------------------------------------------------------------*
  * Hook function run at the start of the experiment. Needs to
  * initialize communication with the device and set it up.

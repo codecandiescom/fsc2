@@ -277,7 +277,7 @@ vars_free( Var_T * v,
         case STR_VAR :
             if ( v->val.sptr )
                 v->val.sptr = T_free( v->val.sptr );
-                break;
+            break;
 
         case INT_REF : case FLOAT_REF :
             if ( v->len == 0 )

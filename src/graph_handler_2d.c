@@ -430,8 +430,8 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                     break;
 
                 case DRAG_2D_Y :                       /* in y-axis window */
-                if ( ( scale_changed = zoom_y_2d( c ) ) )
-                    redraw_canvas_2d( &G_2d.y_axis );
+                    if ( ( scale_changed = zoom_y_2d( c ) ) )
+                        redraw_canvas_2d( &G_2d.y_axis );
                     break;
 
                 case DRAG_2D_Z :                       /* in z-axis window */

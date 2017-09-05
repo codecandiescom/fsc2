@@ -212,10 +212,7 @@ gpib_init_device( const char * name,
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
 
 	reply[ len ] = '\0';
-    if ( extract_int( reply, '\n', dev ) || *dev < 0 )
-        return FAILURE;
-
-	return SUCCESS;
+    return  ( extract_int( reply, '\n', dev ) || *dev < 0 ) ? FAILURE : SUCCESS;
 }
 
 

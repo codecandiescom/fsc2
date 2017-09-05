@@ -37,6 +37,9 @@
 #include <usb.h>
 #elif defined WITH_LIBUSB_1_0
 #include <libusb-1.0/libusb.h>
+#if defined WITH_LIBHIDAPI_LIBUSB
+#include <hidapi/hidapi.h>
+#endif
 #endif
 
 
@@ -302,10 +305,23 @@ start_comm_libs( void )
             eprint( FATAL, false, "Failed to initialize USB.\n" );
             goto libusb_fail;
         }
+
+//#if defined WITH_LIBHIDAPI_LIBUSB
+//        if (hid_init( ))
+//        {
+//            lower_permissions( );
+//            fsc2_release_uucp_lock( "libusb" );
+//            eprint( FATAL, false, "Failed to initialize HIDAPI.\n" );
+//            goto libusb_fail;
+//        }
+//#endif
+
 #endif
 
         lower_permissions( );
     }
+
+
 #endif
 
 #if ! defined WITHOUT_SERIAL_PORTS
@@ -359,6 +375,11 @@ start_comm_libs( void )
     if ( Need_USB )
     {
 #if defined WITH_LIBUSB_1_0
+        
+//#if defined WITH_LIBHIDAPI_LIBUSB
+//        hid_exit( );
+//#endif
+
         libusb_exit( NULL );
 #endif
         fsc2_release_uucp_lock( "libusb" );
@@ -461,6 +482,10 @@ no_prog_to_run( void )
 #if defined WITH_LIBUSB_1_0
     if ( Need_USB )
     {
+//#if defined WITH_LIBHIDAPI_LIBUSB
+//        hid_exit( );
+//#endif
+
         libusb_exit( NULL );
         fsc2_release_uucp_lock( "libusb" );
     }

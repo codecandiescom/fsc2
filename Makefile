@@ -795,6 +795,7 @@ ifdef WITH_LIBUSB_0_1
 endif
 
 ifdef WITH_LIBUSB_1_0
+
 	ifdef libusb_incl_path
 		INCLUDES += -I$(libusb_incl_path)
 	endif
@@ -807,16 +808,16 @@ ifdef WITH_LIBUSB_1_0
 # Setting for the libhidapi-libusb libraray (only in conjunction with
 # libusb-1.0)
 
-ifdef WITH_LIBHIDAPI_LIBUSB
-	ifdef libhidapi-libusb_incl_path
-		INCLUDES += -I$(libhidapi-libusb_incl_path)
+	ifdef WITH_LIBHIDAPI_LIBUSB
+		ifdef libhidapi-libusb_incl_path
+			INCLUDES += -I$(libhidapi-libusb_incl_path)
+		endif
+		ifdef libhidapi-libusb_lib_path
+			LIBS += -L$(libhidapi-libusb_lib_path)
+		endif
+		LIBS      += -lhidapi-libusb
+		CONFFLAGS += -DWITH_LIBHIDAPI_LIBUSB
 	endif
-	ifdef libhidapi-libusb_lib_path
-		LIBS += -L$(libhidapi-libusb_lib_path)
-	endif
-	LIBS      += -lhidapi-libusb
-	CONFFLAGS += -DWITH_LIBHIDAPI_LIBUSB
-endif
 
 endif
 
