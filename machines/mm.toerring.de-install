@@ -1,6 +1,6 @@
 # -*-Makefile-*-
 
-install-hs.toerring.de:
+install-mm.toerring.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	if [ ! -e $(libdir)/rs_spec10.state ]; then \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) \
@@ -11,4 +11,4 @@ install-hs.toerring.de:
 		$(cdir)/spex_cd2a.state $(libdir); \
 	fi
 
-uninstall-hs.toerring.de:
+uninstall-mm.toerring.de:
