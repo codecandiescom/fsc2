@@ -23,6 +23,8 @@
 
 
 #include "ni6601_drv.h"
+#include <linux/vmalloc.h>
+
 
 static int ni6601_tc_irq_handler( Board *board );
 static int ni6601_dma_irq_handler( Board *board );

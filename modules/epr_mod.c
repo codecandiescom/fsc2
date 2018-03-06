@@ -35,7 +35,7 @@ EPR_MOD epr_mod        = { NULL, NULL, 0 },
 
 int epr_mod_init_hook( void )
 {
-	epr_mod_read_state( );
+    epr_mod_read_state( );
     return 1;
 }
 
@@ -93,28 +93,28 @@ epr_modulation_name( Var_T * v  UNUSED_ARG )
 Var_T *
 epr_modulation_ratio( Var_T * v )
 {
-	Calibration_T * res;
-	double freq;
+    Calibration_T * res;
+    double freq;
     double ratio;
     FREQ_ENTRY_T *fe;
 
 
-	res = epr_mod_find( v );
-	v = vars_pop( v );
+    res = epr_mod_find( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing frequency.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing frequency.\n" );
+        THROW( EXCEPTION );
+    }
 
-	freq = get_double( v, "modulation frequency" );
-	v = vars_pop( v );
+    freq = get_double( v, "modulation frequency" );
+    v = vars_pop( v );
 
     if ( freq <= 0.0 )
     {
         print( FATAL, "Invalid zero or negative frequency.\n" );
-		THROW( EXCEPTION );
+        THROW( EXCEPTION );
     }
 
     if ( ( fe = epr_mod_find_fe( res, freq ) ) != NULL )
@@ -203,23 +203,23 @@ epr_modulation_ratio( Var_T * v )
 Var_T *
 epr_modulation_phase( Var_T * v )
 {
-	Calibration_T * res;
-	double freq;
+    Calibration_T * res;
+    double freq;
     double phase;
     FREQ_ENTRY_T *fe;
 
 
-	res = epr_mod_find( v );
-	v = vars_pop( v );
+    res = epr_mod_find( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing frequency.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing frequency.\n" );
+        THROW( EXCEPTION );
+    }
 
-	freq = get_double( v, "modulation frequency" );
-	v = vars_pop( v );
+    freq = get_double( v, "modulation frequency" );
+    v = vars_pop( v );
 
     if ( ! ( fe = epr_mod_find_fe( res, freq ) ) )
     {
@@ -262,21 +262,21 @@ epr_modulation_phase( Var_T * v )
 Var_T *
 epr_modulation_has_phase( Var_T * v )
 {
-	Calibration_T * res;
-	double freq;
+    Calibration_T * res;
+    double freq;
     FREQ_ENTRY_T *fe;
 
 
-	res = epr_mod_find( v );
-	v = vars_pop( v );
+    res = epr_mod_find( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing frequency.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing frequency.\n" );
+        THROW( EXCEPTION );
+    }
 
-	freq = get_double( v, "modulation frequency" );
+    freq = get_double( v, "modulation frequency" );
 
     return vars_push( INT_VAR,
                       ( long ) (    ( fe = epr_mod_find_fe( res, freq ) )
@@ -291,21 +291,21 @@ epr_modulation_has_phase( Var_T * v )
 Var_T *
 epr_modulation_add_calibration( Var_T * v )
 {
-	size_t i;
-	Calibration_T * volatile res = NULL;
+    size_t i;
+    Calibration_T * volatile res = NULL;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing calibration name.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing calibration name.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->type != STR_VAR )
-	{
-		print( FATAL, "Argument must be a string.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "Argument must be a string.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( *v->val.sptr == '\0' )
     {
@@ -313,41 +313,41 @@ epr_modulation_add_calibration( Var_T * v )
         THROW( EXCEPTION );
     }
 
-	for ( i = 0; i < epr_mod.count; i++ )
-		if ( ! strcmp( epr_mod.calibrations[ i ].name, v->val.sptr ) )
-		{
+    for ( i = 0; i < epr_mod.count; i++ )
+        if ( ! strcmp( epr_mod.calibrations[ i ].name, v->val.sptr ) )
+        {
             print( FATAL, "Calibration entry with name '%s' already exists.\n",
                    v->val.sptr );
-		}
+        }
 
-	TRY
-	{
-		res = T_malloc( sizeof *res );
-		res->name = T_strdup( v->val.sptr );
+    TRY
+    {
+        res = T_malloc( sizeof *res );
+        res->name = T_strdup( v->val.sptr );
         res->interpolate = UNSET;
         res->extrapolate = UNSET;
         res->max_amp     = 0.0;
         res->fe          = NULL;
-		res->count       = 0;
+        res->count       = 0;
 
-		epr_mod.calibrations =
-			realloc( epr_mod.calibrations,
-					 ( epr_mod.count + 1 ) * sizeof *epr_mod.calibrations );
-		epr_mod.calibrations[ epr_mod.count++ ] = *res;
-		TRY_SUCCESS;
-	}
-	CATCH ( OUT_OF_MEMORY_EXCEPTION )
-	{
-		if ( res )
+        epr_mod.calibrations =
+            realloc( epr_mod.calibrations,
+                     ( epr_mod.count + 1 ) * sizeof *epr_mod.calibrations );
+        epr_mod.calibrations[ epr_mod.count++ ] = *res;
+        TRY_SUCCESS;
+    }
+    CATCH ( OUT_OF_MEMORY_EXCEPTION )
+    {
+        if ( res )
         {
             if ( res->name )
                 T_free( res->name );
-			T_free( res );
+            T_free( res );
         }
-		RETHROW;
-	}
+        RETHROW;
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -358,22 +358,22 @@ epr_modulation_add_calibration( Var_T * v )
 Var_T *
 epr_modulation_delete_calibration( Var_T * v )
 {
-	Calibration_T * res = epr_mod_find( v );
-	size_t i;
+    Calibration_T * res = epr_mod_find( v );
+    size_t i;
 
 
-	for ( i = 0; i < epr_mod.count; i++ )
-		if ( epr_mod.calibrations + i == res )
-			break;
+    for ( i = 0; i < epr_mod.count; i++ )
+        if ( epr_mod.calibrations + i == res )
+            break;
 
-	fsc2_assert( i < epr_mod.count );
+    fsc2_assert( i < epr_mod.count );
 
-	T_free( res->fe );
-	T_free( res->name );
+    T_free( res->fe );
+    T_free( res->name );
 
-	if ( i < epr_mod.count - 1 )
-		memmove( epr_mod.calibrations + i, epr_mod.calibrations + i + 1,
-				 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.calibrations );
+    if ( i < epr_mod.count - 1 )
+        memmove( epr_mod.calibrations + i, epr_mod.calibrations + i + 1,
+                 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.calibrations );
 
     if ( --epr_mod.count > 0 )
         epr_mod.calibrations =
@@ -382,7 +382,7 @@ epr_modulation_delete_calibration( Var_T * v )
     else
         epr_mod.calibrations = T_free( epr_mod.calibrations );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -452,7 +452,7 @@ epr_modulation_calibration_name( Var_T * v )
 Var_T *
 epr_modulation_calibration_interpolate( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
 
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -472,7 +472,7 @@ epr_modulation_calibration_interpolate( Var_T * v )
 Var_T *
 epr_modulation_calibration_can_interpolate( Var_T * v  UNUSED_ARG )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
 
 
     return vars_push( INT_VAR,
@@ -489,7 +489,7 @@ epr_modulation_calibration_can_interpolate( Var_T * v  UNUSED_ARG )
 Var_T *
 epr_modulation_calibration_extrapolate( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
 
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -509,7 +509,7 @@ epr_modulation_calibration_extrapolate( Var_T * v )
 Var_T *
 epr_modulation_calibration_can_extrapolate( Var_T * v  UNUSED_ARG )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
 
 
     return vars_push( INT_VAR,
@@ -526,7 +526,7 @@ epr_modulation_calibration_can_extrapolate( Var_T * v  UNUSED_ARG )
 Var_T *
 epr_modulation_calibration_amplitude_limit( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
 
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -559,7 +559,7 @@ epr_modulation_calibration_amplitude_limit( Var_T * v )
 Var_T *
 epr_modulation_calibration_check_amplitude( Var_T * v )
 {
-	Calibration_T *res = epr_mod_find( v );
+    Calibration_T *res = epr_mod_find( v );
     double amp = get_double( v->next, "modulation amplitude" );
 
 
@@ -595,7 +595,7 @@ epr_modulation_calibration_check_amplitude( Var_T * v )
 Var_T *
 epr_modulation_calibration_frequencies( Var_T * v )
 {
-	Calibration_T * res = epr_mod_find( v );
+    Calibration_T * res = epr_mod_find( v );
     double *freq = NULL;
     size_t i;
 

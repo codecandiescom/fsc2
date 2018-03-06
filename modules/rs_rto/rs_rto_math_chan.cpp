@@ -29,14 +29,14 @@ using namespace rs_rto;
  *----------------------------------------------------*/
 
 rs_rto_math_chan::rs_rto_math_chan( RS_RTO  & rs,
-									Channel   ch )
+                                    Channel   ch )
     : rs_rto_chan( rs, ch )
 {
-	int chan_number =   enum_to_value( m_channel )
-		              - enum_to_value( Channel::Math1 ) + 1;
-	char buf[ 7 ];
-	sprintf( buf, "CALC:MATH%d", chan_number );
-	m_prefix = buf;
+    int chan_number =   enum_to_value( m_channel )
+                      - enum_to_value( Channel::Math1 ) + 1;
+    char buf[ 7 ];
+    sprintf( buf, "CALC:MATH%d", chan_number );
+    m_prefix = buf;
 }
 
 
@@ -57,7 +57,7 @@ bool
 rs_rto_math_chan::set_state( bool on_off )
 {
     std::string cmd = m_prefix + ":STAT ";
-	m_rs.write( cmd + ( on_off ? '1' : '0' ) );
+    m_rs.write( cmd + ( on_off ? '1' : '0' ) );
     return state( );
 }
 
@@ -95,8 +95,8 @@ rs_rto_math_chan::scale( )
 double
 rs_rto_math_chan::set_scale( double sc )
 {
- 	if ( sc < m_min_scale || sc > m_max_scale )
-		throw std::invalid_argument( "Math channel scale out of range" );
+    if ( sc < m_min_scale || sc > m_max_scale )
+        throw std::invalid_argument( "Math channel scale out of range" );
 
     char buf[ 40 ];
     sprintf( buf, "%s:VERT:SCAL %.8g", m_prefix.c_str( ), sc );
@@ -122,8 +122,8 @@ rs_rto_math_chan::offset( )
 double
 rs_rto_math_chan::set_offset( double offs )
 {
- 	if ( offs < m_min_offset || offs > m_max_offset )
-		throw std::invalid_argument( "Math channel offset out of range" );
+    if ( offs < m_min_offset || offs > m_max_offset )
+        throw std::invalid_argument( "Math channel offset out of range" );
 
     char buf[ 40 ];
     sprintf( buf, "%s:VERT:OFFS %.8g", m_prefix.c_str( ), offs );
@@ -139,9 +139,9 @@ rs_rto_math_chan::set_offset( double offs )
 std::string
 rs_rto_math_chan::function( )
 {
-	std::string reply;
-	m_rs.talk( m_prefix + '?', reply );
-	return reply;
+    std::string reply;
+    m_rs.talk( m_prefix + '?', reply );
+    return reply;
 }
 
 
@@ -154,21 +154,21 @@ rs_rto_math_chan::set_function( std::string const & f )
     if ( f.empty( ) )
         throw std::invalid_argument( "Can't set empty string as function" );
 
-	if (    f.find( "'" ) != std::string::npos
-		 || f.find( '"' ) != std::string::npos )
-		throw std::invalid_argument( "Function may not contain quotes" );
+    if (    f.find( "'" ) != std::string::npos
+         || f.find( '"' ) != std::string::npos )
+        throw std::invalid_argument( "Function may not contain quotes" );
 
-	m_rs.write( m_prefix + " '" + f + "'" );
+    m_rs.write( m_prefix + " '" + f + "'" );
 
-	int ec = 0;
-	do
-	{
-		int ec = m_rs.query< int >( "SYST:ERR:CODE?" );
-		if ( ec == -150 )
-			throw std::invalid_argument( "Invalid function" );
-	} while ( ec != 0 );
+    int ec = 0;
+    do
+    {
+        int ec = m_rs.query< int >( "SYST:ERR:CODE?" );
+        if ( ec == -150 )
+            throw std::invalid_argument( "Invalid function" );
+    } while ( ec != 0 );
 
-	return f;
+    return f;
 }
 
 

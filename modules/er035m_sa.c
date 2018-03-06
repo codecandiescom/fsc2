@@ -103,8 +103,8 @@ struct NMR {
 
     bool keep_going_on_bad_field;
 
-	int              bug_behaviour;
-	bool             device_is_dead;
+    int              bug_behaviour;
+    bool             device_is_dead;
 };
 
 
@@ -180,8 +180,8 @@ er035m_sa_init_hook( void )
 
     nmr.keep_going_on_bad_field = false;
 
-	nmr.bug_behaviour = STOP_ON_BUG;
-	nmr.device_is_dead = false;
+    nmr.bug_behaviour = STOP_ON_BUG;
+    nmr.device_is_dead = false;
 
     return 1;
 }
@@ -212,8 +212,8 @@ er035m_sa_exp_hook( void )
 
     nmr.keep_going_on_bad_field = false;
 
-	nmr.bug_behaviour = STOP_ON_BUG;
-	nmr.device_is_dead = false;
+    nmr.bug_behaviour = STOP_ON_BUG;
+    nmr.device_is_dead = false;
 
     if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
     {
@@ -408,43 +408,43 @@ gaussmeter_keep_going_on_field_error( Var_T * v  UNUSED_ARG )
 Var_T *
 gaussmeter_keep_going_on_error( Var_T * v )
 {
-	if ( ! v )
-		return vars_push( INT_VAR, nmr.bug_behaviour );
+    if ( ! v )
+        return vars_push( INT_VAR, nmr.bug_behaviour );
 
-	long behaviour;
+    long behaviour;
 
-	if ( v->type == STR_VAR )
-	{
-		if ( ! strcasecmp( v->val.sptr, "STOP" ) )
-			behaviour = STOP_ON_BUG;
-		else if ( ! strcasecmp( v->val.sptr, "CONTINUE" ) )
-			behaviour = CONTINUE_ON_BUG;
-		else if ( ! strcasecmp( v->val.sptr, "RETRY" ) )
-			behaviour = RETRY_ON_BUG;
-		else
-		{
-			print( FATAL, "Invalid argument \"%s\".\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		behaviour = get_strict_long( v, "behaviour on errors" );
-		if (    behaviour != STOP_ON_BUG
-			 && behaviour != CONTINUE_ON_BUG
-			 && behaviour != RETRY_ON_BUG )
-		{
-			print( FATAL, "Invalid argument: %ld.\n", behaviour );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcasecmp( v->val.sptr, "STOP" ) )
+            behaviour = STOP_ON_BUG;
+        else if ( ! strcasecmp( v->val.sptr, "CONTINUE" ) )
+            behaviour = CONTINUE_ON_BUG;
+        else if ( ! strcasecmp( v->val.sptr, "RETRY" ) )
+            behaviour = RETRY_ON_BUG;
+        else
+        {
+            print( FATAL, "Invalid argument \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        behaviour = get_strict_long( v, "behaviour on errors" );
+        if (    behaviour != STOP_ON_BUG
+             && behaviour != CONTINUE_ON_BUG
+             && behaviour != RETRY_ON_BUG )
+        {
+            print( FATAL, "Invalid argument: %ld.\n", behaviour );
+            THROW( EXCEPTION );
+        }
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
     if ( behaviour != CONTINUE_ON_BUG )
         nmr.device_is_dead = false;
 
-	return vars_push( INT_VAR, ( long ) ( nmr.bug_behaviour = behaviour ) );
+    return vars_push( INT_VAR, ( long ) ( nmr.bug_behaviour = behaviour ) );
 }
 
 
@@ -469,8 +469,8 @@ measure_field( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, ER035M_TEST_FIELD );
 
-	if ( nmr.device_is_dead )
-		return vars_push( FLOAT_VAR, -1.0 );
+    if ( nmr.device_is_dead )
+        return vars_push( FLOAT_VAR, -1.0 );
 
     /* If gaussmeter is in oscillator up/down state or the state is unknown
        (i.e. it's standing somewhere but not searching) search for field.
@@ -597,8 +597,8 @@ gaussmeter_resolution( Var_T * v )
         return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
     }
 
-	if ( nmr.device_is_dead )
-		return vars_push( FLOAT_VAR, -1.0 );
+    if ( nmr.device_is_dead )
+        return vars_push( FLOAT_VAR, -1.0 );
 
     double res = get_double( v, "resolution" );
 
@@ -643,19 +643,19 @@ gaussmeter_resolution( Var_T * v )
         TRY
         {
             er035m_sa_set_resolution( nmr.resolution );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			if ( nmr.bug_behaviour != STOP_ON_BUG )
-			{
-				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
-					nmr.device_is_dead = true;
-				return vars_push( FLOAT_VAR, -1.0 );
-			}
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( nmr.bug_behaviour != STOP_ON_BUG )
+            {
+                if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+                    nmr.device_is_dead = true;
+                return vars_push( FLOAT_VAR, -1.0 );
+            }
 
-			RETHROW;
-		}
+            RETHROW;
+        }
     }
 
     return vars_push( FLOAT_VAR, res_list[ nmr.resolution ] );
@@ -711,14 +711,14 @@ gaussmeter_command( Var_T * v )
         {
             cmd = T_free( cmd );
 
-			if ( nmr.bug_behaviour != STOP_ON_BUG )
-			{
-				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
-					nmr.device_is_dead = true;
-				return vars_push( FLOAT_VAR, -1.0 );
-			}
+            if ( nmr.bug_behaviour != STOP_ON_BUG )
+            {
+                if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+                    nmr.device_is_dead = true;
+                return vars_push( FLOAT_VAR, -1.0 );
+            }
 
-			RETHROW;
+            RETHROW;
         }
     }
 
@@ -735,8 +735,8 @@ gaussmeter_upper_search_limit( Var_T * v )
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.upper_search_limit );
 
-	if ( nmr.device_is_dead )
-		return vars_push( FLOAT_VAR, -1.0 );
+    if ( nmr.device_is_dead )
+        return vars_push( FLOAT_VAR, -1.0 );
 
     volatile long int ul = lrnd( get_double( v, "upper search limit" ) );
 
@@ -765,19 +765,19 @@ gaussmeter_upper_search_limit( Var_T * v )
         TRY
         {
             er035m_sa_set_upper_search_limit( ul );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			if ( nmr.bug_behaviour != STOP_ON_BUG )
-			{
-				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
-					nmr.device_is_dead = true;
-				return vars_push( FLOAT_VAR, -1.0 );
-			}
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( nmr.bug_behaviour != STOP_ON_BUG )
+            {
+                if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+                    nmr.device_is_dead = true;
+                return vars_push( FLOAT_VAR, -1.0 );
+            }
 
-			RETHROW;
-		}
+            RETHROW;
+        }
     }
 
     nmr.upper_search_limit = ul;
@@ -795,8 +795,8 @@ gaussmeter_lower_search_limit( Var_T * v )
     if ( v == NULL )
         return vars_push( FLOAT_VAR, ( double ) nmr.lower_search_limit );
 
-	if ( nmr.device_is_dead )
-		return vars_push( FLOAT_VAR, -1.0 );
+    if ( nmr.device_is_dead )
+        return vars_push( FLOAT_VAR, -1.0 );
 
     volatile long ll = lrnd( get_double( v, "lower search limit" ) );
 
@@ -825,19 +825,19 @@ gaussmeter_lower_search_limit( Var_T * v )
         TRY
         {
             er035m_sa_set_lower_search_limit( ll );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			if ( nmr.bug_behaviour != STOP_ON_BUG )
-			{
-				if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
-					nmr.device_is_dead = true;
-				return vars_push( FLOAT_VAR, -1.0 );
-			}
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( nmr.bug_behaviour != STOP_ON_BUG )
+            {
+                if ( nmr.bug_behaviour == CONTINUE_ON_BUG )
+                    nmr.device_is_dead = true;
+                return vars_push( FLOAT_VAR, -1.0 );
+            }
 
-			RETHROW;
-		}
+            RETHROW;
+        }
     }
 
     nmr.lower_search_limit = ll;

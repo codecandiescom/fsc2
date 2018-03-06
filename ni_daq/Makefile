@@ -39,12 +39,12 @@ export
 
 
 .SUFFIXES:
-.PHONY: all driver lib cleanup clean
+.PHONY: all driver cleanup clean
 
 
 all:
 	$(MAKE) driver
-	$(MAKE) lib
+	$(MAKE) -C lib
 
 
 driver:
@@ -58,14 +58,10 @@ driver:
 	$(MAKE) -C driver
 
 
-lib:
-	$(MAKE) -C lib
-
-
 install:
 	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 include/ni_daq.h $(incl_dir)
-	$(INSTALL) -m 644 include/ni_daq_drv.h $(incl_dir)
+	$(INSTALL) -m 644 driver/include/ni_daq_drv.h $(incl_dir)
 	$(MAKE) -C driver install
 	$(MAKE) -C lib install
 

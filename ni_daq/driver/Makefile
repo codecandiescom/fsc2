@@ -81,9 +81,9 @@ all $(MODULE) install check clean:
 
 else      # if KERNEL_VER is set
 
-# First handle the case that we're building for a 2.6 or 3.x kernel
+# First handle the case that we're building for a 2.6 or [34].x kernel
 
-ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.' 2>/dev/null),)
+ifneq ($(shell echo $(KERNEL_VER) | grep '^\(2\.6\)\|3\.\|4\.' 2>/dev/null),)
 
 ifneq ($(KERNELRELEASE),)    # if we can use the kernel build system
 	obj-m                := $(MODULE)

@@ -23,6 +23,7 @@
 
 
 #include "ni6601_drv.h"
+#include <linux/vmalloc.h>
 
 
 extern Board boards[ NI6601_MAX_BOARDS ];    /* defined in ni6601_drv.c */
@@ -183,7 +184,11 @@ long ni6601_ioctl( struct file *  filep,
 	inode_p = inode_p;
 #endif
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( filep->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -282,8 +287,11 @@ unsigned int ni6601_poll( struct file *              filep,
 	unsigned int mask = POLLIN | POLLRDNORM;
 	int ret = 0;
 
-
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( filep->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -377,7 +385,11 @@ ssize_t ni6601_read( struct file * filep,
 	u32 *high_ptr;
 
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( filep->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );

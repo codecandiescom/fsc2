@@ -1,0 +1,37 @@
+# -*-Makefile-*-
+
+GROUP                 := dialout
+EDITOR                := emacs
+GPIB_LIBRARY          := SLG
+GPIB_HEADER_DIR       := /usr/local/include/gpib
+GPIB_LOG_LEVEL        := HIGH
+WITHOUT_SERIAL_PORTS  := no
+SERIAL_LOG_LEVEL      := HIGH
+LAN_LOG_LEVEL         := HIGH
+WITH_NI6601           := yes
+ni6601_libs           := libni6601.so
+WITH_ME6000           := yes
+me6000_libs           := libme6x00.so
+#WITH_RS_SPEC10        := yes
+rs_spec10_incl        := /usr/local/include/pvcam
+rs_spec10_libs        := libpvcam.so
+WITH_WITIO_48         := yes
+witio_48_libs         := libwitio_48.so
+WITH_PCI_MIO_16E_1    := yes
+pci_mio_16e_1_libs    := libni_daq.so
+WITH_RULBUS           := yes
+rulbus_incl_path      := /usr/local/include
+rulbus_lib_path       := /usr/local/lib
+#WITH_MEDRIVER         := yes
+#medriver_version      := NEW
+#medriver_incl_path    := /usr/include/medriver
+#medriver_lib_path     := /usr/lib
+#WITH_LIBUSB_0_1       := yes
+WITH_LIBUSB_1_0       := yes
+WITH_LIBHIDAPI_LIBUSB := yes
+WITH_FFT              := yes
+#ADD_LIB_PATHS         := /usr/lib64
+WITH_HTTP_SERVER      := yes
+BROWSER               := /usr/bin/firefox 
+#CRASH_REPORT_DIR      := /xxx
+DESCRIPTION           := "Test machine"

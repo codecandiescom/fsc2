@@ -1429,7 +1429,9 @@ static int me6x00_open( struct inode * inode_p,
 		CALL_PDEBUG( "Got a ME6100 board\n" );
 
 		if ( request_irq( info->irq, me6x00_isr,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 21 )
+#if LINUX_VERSION_CODE > KERNEL_VERSION( 3, 13, 0 )
+				  IRQF_SHARED,
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 21 )
 				  IRQF_DISABLED | IRQF_SHARED,
 #else
 				  SA_INTERRUPT | SA_SHIRQ,
@@ -1594,13 +1596,17 @@ static long me6x00_ioctl( struct file *  file_p,
 	int ret;
 
 
+	CALL_PDEBUG( "me6x00_ioctl() is executed\n" );
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	inode_p = inode_p;
 #endif
 
-	CALL_PDEBUG( "me6x00_ioctl() is executed\n" );
-
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor(file_p->f_path.dentry->d_inode);
+#endif
 
 	if ( minor >= me6x00_board_count ) {
 		printk( KERN_ERR "ME6X00: me6x00_ioctl(): Board %d does not "
