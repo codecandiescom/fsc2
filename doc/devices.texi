@@ -5885,6 +5885,9 @@ EIP Microwave Inc.@: EIP371
 
 @item @ref{agilent_53181a}
 Agilent 53181A
+
+@item @ref{agilent_53131a}
+Agilent 53131A
 @end table
 @noindent
 To use a module in an experiment put its name into the @code{DEVICES}
@@ -5949,10 +5952,10 @@ than @w{1%} a warning is printed out).
 @anchor{freq_counter_coupling()}
 @findex freq_counter_coupling()
 @item freq_counter_coupling()
-This function only exists for the @ref{agilent_53181a}. It allows to
-set or query the input coupling and impedance of channel 1 of the
-counter (the second channel's input coupling is always AC and the
-impedance is 50 Ohms).
+This function only exists for the @ref{agilent_53181a} and
+@ref{agilent_53131a}. It allows to set or query the input coupling and
+impedance of channel 1 of the counter (the second channel's input
+coupling is always AC and the impedance is 50 Ohms).
 
 To set the coupling and impedance pass the function a singe argument,
 either the string @code{"A50"} (or the integer @code{0}) to switch to
@@ -5969,9 +5972,9 @@ coupling haven't been set before).
 @anchor{freq_counter_timebase()}
 @findex freq_counter_timebase()
 @item freq_counter_timebase()
-This function only exists for the @ref{agilent_53181a}. It allows to
-set or query the timebase used by the counter, either internal,
-external or automatic.
+This function only exists for the @ref{agilent_53181a} and
+@ref{agilent_53131a}. It allows to set or query the timebase used by
+the counter, either internal, external or automatic.
 
 To set the timebase source pass the function a singe argument, either
 the string @code{"INT"} (or the integer @code{0}) to switch internal
@@ -5990,15 +5993,16 @@ been set before.
 @anchor{freq_counter_mode()}
 @findex freq_counter_mode()
 @item freq_counter_mode()
-This function only exists for the @ref{agilent_53181a}. It allows to
-set or query the arming mode, either automatic, based on the gate time
-or requiring a certain number of digits (in automatic mode the device
-does the fastest possible acquisistion, in gate time mode it measures
-for the specified gate time, and in digits mode the time required for
-a measurement depends on the number of digits requested). Please note
-that this setting influences the resolution of the results, use
-automatic mode for fastest remeasurements (but typically with lower
-resolution) or choose a resolution explicitely by using the functions
+This function only exists for the @ref{agilent_53181a} and
+@ref{agilent_53131a}. It allows to set or query the arming mode,
+either automatic, based on the gate time or requiring a certain number
+of digits (in automatic mode the device does the fastest possible
+acquisistion, in gate time mode it measures for the specified gate
+time, and in digits mode the time required for a measurement depends
+on the number of digits requested). Please note that this setting
+influences the resolution of the results, use automatic mode for
+fastest remeasurements (but typically with lower resolution) or choose
+a resolution explicitely by using the functions
 @ref{freq_counter_gate_time()} to set the gate time for gate time mode
 or @ref{freq_counter_digits()} for digits mode.
 
@@ -6018,10 +6022,10 @@ sections and the mode hasn't been set before).
 @anchor{freq_counter_digits()}
 @findex freq_counter_digits()
 @item freq_counter_digits()
-This function only exists for the @ref{agilent_53181a}. It allows to
-set or query the number of measured digits when te device is used in
-digits arming mode (use function @ref{freq_counter_mode()} to set this
-mode).
+This function only exists for the @ref{agilent_53181a} and
+@ref{agilent_53131a}. It allows to set or query the number of measured
+digits when te device is used in digits arming mode (use function
+@ref{freq_counter_mode()} to set this mode).
 
 To set the number of digits call the function with an integer argument
 between @code{3} and @code{15}, to determine the numer of digits call
@@ -6033,9 +6037,10 @@ number of digits hasn't been set before).
 @anchor{freq_counter_gate_time()}
 @findex freq_counter_gate_time()
 @item freq_counter_gate_time()
-This function only exists for the @ref{agilent_53181a}. It allows to
-set or query the gate time when te device is used in gate time arming
-mode (use function @ref{freq_counter_mode()} to set this mode).
+This function only exists for the @ref{agilent_53181a} and
+@ref{agilent_53131a}. It allows to set or query the gate time when te
+device is used in gate time arming mode (use function
+@ref{freq_counter_mode()} to set this mode).
 
 To set the gate time call the function with an value between @w{1 ms}
 and @w{1000 s}, to determine the gate time call it with no argument.
@@ -6048,10 +6053,12 @@ before).
 @findex freq_counter_measure()
 @item freq_counter_measure()
 Returns a floating point value with the measured frequency. Except for
-the @ref{agilent_53181a} the function does not accept any parameters.
-For the @ref{agilent_53181a} a single argument is required, the
-channel to be used, either @code{CH1} or @code{CH2}. The function can
-only by used in the @code{EXPERIMENT} section.
+the @ref{agilent_53181a} and @ref{agilent_53131a} the function does
+not accept any parameters. For the @ref{agilent_53181a} and
+@ref{agilent_53131a} a single argument is required, the channel to be
+used, either @code{CH1} or @code{CH2} (or @code{CH3} for the
+@ref{agilent_53181a}). The function can only by used in the
+@code{EXPERIMENT} section.
 
 
 @end table

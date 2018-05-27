@@ -27,6 +27,7 @@ List of devices, sorted by module name:
 * aeg_s_band::      S-band AEG Magnet Power Supply
 * aeg_x_band::      X-band AEG Magnet Power Supply
 * agilent_53181a::  Agilent Frequency Counter 53181A
+* agilent_53131a::  Agilent Frequency Counter 53131A
 * bh15::            Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 * bh15_fc::         Bruker Hall Effect Field Controller BH 15 (as field controller)
 * bnm12::           Bruker NMR Gaussmeter BNM12
@@ -128,6 +129,7 @@ List of devices, sorted by module name:
 @item @ref{aeg_s_band}      S-band AEG Magnet Power Supply
 @item @ref{aeg_x_band}      X-band AEG Magnet Power Supply
 @item @ref{agilent_53181a}  Agilent Frequency Counter 53181A
+@item @ref{agilent_53131a}  Agilent Frequency Counter 53131A
 @item @ref{bh15}            Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 @item @ref{bh15_fc}         Bruker Hall Effect Field Controller BH 15 (as field controller)
 @item @ref{bnm12}           Bruker NMR Gaussmeter BNM12
@@ -339,7 +341,7 @@ to @w{19900 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 
 @c #############################################################
 
-@node agilent_53181a, bh15, aeg_x_band, Device Reference
+@node agilent_53181a, agilent_53131a, aeg_x_band, Device Reference
 @iftex
 @subheading Agilent Frequency Counter 53181A
 @end iftex
@@ -378,7 +380,46 @@ to @w{19900 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 
 @c #############################################################
 
-@node bh15, bh15_fc, agilent_53181a, Device Reference
+@node agilent_53131a, bh15, agilent_53181a, Device Reference
+@iftex
+@subheading Agilent Frequency Counter 53131A
+@end iftex
+@ifnottex
+@section Agilent Frequency Counter 53131A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{agilent_53131a}
+
+@paragraphindent 0
+@strong{Description}: Agilent (now
+@uref{http://www.keysight.com/,Keysight}) frequency counter 53131A.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+@c In the GPIB configuration file use @code{"AGILENT_53131A"} as the
+@c device name, @code{'\n'} or @code{0xa} as the EOS character and set
+@c @code{set-reos} @code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_coupling()}
+@item @ref{freq_counter_timebase()}
+@item @ref{freq_counter_mode()}
+@item @ref{freq_counter_digits()}
+@item @ref{freq_counter_gate_time()}
+@end table
+
+
+@c #############################################################
+
+@node bh15, bh15_fc, agilent_53131a, Device Reference
 @iftex
 @subheading Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 @end iftex
