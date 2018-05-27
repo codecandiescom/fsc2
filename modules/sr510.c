@@ -367,14 +367,14 @@ lockin_sensitivity( Var_T * v )
 
         if ( ! sr510.sens_warn )                      /* no warn message yet */
         {
-        if ( sens >= 1.0e-3 )
-            print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf mV "
-                   "instead.\n",
-                   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
-        else
-            print( WARN, "Sensitivity of %.0lf nV is too high, using "
-                   "%.0lf nV instead.\n",
-                   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+            if ( sens >= 1.0e-3 )
+                print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf "
+                       "mV instead.\n",
+                       sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+            else
+                print( WARN, "Sensitivity of %.0lf nV is too high, using "
+                       "%.0lf nV instead.\n",
+                       sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
             sr510.sens_warn = SET;
         }
     }

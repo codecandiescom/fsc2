@@ -42,7 +42,7 @@ bool
 fsc2_obtain_uucp_lock( const char * volatile name )
 {
     int fd;
-	char *fn = NULL;
+    char *fn = NULL;
     char buf[ 13 ];
     mode_t mask;
 
@@ -71,13 +71,13 @@ fsc2_obtain_uucp_lock( const char * volatile name )
 
     raise_permissions( );
 
-	/* Try to open the lock file. This might fail either because we don't
-	   have the permissions or because it doesn't exist (which is ok). In
+    /* Try to open the lock file. This might fail either because we don't
+       have the permissions or because it doesn't exist (which is ok). In
        the latter case open it, If it can be opened check it's content and
        that no other existing process is holding the lock. Then rewind it. */
 
     if ( ( fd = open( fn, O_RDWR ) ) == -1 )         /* File can't be opened */
-	{
+    {
         if ( errno == EACCES )                       /* no access permission */
         {
             lower_permissions( );
@@ -134,7 +134,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
     }
 
     close( fd );
-	T_free( fn );
+    T_free( fn );
     return true;
 }
 
@@ -146,7 +146,7 @@ fsc2_obtain_uucp_lock( const char * volatile name )
 void
 fsc2_release_uucp_lock( const char * volatile name )
 {
-	char *fn = NULL;
+    char *fn = NULL;
 
 
     fsc2_assert( name && *name );
@@ -171,11 +171,11 @@ fsc2_release_uucp_lock( const char * volatile name )
     CATCH( OUT_OF_MEMORY_EXCEPTION )
         return;
 
-	raise_permissions( );
-	if ( unlink( fn ) < 0 )
-		print( SEVERE, "Can't remove lock file '%s'.\n", fn );
-	lower_permissions( );
-	T_free( fn );
+    raise_permissions( );
+    if ( unlink( fn ) < 0 )
+        print( SEVERE, "Can't remove lock file '%s'.\n", fn );
+    lower_permissions( );
+    T_free( fn );
 }
 
 
@@ -236,7 +236,7 @@ check_lock_file( int          fd,
 {
     char buf[ 12 ];
     const char *bp;
-	char *eptr;
+    char *eptr;
     long pid = -1;
 
 
@@ -261,8 +261,8 @@ check_lock_file( int          fd,
     errno = 0;
     if (    ! isdigit( ( int ) *bp )
          || ( pid = strtol( bp, &eptr, 10 ) ) < 0
-		 || eptr == bp
-		 || *eptr != '\n'
+         || eptr == bp
+         || *eptr != '\n'
          || ( pid == LONG_MAX && errno == ERANGE ) )
     {
         close( fd );

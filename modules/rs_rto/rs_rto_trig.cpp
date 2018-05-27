@@ -31,7 +31,7 @@ using namespace rs_rto;
 rs_rto_trig::rs_rto_trig( RS_RTO & rs )
     : m_rs( rs )
 {
-	reset( );
+    reset( );
 }
 
 
@@ -89,27 +89,27 @@ rs_rto_trig::reset( )
 
     m_rs.write( "TRIG:OFFS:LIM 0" );
 
-	// The trigger source might be set to something we don't support, in
-	// that case catch the resulting exception and default to external
+    // The trigger source might be set to something we don't support, in
+    // that case catch the resulting exception and default to external
     // trigger
 
-	try
-	{
-		m_source = m_rs.query< Channel >( "TRIG1:SOUR?" );
-	}
-	catch ( std::invalid_argument const & )
-	{
-		set_source( Channel::Ext );
-	}
+    try
+    {
+        m_source = m_rs.query< Channel >( "TRIG1:SOUR?" );
+    }
+    catch ( std::invalid_argument const & )
+    {
+        set_source( Channel::Ext );
+    }
 
     // Set trigger type to edge trigger
 
-	std::string cmd;
-	if ( m_source == Channel::Ext )
-		cmd = "TRIG1:TYPE ANED";
-	else
-		cmd = "TRIG1:TYPE EDGE";
-	m_rs.write( cmd );
+    std::string cmd;
+    if ( m_source == Channel::Ext )
+        cmd = "TRIG1:TYPE ANED";
+    else
+        cmd = "TRIG1:TYPE EDGE";
+    m_rs.write( cmd );
 
     m_slope[ 0 ] = m_rs.query< Trig_Slope >( "TRIG1:ANED:SLOPE?" );
     m_slope[ 1 ] = m_rs.query< Trig_Slope >( "TRIG:EDGE:SLOPE?" );
@@ -132,7 +132,7 @@ rs_rto_trig::set_source( Channel source )
 {
     int ind = check_channel( source );
 
-	std::string cmd = "TRIG1:SOUR ";
+    std::string cmd = "TRIG1:SOUR ";
     ind = enum_to_value( source );
     if ( ind == 0 )
         cmd += "EXT";
@@ -143,15 +143,15 @@ rs_rto_trig::set_source( Channel source )
         cmd += buf;
     }
 
-	m_rs.write( cmd );
+    m_rs.write( cmd );
 
     cmd = source == Channel::Ext ? "TRIG1:TYPE ANED" : "TRIG1:TYPE EDGE";
-	m_rs.write( cmd );
+    m_rs.write( cmd );
 
     m_source = source;
     set_slope( m_slope[ ind ] );
 
-	return m_source;
+    return m_source;
 }
 
 
@@ -171,7 +171,7 @@ rs_rto_trig::set_mode( Trig_Mode mode )
     else if ( mode == Trig_Mode::Free_Running )
         cmd += "FRE";
 
-	m_rs.write( cmd );
+    m_rs.write( cmd );
     return m_mode = mode;
 }
 
@@ -220,7 +220,7 @@ rs_rto_trig::set_slope( Channel    ch,
     if ( ch != m_source )
         return m_slope[ ind ] = slope;
 
-	std::string cmd = "TRIG1:";
+    std::string cmd = "TRIG1:";
 
     if ( ch == Channel::Ext )
         cmd += "ANED:";
@@ -228,28 +228,28 @@ rs_rto_trig::set_slope( Channel    ch,
         cmd += "EDGE:";
     cmd += "SLOP ";
 
-	switch ( slope )
-	{
-		case Trig_Slope::Positive :
-			cmd += "POS";
-			break;
+    switch ( slope )
+    {
+        case Trig_Slope::Positive :
+            cmd += "POS";
+            break;
 
-		case Trig_Slope::Negative :
-			cmd += "NEG";
-			break;
+        case Trig_Slope::Negative :
+            cmd += "NEG";
+            break;
 
-		case Trig_Slope::Either :
+        case Trig_Slope::Either :
             if ( ch == Channel::Ext )
                 throw std::invalid_argument( "Triggering on positive and "
                                              "negative slope not possible for "
                                              "external trigger input" );
-			cmd += "EITH";
-			break;
-	}
+            cmd += "EITH";
+            break;
+    }
 
-	m_rs.write( cmd );
+    m_rs.write( cmd );
 
-	return m_slope[ ind ] = slope;
+    return m_slope[ ind ] = slope;
 }
 
 
@@ -275,13 +275,13 @@ rs_rto_trig::level( Channel ch )
 {
     int ind = check_channel( ch );
 
-	char level_index[ ] = { '5', '1', '2', '3', '4' };
+    char level_index[ ] = { '5', '1', '2', '3', '4' };
 
-	std::string cmd = "TRIG1:LEV";
+    std::string cmd = "TRIG1:LEV";
     cmd += level_index[ ind ];
-	cmd += '?';
+    cmd += '?';
 
-	return m_rs.query< double >( cmd );
+    return m_rs.query< double >( cmd );
 }
 
 
@@ -312,18 +312,18 @@ rs_rto_trig::set_level( Channel ch,
 {
     int ind = check_channel( ch );
 
-	if (    level <  min_level( ch ) - m_level_resolution / 2
+    if (    level <  min_level( ch ) - m_level_resolution / 2
          || level >= max_level( ch ) + m_level_resolution / 2 )
-		throw std::invalid_argument( "Trigger level out of range" );
+        throw std::invalid_argument( "Trigger level out of range" );
 
     std::vector< std::string > lev = { "LEV5", "LEV1", "LEV2", "LEV3", "LEV4" };
 
-	std::string cmd = "TRIG1:" + lev[ ind ];
-	char buf[ 10 ];
-	sprintf( buf, " %.3f", level );
-	m_rs.write( cmd + buf );
+    std::string cmd = "TRIG1:" + lev[ ind ];
+    char buf[ 10 ];
+    sprintf( buf, " %.3f", level );
+    m_rs.write( cmd + buf );
 
-	return m_rs.query< double >( cmd + "?" );
+    return m_rs.query< double >( cmd + "?" );
 }
 
 

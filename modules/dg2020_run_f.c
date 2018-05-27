@@ -424,7 +424,7 @@ dg2020_recalc_phase_pulse( Function_T * f,
                 }
 
                 if (    pppl[ i ]->pos + pppl[ i ]->len <
-                                                 pppl[ i ]->for_pulse->pos
+                                                   pppl[ i ]->for_pulse->pos
                                                  + pppl[ i ]->for_pulse->len
                      && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
                 {
@@ -435,7 +435,7 @@ dg2020_recalc_phase_pulse( Function_T * f,
                 }
 
                 if (    pppl[ i ]->pos + pppl[ i ]->len <
-                                               pppl[ i ]->for_pulse->pos
+                                                 pppl[ i ]->for_pulse->pos
                                                + pppl[ i ]->for_pulse->len
                                                + dg2020.grace_period
                      && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc

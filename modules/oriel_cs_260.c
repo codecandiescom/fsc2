@@ -651,7 +651,7 @@ Var_T *
 monochromator_shutter( Var_T * v )
 {
     if ( ! v )
-		return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
+        return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
 
     bool state;
 
@@ -674,14 +674,14 @@ monochromator_shutter( Var_T * v )
     else
         state = get_boolean( v );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT )
         oriel_cs_260_set_shutter( state );
     else if ( FSC2_MODE == TEST )
         oriel_cs_260.shutter_state = state;
 
-	return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
+    return vars_push( INT_VAR, ( long int ) oriel_cs_260.shutter_state );
 }
 
 
@@ -1517,7 +1517,7 @@ oriel_cs_260_set_shutter( bool on_off )
     else
         gettimeofday( &oriel_cs_260.last_shutter_close, NULL );
 
-	return oriel_cs_260.shutter_state = on_off;
+    return oriel_cs_260.shutter_state = on_off;
 }
 
 

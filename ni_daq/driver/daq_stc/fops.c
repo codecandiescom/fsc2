@@ -94,7 +94,7 @@ static int ni_daq_open( struct inode * inode_p,
 
 
 	minor = MINOR( inode_p->i_rdev );
-
+	
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
 		return -ENODEV;
@@ -185,7 +185,11 @@ static unsigned int ni_daq_poll( struct file              * file_p,
 	unsigned int mask = 0;
 
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( file_p->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -268,7 +272,11 @@ static ssize_t ni_daq_read( struct file * file_p,
 	int ret;
 
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( file_p->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -406,7 +414,11 @@ static long ni_daq_ioctl( struct file   * file_p,
 	inode_p = inode_p;
 #endif
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION( 3, 13, 0 )
 	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
+#else
+	minor = iminor( file_p->f_path.dentry->d_inode );
+#endif
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );

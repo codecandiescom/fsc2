@@ -638,7 +638,7 @@ static void pci_e_series_init_all( Board * board )
 
 	/* Clear the copy of the contents of write-only DAQ-STC registers */
 
-	memset( &board->stc, sizeof board->stc, 0 );
+	memset( &board->stc, 0, sizeof board->stc );
 
 	/* Set up the MITE */
 

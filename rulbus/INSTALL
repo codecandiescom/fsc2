@@ -33,17 +33,13 @@ function get_reply( )
 
 function get_module_conf()
 {
-	if [ -e /etc/modules ]
-	then
+	if [ -e /etc/modules ]; then
 		echo "/etc/modules";
-	elif [ -e /etc/modules.conf ]
-	then
+	elif [ -e /etc/modules.conf ]; then
 		echo "/etc/modules.conf"
-	elif [ -e /etc/conf.modules ]
-	then
+	elif [ -e /etc/conf.modules ]; then
 		echo "/etc/conf.modules"
-	elif [ -e /etc/modules.conf.local ]
-	then
+	elif [ -e /etc/modules.conf.local ]; then
 	    echo "/etc/modules.conf.local"
 	fi
 }
@@ -62,8 +58,7 @@ function get_major()
 
 function do_setup()
 {
-	if [ $1 -ne 1 ]
-	then
+	if [ $1 -ne 1 ]; then
 		dialog --yesno \
 "  Installation of RULBUS (Rijksuniversiteit Leiden BUS)\n\
      parallel port (EPP) interface driver and library\n\n\
@@ -78,8 +73,7 @@ settings for the driver. If you have problems understanding\n\
 	# Ask for the default parallel port base address
 
 	REPEAT=1;
-	while [ $REPEAT -ne 0 ]
-	do
+	while [ $REPEAT -ne 0 ]; do
 		BASE="0x378";
 		dialog --inputbox "\
 Enter the default parallel port base address. Typically,\n\
@@ -89,8 +83,8 @@ address can be set when the module is loaded." \
 	    12 64 "$BASE" 2> /tmp/RULBUS_reply
 
 		get_reply BASE
-		if [ -n "$BASE" -a -z "`echo $BASE | tr -d '[:digit:] | tr -d 'x''`" ]
-		then
+		if [ -n "$BASE" \
+			 -a -z "`echo $BASE | tr -d '[:digit:] | tr -d 'x''`" ]; then
 			REPEAT=0
 		fi
 	done
@@ -98,16 +92,14 @@ address can be set when the module is loaded." \
 	# Ask for the major device number, it must be between 1 and 254 (or 4094
 	# for 2.6 and above) or 0 for a dynamically assigned major device number
 
-	if [ ! $IS_NEW_KERNEL ]
-	then
+	if [ ! $IS_NEW_KERNEL ]; then
 		MAX_MAJOR=254
 	else
 		MAX_MAJOR=4094
 	fi
 
 	REPEAT=1;
-	while [ $REPEAT -ne 0 ]
-	do
+	while [ $REPEAT -ne 0 ]; do
 		MAJOR=0;
 		dialog --inputbox "\
 Select the major device number, pick one between 1 and $MAX_MAJOR\n\
@@ -119,8 +111,7 @@ device number." 12 70 "$MAJOR" 2> /tmp/RULBUS_reply
 		if [    -n "$MAJOR" \
 			 -a -z "`echo $MAJOR | tr -d '[:digit:]'`" \
 			 -a $MAJOR -ge 0 \
-			 -a $MAJOR -le $MAX_MAJOR ]
-		then
+			 -a $MAJOR -le $MAX_MAJOR ]; then
 			echo "Good"
 			REPEAT=0
 		fi
@@ -171,8 +162,7 @@ function make_auto()
 function do_setup_loop()
 {
     do_setup $1
-    while [ $? -ne  0 ]
-	do
+    while [ $? -ne  0 ]; do
         do_setup 1
     done
 
@@ -199,8 +189,7 @@ function do_compile()
 
 	if [    ! -e $KERNEL_DIR/include/linux/autoconf.h \
 		 -a ! -e /usr/include/linux/autoconf.h \
-		 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]
-	then
+		 -a ! -e $KERNEL_DIR/include/generated/autoconf.h ]; then
 		dialog --msgbox \
 "To create the driver for the RULBUS interface the file\n\
 $KERNEL_DIR/include/linux/autoconf.h,\n\
@@ -218,8 +207,7 @@ Unfortunately, the installation can't proceed.\n" 13 62
 	echo "Compiling the driver, please wait..."
 	make driver > makelog 2>&1
 
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "Sorry, compiling the driver failed.\n\
 See \"makelog\" for the reasons.\n" 7 42;
@@ -229,8 +217,7 @@ See \"makelog\" for the reasons.\n" 7 42;
 	echo "Compiling the library, please wait..."
 	make lib >> makelog 2>&1
 
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "  Sorry, compiling the library failed.\n\
 See \"makelog\" for the reasons.\n" 7 45;
@@ -251,12 +238,9 @@ necessary runlevel links so that the RULBUS EPP module\n\
 gets loaded at boot time and the device files are\n\
              created automatically?" 9 65
 
-	if [ $? -eq 0 ]
-	then
-		if [ -e /etc/init.d/rulbus_epp ]
-		then
-			if [ -e /lib/lsb/remove_initd ]
-			then
+	if [ $? -eq 0 ]; then
+		if [ -e /etc/init.d/rulbus_epp ]; then
+			if [ -e /lib/lsb/remove_initd ]; then
 				/lib/lsb/remove_initd /etc/init.d/rulbus_epp > /dev/null 2>&1
 			else
 				/usr/lib/lsb/remove_initd /etc/init.d/rulbus_epp > /dev/null 2>&1
@@ -264,8 +248,7 @@ gets loaded at boot time and the device files are\n\
 			rm -f /etc/init.d/rulbus_epp
 		fi
 		install -m 744 utils/rulbus_epp /etc/init.d/rulbus_epp
-		if [ -e /lib/lsb/install_initd ]
-		then
+		if [ -e /lib/lsb/install_initd ]; then
 			/lib/lsb/install_initd /etc/init.d/rulbus_epp
 		else
 			/usr/lib/lsb/install_initd /etc/init.d/rulbus_epp
@@ -297,8 +280,7 @@ necessary runlevel links so that the RULBUS EPP module\n\
 gets loaded at boot time and the device files are\n\
              created automatically?" 9 65
 
-	if [ $? -eq 0 ]
-	then
+	if [ $? -eq 0 ]; then
 		install -m 744 utils/rulbus_epp /etc/init.d/rulbus_epp
 		update-rc.d rulbus_epp defaults
 
@@ -325,8 +307,7 @@ function do_install()
 {
 	# Check that user has the necessary permissions for installation
 
-	if [ `id -u` != "0" ]
-	then
+	if [ `id -u` != "0" ]; then
 		dialog --msgbox \
 "For installation you need root privileges.\n\
 Please become root (or run 'INSTALL' with\n\
@@ -369,8 +350,7 @@ directories that don't exist:\n\n\
 	# Do the basic installation (covered by the makefile)
 
 	make install_lib >> makelog 2>&1
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "Sorry, installation of libarary failed.\n\
 See \"makelog\" for the reasons.\n" 7 45;
@@ -385,12 +365,10 @@ See \"makelog\" for the reasons.\n" 7 45;
 function install_driver()
 {
 	dkms > /dev/null 2>&1
-	if [ $? -eq 0 ]
-	then
+	if [ $? -eq 0 ]; then
 		dialog --yesno \
 "Do you want to install the device driver using dkms?" 5 60
-        if [ $? -eq 0 ]
-		then
+        if [ $? -eq 0 ]; then
 			install_dkms
 		else
 			install_driver_mech
@@ -406,8 +384,7 @@ function install_driver()
 
 function install_dkms()
 {
-	if [ -n "`dkms status -m rulbus_epp -v 1.0`" ]
-	then
+	if [ -n "`dkms status -m rulbus_epp -v 1.0`" ]; then
 		dkms uninstall -m rulbus_epp -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
 		rm -rf /usr/src/rulbus_epp-1.0 >> makelog 2>&1
 		cp -r driver /usr/src/rulbus_epp-1.0
@@ -415,8 +392,7 @@ function install_dkms()
 		dkms add driver >> makelog 2>&1
 	fi
 
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "Sorry, Failed to add module to dkms.\n\
 See \"makelog\" for the reasons.\n" 7 45;
@@ -424,16 +400,14 @@ See \"makelog\" for the reasons.\n" 7 45;
 	fi
 
 	dkms build -m rulbus_epp -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 "Sorry, Failed to build module with dkms.\n\
 See \"makelog\" for the reasons.\n" 7 45;
         exit 1
 	fi
 
 	dkms install -m rulbus_epp -v 1.0 -k $KERNEL_VERSION >> makelog 2>&1
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 "Sorry, Failed to unstall module with dkms.\n\
 See \"makelog\" for the reasons.\n" 7 45;
         exit 1
@@ -448,8 +422,7 @@ See \"makelog\" for the reasons.\n" 7 45;
 
 function install_driver_mech()
 {
-	if [ $IS_NEW_KERNEL ]
-	then
+	if [ $IS_NEW_KERNEL ]; then
 		MOD_INST_AS="/lib/modules/$KERNEL_VERSION/kernel/extra/rulbus_epp.ko";
 		LOCAL_NAME="driver/rulbus_epp.ko";
 	else
@@ -463,16 +436,14 @@ We'll copy the following file, if necessary creating\n\
 directories that don't exist:\n\n\
 $LOCAL_NAME => $MOD_INST_AS" 12 75
 
-    if [ $? -ne 0 ]
-	then
+    if [ $? -ne 0 ]; then
 		NO_DRIVER_INSTALL=1
 		return
 	fi
 
 	make install_driver >> makelog 2>&1
 
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "Sorry, installation of the driver failed.\n\
 See \"makelog\" for the reasons.\n" 7 50;
@@ -497,14 +468,12 @@ function install_device_files()
 
     test $? -eq 0 || return
 
-    if [ -e /dev/rulbus_epp ]
-	then 
+    if [ -e /dev/rulbus_epp ]; then 
 		dialog --yesno \
 "A device file /dev/rulbus_epp already exists.\n\
 Delete existing file and replace with a new one?" 7 54;
 
-        if [ $? -eq 0 ]
-		then
+        if [ $? -eq 0 ]; then
 			rm -f /dev/rulbus_epp
 			mknod /dev/rulbus_epp c $MAJOR 0
 			chmod 666 /dev/rulbus_epp
@@ -528,21 +497,18 @@ Delete existing file and replace with a new one?" 7 54;
 function install_modules_conf()
 {
 	if [    -z $MODULECONF \
-		 -o \( $MAJOR -eq 0 -a $MODULECONF != "/etc/modules" \) ]
-	then
+		 -o \( $MAJOR -eq 0 -a $MODULECONF != "/etc/modules" \) ]; then
 		return
 	fi
 
-	if [ $MODULECONF = "/etc/modules" ]
-	then
+	if [ $MODULECONF = "/etc/modules" ]; then
 		dialog --yesno \
 "Add rulbus_epp to /etc/modules to have\n\
 the driver loaded on reboot?" 7 50
 		test $? -eq 0 || return
 
 		grep '^[ \t]*rulbus_epp[ \t]*\(#.*\)*$' $MODULECONF 2<&1 > /dev/null;
-		if [ $? -ne 0 ]
-		then
+		if [ $? -ne 0 ]; then
 			cp $MODULECONF $MODULECONF.bak
 			echo "rulbus_epp" >> $MODULECONF
 		fi
@@ -560,11 +526,9 @@ version will be saved as $MODULECONF.bak.)" 7 62
 	PATTERN2="^[[:space:]]*pre-install[[:space:]+]rulbus_epp[[:space:]+]"
 
 	LINE=`grep $PATTERN $MODULECONF`
-	if [ $? -eq 0 ]
-	then
+	if [ $? -eq 0 ]; then
 		LINE2=`grep $PATTERN2 $MODULECONF`
-		if [ $? -eq 0 ]
-		then
+		if [ $? -eq 0 ]; then
 			grep -v $PATTERN $MODULECONF | grep -v $PATTERN2 > /tmp/`basename $MODULECONF`
 			echo "#$LINE2" >> /tmp/`basename $MODULECONF`
 			echo "#$LINE" >> /tmp/`basename $MODULECONF`
@@ -574,8 +538,7 @@ version will be saved as $MODULECONF.bak.)" 7 62
 			fi
 
 		LINE=`grep "^[[:space:]]*options[[:space:]+]rulbus_epp" /tmp/\`basename $MODULECONF\``;
-		if [ $? -eq 0 ]
-		then
+		if [ $? -eq 0 ]; then
 			mv /tmp/`basename $MODULECONF` /tmp/`basename $MODULECONF`2
 			grep -v "$LINE" /tmp/`basename $MODULECONF`2 > /tmp/`basename $MODULECONF`
 			rm -f /tmp/`basename $MODULECONF`2
@@ -599,8 +562,7 @@ version will be saved as $MODULECONF.bak.)" 7 62
 
 function install_init_script()
 {
-	if [ $MAJOR -ne 0 -o $MODULECONF = "/etc/modules" ]
-	then
+	if [ $MAJOR -ne 0 -o $MODULECONF = "/etc/modules" ]; then
 		return
 	fi
 
@@ -613,16 +575,13 @@ and recreate the device file on reboot?" 7 65
 	# Try to install the init.d script
 
 	if [    -d /etc/init.d \
-		-a -e /lib/lsb/init-functions ]
-	then
+		-a -e /lib/lsb/init-functions ]; then
 		if [    \(    -e /lib/lsb/install_initd \
 			 -o -e /usr/lib/lsb/install_initd \) \
 			 -a \(    -e /lib/lsb/remove_initd \
-			       -o -e /usr/lib/lsb/remove_initd \) ]
-		then
+			       -o -e /usr/lib/lsb/remove_initd \) ]; then
 			install_lsb
-		elif [ -e /usr/sbin/update-rc.d ]
-		then
+		elif [ -e /usr/sbin/update-rc.d ]; then
 			install_update_rc
 		else
 			dialog --msgbox "\
@@ -641,8 +600,7 @@ in the directory for init scripts yourself." 12 70
 
 function update_dep()
 {
-	if [ -n "$NO_DRIVER_INSTALL" -o -n "$DKMS_INSTALL" ]
-	then
+	if [ -n "$NO_DRIVER_INSTALL" -o -n "$DKMS_INSTALL" ]; then
 		return
 	fi
 
@@ -659,8 +617,7 @@ using the command 'depmod'?" 8 55
 
 function load_module()
 {
-	if [ -n "$NO_DRIVER_INSTALL" ]
-	then
+	if [ -n "$NO_DRIVER_INSTALL" ]; then
 		return
 	fi
 
@@ -672,11 +629,9 @@ kernel? Make sure no program is using it!" 6 50
 	# Check if the module is already loaded and try to unload it
 
 	lsmod | grep '^rulbus_epp[ \t]' > /dev/null 2>&1
-	if [ $? -eq 0 ]
-	then
+	if [ $? -eq 0 ]; then
 		rmmod rulbus_epp >> makelog 2>&1
-		if [ $? -ne 0 ]
-		then
+		if [ $? -ne 0 ]; then
 			dialog --msgbox \
 "Failed to unload running module, so the\n\
 new module could not be loaded. See\n\
@@ -689,8 +644,7 @@ new module could not be loaded. See\n\
 
 	echo "modprobe rulbus_epp" >> makelog
 	modprobe rulbus_epp >> makelog 2>&1
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		dialog --msgbox \
 "Failed to load module into the kernel.\n\
 See \"makelog\" for the reasons." 7 42
@@ -763,19 +717,16 @@ function pref_inst()
 
 function get_kernel_version()
 {
-	if [ -n "$RULBUS_EPP_KERNEL_SOURCE" ]
-	then
+	if [ -n "$RULBUS_EPP_KERNEL_SOURCE" ]; then
 		KERNEL_DIR=$RULBUS_EPP_KERNEL_SOURCE;
 	else
 		KERNEL_DIR="/lib/modules/`uname -r`/build";
-		if [ -z "$KERNEL_DIR" ]
-		then
+		if [ -z "$KERNEL_DIR" ]; then
 			KERNEL_DIR="/usr/src/linux";
 		fi
 	fi
 
-	if [ -z "$KERNEL_DIR" ]
-	then
+	if [ -z "$KERNEL_DIR" ]; then
 		dialog --msgbox "\n\
 Failed to find the kernel headers which are needed to\n\
 compile the module. Either install the appropriate\n\
@@ -789,29 +740,25 @@ to the location of the kernel headers." 9 60;
                     2>/dev/null |                                    \
 				    sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 
-	if [ -z "$KERNEL_VERSION" ]
-	then
+	if [ -z "$KERNEL_VERSION" ]; then
 		KERNEL_VERSION=`grep UTS_RELEASE                                \
 			            $KERNEL_DIR/include/linux/utsrelease.h          \
                         2>/dev/null |                                   \
 				   s    ed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
 	fi
 
-	if [ -z "$KERNEL_VERSION" ]
-	then
+	if [ -z "$KERNEL_VERSION" ]; then
 		KERNEL_VERSION=`grep UTS_RELEASE
 		                     $KERNELDIR/include/linux/version.h \
                        2>/dev/null |
 				       sed 's/^[^"]\+"\([^"]\+\)".*$/\1/' 2>/dev/null`;
     fi
 
-    if [ -z "$KERNEL_VERSION" ]
-	then
+    if [ -z "$KERNEL_VERSION" ]; then
         KERNEL_VERSION=`make --quiet -C $KERNEL_DIR kernelrelease 2>/dev/null`;
 	fi
 
-	if [ -z "$KERNEL_VERSION" ]
-	then
+	if [ -z "$KERNEL_VERSION" ]; then
 		dialog --msgbox "\
 Sorry, can't determine kernel version under the assumption\n\
 that kernel sources are at '$KERNEL_DIR'" 6 64;
@@ -821,8 +768,7 @@ that kernel sources are at '$KERNEL_DIR'" 6 64;
 	KV_MAJOR=`echo $KERNEL_VERSION | sed 's/^\([0-9]\+\)\..*$/\1/' 2>/dev/null`
 	KV_MINOR=`echo $KERNEL_VERSION | \
               sed 's/^[0-9]\+\.\([0-9]\+\)\..*$/\1/' 2>/dev/null`
-	if [ $KV_MAJOR -lt 2 -o \( $KV_MAJOR  -eq 2 -a $KV_MINOR -le 4 \) ]
-	then
+	if [ $KV_MAJOR -lt 2 -o \( $KV_MAJOR  -eq 2 -a $KV_MINOR -le 4 \) ]; then
 		IS_NEW_KERNEL=0;
 	else
 		IS_NEW_KERNEL=1;
@@ -840,8 +786,7 @@ export DIALOGRC=./.INSTALLrc
 # We need dialog so check if it's available
 
 DIALOG=`which dialog`
-if [ $? -eq 1 ]
-then
+if [ $? -eq 1 ]; then
     echo "Sorry, you need the 'dialog' utility to run this script!";
     exit 1;
 fi
@@ -853,8 +798,7 @@ get_kernel_version;
 if [    $KV_MAJOR -ne 3 \
 	 -a $KV_MAJOR -ne 4 \
 	 -a \(    $KV_MAJOR -ne 2 \
-           -o \( $KV_MINOR -ne 4 -a $KV_MINOR -ne 6 \) \) ]
-then
+           -o \( $KV_MINOR -ne 4 -a $KV_MINOR -ne 6 \) \) ]; then
     dialog --yesno \
 "This package is only tested with 2.4, 2.6 and 3.x\n\
 kernels. There could be problems with other kernels.\n\n\
@@ -864,8 +808,7 @@ fi
 
 rm -f makelog > /dev/null 2>&1
 
-if [ ! -e driver/rulbus_epp_autoconf.h ]
-then
+if [ ! -e driver/rulbus_epp_autoconf.h ]; then
    do_setup_loop 0
    do_compile 0
    do_install
@@ -873,8 +816,7 @@ else
     if [    \( ! $IS_NEW_KERNEL -a ! -e driver/rulbus_epp.o  \)  \
          -o \(   $IS_NEW_KERNEL -a ! -e driver/rulbus_epp.ko \)  \
 		 -o ! -e lib/librulbus.a                                 \
-		 -o ! -e lib/librulbus.so ]
-	then
+		 -o ! -e lib/librulbus.so ]; then
         pref_comp
         do_compile 0
         do_install

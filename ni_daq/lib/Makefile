@@ -27,10 +27,10 @@ lib_dir   = $(prefix)/lib
 CFLAGS    = -ggdb -O0 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W -fpic
 #LDFLAGS   = -Wl,--version-script=ni_daq_lib.map
-INCLUDES  = -I../include -I.
+INCLUDES  = -I../include -I../driver/include -I.
 
 sources   = $(shell ls *.c)
-headers   = ../include/ni_daq.h ../include/ni_daq_drv.h
+headers   = ../include/ni_daq.h ../driver/include/ni_daq_drv.h
 
 
 .SUFFIXES:                    # don't use implicit rules

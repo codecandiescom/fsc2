@@ -184,18 +184,17 @@ int ni_daq_msc_set_trigger( int              board,
 
 int ni_daq_msc_init( int board )
 {
-    int ret;
     NI_DAQ_MSC_ARG msc;
 
     msc.cmd = NI_DAQ_MSC_GET_CLOCK;
 
-    if ( ( ret == ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) ) < 0 )
+    if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) < 0 )
         return 1;
 
     msc.cmd = NI_DAQ_MSC_TRIGGER_STATE;
     msc.trigger_type = NI_DAQ_TRIG_TTL;
 
-    if ( ( ret == ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) ) < 0 )
+    if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_MSC, &msc ) < 0 )
         return 1;
 
     ni_daq_dev[ board ].msc_state.clock = msc.clock;

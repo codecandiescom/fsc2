@@ -1447,8 +1447,8 @@ lecroy_wr_get_prep( int              ch,
         sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\n",
                  lecroy_wr_curve_length( ) );
 
-	len = strlen( cmd );
-	if ( gpib_write( lecroy_wr.device, cmd, len ) == FAILURE )
+    len = strlen( cmd );
+    if ( gpib_write( lecroy_wr.device, cmd, len ) == FAILURE )
         lecroy_wr_comm_failure( );
 
     /* Ask the device for the data... */
@@ -1514,7 +1514,7 @@ lecroy_wr_can_fetch( int ch )
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
 
-	return lecroy_wr_get_get_int_value( ch, "SWEEPS_PER_ACQ" )
+    return lecroy_wr_get_get_int_value( ch, "SWEEPS_PER_ACQ" )
                                                     >= lecroy_wr.num_avg[ ch ];
 #endif
 }

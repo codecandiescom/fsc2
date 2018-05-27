@@ -1520,7 +1520,7 @@ lecroy_wr_get_prep( int              ch,
         sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\r",
                  lecroy_wr_curve_length( ) );
 
-	to_send = strlen( cmd );
+    to_send = strlen( cmd );
     if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
             lecroy_wr_comm_failure( );
@@ -1589,7 +1589,7 @@ lecroy_wr_can_fetch( int ch )
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         return lecroy_wr_get_inr( ) & LECROY_WR_SIGNAL_ACQ;
 
-	return lecroy_wr_get_get_int_value( ch, "SWEEPS_PER_ACQ" )
+    return lecroy_wr_get_get_int_value( ch, "SWEEPS_PER_ACQ" )
                                                     >= lecroy_wr.num_avg[ ch ];
 #endif
 }

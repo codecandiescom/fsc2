@@ -39,49 +39,49 @@ tegam2714a_p_check_levels( double high,
     else
         offset = high;
 
-	if ( high < low )
-	{
-		print( FATAL, "Low voltage level isn't below high level, use keyword "
+    if ( high < low )
+    {
+        print( FATAL, "Low voltage level isn't below high level, use keyword "
                "INVERT to invert the polarity.\n" );
         THROW( EXCEPTION );
     }
 
-	if ( ampl > MAX_AMPLITUDE )
-	{
-		print( FATAL, "Requested pulse amplitude too large, maximum amplitude "
+    if ( ampl > MAX_AMPLITUDE )
+    {
+        print( FATAL, "Requested pulse amplitude too large, maximum amplitude "
                "is %g V.\n", MAX_AMPLITUDE );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
-	/* The device has three ranges with different maximum offsets */
+    /* The device has three ranges with different maximum offsets */
 
-	if ( ampl > 0.999 )
-	{
-		if ( ampl + fabs( offset ) > MAX_AMPLITUDE )
-		{
-			print( FATAL, "With the selected pulse level difference the low "
-				   "voltage level can't be higher than %g V.\n",
+    if ( ampl > 0.999 )
+    {
+        if ( ampl + fabs( offset ) > MAX_AMPLITUDE )
+        {
+            print( FATAL, "With the selected pulse level difference the low "
+                   "voltage level can't be higher than %g V.\n",
                    MAX_AMPLITUDE - ampl );
-			THROW( EXCEPTION );
-		}
-	}
-	else if ( ampl > 0.099 )
-	{
-		if ( ampl + fabs( offset ) > 1.0 )
-		{
-			print( FATAL, "With the selected pulse level difference the low "
-				   "voltage level must be in the +/%g V range.\n",
+            THROW( EXCEPTION );
+        }
+    }
+    else if ( ampl > 0.099 )
+    {
+        if ( ampl + fabs( offset ) > 1.0 )
+        {
+            print( FATAL, "With the selected pulse level difference the low "
+                   "voltage level must be in the +/%g V range.\n",
                    1.0 - ampl );
-			THROW( EXCEPTION );
-		}
-	}
-	else if ( ampl + fabs( offset ) > 0.1 )
-	{
-		print( FATAL, "With the selected pulse level difference the low "
-			   "voltage level must be in the +%g mV range.\n",
+            THROW( EXCEPTION );
+        }
+    }
+    else if ( ampl + fabs( offset ) > 0.1 )
+    {
+        print( FATAL, "With the selected pulse level difference the low "
+               "voltage level must be in the +%g mV range.\n",
                100.0 * ( 1.0 - ampl ) );
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 }
 
 
