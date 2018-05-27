@@ -42,8 +42,10 @@ Tomography Center, Novosibirsk), who wrote the the module for the
 (California State University, Northridge) for contributing the module
 for the Newport Oriel Matrix Spectrometer, Ivo Alxneit (Paul Scherrer
 Institute, Villingen, Switzerland) for writing the module for the
-SpectraPro-275 monochromator and Christoph Oelm@"uller (FU Berlin),
-who wrote the @code{EDL} mode for @code{vim}.
+SpectraPro-275 monochromator, Christoph Oelm@"uller (FU Berlin),
+who wrote the @code{EDL} mode for @code{vim} and Maxim Rybakov
+(International Tomography Center, Novosibirsk), who wrote the
+module for the Agilent 53131A frequency counter.
 
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant

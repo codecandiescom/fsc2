@@ -139,6 +139,7 @@ hp5352a         // HP5352A frequency counter
 hp5352b         // HP5352B frequency counter
 eip371          // EIP 371 frequency counter
 agilent_53181a  // Agilent 53181a frequency counter
+agilent_53181a  // Agilent 53181a frequency counter
 
 
 // DAQ cards and devices (ME-6000 board, HJS_DAADC, NI PCI-MIO-16E-1,
