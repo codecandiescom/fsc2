@@ -183,20 +183,14 @@ temp_contr_loop_conf(Var_T * v)
 	int loop = -1;
 	int state = -1;
 
-
-	// list of parameters
-
-	const char *par_str[] =	{ "loop", "input", "units", "state" };
 	const char *state_str[] = { "off", "on" };
 
-	if (FSC2_MODE == TEST)
-	{
-		if (v == NULL)
-			print(WARN, "Missing loop argument.\n");
-		return vars_push(FLOAT_VAR, 1.0);
-	}
+    if (v == NULL) {
+        print(FATAL, "Missing arguments.\n");
+        THROW(EXCEPTION);
+    }
 
-    while (v != NULL)
+    do
     {
         // get name of parameter...
 
@@ -206,6 +200,8 @@ temp_contr_loop_conf(Var_T * v)
         }
 
         int par = -1;
+        const char *par_str[] =	{ "loop", "input", "units", "state" };
+
         for (size_t i = 0; i < NUM_ELEMS(par_str); i++)
             if (! strcasecmp(v->val.sptr, par_str[i]))
             {
@@ -301,12 +297,16 @@ temp_contr_loop_conf(Var_T * v)
                 }
 				break;
         }
+    } while ((v = vars_pop(v)) != NULL);
 
-        v = vars_pop(v);
-    }
+    /* Use loop 1 per default if none was specified in the arguments
+    * (and warn once during the test run) */
 
-    if (loop != 1 && loop != 2)
+    if (loop != 1 && loop != 2) {
         loop = DEFAULT_LOOP;
+        if (FSC2_MODE == TEST)
+            print(WARN, "No loop argument found, using default loop 1.\n");
+    }
 
     if (input == 'A' || input == 'B' || input == 'C' || input == 'D')
         lakeshore340.loop_params[loop - 1].input = input;

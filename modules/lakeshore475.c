@@ -615,7 +615,6 @@ lakeshore475_set_setpoint(double point)
 
 	sprintf(cmd, "CSETP %lf\n", point);
 	lakeshore475_command(cmd);
-
 }
 
 
@@ -627,19 +626,19 @@ lakeshore475_get_setpoint(void)
 {
 	char buf[50];
 	long len = sizeof buf - 1;
-	double setpoint = 0.0;
 
 	lakeshore475_talk("CSETP?\n", buf, &len);
 	buf[len] = '\0';
 
+	double setpoint;
 	if (sscanf(buf, "%lf", &setpoint) != 1) {
         print(FATAL, "Invalid reply from device.\n");
 		THROW(EXCEPTION);
 	}
 
 	return setpoint;
-
 }
+
 
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
