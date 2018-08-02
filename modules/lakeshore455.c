@@ -186,16 +186,10 @@ gaussmeter_measure_mode(Var_T * v)
 
     if (v->type == STR_VAR) {
         const char * mode_str[] = { "DC", "RMS", "peak" };
-
-        for (size_t i = 0; i < NUM_ELEMS(mode_str); i++)
-            if (! strcasecmp(v->val.sptr, mode_str[i]))
-            {
-                mode = i + 1;
-                break;
-            }
+        mode = is_in(v->val.sptr, mode_str, NUM_ELEMS(mode_str));
     }
     else
-        mode = get_strict_long(v, "mode");
+        mode = get_strict_long(v, "mode") + 1;
 
     if (mode < MEASURE_DC || mode > MEASURE_PEAK)
     {
@@ -231,12 +225,7 @@ gaussmeter_unit(Var_T * v)
     if (v->type == STR_VAR)
     {
         const char *unit_str[] = { "G", "T", "O", "A/m" };
-        for (size_t i = 0; i < NUM_ELEMS(unit_str); i++)
-            if (!strcasecmp(v->val.sptr, unit_str[i]))
-            {
-                unit = i + 1;
-                break;
-            }
+        unit = is_in(v->val.sptr, unit_str, NUM_ELEMS(unit_str)) + 1;
     }
     else
         unit = get_strict_long(v, "unit");

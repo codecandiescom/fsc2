@@ -193,17 +193,10 @@ gaussmeter_field_parameter( Var_T * v )
             THROW( EXCEPTION);
         }
 
-        int par = -1;
         const char *par_str[] =	{ "P", "I", "ramp", "slope" };
+        int par = is_in(v->val.sptr, par_str, NUM_ELEMS(par_str));
 
-        for (size_t i = 0; i < NUM_ELEMS(par_str); i++)
-            if (!strcasecmp(v->val.sptr, par_str[i]))
-            {
-                par = i;
-                break;
-            }
-
-        if (par < 0) {
+        if (par == -1) {
             print(FATAL, "Invlaid parameter type argument '%s'.\n",
                   v->val.sptr);
             THROW(EXCEPTION);
@@ -292,13 +285,7 @@ gaussmeter_measure_mode(Var_T * v)
     if (v->type == STR_VAR)
     {
         const char *mode_str[] = { "DC", "RMS", "peak" };
-        
-        for (size_t i = 0; i < NUM_ELEMS(mode_str); i++)
-            if (!strcasecmp(v->val.sptr, mode_str[i]))
-            {
-                mode = i + 1;
-                break;
-            }
+        mode = is_in(v->val.sptr, mode_str, NUM_ELEMS(mode_str)) + 1;
     }
     else
         mode = get_strict_long(v, "mode");

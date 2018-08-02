@@ -121,6 +121,7 @@ lakeshore340_exp_hook( void )
         print( FATAL, "Initialization of device failed.\n" );
         THROW( EXCEPTION );
     }
+
     return 1;
 }
 
@@ -161,9 +162,9 @@ temp_contr_name( Var_T * v UNUSED_ARG )
  *
  * The parameters are:
  * "input": "A", "B", "C" or "D" (the latter only for devices with sample
-            channels C and D);
- * "units": "K" (for Kelvin), "C" (for Celsius), "S" (for Sensor units(
- * "state": "on", "off";
+ *          channels C and D);
+ * "unit": "K" (for Kelvin), "C" (for Celsius), "S" (for Sensor units(
+ * "state": "on", "off" or any other boolean
  * "loop" (number) = 1 or 2. If no loop number is given function defaults to 1.
  * Function can get any number of arguments and in any order.
  * For example:
@@ -171,7 +172,7 @@ temp_contr_name( Var_T * v UNUSED_ARG )
  * temp_contr_loop_conf("loop", 1, "input", "D", "state", "on");
  * (enables control loop 1 and sets input D as working one)
  *
- * temp_contr_loop_conf("loop", 2, "units", "K");
+ * temp_contr_loop_conf("loop", 2, "unit", "K");
  * (sets Kelvin units for control loop 2)
  *---------------------------------------------------------*/
 
@@ -182,8 +183,6 @@ temp_contr_loop_conf(Var_T * v)
 	int unit = -1;
 	int loop = -1;
 	int state = -1;
-
-	const char *state_str[] = { "off", "on" };
 
     if (v == NULL) {
         print(FATAL, "Missing arguments.\n");
@@ -199,15 +198,8 @@ temp_contr_loop_conf(Var_T * v)
             THROW(EXCEPTION);
         }
 
-        int par = -1;
-        const char *par_str[] =	{ "loop", "input", "units", "state" };
-
-        for (size_t i = 0; i < NUM_ELEMS(par_str); i++)
-            if (! strcasecmp(v->val.sptr, par_str[i]))
-            {
-                par = i;
-                break;
-            }
+        const char *par_str[] =	{ "loop", "input", "unit", "state" };
+        int par = is_in(v->val.sptr, par_str, NUM_ELEMS(par_str));
 
         if (par == -1) {
             print(FATAL, "Invalid parameter name '%s'.\n", v->val.sptr);
@@ -234,20 +226,23 @@ temp_contr_loop_conf(Var_T * v)
 				break;
 
 			case 1: // input
+            {
                 if (v->type != STR_VAR) {
                     print(FATAL, "Expected string for channel.\n");
                     THROW(EXCEPTION);
                 }
 
-                if (   (   *v->val.sptr != 'A' && *v->val.sptr != 'B'
-#if defined HAS_SAMPLE_CHANNEL_CHAS_SAMPLE_CHANNEL_D
-                        && *v->val.sptr != 'C'
+                const char *channels[] = {"A", "B"
+#if defined HAS_SAMPLE_CHANNEL_C
+                                          , "C"
 #endif
-#if defined HAS_SAMPLE_CHANNEL_CHAS_SAMPLE_CHANNEL_D
+#if defined HAS_SAMPLE_CHANNEL_D
+                                          , "D"
                         && *v->val.sptr != 'D'
 #endif
-					   )
-                    || strlen(v->val.sptr) != 1)
+                                         };
+
+                if (is_in(v->val.sptr, channels, NUM_ELEMS(channels)) == -1)
                 {
                     print(FATAL, "Invalid input channel (\"%s\").\n",
                           v->val.sptr);
@@ -255,52 +250,35 @@ temp_contr_loop_conf(Var_T * v)
                 }
 
                 input = *v->val.sptr;
-				break;
+                break;
+            }
 
-			case 2: // units
+			case 2: // unit
+            {
                 if (v->type != STR_VAR) {
                     print(FATAL, "Expected string for unit.\n");
                     THROW(EXCEPTION);
                 }
 
-				if (*v->val.sptr == 'K')
-					unit = 1;
-				else if (*v->val.sptr == 'C')
-					unit = 2;
-				else if (*v->val.sptr == 'S')
-					unit = 3;
-				else
+                const char *units[] = {"K", "C", "S"};
+                unit = is_in(v->val.sptr, units, NUM_ELEMS(units)) + 1;
+                if (unit == 0)
 				{
 					print(FATAL, "Invalid input units (\"%s\").\n",
                           v->val.sptr);
 					THROW(EXCEPTION);
 				}
 				break;
+            }
 
 			case 3: // state
-                if (v->type != STR_VAR) {
-                    print(FATAL, "Expected string for state.\n");
-                    THROW(EXCEPTION);
-                }
-
-                for (size_t i = 0; i < NUM_ELEMS(state_str); i++)
-                    if (!strcasecmp(v->val.sptr, state_str[i]))
-                    {
-                        state = i;
-                        break;
-                    }
-
-                if (state == -1)
-                {
-                    print(FATAL, "Invalid loop state (\"%s\").\n", v->val.sptr);
-                    THROW(EXCEPTION);
-                }
+                state = get_boolean(v);
 				break;
         }
     } while ((v = vars_pop(v)) != NULL);
 
     /* Use loop 1 per default if none was specified in the arguments
-    * (and warn once during the test run) */
+     * (and warn once during the test run) */
 
     if (loop != 1 && loop != 2) {
         loop = DEFAULT_LOOP;
