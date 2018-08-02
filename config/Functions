@@ -105,7 +105,8 @@ magnet_heater_state, -1, ALL;
 magnet_command, 1, EXP;
 
 
-/* Functions exported by the field meter drivers (BH15, ER035M, PT2025 ) */
+/* Functions exported by the field meter drivers (BH15, ER035M, PT2025
+   Lakeshore 455, 475) */
 
 gaussmeter_name, 0, ALL;        // returns the device name
 gaussmeter_field, 0, EXP;       // returns current field
@@ -121,6 +122,14 @@ gaussmeter_keep_going_on_error, -1, EXP;       // er035m_sa family only
 find_field, 0, EXP;             // return current field value (deprecated)
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
                                 // and PT2025) (deprecated)
+
+gaussmeter_field_parameter, -1, EXP; // for lakeshore 455, 475
+gaussmeter_range, -1, EXP;         
+gaussmeter_measure_mode, -1, EXP;
+gaussmeter_unit, -1, EXP;
+gaussmeter_setpoint, -1, EXP;
+gaussmeter_analog_mode, -1, EXP;
+gaussmeter_digits, -1, EXP;
 
 /* Functions exported by the pulser drivers (DG2020, HFS9000, EP385, RS690)
    (functions involving phases and keyboard for DG2020 and RS690 only) */
@@ -372,11 +381,12 @@ multimeter_command, 1, EXP;
 
 
 /* Functions exported by the temperature controllers (Lakeshore 330,
-   Oxford ITC503, Bruker BVT3000) */
+   Lakeshore 330, Oxford ITC503, Bruker BVT3000) */
 
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
-temp_contr_temperature, 0, EXP;
+temp_contr_temperature, -1, EXP;
+temp_contr_loop_conf, -1, EXP;
 temp_contr_sample_channel, -1, EXP;
 temp_contr_setpoint, -1, EXP;
 temp_contr_state, -1, EXP;
@@ -398,7 +408,7 @@ temp_contr_command, 1, EXP;
 
 
 /* Functions exported by the frequency counter
-    (HP5340A, EIP371, Agilent 53181A) */
+    (HP5340A, EIP371, Agilent 53131A, Agilent 53181A) */
 
 freq_counter_name, 0, ALL;
 freq_counter_band, -1, ALL;
