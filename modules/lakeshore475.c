@@ -229,8 +229,7 @@ gaussmeter_field_parameter( Var_T * v )
 				lakeshore475.slope = val;
 				break;
         }
-
-    } while (v != NULL);
+    } while ((v = vars_pop(v)) != NULL);
 
     if (FSC2_MODE == EXPERIMENT)
         lakeshore475_field_control();

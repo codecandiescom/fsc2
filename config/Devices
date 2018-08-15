@@ -98,6 +98,8 @@ er035m_sas    // Bruker NMR gaussmeter (serial, stand alone)
 bh15          // Bruker Hall effect field controller (as gaussmeter)
 pt2025        // Metrolab NMR teslameter
 bnm12         // Bruker NMR gaussmeter (requires WITIO-48 card)
+lakeshore455  // Lakeshore 455 gausmeter
+lakeshore475  // Lakeshore 475 gausmeter
 
 
 // Synthesizers
@@ -122,6 +124,7 @@ schlum7150    // Schlumberger 7150
 // Temperature controllers
 
 lakeshore330   // Lakeshore 330 temperature controller
+lakeshore340   // Lakeshore 340 temperature controller
 itc503         // Oxford ITC503 temperature controller
 bvt3000        // Bruker BVT3000 temperature controller (with Eurotherm 902S)
 

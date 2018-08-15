@@ -238,7 +238,6 @@ temp_contr_loop_conf(Var_T * v)
 #endif
 #if defined HAS_SAMPLE_CHANNEL_D
                                           , "D"
-                        && *v->val.sptr != 'D'
 #endif
                                          };
 
@@ -288,7 +287,7 @@ temp_contr_loop_conf(Var_T * v)
 
     if (input == 'A' || input == 'B' || input == 'C' || input == 'D')
         lakeshore340.loop_params[loop - 1].input = input;
-    if (unit == 'K' || unit == 'C' || unit == 'S')
+    if (unit == '1' || unit == '2' || unit == '3')
         lakeshore340.loop_params[loop - 1].unit = unit;
     if (state == 0 || state == 1)
         lakeshore340.loop_params[loop - 1].state = state;
