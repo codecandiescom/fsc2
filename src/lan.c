@@ -1238,8 +1238,12 @@ find_lan_entry( int handle )
 {
     LAN_List_T * ll = lan_list;
     while ( ll != NULL )
+    {
         if ( ll->fd == handle )
             return ll;
+
+        ll = ll->next;
+    }
 
     return NULL;
 }
@@ -1281,13 +1285,16 @@ get_ip_address( const char     * address,
 
 
 /*-----------------------------------------------------------------------*
- * This function is called internally (i.e. not from modules) before the
- * start of an experiment in order to open the log file.
+ * This function is called internally (i.e. not from modules except
+ * the VX11 module) before the start of an experiment in order to
+ * open the log file.
  * ->
  *  * Pointer to the name of log file - if the pointer is NULL or does
  *    not point to a non-empty string stderr used.
  *  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL
  *    (if log level is LL_NONE 'log_file_name' is not used at all)
+ * <-
+ *    FILE pointer for the log file (might be stderr)
  *-----------------------------------------------------------------------*/
 
 FILE *
@@ -1345,6 +1352,7 @@ fsc2_lan_open_log( const char * dev_name )
 
 
 /*------------------------------------------------------*
+ * Closes the LAN log file for the given device
  *------------------------------------------------------*/
 
 FILE *

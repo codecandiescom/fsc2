@@ -780,7 +780,6 @@ vicp_read( char    * buffer,
        a message from the device can be split into several chunks, each
        starting with a new header. */
 
-
     do
     {
         unsigned char  header[ VICP_HEADER_SIZE ];
@@ -840,7 +839,7 @@ vicp_read( char    * buffer,
            the user asked for. If we could read more we store the number of
            bytes we could have read but didn't yet fetch. */
 
-        if ( ( ssize_t ) bytes_to_expect - total_length > *length )
+        if ( ( ssize_t ) bytes_to_expect > *length - total_length )
         {
             vicp.remaining = bytes_to_expect - *length + total_length;
             bytes_to_expect = *length - total_length;

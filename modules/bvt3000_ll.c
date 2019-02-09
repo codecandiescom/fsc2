@@ -133,11 +133,11 @@ bvt3000_init( void )
         THROW( EXCEPTION );
     }
 
-    /* Check the Eurotherm902S and bring into known state */
+    /* Check the Eurotherm902S and bring it into known state */
 
     eurotherm902s_init( );
 
-    /* Get the display maximum and minimum */
+    /* Get display maximum and minimum */
 
     bvt3000.display_max = eurotherm902s_get_display_maximum( );
     bvt3000.display_min = eurotherm902s_get_display_minimum( );
@@ -438,7 +438,7 @@ bvt3000_check_ln2_heater( void )
 
 
 /*---------------------------------------------------------------*
- * Sends an query to the device. The command must consist of a
+ * Sends a query to the device. The command must consist of a
  * 2 character string and the function returns the data returned
  * by the device as a string with a terminating '\0' appened.
  *---------------------------------------------------------------*/

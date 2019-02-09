@@ -192,7 +192,7 @@ main( void )
 	set_gpibd_signals( );
 
     /* Check that the socket file does not exist, if it does test if another
-       instance is acceptng connections. If that's the case give up, otherwise
+       instance is accepting connections. If that's the case give up, otherwise
        delete it, must be a stale file. */
 
     struct stat sbuf;
